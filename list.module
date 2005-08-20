@@ -1,0 +1,80 @@
+<?php
+// $Id$
+
+/**
+ * @file
+ * Renders URL-specified listings of content.
+ */
+
+/**
+ * Implementation of hook_help().
+ */
+function list_help($section) {
+  switch ($section) {
+    case 'admin/modules#description':
+      return t('Renders URL-specified listings of content.');
+  }
+}
+
+/**
+ * Implementation of hook_menu().
+ */
+function list_menu($may_cache) {
+  $items = array();
+
+  if ($may_cache) {
+    $items[] = array('path' => 'list', 'title' => t('list'),
+      'callback' => 'list_page', 'access' => user_access('access content'),
+      'type' => MENU_CALLBACK);
+    $items[] = array('path' => 'list/titles', 'title' => t('list'),
+      'callback' => 'list_page', 'access' => user_access('access content'),
+      'type' => MENU_CALLBACK);
+  }
+
+  return $items;
+}
+
+/**
+ * Menu callback; presents a listing of nodes.
+ */
+function list_page() {
+  $output = '';
+
+  $arguments = explode('/', $_GET['q']);
+  array_shift($arguments);
+  
+  if ($arguments[0] == 'titles') {
+    $titles_only = TRUE;
+    array_shift($arguments); 
+  }
+
+  $conditions = array();
+  $sort = array();
+
+  while (count($arguments)) {
+    $field = array_shift($arguments);
+    $op = array_shift($arguments);
+    $value = array_shift($arguments);
+
+    $conditions[] = array('field' => $field, 'op' => $op, 'value' => $value);
+  }
+
+  if ($titles_only) {
+    $header = array('title');
+    $result = content_node_query($conditions, $sort, 'n.nid, n.title');
+    while ($node = db_fetch_object($result)) {
+      $rows[] = l($node->title, drupal_get_path_alias("node/$node->nid'")); 
+    }
+    $output = theme('node_list', $rows);
+  }
+  else {
+    $result = content_node_query($conditions, $sort);
+    while ($node = db_fetch_array($result)) {
+      $node = node_load($node);
+      $output .= node_view($node);
+    }
+  }
+  print theme('page', $output);
+}
+
+?>
