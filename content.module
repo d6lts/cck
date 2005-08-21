@@ -722,9 +722,7 @@ function _content_field_types() {
   return $types;
 }
 
-function content_xmlrpcs_post($xmlrpcmsg) {
-  $params = _content_xml_convert($xmlrpcmsg);
-  $type_name = $params[0];
+function content_xmlrpcs_post($type_name) {
   $types = _content_field_types();
   $type = $types[$type_name];
   
@@ -734,25 +732,5 @@ function content_xmlrpcs_post($xmlrpcmsg) {
   
 }
 
-/**
- * Process the parameters to an XMLRPC callback, and return them as an array.
- *
- * @param $params
- *   Object of type xmlrpcmsg
- *
- * @return
- *   A native PHP array
- */
- function _content_xml_convert($params) {
-  $cparams = array();
-  $num_params= $params->getNumParams();
-
-  for ($i = 0; $i < $num_params; $i++) {
-    $sn = $params->getParam($i);
-    $cparams[] = $sn->getval();
-  }
-
-  return $cparams;
-}
 
 ?>
