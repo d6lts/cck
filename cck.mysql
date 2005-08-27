@@ -98,7 +98,7 @@ CREATE TABLE `node_field_shorttext_data` (
 #
 
 CREATE TABLE node_type (
-  type_name varchar(31) NOT NULL default '',
+  type_name varchar(24) NOT NULL default '',
   label varchar(255) NOT NULL default '',
   description mediumtext NOT NULL,
   help mediumtext NOT NULL,
