@@ -111,7 +111,10 @@ function field_field_settings($op, $field, $scope) {
       
     // This is where we assign default properties for fields when a field is created.
     // Default values are overridden when the user configures the field using the 'form' $op.
-    // See also the 'save' $op.
+    // See also the 'save' $op, which is different because it provides a list of fields
+    // to loop through when saving.
+    // Making one of the returned array members an array signifies that the member
+    // cannot be overwritten. E.g., the datatype is read-only.
     case 'properties':
       switch ($field['type']) {
         case 'field_shorttext':
@@ -119,14 +122,14 @@ function field_field_settings($op, $field, $scope) {
             case 'instance':
               return array('rows' => 1);
             case 'global':
-              return array('text_processing' => 0, 'datatype' => 'shorttext');
+              return array('text_processing' => 0, array('datatype' => 'shorttext'));
           }
         case 'field_longtext':
           switch ($scope) {
             case 'instance':
               return array('rows' => 3);
             case 'global':
-              return array('text_processing', array('datatype' => 'longtext'));
+              return array('text_processing' => 0, array('datatype' => 'longtext'));
           }
           break;
         // min and max are not defined here for integer and float fields but are in the save $op
@@ -135,63 +138,24 @@ function field_field_settings($op, $field, $scope) {
             case 'instance':
               return array('instance_width' => 6);
             case 'global':
-              return array('rounding' => 'fail', 'width' => 6, 'datatype' => 'integer');
+              return array('rounding' => 'fail', 'width' => 6, 'max' => '', 'min' => '', array('datatype' => 'integer'));
           }
         case 'field_integer-multi':
           switch ($scope) {
             case 'instance':
               return array('instance_field_format' => 'text', 'instance_width' => 8);
             case 'global':
-              return array('rounding' => 'fail', 'field_format' => 'text', 'width' => 8, 'datatype' => 'integer');
+              return array('rounding' => 'fail', 'field_format' => 'text', 'width' => 8, array('datatype' => 'integer'));
           }
         case 'field_decimal':
           switch ($scope) {
             case 'instance':
               return array();
             case 'global':
-              return array('datatype' => 'float');
+              return array(array('datatype' => 'float'));
           }
-          break;
-      }    
-    
-      break;
-
-    case 'save':
-      switch ($field['type']) {
-        case 'field_shorttext':
-        case 'field_longtext':
-          switch ($scope) {
-            case 'instance':
-              return array('rows');
-            case 'global':
-              return array('text_processing', array('datatype' => array_pop(explode($field['type'], '_'))));
-          }
-          break;
-        case 'field_integer':
-          switch ($scope) {
-            case 'instance':
-              return array('instance_width');
-            case 'global':
-              return array('rounding', 'min', 'max', 'width', array('datatype' => 'integer'));
-          }
-        case 'field_integer-multi':
-          switch ($scope) {
-            case 'instance':
-              return array('instance_field_format', 'instance_width');
-            case 'global':
-              return array('rounding', 'min', 'max', 'field_format', 'width', array('datatype' => 'integer'));
-          }
-        case 'field_decimal':
-          switch ($scope) {
-            case 'instance':
-              return array();
-            case 'global':
-              return array('min', 'max', 'datatype' => 'float');
-          }
-          break;
-      }
-    break;
-  }
+      } 
+  }   
 }
 
 /**
@@ -228,7 +192,7 @@ function field_field($op, &$node, $field, $a2, $a3, $a4) {
         case 'field_shorttext':
         case 'field_longtext':
           if ($field['text_processing']) {
-            $output = check_output($node_field['value'], $node_field['format']);
+            $output = check_markup($node_field['value'], $node_field['format']);
           }
           else {
             $output = check_plain($node_field['value']);

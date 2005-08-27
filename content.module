@@ -279,8 +279,8 @@ function _content_admin_types_overview() {
   $output = '<h2>'. t('Available content types') . '</h2>' . $group;
 
   $group = t('<p>To add a new content type, type its name here. After it has been added, you can configure its options.</p>');
-  // TODO: we are currently limited to 23 chars for the content type name
-  // because the node table's type field is limited to 31 chars (we modify it to 31 in our .mysql file)
+  // TODO: we are currently limited to 24 chars for the content type name
+  // because the node table's type field is limited to 32 chars
   // and we use 8 of those for 'content-', e.g. 'content-foo'
   $form = form_textfield(t('Label'), 'label', '', 40, 255, t('Friendly name of your content type.'), NULL, TRUE);
   $form .= form_textfield(t('Name'), 'type_name', '', 40, 23, t('Short name, used in urls. No spaces or weird characters.'), NULL, TRUE);
@@ -473,8 +473,23 @@ function _content_admin_field_create($type_name, $edit) {
   $module = $field_types[$field_type]['module'];
   
   // initialize default values for properties defined by the field
-  $global_settings = module_invoke($module, 'field_settings', 'properties', array('type' => $field_type), 'global');
-  $instance_settings = module_invoke($module, 'field_settings', 'properties', array('type' => $field_type), 'instance');
+  $settings = module_invoke($module, 'field_settings', 'properties', array('type' => $field_type), 'global');  foreach ($settings as $key => $value) {
+    if (is_array($value)) {
+      $global_settings[key($value)] = current($value);
+    }
+    else {
+      $global_settings[$key] = $value;
+    }
+  }
+  
+  $settings = module_invoke($module, 'field_settings', 'properties', array('type' => $field_type), 'instance');  foreach ($settings as $key => $value) {
+    if (is_array($value)) {
+      $instance_settings[key($value)] = current($value);
+    }
+    else {
+      $instance_settings[$key] = $value;
+    }
+  }
   
   db_query("INSERT INTO {node_field} (field_name, type, global_settings) VALUES ('%s', '%s', '%s')", $field_name, $field_type, serialize($global_settings));
 
@@ -579,30 +594,34 @@ function _content_admin_field_save($type_name, $field_name, $edit) {
   $field_types = _content_field_types();
   $field_type = $field_types[$field['type']];
   
-  // TODO: we are losing settings here because we are not overlaying
-  // the settings from the settings page onto the original settings
-  // gotten when the field is created. E.g., we are losing the datatype
-  // setting from the body field.
-
-  $instance_settings = array();
-  foreach (module_invoke($field_type['module'], 'field_settings', 'save', $field, 'instance') as $setting) {
-    if (is_array($setting)) {
-      $instance_settings[key($setting)] = current($setting);
+  // overlay values from the form onto current values safely
+  // values defined as arrays in a field's properties are treated as read-only
+  $result = db_fetch_object(db_query("SELECT instance_settings FROM {node_field_instance} WHERE field_name = '%s'", $field_name));
+  $instance_settings = unserialize($result->instance_settings);
+  $settings = module_invoke($field_type['module'], 'field_settings', 'properties', $field, 'instance');
+  foreach ($settings as $key => $value) {
+    if (is_array($value)) {
+      $key = key($value);
+      $instance_settings[key($value)] = current($value);
     }
     else {
-      $instance_settings[$setting] = $edit[$setting];
+      $instance_settings[$key] = $edit[$key];
     }
   }
-  $global_settings = array();
-  foreach (module_invoke($field_type['module'], 'field_settings', 'save', $field, 'global') as $setting) {
-    if (is_array($setting)) {
-      $global_settings[key($setting)] = current($setting);
+
+  $result = db_fetch_object(db_query("SELECT global_settings FROM {node_field} WHERE field_name = '%s'", $field_name));
+  $global_settings = unserialize($result->global_settings);
+  $settings = module_invoke($field_type['module'], 'field_settings', 'properties', $field, 'global');
+  foreach ($settings as $key => $value) {
+    if (is_array($value)) {
+      $key = key($value);
+      $global_settings[key($value)] = current($value);
     }
     else {
-      $global_settings[$setting] = $edit[$setting];
-
+      $global_settings[$key] = $edit[$key];
     }
   }
+
   db_query("UPDATE {node_field_instance} SET label = '%s', instance_settings = '%s' WHERE type_name = '%s' AND field_name = '%s'", $edit['label'], serialize($instance_settings), $type_name, $field_name);
 
   db_query("UPDATE {node_field} SET required = %d, global_settings = '%s' WHERE field_name = '%s'", $edit['required'], serialize($global_settings), $field['field_name']);
