@@ -1,119 +1,64 @@
-#
-# Table structure for table `node_field`
-#
+
+CREATE TABLE node_type (
+  type_name varchar(31) NOT NULL default '',
+  label varchar(255) NOT NULL default '',
+  description mediumtext NOT NULL,
+  help mediumtext NOT NULL,
+  title_label varchar(255) NOT NULL default '',
+  PRIMARY KEY  (type_name)
+) TYPE=MyISAM;
 
 CREATE TABLE node_field (
   field_name varchar(31) NOT NULL default '',
   type varchar(127) NOT NULL default '',
   global_settings mediumtext NOT NULL,
   required int(1) NOT NULL default '0',
+  multiple int(1) NOT NULL default '0',
   PRIMARY KEY  (field_name)
 ) TYPE=MyISAM;
 
-#
-# Dumping data for table `node_field`
-#
-
-INSERT INTO `node_field` VALUES ('field_body', 'field_longtext', 'a:2:{s:15:"text_processing";s:1:"1";s:8:"datatype";s:1:"longtext";}', 0);
-INSERT INTO `node_field` VALUES ('field_log', 'field_longtext', 'a:2:{s:15:"text_processing";s:1:"0";s:8:"datatype";s:1:"longtext";}', 0);
-
-# --------------------------------------------------------
-
-#
-# Table structure for table `node_field_instance`
-#
-
 CREATE TABLE node_field_instance (
+  field_name varchar(31) NOT NULL default '',
+  type_name varchar(31) NOT NULL default '',
   weight int(10) NOT NULL default '0',
   label varchar(255) NOT NULL default '',
   instance_settings mediumtext NOT NULL,
-  field_name varchar(31) NOT NULL default '',
-  type_name varchar(31) NOT NULL default '',
   PRIMARY KEY  (field_name,type_name)
 ) TYPE=MyISAM;
 
-#
-# Dumping data for table `node_field_instance`
-#
 
-INSERT INTO node_field_instance VALUES (0, 'Body', 'a:1:{s:4:"rows";s:2:"20";}', 'field_body', 'story');
-INSERT INTO node_field_instance VALUES (0, 'Body', 'a:1:{s:4:"rows";s:2:"20";}', 'field_body', 'book');
-INSERT INTO node_field_instance VALUES (0, 'Body', 'a:1:{s:4:"rows";s:2:"25";}', 'field_body', 'blog');
-INSERT INTO node_field_instance VALUES (0, 'Log message', 'a:1:{s:4:"rows";s:1:"5";}', 'field_log', 'book');
-# --------------------------------------------------------
-
-
-# Dump of table node_field_float_data
-# ------------------------------------------------------------
+# field data
 
 CREATE TABLE `node_field_float_data` (
-  `nid` int(10) unsigned NOT NULL default '0',
+  `vid` int(10) unsigned NOT NULL default '0',
   `field_name` varchar(31) NOT NULL default '',
+  `delta` int(10) unsigned NOT NULL default '0',
   `field_float` float NOT NULL default '0',
-  PRIMARY KEY  (`nid`,`field_name`)
+  PRIMARY KEY  (`vid`,`field_name`,`delta`)
 ) TYPE=MyISAM;
 
-
-
-# Dump of table node_field_integer_data
-# ------------------------------------------------------------
-
-CREATE TABLE `node_field_integer_data` (
-  `nid` int(10) unsigned NOT NULL default '0',
+CREATE TABLE `node_field_int_data` (
+  `vid` int(10) unsigned NOT NULL default '0',
   `field_name` varchar(31) NOT NULL default '',
-  `field_integer` int(11) NOT NULL default '0',
-  PRIMARY KEY  (`nid`,`field_name`)
+  `delta` int(10) unsigned NOT NULL default '0',
+  `field_int` int(11) NOT NULL default '0',
+  PRIMARY KEY  (`vid`,`field_name`,`delta`)
 ) TYPE=MyISAM;
-
-
-
-# Dump of table node_field_longtext_data
-# ------------------------------------------------------------
 
 CREATE TABLE `node_field_longtext_data` (
-  `nid` int(10) unsigned NOT NULL default '0',
+  `vid` int(10) unsigned NOT NULL default '0',
   `field_name` varchar(31) NOT NULL default '',
+  `delta` int(10) unsigned NOT NULL default '0',
   `field_longtext` mediumtext NOT NULL,
   `format` int(4) NOT NULL default '0',
-  PRIMARY KEY  (`nid`,`field_name`)
+  PRIMARY KEY  (`vid`,`field_name`,`delta`)
 ) TYPE=MyISAM;
-
-
-
-# Dump of table node_field_shorttext_data
-# ------------------------------------------------------------
 
 CREATE TABLE `node_field_shorttext_data` (
-  `nid` int(10) unsigned NOT NULL default '0',
+  `vid` int(10) unsigned NOT NULL default '0',
   `field_name` varchar(31) NOT NULL default '',
+  `delta` int(10) unsigned NOT NULL default '0',
   `field_shorttext` varchar(255) NOT NULL default '',
   `format` int(4) NOT NULL default '0',
-  PRIMARY KEY  (`nid`,`field_name`)
+  PRIMARY KEY  (`vid`,`field_name`,`delta`)
 ) TYPE=MyISAM;
-
-
-
-#
-# Table structure for table `node_type`
-#
-
-CREATE TABLE node_type (
-  type_name varchar(24) NOT NULL default '',
-  label varchar(255) NOT NULL default '',
-  description mediumtext NOT NULL,
-  help mediumtext NOT NULL,
-  PRIMARY KEY  (type_name)
-) TYPE=MyISAM;
-
-#
-# Dumping data for table `node_type`
-#
-
-INSERT INTO node_type VALUES ('story', 'story', 'Stories are articles in their simplest form: they have a title, a teaser and a body, but can be extended by other modules. The teaser is part of the body too. Stories may be used as a personal blog or for news articles.', '');
-INSERT INTO node_type VALUES ('page', 'page', 'If you want to add a static page, like an a contact page or an about page, use a page.', '');
-INSERT INTO node_type VALUES ('book', 'book page', 'A book is a collaborative writing effort: users can collaborate writing the pages of the book, positioning the pages in the right order, and reviewing or modifying pages previously written.  So when you have some information to share or when you read a page of the book and you didn\'t like it, or if you think a certain page could have been written better, you can do something about it.', '');
-INSERT INTO node_type VALUES ('blog', 'personal blog entry', 'A blog is a regularly updated journal or diary made up of individual posts shown in reversed chronological order.  A blog is tightly coupled to the author so each user will have his "own" blog.', '');
-INSERT INTO node_type VALUES ('forum', 'forum topic', 'A forum is a threaded discussion, enabling users to communicate about a particular topic.', '');
-
-ALTER TABLE  `node` CHANGE  `type`  `type` VARCHAR( 32 ) NOT NULL;
-ALTER TABLE files ADD field_name varchar(31) NOT NULL default '';

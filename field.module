@@ -24,7 +24,6 @@ function field_field_info() {
     'field_shorttext' => array('label' => 'Short Text'),
     'field_longtext' => array('label' => 'Long Text'),
     'field_integer' => array('label' => 'Integer'),
-    'field_integer-multi' => array('label' => 'Multiple Integer'),
     'field_decimal' => array('label' => 'Decimal')
   );
 }
@@ -35,151 +34,107 @@ function field_field_info() {
 function field_field_settings($op, $field, $scope) {
   switch ($op) {
     case 'form':
-      $form = '';
+      $form = array();
       switch ($field['type']) {
         case 'field_shorttext':
         case 'field_longtext':
           switch ($scope) {
             case 'instance':
-              $form .= form_textfield(t('Rows'), 'rows', $field['rows'] ? $field['rows'] : 1, 20, 20, '', NULL, TRUE);
+              $form['rows'] = array('#type' => 'textfield', '#title' => t('Rows'), '#default_value' => $field['rows'] ? $field['rows'] : 1, '#required' => TRUE);
               break;
 
             case 'global':
               $options = array(0 => t('Plain text'), 1 => t('Filtered text (user selects input format)'));
-              $form .= form_radios(t('Text processing'), 'text_processing', $field['text_processing'] ? $field['text_processing'] : 0, $options);
+              $form['text_processing'] = array('#type' => 'radios', '#title' => t('Text processing'), '#default_value' => $field['text_processing'] ? $field['text_processing'] : 0, '#options' => $options);
               break;
           }
-          break;
+        break;
         case 'field_integer':
-          switch($scope) {
-            case 'instance':
-              $form .= form_textfield('Field width', 'instance_width', $field['instance_width'], '3', '4', t('How many characters wide should the field be?'));
-              break;
-            case 'global':
-              $options = array(
-                'round' => t('Round up to nearest integer'), 
-                'truncate' => t('Truncate at decimal point'), 
-                'fail' => t('Fail validation'));
-              $form .= form_radios(t('Rounding behavior'), 'rounding', $field['rounding'], $options, t('What should happen when a numeric value with a decimal point is entered?'));
-              $form .= form_textfield('Field width', 'width', $field['width'], '3', '4', t('How many characters wide should the field be?'));                 
-          }
-          break;
-        case 'field_integer-multi':
-          switch ($scope) {
-            case 'instance':
-              $field_format = $field['instance_field_format'];
-              $options = array(
-                'textfield' => 'text field',
-                'radio' => 'radio buttons',
-                'checkbox' => 'checkboxes',
-                'selectbox' => 'selectbox');
-              $form .= form_select(t('Field format'), 'instance_field_format', $field_format, $options, t('How you want this field to appear when entering data.'));
-              if ($field_format == 'textfield') {
-                $form .= form_textfield('Field width', 'instance_width', $field['instance_width'], '3', '4', t('How many characters wide should the field be?'));
-              }
-              break;
-            case 'global':
-              $options = array(
-                'round' => t('Round up to nearest integer'), 
-                'truncate' => t('Truncate at decimal point'), 
-                'fail' => t('Fail validation'));
-              $form .= form_radios(t('Rounding behavior'), 'rounding', $field['rounding'], $options, t('What should happen when a numeric value with a decimal point is entered?'));
-          
-              $field_format = $field['field_format'];
-              $options = array(
-                'textfield' => 'text field',
-                'radio' => 'radio buttons',
-                'checkbox' => 'checkboxes',
-                'selectbox' => 'selectbox');
-              $form .= form_select(t('Field format'), 'field_format', $field_format, $options, t('How you want this field to appear when entering data.'));
-             if ($field_format == 'textfield') {
-               $form .= form_textfield('Field width', 'width', $field['width'], '3', '4', t('How many characters wide should the field be?'));
-             }
-          }
-          break;
-      
-       case 'field_decimal':
+        case 'field_decimal':
           switch ($scope) {
             case 'global':
-              $form .= form_textfield(t('Minimum'), 'min', $field['min'] ? $field['min'] : '', 20, 20, '', NULL, FALSE);
-              $form .= form_textfield(t('Maximum'), 'max', $field['max'] ? $field['max'] : '', 20, 20, '', NULL, FALSE);
+              $form['min'] = array('#type' => 'textfield', '#title' => t('Minimum'), '#default_value' => $field['min'] ? $field['min'] : '');
+              $form['max'] = array('#type' => 'textfield', '#title' => t('Maximum'), '#default_value' => $field['min'] ? $field['min'] : '');
               break;
           }
           break;
       }
       return $form;
-      
-    // This is where we assign default properties for fields when a field is created.
-    // Default values are overridden when the user configures the field using the 'form' $op.
-    // See also the 'save' $op, which is different because it provides a list of fields
-    // to loop through when saving.
-    // Making one of the returned array members an array signifies that the member
-    // cannot be overwritten. E.g., the datatype is read-only.
-    case 'properties':
+    
+    case 'validate':
       switch ($field['type']) {
         case 'field_shorttext':
-          switch ($scope) {
-            case 'instance':
-              return array('rows' => 1);
-            case 'global':
-              return array('text_processing' => 0, array('datatype' => 'shorttext'));
-          }
         case 'field_longtext':
           switch ($scope) {
             case 'instance':
-              return array('rows' => 3);
+              if (!is_numeric($field['rows']) || intval($field['rows']) != $field['rows'] || $field['rows'] <= 0) {
+                form_set_error('rows', t('"Rows" must be a positive integer.'));
+              }
+              break;
+          }
+        break;
+        case 'field_integer':
+        case 'field_decimal':
+          switch ($scope) {
             case 'global':
-              return array('text_processing' => 0, array('datatype' => 'longtext'));
+              if ($field['min'] && !is_numeric($field['min'])) {
+                form_set_error('rows', t('"Minimum" must be a number.'));
+              }
+              if ($field['max'] && !is_numeric($field['max'])) {
+                form_set_error('rows', t('"Maximum" must be a number.'));
+              }
+              break;
           }
           break;
-        // min and max are not defined here for integer and float fields but are in the save $op
+      }
+      break;
+
+    case 'save':
+      switch ($field['type']) {
+        case 'field_shorttext':
+        case 'field_longtext':
+          switch ($scope) {
+            case 'instance':
+              return array('rows');
+            case 'global':
+              return array('text_processing');
+          }
+          break;
         case 'field_integer':
-          switch ($scope) {
-            case 'instance':
-              return array('instance_width' => 6);
-            case 'global':
-              return array('rounding' => 'fail', 'width' => 6, 'max' => '', 'min' => '', array('datatype' => 'integer'));
-          }
-        case 'field_integer-multi':
-          switch ($scope) {
-            case 'instance':
-              return array('instance_field_format' => 'text', 'instance_width' => 8);
-            case 'global':
-              return array('rounding' => 'fail', 'field_format' => 'text', 'width' => 8, array('datatype' => 'integer'));
-          }
         case 'field_decimal':
           switch ($scope) {
             case 'instance':
               return array();
             case 'global':
-              return array(array('datatype' => 'float'));
+              return array('min', 'max');
           }
-      } 
-  }   
+          break;
+      }
+    break;
+  }
 }
 
 /**
  * Implementation of hook_field().
  */
-function field_field($op, &$node, $field, $a2, $a3, $a4) {
+function field_field($op, $node, $field, $a2, $a3, $a4) {
   switch ($op) {
     case 'load':
       switch($field['type']) {
         case 'field_shorttext':
-          $result = db_fetch_object(db_query("SELECT field_shorttext, format FROM {node_field_shorttext_data} WHERE nid = %d AND field_name = '%s'", $node->nid, $field['field_name']));
+          $result = db_fetch_object(db_query("SELECT field_shorttext, format FROM {node_field_shorttext_data} WHERE vid = %d AND field_name = '%s' ORDER BY delta", $node->vid, $field['field_name']));
           $additions = array($field['field_name'] => array('value' => $result->field_shorttext, 'format' => $result->format));
           break;
         case 'field_longtext':
-          $result = db_fetch_object(db_query("SELECT field_longtext, format FROM {node_field_longtext_data} WHERE nid = %d AND field_name = '%s'", $node->nid, $field['field_name']));
+          $result = db_fetch_object(db_query("SELECT field_longtext, format FROM {node_field_longtext_data} WHERE vid = %d AND field_name = '%s' ORDER BY delta", $node->vid, $field['field_name']));
           $additions = array($field['field_name'] => array('value' => $result->field_longtext, 'format' => $result->format));
           break;
         case 'field_integer':
-        case 'field_integer-multi':
-          $result = db_fetch_object(db_query("SELECT field_integer FROM {node_field_integer_data} WHERE nid = %d AND field_name = '%s'", $node->nid, $field['field_name']));
-          $additions = array($field['field_name'] => $result->field_integer);
+          $result = db_fetch_object(db_query("SELECT field_int FROM {node_field_int_data} WHERE vid = %d AND field_name = '%s' ORDER BY delta", $node->vid, $field['field_name']));
+          $additions = array($field['field_name'] => $result->field_int);
           break;
         case 'field_decimal':
-          $result = db_fetch_object(db_query("SELECT field_float FROM {node_field_float_data} WHERE nid = %d AND field_name = '%s'", $node->nid, $field['field_name']));
+          $result = db_fetch_object(db_query("SELECT field_float FROM {node_field_float_data} WHERE vid = %d AND field_name = '%s' ORDER BY delta", $node->vid, $field['field_name']));
           $additions = array($field['field_name'] => $result->field_float);
           break;
       }
@@ -192,7 +147,7 @@ function field_field($op, &$node, $field, $a2, $a3, $a4) {
         case 'field_shorttext':
         case 'field_longtext':
           if ($field['text_processing']) {
-            $output = check_markup($node_field['value'], $node_field['format']);
+            $output = check_markup($node_field['value'], $node_field['format'], FALSE);
           }
           else {
             $output = check_plain($node_field['value']);
@@ -200,9 +155,6 @@ function field_field($op, &$node, $field, $a2, $a3, $a4) {
           break;
         case 'field_integer':
         case 'field_decimal':
-          $output = $node_field;
-          break;
-        case 'field_integer-multi':
           $output = $node_field;
           break;
       }
@@ -226,34 +178,6 @@ function field_field($op, &$node, $field, $a2, $a3, $a4) {
           }
           break;
         case 'field_integer':
-          // why is $node_field a string sometimes and an array other times?
-          // it's a string when building the edit form
-          $output .= form_textfield(t($field['label']), $field['field_name'] .'][value', is_array($node_field) ? $node_field['value'] : $node_field, 10, 127, '', NULL, $field['required']);
-          break;
-        case 'field_integer-multi':
-          $values = _field_integer_load($field);
-          // use instance field format if user has defined one
-          if (isset($field['field_format'])) {
-            $field_format = isset($field['instance_field_format']) ? $field['instance_field_format'] : $field['field_format'];
-          }
-          switch ($field_format) {
-            case 'radio':
-            // TODO: validation is rewriting $node->$field['field_name'] as a string; it needs to be array
-            // symptom: previewing with field_format set to radio changes the value
-              $output .= form_radios($field['label'], $field['field_name'] .'][value', $node_field['value'], $values, NULL, $field['required']);
-              break;
-            // checkbox is multiple select
-            case 'checkbox':
-              $output .= form_checkboxes($field['label'], $field['field_name'] . '][value', $node_field['value'], $values, NULL, NULL, $field['required']);
-              break;
-            case 'selectbox':
-              $output .= form_select($field['label'], $field['field_name'] . '][value', $node_field['value'], $values, NULL, 0, FALSE, $field['required']);
-              break;
-            // default to textfield
-            default:
-              $output .= form_textfield(t($field['label']), $field['field_name'] .'][value', $node_field['value'], 10, 127, '', NULL, $field['required']);
-          }
-          break;
         case 'field_decimal':
           $output .= form_textfield(t($field['label']), $field['field_name'], $node_field, 60, 127, '', NULL, $field['required']);
           break;
@@ -273,29 +197,6 @@ function field_field($op, &$node, $field, $a2, $a3, $a4) {
           }
           break;
         case 'field_integer':
-          // $node_field == null in the node add form
-          // in the preview form, $node_field is an array, e.g. value => 7
-          // in the edit form, $node_field is a string, e.g. '7'
-          if (isset($node_field)) {
-            _field_integer_validate($node, $field, is_array($node_field) ? $node_field['value'] : $node_field); 
-          }
-          break;
-        case 'field_integer-multi':
-          if (isset($node_field)) {
-            /*
-            if (is_string($node_field['value'])) {
-              $node_field['value'] = array($node_field['value']); 
-            }
-            */
-            if (is_string($node_field)) {
-              $node_field = array('value' => array($node_field)); 
-            }
-            
-            foreach ($node_field['value'] as $value) {
-              _field_integer_validate($value);
-            }
-          }
-          break;
         case 'field_decimal':
           if (isset($node_field)) {
             if ($field['required'] && $node_field == '') {
@@ -318,20 +219,16 @@ function field_field($op, &$node, $field, $a2, $a3, $a4) {
       $node_field = $node->$field['field_name'];
       switch($field['type']) {
         case 'field_shorttext':
-          db_query("INSERT INTO {node_field_shorttext_data} (nid, field_name, field_shorttext, format) VALUES (%d, '%s', '%s', %d)", $node->nid, $field['field_name'], $node_field['value'], $node_field['format']);
+          db_query("INSERT INTO {node_field_shorttext_data} (vid, field_name, field_shorttext, format) VALUES (%d, '%s', '%s', %d)", $node->vid, $field['field_name'], $node_field['value'], $node_field['format']);
           break;
         case 'field_longtext':
-          db_query("INSERT INTO {node_field_longtext_data} (nid, field_name, field_longtext, format) VALUES (%d, '%s', '%s', %d)", $node->nid, $field['field_name'], $node_field['value'], $node_field['format']);
+          db_query("INSERT INTO {node_field_longtext_data} (vid, field_name, field_longtext, format) VALUES (%d, '%s', '%s', %d)", $node->vid, $field['field_name'], $node_field['value'], $node_field['format']);
           break;
         case 'field_integer':
-          db_query("INSERT INTO {node_field_integer_data} (nid, field_name, field_integer) VALUES (%d, '%s', %d)", $node->nid, $field['field_name'], $node_field);
-          break;
-        case 'field_integer-multi':
-          // TODO: need a loop here to handle multiple values
-          db_query("INSERT INTO {node_field_integer_data} (nid, field_name, field_integer) VALUES (%d, '%s', %d)", $node->nid, $field['field_name'], $node_field);          
+          db_query("INSERT INTO {node_field_int_data} (vid, field_name, field_int) VALUES (%d, '%s', %d)", $node->vid, $field['field_name'], $node_field);
           break;
         case 'field_decimal':
-          db_query("INSERT INTO {node_field_float_data} (nid, field_name, field_float) VALUES (%d, '%s', %d)", $node->nid, $field['field_name'], $node_field);
+          db_query("INSERT INTO {node_field_float_data} (vid, field_name, field_float) VALUES (%d, '%s', %d)", $node->vid, $field['field_name'], $node_field);
           break;
       }
       return;
@@ -339,32 +236,25 @@ function field_field($op, &$node, $field, $a2, $a3, $a4) {
     case 'update':
       $node_field = $node->$field['field_name'];
       // Delete and insert, rather than update, in case a field was added.
-      // Fields must declare their datatype in field_field('properties' ...)
-      $table = 'node_field_' . $field['datatype'] . '_data';
-      db_query("DELETE FROM {%s} WHERE nid = %d AND field_name = '%s'", $table, $node->nid, $field['field_name']);
+      db_query("DELETE FROM {%s} WHERE vid = %d AND field_name = '%s'", $table, $node->vid, $field['field_name']);
       switch($field['type']) {
         case 'field_shorttext':
-          db_query("INSERT INTO {node_field_shorttext_data} (nid, field_name, field_shorttext, format) VALUES (%d, '%s', '%s', %d)", $node->nid, $field['field_name'], $node_field['value'], $node_field['format']);
+          db_query("INSERT INTO {node_field_shorttext_data} (vid, field_name, field_shorttext, format) VALUES (%d, '%s', '%s', %d)", $node->vid, $field['field_name'], $node_field['value'], $node_field['format']);
           break;
         case 'field_longtext':
-          db_query("INSERT INTO {node_field_longtext_data} (nid, field_name, field_longtext, format) VALUES (%d, '%s', '%s', %d)", $node->nid, $field['field_name'], $node_field['value'], $node_field['format']);
+          db_query("INSERT INTO {node_field_longtext_data} (vid, field_name, field_longtext, format) VALUES (%d, '%s', '%s', %d)", $node->vid, $field['field_name'], $node_field['value'], $node_field['format']);
           break;
         case 'field_integer':
-          db_query("INSERT INTO {node_field_integer_data} (nid, field_name, field_integer) VALUES (%d, '%s', %d)", $node->nid, $field['field_name'], $node_field);
-          break;
-        case 'field_integer-multi':
-          // TODO: need a loop here to handle multiple values
-          db_query("INSERT INTO {node_field_integer_data} (nid, field_name, field_integer) VALUES (%d, '%s', %d)", $node->nid, $field['field_name'], $node_field);
+          db_query("INSERT INTO {node_field_int_data} (vid, field_name, field_int) VALUES (%d, '%s', %d)", $node->vid, $field['field_name'], $node_field);
           break;
         case 'field_decimal':
-          db_query("INSERT INTO {node_field_float_data} (nid, field_name, field_float) VALUES (%d, '%s', %d)", $node->nid, $field['field_name'], $node_field);
+          db_query("INSERT INTO {node_field_float_data} (vid, field_name, field_float) VALUES (%d, '%s', %d)", $node->vid, $field['field_name'], $node_field);
           break;
       }
       return;
 
     case 'delete':
-      $table = 'node_field_' . $field['datatype'] . '_data';
-      db_query("DELETE FROM {%s} WHERE nid = %d AND field_name = '%s'", $table, $node->nid, $field['field_name']);
+      db_query("DELETE FROM {%s} WHERE vid = %d AND field_name = '%s'", $table, $node->vid, $field['field_name']);
       return;
   }
 }
@@ -403,10 +293,9 @@ function field_field_query($field, $op, $value) {
       break;
 
     case 'field_integer':
-    case 'field_integer-multi':
     case 'field_decimal':
-      $table_name = ($field['type'] == 'field_integer' ? 'node_field_integer_data' : 'node_field_float_data');
-      $column_name = ($field['type'] == 'field_integer' ? 'field_integer' : 'field_float');
+      $table_name = ($field['type'] == 'field_integer' ? 'node_field_int_data' : 'node_field_float_data');
+      $column_name = ($field['type'] == 'field_integer' ? 'field_int' : 'field_float');
 
       switch ($op) {
         case 'is':
@@ -431,55 +320,6 @@ function field_field_query($field, $op, $value) {
   }
 
   return $query_additions;
-}
-
-/**
- * Retrieve possible values for given integer field
- */
-function _field_integer_load($field) {
-  $result = db_query("SELECT field_integer FROM {node_field_integer_data} WHERE field_name = '%s'", $field['field_name']);
-  $values = array();
-  while ($data = db_fetch_object($result)) {
-    $values[$data->field_integer] = $data->field_integer;
-  }
-  
-  return $values;
-}
-
-/**
- * Validate an integer according to field preferences
- */
-function _field_integer_validate(&$node, $field, $value) {
-  if ($field['vocab_type'] == 'closed') {
-    $field_integer_values = _field_integer_load($field);
-    if (!array_key_exists($value, $field_integer_values)) {
-      form_set_error($field['field_name'] . '][value', t('Field %name does not allow the insertion of new values.', array('%name' => theme('placeholder', t($field['label'])))));
-    }
-  }
-  else {
-    switch ($field['rounding']) {
-      case 'round':
-        $node->$field['field_name'] = (string) round($value);
-        watchdog('content', t('Noninteger %val rounded to %newval', array('%val' => theme('placeholder', $value), '%newval' => theme('placeholder', $node->$field['field_name']))));
-        break;
-      case 'truncate':
-        if ((integer) $value) {
-          $node->$field['field_name'] = (string) (integer) $value;
-          watchdog('content', t('Noninteger %val truncated to %newval', array('%val' => theme('placeholder', $value), '%newval' => theme('placeholder', $node->$field['field_name']))));
-        }
-        else {
-          form_set_error($field['field_name'] . '][value', t('The value of %name must be an integer.', array('%name' => theme('placeholder', t($field['label'])))));
-        }
-        break;
-      default:
-        if (!strstr($value, '.') && is_numeric($value)) {
-          $node->$field['field_name'] = (string) (integer) $value;
-        }
-        else {
-          form_set_error($field['field_name'] . '][value', t('The value of %name must be an integer.', array('%name' => t($field['label']))));
-        }
-    }
-  }
 }
 
 ?>

@@ -3,7 +3,7 @@
 
 /**
  * @file
- * Allows administrators to define new content types.1
+ * Allows administrators to define new content types.
  */
 
 /**
@@ -18,22 +18,14 @@ function content_help($section) {
   if (strpos($section, 'node/add') === 0) {
     $types = _content_types();
     foreach ($types as $type_name => $type) {
-      if ($section == 'node/add#content-' . $type_name) {
+      if ($section == 'node/add#' . $type_name) {
         return t($types[$type_name]->description);
       }
-      if ($section == 'node/add/content-' . $type) {
+      if ($section == 'node/add/' . $type_name) {
         return t($types[$type_name]->help);
       }
     }
   }
-}
-
-/**
- * Implementation of hook_xmlrpc().
- */
-function content_xmlrpc() {
-  return array(
-    'drupal.contentPost' => 'content_xmlrpcs_post');
 }
 
 /**
@@ -57,11 +49,16 @@ function content_menu($may_cache) {
 
   if ($may_cache) {
     $items[] = array('path' => 'admin/node/types', 'title' => t('content types'),
-      'callback' => '_content_admin_types_overview', 'access' => $access);
+      'callback' => '_content_admin_type_overview', 'access' => $access);
+    $items[] = array('path' => 'admin/node/types/list', 'title' => t('list'),
+      'type' => MENU_DEFAULT_LOCAL_TASK, 'weight' => -10);
+    $items[] = array('path' => 'admin/node/types/add', 'title' => t('add content type'),
+      'callback' => '_content_admin_type_edit', 'access' => $access,
+      'type' => MENU_LOCAL_TASK);
 
     $types = _content_types();
     foreach ($types as $type_name => $type) {
-      $items[] = array('path' => 'node/add/content-'. $type_name, 'title' => t($type->label),
+      $items[] = array('path' => 'node/add/'. $type_name, 'title' => t($type->label),
         'access' => user_access('create '. $type_name .' content'));
     }
   }
@@ -72,25 +69,36 @@ function content_menu($may_cache) {
       if (isset($types[arg(3)])) {
         $items[] = array('path' => 'admin/node/types/'. arg(3),
           'title' => t($types[arg(3)]->label),
-          'callback' => '_content_admin_type', 'access' => $access,
+          'callback' => '_content_admin_type_edit', 'access' => $access,
           'callback arguments' => array(arg(3)),
+          'type' => MENU_CALLBACK);
+        $items[] = array('path' => 'admin/node/types/'. arg(3) .'/delete',
+          'title' => t('delete'),
+          'callback' => '_content_admin_type_delete', 'access' => $access,
+          'callback arguments' => array(arg(3)),
+          'type' => MENU_CALLBACK);
+        $items[] = array('path' => 'admin/node/types/'. arg(3) .'/duplicate',
+          'title' => t('duplicate'),
+          'callback' => '_content_admin_type_edit', 'access' => $access,
+          'callback arguments' => array('', arg(3)),
           'type' => MENU_CALLBACK);
 
         $items[] = array('path' => 'admin/node/types/'. arg(3) .'/edit',
           'title' => t('edit'),
           'type' => MENU_DEFAULT_LOCAL_TASK, 'weight' => -10);
 
-        $items[] = array('path' => 'admin/node/types/'. arg(3) .'/delete',
-          'title' => t('delete'),
-          'callback' => '_content_admin_type_deleteform', 'access' => $access,
-          'callback arguments' => arg(3),
-          'type' => MENU_CALLBACK, 'weight' => -10);
-
         $items[] = array('path' => 'admin/node/types/'. arg(3) .'/fields',
           'title' => t('manage fields'),
-          'callback' => '_content_admin_fields', 'access' => $access,
+          'callback' => '_content_admin_field_overview', 'access' => $access,
           'callback arguments' => array(arg(3)),
-          'type' => MENU_LOCAL_TASK);
+          'type' => MENU_LOCAL_TASK,
+          'weight' => 1);
+        $items[] = array('path' => 'admin/node/types/'. arg(3) .'/add_field',
+          'title' => t('add field'),
+          'callback' => '_content_admin_field_add', 'access' => $access,
+          'callback arguments' => array(arg(3)),
+          'type' => MENU_LOCAL_TASK,
+          'weight' => 2);
 
         if (arg(4) == 'fields' && arg(5)
             && isset($types[arg(3)]->fields[arg(5)])) {
@@ -114,23 +122,14 @@ function content_menu($may_cache) {
 }
 
 /**
- * Implementation of hook_node_types().
+ * Implementation of hook_node_info().
  */
-function content_node_types() {
+function content_node_info() {
   $types = array();
   foreach (_content_types() as $name => $type) {
-    $types[] = 'content-' . $name;
+    $types[$name] = array('name' => t($type->label), 'base' => 'content');
   }
   return $types;
-}
-
-/**
- * Implementation of hook_node_name().
- */
-function content_node_name($node) {
-  $types = _content_types();
-  $type = is_string($node) ? $node : (is_array($node) ? $node['type'] : $node->type);
-  return t($types[substr($type, 8)]->label);
 }
 
 /**
@@ -139,7 +138,6 @@ function content_node_name($node) {
 function content_access($op, $node) {
   global $user;
   $type = is_string($node) ? $node : (is_array($node) ? $node['type'] : $node->type);
-  $type = substr($type, 8);
 
   if ($op == 'create') {
     return user_access('create '. $type .' content');
@@ -187,7 +185,8 @@ function content_form(&$node, &$param) {
   // Set form parameters so we can accept file uploads.
   $param['options'] = array('enctype' => 'multipart/form-data');
 
-  $output = implode('', _content_field_invoke('form', $node));
+  $output = form_textfield(t('Title'), 'title', $node->title, 60, 128, NULL, NULL, TRUE);
+  $output .= implode('', _content_field_invoke('form', $node));
 
   return $output;
 }
@@ -211,7 +210,7 @@ function content_view(&$node, $teaser = FALSE, $page = FALSE) {
 /**
  * Fetch a list of nodes from the database.
  */
-function content_node_query($conditions = array(), $sort = array(), $return = 'n.nid', $fields = array('node_nid')) {
+function content_node_query($conditions = array(), $sort = array(), $fields = array('node_nid')) {
   $fields = _content_fields();
   $field_types = _content_field_types();
 
@@ -240,24 +239,17 @@ function content_node_query($conditions = array(), $sort = array(), $return = 'n
   else {
     $where_sql = '1';
   }
-  $result = pager_query(db_rewrite_sql('SELECT ' . $return . ' FROM {node} n '. $join_sql .' WHERE '. $where_sql .' ORDER BY n.sticky DESC, n.created DESC'), variable_get('default_nodes_main', 10), 0, NULL, $data);
+  $result = pager_query(db_rewrite_sql('SELECT n.nid FROM {node} n '. $join_sql .' WHERE '. $where_sql .' ORDER BY n.sticky DESC, n.created DESC'), variable_get('default_nodes_main', 10), 0, NULL, $data);
 
   return $result;
 }
 
+
+
 /**
  * Menu callback; presents a listing of content types.
  */
-function _content_admin_types_overview() {
-  $op = $_POST['op'];
-  $edit = $_POST['edit'];
-
-  switch ($op) {
-    case t('Add content type'):
-      _content_admin_type_add($edit['type_name'], $edit['label'], $edit['description']);
-      break;
-  }
-
+function _content_admin_type_overview() {
   $types = _content_types();
 
   $header = array(t('Label'), t('Name'), t('Description'), array('data' => t('Operations'), 'colspan' => 3));
@@ -275,384 +267,352 @@ function _content_admin_types_overview() {
     $rows[] = $row;
   }
 
-  $group = theme('table', $header, $rows);
-  $output = '<h2>'. t('Available content types') . '</h2>' . $group;
+  $output = theme('table', $header, $rows);
 
-  $group = t('<p>To add a new content type, type its name here. After it has been added, you can configure its options.</p>');
-  // TODO: we are currently limited to 24 chars for the content type name
-  // because the node table's type field is limited to 32 chars
-  // and we use 8 of those for 'content-', e.g. 'content-foo'
-  $form = form_textfield(t('Label'), 'label', '', 40, 255, t('Friendly name of your content type.'), NULL, TRUE);
-  $form .= form_textfield(t('Name'), 'type_name', '', 40, 23, t('Short name, used in urls. No spaces or weird characters.'), NULL, TRUE);
-  $form .= form_textfield(t('Description'), 'description', '', 80, 255);
-  $form .= form_submit(t('Add content type'));
-  $group .= form($form);
-  $output .= '<h2>'. t('Add new content type') .'</h2>'. $group;
-
-  print theme('page', $output);
-}
-
-/**
- * Add a new content type.
- */
-function _content_admin_type_add($type_name, $label, $description) {
-  // TODO: check for existence of type with this name, and for illegal characters.
-  $type_name = trim($type_name);
-  $type_name = urlencode($type_name);
-  
-  if ($type_name == '' || $label == '') {
-    drupal_set_message(t('Please fill in all required fields.'), 'error');
-    drupal_goto('admin/node/types'); 
-  }
-
-  db_query("INSERT INTO {node_type} (type_name, label, description) VALUES ('%s', '%s', '%s')", $type_name, $label, $description);
-
-  drupal_set_message(t('Added content type %type.', array('%type' => '<em>'. $type_name .'</em>')));
-  cache_clear_all('content_types');
-  drupal_goto('admin/node/types');
-}
-
-/**
- * Form to delete a content type.
- */
-function _content_admin_type_deleteform($type_name) {
-  $edit = $_POST['edit'];
-  if ($edit['confirm']) {
-    _content_admin_type_delete($type_name, $edit['delete-content']);
-    drupal_set_message(t('Deletion complete.'));
-    drupal_goto('admin/node/types');
-  }
-  else {
-    $options = array(t('Delete this content type but preserve data of this content type in the database'), t('Delete this content type and all data of this content type'));
-    $extra = form_radios(t('Delete all content of this type'), 'delete-content', 0, $options);
-    return theme('confirm',
-    t('Are you sure you want to delete this content type?'),
-    'admin/node',
-    t('This action cannot be undone.'),
-    t('Delete'),
-    t('Cancel'),
-    $extra);
-  }
-}
-
-/**
- * Delete content type and/or all data of that type.
- */
-function _content_admin_type_delete($type_name, $delete_content = FALSE) {
-  db_query("DELETE FROM {node_type} WHERE type_name = '%s'", $type_name);
-  if ($delete_content) {
-    $result = db_query("SELECT nid FROM {node} WHERE type = '%s'", 'content-' . $type_name);
-    while ($data = db_fetch_object($result)) {
-      node_delete(array('confirm' => 1, 'nid' => $data->nid));
-    }
-  }
+  return $output;
 }
 
 /**
  * Menu callback; handles the editing of a content type.
  */
-function _content_admin_type($type_name) {
-  $op = $_POST['op'];
-  $edit = $_POST['edit'];
-
+function _content_admin_type_edit($type_name = '', $original_type_name = '') {
   $types = _content_types();
-  $type = $types[$type_name];
-
-  switch ($op) {
-    case t('Save content type'):
-      // TODO: add validation of fields
-      $edit['type_name'] = $type->type_name;
-      _content_admin_type_save($type_name, $edit);
-      break;
+  if (array_key_exists($type_name, $types)) {
+    $type = $types[$type_name];
+  }
+  else {
+    if (array_key_exists($original_type_name, $types)) {
+      $type = $types[$original_type_name];
+    }
+    else {
+      $type = new stdClass();
+      $type->title_label = 'Title';
+    }
   }
 
-  $form = '';
-  $form .= form_textfield(t('Label'), 'label', $type->label, 60, 255, '', NULL, TRUE);
-  $form .= form_textarea(t('Description'), 'description', $type->description, 60, 5, t('A brief description of the content type.'));
-  $form .= form_textarea(t('Help text'), 'help', $type->help, 60, 5, t('Instructions to present to the user when adding new content of this type.'));
-
-  $form .= form_submit(t('Save content type'));
-
-  $output = form($form);
-
-  print theme('page', $output);
+  $form = array();
+  $form['label'] = array('#title' => t('Label'), '#type' => 'textfield', '#default_value' => $type->label, '#description' => t('The human-readable name of this content type.'), '#required' => TRUE);
+  $form['description'] = array('#title' => t('Description'), '#type' => 'textarea', '#default_value' => $type->description, '#rows' => 10, '#description' => t('A brief description of the content type.'), '#required' => FALSE);
+  $form['help'] = array('#title' => t('Help text'), '#type' => 'textarea', '#default_value' => $type->help, '#rows' => 10, '#description' => t('Instructions to present to the user when adding new content of this type.'), '#required' => FALSE);
+  $form['title_label'] = array('#title' => t('Title field label'), '#type' => 'textfield', '#default_value' => $type->title_label, '#description' => t('The label for the title field.'), '#required' => TRUE);
+  $form['submit'] = array('#type' => 'submit', '#value' => t('Save content type'));
+  $form['type_name'] = array('#type' => 'value', '#value' => $type_name);
+  $form['original_type_name'] = array('#type' => 'value', '#value' => $original_type_name);
+  return drupal_get_form('_content_admin_type_edit', $form);
 }
 
 /**
  * Save a content type after editing.
  */
-function _content_admin_type_save($type_name, $edit) {
-  db_query("UPDATE {node_type} SET label = '%s', description = '%s', help = '%s' WHERE type_name = '%s'", $edit['label'], $edit['description'], $edit['help'], $type_name);
+function _content_admin_type_edit_execute($form_id, $form_values) {
+  $types = _content_types();
+  if (!array_key_exists($form_values['type_name'], $types)) {
+    // Find a valid, computer-friendly type name.
+    $form_values['type_name'] = trim($form_values['label']);
+    $form_values['type_name'] = drupal_strtolower($form_values['type_name']);
+    $form_values['type_name'] = str_replace(array(' ', '-'), '_', $form_values['type_name']);
+    $form_values['type_name'] = preg_replace('/[^a-z0-9_]/', '', $form_values['type_name']);
+    $form_values['type_name'] = 'content-'. $form_values['type_name'];
+    $form_values['type_name'] = substr($form_values['type_name'], 0, 31);
+    if (array_key_exists($form_values['type_name'], $types)) {
+      $counter = 0;
+      do {
+        $new_name = substr($form_values['type_name'], 0, 29) .'_'. $counter++;
+      } while (array_key_exists($new_name, $types));
+      $form_values['type_name'] = $new_name;
+    }
 
-  drupal_set_message(t('Updated content type %type.', array('%type' => '<em>'. $edit['type_name'] .'</em>')));
+    db_query("INSERT INTO {node_type} (type_name, label, description, help, title_label) VALUES ('%s', '%s', '%s', '%s', '%s')", $form_values['type_name'], $form_values['label'], $form_values['description'], $form_values['help'], $form_values['title_label']);
+  }
+  else {
+    db_query("UPDATE {node_type} SET label = '%s', description = '%s', help = '%s', title_label = '%s' WHERE type_name = '%s'", $form_values['label'], $form_values['description'], $form_values['help'], $form_values['title_label'], $form_values['type_name']);
+  }
+  
+  if (array_key_exists('original_type_name', $form_values)) {
+    // Duplicate the field structure from the old content type.
+    db_query("INSERT INTO {node_field_instance} (field_name, type_name, weight, label, instance_settings) SELECT field_name, '%s', weight, label, instance_settings FROM {node_field_instance} WHERE type_name = '%s'", $form_values['type_name'], $form_values['original_type_name']);
+  }
+
+  drupal_set_message(t('Saved content type %type.', array('%type' => theme('placeholder', $form_values['label']))));
   cache_clear_all('content_types');
-  drupal_goto('admin/node/types/'. $type_name);
+  drupal_goto('admin/node/types/'. $form_values['type_name']);
 }
 
 /**
- * Menu callback; presents an overview of a content type's fields.
+ * Menu callback; delete a content type.
  */
-function _content_admin_fields($type_name) {
-  $op = $_POST['op'];
-  $edit = $_POST['edit'];
+function _content_admin_type_delete($type_name = '') {
+  $types = _content_types();
+  $type = $types[$type_name];
 
-  switch ($op) {
-    case t('Create field'):
-      _content_admin_field_create($type_name, $edit);
-      break;
-    case t('Add field'):
-      _content_admin_field_add($type_name, $edit);
-      break;
+  $form = array();
+  $form['type_name'] = array('#type' => 'value', '#value' => $type_name);
+  return confirm_form('_content_admin_type_delete', $form, t('Are you sure you want to delete the content type %type?', array('%type' => theme('placeholder', $type->label))), 'admin/node/types', t('If you have any content left in this content type, it will be permanently deleted. This action cannot be undone.'), t('Delete'), t('Cancel'));
+}
+
+/**
+ * Delete a content type.
+ */
+function _content_admin_type_delete_execute($form_id, $form_values) {
+  $types = _content_types();
+  $type = $types[$form_values['type_name']];
+  
+  if ($type && $form_values['confirm']) {
+    // Delete all nodes of this content type.
+    $result = db_query("SELECT nid FROM {node} WHERE type = '%s'", $form_values['type_name']);
+    while ($node = db_fetch_object($result)) {
+      $node = node_load($node->nid);
+      db_query('DELETE FROM {node} WHERE nid = %d', $node->nid);
+      db_query('DELETE FROM {node_revisions} WHERE nid = %d', $node->nid);
+      node_invoke($node, 'delete');
+      node_invoke_nodeapi($node, 'delete');
+      if (function_exists('search_wipe')) {
+        search_wipe($node->nid, 'node');
+      }
+    }
+    db_query("DELETE FROM {node_field_instance} WHERE type_name = '%s'", $form_values['type_name']);
+    db_query("DELETE FROM {node_type} WHERE type_name = '%s'", $form_values['type_name']);
+
+    drupal_set_message(t('Deleted content type %type.', array('%type' => theme('placeholder', $type->label))));
+    cache_clear_all('content_types');
+    drupal_goto('admin/node/types');
   }
+}
 
+
+/**
+ * Menu callback; presents a listing of fields for a content type.
+ */
+function _content_admin_field_overview($type_name) {
   $types = _content_types();
   $type = $types[$type_name];
   $field_types = _content_field_types();
 
-  $header = array(t('Label'), t('Name'), t('Type'), t('Weight'), array('data' => t('Operations'), 'colspan' => 2));
+  $header = array(t('Label'), t('Name'), t('Type'), array('data' => t('Operations'), 'colspan' => 2));
   $rows = array();
+  $rows[] = array($type->title_label, 'title', '', '', '');
   foreach ($type->fields as $field) {
     $row = array();
     $row[] = $field['label'];
     $row[] = $field['field_name'];
     $row[] = $field_types[$field['type']]['label'];
-    $row[] = form_weight(NULL, $field['field_name'] .'][weight', $field['weight']);
+
     $row[] = l(t('configure'), 'admin/node/types/'. $type_name .'/fields/'. $field['field_name']);
     $row[] = l(t('remove'), 'admin/node/types/'. $type_name .'/fields/'. $field['field_name'] .'/remove');
+
     $rows[] = $row;
   }
-  $group = theme('table', $header, $rows);
-  $output = '<h2>'. t('Fields') . '</h2>' . $group;
 
-  $included_field_names = array();
-  foreach ($type->fields as $field) {
-    $included_field_names[] = "'". db_escape_string($field['field_name']) ."'";
-  }
-  // TODO: Figure out more elegant (secure) query.
-  if ($included_field_names) {
-    $result = db_query('SELECT field_name, type FROM {node_field} WHERE field_name NOT IN ('. implode(',',  $included_field_names) .')');
-  }
-  else {
-    $result = db_query('SELECT field_name, type FROM {node_field} WHERE 1');
-  }
+  $output = theme('table', $header, $rows);
+
+  return $output;
+}
+
+/**
+ * Menu callback; presents the form for adding a new field.
+ */
+function _content_admin_field_add($type_name) {
+  $types = _content_types();
+  $type = $types[$type_name];
+  $field_types = _content_field_types();
+  $fields = _content_fields();
+  $output = '';
+
   $options = array();
-  while ($field = db_fetch_object($result)) {
-    $options[$field->field_name] = $field->field_name .' ('. $field_types[$field->type]['label'] .')';
+  foreach ($fields as $field) {
+    if (!array_key_exists($field['field_name'], $type->fields))
+    $options[$field['field_name']] = t($field['label']) .' ('. $field['field_name'] .')';
   }
   if ($options) {
-    $form .= form_select('', 'field_name', NULL, $options, '', 0, FALSE, TRUE);
-    $form .= form_submit(t('Add field'));
-    $group = form($form);
-    $output .= '<h2>'. t('Add existing field') .'</h2>'. $group;
+    $form = array();
+    $form['field_name'] = array('#type' => 'select', '#required' => TRUE, '#options' => $options);
+    $form['submit'] = array('#type' => 'submit', '#value' => t('Add field'));
+    $form['type_name'] = array('#type' => 'value', '#value' => $type_name);
+    $output .= drupal_get_form('_content_admin_field_add_existing', $form);
   }
-
-  $form = form_textfield(t('Label'), 'field_label', '', 40, 127, t('The friendly name for this field that will show in forms, e.g. Body.'), NULL, TRUE);
+  
+  $form = array();
+  $form['label'] = array('#title' => t('Label'), '#type' => 'textfield', '#default_value' => '', '#description' => t('The human-readable name of this field.'), '#required' => TRUE);
   $options = array();
-  foreach (_content_field_types() as $field_name => $field_type) {
+  foreach ($field_types as $field_name => $field_type) {
     $options[$field_name] = $field_type['label'];
   }
-  $form .= form_select(t('Type'), 'field_type', 'textfield', $options);
-  $form .= form_submit(t('Create field'));
-  $group = form($form);
-  $output .= '<h2>'. t('Create new field') .'</h2>'. $group;
+  $form['type'] = array('#type' => 'select', '#required' => TRUE, '#options' => $options);
+  $form['submit'] = array('#type' => 'submit', '#value' => t('Create field'));
+  $form['type_name'] = array('#type' => 'value', '#value' => $type_name);
+  $output .= drupal_get_form('_content_admin_field_add_new', $form);
 
-  print theme('page', $output);
+  return $output;
 }
 
 /**
- * Create a new field.
+ * Add an existing field to a content type.
  */
-function _content_admin_field_create($type_name, $edit) {
-  // TODO: check for existence of field with this name, and for illegal characters.
-  $field_label = trim($edit['field_label']);
-  $field_name = 'field_' . strtolower(trim($edit['field_label']));
-  
-  // TODO: check that $edit['type'] is a supported type
-  $field_type = $edit['field_type'];
-  $field_types = _content_field_types();
-  $module = $field_types[$field_type]['module'];
-  
-  // initialize default values for properties defined by the field
-  $settings = module_invoke($module, 'field_settings', 'properties', array('type' => $field_type), 'global');  foreach ($settings as $key => $value) {
-    if (is_array($value)) {
-      $global_settings[key($value)] = current($value);
-    }
-    else {
-      $global_settings[$key] = $value;
-    }
+function _content_admin_field_add_existing_execute($form_id, $form_values) {
+  $prior_instance = db_fetch_object(db_query("SELECT weight, label, instance_settings FROM {node_field_instance} WHERE field_name = '%s'", $form_values['field_name']));
+  if (!$prior_instance) {
+    $prior_instance = new stdClass;
+    $prior_instance->weight = 0;
+    $prior_instance->label = $form_values['field_name'];
+    $prior_instance->instance_settings = '';
   }
-  
-  $settings = module_invoke($module, 'field_settings', 'properties', array('type' => $field_type), 'instance');  foreach ($settings as $key => $value) {
-    if (is_array($value)) {
-      $instance_settings[key($value)] = current($value);
-    }
-    else {
-      $instance_settings[$key] = $value;
-    }
-  }
-  
-  db_query("INSERT INTO {node_field} (field_name, type, global_settings) VALUES ('%s', '%s', '%s')", $field_name, $field_type, serialize($global_settings));
+  db_query("INSERT INTO {node_field_instance} (field_name, type_name, weight, label, instance_settings) VALUES ('%s', '%s', %d, '%s', '%s')", $form_values['field_name'], $form_values['type_name'], $prior_instance->weight, $prior_instance->label, $prior_instance->instance_settings);
 
-  db_query("INSERT INTO {node_field_instance} (type_name, field_name, label, instance_settings) VALUES ('%s', '%s', '%s', '%s')", $type_name, $field_name, $field_label, serialize($instance_settings));
-
-  drupal_set_message(t('Added field %field.', array('%field' => '<em>'. $field_name .'</em>')));
+  drupal_set_message(t('Added field %label.', array('%label' => theme('placeholder', $prior_instance->label))));
   cache_clear_all('content_types');
-  drupal_goto('admin/node/types/'. $type_name .'/fields');
+  drupal_goto('admin/node/types/'. $form_values['type_name'] .'/fields');
 }
 
 /**
- * Add an existing field.
+ * Create a new field for a content type.
  */
-function _content_admin_field_add($type_name, $edit) {
-  $fields = _content_fields();
-  $field_name = $edit['field_name'];
-  $field_type = $fields[$field_name]['type'];
-  $field_types = _content_field_types();
-  $module = $field_types[$field_type]['module'];
-  
-  // since this is a new instance, we use default instance settings
-  $instance_settings = module_invoke($module, 'field_settings', 'properties', array('type' => $field_type), 'instance');
-  
-  db_query("INSERT INTO {node_field_instance} (type_name, field_name, label, instance_settings) VALUES ('%s', '%s', '%s', '%s')", $type_name, $field_name, $field_name, $instance_settings);
+function _content_admin_field_add_new_execute($form_id, $form_values) {
+  // Find a valid, computer-friendly type name.
+  $field_name = trim($form_values['label']);
+  $field_name = drupal_strtolower($field_name);
+  $field_name = str_replace(array(' ', '-'), '_', $field_name);
+  $field_name = preg_replace('/[^a-z0-9_]/', '', $field_name);
+  $field_name = 'field_'. $field_name;
+  $field_name = substr($field_name, 0, 31);
+  if (array_key_exists($field_name, $types)) {
+    $counter = 0;
+    do {
+      $new_name = substr($field_name, 0, 29) .'_'. $counter++;
+    } while (array_key_exists($new_name, $types));
+    $field_name = $new_name;
+  }
 
-  drupal_set_message(t('Added field %field.', array('%field' => '<em>'. $edit['field_name'] .'</em>')));
+  db_query("INSERT INTO {node_field} (field_name, type) VALUES ('%s', '%s')", $field_name, $form_values['type']);
+
+  db_query("INSERT INTO {node_field_instance} (type_name, field_name, label) VALUES ('%s', '%s', '%s')", $form_values['type_name'], $field_name, $form_values['label']);
+
+  drupal_set_message(t('Created field %label.', array('%label' => theme('placeholder', $form_values['label']))));
   cache_clear_all('content_types');
-  drupal_goto('admin/node/types/'. $type_name .'/fields');
+  drupal_goto('admin/node/types/'. $form_values['type_name'] .'/fields/'. $field_name);
 }
 
 /**
- * Remove a field.
+ * Menu callback; delete a content type.
  */
 function _content_admin_field_remove($type_name, $field_name) {
   $types = _content_types();
   $type = $types[$type_name];
   $field = $type->fields[$field_name];
 
-  if ($_POST['op'] == t('Delete')) {
-    db_query("DELETE FROM {node_field_instance} WHERE type_name = '%s' AND field_name = '%s'", $type_name, $field_name);
+  $form = array();
+  $form['type_name'] = array('#type' => 'value', '#value' => $type_name);
+  $form['field_name'] = array('#type' => 'value', '#value' => $field_name);
+  return confirm_form('_content_admin_field_remove', $form, t('Are you sure you want to remove the field %field?', array('%field' => theme('placeholder', $field['label']))), 'admin/node/types/'. $type_name .'/fields', t('If you have any content left in this field, it will be lost. This action cannot be undone.'), t('Remove'), t('Cancel'));
+}
 
-    drupal_set_message(t('Removed field %field.', array('%field' => '<em>'. $field['field_name'] .'</em>')));
+/**
+ * Remove a field from a content type.
+ */
+function _content_admin_field_remove_execute($form_id, $form_values) {
+  $types = _content_types();
+  $type = $types[$form_values['type_name']];
+  $field = $type->fields[$form_values['field_name']];
+  
+  if ($type && $field && $form_values['confirm']) {
+    db_query("DELETE FROM {node_field_instance} WHERE type_name = '%s' AND field_name = '%s'", $form_values['type_name'], $form_values['field_name']);
+
+    drupal_set_message(t('Removed field %field from %type.', array('%field' => theme('placeholder', $field['label']), '%type' => theme('placeholder', $type->label))));
     cache_clear_all('content_types');
-    drupal_goto('admin/node/types/'. $type_name .'/fields');
-  }
-  else {
-    $form .= '<p>'. t('Are you sure you want to remove the field %field from content type %type? If you have any content left in this field, it will be lost.', array('%field' => '<em>'. $field['field_name'] .'</em>', '%type' => '<em>'. $type->type_name .'</em>')) ."</p>\n";
-    $form .= form_submit(t('Delete'));
-    print theme('page', form($form));
+    drupal_goto('admin/node/types/'. $form_values['type_name'] .'/fields');
   }
 }
+
 
 /**
  * Menu callback; presents the field editing page.
  */
 function _content_admin_field($type_name, $field_name) {
-  $op = $_POST['op'];
-  $edit = $_POST['edit'];
-
+  $output = '';
   $types = _content_types();
   $type = $types[$type_name];
   $field = $type->fields[$field_name];
   $field_types = _content_field_types();
   $field_type = $field_types[$field['type']];
 
-  switch ($op) {
-    case t('Save field'):
-      // TODO: add validation of fields
-      $edit['field_name'] = $field['field_name'];
-      _content_admin_field_save($type_name, $field_name, $edit);
-      break;
-  }
+  $form = array();
+  $form['instance'] = array('#type' => 'fieldset', '#title' => t('Instance settings'), '#description' => t('These settings apply only to the %field field as it appears in the %type content type.', array('%field' => theme('placeholder', $field['label']), '%type' => theme('placeholder', $type->label))));
+  $form['instance']['label'] = array('#type' => 'textfield', '#title' => t('Label'), '#default_value' => $field['label'], '#required' => TRUE);
+  $form['instance']['weight'] = array('#type' => 'weight', '#title' => t('Weight'), '#default_value' => $field['weight'], '#description' => t('In the node editing form, the heavier fields will sink and the lighter fields will be positioned nearer the top.'));
+  $form['instance'] = array_merge($form['instance'], module_invoke($field_type['module'], 'field_settings', 'form', $field, 'instance'));
 
-  $form = '';
-  $form .= '<h2>'. t('Instance settings') .'</h2>';
-  $form .= '<p>'. t('The following settings apply only to the %field field as it appears in the %type content type.', array('%field' => '<em>'. $field['field_name'] .'</em>', '%type' => '<em>'. $type->type_name .'</em>')) .'</p>';
-  $form .= form_textfield(t('Label'), 'label', $field['label'], 60, 255, '', NULL, TRUE);
+  $form['global'] = array('#type' => 'fieldset', '#title' => t('Global settings'), '#description' => t('These settings apply to the %field field in every content type in which it appears.', array('%field' => theme('placeholder', $field['label']))));
+  $form['global']['required'] = array('#type' => 'checkbox', '#title' => t('Required'), '#default_value' => $field['required']);
+  $form['global']['multiple'] = array('#type' => 'checkbox', '#title' => t('Multiple values'), '#default_value' => $field['multiple']);
+  $form['global'] = array_merge($form['global'], module_invoke($field_type['module'], 'field_settings', 'form', $field, 'global'));
 
-  $form .= module_invoke($field_type['module'], 'field_settings', 'form', $field, 'instance');
+  $form['submit'] = array('#type' => 'submit', '#value' => t('Save field settings'));
+  $form['type_name'] = array('#type' => 'value', '#value' => $type_name);
+  $form['field_name'] = array('#type' => 'value', '#value' => $field_name);
 
-  $form .= '<h2>'. t('Global settings') .'</h2>';
-  $form .= '<p>'. t('The following settings apply to the %field field in every content type in which it appears.', array('%field' => '<em>'. $field['field_name'] .'</em>')) .'</p>';
+  $output .= drupal_get_form('_content_admin_field', $form);
 
-  $form .= form_checkbox(t('Required'), 'required', TRUE, $field['required']);
+  return $output;
+}
 
-  $form .= module_invoke($field_type['module'], 'field_settings', 'form', $field, 'global');
+/**
+ * Validate a field's settings.
+ */
+function _content_admin_field_validate($form_id, $form_values) {
+  $types = _content_types();
+  $type = $types[$form_values['type_name']];
+  $field = $type->fields[$form_values['field_name']];
+  $field_types = _content_field_types();
+  $field_type = $field_types[$field['type']];
 
-  $form .= form_submit(t('Save field'));
-
-  $output = form($form);
-
-  print theme('page', $output);
+  module_invoke($field_type['module'], 'field_settings', 'validate', array_merge($field, $form_values), 'instance');
+  module_invoke($field_type['module'], 'field_settings', 'validate', array_merge($field, $form_values), 'global');
 }
 
 /**
  * Save a field's settings after editing.
  */
-function _content_admin_field_save($type_name, $field_name, $edit) {
+function _content_admin_field_execute($form_id, $form_values) {
   $types = _content_types();
-  $type = $types[$type_name];
-  $field = $type->fields[$field_name];
+  $type = $types[$form_values['type_name']];
+  $field = $type->fields[$form_values['field_name']];
   $field_types = _content_field_types();
   $field_type = $field_types[$field['type']];
-  
-  // overlay values from the form onto current values safely
-  // values defined as arrays in a field's properties are treated as read-only
-  $result = db_fetch_object(db_query("SELECT instance_settings FROM {node_field_instance} WHERE field_name = '%s'", $field_name));
-  $instance_settings = unserialize($result->instance_settings);
-  $settings = module_invoke($field_type['module'], 'field_settings', 'properties', $field, 'instance');
-  foreach ($settings as $key => $value) {
-    if (is_array($value)) {
-      $key = key($value);
-      $instance_settings[key($value)] = current($value);
-    }
-    else {
-      $instance_settings[$key] = $edit[$key];
-    }
+
+  $instance_settings = array();
+  foreach (module_invoke($field_type['module'], 'field_settings', 'save', $field, 'instance') as $setting) {
+    $instance_settings[$setting] = $form_values[$setting];
+  }
+  $global_settings = array();
+  foreach (module_invoke($field_type['module'], 'field_settings', 'save', $field, 'global') as $setting) {
+    $global_settings[$setting] = $form_values[$setting];
   }
 
-  $result = db_fetch_object(db_query("SELECT global_settings FROM {node_field} WHERE field_name = '%s'", $field_name));
-  $global_settings = unserialize($result->global_settings);
-  $settings = module_invoke($field_type['module'], 'field_settings', 'properties', $field, 'global');
-  foreach ($settings as $key => $value) {
-    if (is_array($value)) {
-      $key = key($value);
-      $global_settings[key($value)] = current($value);
-    }
-    else {
-      $global_settings[$key] = $edit[$key];
-    }
-  }
+  db_query("UPDATE {node_field_instance} SET weight = %d, label = '%s', instance_settings = '%s' WHERE type_name = '%s' AND field_name = '%s'", $form_values['weight'], $form_values['label'], serialize($instance_settings), $form_values['type_name'], $form_values['field_name']);
 
-  db_query("UPDATE {node_field_instance} SET label = '%s', instance_settings = '%s' WHERE type_name = '%s' AND field_name = '%s'", $edit['label'], serialize($instance_settings), $type_name, $field_name);
+  db_query("UPDATE {node_field} SET required = %d, multiple = %d, global_settings = '%s' WHERE field_name = '%s'", $form_values['required'], $form_values['multiple'], serialize($global_settings), $form_values['field_name']);
 
-  db_query("UPDATE {node_field} SET required = %d, global_settings = '%s' WHERE field_name = '%s'", $edit['required'], serialize($global_settings), $field['field_name']);
-
-  drupal_set_message(t('Updated field %field.', array('%field' => '<em>'. $edit['field_name'] .'</em>')));
-
+  drupal_set_message(t('Saved field %field.', array('%field' => theme('placeholder', $form_values['label']))));
   cache_clear_all('content_types');
-  drupal_goto('admin/node/types/'. $type_name .'/fields');
+  drupal_goto('admin/node/types/'. $form_values['type_name'] .'/fields');
 }
 
+
 /**
- * Invoke a field hook. This passes along the $op that the content type
- * received to the individual fields. E.g., when the node is loaded the
- * content_load() function passes along the 'load' op.
+ * Invoke a field hook.
  */
 function _content_field_invoke($op, &$node, $a2 = NULL, $a3 = NULL, $a4 = NULL) {
   $type_name = is_string($node) ? $node : (is_array($node) ? $node['type'] : $node->type);
-  $type_name = substr($type_name, 8); // content-foo becomes foo
   $types = _content_types();
   $type = $types[$type_name];
   $field_types = _content_field_types();
 
   $return = array();
-  // if you end up with errors about Invalid argument supplied to foreach here,
-  // it's because the type column in the node table is truncating the field name
   foreach ($type->fields as $field) {
     $module = $field_types[$field['type']]['module'];
     $function = $module .'_field';
     if (function_exists($function)) {
       $result = $function($op, $node, $field, $a2, $a3, $a4);
-      if (($result) && is_array($result)) {
+      if (is_array($result)) {
         $return = array_merge($return, $result);
       }
       else if (isset($result)) {
@@ -668,7 +628,7 @@ function _content_field_invoke($op, &$node, $a2 = NULL, $a3 = NULL, $a4 = NULL) 
  * Return a list of all content types.
  */
 function _content_types() {
-  //static $types;
+  static $types;
 
   if (!isset($types)) {
     if ($cached = cache_get('content_types')) {
@@ -679,10 +639,10 @@ function _content_types() {
       $type_result = db_query('SELECT * FROM {node_type} nt WHERE 1 ORDER BY nt.type_name ASC');
       while ($type = db_fetch_object($type_result)) {
         $type->fields = array();
-        $field_result = db_query("SELECT * FROM {node_field_instance} nfi INNER JOIN {node_field} nf ON nfi.field_name = nf.field_name WHERE nfi.type_name = '%s' ORDER BY nfi.weight ASC, nfi.label ASC", $type->type_name);
+        $field_result = db_query("SELECT nfi.field_name, nfi.weight, nfi.label, nfi.instance_settings, nf.type, nf.global_settings, nf.required, nf.multiple FROM {node_field_instance} nfi LEFT JOIN {node_field} nf ON nfi.field_name = nf.field_name WHERE nfi.type_name = '%s' ORDER BY nfi.weight ASC, nfi.label ASC", $type->type_name);
         while ($field = db_fetch_array($field_result)) {
-          $global_settings = unserialize($field['global_settings']);
-          $instance_settings = unserialize($field['instance_settings']);
+          $global_settings = $field['global_settings'] ? unserialize($field['global_settings']) : array();
+          $instance_settings = $field['instance_settings'] ? unserialize($field['instance_settings']) : array();
           unset($field['global_settings']);
           unset($field['instance_settings']);
           $field = array_merge($field, $global_settings, $instance_settings);
@@ -692,7 +652,7 @@ function _content_types() {
         $types[$type->type_name] = $type;
       }
 
-      //cache_set('content_types', serialize($types), CACHE_PERMANENT);
+      cache_set('content_types', serialize($types), CACHE_PERMANENT);
     }
   }
 
@@ -709,9 +669,10 @@ function _content_fields() {
     $fields = array();
     $field_result = db_query('SELECT * FROM {node_field} nf');
     while ($field = db_fetch_array($field_result)) {
-      $global_settings = unserialize($field['global_settings']);
+      $global_settings = $field['global_settings'] ? unserialize($field['global_settings']) : array();
       unset($field['global_settings']);
       $field = array_merge($field, $global_settings);
+      $field['label'] = db_result(db_query("SELECT label FROM {node_field_instance} WHERE field_name = '%s'", $field['field_name']));
       $fields[$field['field_name']] = $field;
     }
   }
@@ -740,16 +701,5 @@ function _content_field_types() {
 
   return $types;
 }
-
-function content_xmlrpcs_post($type_name) {
-  $types = _content_field_types();
-  $type = $types[$type_name];
-  
-  // which fields belong to this type?
-  
-   
-  
-}
-
 
 ?>
