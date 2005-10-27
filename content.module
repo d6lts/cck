@@ -182,13 +182,16 @@ function content_delete($node) {
  * Implementation of hook_form().
  */
 function content_form(&$node, &$param) {
+  $form = array();
+  $types = _content_types();
+  $type = $types[$node->type];
+
   // Set form parameters so we can accept file uploads.
-  $param['options'] = array('enctype' => 'multipart/form-data');
+  $form['#attributes'] = array("enctype" => "multipart/form-data");
 
-  $output = form_textfield(t('Title'), 'title', $node->title, 60, 128, NULL, NULL, TRUE);
-  $output .= implode('', _content_field_invoke('form', $node));
-
-  return $output;
+  $form['title'] = array('#type' => 'textfield', '#title' => t($type->title_label), '#required' => TRUE, '#default_value' => $node->title);
+  $form = array_merge($form, _content_field_invoke('form', $node));
+  return $form;
 }
 
 /**

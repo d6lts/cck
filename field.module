@@ -161,28 +161,29 @@ function field_field($op, $node, $field, $a2, $a3, $a4) {
       return $output;
 
     case 'form':
-      $output = '';
+      $form = array();
       $node_field = $node->$field['field_name'];
 
       switch($field['type']) {
         case 'field_shorttext':
         case 'field_longtext':
+          $form[$field['field_name']] = array('#tree' => TRUE);
           if ($field['rows'] == 1) {
-            $output .= form_textfield(t($field['label']), $field['field_name'] .'][value', $node_field['value'], 60, 127, '', NULL, $field['required']);
+            $form[$field['field_name']]['value'] = array('#type' => 'textfield', '#title' => t($field['label']), '#default_value' => $node_field['value'], '#required' => $field['required']);
           }
           else {
-            $output .= form_textarea(t($field['label']), $field['field_name'] .'][value', $node_field['value'], 60, $field['rows'], '', NULL, $field['required']);
+            $form[$field['field_name']]['value'] = array('#type' => 'textarea', '#title' => t($field['label']), '#default_value' => $node_field['value'], '#required' => $field['required'], '#rows' => $field['rows']);
           }
           if ($field['text_processing']) {
-            $output .= filter_form($field['field_name'] .'][format', $node_field['format']);
+            array_merge($form, filter_form($node_field['format']));
           }
           break;
         case 'field_integer':
         case 'field_decimal':
-          $output .= form_textfield(t($field['label']), $field['field_name'], $node_field, 60, 127, '', NULL, $field['required']);
+          $form[$field['field_name']] = array('#type' => 'textfield', '#title' => t($field['label']), '#default_value' => $node_field['value'], '#required' => $field['required']);
           break;
       }
-      return $output;
+      return $form;
 
     case 'validate':
       $node_field = $node->$field['field_name'];
@@ -190,19 +191,11 @@ function field_field($op, $node, $field, $a2, $a3, $a4) {
       switch($field['type']) {
         case 'field_shorttext':
         case 'field_longtext':
-          if ($field['required']) {
-            if (isset($node_field['value']) && $node_field['value'] == '') {
-              form_set_error($field['field_name'] .'][value', t('You must fill in the %name field.', array('%name' => t($field['label']))));
-            }
-          }
           break;
         case 'field_integer':
         case 'field_decimal':
           if (isset($node_field)) {
-            if ($field['required'] && $node_field == '') {
-              form_set_error($field['field_name'] .'][value', t('You must fill in the %name field.', array('%name' => t($field['label']))));
-            }
-            else {
+            if ($node_field != '') {
               if (is_numeric($field['min']) && $node_field < $field['min']) {
                 form_set_error($field['field_name'] .'][value', t('The value of %name may be no smaller than %min.', array('%name' => t($field['label']), '%min' => $field['min'])));
               }
