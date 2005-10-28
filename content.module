@@ -189,7 +189,12 @@ function content_form(&$node, &$param) {
   // Set form parameters so we can accept file uploads.
   $form['#attributes'] = array("enctype" => "multipart/form-data");
 
-  $form['title'] = array('#type' => 'textfield', '#title' => t($type->title_label), '#required' => TRUE, '#default_value' => $node->title);
+  $form['title'] = array(
+    '#type' => 'textfield',
+    '#title' => t($type->title_label),
+    '#required' => TRUE,
+    '#default_value' => $node->title,
+  );
   $form = array_merge($form, _content_field_invoke('form', $node));
 
   return $form;
@@ -208,7 +213,7 @@ function content_validate(&$node) {
 function content_view(&$node, $teaser = FALSE, $page = FALSE) {
   $node->body = implode(_content_field_invoke('view', $node, $teaser, $page));
   $node->teaser = implode(_content_field_invoke('view', $node, $teaser, $page));
-  $node->readmore = TRUE;
+  $node->readmore = ($node->body != $node->teaser);
 }
 
 /**
@@ -298,13 +303,48 @@ function _content_admin_type_edit($type_name = '', $original_type_name = '') {
   }
 
   $form = array();
-  $form['label'] = array('#title' => t('Label'), '#type' => 'textfield', '#default_value' => $type->label, '#description' => t('The human-readable name of this content type.'), '#required' => TRUE);
-  $form['description'] = array('#title' => t('Description'), '#type' => 'textarea', '#default_value' => $type->description, '#rows' => 10, '#description' => t('A brief description of the content type.'), '#required' => FALSE);
-  $form['help'] = array('#title' => t('Help text'), '#type' => 'textarea', '#default_value' => $type->help, '#rows' => 10, '#description' => t('Instructions to present to the user when adding new content of this type.'), '#required' => FALSE);
-  $form['title_label'] = array('#title' => t('Title field label'), '#type' => 'textfield', '#default_value' => $type->title_label, '#description' => t('The label for the title field.'), '#required' => TRUE);
-  $form['submit'] = array('#type' => 'submit', '#value' => t('Save content type'));
-  $form['type_name'] = array('#type' => 'value', '#value' => $type_name);
-  $form['original_type_name'] = array('#type' => 'value', '#value' => $original_type_name);
+  $form['label'] = array(
+    '#title' => t('Label'),
+    '#type' => 'textfield',
+    '#default_value' => $type->label,
+    '#description' => t('The human-readable name of this content type.'),
+    '#required' => TRUE,
+  );
+  $form['description'] = array(
+    '#title' => t('Description'),
+    '#type' => 'textarea',
+    '#default_value' => $type->description,
+    '#rows' => 10,
+    '#description' => t('A brief description of the content type.'),
+    '#required' => FALSE,
+  );
+  $form['help'] = array(
+    '#title' => t('Help text'),
+    '#type' => 'textarea',
+    '#default_value' => $type->help,
+    '#rows' => 10,
+    '#description' => t('Instructions to present to the user when adding new content of this type.'),
+    '#required' => FALSE,
+  );
+  $form['title_label'] = array(
+    '#title' => t('Title field label'),
+    '#type' => 'textfield',
+    '#default_value' => $type->title_label,
+    '#description' => t('The label for the title field.'),
+    '#required' => TRUE,
+  );
+  $form['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('Save content type'),
+  );
+  $form['type_name'] = array(
+    '#type' => 'value',
+    '#value' => $type_name,
+  );
+  $form['original_type_name'] = array(
+    '#type' => 'value',
+    '#value' => $original_type_name,
+  );
   return drupal_get_form('_content_admin_type_edit', $form);
 }
 
@@ -320,11 +360,11 @@ function _content_admin_type_edit_execute($form_id, $form_values) {
     $form_values['type_name'] = str_replace(array(' ', '-'), '_', $form_values['type_name']);
     $form_values['type_name'] = preg_replace('/[^a-z0-9_]/', '', $form_values['type_name']);
     $form_values['type_name'] = 'content-'. $form_values['type_name'];
-    $form_values['type_name'] = substr($form_values['type_name'], 0, 31);
+    $form_values['type_name'] = substr($form_values['type_name'], 0, 16);
     if (isset($types[$form_values['type_name']])) {
       $counter = 0;
       do {
-        $new_name = substr($form_values['type_name'], 0, 29) .'_'. $counter++;
+        $new_name = substr($form_values['type_name'], 0, 14) .'_'. $counter++;
       } while (isset($types[$new_name]));
       $form_values['type_name'] = $new_name;
     }
@@ -432,21 +472,47 @@ function _content_admin_field_add($type_name) {
   }
   if ($options) {
     $form = array();
-    $form['field_name'] = array('#type' => 'select', '#required' => TRUE, '#options' => $options);
-    $form['submit'] = array('#type' => 'submit', '#value' => t('Add field'));
-    $form['type_name'] = array('#type' => 'value', '#value' => $type_name);
+    $form['field_name'] = array(
+      '#type' => 'select',
+      '#required' => TRUE,
+      '#options' => $options,
+    );
+    $form['submit'] = array(
+      '#type' => 'submit',
+      '#value' => t('Add field'),
+    );
+    $form['type_name'] = array(
+      '#type' => 'value',
+      '#value' => $type_name,
+    );
     $output .= drupal_get_form('_content_admin_field_add_existing', $form);
   }
   
   $form = array();
-  $form['label'] = array('#title' => t('Label'), '#type' => 'textfield', '#default_value' => '', '#description' => t('The human-readable name of this field.'), '#required' => TRUE);
+  $form['label'] = array(
+    '#title' => t('Label'),
+    '#type' => 'textfield',
+    '#default_value' => '',
+    '#description' => t('The human-readable name of this field.'),
+    '#required' => TRUE,
+  );
   $options = array();
   foreach ($field_types as $field_name => $field_type) {
     $options[$field_name] = $field_type['label'];
   }
-  $form['type'] = array('#type' => 'select', '#required' => TRUE, '#options' => $options);
-  $form['submit'] = array('#type' => 'submit', '#value' => t('Create field'));
-  $form['type_name'] = array('#type' => 'value', '#value' => $type_name);
+  $form['type'] = array(
+    '#type' => 'select',
+    '#required' => TRUE,
+    '#options' => $options,
+  );
+  $form['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('Create field'),
+  );
+  $form['type_name'] = array(
+    '#type' => 'value',
+    '#value' => $type_name,
+  );
   $output .= drupal_get_form('_content_admin_field_add_new', $form);
 
   return $output;
@@ -507,8 +573,14 @@ function _content_admin_field_remove($type_name, $field_name) {
   $field = $type->fields[$field_name];
 
   $form = array();
-  $form['type_name'] = array('#type' => 'value', '#value' => $type_name);
-  $form['field_name'] = array('#type' => 'value', '#value' => $field_name);
+  $form['type_name'] = array(
+    '#type' => 'value',
+    '#value' => $type_name,
+  );
+  $form['field_name'] = array(
+    '#type' => 'value',
+    '#value' => $field_name,
+  );
   return confirm_form('_content_admin_field_remove', $form, t('Are you sure you want to remove the field %field?', array('%field' => theme('placeholder', $field['label']))), 'admin/node/types/'. $type_name .'/fields', t('If you have any content left in this field, it will be lost. This action cannot be undone.'), t('Remove'), t('Cancel'));
 }
 
@@ -542,19 +614,54 @@ function _content_admin_field($type_name, $field_name) {
   $field_type = $field_types[$field['type']];
 
   $form = array();
-  $form['instance'] = array('#type' => 'fieldset', '#title' => t('Instance settings'), '#description' => t('These settings apply only to the %field field as it appears in the %type content type.', array('%field' => theme('placeholder', $field['label']), '%type' => theme('placeholder', $type->label))));
-  $form['instance']['label'] = array('#type' => 'textfield', '#title' => t('Label'), '#default_value' => $field['label'], '#required' => TRUE);
-  $form['instance']['weight'] = array('#type' => 'weight', '#title' => t('Weight'), '#default_value' => $field['weight'], '#description' => t('In the node editing form, the heavier fields will sink and the lighter fields will be positioned nearer the top.'));
+  $form['instance'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Instance settings'),
+    '#description' => t('These settings apply only to the %field field as it appears in the %type content type.', array('%field' => theme('placeholder', $field['label']), '%type' => theme('placeholder', $type->label))),
+  );
+  $form['instance']['label'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Label'),
+    '#default_value' => $field['label'],
+    '#required' => TRUE,
+  );
+  $form['instance']['weight'] = array(
+    '#type' => 'weight',
+    '#title' => t('Weight'),
+    '#default_value' => $field['weight'],
+    '#description' => t('In the node editing form, the heavier fields will sink and the lighter fields will be positioned nearer the top.'),
+  );
   $form['instance'] = array_merge($form['instance'], module_invoke($field_type['module'], 'field_settings', 'form', $field, 'instance'));
 
-  $form['global'] = array('#type' => 'fieldset', '#title' => t('Global settings'), '#description' => t('These settings apply to the %field field in every content type in which it appears.', array('%field' => theme('placeholder', $field['label']))));
-  $form['global']['required'] = array('#type' => 'checkbox', '#title' => t('Required'), '#default_value' => $field['required']);
-  $form['global']['multiple'] = array('#type' => 'checkbox', '#title' => t('Multiple values'), '#default_value' => $field['multiple']);
+  $form['global'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Global settings'),
+    '#description' => t('These settings apply to the %field field in every content type in which it appears.', array('%field' => theme('placeholder', $field['label']))),
+  );
+  $form['global']['required'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Required'),
+    '#default_value' => $field['required'],
+  );
+  $form['global']['multiple'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Multiple values'),
+    '#default_value' => $field['multiple'],
+  );
   $form['global'] = array_merge($form['global'], module_invoke($field_type['module'], 'field_settings', 'form', $field, 'global'));
 
-  $form['submit'] = array('#type' => 'submit', '#value' => t('Save field settings'));
-  $form['type_name'] = array('#type' => 'value', '#value' => $type_name);
-  $form['field_name'] = array('#type' => 'value', '#value' => $field_name);
+  $form['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('Save field settings'),
+  );
+  $form['type_name'] = array(
+    '#type' => 'value',
+    '#value' => $type_name,
+  );
+  $form['field_name'] = array(
+    '#type' => 'value',
+    '#value' => $field_name,
+  );
 
   $output .= drupal_get_form('_content_admin_field', $form);
 

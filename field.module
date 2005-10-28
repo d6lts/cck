@@ -40,12 +40,22 @@ function field_field_settings($op, $field, $scope) {
         case 'field_longtext':
           switch ($scope) {
             case 'instance':
-              $form['rows'] = array('#type' => 'textfield', '#title' => t('Rows'), '#default_value' => $field['rows'] ? $field['rows'] : 1, '#required' => TRUE);
+              $form['rows'] = array(
+                '#type' => 'textfield',
+                '#title' => t('Rows'),
+                '#default_value' => $field['rows'] ? $field['rows'] : 1,
+                '#required' => TRUE,
+              );
               break;
 
             case 'global':
               $options = array(0 => t('Plain text'), 1 => t('Filtered text (user selects input format)'));
-              $form['text_processing'] = array('#type' => 'radios', '#title' => t('Text processing'), '#default_value' => $field['text_processing'] ? $field['text_processing'] : 0, '#options' => $options);
+              $form['text_processing'] = array(
+                '#type' => 'radios',
+                '#title' => t('Text processing'),
+                '#default_value' => $field['text_processing'] ? $field['text_processing'] : 0,
+                '#options' => $options,
+              );
               break;
           }
         break;
@@ -53,8 +63,16 @@ function field_field_settings($op, $field, $scope) {
         case 'field_decimal':
           switch ($scope) {
             case 'global':
-              $form['min'] = array('#type' => 'textfield', '#title' => t('Minimum'), '#default_value' => $field['min'] ? $field['min'] : '');
-              $form['max'] = array('#type' => 'textfield', '#title' => t('Maximum'), '#default_value' => $field['min'] ? $field['min'] : '');
+              $form['min'] = array(
+                '#type' => 'textfield',
+                '#title' => t('Minimum'),
+                '#default_value' => $field['min'] ? $field['min'] : '',
+              );
+              $form['max'] = array(
+                '#type' => 'textfield',
+                '#title' => t('Maximum'),
+                '#default_value' => $field['min'] ? $field['min'] : '',
+              );
               break;
           }
           break;
@@ -169,10 +187,21 @@ function field_field($op, $node, $field, $a2, $a3, $a4) {
         case 'field_longtext':
           $form[$field['field_name']] = array('#tree' => TRUE);
           if ($field['rows'] == 1) {
-            $form[$field['field_name']]['value'] = array('#type' => 'textfield', '#title' => t($field['label']), '#default_value' => $node_field['value'], '#required' => $field['required']);
+            $form[$field['field_name']]['value'] = array(
+              '#type' => 'textfield',
+              '#title' => t($field['label']),
+              '#default_value' => $node_field['value'],
+              '#required' => $field['required'],
+            );
           }
           else {
-            $form[$field['field_name']]['value'] = array('#type' => 'textarea', '#title' => t($field['label']), '#default_value' => $node_field['value'], '#required' => $field['required'], '#rows' => $field['rows']);
+            $form[$field['field_name']]['value'] = array(
+              '#type' => 'textarea',
+              '#title' => t($field['label']),
+              '#default_value' => $node_field['value'],
+              '#required' => $field['required'],
+              '#rows' => $field['rows'],
+            );
           }
           if ($field['text_processing']) {
             $form[$field['field_name']] = array_merge($form[$field['field_name']], filter_form($node_field['format']));
@@ -180,7 +209,12 @@ function field_field($op, $node, $field, $a2, $a3, $a4) {
           break;
         case 'field_integer':
         case 'field_decimal':
-          $form[$field['field_name']] = array('#type' => 'textfield', '#title' => t($field['label']), '#default_value' => $node_field['value'], '#required' => $field['required']);
+          $form[$field['field_name']] = array(
+            '#type' => 'textfield',
+            '#title' => t($field['label']),
+            '#default_value' => $node_field['value'],
+            '#required' => $field['required'],
+          );
           break;
       }
       return $form;
