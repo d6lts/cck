@@ -147,7 +147,7 @@ function field_field($op, $node, $field, $a2, $a3, $a4) {
         case 'field_shorttext':
         case 'field_longtext':
           if ($field['text_processing']) {
-            $output = check_markup($node_field['value'], $node_field['format'], FALSE);
+            $output = check_markup($node_field['value'], $node_field['format'], isset($node->in_preview) ? $node->in_preview : FALSE);
           }
           else {
             $output = check_plain($node_field['value']);
@@ -175,7 +175,7 @@ function field_field($op, $node, $field, $a2, $a3, $a4) {
             $form[$field['field_name']]['value'] = array('#type' => 'textarea', '#title' => t($field['label']), '#default_value' => $node_field['value'], '#required' => $field['required'], '#rows' => $field['rows']);
           }
           if ($field['text_processing']) {
-            array_merge($form, filter_form($node_field['format']));
+            $form[$field['field_name']] = array_merge($form[$field['field_name']], filter_form($node_field['format']));
           }
           break;
         case 'field_integer':
@@ -229,25 +229,41 @@ function field_field($op, $node, $field, $a2, $a3, $a4) {
     case 'update':
       $node_field = $node->$field['field_name'];
       // Delete and insert, rather than update, in case a field was added.
-      db_query("DELETE FROM {%s} WHERE vid = %d AND field_name = '%s'", $table, $node->vid, $field['field_name']);
       switch($field['type']) {
         case 'field_shorttext':
+          db_query("DELETE FROM {node_field_shorttext_data} WHERE vid = %d AND field_name = '%s'", $node->vid, $field['field_name']);
           db_query("INSERT INTO {node_field_shorttext_data} (vid, field_name, field_shorttext, format) VALUES (%d, '%s', '%s', %d)", $node->vid, $field['field_name'], $node_field['value'], $node_field['format']);
           break;
         case 'field_longtext':
+          db_query("DELETE FROM {node_field_longtext_data} WHERE vid = %d AND field_name = '%s'", $node->vid, $field['field_name']);
           db_query("INSERT INTO {node_field_longtext_data} (vid, field_name, field_longtext, format) VALUES (%d, '%s', '%s', %d)", $node->vid, $field['field_name'], $node_field['value'], $node_field['format']);
           break;
         case 'field_integer':
+          db_query("DELETE FROM {node_field_int_data} WHERE vid = %d AND field_name = '%s'", $node->vid, $field['field_name']);
           db_query("INSERT INTO {node_field_int_data} (vid, field_name, field_int) VALUES (%d, '%s', %d)", $node->vid, $field['field_name'], $node_field);
           break;
         case 'field_decimal':
+          db_query("DELETE FROM {node_field_float_data} WHERE vid = %d AND field_name = '%s'", $node->vid, $field['field_name']);
           db_query("INSERT INTO {node_field_float_data} (vid, field_name, field_float) VALUES (%d, '%s', %d)", $node->vid, $field['field_name'], $node_field);
           break;
       }
       return;
 
     case 'delete':
-      db_query("DELETE FROM {%s} WHERE vid = %d AND field_name = '%s'", $table, $node->vid, $field['field_name']);
+      switch($field['type']) {
+        case 'field_shorttext':
+          db_query("DELETE FROM {node_field_shorttext_data} WHERE vid = %d AND field_name = '%s'", $node->vid, $field['field_name']);
+          break;
+        case 'field_longtext':
+          db_query("DELETE FROM {node_field_longtext_data} WHERE vid = %d AND field_name = '%s'", $node->vid, $field['field_name']);
+          break;
+        case 'field_integer':
+          db_query("DELETE FROM {node_field_int_data} WHERE vid = %d AND field_name = '%s'", $node->vid, $field['field_name']);
+          break;
+        case 'field_decimal':
+          db_query("DELETE FROM {node_field_float_data} WHERE vid = %d AND field_name = '%s'", $node->vid, $field['field_name']);
+          break;
+      }
       return;
   }
 }
