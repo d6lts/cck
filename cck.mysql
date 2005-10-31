@@ -12,15 +12,15 @@ CREATE TABLE node_field (
   field_name varchar(31) NOT NULL default '',
   type varchar(127) NOT NULL default '',
   global_settings mediumtext NOT NULL,
-  required int(1) NOT NULL default '0',
-  multiple int(1) NOT NULL default '0',
+  required int NOT NULL default '0',
+  multiple int NOT NULL default '0',
   PRIMARY KEY  (field_name)
 ) TYPE=MyISAM;
 
 CREATE TABLE node_field_instance (
   field_name varchar(31) NOT NULL default '',
   type_name varchar(31) NOT NULL default '',
-  weight int(10) NOT NULL default '0',
+  weight int NOT NULL default '0',
   label varchar(255) NOT NULL default '',
   instance_settings mediumtext NOT NULL,
   PRIMARY KEY  (field_name,type_name)
@@ -30,35 +30,43 @@ CREATE TABLE node_field_instance (
 # field data
 
 CREATE TABLE `node_field_float_data` (
-  `vid` int(10) unsigned NOT NULL default '0',
+  `vid` int unsigned NOT NULL default '0',
   `field_name` varchar(31) NOT NULL default '',
-  `delta` int(10) unsigned NOT NULL default '0',
+  `delta` int unsigned NOT NULL default '0',
   `field_float` float NOT NULL default '0',
   PRIMARY KEY  (`vid`,`field_name`,`delta`)
 ) TYPE=MyISAM;
 
 CREATE TABLE `node_field_int_data` (
-  `vid` int(10) unsigned NOT NULL default '0',
+  `vid` int unsigned NOT NULL default '0',
   `field_name` varchar(31) NOT NULL default '',
-  `delta` int(10) unsigned NOT NULL default '0',
-  `field_int` int(11) NOT NULL default '0',
+  `delta` int unsigned NOT NULL default '0',
+  `field_int` int NOT NULL default '0',
   PRIMARY KEY  (`vid`,`field_name`,`delta`)
 ) TYPE=MyISAM;
 
 CREATE TABLE `node_field_longtext_data` (
-  `vid` int(10) unsigned NOT NULL default '0',
+  `vid` int unsigned NOT NULL default '0',
   `field_name` varchar(31) NOT NULL default '',
-  `delta` int(10) unsigned NOT NULL default '0',
+  `delta` int unsigned NOT NULL default '0',
   `field_longtext` mediumtext NOT NULL,
-  `format` int(4) NOT NULL default '0',
+  `format` int NOT NULL default '0',
   PRIMARY KEY  (`vid`,`field_name`,`delta`)
 ) TYPE=MyISAM;
 
 CREATE TABLE `node_field_shorttext_data` (
-  `vid` int(10) unsigned NOT NULL default '0',
+  `vid` int unsigned NOT NULL default '0',
   `field_name` varchar(31) NOT NULL default '',
-  `delta` int(10) unsigned NOT NULL default '0',
+  `delta` int unsigned NOT NULL default '0',
   `field_shorttext` varchar(255) NOT NULL default '',
-  `format` int(4) NOT NULL default '0',
+  `format` int NOT NULL default '0',
+  PRIMARY KEY  (`vid`,`field_name`,`delta`)
+) TYPE=MyISAM;
+
+CREATE TABLE `node_field_date_data` (
+  `vid` int unsigned NOT NULL default '0',
+  `field_name` varchar(31) NOT NULL default '',
+  `delta` int unsigned NOT NULL default '0',
+  `field_date` char(17) NOT NULL default '00010101T00:00:00',
   PRIMARY KEY  (`vid`,`field_name`,`delta`)
 ) TYPE=MyISAM;

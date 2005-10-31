@@ -24,7 +24,8 @@ function field_field_info() {
     'field_shorttext' => array('label' => 'Short Text'),
     'field_longtext' => array('label' => 'Long Text'),
     'field_integer' => array('label' => 'Integer'),
-    'field_decimal' => array('label' => 'Decimal')
+    'field_decimal' => array('label' => 'Decimal'),
+    'field_date' => array('label' => 'Date'),
   );
 }
 
@@ -58,7 +59,7 @@ function field_field_settings($op, $field, $scope) {
               );
               break;
           }
-        break;
+          break;
         case 'field_integer':
         case 'field_decimal':
           switch ($scope) {
@@ -72,6 +73,37 @@ function field_field_settings($op, $field, $scope) {
                 '#type' => 'textfield',
                 '#title' => t('Maximum'),
                 '#default_value' => $field['min'] ? $field['min'] : '',
+              );
+              break;
+          }
+          break;
+        case 'field_date':
+          switch ($scope) {
+            case 'instance':
+              $options = array(
+                0 => t('Times are entered and displayed with site\'s time zone'),
+                1 => t('Times are entered and displayed with user\'s time zone'),
+              );
+              $form['time_zone'] = array(
+                '#type' => 'radios',
+                '#title' => t('Time zone handling'),
+                '#default_value' => $field['time_zone'] ? $field['time_zone'] : 0,
+                '#options' => $options,
+              );
+              break;
+            case 'global':
+              $options = array(
+                0 => t('Year'),
+                1 => t('Year and month'),
+                2 => t('Date'),
+                3 => t('Date and time'),
+                4 => t('Time only'),
+              );
+              $form['granularity'] = array(
+                '#type' => 'radios',
+                '#title' => t('Granularity'),
+                '#default_value' => $field['granularity'] ? $field['granularity'] : 0,
+                '#options' => $options,
               );
               break;
           }
@@ -104,6 +136,8 @@ function field_field_settings($op, $field, $scope) {
               break;
           }
           break;
+        case 'field_date':
+          break;
       }
       break;
 
@@ -125,6 +159,14 @@ function field_field_settings($op, $field, $scope) {
               return array();
             case 'global':
               return array('min', 'max');
+          }
+          break;
+        case 'field_date':
+          switch ($scope) {
+            case 'instance':
+              return array('time_zone');
+            case 'global':
+              return array('granularity');
           }
           break;
       }
@@ -195,6 +237,20 @@ function field_field($op, $node, $field, $a2, $a3, $a4) {
             $additions = array($field['field_name'] => array('value' => $value->field_float));
           }
           break;
+        case 'field_date':
+          $result = db_query("SELECT field_date FROM {node_field_date_data} WHERE vid = %d AND field_name = '%s' ORDER BY delta", $node->vid, $field['field_name']);
+          if ($field['multiple']) {
+            $values = array();
+            while ($value = db_fetch_object($result)) {
+              $values[] = array('value' => $value->field_date);
+            }
+            $additions = array($field['field_name'] => $values);
+          }
+          else {
+            $value = db_fetch_object($result);
+            $additions = array($field['field_name'] => array('value' => $value->field_date));
+          }
+          break;
       }
       return $additions;
 
@@ -225,6 +281,16 @@ function field_field($op, $node, $field, $a2, $a3, $a4) {
           break;
         case 'field_integer':
         case 'field_decimal':
+          if ($field['multiple']) {
+            foreach ($node_field as $delta => $item) {
+              $node_field[$delta]['view'] = check_plain($item['value']);
+            }
+          }
+          else {
+            $node_field['view'] = check_plain($node_field['value']);
+          }
+          break;
+        case 'field_date':
           if ($field['multiple']) {
             foreach ($node_field as $delta => $item) {
               $node_field[$delta]['view'] = check_plain($item['value']);
@@ -324,6 +390,26 @@ function field_field($op, $node, $field, $a2, $a3, $a4) {
             );
           }
           break;
+        case 'field_date':
+          if ($field['multiple']) {
+            foreach (range(0, 2) as $delta) {
+              $form[$field['field_name']][$delta]['value'] = array(
+                '#type' => 'textfield',
+                '#title' => t($field['label']),
+                '#default_value' => $node_field[$delta]['value'],
+                '#required' => ($delta == 0) ? $field['required'] : FALSE,
+              );
+            }
+          }
+          else {
+            $form[$field['field_name']]['value'] = array(
+              '#type' => 'textfield',
+              '#title' => t($field['label']),
+              '#default_value' => $node_field['value'],
+              '#required' => $field['required'],
+            );
+          }
+          break;
       }
       return $form;
 
@@ -358,6 +444,28 @@ function field_field($op, $node, $field, $a2, $a3, $a4) {
                 }
                 if (is_numeric($field['max']) && $node_field['value'] > $field['max']) {
                   form_set_error($field['field_name'] .'][value', t('The value of %name may be no larger than %max.', array('%name' => t($field['label']), '%max' => $field['max'])));
+                }
+              }
+            }
+          }
+          break;
+        case 'field_date':
+          if ($field['multiple']) {
+            if (is_array($node_field)) {
+              foreach ($node_field as $delta => $item) {
+                if ($item['value'] != '') {
+                  if (preg_match('/[0-9]{8}T[0-9]{2}:[0-9]{2}:[0-9]{2}/', $item['value']) {
+                    form_set_error($field['field_name'] .']['. $delta .'][value', t('%name must be entered in ISO 8601 format (YYYYMMDDThh:mm:ss).', array('%name' => t($field['label']))));
+                  }
+                }
+              }
+            }
+          }
+          else {
+            if (isset($node_field['value'])) {
+              if ($node_field['value'] != '') {
+                if (preg_match('/[0-9]{8}T[0-9]{2}:[0-9]{2}:[0-9]{2}/', $node_field['value']) {
+                  form_set_error($field['field_name'] .'][value', t('%name must be entered in ISO 8601 format (YYYYMMDDThh:mm:ss).', array('%name' => t($field['label']))));
                 }
               }
             }
@@ -407,6 +515,16 @@ function field_field($op, $node, $field, $a2, $a3, $a4) {
           }
           else {
             db_query("INSERT INTO {node_field_float_data} (vid, field_name, field_float) VALUES (%d, '%s', %d)", $node->vid, $field['field_name'], $node_field['value']);
+          }
+          break;
+        case 'field_date':
+          if ($field['multiple']) {
+            foreach ($node_field as $delta => $item) {
+              db_query("INSERT INTO {node_field_date_data} (vid, field_name, delta, field_date) VALUES (%d, '%s', %d, '%s')", $node->vid, $field['field_name'], $delta, $item['value']);
+            }
+          }
+          else {
+            db_query("INSERT INTO {node_field_date_data} (vid, field_name, field_date) VALUES (%d, '%s', '%s')", $node->vid, $field['field_name'], $node_field['value']);
           }
           break;
       }
@@ -460,6 +578,17 @@ function field_field($op, $node, $field, $a2, $a3, $a4) {
             db_query("INSERT INTO {node_field_float_data} (vid, field_name, field_float) VALUES (%d, '%s', %d)", $node->vid, $field['field_name'], $node_field['value']);
           }
           break;
+        case 'field_date':
+          db_query("DELETE FROM {node_field_date_data} WHERE vid = %d AND field_name = '%s'", $node->vid, $field['field_name']);
+          if ($field['multiple']) {
+            foreach ($node_field as $delta => $item) {
+              db_query("INSERT INTO {node_field_date_data} (vid, field_name, delta, field_date) VALUES (%d, '%s', %d, '%s')", $node->vid, $field['field_name'], $delta, $item['value']);
+            }
+          }
+          else {
+            db_query("INSERT INTO {node_field_date_data} (vid, field_name, field_date) VALUES (%d, '%s', '%s')", $node->vid, $field['field_name'], $node_field['value']);
+          }
+          break;
       }
       return;
 
@@ -476,6 +605,9 @@ function field_field($op, $node, $field, $a2, $a3, $a4) {
           break;
         case 'field_decimal':
           db_query("DELETE FROM {node_field_float_data} WHERE vid = %d AND field_name = '%s'", $node->vid, $field['field_name']);
+          break;
+        case 'field_date':
+          db_query("DELETE FROM {node_field_date_data} WHERE vid = %d AND field_name = '%s'", $node->vid, $field['field_name']);
           break;
       }
       return;
@@ -536,6 +668,27 @@ function field_field_query($field, $op, $value) {
         case 'under':
           $query_additions['tables'] = array('%table' => $table_name);
           $query_additions['where'] = "%table.". $column_name ." < %d";
+          $query_additions['data'] = array($value);
+          break;
+      }
+
+    case 'field_date':
+      switch ($op) {
+        case 'is':
+          $query_additions['tables'] = array('%table' => 'node_field_date_data');
+          $query_additions['where'] = "%table.field_date = '%s'";
+          $query_additions['data'] = array($value);
+          break;
+
+        case 'after':
+          $query_additions['tables'] = array('%table' => 'node_field_date_data');
+          $query_additions['where'] = "%table.field_date > '%s'";
+          $query_additions['data'] = array($value);
+          break;
+
+        case 'before':
+          $query_additions['tables'] = array('%table' => 'node_field_date_data');
+          $query_additions['where'] = "%table.field_date < '%s'";
           $query_additions['data'] = array($value);
           break;
       }
