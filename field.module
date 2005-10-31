@@ -140,20 +140,60 @@ function field_field($op, $node, $field, $a2, $a3, $a4) {
     case 'load':
       switch($field['type']) {
         case 'field_shorttext':
-          $result = db_fetch_object(db_query("SELECT field_shorttext, format FROM {node_field_shorttext_data} WHERE vid = %d AND field_name = '%s' ORDER BY delta", $node->vid, $field['field_name']));
-          $additions = array($field['field_name'] => array('value' => $result->field_shorttext, 'format' => $result->format));
+          $result = db_query("SELECT field_shorttext, format FROM {node_field_shorttext_data} WHERE vid = %d AND field_name = '%s' ORDER BY delta", $node->vid, $field['field_name']);
+          if ($field['multiple']) {
+            $values = array();
+            while ($value = db_fetch_object($result)) {
+              $values[] = array('value' => $value->field_shorttext, 'format' => $value->format);
+            }
+            $additions = array($field['field_name'] => $values);
+          }
+          else {
+            $value = db_fetch_object($result);
+            $additions = array($field['field_name'] => array('value' => $value->field_shorttext, 'format' => $value->format));
+          }
           break;
         case 'field_longtext':
-          $result = db_fetch_object(db_query("SELECT field_longtext, format FROM {node_field_longtext_data} WHERE vid = %d AND field_name = '%s' ORDER BY delta", $node->vid, $field['field_name']));
-          $additions = array($field['field_name'] => array('value' => $result->field_longtext, 'format' => $result->format));
+          $result = db_query("SELECT field_longtext, format FROM {node_field_longtext_data} WHERE vid = %d AND field_name = '%s' ORDER BY delta", $node->vid, $field['field_name']);
+          if ($field['multiple']) {
+            $values = array();
+            while ($value = db_fetch_object($result)) {
+              $values[] = array('value' => $value->field_longtext, 'format' => $value->format);
+            }
+            $additions = array($field['field_name'] => $values);
+          }
+          else {
+            $value = db_fetch_object($result);
+            $additions = array($field['field_name'] => array('value' => $value->field_longtext, 'format' => $value->format));
+          }
           break;
         case 'field_integer':
-          $result = db_fetch_object(db_query("SELECT field_int FROM {node_field_int_data} WHERE vid = %d AND field_name = '%s' ORDER BY delta", $node->vid, $field['field_name']));
-          $additions = array($field['field_name'] => $result->field_int);
+          $result = db_query("SELECT field_int FROM {node_field_int_data} WHERE vid = %d AND field_name = '%s' ORDER BY delta", $node->vid, $field['field_name']);
+          if ($field['multiple']) {
+            $values = array();
+            while ($value = db_fetch_object($result)) {
+              $values[] = array('value' => $value->field_int);
+            }
+            $additions = array($field['field_name'] => $values);
+          }
+          else {
+            $value = db_fetch_object($result);
+            $additions = array($field['field_name'] => array('value' => $value->field_int));
+          }
           break;
         case 'field_decimal':
-          $result = db_fetch_object(db_query("SELECT field_float FROM {node_field_float_data} WHERE vid = %d AND field_name = '%s' ORDER BY delta", $node->vid, $field['field_name']));
-          $additions = array($field['field_name'] => $result->field_float);
+          $result = db_query("SELECT field_float FROM {node_field_float_data} WHERE vid = %d AND field_name = '%s' ORDER BY delta", $node->vid, $field['field_name']);
+          if ($field['multiple']) {
+            $values = array();
+            while ($value = db_fetch_object($result)) {
+              $values[] = array('value' => $value->field_int);
+            }
+            $additions = array($field['field_name'] => $values);
+          }
+          else {
+            $value = db_fetch_object($result);
+            $additions = array($field['field_name'] => array('value' => $value->field_float));
+          }
           break;
       }
       return $additions;
@@ -164,29 +204,118 @@ function field_field($op, $node, $field, $a2, $a3, $a4) {
       switch($field['type']) {
         case 'field_shorttext':
         case 'field_longtext':
-          if ($field['text_processing']) {
-            $output = check_markup($node_field['value'], $node_field['format'], isset($node->in_preview) ? $node->in_preview : FALSE);
+          if ($field['multiple']) {
+            foreach ($node_field as $delta => $item) {
+              if ($field['text_processing']) {
+                $node_field[$delta]['view'] = check_markup($item['value'], $item['format'], isset($node->in_preview) ? $node->in_preview : FALSE);
+              }
+              else {
+                $node_field[$delta]['view'] = check_plain($item['value']);
+              }
+            }
           }
           else {
-            $output = check_plain($node_field['value']);
+            if ($field['text_processing']) {
+              $node_field['view'] = check_markup($node_field['value'], $node_field['format'], isset($node->in_preview) ? $node->in_preview : FALSE);
+            }
+            else {
+              $node_field['view'] = check_plain($node_field['value']);
+            }
           }
           break;
         case 'field_integer':
         case 'field_decimal':
-          $output = $node_field;
+          if ($field['multiple']) {
+            foreach ($node_field as $delta => $item) {
+              $node_field[$delta]['view'] = check_plain($item['value']);
+            }
+          }
+          else {
+            $node_field['view'] = check_plain($node_field['value']);
+          }
           break;
       }
-      return $output;
+      $node->$field['field_name'] = $node_field;
+      if ($field['multiple']) {
+        $output = '';
+        foreach ($node_field as $delta => $item) {
+          $output .= '<div class="'. $field['field_name'] .'">'. $item['view'] .'</div>';
+        }
+        return $output;
+      }
+      else {
+        return '<div class="'. $field['field_name'] .'">'. $node_field['view'] .'</div>';
+      }
 
     case 'form':
       $form = array();
       $node_field = $node->$field['field_name'];
 
+      $form[$field['field_name']] = array('#tree' => TRUE);
+
       switch($field['type']) {
         case 'field_shorttext':
         case 'field_longtext':
-          $form[$field['field_name']] = array('#tree' => TRUE);
-          if ($field['rows'] == 1) {
+          if ($field['multiple']) {
+            foreach (range(0, 2) as $delta) {
+              if ($field['rows'] == 1) {
+                $form[$field['field_name']][$delta]['value'] = array(
+                  '#type' => 'textfield',
+                  '#title' => t($field['label']),
+                  '#default_value' => $node_field[$delta]['value'],
+                  '#required' => ($delta == 0) ? $field['required'] : FALSE,
+                );
+              }
+              else {
+                $form[$field['field_name']][$delta]['value'] = array(
+                  '#type' => 'textarea',
+                  '#title' => t($field['label']),
+                  '#default_value' => $node_field[$delta]['value'],
+                  '#required' => ($delta == 0) ? $field['required'] : FALSE,
+                  '#rows' => $field['rows'],
+                );
+              }
+              if ($field['text_processing']) {
+                $form[$field['field_name']][$delta] = array_merge($form[$field['field_name']][$delta], filter_form($node_field[$delta]['format']));
+              }
+            }
+          }
+          else {
+            if ($field['rows'] == 1) {
+              $form[$field['field_name']]['value'] = array(
+                '#type' => 'textfield',
+                '#title' => t($field['label']),
+                '#default_value' => $node_field['value'],
+                '#required' => $field['required'],
+              );
+            }
+            else {
+              $form[$field['field_name']]['value'] = array(
+                '#type' => 'textarea',
+                '#title' => t($field['label']),
+                '#default_value' => $node_field['value'],
+                '#required' => $field['required'],
+                '#rows' => $field['rows'],
+              );
+            }
+            if ($field['text_processing']) {
+              $form[$field['field_name']] = array_merge($form[$field['field_name']], filter_form($node_field['format']));
+            }
+          }
+          break;
+        case 'field_integer':
+        case 'field_decimal':
+          if ($field['multiple']) {
+            foreach (range(0, 2) as $delta) {
+              $form[$field['field_name']][$delta]['value'] = array(
+                '#type' => 'textfield',
+                '#title' => t($field['label']),
+                '#default_value' => $node_field[$delta]['value'],
+                '#required' => ($delta == 0) ? $field['required'] : FALSE,
+              );
+            }
+          }
+          else {
             $form[$field['field_name']]['value'] = array(
               '#type' => 'textfield',
               '#title' => t($field['label']),
@@ -194,27 +323,6 @@ function field_field($op, $node, $field, $a2, $a3, $a4) {
               '#required' => $field['required'],
             );
           }
-          else {
-            $form[$field['field_name']]['value'] = array(
-              '#type' => 'textarea',
-              '#title' => t($field['label']),
-              '#default_value' => $node_field['value'],
-              '#required' => $field['required'],
-              '#rows' => $field['rows'],
-            );
-          }
-          if ($field['text_processing']) {
-            $form[$field['field_name']] = array_merge($form[$field['field_name']], filter_form($node_field['format']));
-          }
-          break;
-        case 'field_integer':
-        case 'field_decimal':
-          $form[$field['field_name']] = array(
-            '#type' => 'textfield',
-            '#title' => t($field['label']),
-            '#default_value' => $node_field['value'],
-            '#required' => $field['required'],
-          );
           break;
       }
       return $form;
@@ -228,13 +336,29 @@ function field_field($op, $node, $field, $a2, $a3, $a4) {
           break;
         case 'field_integer':
         case 'field_decimal':
-          if (isset($node_field)) {
-            if ($node_field != '') {
-              if (is_numeric($field['min']) && $node_field < $field['min']) {
-                form_set_error($field['field_name'] .'][value', t('The value of %name may be no smaller than %min.', array('%name' => t($field['label']), '%min' => $field['min'])));
+          if ($field['multiple']) {
+            if (is_array($node_field)) {
+              foreach ($node_field as $delta => $item) {
+                if ($item['value'] != '') {
+                  if (is_numeric($field['min']) && $item['value'] < $field['min']) {
+                    form_set_error($field['field_name'] .']['. $delta .'][value', t('The value of %name may be no smaller than %min.', array('%name' => t($field['label']), '%min' => $field['min'])));
+                  }
+                  if (is_numeric($field['max']) && $item['value'] > $field['max']) {
+                    form_set_error($field['field_name'] .']['. $delta .'][value', t('The value of %name may be no larger than %max.', array('%name' => t($field['label']), '%max' => $field['max'])));
+                  }
+                }
               }
-              if (is_numeric($field['max']) && $node_field > $field['max']) {
-                form_set_error($field['field_name'] .'][value', t('The value of %name may be no larger than %max.', array('%name' => t($field['label']), '%max' => $field['max'])));
+            }
+          }
+          else {
+            if (isset($node_field['value'])) {
+              if ($node_field['value'] != '') {
+                if (is_numeric($field['min']) && $node_field['value'] < $field['min']) {
+                  form_set_error($field['field_name'] .'][value', t('The value of %name may be no smaller than %min.', array('%name' => t($field['label']), '%min' => $field['min'])));
+                }
+                if (is_numeric($field['max']) && $node_field['value'] > $field['max']) {
+                  form_set_error($field['field_name'] .'][value', t('The value of %name may be no larger than %max.', array('%name' => t($field['label']), '%max' => $field['max'])));
+                }
               }
             }
           }
@@ -246,16 +370,44 @@ function field_field($op, $node, $field, $a2, $a3, $a4) {
       $node_field = $node->$field['field_name'];
       switch($field['type']) {
         case 'field_shorttext':
-          db_query("INSERT INTO {node_field_shorttext_data} (vid, field_name, field_shorttext, format) VALUES (%d, '%s', '%s', %d)", $node->vid, $field['field_name'], $node_field['value'], $node_field['format']);
+          if ($field['multiple']) {
+            foreach ($node_field as $delta => $item) {
+              db_query("INSERT INTO {node_field_shorttext_data} (vid, field_name, delta, field_shorttext, format) VALUES (%d, '%s', %d, '%s', %d)", $node->vid, $field['field_name'], $delta, $item['value'], $item['format']);
+            }
+          }
+          else {
+            db_query("INSERT INTO {node_field_shorttext_data} (vid, field_name, field_shorttext, format) VALUES (%d, '%s', '%s', %d)", $node->vid, $field['field_name'], $node_field['value'], $node_field['format']);
+          }
           break;
         case 'field_longtext':
-          db_query("INSERT INTO {node_field_longtext_data} (vid, field_name, field_longtext, format) VALUES (%d, '%s', '%s', %d)", $node->vid, $field['field_name'], $node_field['value'], $node_field['format']);
+          if ($field['multiple']) {
+            foreach ($node_field as $delta => $item) {
+              db_query("INSERT INTO {node_field_longtext_data} (vid, field_name, delta, field_longtext, format) VALUES (%d, '%s', %d, '%s', %d)", $node->vid, $field['field_name'], $delta, $item['value'], $item['format']);
+            }
+          }
+          else {
+            db_query("INSERT INTO {node_field_longtext_data} (vid, field_name, field_longtext, format) VALUES (%d, '%s', '%s', %d)", $node->vid, $field['field_name'], $node_field['value'], $node_field['format']);
+          }
           break;
         case 'field_integer':
-          db_query("INSERT INTO {node_field_int_data} (vid, field_name, field_int) VALUES (%d, '%s', %d)", $node->vid, $field['field_name'], $node_field);
+          if ($field['multiple']) {
+            foreach ($node_field as $delta => $item) {
+              db_query("INSERT INTO {node_field_int_data} (vid, field_name, delta, field_int) VALUES (%d, '%s', %d, %d)", $node->vid, $field['field_name'], $delta, $item['value']);
+            }
+          }
+          else {
+            db_query("INSERT INTO {node_field_int_data} (vid, field_name, field_int) VALUES (%d, '%s', %d)", $node->vid, $field['field_name'], $node_field['value']);
+          }
           break;
         case 'field_decimal':
-          db_query("INSERT INTO {node_field_float_data} (vid, field_name, field_float) VALUES (%d, '%s', %d)", $node->vid, $field['field_name'], $node_field);
+          if ($field['multiple']) {
+            foreach ($node_field as $delta => $item) {
+              db_query("INSERT INTO {node_field_float_data} (vid, field_name, delta, field_float) VALUES (%d, '%s', %d, %d)", $node->vid, $field['field_name'], $delta, $item['value']);
+            }
+          }
+          else {
+            db_query("INSERT INTO {node_field_float_data} (vid, field_name, field_float) VALUES (%d, '%s', %d)", $node->vid, $field['field_name'], $node_field['value']);
+          }
           break;
       }
       return;
@@ -266,19 +418,47 @@ function field_field($op, $node, $field, $a2, $a3, $a4) {
       switch($field['type']) {
         case 'field_shorttext':
           db_query("DELETE FROM {node_field_shorttext_data} WHERE vid = %d AND field_name = '%s'", $node->vid, $field['field_name']);
-          db_query("INSERT INTO {node_field_shorttext_data} (vid, field_name, field_shorttext, format) VALUES (%d, '%s', '%s', %d)", $node->vid, $field['field_name'], $node_field['value'], $node_field['format']);
+          if ($field['multiple']) {
+            foreach ($node_field as $delta => $item) {
+              db_query("INSERT INTO {node_field_shorttext_data} (vid, field_name, delta, field_shorttext, format) VALUES (%d, '%s', %d, '%s', %d)", $node->vid, $field['field_name'], $delta, $item['value'], $item['format']);
+            }
+          }
+          else {
+            db_query("INSERT INTO {node_field_shorttext_data} (vid, field_name, field_shorttext, format) VALUES (%d, '%s', '%s', %d)", $node->vid, $field['field_name'], $node_field['value'], $node_field['format']);
+          }
           break;
         case 'field_longtext':
           db_query("DELETE FROM {node_field_longtext_data} WHERE vid = %d AND field_name = '%s'", $node->vid, $field['field_name']);
-          db_query("INSERT INTO {node_field_longtext_data} (vid, field_name, field_longtext, format) VALUES (%d, '%s', '%s', %d)", $node->vid, $field['field_name'], $node_field['value'], $node_field['format']);
+          if ($field['multiple']) {
+            foreach ($node_field as $delta => $item) {
+              db_query("INSERT INTO {node_field_longtext_data} (vid, field_name, delta, field_longtext, format) VALUES (%d, '%s', %d, '%s', %d)", $node->vid, $field['field_name'], $delta, $item['value'], $item['format']);
+            }
+          }
+          else {
+            db_query("INSERT INTO {node_field_longtext_data} (vid, field_name, field_longtext, format) VALUES (%d, '%s', '%s', %d)", $node->vid, $field['field_name'], $node_field['value'], $node_field['format']);
+          }
           break;
         case 'field_integer':
           db_query("DELETE FROM {node_field_int_data} WHERE vid = %d AND field_name = '%s'", $node->vid, $field['field_name']);
-          db_query("INSERT INTO {node_field_int_data} (vid, field_name, field_int) VALUES (%d, '%s', %d)", $node->vid, $field['field_name'], $node_field);
+          if ($field['multiple']) {
+            foreach ($node_field as $delta => $item) {
+              db_query("INSERT INTO {node_field_int_data} (vid, field_name, delta, field_int) VALUES (%d, '%s', %d, %d)", $node->vid, $field['field_name'], $delta, $item['value']);
+            }
+          }
+          else {
+            db_query("INSERT INTO {node_field_int_data} (vid, field_name, field_int) VALUES (%d, '%s', %d)", $node->vid, $field['field_name'], $node_field['value']);
+          }
           break;
         case 'field_decimal':
           db_query("DELETE FROM {node_field_float_data} WHERE vid = %d AND field_name = '%s'", $node->vid, $field['field_name']);
-          db_query("INSERT INTO {node_field_float_data} (vid, field_name, field_float) VALUES (%d, '%s', %d)", $node->vid, $field['field_name'], $node_field);
+          if ($field['multiple']) {
+            foreach ($node_field as $delta => $item) {
+              db_query("INSERT INTO {node_field_float_data} (vid, field_name, delta, field_float) VALUES (%d, '%s', %d, %d)", $node->vid, $field['field_name'], $delta, $item['value']);
+            }
+          }
+          else {
+            db_query("INSERT INTO {node_field_float_data} (vid, field_name, field_float) VALUES (%d, '%s', %d)", $node->vid, $field['field_name'], $node_field['value']);
+          }
           break;
       }
       return;
