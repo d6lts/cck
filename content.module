@@ -154,7 +154,15 @@ function content_access($op, $node) {
  * Implementation of hook_load().
  */
 function content_load($node) {
-  return _content_field_invoke('load', $node);
+  $cid = 'content:'. $node->nid;
+  if ($cached = cache_get($cid)) {
+    return unserialize($cached->data);
+  }
+  else {
+    $additions = _content_field_invoke('load', $node);
+    cache_set($cid, serialize($additions), CACHE_PERMANENT);
+    return $additions;
+  }
 }
 
 /**
@@ -169,6 +177,7 @@ function content_insert($node) {
  */
 function content_update($node) {
   _content_field_invoke('update', $node);
+  cache_clear_all('content:'. $node->nid);
 }
 
 /**
@@ -176,6 +185,7 @@ function content_update($node) {
  */
 function content_delete($node) {
   _content_field_invoke('delete', $node);
+  cache_clear_all('content:'. $node->nid);
 }
 
 /**

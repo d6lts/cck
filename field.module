@@ -454,7 +454,7 @@ function field_field($op, $node, $field, $a2, $a3, $a4) {
             if (is_array($node_field)) {
               foreach ($node_field as $delta => $item) {
                 if ($item['value'] != '') {
-                  if (preg_match('/[0-9]{8}T[0-9]{2}:[0-9]{2}:[0-9]{2}/', $item['value']) {
+                  if (preg_match('/[0-9]{8}T[0-9]{2}:[0-9]{2}:[0-9]{2}/', $item['value'])) {
                     form_set_error($field['field_name'] .']['. $delta .'][value', t('%name must be entered in ISO 8601 format (YYYYMMDDThh:mm:ss).', array('%name' => t($field['label']))));
                   }
                 }
@@ -464,7 +464,7 @@ function field_field($op, $node, $field, $a2, $a3, $a4) {
           else {
             if (isset($node_field['value'])) {
               if ($node_field['value'] != '') {
-                if (preg_match('/[0-9]{8}T[0-9]{2}:[0-9]{2}:[0-9]{2}/', $node_field['value']) {
+                if (preg_match('/[0-9]{8}T[0-9]{2}:[0-9]{2}:[0-9]{2}/', $node_field['value'])) {
                   form_set_error($field['field_name'] .'][value', t('%name must be entered in ISO 8601 format (YYYYMMDDThh:mm:ss).', array('%name' => t($field['label']))));
                 }
               }
