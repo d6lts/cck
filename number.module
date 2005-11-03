@@ -48,7 +48,7 @@ function number_field_settings($op, $field, $scope) {
           break;
       }
       return $form;
-    
+
     case 'validate':
       switch ($scope) {
         case 'global':

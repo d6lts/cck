@@ -275,7 +275,7 @@ function _content_admin_type_overview() {
   $rows = array();
   foreach ($types as $type) {
     $row = array();
-    $row[] = $type->label;
+    $row[] = l(t($type->label), 'admin/node/types/'. $type->type_name .'/fields');
     $row[] = $type->type_name;
     $row[] = $type->description;
 
@@ -384,7 +384,7 @@ function _content_admin_type_edit_execute($form_id, $form_values) {
   else {
     db_query("UPDATE {node_type} SET label = '%s', description = '%s', help = '%s', title_label = '%s' WHERE type_name = '%s'", $form_values['label'], $form_values['description'], $form_values['help'], $form_values['title_label'], $form_values['type_name']);
   }
-  
+
   if (isset($form_values['original_type_name'])) {
     // Duplicate the field structure from the old content type.
     db_query("INSERT INTO {node_field_instance} (field_name, type_name, weight, label, instance_settings) SELECT field_name, '%s', weight, label, instance_settings FROM {node_field_instance} WHERE type_name = '%s'", $form_values['type_name'], $form_values['original_type_name']);
@@ -413,7 +413,7 @@ function _content_admin_type_delete($type_name = '') {
 function _content_admin_type_delete_execute($form_id, $form_values) {
   $types = _content_types();
   $type = $types[$form_values['type_name']];
-  
+
   if ($type && $form_values['confirm']) {
     // Delete all nodes of this content type.
     $result = db_query("SELECT nid FROM {node} WHERE type = '%s'", $form_values['type_name']);
@@ -447,7 +447,13 @@ function _content_admin_field_overview($type_name) {
 
   $header = array(t('Label'), t('Name'), t('Type'), array('data' => t('Operations'), 'colspan' => 2));
   $rows = array();
-  $rows[] = array($type->title_label, 'title', '', '', '');
+  $rows[] = array(t($type->title_label), 'title', '', '', '');
+
+  $c = db_query(db_rewrite_sql("SELECT v.*, n.type FROM {vocabulary} v INNER JOIN {vocabulary_node_types} n ON v.vid = n.vid WHERE n.type = '%s' ORDER BY v.weight, v.name", 'v', 'vid'), $type_name);
+  while ($vocabulary = db_fetch_object($c)) {
+    $rows[] = array(check_plain($vocabulary->name), 'taxonomy', '', '', '');
+  }
+
   foreach ($type->fields as $field) {
     $row = array();
     $row[] = $field['label'];
@@ -501,7 +507,7 @@ function _content_admin_field_add($type_name) {
     );
     $output .= drupal_get_form('_content_admin_field_add_existing', $form);
   }
-  
+
   $form = array();
   $form['new'] = array(
     '#type' => 'fieldset',
@@ -610,7 +616,7 @@ function _content_admin_field_remove_execute($form_id, $form_values) {
   $types = _content_types();
   $type = $types[$form_values['type_name']];
   $field = $type->fields[$form_values['field_name']];
-  
+
   if ($type && $field && $form_values['confirm']) {
     db_query("DELETE FROM {node_field_instance} WHERE type_name = '%s' AND field_name = '%s'", $form_values['type_name'], $form_values['field_name']);
 
