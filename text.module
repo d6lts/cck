@@ -1,0 +1,307 @@
+<?php
+// $Id$
+
+/**
+ * @file
+ * Defines standard simple field types.
+ */
+
+/**
+ * Implementation of hook_help().
+ */
+function text_help($section) {
+  switch ($section) {
+    case 'admin/modules#description':
+      return t('Defines simple text field types.');
+  }
+}
+
+/**
+ * Implementation of hook_field_info().
+ */
+function text_field_info() {
+  return array(
+    'text_shorttext' => array('label' => 'Short Text'),
+    'text_longtext' => array('label' => 'Long Text'),
+  );
+}
+
+/**
+ * Implementation of hook_field_settings().
+ */
+function text_field_settings($op, $field, $scope) {
+  switch ($op) {
+    case 'form':
+      $form = array();
+      switch ($scope) {
+        case 'instance':
+          $form['rows'] = array(
+            '#type' => 'textfield',
+            '#title' => t('Rows'),
+            '#default_value' => $field['rows'] ? $field['rows'] : 1,
+            '#required' => TRUE,
+          );
+          break;
+
+        case 'global':
+          $options = array(0 => t('Plain text'), 1 => t('Filtered text (user selects input format)'));
+          $form['text_processing'] = array(
+            '#type' => 'radios',
+            '#title' => t('Text processing'),
+            '#default_value' => $field['text_processing'] ? $field['text_processing'] : 0,
+            '#options' => $options,
+          );
+          break;
+      }
+      return $form;
+    
+    case 'validate':
+      switch ($scope) {
+        case 'instance':
+          if (!is_numeric($field['rows']) || intval($field['rows']) != $field['rows'] || $field['rows'] <= 0) {
+            form_set_error('rows', t('"Rows" must be a positive integer.'));
+          }
+          break;
+      }
+      break;
+
+    case 'save':
+      switch ($scope) {
+        case 'instance':
+          return array('rows');
+        case 'global':
+          return array('text_processing');
+      }
+      break;
+  }
+}
+
+/**
+ * Implementation of hook_field().
+ */
+function text_field($op, $node, $field, $a2, $a3, $a4) {
+  switch ($op) {
+    case 'load':
+      switch($field['type']) {
+        case 'text_shorttext':
+          $result = db_query("SELECT field_shorttext, format FROM {node_field_shorttext_data} WHERE vid = %d AND field_name = '%s' ORDER BY delta", $node->vid, $field['field_name']);
+          if ($field['multiple']) {
+            $values = array();
+            while ($value = db_fetch_object($result)) {
+              $values[] = array('value' => $value->field_shorttext, 'format' => $value->format);
+            }
+            $additions = array($field['field_name'] => $values);
+          }
+          else {
+            $value = db_fetch_object($result);
+            $additions = array($field['field_name'] => array('value' => $value->field_shorttext, 'format' => $value->format));
+          }
+          break;
+        case 'text_longtext':
+          $result = db_query("SELECT field_longtext, format FROM {node_field_longtext_data} WHERE vid = %d AND field_name = '%s' ORDER BY delta", $node->vid, $field['field_name']);
+          if ($field['multiple']) {
+            $values = array();
+            while ($value = db_fetch_object($result)) {
+              $values[] = array('value' => $value->field_longtext, 'format' => $value->format);
+            }
+            $additions = array($field['field_name'] => $values);
+          }
+          else {
+            $value = db_fetch_object($result);
+            $additions = array($field['field_name'] => array('value' => $value->field_longtext, 'format' => $value->format));
+          }
+          break;
+      }
+      return $additions;
+
+    case 'view':
+      $output = '';
+      $node_field = $node->$field['field_name'];
+      if ($field['multiple']) {
+        foreach ($node_field as $delta => $item) {
+          if ($field['text_processing']) {
+            $node_field[$delta]['view'] = check_markup($item['value'], $item['format'], isset($node->in_preview) ? $node->in_preview : FALSE);
+          }
+          else {
+            $node_field[$delta]['view'] = check_plain($item['value']);
+          }
+        }
+      }
+      else {
+        if ($field['text_processing']) {
+          $node_field['view'] = check_markup($node_field['value'], $node_field['format'], isset($node->in_preview) ? $node->in_preview : FALSE);
+        }
+        else {
+          $node_field['view'] = check_plain($node_field['value']);
+        }
+      }
+      $node->$field['field_name'] = $node_field;
+      if ($field['multiple']) {
+        $output = '';
+        foreach ($node_field as $delta => $item) {
+          $output .= '<div class="'. $field['field_name'] .'">'. $item['view'] .'</div>';
+        }
+        return $output;
+      }
+      else {
+        return '<div class="'. $field['field_name'] .'">'. $node_field['view'] .'</div>';
+      }
+
+    case 'form':
+      $form = array();
+      $node_field = $node->$field['field_name'];
+
+      $form[$field['field_name']] = array('#tree' => TRUE);
+
+      if ($field['multiple']) {
+        foreach (range(0, 2) as $delta) {
+          if ($field['rows'] == 1) {
+            $form[$field['field_name']][$delta]['value'] = array(
+              '#type' => 'textfield',
+              '#title' => t($field['label']),
+              '#default_value' => $node_field[$delta]['value'],
+              '#required' => ($delta == 0) ? $field['required'] : FALSE,
+            );
+          }
+          else {
+            $form[$field['field_name']][$delta]['value'] = array(
+              '#type' => 'textarea',
+              '#title' => t($field['label']),
+              '#default_value' => $node_field[$delta]['value'],
+              '#required' => ($delta == 0) ? $field['required'] : FALSE,
+              '#rows' => $field['rows'],
+            );
+          }
+          if ($field['text_processing']) {
+            $form[$field['field_name']][$delta] = array_merge($form[$field['field_name']][$delta], filter_form($node_field[$delta]['format']));
+          }
+        }
+      }
+      else {
+        if ($field['rows'] == 1) {
+          $form[$field['field_name']]['value'] = array(
+            '#type' => 'textfield',
+            '#title' => t($field['label']),
+            '#default_value' => $node_field['value'],
+            '#required' => $field['required'],
+          );
+        }
+        else {
+          $form[$field['field_name']]['value'] = array(
+            '#type' => 'textarea',
+            '#title' => t($field['label']),
+            '#default_value' => $node_field['value'],
+            '#required' => $field['required'],
+            '#rows' => $field['rows'],
+          );
+        }
+        if ($field['text_processing']) {
+          $form[$field['field_name']] = array_merge($form[$field['field_name']], filter_form($node_field['format']));
+        }
+      }
+      return $form;
+
+    case 'validate':
+      return;
+
+    case 'insert':
+      $node_field = $node->$field['field_name'];
+      switch($field['type']) {
+        case 'text_shorttext':
+          if ($field['multiple']) {
+            foreach ($node_field as $delta => $item) {
+              db_query("INSERT INTO {node_field_shorttext_data} (vid, field_name, delta, field_shorttext, format) VALUES (%d, '%s', %d, '%s', %d)", $node->vid, $field['field_name'], $delta, $item['value'], $item['format']);
+            }
+          }
+          else {
+            db_query("INSERT INTO {node_field_shorttext_data} (vid, field_name, field_shorttext, format) VALUES (%d, '%s', '%s', %d)", $node->vid, $field['field_name'], $node_field['value'], $node_field['format']);
+          }
+          break;
+        case 'text_longtext':
+          if ($field['multiple']) {
+            foreach ($node_field as $delta => $item) {
+              db_query("INSERT INTO {node_field_longtext_data} (vid, field_name, delta, field_longtext, format) VALUES (%d, '%s', %d, '%s', %d)", $node->vid, $field['field_name'], $delta, $item['value'], $item['format']);
+            }
+          }
+          else {
+            db_query("INSERT INTO {node_field_longtext_data} (vid, field_name, field_longtext, format) VALUES (%d, '%s', '%s', %d)", $node->vid, $field['field_name'], $node_field['value'], $node_field['format']);
+          }
+          break;
+      }
+      return;
+
+    case 'update':
+      $node_field = $node->$field['field_name'];
+      // Delete and insert, rather than update, in case a field was added.
+      switch($field['type']) {
+        case 'text_shorttext':
+          db_query("DELETE FROM {node_field_shorttext_data} WHERE vid = %d AND field_name = '%s'", $node->vid, $field['field_name']);
+          if ($field['multiple']) {
+            foreach ($node_field as $delta => $item) {
+              db_query("INSERT INTO {node_field_shorttext_data} (vid, field_name, delta, field_shorttext, format) VALUES (%d, '%s', %d, '%s', %d)", $node->vid, $field['field_name'], $delta, $item['value'], $item['format']);
+            }
+          }
+          else {
+            db_query("INSERT INTO {node_field_shorttext_data} (vid, field_name, field_shorttext, format) VALUES (%d, '%s', '%s', %d)", $node->vid, $field['field_name'], $node_field['value'], $node_field['format']);
+          }
+          break;
+        case 'text_longtext':
+          db_query("DELETE FROM {node_field_longtext_data} WHERE vid = %d AND field_name = '%s'", $node->vid, $field['field_name']);
+          if ($field['multiple']) {
+            foreach ($node_field as $delta => $item) {
+              db_query("INSERT INTO {node_field_longtext_data} (vid, field_name, delta, field_longtext, format) VALUES (%d, '%s', %d, '%s', %d)", $node->vid, $field['field_name'], $delta, $item['value'], $item['format']);
+            }
+          }
+          else {
+            db_query("INSERT INTO {node_field_longtext_data} (vid, field_name, field_longtext, format) VALUES (%d, '%s', '%s', %d)", $node->vid, $field['field_name'], $node_field['value'], $node_field['format']);
+          }
+          break;
+      }
+      return;
+
+    case 'delete':
+      switch($field['type']) {
+        case 'field_shorttext':
+          db_query("DELETE FROM {node_field_shorttext_data} WHERE vid = %d AND field_name = '%s'", $node->vid, $field['field_name']);
+          break;
+        case 'field_longtext':
+          db_query("DELETE FROM {node_field_longtext_data} WHERE vid = %d AND field_name = '%s'", $node->vid, $field['field_name']);
+          break;
+      }
+      return;
+  }
+}
+
+/**
+ * Implementation of hook_field_query().
+ */
+function text_field_query($field, $op, $value) {
+  $query_additions = array();
+
+  $table_name = ($field['type'] == 'field_shorttext' ? 'node_field_shorttext_data' : 'node_field_longtext_data');
+  $column_name = ($field['type'] == 'field_shorttext' ? 'field_shorttext' : 'field_longtext');
+
+  switch ($op) {
+    case 'is':
+      $query_additions['tables'] = array('%table' => $table_name);
+      $query_additions['where'] = "%table.". $column_name ." = '%s'";
+      $query_additions['data'] = array($value);
+      break;
+
+    case 'contains':
+      $query_additions['tables'] = array('%table' => $table_name);
+      $query_additions['where'] = "%table.". $column_name ." LIKE '%%%s%%'";
+      $query_additions['data'] = array($value);
+      break;
+
+    case 'like':
+      $query_additions['tables'] = array('%table' => $table_name);
+      $query_additions['where'] = "%table.". $column_name ." LIKE '%s'";
+      $query_additions['data'] = array($value);
+      break;
+  }
+
+  return $query_additions;
+}
+
+?>

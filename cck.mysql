@@ -1,3 +1,4 @@
+# content.module
 
 CREATE TABLE node_type (
   type_name varchar(31) NOT NULL default '',
@@ -27,23 +28,7 @@ CREATE TABLE node_field_instance (
 ) TYPE=MyISAM;
 
 
-# field data
-
-CREATE TABLE `node_field_float_data` (
-  `vid` int unsigned NOT NULL default '0',
-  `field_name` varchar(31) NOT NULL default '',
-  `delta` int unsigned NOT NULL default '0',
-  `field_float` float NOT NULL default '0',
-  PRIMARY KEY  (`vid`,`field_name`,`delta`)
-) TYPE=MyISAM;
-
-CREATE TABLE `node_field_int_data` (
-  `vid` int unsigned NOT NULL default '0',
-  `field_name` varchar(31) NOT NULL default '',
-  `delta` int unsigned NOT NULL default '0',
-  `field_int` int NOT NULL default '0',
-  PRIMARY KEY  (`vid`,`field_name`,`delta`)
-) TYPE=MyISAM;
+# text.module
 
 CREATE TABLE `node_field_longtext_data` (
   `vid` int unsigned NOT NULL default '0',
@@ -62,6 +47,28 @@ CREATE TABLE `node_field_shorttext_data` (
   `format` int NOT NULL default '0',
   PRIMARY KEY  (`vid`,`field_name`,`delta`)
 ) TYPE=MyISAM;
+
+
+# number.module
+
+CREATE TABLE `node_field_float_data` (
+  `vid` int unsigned NOT NULL default '0',
+  `field_name` varchar(31) NOT NULL default '',
+  `delta` int unsigned NOT NULL default '0',
+  `field_float` float NOT NULL default '0',
+  PRIMARY KEY  (`vid`,`field_name`,`delta`)
+) TYPE=MyISAM;
+
+CREATE TABLE `node_field_int_data` (
+  `vid` int unsigned NOT NULL default '0',
+  `field_name` varchar(31) NOT NULL default '',
+  `delta` int unsigned NOT NULL default '0',
+  `field_int` int NOT NULL default '0',
+  PRIMARY KEY  (`vid`,`field_name`,`delta`)
+) TYPE=MyISAM;
+
+
+# date.module
 
 CREATE TABLE `node_field_date_data` (
   `vid` int unsigned NOT NULL default '0',

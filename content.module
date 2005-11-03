@@ -482,16 +482,20 @@ function _content_admin_field_add($type_name) {
   }
   if ($options) {
     $form = array();
-    $form['field_name'] = array(
+    $form['existing'] = array(
+      '#type' => 'fieldset',
+      '#title' => t('Add existing field'),
+    );
+    $form['existing']['field_name'] = array(
       '#type' => 'select',
       '#required' => TRUE,
       '#options' => $options,
     );
-    $form['submit'] = array(
+    $form['existing']['submit'] = array(
       '#type' => 'submit',
       '#value' => t('Add field'),
     );
-    $form['type_name'] = array(
+    $form['existing']['type_name'] = array(
       '#type' => 'value',
       '#value' => $type_name,
     );
@@ -499,7 +503,11 @@ function _content_admin_field_add($type_name) {
   }
   
   $form = array();
-  $form['label'] = array(
+  $form['new'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Create new field'),
+  );
+  $form['new']['label'] = array(
     '#title' => t('Label'),
     '#type' => 'textfield',
     '#default_value' => '',
@@ -510,16 +518,17 @@ function _content_admin_field_add($type_name) {
   foreach ($field_types as $field_name => $field_type) {
     $options[$field_name] = $field_type['label'];
   }
-  $form['type'] = array(
-    '#type' => 'select',
+  $form['new']['type'] = array(
+    '#type' => 'radios',
+    '#title' => t('Field type'),
     '#required' => TRUE,
     '#options' => $options,
   );
-  $form['submit'] = array(
+  $form['new']['submit'] = array(
     '#type' => 'submit',
     '#value' => t('Create field'),
   );
-  $form['type_name'] = array(
+  $form['new']['type_name'] = array(
     '#type' => 'value',
     '#value' => $type_name,
   );

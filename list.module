@@ -26,9 +26,6 @@ function list_menu($may_cache) {
     $items[] = array('path' => 'list', 'title' => t('list'),
       'callback' => 'list_page', 'access' => user_access('access content'),
       'type' => MENU_CALLBACK);
-    $items[] = array('path' => 'list/titles', 'title' => t('list'),
-      'callback' => 'list_page', 'access' => user_access('access content'),
-      'type' => MENU_CALLBACK);
   }
 
   return $items;
@@ -42,11 +39,6 @@ function list_page() {
 
   $arguments = explode('/', $_GET['q']);
   array_shift($arguments);
-  
-  if ($arguments[0] == 'titles') {
-    $titles_only = TRUE;
-    array_shift($arguments); 
-  }
 
   $conditions = array();
   $sort = array();
@@ -59,22 +51,14 @@ function list_page() {
     $conditions[] = array('field' => $field, 'op' => $op, 'value' => $value);
   }
 
-  if ($titles_only) {
-    $header = array('title');
-    $result = content_node_query($conditions, $sort, 'n.nid, n.title');
-    while ($node = db_fetch_object($result)) {
-      $rows[] = l($node->title, drupal_get_path_alias("node/$node->nid'")); 
-    }
-    $output = theme('node_list', $rows);
+  $result = content_node_query($conditions, $sort);
+
+  while ($node = db_fetch_object($result)) {
+    $node = node_load($node->nid);
+    $output .= node_view($node);
   }
-  else {
-    $result = content_node_query($conditions, $sort);
-    while ($node = db_fetch_array($result)) {
-      $node = node_load($node);
-      $output .= node_view($node);
-    }
-  }
-  print theme('page', $output);
+
+  return $output;
 }
 
 ?>
