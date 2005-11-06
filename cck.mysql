@@ -1,3 +1,5 @@
+# $Id$
+
 # content.module
 
 CREATE TABLE node_type (

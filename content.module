@@ -48,18 +48,33 @@ function content_menu($may_cache) {
   $access = user_access('administer content types');
 
   if ($may_cache) {
-    $items[] = array('path' => 'admin/node/types', 'title' => t('content types'),
-      'callback' => '_content_admin_type_overview', 'access' => $access);
-    $items[] = array('path' => 'admin/node/types/list', 'title' => t('list'),
-      'type' => MENU_DEFAULT_LOCAL_TASK, 'weight' => -10);
-    $items[] = array('path' => 'admin/node/types/add', 'title' => t('add content type'),
-      'callback' => '_content_admin_type_edit', 'access' => $access,
-      'type' => MENU_LOCAL_TASK);
+    $items[] = array(
+      'path' => 'admin/node/types',
+      'title' => t('content types'),
+      'callback' => '_content_admin_type_overview',
+      'access' => $access,
+    );
+    $items[] = array(
+      'path' => 'admin/node/types/list',
+      'title' => t('list'),
+      'type' => MENU_DEFAULT_LOCAL_TASK,
+      'weight' => -10,
+    );
+    $items[] = array(
+      'path' => 'admin/node/types/add',
+      'title' => t('add content type'),
+      'callback' => '_content_admin_type_edit',
+      'access' => $access,
+      'type' => MENU_LOCAL_TASK,
+    );
 
     $types = _content_types();
     foreach ($types as $type_name => $type) {
-      $items[] = array('path' => 'node/add/'. $type_name, 'title' => t($type->label),
-        'access' => user_access('create '. $type_name .' content'));
+      $items[] = array(
+        'path' => 'node/add/'. $type_name,
+        'title' => t($type->label),
+        'access' => user_access('create '. $type_name .' content'),
+      );
     }
   }
   else {
@@ -67,51 +82,75 @@ function content_menu($may_cache) {
       $types = _content_types();
 
       if (isset($types[arg(3)])) {
-        $items[] = array('path' => 'admin/node/types/'. arg(3),
+        $items[] = array(
+          'path' => 'admin/node/types/'. arg(3),
           'title' => t($types[arg(3)]->label),
-          'callback' => '_content_admin_type_edit', 'access' => $access,
+          'callback' => '_content_admin_type_edit',
+          'access' => $access,
           'callback arguments' => array(arg(3)),
-          'type' => MENU_CALLBACK);
-        $items[] = array('path' => 'admin/node/types/'. arg(3) .'/delete',
+          'type' => MENU_CALLBACK,
+        );
+        $items[] = array(
+          'path' => 'admin/node/types/'. arg(3) .'/delete',
           'title' => t('delete'),
-          'callback' => '_content_admin_type_delete', 'access' => $access,
+          'callback' => '_content_admin_type_delete',
+          'access' => $access,
           'callback arguments' => array(arg(3)),
-          'type' => MENU_CALLBACK);
-        $items[] = array('path' => 'admin/node/types/'. arg(3) .'/duplicate',
+          'type' => MENU_CALLBACK,
+        );
+        $items[] = array(
+          'path' => 'admin/node/types/'. arg(3) .'/duplicate',
           'title' => t('duplicate'),
-          'callback' => '_content_admin_type_edit', 'access' => $access,
+          'callback' => '_content_admin_type_edit',
+          'access' => $access,
           'callback arguments' => array('', arg(3)),
-          'type' => MENU_CALLBACK);
+          'type' => MENU_CALLBACK,
+        );
 
-        $items[] = array('path' => 'admin/node/types/'. arg(3) .'/edit',
+        $items[] = array(
+          'path' => 'admin/node/types/'. arg(3) .'/edit',
           'title' => t('edit'),
-          'type' => MENU_DEFAULT_LOCAL_TASK, 'weight' => -10);
+          'type' => MENU_DEFAULT_LOCAL_TASK,
+          'weight' => -10,
+        );
 
-        $items[] = array('path' => 'admin/node/types/'. arg(3) .'/fields',
+        $items[] = array(
+          'path' => 'admin/node/types/'. arg(3) .'/fields',
           'title' => t('manage fields'),
-          'callback' => '_content_admin_field_overview', 'access' => $access,
+          'callback' => '_content_admin_field_overview',
+          'access' => $access,
           'callback arguments' => array(arg(3)),
           'type' => MENU_LOCAL_TASK,
-          'weight' => 1);
-        $items[] = array('path' => 'admin/node/types/'. arg(3) .'/add_field',
+          'weight' => 1,
+        );
+        $items[] = array(
+          'path' => 'admin/node/types/'. arg(3) .'/add_field',
           'title' => t('add field'),
-          'callback' => '_content_admin_field_add', 'access' => $access,
+          'callback' => '_content_admin_field_add',
+          'access' => $access,
           'callback arguments' => array(arg(3)),
           'type' => MENU_LOCAL_TASK,
-          'weight' => 2);
+          'weight' => 2,
+        );
 
         if (arg(4) == 'fields' && arg(5)
             && isset($types[arg(3)]->fields[arg(5)])) {
-          $items[] = array('path' => 'admin/node/types/'. arg(3) .'/fields/'. arg(5),
+          $items[] = array(
+            'path' => 'admin/node/types/'. arg(3) .'/fields/'. arg(5),
             'title' => t($types[arg(3)]->fields[arg(5)]['label']),
-            'callback' => '_content_admin_field', 'access' => $access,
+            'callback' => '_content_admin_field',
+            'access' => $access,
             'callback arguments' => array(arg(3), arg(5)),
-            'type' => MENU_CALLBACK);
-          $items[] = array('path' => 'admin/node/types/'. arg(3) .'/fields/'. arg(5) .'/remove',
+            'type' => MENU_CALLBACK,
+          );
+          $items[] = array(
+            'path' => 'admin/node/types/'. arg(3) .'/fields/'. arg(5) .'/remove',
             'title' => t('remove field'),
-            'callback' => '_content_admin_field_remove', 'access' => $access,
+            'callback' => '_content_admin_field_remove',
+            'access' => $access,
             'callback arguments' => array(arg(3), arg(5)),
-            'type' => MENU_CALLBACK);
+            'type' => MENU_CALLBACK,
+          );
         }
 
       }
@@ -418,14 +457,7 @@ function _content_admin_type_delete_execute($form_id, $form_values) {
     // Delete all nodes of this content type.
     $result = db_query("SELECT nid FROM {node} WHERE type = '%s'", $form_values['type_name']);
     while ($node = db_fetch_object($result)) {
-      $node = node_load($node->nid);
-      db_query('DELETE FROM {node} WHERE nid = %d', $node->nid);
-      db_query('DELETE FROM {node_revisions} WHERE nid = %d', $node->nid);
-      node_invoke($node, 'delete');
-      node_invoke_nodeapi($node, 'delete');
-      if (function_exists('search_wipe')) {
-        search_wipe($node->nid, 'node');
-      }
+      node_delete($node->nid);
     }
     db_query("DELETE FROM {node_field_instance} WHERE type_name = '%s'", $form_values['type_name']);
     db_query("DELETE FROM {node_type} WHERE type_name = '%s'", $form_values['type_name']);
@@ -840,5 +872,3 @@ function _content_field_types() {
 
   return $types;
 }
-
-?>

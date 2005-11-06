@@ -303,5 +303,3 @@ function text_field_query($field, $op, $value) {
 
   return $query_additions;
 }
-
-?>
