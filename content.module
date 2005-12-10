@@ -400,7 +400,7 @@ function _content_admin_type_edit($type_name = '', $original_type_name = '') {
 /**
  * Save a content type after editing.
  */
-function _content_admin_type_edit_execute($form_id, $form_values) {
+function _content_admin_type_edit_submit($form_id, $form_values) {
   $types = _content_types();
   if (!isset($types[$form_values['type_name']])) {
     // Find a valid, computer-friendly type name.
@@ -449,7 +449,7 @@ function _content_admin_type_delete($type_name = '') {
 /**
  * Delete a content type.
  */
-function _content_admin_type_delete_execute($form_id, $form_values) {
+function _content_admin_type_delete_submit($form_id, $form_values) {
   $types = _content_types();
   $type = $types[$form_values['type_name']];
 
@@ -578,7 +578,7 @@ function _content_admin_field_add($type_name) {
 /**
  * Add an existing field to a content type.
  */
-function _content_admin_field_add_existing_execute($form_id, $form_values) {
+function _content_admin_field_add_existing_submit($form_id, $form_values) {
   $prior_instance = db_fetch_object(db_query("SELECT weight, label, instance_settings FROM {node_field_instance} WHERE field_name = '%s'", $form_values['field_name']));
   if (!$prior_instance) {
     $prior_instance = new stdClass;
@@ -596,7 +596,7 @@ function _content_admin_field_add_existing_execute($form_id, $form_values) {
 /**
  * Create a new field for a content type.
  */
-function _content_admin_field_add_new_execute($form_id, $form_values) {
+function _content_admin_field_add_new_submit($form_id, $form_values) {
   // Find a valid, computer-friendly type name.
   $field_name = trim($form_values['label']);
   $field_name = drupal_strtolower($field_name);
@@ -644,7 +644,7 @@ function _content_admin_field_remove($type_name, $field_name) {
 /**
  * Remove a field from a content type.
  */
-function _content_admin_field_remove_execute($form_id, $form_values) {
+function _content_admin_field_remove_submit($form_id, $form_values) {
   $types = _content_types();
   $type = $types[$form_values['type_name']];
   $field = $type->fields[$form_values['field_name']];
@@ -742,7 +742,7 @@ function _content_admin_field_validate($form_id, $form_values) {
 /**
  * Save a field's settings after editing.
  */
-function _content_admin_field_execute($form_id, $form_values) {
+function _content_admin_field_submit($form_id, $form_values) {
   $types = _content_types();
   $type = $types[$form_values['type_name']];
   $field = $type->fields[$form_values['field_name']];
