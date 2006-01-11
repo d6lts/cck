@@ -409,11 +409,11 @@ function _content_admin_type_edit_submit($form_id, $form_values) {
     $form_values['type_name'] = str_replace(array(' ', '-'), '_', $form_values['type_name']);
     $form_values['type_name'] = preg_replace('/[^a-z0-9_]/', '', $form_values['type_name']);
     $form_values['type_name'] = 'content-'. $form_values['type_name'];
-    $form_values['type_name'] = substr($form_values['type_name'], 0, 16);
+    $form_values['type_name'] = substr($form_values['type_name'], 0, 32);
     if (isset($types[$form_values['type_name']])) {
       $counter = 0;
       do {
-        $new_name = substr($form_values['type_name'], 0, 14) .'_'. $counter++;
+        $new_name = substr($form_values['type_name'], 0, 30) .'_'. $counter++;
       } while (isset($types[$new_name]));
       $form_values['type_name'] = $new_name;
     }
@@ -431,7 +431,7 @@ function _content_admin_type_edit_submit($form_id, $form_values) {
 
   drupal_set_message(t('Saved content type %type.', array('%type' => theme('placeholder', $form_values['label']))));
   cache_clear_all('content_types');
-  menu_rebuild;
+  menu_rebuild();
   drupal_goto('admin/node/types/'. $form_values['type_name']);
 }
 

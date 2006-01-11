@@ -3,7 +3,7 @@
 # content.module
 
 CREATE TABLE node_type (
-  type_name varchar(31) NOT NULL default '',
+  type_name varchar(32) NOT NULL default '',
   label varchar(255) NOT NULL default '',
   description mediumtext NOT NULL,
   help mediumtext NOT NULL,
@@ -12,7 +12,7 @@ CREATE TABLE node_type (
 ) TYPE=MyISAM;
 
 CREATE TABLE node_field (
-  field_name varchar(31) NOT NULL default '',
+  field_name varchar(32) NOT NULL default '',
   type varchar(127) NOT NULL default '',
   global_settings mediumtext NOT NULL,
   required int NOT NULL default '0',
@@ -21,8 +21,8 @@ CREATE TABLE node_field (
 ) TYPE=MyISAM;
 
 CREATE TABLE node_field_instance (
-  field_name varchar(31) NOT NULL default '',
-  type_name varchar(31) NOT NULL default '',
+  field_name varchar(32) NOT NULL default '',
+  type_name varchar(32) NOT NULL default '',
   weight int NOT NULL default '0',
   label varchar(255) NOT NULL default '',
   instance_settings mediumtext NOT NULL,
@@ -34,7 +34,7 @@ CREATE TABLE node_field_instance (
 
 CREATE TABLE `node_field_longtext_data` (
   `vid` int unsigned NOT NULL default '0',
-  `field_name` varchar(31) NOT NULL default '',
+  `field_name` varchar(32) NOT NULL default '',
   `delta` int unsigned NOT NULL default '0',
   `field_longtext` mediumtext NOT NULL,
   `format` int NOT NULL default '0',
@@ -43,7 +43,7 @@ CREATE TABLE `node_field_longtext_data` (
 
 CREATE TABLE `node_field_shorttext_data` (
   `vid` int unsigned NOT NULL default '0',
-  `field_name` varchar(31) NOT NULL default '',
+  `field_name` varchar(32) NOT NULL default '',
   `delta` int unsigned NOT NULL default '0',
   `field_shorttext` varchar(255) NOT NULL default '',
   `format` int NOT NULL default '0',
@@ -55,7 +55,7 @@ CREATE TABLE `node_field_shorttext_data` (
 
 CREATE TABLE `node_field_float_data` (
   `vid` int unsigned NOT NULL default '0',
-  `field_name` varchar(31) NOT NULL default '',
+  `field_name` varchar(32) NOT NULL default '',
   `delta` int unsigned NOT NULL default '0',
   `field_float` float NOT NULL default '0',
   PRIMARY KEY  (`vid`,`field_name`,`delta`)
@@ -63,7 +63,7 @@ CREATE TABLE `node_field_float_data` (
 
 CREATE TABLE `node_field_int_data` (
   `vid` int unsigned NOT NULL default '0',
-  `field_name` varchar(31) NOT NULL default '',
+  `field_name` varchar(32) NOT NULL default '',
   `delta` int unsigned NOT NULL default '0',
   `field_int` int NOT NULL default '0',
   PRIMARY KEY  (`vid`,`field_name`,`delta`)
@@ -74,7 +74,7 @@ CREATE TABLE `node_field_int_data` (
 
 CREATE TABLE `node_field_date_data` (
   `vid` int unsigned NOT NULL default '0',
-  `field_name` varchar(31) NOT NULL default '',
+  `field_name` varchar(32) NOT NULL default '',
   `delta` int unsigned NOT NULL default '0',
   `field_date` char(17) NOT NULL default '00010101T00:00:00',
   PRIMARY KEY  (`vid`,`field_name`,`delta`)
