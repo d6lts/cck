@@ -79,3 +79,25 @@ CREATE TABLE `node_field_date_data` (
   `field_date` char(17) NOT NULL default '00010101T00:00:00',
   PRIMARY KEY  (`vid`,`field_name`,`delta`)
 ) TYPE=MyISAM;
+
+
+# nodereference.module
+
+CREATE TABLE `node_field_nodereference_data` (
+  `vid` int unsigned NOT NULL default '0',
+  `field_name` varchar(32) NOT NULL default '',
+  `delta` int unsigned NOT NULL default '0',
+  `field_nid` int unsigned NOT NULL default '0',
+  PRIMARY KEY  (`vid`,`field_name`,`delta`)
+) TYPE=MyISAM;
+
+
+# userreference.module
+
+CREATE TABLE `node_field_userreference_data` (
+  `vid` int unsigned NOT NULL default '0',
+  `field_name` varchar(32) NOT NULL default '',
+  `delta` int unsigned NOT NULL default '0',
+  `field_uid` int unsigned NOT NULL default '0',
+  PRIMARY KEY  (`vid`,`field_name`,`delta`)
+) TYPE=MyISAM;

@@ -1,0 +1,204 @@
+<?php
+// $Id$
+
+/**
+ * @file
+ * Defines a field type for referencing one node from another. 
+ */
+
+/**
+ * Implementation of hook_help().
+ */
+function nodereference_help($section) {
+  switch ($section) {
+    case 'admin/modules#description':
+      return t('Defines a field type for referencing one node from another.');
+  }
+}
+
+/**
+ * Implementation of hook_field_info().
+ */
+function nodereference_field_info() {
+  return array(
+    'nodereference' => array('label' => 'Node Reference'),
+  );
+}
+
+/**
+ * Implementation of hook_field_settings().
+ */
+function nodereference_field_settings($op, $field, $scope) {
+  switch ($op) {
+    case 'form':
+      $form = array();
+      switch ($scope) {
+        case 'instance':
+
+          break;
+
+        case 'global':
+          $form['referenceable_types'] = array(
+            '#type' => 'checkboxes',
+            '#title' => t('Content types that can be referenced'),
+            '#multiple' => TRUE,
+            '#default_value' => $field['referenceable_types'],
+            '#options' => node_get_types(),
+          );
+          break;
+      }
+      return $form;
+
+    case 'validate':
+      switch ($scope) {
+        case 'instance':
+          break;
+      }
+      break;
+
+    case 'save':
+      switch ($scope) {
+        case 'instance':
+          return array();
+        case 'global':
+          return array('referenceable_types');
+      }
+      break;
+  }
+}
+
+/**
+ * Implementation of hook_field().
+ */
+function nodereference_field($op, $node, $field, $a2, $a3, $a4) {
+  switch ($op) {
+    case 'load':
+      $result = db_query("SELECT field_int FROM {node_field_nodereference_data} WHERE vid = %d AND field_name = '%s' ORDER BY delta", $node->nid, $field['field_name']);
+
+      if ($field['multiple']) {
+        $values = array();
+        while ($value = db_fetch_object($result)) {
+          $values[] = $value->field_nid;
+        }
+        $additions = array($field['field_name'] => $values);
+      } else {
+        $value = db_fetch_object($result);
+        $additions = array($field['field_name'] => array($value->field_nid));
+      }
+
+      return $additions;
+
+    case 'view':
+      $node_field = $node->$field['field_name'];
+
+      $output = '<ul class="nodereference-'. $field['field_name'] .'">';
+      foreach ($node_field as $referenced_nid) {
+        $referenced_node = node_load(array('nid' => $referenced_nid));
+        $output .= '<li>'. l($referenced_node->title, 'node/'. $referenced_node->nid) .'</li>';
+      }
+      $output .= '</ul>';
+
+      return $output;
+
+    case 'form':
+      $form = array();
+      $node_field = $node->$field['field_name'];
+
+      $form[$field['field_name']] = array('#tree' => TRUE);
+
+      $form[$field['field_name']]['relation'] = array(
+        '#type' => 'select',
+        '#title' => t($field['label']),
+        '#default_value' => $node_field,
+        '#multiple' => $field['multiple'],
+        '#options' => _nodereference_potential_references($field),
+      );
+
+      return $form;
+
+    case 'validate':
+      return;
+
+    case 'insert':
+      $node_field = $node->$field['field_name'];
+
+      if ($field['multiple']) {
+        foreach ($node_field['relation'] as $delta => $value) {
+          db_query("INSERT INTO {node_field_nodereference_data} (vid, field_name, delta, field_nid) VALUES (%d, '%s', %d, %d)", $node->vid, $field['field_name'], $delta, $value);
+        }
+      }
+      else {
+        db_query("INSERT INTO {node_field_nodereference_data} (vid, field_name, delta, field_nid) VALUES (%d, '%s', %d, %d)", $node->vid, $field['field_name'], $delta, $node_field['relation']);
+      }
+      break;
+
+    case 'update':
+      $node_field = $node->$field['field_name'];
+
+      // Delete and insert, rather than update, in case a field was added.
+      db_query("DELETE FROM {node_field_nodereference_data} WHERE vid = %d AND field_name = '%s'", $node->vid, $field['field_name']);
+      if ($field['multiple']) {
+        foreach ($node_field['relation'] as $delta => $value) {
+          db_query("INSERT INTO {node_field_nodereference_data} (vid, field_name, delta, field_nid) VALUES (%d, '%s', %d, %d)", $node->vid, $field['field_name'], $delta, $value);
+        }
+      }
+      else {
+        db_query("INSERT INTO {node_field_nodereference_data} (vid, field_name, delta, field_nid) VALUES (%d, '%s', %d, %d)", $node->vid, $field['field_name'], $delta, $node_field['relation']);
+      }
+      return;
+
+    case 'delete':
+      db_query("DELETE FROM {node_field_nodereference_data} WHERE vid = %d AND field_name = '%s'", $node->vid, $field['field_name']);
+      return;
+  }
+}
+
+/**
+ * Implementation of hook_field_query().
+ */
+function nodereference_field_query($field, $op, $value) {
+  $query_additions = array();
+
+  switch ($op) {
+    case 'is':
+      $query_additions['tables'] = array('%table' => 'node_field_nodereference_data');
+      $query_additions['where'] = '%table.field_nid = %d';
+      $query_additions['data'] = array($value);
+      break;
+  }
+
+  return $query_additions;
+}
+
+/**
+ * Fetch an array of all candidate referenced nodes, for use in presenting the selection form to the user.
+ */
+function _nodereference_potential_references($field) {
+  $related_types = array();
+
+  foreach ($field['referenceable_types'] as $related_type) {
+    if ($related_type) {
+      $related_types[] = " type = '". $related_type ."'";
+    }
+  }
+
+  $related_clause = implode(' OR ', $related_types);
+
+  if (!count($related_types)) {
+    return array();
+  }
+
+  $result = db_query(db_rewrite_sql("SELECT nid, title, type FROM {node} WHERE ". $related_clause));
+
+  if (db_num_rows($result) == 0) {
+    return array();
+  }
+
+  $rows = array();
+
+  while ($node = db_fetch_object($result)) {
+    $rows[$node->nid] = $node->title;
+  }
+
+  return $rows;
+}
