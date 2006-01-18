@@ -173,7 +173,7 @@ function text_field($op, $node, $field, $a2, $a3, $a4) {
             );
           }
           if ($field['text_processing']) {
-            $form[$field['field_name']][$delta] = array_merge($form[$field['field_name']][$delta], filter_form($node_field[$delta]['format']));
+            $form[$field['field_name']][$delta]['format'] = filter_form($node_field[$delta]['format']);
           }
         }
       }
@@ -196,7 +196,7 @@ function text_field($op, $node, $field, $a2, $a3, $a4) {
           );
         }
         if ($field['text_processing']) {
-          $form[$field['field_name']] = array_merge($form[$field['field_name']], filter_form($node_field['format']));
+          $form[$field['field_name']]['format'] = filter_form($node_field['format']);
         }
       }
       return $form;

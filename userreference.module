@@ -3,7 +3,7 @@
 
 /**
  * @file
- * Defines a field type for referencing a user from a node. 
+ * Defines a field type for referencing a user from a node.
  */
 
 /**
@@ -65,7 +65,7 @@ function userreference_field_settings($op, $field, $scope) {
 function userreference_field($op, $node, $field, $a2, $a3, $a4) {
   switch ($op) {
     case 'load':
-      $result = db_query("SELECT field_int FROM {node_field_userreference_data} WHERE vid = %d AND field_name = '%s' ORDER BY delta", $node->nid, $field['field_name']);
+      $result = db_query("SELECT field_uid FROM {node_field_userreference_data} WHERE vid = %d AND field_name = '%s' ORDER BY delta", $node->vid, $field['field_name']);
 
       if ($field['multiple']) {
         $values = array();
@@ -83,14 +83,16 @@ function userreference_field($op, $node, $field, $a2, $a3, $a4) {
     case 'view':
       $node_field = $node->$field['field_name'];
 
-      $output = '<ul class="userreference-'. $field['field_name'] .'">';
+      $user_array = array();
+
       foreach ($node_field as $referenced_uid) {
         $referenced_user = user_load(array('uid' => $referenced_uid));
-        $output .= '<li>'. theme('username', $referenced_user) .'</li>';
+        $user_array[] = theme('username', $referenced_user);
       }
-      $output .= '</ul>';
 
-      return $output;
+      $item['view'] = theme('item_list', $user_array);
+
+      return '<div class="'. $field['field_name'] .'">'. $item['view'] .'</div>';
 
     case 'form':
       $form = array();
@@ -98,13 +100,24 @@ function userreference_field($op, $node, $field, $a2, $a3, $a4) {
 
       $form[$field['field_name']] = array('#tree' => TRUE);
 
-      $form[$field['field_name']]['relation'] = array(
-        '#type' => 'select',
-        '#title' => t($field['label']),
-        '#default_value' => $node_field,
-        '#multiple' => $field['multiple'],
-        '#options' => _userreference_potential_references($field),
-      );
+      if($field['multiple']) {
+        $form[$field['field_name']]['relation'] = array(
+          '#type' => 'select',
+          '#title' => t($field['label']),
+          '#default_value' => $node_field,
+          '#multiple' => $field['multiple'],
+          '#options' => _userreference_potential_references($field),
+        );
+
+      } else {
+        $form[$field['field_name']]['relation'] = array(
+          '#type' => 'textfield',
+          '#title' => t($field['label']),
+          '#maxlength' => 60,
+          '#autocomplete_path' => 'user/autocomplete',
+          '#default_value' => $node_field ? $node_field : ''
+        );
+      }
 
       return $form;
 
@@ -120,6 +133,8 @@ function userreference_field($op, $node, $field, $a2, $a3, $a4) {
         }
       }
       else {
+        // Ajax user autocomplete returns the user's name, but we need to save the uid
+        $user_id = db_result(db_query("SELECT uid FROM {users} WHERE name = '%s'", $value));
         db_query("INSERT INTO {node_field_userreference_data} (vid, field_name, delta, field_uid) VALUES (%d, '%s', %d, %d)", $node->vid, $field['field_name'], $delta, $node_field['relation']);
       }
       break;
@@ -135,6 +150,8 @@ function userreference_field($op, $node, $field, $a2, $a3, $a4) {
         }
       }
       else {
+        // Ajax user autocomplete returns the user's name, but we need to save the uid
+        $user_id = db_result(db_query("SELECT uid FROM {users} WHERE name = '%s'", $value));
         db_query("INSERT INTO {node_field_userreference_data} (vid, field_name, delta, field_uid) VALUES (%d, '%s', %d, %d)", $node->vid, $field['field_name'], $delta, $node_field['relation']);
       }
       return;
@@ -175,4 +192,40 @@ function _userreference_potential_references($field) {
   }
 
   return $rows;
+}
+
+function userreference_referenced_by_list($uid, $content_type = '') {
+  if ($content_type) {
+    $result = db_query("SELECT n.* FROM {node_field_userreference_data} user_ref INNER JOIN {node} n ON n.vid = user_ref.vid AND n.type = '%s' WHERE user_ref.field_uid = %d ORDER BY n.type, delta", $content_type, $uid);
+  } else {
+    $result = db_query("SELECT n.* FROM {node_field_userreference_data} user_ref INNER JOIN {node} n ON n.vid = user_ref.vid WHERE user_ref.field_uid = %d ORDER BY n.type, delta", $uid);
+  }
+
+  $values = array();
+
+  while ($value = db_fetch_object($result)) {
+    $values[] = $value;
+  }
+
+  return $values;
+}
+
+function userreference_user($op, &$edit, &$user, $category = NULL) {
+  switch ($op) {
+    case 'categories':
+      return array('referenced by');
+      break;
+
+    case 'view':
+      $nodes = userreference_referenced_by_list($user->uid);
+
+      $node_array = array();
+
+      foreach ($nodes as $node) {
+        $node_array[] = '('. str_replace('content-', '', $node->type) .') '. l($node->title, 'node/'. $node->vid);
+      }
+
+      return array('referenced by' => array('view' => '<div class="'. $field['field_name'] .'">'. theme('item_list',  $node_array) .'</div>'));
+      break;
+  }
 }

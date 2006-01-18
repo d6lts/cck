@@ -10,6 +10,8 @@ the content module and one or more field type modules:
 - text.module
 - number.module
 - date.module
+- userreference.module
+- nodereference.module
 
 Now go to administer -> content -> content types. Create a new
 content type and edit it to add some fields. Then test by

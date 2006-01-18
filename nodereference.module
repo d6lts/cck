@@ -3,7 +3,7 @@
 
 /**
  * @file
- * Defines a field type for referencing one node from another. 
+ * Defines a field type for referencing one node from another.
  */
 
 /**
@@ -14,6 +14,20 @@ function nodereference_help($section) {
     case 'admin/modules#description':
       return t('Defines a field type for referencing one node from another.');
   }
+}
+
+/**
+ * Implementation of hook_menu().
+ */
+function nodereference_menu($may_cache) {
+  $items = array();
+
+  if($may_cache) {
+    $items[] = array('path' => 'nodereference/autocomplete', 'title' => t('node reference autocomplete'),
+      'callback' => 'nodereference_autocomplete', 'access' => user_access('access content'), 'type' => MENU_CALLBACK);
+  }
+
+  return $items;
 }
 
 /**
@@ -38,6 +52,12 @@ function nodereference_field_settings($op, $field, $scope) {
           break;
 
         case 'global':
+          $form['autocomplete'] = array(
+            '#type' => 'checkbox',
+            '#title' => t('Autocomplete'),
+            '#default_value' => $field['autocomplete'],
+          );
+
           $form['referenceable_types'] = array(
             '#type' => 'checkboxes',
             '#title' => t('Content types that can be referenced'),
@@ -61,7 +81,7 @@ function nodereference_field_settings($op, $field, $scope) {
         case 'instance':
           return array();
         case 'global':
-          return array('referenceable_types');
+          return array('referenceable_types', 'autocomplete');
       }
       break;
   }
@@ -73,7 +93,7 @@ function nodereference_field_settings($op, $field, $scope) {
 function nodereference_field($op, $node, $field, $a2, $a3, $a4) {
   switch ($op) {
     case 'load':
-      $result = db_query("SELECT field_int FROM {node_field_nodereference_data} WHERE vid = %d AND field_name = '%s' ORDER BY delta", $node->nid, $field['field_name']);
+      $result = db_query("SELECT field_nid FROM {node_field_nodereference_data} WHERE vid = %d AND field_name = '%s' ORDER BY delta", $node->vid, $field['field_name']);
 
       if ($field['multiple']) {
         $values = array();
@@ -91,14 +111,16 @@ function nodereference_field($op, $node, $field, $a2, $a3, $a4) {
     case 'view':
       $node_field = $node->$field['field_name'];
 
-      $output = '<ul class="nodereference-'. $field['field_name'] .'">';
+      $referenced_nodes = array();
+
       foreach ($node_field as $referenced_nid) {
         $referenced_node = node_load(array('nid' => $referenced_nid));
-        $output .= '<li>'. l($referenced_node->title, 'node/'. $referenced_node->nid) .'</li>';
+        $referenced_nodes[] = '('. str_replace('content-', '', $referenced_node->type) .') '. l($referenced_node->title, 'node/'. $referenced_node->nid);
       }
-      $output .= '</ul>';
 
-      return $output;
+      $item['view'] = theme('item_list', $referenced_nodes);
+
+      return '<div class="'. $field['field_name'] .'">'. $item['view'] .'</div>';
 
     case 'form':
       $form = array();
@@ -106,17 +128,70 @@ function nodereference_field($op, $node, $field, $a2, $a3, $a4) {
 
       $form[$field['field_name']] = array('#tree' => TRUE);
 
-      $form[$field['field_name']]['relation'] = array(
-        '#type' => 'select',
-        '#title' => t($field['label']),
-        '#default_value' => $node_field,
-        '#multiple' => $field['multiple'],
-        '#options' => _nodereference_potential_references($field),
-      );
+      if ($field['autocomplete']) {
+        if($field['multiple']) {
+
+          foreach($node_field as $delta => $value) {
+            $display_value = db_result(db_query("SELECT title FROM {node} WHERE nid = %d", $value));
+            $form[$field['field_name']]['relation'][$delta] = array(
+              '#type' => 'textfield',
+              '#title' => t($field['label']),
+              '#maxlength' => 128,
+              '#autocomplete_path' => 'nodereference/autocomplete/'. $field['field_name'],
+              '#default_value' => $display_value ? $display_value : ''
+            );
+          }
+
+          $form[$field['field_name']]['relation'][$delta + 1] = array(
+            '#type' => 'textfield',
+            '#title' => t($field['label']),
+            '#maxlength' => 128,
+            '#autocomplete_path' => 'nodereference/autocomplete/'. $field['field_name'],
+            '#default_value' => ''
+          );
+
+        } else {
+          $node_field = db_result(db_query("SELECT title FROM {node} WHERE nid = %d", $node->$field['field_name']));
+
+
+          $form[$field['field_name']]['relation'] = array(
+            '#type' => 'textfield',
+            '#title' => t($field['label']),
+            '#maxlength' => 128,
+            '#autocomplete_path' => 'nodereference/autocomplete/'. $field['field_name'],
+            '#default_value' => $node_field ? $node_field : ''
+          );
+        }
+      } else {
+         $form[$field['field_name']]['relation'] = array(
+            '#type' => 'select',
+            '#title' => t($field['label']),
+            '#default_value' => $node_field,
+            '#multiple' => $field['multiple'],
+            '#options' => _nodereference_potential_references($field),
+          );
+      }
 
       return $form;
 
     case 'validate':
+
+      $node_field = $node->$field['field_name'];
+
+      if ($field['autocomplete']) {
+        if ($field['multiple']) {
+          foreach($node_field['relation'] as $delta => $value) {
+            if ($node_field['relation'][$delta]) {
+              $node_field['relation'][$delta] = db_result(db_query("SELECT nid FROM {node} WHERE title = '%s'", $node_field['relation'][$delta]));
+            }
+          }
+        } else {
+          if ($node_field['relation'][$delta]) {
+            $node_field['relation'] = db_result(db_query("SELECT nid FROM {node} WHERE title = '%s'", $node->$field['field_name']));
+          }
+        }
+      }
+
       return;
 
     case 'insert':
@@ -139,7 +214,9 @@ function nodereference_field($op, $node, $field, $a2, $a3, $a4) {
       db_query("DELETE FROM {node_field_nodereference_data} WHERE vid = %d AND field_name = '%s'", $node->vid, $field['field_name']);
       if ($field['multiple']) {
         foreach ($node_field['relation'] as $delta => $value) {
-          db_query("INSERT INTO {node_field_nodereference_data} (vid, field_name, delta, field_nid) VALUES (%d, '%s', %d, %d)", $node->vid, $field['field_name'], $delta, $value);
+          if($value) {
+            db_query("INSERT INTO {node_field_nodereference_data} (vid, field_name, delta, field_nid) VALUES (%d, '%s', %d, %d)", $node->vid, $field['field_name'], $delta, $value);
+          }
         }
       }
       else {
@@ -201,4 +278,42 @@ function _nodereference_potential_references($field) {
   }
 
   return $rows;
+}
+
+function nodereference_referenced_by_list($nid, $content_type = '') {
+  if ($content_type) {
+    $result = db_query("SELECT n.* FROM {node_field_nodereference_data} node_ref INNER JOIN {node} n ON n.vid = node_ref.vid AND n.type = '%s' WHERE node_ref.field_nid = %d ORDER BY delta", $nid, $content_type);
+  } else {
+    $result = db_query("SELECT n.* FROM {node_field_nodereference_data} node_ref INNER JOIN {node} n ON n.vid = node_ref.vid WHERE node_ref.field_nid = %d ORDER BY delta", $nid);
+  }
+
+  $values = array();
+
+  while ($value = db_fetch_object($result)) {
+    $values[] = $value;
+  }
+
+  return $values;
+}
+
+/**
+ * Retrieve a pipe delimited string of autocomplete suggestions
+ */
+function nodereference_autocomplete($field_name, $string = '') {
+  $fields = _content_fields();
+  $field = $fields[$field_name];
+
+  foreach (_nodereference_potential_references($field) as $key => $value) {
+    if (stristr($value, $string)) {
+      $matches[$value] = check_plain($value);
+    }
+  }
+
+  if($matches) {
+    print drupal_implode_autocomplete($matches);
+  } else {
+    print '|';
+  }
+
+  exit();
 }
