@@ -4,6 +4,7 @@
 /**
  * @file
  * Renders URL-specified listings of content.
+ * This module is now DEPRECATED by Views support.
  */
 
 /**

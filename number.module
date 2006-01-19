@@ -21,8 +21,36 @@ function number_help($section) {
  */
 function number_field_info() {
   return array(
-    'number_integer' => array('label' => 'Integer'),
-    'number_decimal' => array('label' => 'Decimal'),
+    'number_integer' => array(
+      'label' => 'Integer', 
+      'table' => 'node_field_int_data', 
+      'field' => 'field_int',
+      'operator' => array(
+        '<'  => 'Is Less Than', 
+        '<=' => 'Is Less Than Or Equal To', 
+        '='  => 'Is Equal To', 
+        '!=' => 'Is Not Equal To', 
+        '>=' => 'Is Greater Than or Equal To', 
+        '>'  => 'Is Greater Than',
+      ),
+      'sortable' => TRUE,
+      'click-sortable' => TRUE,
+    ),
+    'number_decimal' => array(
+      'label' => 'Decimal',
+      'table' => 'node_field_float_data', 
+      'field' => 'field_float',
+      'operator' => array(
+        '<'  => 'Is Less Than', 
+        '<=' => 'Is Less Than Or Equal To', 
+        '='  => 'Is Equal To', 
+        '!=' => 'Is Not Equal To', 
+        '>=' => 'Is Greater Than or Equal To', 
+        '>'  => 'Is Greater Than',
+      ),
+      'sortable' => TRUE,
+      'click-sortable' => TRUE,
+    ),
   );
 }
 
@@ -117,11 +145,11 @@ function number_field($op, $node, $field, $a2, $a3, $a4) {
 
       if ($field['multiple']) {
         foreach ($node_field as $delta => $item) {
-          $node_field[$delta]['view'] = check_plain($item['value']);
+          $node_field[$delta]['view'] = number_field_view($field, $item['value']);
         }
       }
       else {
-        $node_field['view'] = check_plain($node_field['value']);
+        $node_field['view'] = number_field_view($field, $node_field['value']);
       }
 
       $node->$field['field_name'] = $node_field;
@@ -259,6 +287,13 @@ function number_field($op, $node, $field, $a2, $a3, $a4) {
       }
       return;
   }
+}
+
+/**
+ * Implementation of hook_field_view() which performs any translation necessary.
+ */
+function number_field_view($field, $value) {
+  return check_plain($value);
 }
 
 /**

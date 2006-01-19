@@ -21,9 +21,49 @@ function text_help($section) {
  */
 function text_field_info() {
   return array(
-    'text_shorttext' => array('label' => 'Short Text'),
-    'text_longtext' => array('label' => 'Long Text'),
+    'text_shorttext' => array(
+      'label' => 'Short Text',
+      'table' => 'node_field_shorttext_data', 
+      'field' => 'field_shorttext',
+      'operator' => array(
+        '='  => 'Is', 
+        'contains' => 'Contains', 
+        'begins' => 'Begins With', 
+        'ends' => 'Ends With', 
+        'LIKE'  => '(Advanced) Is Like', 
+      ),
+      'operator-handler' => 'text_field_operator',
+      'sortable' => TRUE,
+      'click-sortable' => TRUE,
+      'addlfields' => array('format'),
+    ),
+    'text_longtext' => array(
+      'label' => 'Long Text',
+      'table' => 'node_field_longtext_data', 
+      'field' => 'field_longtext',
+    ),
   );
+}
+
+/**
+ * Format the WHERE portion of a query. For text we have one
+ * exception.
+ */
+function text_field_operator($field, $operator, $value) {
+  switch ($operator) {
+    case 'contains':
+      $string = "$field LIKE '%%%s%%'";
+      break;
+    case 'begins':
+      $string = "$field LIKE '%s%%'";
+      break;
+    case 'ends':
+      $string = "$field LIKE '%%%s'";
+      break;
+    default:
+      $string = "$field $operator '%s'";
+  }
+  return array($string, $value);
 }
 
 /**
@@ -119,21 +159,11 @@ function text_field($op, $node, $field, $a2, $a3, $a4) {
       $node_field = $node->$field['field_name'];
       if ($field['multiple']) {
         foreach ($node_field as $delta => $item) {
-          if ($field['text_processing']) {
-            $node_field[$delta]['view'] = check_markup($item['value'], $item['format'], isset($node->in_preview) ? $node->in_preview : FALSE);
-          }
-          else {
-            $node_field[$delta]['view'] = check_plain($item['value']);
-          }
+          $node_field[$delta]['view'] = text_field_view($field, $item['value'], $item, $node);
         }
       }
       else {
-        if ($field['text_processing']) {
-          $node_field['view'] = check_markup($node_field['value'], $node_field['format'], isset($node->in_preview) ? $node->in_preview : FALSE);
-        }
-        else {
-          $node_field['view'] = check_plain($node_field['value']);
-        }
+        $node_field['view'] = text_field_view($field, $item['value'], $item, $node);
       }
       $node->$field['field_name'] = $node_field;
       if ($field['multiple']) {
@@ -269,6 +299,21 @@ function text_field($op, $node, $field, $a2, $a3, $a4) {
           break;
       }
       return;
+  }
+}
+
+/**
+ * Implementation of hook_field_view() which performs any translation necessary.
+ */
+function text_field_view($field, $value, $addlfields = array(), $node = NULL) {
+  // check permissions in check_markup if previewing.
+  $preview = ($node && isset($node->in_preview));
+
+  if ($field['text_processing']) {
+    return check_markup($value, $addlfields['format'], $preview);
+  }
+  else {
+    return check_plain($value);
   }
 }
 
