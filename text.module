@@ -21,49 +21,9 @@ function text_help($section) {
  */
 function text_field_info() {
   return array(
-    'text_shorttext' => array(
-      'label' => 'Short Text',
-      'table' => 'node_field_shorttext_data', 
-      'field' => 'field_shorttext',
-      'operator' => array(
-        '='  => 'Is', 
-        'contains' => 'Contains', 
-        'begins' => 'Begins With', 
-        'ends' => 'Ends With', 
-        'LIKE'  => '(Advanced) Is Like', 
-      ),
-      'operator-handler' => 'text_field_operator',
-      'sortable' => TRUE,
-      'click-sortable' => TRUE,
-      'addlfields' => array('format'),
-    ),
-    'text_longtext' => array(
-      'label' => 'Long Text',
-      'table' => 'node_field_longtext_data', 
-      'field' => 'field_longtext',
-    ),
+    'text_shorttext' => array('label' => 'Short Text'),
+    'text_longtext' => array('label' => 'Long Text'),
   );
-}
-
-/**
- * Format the WHERE portion of a query. For text we have one
- * exception.
- */
-function text_field_operator($field, $operator, $value) {
-  switch ($operator) {
-    case 'contains':
-      $string = "$field LIKE '%%%s%%'";
-      break;
-    case 'begins':
-      $string = "$field LIKE '%s%%'";
-      break;
-    case 'ends':
-      $string = "$field LIKE '%%%s'";
-      break;
-    default:
-      $string = "$field $operator '%s'";
-  }
-  return array($string, $value);
 }
 
 /**
@@ -119,7 +79,7 @@ function text_field_settings($op, $field, $scope) {
 /**
  * Implementation of hook_field().
  */
-function text_field($op, $node, $field, $a2, $a3, $a4) {
+function text_field($op, &$node, $field, $a2, $a3, $a4) {
   switch ($op) {
     case 'load':
       switch($field['type']) {
@@ -163,7 +123,7 @@ function text_field($op, $node, $field, $a2, $a3, $a4) {
         }
       }
       else {
-        $node_field['view'] = text_field_view($field, $item['value'], $item, $node);
+        $node_field['view'] = text_field_view($field, $node_field['value'], $item, $node);
       }
       $node->$field['field_name'] = $node_field;
       if ($field['multiple']) {
@@ -318,33 +278,72 @@ function text_field_view($field, $value, $addlfields = array(), $node = NULL) {
 }
 
 /**
- * Implementation of hook_field_query().
+ * Implementation of hook_views_tables().
  */
-function text_field_query($field, $op, $value) {
-  $query_additions = array();
+function text_views_tables() {
+  $tables = array();
 
-  $table_name = ($field['type'] == 'field_shorttext' ? 'node_field_shorttext_data' : 'node_field_longtext_data');
-  $column_name = ($field['type'] == 'field_shorttext' ? 'field_shorttext' : 'field_longtext');
-
-  switch ($op) {
-    case 'is':
-      $query_additions['tables'] = array('%table' => $table_name);
-      $query_additions['where'] = "%table.". $column_name ." = '%s'";
-      $query_additions['data'] = array($value);
-      break;
-
-    case 'contains':
-      $query_additions['tables'] = array('%table' => $table_name);
-      $query_additions['where'] = "%table.". $column_name ." LIKE '%%%s%%'";
-      $query_additions['data'] = array($value);
-      break;
-
-    case 'like':
-      $query_additions['tables'] = array('%table' => $table_name);
-      $query_additions['where'] = "%table.". $column_name ." LIKE '%s'";
-      $query_additions['data'] = array($value);
-      break;
+  $fields = _content_fields();
+  foreach ($fields as $field) {
+    if ($field['type'] == 'text_shorttext') {
+      $tables['node_field_shorttext_data_'. $field['field_name']] = array(
+        'name' => 'node_field_shorttext_data', 
+        'join' => array(
+          'left' => array(
+            'table' => 'node',
+            'field' => 'vid',
+          ), 
+          'right' => array(
+            'field' => 'vid',
+            'extra' => array('field_name' => $field['field_name']),
+          ), 
+        ),
+        'fields' => array(
+          'field_shorttext' => array(
+            'name' => 'Short Text: '. $field['field_name'],
+            'sortable' => TRUE,
+          ),
+        ),
+        'sorts' => array(
+          'field_int' => array('name' => 'Short Text: '. $field['field_name']),
+        ),
+        'filters' => array(
+          'field_shorttext' => array(
+            'name' => 'Short Text: '. $field['field_name'],
+            'operator' => array(
+              '='  => 'is', 
+              'contains' => 'contains', 
+              'begins' => 'begins with', 
+              'ends' => 'ends wth', 
+              'LIKE'  => 'matches pattern', 
+            ),
+            'operator-handler' => '_text_filter_operator',
+          ),
+        ),
+      );
+    }
   }
 
-  return $query_additions;
+  return $tables;
 }
+
+/**
+ * Format the WHERE portion of a query.
+ */
+function _text_filter_operator($field, $operator, $value) {
+  switch ($operator) {
+    case 'contains':
+      $string = $field ." LIKE '%%%s%%'";
+      break;
+    case 'begins':
+      $string = $field ." LIKE '%s%%'";
+      break;
+    case 'ends':
+      $string = $field ." LIKE '%%%s'";
+      break;
+    default:
+      $string = $field ." $operator '%s'";
+  }
+  return array($string, $value);
+}
+

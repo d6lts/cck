@@ -80,7 +80,7 @@ function date_field_settings($op, $field, $scope) {
 /**
  * Implementation of hook_field().
  */
-function date_field($op, $node, $field, $a2, $a3, $a4) {
+function date_field($op, $node, &$field, $a2, $a3, $a4) {
   switch ($op) {
     case 'load':
       $result = db_query("SELECT field_date FROM {node_field_date_data} WHERE vid = %d AND field_name = '%s' ORDER BY delta", $node->vid, $field['field_name']);

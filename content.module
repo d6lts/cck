@@ -67,6 +67,13 @@ function content_menu($may_cache) {
       'access' => $access,
       'type' => MENU_LOCAL_TASK,
     );
+    $items[] = array(
+      'path' => 'admin/node/types/fields',
+      'title' => t('fields'),
+      'callback' => '_content_admin_type_fields',
+      'access' => $access,
+      'type' => MENU_LOCAL_TASK,
+    );
 
     $types = _content_types();
     foreach ($types as $type_name => $type) {
@@ -257,6 +264,13 @@ function content_validate(&$node) {
 }
 
 /**
+ * Implementation of hook_submit().
+ */
+function content_submit(&$node) {
+  _content_field_invoke('submit', $node);
+}
+
+/**
  * Implementation of hook_view().
  */
 function content_view(&$node, $teaser = FALSE, $page = FALSE) {
@@ -321,6 +335,34 @@ function _content_admin_type_overview() {
     $row[] = l(t('edit'), 'admin/node/types/'. $type->type_name);
     $row[] = l(t('duplicate'), 'admin/node/types/'. $type->type_name .'/duplicate');
     $row[] = l(t('delete'), 'admin/node/types/'. $type->type_name .'/delete');
+
+    $rows[] = $row;
+  }
+
+  $output = theme('table', $header, $rows);
+
+  return $output;
+}
+
+/**
+ * Menu callback; lists all defined fields for quick reference.
+ */
+function _content_admin_type_fields() {
+  $fields = _content_fields();
+
+  $header = array(t('Name'), t('Type'), t('Content types'));
+  $rows = array();
+  foreach ($fields as $field) {
+    $row = array();
+    $row[] = $field['field_name'];
+    $row[] = $field['type'];
+    
+    $types = array();
+    $result = db_query("SELECT nt.label FROM {node_field_instance} nfi LEFT JOIN {node_type} nt ON nt.type_name = nfi.type_name WHERE nfi.field_name = '%s' ORDER BY nt.label ASC", $field['field_name']);
+    while ($type = db_fetch_object($result)) {
+      $types[] = $type->label;
+    }
+    $row[] = implode (', ', $types);
 
     $rows[] = $row;
   }
@@ -432,7 +474,7 @@ function _content_admin_type_edit_submit($form_id, $form_values) {
   drupal_set_message(t('Saved content type %type.', array('%type' => theme('placeholder', $form_values['label']))));
 
   content_clear_type_cache();
-  menu_rebuild;
+  menu_rebuild();
 
   drupal_goto('admin/node/types/'. $form_values['type_name']);
 }
@@ -619,19 +661,6 @@ function _content_admin_field_add_new_submit($form_id, $form_values) {
     $field_name = $new_name;
   }
 
-  // Preferred if Views default to on if applicable to the type
-  $views_settings = array();
-  if (isset($field_type['table'])) {
-    $views_settings['field'] = true;
-    if ($field_type['sortable']) {
-      $views_settings['sort'] = true;
-    }
-    if (isset($field_type['operator'])) {
-      $views_settings['filter'] = true;
-    }
-    $global_settings['views'] = $views_settings;
-  }
-
   db_query("INSERT INTO {node_field} (field_name, type, global_settings) VALUES ('%s', '%s', '%s')", $field_name, $form_values['type'], serialize($global_settings));
 
   db_query("INSERT INTO {node_field_instance} (type_name, field_name, label) VALUES ('%s', '%s', '%s')", $form_values['type_name'], $field_name, $form_values['label']);
@@ -726,40 +755,6 @@ function _content_admin_field($type_name, $field_name) {
     '#default_value' => $field['multiple'],
   );
 
-  if (module_exist('views') && $field_type['table']) {
-    $views_settings = array();
-    $views_settings['field'] = "Allow field display";
-    if ($field_type['sortable']) {
-      $views_settings['sort'] = "Allow field sorting";
-    }
-    if (isset($field_type['operator'])) {
-      $views_settings['filter'] = "Allow field filtering";
-    }
-    $form['global']['views'] = array(
-      '#type' => 'fieldset',
-      '#title' => t('Views settings'),
-      '#description' => t('These settings control how %field field can be used in the Views module.', array('%field' => theme('placeholder', $field['label']))),
-    );
-    // theoretically temporary hack
-    foreach($field['views'] as $key => $value) {
-      if ($value) {
-        $views[] = $key;
-      }
-    }
-    $form['global']['views']['views'] = array(
-      '#type' => 'checkboxes',
-      '#options' => $views_settings,
-      '#default_value' => $views,
-    );
-  }
-  else {
-    // preserve default (or previous) views settings if views doesn't exist
-    $form['global']['views']['views'] = array(
-      '#type' => 'value',
-      '#value' => $field['views'],
-    );
-  }
-
   $form['global'] = array_merge($form['global'], module_invoke($field_type['module'], 'field_settings', 'form', $field, 'global'));
 
   $form['submit'] = array(
@@ -811,10 +806,6 @@ function _content_admin_field_submit($form_id, $form_values) {
   $global_settings = array();
   foreach (module_invoke($field_type['module'], 'field_settings', 'save', $field, 'global') as $setting) {
     $global_settings[$setting] = $form_values[$setting];
-  }
-
-  if (isset($form_values['views'])) {
-    $global_settings['views'] = $form_values['views'];
   }
 
   db_query("UPDATE {node_field_instance} SET weight = %d, label = '%s', instance_settings = '%s' WHERE type_name = '%s' AND field_name = '%s'", $form_values['weight'], $form_values['label'], serialize($instance_settings), $form_values['type_name'], $form_values['field_name']);
@@ -941,129 +932,4 @@ function content_clear_type_cache() {
   if (module_exist('views')) {
     views_invalidate_cache();
   }
-}
-
-/**
- * Implementation of hook_views_tables()
- */
-function content_views_tables() {
-  $tables = array();
-  $types = _content_types();
-  $field_types = _content_field_types();
-
-  foreach($types as $type_name => $type_data) {
-    foreach ($type_data->fields as $field_name => $field_data) {
-      $info = array();
-      // Some shortcuts to make array notation simpler
-      $field_type = $field_types[$field_data['type']];
-      // Skip fields for which there is no Views implementation:
-      if (!isset($field_type['table'])) {
-        continue;
-      }
-      
-      // disallow multiple fields for now.
-      if ($field_data['multiple']) {
-        continue;
-      }
-      $table = $field_type['table'];
-      $table_field = $field_type['field'];
-      $table_alias = str_replace('-', '_', $type_name . "_" . $field_name);
-      
-      $label = "$type_data->label: $field_data[label]";
-
-      $info['name'] = $table;
-      $info['join'] = array(
-        "left" => array(
-          "table" => "node",
-          "field" => "vid",
-        ), 
-        "right" => array(
-          "field" => "vid"
-        ),
-        "extra" => array(
-          "field_name" => $field_name, 
-        ),
-      );
-
-      if ($field_data['views']['field']) {
-        $fields = array(
-          'name' => $label,
-          'sortable' => (bool) intval($field_type['click-sortable']),
-          'handler' => 'content_views_field_handler',
-          'content_type' => $type_name,
-          'content_field' => $field_name,
-        );
-
-        if (isset($field_type['addlfields'])) {
-          $fields['addlfields'] = $field_type['addlfields'];
-        }
-
-        $info['fields'][$table_field] = $fields;
-      }
-
-      if (isset($field_type['sortable']) && $field_data['views']['sort']) {
-        $info['sorts'][$table_field] = array(
-          'name' => $label,
-        );
-      }
-
-      if (isset($field_type['operator']) && $field_data['views']['filter']) {
-        $info['filters'][$table_field] = array(
-          'name' => $label,
-          'operator' => $field_type['operator'],
-          'handler' => 'content_views_filter_handler',
-          'operator-handler' => $field_type['operator-handler'],
-          'content_table' => $table_alias,
-          'content_field' => $table_field,
-        );
-      }
-      $tables[$table_alias] = $info;
-    }
-  }
-
-//  dprint_r($tables);
-  return $tables;
-}
-// Important concern about the above function: Views caches that
-// data, so this module must be sure that it calls views_invalidate_cache()
-// whenever field information changes.
-
-/**
- * Figure out how to display a particular field (for Views)
- */
-function content_views_field_handler($fieldinfo, $field, $value, $data) {
-  // temporary: Just return the data. Get fancier later.
-  $types = _content_types();
-  $field_types = _content_field_types();
-
-  $field_data = $types[$fieldinfo['content_type']]->fields[$fieldinfo['content_field']];
-  $field_type = $field_types[$field_data['type']];
-  $function = $field_type['module'] . "_field_view";
-
-  $extra = array();
-  if (is_array($fieldinfo['addlfields'])) {
-    foreach ($fieldinfo['addlfields'] as $field) {
-      $fname = $fieldinfo['table'] . "_$field";
-      $extra[$field] = $data->$fname;
-    }
-  }
-  return (function_exists($function) ? $function($field_data, $value, $extra) : check_plain($value));
-}
-
-/**
- * Add filter info to a Views query.
- */
-function content_views_filter_handler($op, $filter, $filterinfo, &$query) {
-  $fieldname = "$filterinfo[content_table].$filterinfo[content_field]";
-  if ($filterinfo['operator-handler'] && function_exists($filterinfo['operator-handler'])) {
-    $args = $filterinfo['operator-handler']($fieldname, $filter['operator'], $filter['value']);
-    $where = array_shift($args);
-
-  }
-  else {
-    $where = "$fieldname $filter[operator] '%s'";
-    $args = array($filter['value']);
-  }
-  $query->ensure_table($filterinfo['content_table']);
-  $query->add_where($where, $args);
 }

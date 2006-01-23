@@ -21,36 +21,8 @@ function number_help($section) {
  */
 function number_field_info() {
   return array(
-    'number_integer' => array(
-      'label' => 'Integer', 
-      'table' => 'node_field_int_data', 
-      'field' => 'field_int',
-      'operator' => array(
-        '<'  => 'Is Less Than', 
-        '<=' => 'Is Less Than Or Equal To', 
-        '='  => 'Is Equal To', 
-        '!=' => 'Is Not Equal To', 
-        '>=' => 'Is Greater Than or Equal To', 
-        '>'  => 'Is Greater Than',
-      ),
-      'sortable' => TRUE,
-      'click-sortable' => TRUE,
-    ),
-    'number_decimal' => array(
-      'label' => 'Decimal',
-      'table' => 'node_field_float_data', 
-      'field' => 'field_float',
-      'operator' => array(
-        '<'  => 'Is Less Than', 
-        '<=' => 'Is Less Than Or Equal To', 
-        '='  => 'Is Equal To', 
-        '!=' => 'Is Not Equal To', 
-        '>=' => 'Is Greater Than or Equal To', 
-        '>'  => 'Is Greater Than',
-      ),
-      'sortable' => TRUE,
-      'click-sortable' => TRUE,
-    ),
+    'number_integer' => array('label' => 'Integer'),
+    'number_decimal' => array('label' => 'Decimal'),
   );
 }
 
@@ -104,7 +76,7 @@ function number_field_settings($op, $field, $scope) {
 /**
  * Implementation of hook_field().
  */
-function number_field($op, $node, $field, $a2, $a3, $a4) {
+function number_field($op, &$node, $field, $a2, $a3, $a4) {
   switch ($op) {
     case 'load':
       switch($field['type']) {
@@ -290,40 +262,96 @@ function number_field($op, $node, $field, $a2, $a3, $a4) {
 }
 
 /**
- * Implementation of hook_field_view() which performs any translation necessary.
+ * Implementation of hook_field_view().
  */
 function number_field_view($field, $value) {
   return check_plain($value);
 }
 
+
 /**
- * Implementation of hook_field_query().
+ * Implementation of hook_views_tables().
  */
-function number_field_query($field, $op, $value) {
-  $query_additions = array();
+function number_views_tables() {
+  $tables = array();
 
-  $table_name = ($field['type'] == 'number_integer' ? 'node_field_int_data' : 'node_field_float_data');
-  $column_name = ($field['type'] == 'number_integer' ? 'field_int' : 'field_float');
-
-  switch ($op) {
-    case 'is':
-      $query_additions['tables'] = array('%table' => $table_name);
-      $query_additions['where'] = "%table.". $column_name ." = %d";
-      $query_additions['data'] = array($value);
-      break;
-
-    case 'over':
-      $query_additions['tables'] = array('%table' => $table_name);
-      $query_additions['where'] = "%table.". $column_name ." > %d";
-      $query_additions['data'] = array($value);
-      break;
-
-    case 'under':
-      $query_additions['tables'] = array('%table' => $table_name);
-      $query_additions['where'] = "%table.". $column_name ." < %d";
-      $query_additions['data'] = array($value);
-      break;
+  $fields = _content_fields();
+  foreach ($fields as $field) {
+    if ($field['type'] == 'number_integer') {
+      $tables['node_field_int_data_'. $field['field_name']] = array(
+        'name' => 'node_field_int_data', 
+        'join' => array(
+          'left' => array(
+            'table' => 'node',
+            'field' => 'vid',
+          ), 
+          'right' => array(
+            'field' => 'vid',
+            'extra' => array('field_name' => $field['field_name']),
+          ), 
+        ),
+        'fields' => array(
+          'field_int' => array(
+            'name' => 'Integer: '. $field['field_name'],
+            'sortable' => TRUE,
+          ),
+        ),
+        'sorts' => array(
+          'field_int' => array('name' => 'Integer: '. $field['field_name']),
+        ),
+        'filters' => array(
+          'field_int' => array(
+            'name' => 'Integer: '. $field['field_name'],
+            'operator' => array(
+              '=' => 'is equal to',
+              '!=' => 'is not equal to',
+              '>' => 'is greater than',
+              '<' => 'is less than',
+              '>=' => 'is greater than or equal to',
+              '<=' => 'is less than or equal to',
+            ),
+          ),
+        ),
+      );
+    }
+    if ($field['type'] == 'number_float') {
+      $tables['node_field_float_data_'. $field['field_name']] = array(
+        'name' => 'node_field_float_data', 
+        'join' => array(
+          'left' => array(
+            'table' => 'node',
+            'field' => 'vid',
+          ), 
+          'right' => array(
+            'field' => 'vid',
+            'extra' => array('field_name' => $field['field_name']),
+          ), 
+        ),
+        'fields' => array(
+          'field_int' => array(
+            'name' => 'Decimal: '. $field['field_name'],
+            'sortable' => TRUE,
+          ),
+        ),
+        'sorts' => array(
+          'field_int' => array('name' => 'Decimal: '. $field['field_name']),
+        ),
+        'filters' => array(
+          'field_int' => array(
+            'name' => 'Decimal: '. $field['field_name'],
+            'operator' => array(
+              '=' => 'is equal to',
+              '!=' => 'is not equal to',
+              '>' => 'is greater than',
+              '<' => 'is less than',
+              '>=' => 'is greater than or equal to',
+              '<=' => 'is less than or equal to',
+            ),
+          ),
+        ),
+      );
+    }
   }
 
-  return $query_additions;
+  return $tables;
 }

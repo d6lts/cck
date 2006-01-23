@@ -62,7 +62,7 @@ function userreference_field_settings($op, $field, $scope) {
 /**
  * Implementation of hook_field().
  */
-function userreference_field($op, $node, $field, $a2, $a3, $a4) {
+function userreference_field($op, &$node, $field, $a2, $a3, $a4) {
   switch ($op) {
     case 'load':
       $result = db_query("SELECT field_uid FROM {node_field_userreference_data} WHERE vid = %d AND field_name = '%s' ORDER BY delta", $node->vid, $field['field_name']);
@@ -222,7 +222,7 @@ function userreference_user($op, &$edit, &$user, $category = NULL) {
       $node_array = array();
 
       foreach ($nodes as $node) {
-        $node_array[] = '('. str_replace('content-', '', $node->type) .') '. l($node->title, 'node/'. $node->vid);
+        $node_array[] = '('. str_replace('content-', '', $node->type) .') '. l($node->title, 'node/'. $node->nid);
       }
 
       return array('referenced by' => array('view' => '<div class="'. $field['field_name'] .'">'. theme('item_list',  $node_array) .'</div>'));
