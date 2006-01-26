@@ -110,12 +110,13 @@ function userreference_field($op, &$node, $field, $a2, $a3, $a4) {
         );
 
       } else {
+        $user_name = db_result(db_query("SELECT name FROM {users} WHERE uid = '%d'", $node_field));
         $form[$field['field_name']]['relation'] = array(
           '#type' => 'textfield',
           '#title' => t($field['label']),
           '#maxlength' => 60,
           '#autocomplete_path' => 'user/autocomplete',
-          '#default_value' => $node_field ? $node_field : ''
+          '#default_value' => $user_name ? $user_name : ''
         );
       }
 
@@ -134,8 +135,8 @@ function userreference_field($op, &$node, $field, $a2, $a3, $a4) {
       }
       else {
         // Ajax user autocomplete returns the user's name, but we need to save the uid
-        $user_id = db_result(db_query("SELECT uid FROM {users} WHERE name = '%s'", $value));
-        db_query("INSERT INTO {node_field_userreference_data} (vid, field_name, delta, field_uid) VALUES (%d, '%s', %d, %d)", $node->vid, $field['field_name'], $delta, $node_field['relation']);
+        $user_id = db_result(db_query("SELECT uid FROM {users} WHERE name = '%s'", $node_field['relation']));
+        db_query("INSERT INTO {node_field_userreference_data} (vid, field_name, delta, field_uid) VALUES (%d, '%s', %d, %d)", $node->vid, $field['field_name'], $delta, $user_id);
       }
       break;
 
@@ -151,8 +152,8 @@ function userreference_field($op, &$node, $field, $a2, $a3, $a4) {
       }
       else {
         // Ajax user autocomplete returns the user's name, but we need to save the uid
-        $user_id = db_result(db_query("SELECT uid FROM {users} WHERE name = '%s'", $value));
-        db_query("INSERT INTO {node_field_userreference_data} (vid, field_name, delta, field_uid) VALUES (%d, '%s', %d, %d)", $node->vid, $field['field_name'], $delta, $node_field['relation']);
+        $user_id = db_result(db_query("SELECT uid FROM {users} WHERE name = '%s'", $node_field['relation']));
+        db_query("INSERT INTO {node_field_userreference_data} (vid, field_name, delta, field_uid) VALUES (%d, '%s', %d, %d)", $node->vid, $field['field_name'], $delta, $user_id);
       }
       return;
 

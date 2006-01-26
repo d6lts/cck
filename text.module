@@ -163,7 +163,7 @@ function text_field($op, &$node, $field, $a2, $a3, $a4) {
             );
           }
           if ($field['text_processing']) {
-            $form[$field['field_name']][$delta]['format'] = filter_form($node_field[$delta]['format']);
+            $form[$field['field_name']][$delta]['format'] = filter_form($node_field[$delta]['format'], NULL, array($field['field_name'], $delta, 'format'));
           }
         }
       }
@@ -186,12 +186,16 @@ function text_field($op, &$node, $field, $a2, $a3, $a4) {
           );
         }
         if ($field['text_processing']) {
-          $form[$field['field_name']]['format'] = filter_form($node_field['format']);
+          $form[$field['field_name']]['format'] = filter_form($node_field['format'], NULL, array($field['field_name'], 'format'));
         }
       }
       return $form;
 
     case 'validate':
+      return;
+    
+    case 'submit':
+      dprint_r($node);
       return;
 
     case 'insert':
@@ -222,6 +226,7 @@ function text_field($op, &$node, $field, $a2, $a3, $a4) {
 
     case 'update':
       $node_field = $node->$field['field_name'];
+      dprint_r($node_field);
       // Delete and insert, rather than update, in case a field was added.
       switch($field['type']) {
         case 'text_shorttext':
@@ -305,7 +310,7 @@ function text_views_tables() {
           ),
         ),
         'sorts' => array(
-          'field_int' => array('name' => 'Short Text: '. $field['field_name']),
+          'field_shorttext' => array('name' => 'Short Text: '. $field['field_name']),
         ),
         'filters' => array(
           'field_shorttext' => array(

@@ -100,10 +100,10 @@ function nodereference_field($op, &$node, $field, $a2, $a3, $a4) {
         while ($value = db_fetch_object($result)) {
           $values[] = $value->field_nid;
         }
-        $additions = array($field['field_name'] => $values);
+        $additions = array($field['field_name']['relation'] => $values);
       } else {
         $value = db_fetch_object($result);
-        $additions = array($field['field_name'] => array($value->field_nid));
+        $additions = array($field['field_name']['relation'] => array($value->field_nid));
       }
 
       return $additions;
@@ -113,7 +113,7 @@ function nodereference_field($op, &$node, $field, $a2, $a3, $a4) {
 
       $referenced_nodes = array();
 
-      foreach ($node_field as $referenced_nid) {
+      foreach ($node_field['relation'] as $referenced_nid) {
         $referenced_node = node_load(array('nid' => $referenced_nid));
         if($referenced_node) {
           $referenced_nodes[] = '('. str_replace('content-', '', $referenced_node->type) .') '. l($referenced_node->title, 'node/'. $referenced_node->nid);
@@ -166,7 +166,7 @@ function nodereference_field($op, &$node, $field, $a2, $a3, $a4) {
           );
         }
       } else {
-         $form[$field['field_name']]['title'] = array(
+         $form[$field['field_name']]['relation'] = array(
             '#type' => 'select',
             '#title' => t($field['label']),
             '#default_value' => $node_field,
