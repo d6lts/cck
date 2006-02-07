@@ -48,16 +48,14 @@ function nodereference_field_settings($op, $field, $scope) {
       $form = array();
       switch ($scope) {
         case 'instance':
-
-          break;
-
-        case 'global':
           $form['autocomplete'] = array(
             '#type' => 'checkbox',
             '#title' => t('Autocomplete'),
             '#default_value' => $field['autocomplete'],
           );
+          break;
 
+        case 'global':
           $form['referenceable_types'] = array(
             '#type' => 'checkboxes',
             '#title' => t('Content types that can be referenced'),
@@ -79,9 +77,9 @@ function nodereference_field_settings($op, $field, $scope) {
     case 'save':
       switch ($scope) {
         case 'instance':
-          return array();
+          return array('autocomplete');
         case 'global':
-          return array('referenceable_types', 'autocomplete');
+          return array('referenceable_types');
       }
       break;
   }
@@ -100,10 +98,10 @@ function nodereference_field($op, &$node, $field, $a2, $a3, $a4) {
         while ($value = db_fetch_object($result)) {
           $values[] = $value->field_nid;
         }
-        $additions = array($field['field_name']['relation'] => $values);
+        $additions = array($field['field_name'] => array('relation' => $values));
       } else {
         $value = db_fetch_object($result);
-        $additions = array($field['field_name']['relation'] => array($value->field_nid));
+        $additions = array($field['field_name'] => array('relation' => array($value->field_nid)));
       }
 
       return $additions;

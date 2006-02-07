@@ -195,7 +195,6 @@ function text_field($op, &$node, $field, $a2, $a3, $a4) {
       return;
     
     case 'submit':
-      dprint_r($node);
       return;
 
     case 'insert':
@@ -226,7 +225,6 @@ function text_field($op, &$node, $field, $a2, $a3, $a4) {
 
     case 'update':
       $node_field = $node->$field['field_name'];
-      dprint_r($node_field);
       // Delete and insert, rather than update, in case a field was added.
       switch($field['type']) {
         case 'text_shorttext':
