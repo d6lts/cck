@@ -661,7 +661,7 @@ function _content_admin_field_add_new_submit($form_id, $form_values) {
     $field_name = $new_name;
   }
 
-  db_query("INSERT INTO {node_field} (field_name, type, global_settings) VALUES ('%s', '%s', '%s')", $field_name, $form_values['type'], serialize($global_settings));
+  db_query("INSERT INTO {node_field} (field_name, type) VALUES ('%s', '%s')", $field_name, $form_values['type']);
 
   db_query("INSERT INTO {node_field_instance} (type_name, field_name, label) VALUES ('%s', '%s', '%s')", $form_values['type_name'], $field_name, $form_values['label']);
 
