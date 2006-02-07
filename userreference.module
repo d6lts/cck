@@ -73,7 +73,8 @@ function userreference_field($op, &$node, $field, $a2, $a3, $a4) {
           $values[] = $value->field_uid;
         }
         $additions = array($field['field_name'] => $values);
-      } else {
+      }
+      else {
         $value = db_fetch_object($result);
         $additions = array($field['field_name'] => array($value->field_uid));
       }
@@ -100,7 +101,7 @@ function userreference_field($op, &$node, $field, $a2, $a3, $a4) {
 
       $form[$field['field_name']] = array('#tree' => TRUE);
 
-      if($field['multiple']) {
+      if ($field['multiple']) {
         $form[$field['field_name']]['relation'] = array(
           '#type' => 'select',
           '#title' => t($field['label']),
@@ -109,7 +110,8 @@ function userreference_field($op, &$node, $field, $a2, $a3, $a4) {
           '#options' => _userreference_potential_references($field),
         );
 
-      } else {
+      }
+      else {
         $user_name = db_result(db_query("SELECT name FROM {users} WHERE uid = '%d'", $node_field));
         $form[$field['field_name']]['relation'] = array(
           '#type' => 'textfield',
@@ -198,7 +200,8 @@ function _userreference_potential_references($field) {
 function userreference_referenced_by_list($uid, $content_type = '') {
   if ($content_type) {
     $result = db_query("SELECT n.* FROM {node_field_userreference_data} user_ref INNER JOIN {node} n ON n.vid = user_ref.vid AND n.type = '%s' WHERE user_ref.field_uid = %d ORDER BY n.type, delta", $content_type, $uid);
-  } else {
+  }
+  else {
     $result = db_query("SELECT n.* FROM {node_field_userreference_data} user_ref INNER JOIN {node} n ON n.vid = user_ref.vid WHERE user_ref.field_uid = %d ORDER BY n.type, delta", $uid);
   }
 
