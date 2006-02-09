@@ -28,54 +28,33 @@ function date_field_info() {
 /**
  * Implementation of hook_field_settings().
  */
-function date_field_settings($op, $field, $scope) {
+function date_field_settings($op, $field) {
   switch ($op) {
     case 'form':
       $form = array();
-      switch ($scope) {
-        case 'instance':
-          $options = array(
-            0 => t('Times are entered and displayed with site\'s time zone'),
-            1 => t('Times are entered and displayed with user\'s time zone'),
-          );
-          $form['time_zone'] = array(
-            '#type' => 'radios',
-            '#title' => t('Time zone handling'),
-            '#default_value' => $field['time_zone'] ? $field['time_zone'] : 0,
-            '#options' => $options,
-          );
-          break;
-        case 'global':
-          $options = array(
-            0 => t('Year'),
-            1 => t('Year and month'),
-            2 => t('Date'),
-            3 => t('Date and time'),
-            4 => t('Time only'),
-          );
-          $form['granularity'] = array(
-            '#type' => 'radios',
-            '#title' => t('Granularity'),
-            '#default_value' => $field['granularity'] ? $field['granularity'] : 0,
-            '#options' => $options,
-          );
-          break;
-      }
+      $options = array(
+        0 => t('Year'),
+        1 => t('Year and month'),
+        2 => t('Date'),
+        3 => t('Date and time'),
+        4 => t('Time only'),
+      );
+      $form['granularity'] = array(
+        '#type' => 'radios',
+        '#title' => t('Granularity'),
+        '#default_value' => $field['granularity'] ? $field['granularity'] : 0,
+        '#options' => $options,
+      );
       return $form;
 
     case 'validate':
       break;
 
     case 'save':
-      switch ($scope) {
-        case 'instance':
-          return array('time_zone');
-        case 'global':
-          return array('granularity');
-      }
-      break;
+      return array('granularity');
   }
 }
+
 
 /**
  * Implementation of hook_field().
@@ -120,57 +99,6 @@ function date_field($op, $node, &$field, $a2, $a3, $a4) {
         return '<div class="'. $field['field_name'] .'">'. $node_field['view'] .'</div>';
       }
 
-    case 'form':
-      $form = array();
-      $node_field = $node->$field['field_name'];
-
-      $form[$field['field_name']] = array('#tree' => TRUE);
-
-      if ($field['multiple']) {
-        foreach (range(0, 2) as $delta) {
-          $form[$field['field_name']][$delta]['value'] = array(
-            '#type' => 'textfield',
-            '#title' => t($field['label']),
-            '#default_value' => $node_field[$delta]['value'],
-            '#required' => ($delta == 0) ? $field['required'] : FALSE,
-          );
-        }
-      }
-      else {
-        $form[$field['field_name']]['value'] = array(
-          '#type' => 'textfield',
-          '#title' => t($field['label']),
-          '#default_value' => $node_field['value'],
-          '#required' => $field['required'],
-        );
-      }
-      return $form;
-
-    case 'validate':
-      $node_field = $node->$field['field_name'];
-
-      if ($field['multiple']) {
-        if (is_array($node_field)) {
-          foreach ($node_field as $delta => $item) {
-            if ($item['value'] != '') {
-              if (preg_match('/[0-9]{8}T[0-9]{2}:[0-9]{2}:[0-9]{2}/', $item['value'])) {
-                form_set_error($field['field_name'] .']['. $delta .'][value', t('%name must be entered in ISO 8601 format (YYYYMMDDThh:mm:ss).', array('%name' => t($field['label']))));
-              }
-            }
-          }
-        }
-      }
-      else {
-        if (isset($node_field['value'])) {
-          if ($node_field['value'] != '') {
-            if (preg_match('/[0-9]{8}T[0-9]{2}:[0-9]{2}:[0-9]{2}/', $node_field['value'])) {
-              form_set_error($field['field_name'] .'][value', t('%name must be entered in ISO 8601 format (YYYYMMDDThh:mm:ss).', array('%name' => t($field['label']))));
-            }
-          }
-        }
-      }
-      return;
-
     case 'insert':
       $node_field = $node->$field['field_name'];
       if ($field['multiple']) {
@@ -199,6 +127,103 @@ function date_field($op, $node, &$field, $a2, $a3, $a4) {
 
     case 'delete':
       db_query("DELETE FROM {node_field_date_data} WHERE vid = %d AND field_name = '%s'", $node->vid, $field['field_name']);
+      return;
+  }
+}
+
+/**
+ * Implementation of hook_widget_info().
+ */
+function date_widget_info() {
+  return array(
+    'date_text' => array(
+      'label' => 'Text Field',
+      'field types' => array('date'),
+    ),
+  );
+}
+
+/**
+ * Implementation of hook_widget_settings().
+ */
+function date_widget_settings($op, $widget) {
+  switch ($op) {
+    case 'form':
+      $form = array();
+      $options = array(
+        0 => t('Times are entered and displayed with site\'s time zone'),
+        1 => t('Times are entered and displayed with user\'s time zone'),
+      );
+      $form['time_zone'] = array(
+        '#type' => 'radios',
+        '#title' => t('Time zone handling'),
+        '#default_value' => $widget['time_zone'] ? $widget['time_zone'] : 0,
+        '#options' => $options,
+      );
+      return $form;
+
+    case 'validate':
+      break;
+
+    case 'save':
+      return array('time_zone');
+  }
+}
+
+/**
+ * Implementation of hook_widget().
+ */
+function date_widget($op, &$node, $field) {
+  switch ($op) {
+    case 'form':
+      $form = array();
+      $node_field = $node->$field['field_name'];
+
+      $form[$field['field_name']] = array('#tree' => TRUE);
+
+      if ($field['multiple']) {
+        foreach (range(0, 2) as $delta) {
+          $form[$field['field_name']][$delta]['value'] = array(
+            '#type' => 'textfield',
+            '#title' => t($field['widget']['label']),
+            '#default_value' => $node_field[$delta]['value'],
+            '#required' => ($delta == 0) ? $field['required'] : FALSE,
+          );
+        }
+      }
+      else {
+        $form[$field['field_name']]['value'] = array(
+          '#type' => 'textfield',
+          '#title' => t($field['widget']['label']),
+          '#default_value' => $node_field['value'],
+          '#required' => $field['required'],
+        );
+      }
+      return $form;
+
+    case 'validate':
+      $node_field = $node->$field['field_name'];
+
+      if ($field['multiple']) {
+        if (is_array($node_field)) {
+          foreach ($node_field as $delta => $item) {
+            if ($item['value'] != '') {
+              if (preg_match('/[0-9]{8}T[0-9]{2}:[0-9]{2}:[0-9]{2}/', $item['value'])) {
+                form_set_error($field['field_name'] .']['. $delta .'][value', t('%name must be entered in ISO 8601 format (YYYYMMDDThh:mm:ss).', array('%name' => t($field['widget']['label']))));
+              }
+            }
+          }
+        }
+      }
+      else {
+        if (isset($node_field['value'])) {
+          if ($node_field['value'] != '') {
+            if (preg_match('/[0-9]{8}T[0-9]{2}:[0-9]{2}:[0-9]{2}/', $node_field['value'])) {
+              form_set_error($field['field_name'] .'][value', t('%name must be entered in ISO 8601 format (YYYYMMDDThh:mm:ss).', array('%name' => t($field['widget']['label']))));
+            }
+          }
+        }
+      }
       return;
   }
 }

@@ -144,7 +144,7 @@ function content_menu($may_cache) {
             && isset($types[arg(3)]->fields[arg(5)])) {
           $items[] = array(
             'path' => 'admin/node/types/'. arg(3) .'/fields/'. arg(5),
-            'title' => t($types[arg(3)]->fields[arg(5)]['label']),
+            'title' => t($types[arg(3)]->fields[arg(5)]['widget']['label']),
             'callback' => '_content_admin_field',
             'access' => $access,
             'callback arguments' => array(arg(3), arg(5)),
@@ -251,7 +251,7 @@ function content_form(&$node, &$param) {
     '#required' => TRUE,
     '#default_value' => $node->title,
   );
-  $form = array_merge($form, _content_field_invoke('form', $node));
+  $form = array_merge($form, _content_widget_invoke('form', $node));
 
   return $form;
 }
@@ -260,14 +260,14 @@ function content_form(&$node, &$param) {
  * Implementation of hook_validate().
  */
 function content_validate(&$node) {
-  _content_field_invoke('validate', $node);
+  _content_widget_invoke('validate', $node);
 }
 
 /**
  * Implementation of hook_submit().
  */
 function content_submit(&$node) {
-  _content_field_invoke('submit', $node);
+  _content_widget_invoke('submit', $node);
 }
 
 /**
@@ -278,44 +278,6 @@ function content_view(&$node, $teaser = FALSE, $page = FALSE) {
   $node->teaser = implode(_content_field_invoke('view', $node, $teaser, $page));
   $node->readmore = ($node->body != $node->teaser);
 }
-
-/**
- * Fetch a list of nodes from the database.
- */
-function content_node_query($conditions = array(), $sort = array(), $fields = array('node_nid')) {
-  $fields = _content_fields();
-  $field_types = _content_field_types();
-
-  $join = array();
-  $where = array();
-  $data = array();
-  $table_num = 0;
-  foreach ($conditions as $condition) {
-    $field = $fields[$condition['field']];
-    $query_additions = module_invoke($field_types[$field['type']]['module'], 'field_query', $field, $condition['op'], $condition['value']);
-    $table_names = array();
-    $table_aliases = array();
-    foreach ($query_additions['tables'] as $name => $table) {
-      $table_names[] = $name;
-      $join[] = 'INNER JOIN {'. $table .'} t'. $table_num .' ON n.nid = t'. $table_num .'.nid';
-      $table_aliases[] = 't'. $table_num;
-      $table_num++;
-    }
-    $where[] = str_replace($table_names, $table_aliases, $query_additions['where']);
-    $data = array_merge($data, $query_additions['data']);
-  }
-  $join_sql = implode(' ', $join);
-  if (count($where) > 0) {
-    $where_sql = implode(' AND ', $where);
-  }
-  else {
-    $where_sql = '1';
-  }
-  $result = pager_query(db_rewrite_sql('SELECT n.nid FROM {node} n '. $join_sql .' WHERE '. $where_sql .' ORDER BY n.sticky DESC, n.created DESC'), variable_get('default_nodes_main', 10), 0, NULL, $data);
-
-  return $result;
-}
-
 
 
 /**
@@ -468,7 +430,7 @@ function _content_admin_type_edit_submit($form_id, $form_values) {
 
   if (isset($form_values['original_type_name'])) {
     // Duplicate the field structure from the old content type.
-    db_query("INSERT INTO {node_field_instance} (field_name, type_name, weight, label, instance_settings) SELECT field_name, '%s', weight, label, instance_settings FROM {node_field_instance} WHERE type_name = '%s'", $form_values['type_name'], $form_values['original_type_name']);
+    db_query("INSERT INTO {node_field_instance} (field_name, type_name, weight, label, widget_type, widget_settings) SELECT field_name, '%s', weight, label, widget_type, widget_settings FROM {node_field_instance} WHERE type_name = '%s'", $form_values['type_name'], $form_values['original_type_name']);
   }
 
   drupal_set_message(t('Saved content type %type.', array('%type' => theme('placeholder', $form_values['label']))));
@@ -533,7 +495,7 @@ function _content_admin_field_overview($type_name) {
 
   foreach ($type->fields as $field) {
     $row = array();
-    $row[] = $field['label'];
+    $row[] = $field['widget']['label'];
     $row[] = $field['field_name'];
     $row[] = $field_types[$field['type']]['label'];
 
@@ -561,7 +523,7 @@ function _content_admin_field_add($type_name) {
   $options = array();
   foreach ($fields as $field) {
     if (!isset($type->fields[$field['field_name']]))
-    $options[$field['field_name']] = t($field['label']) .' ('. $field['field_name'] .')';
+    $options[$field['field_name']] = t($field['widget']['label']) .' ('. $field['field_name'] .')';
   }
   if ($options) {
     $form = array();
@@ -590,7 +552,7 @@ function _content_admin_field_add($type_name) {
     '#type' => 'fieldset',
     '#title' => t('Create new field'),
   );
-  $form['new']['label'] = array(
+  $form['new']['widget']['label'] = array(
     '#title' => t('Label'),
     '#type' => 'textfield',
     '#default_value' => '',
@@ -624,14 +586,15 @@ function _content_admin_field_add($type_name) {
  * Add an existing field to a content type.
  */
 function _content_admin_field_add_existing_submit($form_id, $form_values) {
-  $prior_instance = db_fetch_object(db_query("SELECT weight, label, instance_settings FROM {node_field_instance} WHERE field_name = '%s'", $form_values['field_name']));
+  $prior_instance = db_fetch_object(db_query("SELECT weight, label, widget_type, widget_settings FROM {node_field_instance} WHERE field_name = '%s'", $form_values['field_name']));
   if (!$prior_instance) {
     $prior_instance = new stdClass;
     $prior_instance->weight = 0;
     $prior_instance->label = $form_values['field_name'];
-    $prior_instance->instance_settings = '';
+    $prior_instance->widget_type = '';
+    $prior_instance->widget_settings = '';
   }
-  db_query("INSERT INTO {node_field_instance} (field_name, type_name, weight, label, instance_settings) VALUES ('%s', '%s', %d, '%s', '%s')", $form_values['field_name'], $form_values['type_name'], $prior_instance->weight, $prior_instance->label, $prior_instance->instance_settings);
+  db_query("INSERT INTO {node_field_instance} (field_name, type_name, weight, label, widget_type, widget_settings) VALUES ('%s', '%s', %d, '%s', '%s', '%s')", $form_values['field_name'], $form_values['type_name'], $prior_instance->weight, $prior_instance->label, $prior_instance->widget_type, $prior_instance->widget_settings);
 
   drupal_set_message(t('Added field %label.', array('%label' => theme('placeholder', $prior_instance->label))));
   content_clear_type_cache();
@@ -687,7 +650,7 @@ function _content_admin_field_remove($type_name, $field_name) {
     '#type' => 'value',
     '#value' => $field_name,
   );
-  return confirm_form('_content_admin_field_remove', $form, t('Are you sure you want to remove the field %field?', array('%field' => theme('placeholder', $field['label']))), 'admin/node/types/'. $type_name .'/fields', t('If you have any content left in this field, it will be lost. This action cannot be undone.'), t('Remove'), t('Cancel'));
+  return confirm_form('_content_admin_field_remove', $form, t('Are you sure you want to remove the field %field?', array('%field' => theme('placeholder', $field['widget']['label']))), 'admin/node/types/'. $type_name .'/fields', t('If you have any content left in this field, it will be lost. This action cannot be undone.'), t('Remove'), t('Cancel'));
 }
 
 /**
@@ -701,7 +664,7 @@ function _content_admin_field_remove_submit($form_id, $form_values) {
   if ($type && $field && $form_values['confirm']) {
     db_query("DELETE FROM {node_field_instance} WHERE type_name = '%s' AND field_name = '%s'", $form_values['type_name'], $form_values['field_name']);
 
-    drupal_set_message(t('Removed field %field from %type.', array('%field' => theme('placeholder', $field['label']), '%type' => theme('placeholder', $type->label))));
+    drupal_set_message(t('Removed field %field from %type.', array('%field' => theme('placeholder', $field['widget']['label']), '%type' => theme('placeholder', $type->label))));
     content_clear_type_cache();
     drupal_goto('admin/node/types/'. $form_values['type_name'] .'/fields');
   }
@@ -718,44 +681,61 @@ function _content_admin_field($type_name, $field_name) {
   $field = $type->fields[$field_name];
   $field_types = _content_field_types();
   $field_type = $field_types[$field['type']];
+  $widget_types = _content_widget_types();
+  $widget_type = $widget_types[$field['widget']['type']];
 
   $form = array();
-  $form['instance'] = array(
+  $form['widget'] = array(
     '#type' => 'fieldset',
-    '#title' => t('Instance settings'),
-    '#description' => t('These settings apply only to the %field field as it appears in the %type content type.', array('%field' => theme('placeholder', $field['label']), '%type' => theme('placeholder', $type->label))),
+    '#title' => t('Widget settings'),
+    '#description' => t('These settings apply only to the %field field as it appears in the %type content type.', array('%field' => theme('placeholder', $field['widget']['label']), '%type' => theme('placeholder', $type->label))),
   );
-  $form['instance']['label'] = array(
-    '#type' => 'textfield',
-    '#title' => t('Label'),
-    '#default_value' => $field['label'],
+  $options = array();
+  foreach ($widget_types as $possible_widget_name => $possible_widget_type) {
+    if (in_array($field['type'], $possible_widget_type['field types'])) {
+      $options[$possible_widget_name] = $possible_widget_type['label'];
+    }
+  }
+  $form['widget']['widget_type'] = array(
+    '#type' => 'radios',
+    '#title' => t('Widget'),
+    '#options' => $options,
+    '#default_value' => $field['widget']['type'],
     '#required' => TRUE,
   );
-  $form['instance']['weight'] = array(
+  $form['widget']['label'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Label'),
+    '#default_value' => $field['widget']['label'],
+    '#required' => TRUE,
+  );
+  $form['widget']['weight'] = array(
     '#type' => 'weight',
     '#title' => t('Weight'),
-    '#default_value' => $field['weight'],
+    '#default_value' => $field['widget']['weight'],
     '#description' => t('In the node editing form, the heavier fields will sink and the lighter fields will be positioned nearer the top.'),
   );
-  $form['instance'] = array_merge($form['instance'], module_invoke($field_type['module'], 'field_settings', 'form', $field, 'instance'));
+  if ($additions = module_invoke($widget_type['module'], 'widget_settings', 'form', $field['widget'])) {
+    $form['widget'] = array_merge($form['widget'], $additions);
+  }
 
-  $form['global'] = array(
+  $form['field'] = array(
     '#type' => 'fieldset',
-    '#title' => t('Global settings'),
-    '#description' => t('These settings apply to the %field field in every content type in which it appears.', array('%field' => theme('placeholder', $field['label']))),
+    '#title' => t('Field settings'),
+    '#description' => t('These settings apply to the %field field in every content type in which it appears.', array('%field' => theme('placeholder', $field['widget']['label']))),
   );
-  $form['global']['required'] = array(
+  $form['field']['required'] = array(
     '#type' => 'checkbox',
     '#title' => t('Required'),
     '#default_value' => $field['required'],
   );
-  $form['global']['multiple'] = array(
+  $form['field']['multiple'] = array(
     '#type' => 'checkbox',
     '#title' => t('Multiple values'),
     '#default_value' => $field['multiple'],
   );
 
-  $form['global'] = array_merge($form['global'], module_invoke($field_type['module'], 'field_settings', 'form', $field, 'global'));
+  $form['field'] = array_merge($form['field'], module_invoke($field_type['module'], 'field_settings', 'form', $field));
 
   $form['submit'] = array(
     '#type' => 'submit',
@@ -784,9 +764,11 @@ function _content_admin_field_validate($form_id, $form_values) {
   $field = $type->fields[$form_values['field_name']];
   $field_types = _content_field_types();
   $field_type = $field_types[$field['type']];
+  $widget_types = _content_widget_types();
+  $widget_type = $widget_types[$field['widget']['type']];
 
-  module_invoke($field_type['module'], 'field_settings', 'validate', array_merge($field, $form_values), 'instance');
-  module_invoke($field_type['module'], 'field_settings', 'validate', array_merge($field, $form_values), 'global');
+  module_invoke($widget_type['module'], 'widget_settings', 'validate', array_merge($field, $form_values));
+  module_invoke($field_type['module'], 'field_settings', 'validate', array_merge($field, $form_values));
 }
 
 /**
@@ -798,19 +780,21 @@ function _content_admin_field_submit($form_id, $form_values) {
   $field = $type->fields[$form_values['field_name']];
   $field_types = _content_field_types();
   $field_type = $field_types[$field['type']];
+  $widget_types = _content_widget_types();
+  $widget_type = $widget_types[$field['widget']['type']];
 
-  $instance_settings = array();
-  foreach (module_invoke($field_type['module'], 'field_settings', 'save', $field, 'instance') as $setting) {
-    $instance_settings[$setting] = $form_values[$setting];
+  $widget_settings = array();
+  foreach (module_invoke($widget_type['module'], 'widget_settings', 'save', $field) as $setting) {
+    $widget_settings[$setting] = $form_values[$setting];
   }
-  $global_settings = array();
-  foreach (module_invoke($field_type['module'], 'field_settings', 'save', $field, 'global') as $setting) {
-    $global_settings[$setting] = $form_values[$setting];
+  $field_settings = array();
+  foreach (module_invoke($field_type['module'], 'field_settings', 'save', $field) as $setting) {
+    $field_settings[$setting] = $form_values[$setting];
   }
 
-  db_query("UPDATE {node_field_instance} SET weight = %d, label = '%s', instance_settings = '%s' WHERE type_name = '%s' AND field_name = '%s'", $form_values['weight'], $form_values['label'], serialize($instance_settings), $form_values['type_name'], $form_values['field_name']);
+  db_query("UPDATE {node_field_instance} SET weight = %d, label = '%s', widget_type = '%s', widget_settings = '%s' WHERE type_name = '%s' AND field_name = '%s'", $form_values['weight'], $form_values['label'], $form_values['widget_type'], serialize($widget_settings), $form_values['type_name'], $form_values['field_name']);
 
-  db_query("UPDATE {node_field} SET required = %d, multiple = %d, global_settings = '%s' WHERE field_name = '%s'", $form_values['required'], $form_values['multiple'], serialize($global_settings), $form_values['field_name']);
+  db_query("UPDATE {node_field} SET required = %d, multiple = %d, global_settings = '%s' WHERE field_name = '%s'", $form_values['required'], $form_values['multiple'], serialize($field_settings), $form_values['field_name']);
 
   drupal_set_message(t('Saved field %field.', array('%field' => theme('placeholder', $form_values['label']))));
   content_clear_type_cache();
@@ -846,6 +830,33 @@ function _content_field_invoke($op, &$node, $a2 = NULL, $a3 = NULL, $a4 = NULL) 
 }
 
 /**
+ * Invoke a field hook.
+ */
+function _content_widget_invoke($op, &$node) {
+  $type_name = is_string($node) ? $node : (is_array($node) ? $node['type'] : $node->type);
+  $types = _content_types();
+  $type = $types[$type_name];
+  $widget_types = _content_widget_types();
+
+  $return = array();
+  foreach ($type->fields as $field) {
+    $module = $widget_types[$field['widget']['type']]['module'];
+    $function = $module .'_widget';
+    if (function_exists($function)) {
+      $result = $function($op, $node, $field);
+      if (is_array($result)) {
+        $return = array_merge($return, $result);
+      }
+      else if (isset($result)) {
+        $return[] = $result;
+      }
+    }
+  }
+
+  return $return;
+}
+
+/**
  * Return a list of all content types.
  */
 function _content_types() {
@@ -860,13 +871,20 @@ function _content_types() {
       $type_result = db_query('SELECT * FROM {node_type} nt WHERE 1 ORDER BY nt.type_name ASC');
       while ($type = db_fetch_object($type_result)) {
         $type->fields = array();
-        $field_result = db_query("SELECT nfi.field_name, nfi.weight, nfi.label, nfi.instance_settings, nf.type, nf.global_settings, nf.required, nf.multiple FROM {node_field_instance} nfi LEFT JOIN {node_field} nf ON nfi.field_name = nf.field_name WHERE nfi.type_name = '%s' ORDER BY nfi.weight ASC, nfi.label ASC", $type->type_name);
+        $field_result = db_query("SELECT nfi.field_name, nfi.weight, nfi.label, nfi.widget_type, nfi.widget_settings, nf.type, nf.global_settings, nf.required, nf.multiple FROM {node_field_instance} nfi LEFT JOIN {node_field} nf ON nfi.field_name = nf.field_name WHERE nfi.type_name = '%s' ORDER BY nfi.weight ASC, nfi.label ASC", $type->type_name);
         while ($field = db_fetch_array($field_result)) {
-          $global_settings = $field['global_settings'] ? unserialize($field['global_settings']) : array();
-          $instance_settings = $field['instance_settings'] ? unserialize($field['instance_settings']) : array();
+          $field_settings = $field['global_settings'] ? unserialize($field['global_settings']) : array();
+          $widget_settings = $field['widget_settings'] ? unserialize($field['widget_settings']) : array();
           unset($field['global_settings']);
-          unset($field['instance_settings']);
-          $field = array_merge($field, $global_settings, $instance_settings);
+          unset($field['widget_settings']);
+          $field = array_merge($field, $field_settings);
+          $field['widget'] = $widget_settings;
+          $field['widget']['type'] = $field['widget_type'];
+          unset($field['widget_type']);
+          $field['widget']['weight'] = $field['weight'];
+          unset($field['weight']);
+          $field['widget']['label'] = $field['label'];
+          unset($field['label']);
           $type->fields[$field['field_name']] = $field;
         }
 
@@ -893,7 +911,7 @@ function _content_fields() {
       $global_settings = $field['global_settings'] ? unserialize($field['global_settings']) : array();
       unset($field['global_settings']);
       $field = array_merge($field, $global_settings);
-      $field['label'] = db_result(db_query("SELECT label FROM {node_field_instance} WHERE field_name = '%s'", $field['field_name']));
+      $field['widget']['label'] = db_result(db_query("SELECT label FROM {node_field_instance} WHERE field_name = '%s'", $field['field_name']));
       $fields[$field['field_name']] = $field;
     }
   }
@@ -911,6 +929,28 @@ function _content_field_types() {
     $types = array();
     foreach (module_list() as $module) {
       $module_types = module_invoke($module, 'field_info');
+      if ($module_types) {
+        foreach ($module_types as $name => $info) {
+          $types[$name] = $info;
+          $types[$name]['module'] = $module;
+        }
+      }
+    }
+  }
+
+  return $types;
+}
+
+/**
+ * Return a list of widget types.
+ */
+function _content_widget_types() {
+  static $types;
+
+  if (!isset($types)) {
+    $types = array();
+    foreach (module_list() as $module) {
+      $module_types = module_invoke($module, 'widget_info');
       if ($module_types) {
         foreach ($module_types as $name => $info) {
           $types[$name] = $info;

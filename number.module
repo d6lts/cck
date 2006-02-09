@@ -29,47 +29,33 @@ function number_field_info() {
 /**
  * Implementation of hook_field_settings().
  */
-function number_field_settings($op, $field, $scope) {
+function number_field_settings($op, $field) {
   switch ($op) {
     case 'form':
       $form = array();
-      switch ($scope) {
-        case 'global':
-          $form['min'] = array(
-            '#type' => 'textfield',
-            '#title' => t('Minimum'),
-            '#default_value' => $field['min'] ? $field['min'] : '',
-          );
-          $form['max'] = array(
-            '#type' => 'textfield',
-            '#title' => t('Maximum'),
-            '#default_value' => $field['min'] ? $field['min'] : '',
-          );
-          break;
-      }
+      $form['min'] = array(
+        '#type' => 'textfield',
+        '#title' => t('Minimum'),
+        '#default_value' => $field['min'] ? $field['min'] : '',
+      );
+      $form['max'] = array(
+        '#type' => 'textfield',
+        '#title' => t('Maximum'),
+        '#default_value' => $field['min'] ? $field['min'] : '',
+      );
       return $form;
 
     case 'validate':
-      switch ($scope) {
-        case 'global':
-          if ($field['min'] && !is_numeric($field['min'])) {
-            form_set_error('rows', t('"Minimum" must be a number.'));
-          }
-          if ($field['max'] && !is_numeric($field['max'])) {
-            form_set_error('rows', t('"Maximum" must be a number.'));
-          }
-          break;
+      if ($field['min'] && !is_numeric($field['min'])) {
+        form_set_error('rows', t('"Minimum" must be a number.'));
+      }
+      if ($field['max'] && !is_numeric($field['max'])) {
+        form_set_error('rows', t('"Maximum" must be a number.'));
       }
       break;
 
     case 'save':
-      switch ($scope) {
-        case 'instance':
-          return array();
-        case 'global':
-          return array('min', 'max');
-      }
-      break;
+      return array('min', 'max');
   }
 }
 
@@ -135,63 +121,6 @@ function number_field($op, &$node, $field, $a2, $a3, $a4) {
       else {
         return '<div class="'. $field['field_name'] .'">'. $node_field['view'] .'</div>';
       }
-
-    case 'form':
-      $form = array();
-      $node_field = $node->$field['field_name'];
-
-      $form[$field['field_name']] = array('#tree' => TRUE);
-
-      if ($field['multiple']) {
-        foreach (range(0, 2) as $delta) {
-          $form[$field['field_name']][$delta]['value'] = array(
-            '#type' => 'textfield',
-            '#title' => t($field['label']),
-            '#default_value' => $node_field[$delta]['value'],
-            '#required' => ($delta == 0) ? $field['required'] : FALSE,
-          );
-        }
-      }
-      else {
-        $form[$field['field_name']]['value'] = array(
-          '#type' => 'textfield',
-          '#title' => t($field['label']),
-          '#default_value' => $node_field['value'],
-          '#required' => $field['required'],
-        );
-      }
-      return $form;
-
-    case 'validate':
-      $node_field = $node->$field['field_name'];
-
-      if ($field['multiple']) {
-        if (is_array($node_field)) {
-          foreach ($node_field as $delta => $item) {
-            if ($item['value'] != '') {
-              if (is_numeric($field['min']) && $item['value'] < $field['min']) {
-                form_set_error($field['field_name'] .']['. $delta .'][value', t('The value of %name may be no smaller than %min.', array('%name' => t($field['label']), '%min' => $field['min'])));
-              }
-              if (is_numeric($field['max']) && $item['value'] > $field['max']) {
-                form_set_error($field['field_name'] .']['. $delta .'][value', t('The value of %name may be no larger than %max.', array('%name' => t($field['label']), '%max' => $field['max'])));
-              }
-            }
-          }
-        }
-      }
-      else {
-        if (isset($node_field['value'])) {
-          if ($node_field['value'] != '') {
-            if (is_numeric($field['min']) && $node_field['value'] < $field['min']) {
-              form_set_error($field['field_name'] .'][value', t('The value of %name may be no smaller than %min.', array('%name' => t($field['label']), '%min' => $field['min'])));
-            }
-            if (is_numeric($field['max']) && $node_field['value'] > $field['max']) {
-              form_set_error($field['field_name'] .'][value', t('The value of %name may be no larger than %max.', array('%name' => t($field['label']), '%max' => $field['max'])));
-            }
-          }
-        }
-      }
-      return;
 
     case 'insert':
       $node_field = $node->$field['field_name'];
@@ -260,6 +189,100 @@ function number_field($op, &$node, $field, $a2, $a3, $a4) {
       return;
   }
 }
+
+/**
+ * Implementation of hook_widget_info().
+ */
+function number_widget_info() {
+  return array(
+    'number' => array(
+      'label' => 'Text Field',
+      'field types' => array('number_integer', 'number_decimal'),
+    ),
+  );
+}
+
+/**
+ * Implementation of hook_widget_settings().
+ */
+function number_widget_settings($op, $widget) {
+  switch ($op) {
+    case 'form':
+      return array();
+
+    case 'validate':
+      break;
+
+    case 'save':
+      return array();
+  }
+}
+
+
+/**
+ * Implementation of hook_widget().
+ */
+function number_widget($op, &$node, $field) {
+  switch ($op) {
+    case 'form':
+      $form = array();
+      $node_field = $node->$field['field_name'];
+
+      $form[$field['field_name']] = array('#tree' => TRUE);
+
+      if ($field['multiple']) {
+        foreach (range(0, 2) as $delta) {
+          $form[$field['field_name']][$delta]['value'] = array(
+            '#type' => 'textfield',
+            '#title' => t($field['widget']['label']),
+            '#default_value' => $node_field[$delta]['value'],
+            '#required' => ($delta == 0) ? $field['required'] : FALSE,
+          );
+        }
+      }
+      else {
+        $form[$field['field_name']]['value'] = array(
+          '#type' => 'textfield',
+          '#title' => t($field['widget']['label']),
+          '#default_value' => $node_field['value'],
+          '#required' => $field['required'],
+        );
+      }
+      return $form;
+
+    case 'validate':
+      $node_field = $node->$field['field_name'];
+
+      if ($field['multiple']) {
+        if (is_array($node_field)) {
+          foreach ($node_field as $delta => $item) {
+            if ($item['value'] != '') {
+              if (is_numeric($field['min']) && $item['value'] < $field['min']) {
+                form_set_error($field['field_name'] .']['. $delta .'][value', t('The value of %name may be no smaller than %min.', array('%name' => t($field['widget']['label']), '%min' => $field['min'])));
+              }
+              if (is_numeric($field['max']) && $item['value'] > $field['max']) {
+                form_set_error($field['field_name'] .']['. $delta .'][value', t('The value of %name may be no larger than %max.', array('%name' => t($field['widget']['label']), '%max' => $field['max'])));
+              }
+            }
+          }
+        }
+      }
+      else {
+        if (isset($node_field['value'])) {
+          if ($node_field['value'] != '') {
+            if (is_numeric($field['min']) && $node_field['value'] < $field['min']) {
+              form_set_error($field['field_name'] .'][value', t('The value of %name may be no smaller than %min.', array('%name' => t($field['widget']['label']), '%min' => $field['min'])));
+            }
+            if (is_numeric($field['max']) && $node_field['value'] > $field['max']) {
+              form_set_error($field['field_name'] .'][value', t('The value of %name may be no larger than %max.', array('%name' => t($field['widget']['label']), '%max' => $field['max'])));
+            }
+          }
+        }
+      }
+      return;
+  }
+}
+
 
 /**
  * Implementation of hook_field_view().

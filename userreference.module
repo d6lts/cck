@@ -31,31 +31,13 @@ function userreference_field_info() {
 function userreference_field_settings($op, $field, $scope) {
   switch ($op) {
     case 'form':
-      $form = array();
-      switch ($scope) {
-        case 'instance':
-          break;
-
-        case 'global':
-          break;
-      }
-      return $form;
+      return array();
 
     case 'validate':
-      switch ($scope) {
-        case 'instance':
-          break;
-      }
       break;
 
     case 'save':
-      switch ($scope) {
-        case 'instance':
-          return array();
-        case 'global':
-          return array();
-      }
-      break;
+      return array();
   }
 }
 
@@ -95,38 +77,6 @@ function userreference_field($op, &$node, $field, $a2, $a3, $a4) {
 
       return '<div class="'. $field['field_name'] .'">'. $item['view'] .'</div>';
 
-    case 'form':
-      $form = array();
-      $node_field = $node->$field['field_name'];
-
-      $form[$field['field_name']] = array('#tree' => TRUE);
-
-      if ($field['multiple']) {
-        $form[$field['field_name']]['relation'] = array(
-          '#type' => 'select',
-          '#title' => t($field['label']),
-          '#default_value' => $node_field,
-          '#multiple' => $field['multiple'],
-          '#options' => _userreference_potential_references($field),
-        );
-
-      }
-      else {
-        $user_name = db_result(db_query("SELECT name FROM {users} WHERE uid = '%d'", $node_field));
-        $form[$field['field_name']]['relation'] = array(
-          '#type' => 'textfield',
-          '#title' => t($field['label']),
-          '#maxlength' => 60,
-          '#autocomplete_path' => 'user/autocomplete',
-          '#default_value' => $user_name ? $user_name : ''
-        );
-      }
-
-      return $form;
-
-    case 'validate':
-      return;
-
     case 'insert':
       $node_field = $node->$field['field_name'];
 
@@ -165,22 +115,78 @@ function userreference_field($op, &$node, $field, $a2, $a3, $a4) {
   }
 }
 
+
 /**
- * Implementation of hook_field_query().
+ * Implementation of hook_widget_info().
  */
-function userreference_field_query($field, $op, $value) {
-  $query_additions = array();
-
-  switch ($op) {
-    case 'is':
-      $query_additions['tables'] = array('%table' => 'node_field_userreference_data');
-      $query_additions['where'] = '%table.field_uid = %d';
-      $query_additions['data'] = array($value);
-      break;
-  }
-
-  return $query_additions;
+function userreference_widget_info() {
+  return array(
+    'userreference_select' => array(
+      'label' => 'Select List',
+      'field types' => array('userreference'),
+    ),
+    'userreference_autocomplete' => array(
+      'label' => 'Autocomplete Text Field',
+      'field types' => array('userreference'),
+    ),
+  );
 }
+
+/**
+ * Implementation of hook_widget_settings().
+ */
+function userreference_widget_settings($op, $widget) {
+  switch ($op) {
+    case 'form':
+      return array();
+
+    case 'validate':
+      break;
+
+    case 'save':
+      return array();
+  }
+}
+
+/**
+ * Implementation of hook_widget().
+ */
+function userreference_widget($op, &$node, $field) {
+  switch ($op) {
+    case 'form':
+      $form = array();
+      $node_field = $node->$field['field_name'];
+
+      $form[$field['field_name']] = array('#tree' => TRUE);
+
+      if ($field['multiple']) {
+        $form[$field['field_name']]['relation'] = array(
+          '#type' => 'select',
+          '#title' => t($field['widget']['label']),
+          '#default_value' => $node_field,
+          '#multiple' => $field['multiple'],
+          '#options' => _userreference_potential_references($field),
+        );
+
+      }
+      else {
+        $user_name = db_result(db_query("SELECT name FROM {users} WHERE uid = '%d'", $node_field));
+        $form[$field['field_name']]['relation'] = array(
+          '#type' => 'textfield',
+          '#title' => t($field['widget']['label']),
+          '#maxlength' => 60,
+          '#autocomplete_path' => 'user/autocomplete',
+          '#default_value' => $user_name ? $user_name : ''
+        );
+      }
+
+      return $form;
+
+    case 'validate':
+      return;
+  }
+}
+
 
 /**
  * Fetch an array of all candidate referenced users, for use in presenting the selection form to the user.

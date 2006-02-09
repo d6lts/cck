@@ -29,49 +29,24 @@ function text_field_info() {
 /**
  * Implementation of hook_field_settings().
  */
-function text_field_settings($op, $field, $scope) {
+function text_field_settings($op, $field) {
   switch ($op) {
     case 'form':
       $form = array();
-      switch ($scope) {
-        case 'instance':
-          $form['rows'] = array(
-            '#type' => 'textfield',
-            '#title' => t('Rows'),
-            '#default_value' => $field['rows'] ? $field['rows'] : 1,
-            '#required' => TRUE,
-          );
-          break;
-
-        case 'global':
-          $options = array(0 => t('Plain text'), 1 => t('Filtered text (user selects input format)'));
-          $form['text_processing'] = array(
-            '#type' => 'radios',
-            '#title' => t('Text processing'),
-            '#default_value' => $field['text_processing'] ? $field['text_processing'] : 0,
-            '#options' => $options,
-          );
-          break;
-      }
+      $options = array(0 => t('Plain text'), 1 => t('Filtered text (user selects input format)'));
+      $form['text_processing'] = array(
+        '#type' => 'radios',
+        '#title' => t('Text processing'),
+        '#default_value' => $field['text_processing'] ? $field['text_processing'] : 0,
+        '#options' => $options,
+      );
       return $form;
 
     case 'validate':
-      switch ($scope) {
-        case 'instance':
-          if (!is_numeric($field['rows']) || intval($field['rows']) != $field['rows'] || $field['rows'] <= 0) {
-            form_set_error('rows', t('"Rows" must be a positive integer.'));
-          }
-          break;
-      }
       break;
 
     case 'save':
-      switch ($scope) {
-        case 'instance':
-          return array('rows');
-        case 'global':
-          return array('text_processing');
-      }
+      return array('text_processing');
       break;
   }
 }
@@ -123,7 +98,7 @@ function text_field($op, &$node, $field, $a2, $a3, $a4) {
         }
       }
       else {
-        $node_field['view'] = text_field_view($field, $node_field['value'], $item, $node);
+        $node_field['view'] = text_field_view($field, $node_field['value'], $node_field, $node);
       }
       $node->$field['field_name'] = $node_field;
       if ($field['multiple']) {
@@ -136,66 +111,6 @@ function text_field($op, &$node, $field, $a2, $a3, $a4) {
       else {
         return '<div class="'. $field['field_name'] .'">'. $node_field['view'] .'</div>';
       }
-
-    case 'form':
-      $form = array();
-      $node_field = $node->$field['field_name'];
-
-      $form[$field['field_name']] = array('#tree' => TRUE);
-
-      if ($field['multiple']) {
-        foreach (range(0, 2) as $delta) {
-          if ($field['rows'] == 1) {
-            $form[$field['field_name']][$delta]['value'] = array(
-              '#type' => 'textfield',
-              '#title' => t($field['label']),
-              '#default_value' => $node_field[$delta]['value'],
-              '#required' => ($delta == 0) ? $field['required'] : FALSE,
-            );
-          }
-          else {
-            $form[$field['field_name']][$delta]['value'] = array(
-              '#type' => 'textarea',
-              '#title' => t($field['label']),
-              '#default_value' => $node_field[$delta]['value'],
-              '#required' => ($delta == 0) ? $field['required'] : FALSE,
-              '#rows' => $field['rows'],
-            );
-          }
-          if ($field['text_processing']) {
-            $form[$field['field_name']][$delta]['format'] = filter_form($node_field[$delta]['format'], NULL, array($field['field_name'], $delta, 'format'));
-          }
-        }
-      }
-      else {
-        if ($field['rows'] == 1) {
-          $form[$field['field_name']]['value'] = array(
-            '#type' => 'textfield',
-            '#title' => t($field['label']),
-            '#default_value' => $node_field['value'],
-            '#required' => $field['required'],
-          );
-        }
-        else {
-          $form[$field['field_name']]['value'] = array(
-            '#type' => 'textarea',
-            '#title' => t($field['label']),
-            '#default_value' => $node_field['value'],
-            '#required' => $field['required'],
-            '#rows' => $field['rows'],
-          );
-        }
-        if ($field['text_processing']) {
-          $form[$field['field_name']]['format'] = filter_form($node_field['format'], NULL, array($field['field_name'], 'format'));
-        }
-      }
-      return $form;
-
-    case 'validate':
-      return;
-    
-    case 'submit':
-      return;
 
     case 'insert':
       $node_field = $node->$field['field_name'];
@@ -261,6 +176,112 @@ function text_field($op, &$node, $field, $a2, $a3, $a4) {
           db_query("DELETE FROM {node_field_longtext_data} WHERE vid = %d AND field_name = '%s'", $node->vid, $field['field_name']);
           break;
       }
+      return;
+  }
+}
+
+/**
+ * Implementation of hook_widget_info().
+ */
+function text_widget_info() {
+  return array(
+    'text' => array(
+      'label' => 'Text Field',
+      'field types' => array('text_shorttext', 'text_longtext'),
+    ),
+  );
+}
+
+/**
+ * Implementation of hook_widget_settings().
+ */
+function text_widget_settings($op, $widget) {
+  switch ($op) {
+    case 'form':
+      $form = array();
+      $form['rows'] = array(
+        '#type' => 'textfield',
+        '#title' => t('Rows'),
+        '#default_value' => $widget['rows'] ? $widget['rows'] : 1,
+        '#required' => TRUE,
+      );
+      return $form;
+
+    case 'validate':
+      if (!is_numeric($widget['rows']) || intval($widget['rows']) != $widget['rows'] || $widget['rows'] <= 0) {
+        form_set_error('rows', t('"Rows" must be a positive integer.'));
+      }
+      break;
+
+    case 'save':
+      return array('rows');
+  }
+}
+
+
+/**
+ * Implementation of hook_widget().
+ */
+function text_widget($op, &$node, $field) {
+  switch ($op) {
+    case 'form':
+      $form = array();
+      $node_field = $node->$field['field_name'];
+
+      $form[$field['field_name']] = array('#tree' => TRUE);
+
+      if ($field['multiple']) {
+        foreach (range(0, 2) as $delta) {
+          if ($field['rows'] == 1) {
+            $form[$field['field_name']][$delta]['value'] = array(
+              '#type' => 'textfield',
+              '#title' => t($field['widget']['label']),
+              '#default_value' => $node_field[$delta]['value'],
+              '#required' => ($delta == 0) ? $field['required'] : FALSE,
+            );
+          }
+          else {
+            $form[$field['field_name']][$delta]['value'] = array(
+              '#type' => 'textarea',
+              '#title' => t($field['widget']['label']),
+              '#default_value' => $node_field[$delta]['value'],
+              '#required' => ($delta == 0) ? $field['required'] : FALSE,
+              '#rows' => $field['widget']['rows'],
+            );
+          }
+          if ($field['text_processing']) {
+            $form[$field['field_name']][$delta]['format'] = filter_form($node_field[$delta]['format'], NULL, array($field['field_name'], $delta, 'format'));
+          }
+        }
+      }
+      else {
+        if ($field['rows'] == 1) {
+          $form[$field['field_name']]['value'] = array(
+            '#type' => 'textfield',
+            '#title' => t($field['widget']['label']),
+            '#default_value' => $node_field['value'],
+            '#required' => $field['required'],
+          );
+        }
+        else {
+          $form[$field['field_name']]['value'] = array(
+            '#type' => 'textarea',
+            '#title' => t($field['widget']['label']),
+            '#default_value' => $node_field['value'],
+            '#required' => $field['required'],
+            '#rows' => $field['widget']['rows'],
+          );
+        }
+        if ($field['text_processing']) {
+          $form[$field['field_name']]['format'] = filter_form($node_field['format'], NULL, array($field['field_name'], 'format'));
+        }
+      }
+      return $form;
+
+    case 'validate':
+      return;
+    
+    case 'submit':
       return;
   }
 }
