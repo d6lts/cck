@@ -2,11 +2,10 @@ Content Construction Kit
 ------------------------
 For information about the CCK, see http://drupal.org/cck-status
 
-This is still in development. Do not use on production sites.
+To install, place the entire cck folder into your modules directory. 
+Go to administer -> modules and enable the content module and one or 
+more field type modules:
 
-To test, add cck.mysql to your database. Place the cck folder
-into your modules directory. Go to administer -> modules and enable
-the content module and one or more field type modules:
 - text.module
 - number.module
 - date.module
@@ -14,8 +13,8 @@ the content module and one or more field type modules:
 - nodereference.module
 
 Now go to administer -> content -> content types. Create a new
-content type and edit it to add some fields. Then test by
-creating a new node of your new type.
+content type and edit it to add some fields. Then test by creating 
+a new node of your new type using the create content menu link.
 
 jvandyk [at] iastate.edu
 jchaffer [at] structureinteractive.com
