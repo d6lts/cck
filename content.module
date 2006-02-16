@@ -318,7 +318,7 @@ function _content_admin_type_fields() {
     $row = array();
     $row[] = $field['field_name'];
     $row[] = $field['type'];
-    
+
     $types = array();
     $result = db_query("SELECT nt.label FROM {node_field_instance} nfi LEFT JOIN {node_type} nt ON nt.type_name = nfi.type_name WHERE nfi.field_name = '%s' ORDER BY nt.label ASC", $field['field_name']);
     while ($type = db_fetch_object($result)) {
@@ -696,11 +696,15 @@ function _content_admin_field($type_name, $field_name) {
       $options[$possible_widget_name] = $possible_widget_type['label'];
     }
   }
+  if (count($options) == 1) {
+    $key = array_keys($options);
+    $default_widget = array_pop($key);
+  }
   $form['widget']['widget_type'] = array(
     '#type' => 'radios',
     '#title' => t('Widget'),
     '#options' => $options,
-    '#default_value' => $field['widget']['type'],
+    '#default_value' => $field['widget']['type'] ? $field['widget']['type'] : $default_widget,
     '#required' => TRUE,
   );
   $form['widget']['label'] = array(
@@ -781,7 +785,7 @@ function _content_admin_field_submit($form_id, $form_values) {
   $field_types = _content_field_types();
   $field_type = $field_types[$field['type']];
   $widget_types = _content_widget_types();
-  $widget_type = $widget_types[$field['widget']['type']];
+  $widget_type = $widget_types[$form_values['widget_type']];
 
   $widget_settings = array();
   foreach (module_invoke($widget_type['module'], 'widget_settings', 'save', $field) as $setting) {
