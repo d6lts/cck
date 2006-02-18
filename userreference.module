@@ -28,7 +28,7 @@ function userreference_field_info() {
 /**
  * Implementation of hook_field_settings().
  */
-function userreference_field_settings($op, $field, $scope) {
+function userreference_field_settings($op, $field) {
   switch ($op) {
     case 'form':
       return array();

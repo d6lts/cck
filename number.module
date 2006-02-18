@@ -337,7 +337,7 @@ function number_views_tables() {
         ),
       );
     }
-    if ($field['type'] == 'number_float') {
+    if ($field['type'] == 'number_decimal') {
       $tables['node_field_float_data_'. $field['field_name']] = array(
         'name' => 'node_field_float_data', 
         'join' => array(

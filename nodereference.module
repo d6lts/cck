@@ -42,7 +42,7 @@ function nodereference_field_info() {
 /**
  * Implementation of hook_field_settings().
  */
-function nodereference_field_settings($op, $field, $scope) {
+function nodereference_field_settings($op, $field) {
   switch ($op) {
     case 'form':
       $form = array();

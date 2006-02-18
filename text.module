@@ -232,7 +232,7 @@ function text_widget($op, &$node, $field) {
 
       if ($field['multiple']) {
         foreach (range(0, 2) as $delta) {
-          if ($field['rows'] == 1) {
+          if ($field['widget']['rows'] == 1) {
             $form[$field['field_name']][$delta]['value'] = array(
               '#type' => 'textfield',
               '#title' => t($field['widget']['label']),
@@ -255,7 +255,7 @@ function text_widget($op, &$node, $field) {
         }
       }
       else {
-        if ($field['rows'] == 1) {
+        if ($field['widget']['rows'] == 1) {
           $form[$field['field_name']]['value'] = array(
             '#type' => 'textfield',
             '#title' => t($field['widget']['label']),

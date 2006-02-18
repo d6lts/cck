@@ -227,32 +227,3 @@ function date_widget($op, &$node, $field) {
       return;
   }
 }
-
-/**
- * Implementation of hook_field_query().
- */
-function date_field_query($field, $op, $value) {
-  $query_additions = array();
-
-  switch ($op) {
-    case 'is':
-      $query_additions['tables'] = array('%table' => 'node_field_date_data');
-      $query_additions['where'] = "%table.field_date = '%s'";
-      $query_additions['data'] = array($value);
-      break;
-
-    case 'after':
-      $query_additions['tables'] = array('%table' => 'node_field_date_data');
-      $query_additions['where'] = "%table.field_date > '%s'";
-      $query_additions['data'] = array($value);
-      break;
-
-    case 'before':
-      $query_additions['tables'] = array('%table' => 'node_field_date_data');
-      $query_additions['where'] = "%table.field_date < '%s'";
-      $query_additions['data'] = array($value);
-      break;
-  }
-
-  return $query_additions;
-}
