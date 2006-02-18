@@ -69,7 +69,7 @@ function nodereference_field_settings($op, $field) {
 function nodereference_field($op, &$node, $field, $a2, $a3, $a4) {
   switch ($op) {
     case 'load':
-      $result = db_query("SELECT field_nid FROM {node_field_nodereference_data} WHERE vid = %d AND field_name = '%s' ORDER BY delta", $node->vid, $field['field_name']);
+      $result = db_query("SELECT nfnd.field_nid FROM {node_field_nodereference_data} nfnd WHERE nfnd.vid = %d AND nfnd.field_name = '%s' ORDER BY delta", $node->vid, $field['field_name']);
 
       if ($field['multiple']) {
         $values = array();
@@ -186,7 +186,7 @@ function nodereference_widget($op, &$node, $field) {
         if ($field['multiple']) {
 
           foreach($node_field as $delta => $value) {
-            $display_value = db_result(db_query("SELECT title FROM {node} WHERE nid = %d", $value));
+            $display_value = db_result(db_query("SELECT n.title FROM {node} n WHERE n.nid = %d", $value));
             $form[$field['field_name']]['title'][$delta] = array(
               '#type' => 'textfield',
               '#title' => t($field['widget']['label']),
@@ -206,7 +206,7 @@ function nodereference_widget($op, &$node, $field) {
 
         }
         else {
-          $node_field = db_result(db_query("SELECT title FROM {node} WHERE nid = %d", $node->$field['field_name']));
+          $node_field = db_result(db_query("SELECT n.title FROM {node} n WHERE n.nid = %d", $node->$field['field_name']));
 
 
           $form[$field['field_name']]['title'] = array(
@@ -237,7 +237,7 @@ function nodereference_widget($op, &$node, $field) {
         if ($field['multiple']) {
           foreach($node_field['title'] as $delta => $value) {
             if ($node_field['title'][$delta]) {
-              if (!db_result(db_query("SELECT nid FROM {node} WHERE title = '%s'", $node_field['title'][$delta]))) {
+              if (!db_result(db_query("SELECT n.nid FROM {node} n WHERE n.title = '%s'", $node_field['title'][$delta]))) {
                 form_set_error($field['field_name'] .'][title]['. $delta, t('No post with that title exists.'));
               }
             }
@@ -245,7 +245,7 @@ function nodereference_widget($op, &$node, $field) {
         }
         else {
           if ($node_field['title']) {
-            if (!db_result(db_query("SELECT nid FROM {node} WHERE title = '%s'", $node_field['title']))) {
+            if (!db_result(db_query("SELECT n.nid FROM {node} n WHERE n.title = '%s'", $node_field['title']))) {
               form_set_error($field['field_name'] .'][title', t('No post with that title exists.'));
             }
           }
@@ -260,13 +260,13 @@ function nodereference_widget($op, &$node, $field) {
         if ($field['multiple']) {
           foreach($node_field['title'] as $delta => $value) {
             if ($node_field['title'][$delta]) {
-              $node_field['relation'][$delta] = db_result(db_query("SELECT nid FROM {node} WHERE title = '%s'", $node_field['title'][$delta]));
+              $node_field['relation'][$delta] = db_result(db_query("SELECT n.nid FROM {node} n WHERE n.title = '%s'", $node_field['title'][$delta]));
             }
           }
         }
         else {
           if ($node_field['title']) {
-            $node_field['relation'] = db_result(db_query("SELECT nid FROM {node} WHERE title = '%s'", $node_field['title']));
+            $node_field['relation'] = db_result(db_query("SELECT n.nid FROM {node} n WHERE n.title = '%s'", $node_field['title']));
           }
         }
       }
@@ -362,7 +362,7 @@ function _nodereference_potential_references($field, $return_full_nodes = false)
     return array();
   }
 
-  $result = db_query(db_rewrite_sql("SELECT nid, title, type FROM {node} WHERE ". $related_clause ." ORDER BY title, type"));
+  $result = db_query(db_rewrite_sql("SELECT n.nid, n.title, n.type FROM {node} n WHERE ". $related_clause ." ORDER BY n.title, n.type"));
 
   if (db_num_rows($result) == 0) {
     return array();
