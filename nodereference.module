@@ -185,7 +185,7 @@ function nodereference_widget($op, &$node, $field) {
       if ($field['widget']['type'] == 'nodereference_autocomplete') {
         if ($field['multiple']) {
 
-          foreach($node_field as $delta => $value) {
+          foreach($node_field['relation'] as $delta => $value) {
             $display_value = db_result(db_query("SELECT n.title FROM {node} n WHERE n.nid = %d", $value));
             $form[$field['field_name']]['title'][$delta] = array(
               '#type' => 'textfield',
