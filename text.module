@@ -12,7 +12,7 @@
 function text_help($section) {
   switch ($section) {
     case 'admin/modules#description':
-      return t('Defines simple text field types.');
+      return t('Defines simple text field types. <em>Note: Requires content.module.</em>');
   }
 }
 
@@ -280,7 +280,7 @@ function text_widget($op, &$node, $field) {
 
     case 'validate':
       return;
-    
+
     case 'submit':
       return;
   }
@@ -311,16 +311,16 @@ function text_views_tables() {
   foreach ($fields as $field) {
     if ($field['type'] == 'text_shorttext') {
       $tables['node_field_shorttext_data_'. $field['field_name']] = array(
-        'name' => 'node_field_shorttext_data', 
+        'name' => 'node_field_shorttext_data',
         'join' => array(
           'left' => array(
             'table' => 'node',
             'field' => 'vid',
-          ), 
+          ),
           'right' => array(
             'field' => 'vid',
             'extra' => array('field_name' => $field['field_name']),
-          ), 
+          ),
         ),
         'fields' => array(
           'field_shorttext' => array(
@@ -335,11 +335,11 @@ function text_views_tables() {
           'field_shorttext' => array(
             'name' => 'Short Text: '. $field['field_name'],
             'operator' => array(
-              '='  => 'is', 
-              'contains' => 'contains', 
-              'begins' => 'begins with', 
-              'ends' => 'ends wth', 
-              'LIKE'  => 'matches pattern', 
+              '='  => 'is',
+              'contains' => 'contains',
+              'begins' => 'begins with',
+              'ends' => 'ends wth',
+              'LIKE'  => 'matches pattern',
             ),
             'operator-handler' => '_text_filter_operator',
           ),

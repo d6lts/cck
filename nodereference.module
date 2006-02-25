@@ -12,7 +12,7 @@
 function nodereference_help($section) {
   switch ($section) {
     case 'admin/modules#description':
-      return t('Defines a field type for referencing one node from another.');
+      return t('Defines a field type for referencing one node from another. <em>Note: Requires content.module.</em>');
   }
 }
 
@@ -287,16 +287,16 @@ function nodereference_views_tables() {
   foreach ($fields as $field) {
     if ($field['type'] == 'nodereference') {
       $tables['node_field_nodereference_data_'. $field['field_name']] = array(
-        'name' => 'node_field_nodereference_data', 
+        'name' => 'node_field_nodereference_data',
         'join' => array(
           'left' => array(
             'table' => 'node',
             'field' => 'vid',
-          ), 
+          ),
           'right' => array(
             'field' => 'vid',
             'extra' => array('field_name' => $field['field_name']),
-          ), 
+          ),
         ),
         'fields' => array(
           'field_nid' => array(
@@ -315,16 +315,16 @@ function nodereference_views_tables() {
         ),
       );
       $tables['node_field_nodereference_data_reverse_'. $field['field_name']] = array(
-        'name' => 'node_field_nodereference_data', 
+        'name' => 'node_field_nodereference_data',
         'join' => array(
           'left' => array(
             'table' => 'node',
             'field' => 'nid',
-          ), 
+          ),
           'right' => array(
             'field' => 'field_nid',
             'extra' => array('field_name' => $field['field_name']),
-          ), 
+          ),
         ),
         'fields' => array(
           'vid' => array(

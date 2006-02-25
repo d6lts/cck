@@ -12,7 +12,7 @@
 function userreference_help($section) {
   switch ($section) {
     case 'admin/modules#description':
-      return t('Defines a field type for referencing a user from a node.');
+      return t('Defines a field type for referencing a user from a node. <em>Note: Requires content.module.</em>');
   }
 }
 

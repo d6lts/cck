@@ -22,7 +22,7 @@ function text_install() {
           PRIMARY KEY  (vid,field_name,delta)
         ) TYPE=MyISAM /*!40100 DEFAULT CHARACTER SET utf8 */;");
       break;
-    
+
     case 'pgsql':
       db_query("CREATE TABLE {node_field_longtext_data} (
           vid integer unsigned NOT NULL default '0',

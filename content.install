@@ -30,7 +30,7 @@ function content_install() {
         PRIMARY KEY  (field_name,type_name)
       ) TYPE=MyISAM /*!40100 DEFAULT CHARACTER SET utf8 */;");
       break;
-    
+
     case 'pgsql':
       db_query("CREATE TABLE {node_type} (
           type_name varchar(32) NOT NULL default '',

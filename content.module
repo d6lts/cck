@@ -518,6 +518,7 @@ function _content_admin_field_add($type_name) {
   $type = $types[$type_name];
   $field_types = _content_field_types();
   $fields = _content_fields();
+  $widget_types = _content_widget_types();
   $output = '';
 
   $options = array();
@@ -561,14 +562,20 @@ function _content_admin_field_add($type_name) {
   );
   $options = array();
   foreach ($field_types as $field_name => $field_type) {
-    $options[$field_name] = $field_type['label'];
+    foreach ($widget_types as $widget_name => $widget_type) {
+      if (in_array($field_name, $widget_type['field types'])) {
+        $options[$field_name .'-'. $widget_name] = $widget_type['label'];
+      }
+    }
   }
-  $form['new']['type'] = array(
+  $form['new']['field_widget_type'] = array(
     '#type' => 'radios',
     '#title' => t('Field type'),
     '#required' => TRUE,
     '#options' => $options,
+    '#theme' => 'content_admin_field_add_new_field_widget_type',
   );
+
   $form['new']['submit'] = array(
     '#type' => 'submit',
     '#value' => t('Create field'),
@@ -578,6 +585,28 @@ function _content_admin_field_add($type_name) {
     '#value' => $type_name,
   );
   $output .= drupal_get_form('_content_admin_field_add_new', $form);
+
+  return $output;
+}
+
+function theme_content_admin_field_add_new_field_widget_type($form) {
+  $types = _content_types();
+  $type = $types[$type_name];
+  $field_types = _content_field_types();
+  $fields = _content_fields();
+  $widget_types = _content_widget_types();
+  $output = '';
+
+  $output .= '<dl>';
+  foreach ($field_types as $field_name => $field_type) {
+    $output .= '<dt>'. $field_type['label'] .'</dt>';
+    foreach ($widget_types as $widget_name => $widget_type) {
+      if (in_array($field_name, $widget_type['field types'])) {
+        $output .= '<dd>'. form_render($form[$field_name .'-'. $widget_name]) .'</dd>';
+      }
+    }
+  }
+  $output .= '</dl>';
 
   return $output;
 }
@@ -605,10 +634,9 @@ function _content_admin_field_add_existing_submit($form_id, $form_values) {
  * Create a new field for a content type.
  */
 function _content_admin_field_add_new_submit($form_id, $form_values) {
-  // Find a valid, computer-friendly type name.
+  // Find a valid, computer-friendly field name.
 
-  $field_types = _content_field_types();
-  $field_type = $field_types[$form_values['type']];
+  $fields = _content_fields();
 
   $field_name = trim($form_values['label']);
   $field_name = drupal_strtolower($field_name);
@@ -616,17 +644,18 @@ function _content_admin_field_add_new_submit($form_id, $form_values) {
   $field_name = preg_replace('/[^a-z0-9_]/', '', $field_name);
   $field_name = 'field_'. $field_name;
   $field_name = substr($field_name, 0, 31);
-  if (isset($types['$field_name'])) {
+  if (isset($fields[$field_name])) {
     $counter = 0;
     do {
       $new_name = substr($field_name, 0, 29) .'_'. $counter++;
-    } while (isset($types['$new_name']));
+    } while (isset($fields[$new_name]));
     $field_name = $new_name;
   }
 
-  db_query("INSERT INTO {node_field} (field_name, type) VALUES ('%s', '%s')", $field_name, $form_values['type']);
+  $field_widget_type = explode('-', $form_values['field_widget_type']);
+  db_query("INSERT INTO {node_field} (field_name, type) VALUES ('%s', '%s')", $field_name, $field_widget_type[0]);
 
-  db_query("INSERT INTO {node_field_instance} (type_name, field_name, label) VALUES ('%s', '%s', '%s')", $form_values['type_name'], $field_name, $form_values['label']);
+  db_query("INSERT INTO {node_field_instance} (type_name, field_name, label, widget_type) VALUES ('%s', '%s', '%s', '%s')", $form_values['type_name'], $field_name, $form_values['label'], $field_widget_type[1]);
 
   drupal_set_message(t('Created field %label.', array('%label' => theme('placeholder', $form_values['label']))));
   content_clear_type_cache();

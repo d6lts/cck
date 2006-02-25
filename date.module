@@ -12,7 +12,7 @@
 function date_help($section) {
   switch ($section) {
     case 'admin/modules#description':
-      return t('Defines a date/time field type.');
+      return t('Defines a date/time field type. <em>Note: Requires content.module.</em>');
   }
 }
 

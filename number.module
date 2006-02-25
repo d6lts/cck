@@ -12,7 +12,7 @@
 function number_help($section) {
   switch ($section) {
     case 'admin/modules#description':
-      return t('Defines numeric field types.');
+      return t('Defines numeric field types. <em>Note: Requires content.module.</em>');
   }
 }
 
@@ -302,16 +302,16 @@ function number_views_tables() {
   foreach ($fields as $field) {
     if ($field['type'] == 'number_integer') {
       $tables['node_field_int_data_'. $field['field_name']] = array(
-        'name' => 'node_field_int_data', 
+        'name' => 'node_field_int_data',
         'join' => array(
           'left' => array(
             'table' => 'node',
             'field' => 'vid',
-          ), 
+          ),
           'right' => array(
             'field' => 'vid',
             'extra' => array('field_name' => $field['field_name']),
-          ), 
+          ),
         ),
         'fields' => array(
           'field_int' => array(
@@ -339,16 +339,16 @@ function number_views_tables() {
     }
     if ($field['type'] == 'number_decimal') {
       $tables['node_field_float_data_'. $field['field_name']] = array(
-        'name' => 'node_field_float_data', 
+        'name' => 'node_field_float_data',
         'join' => array(
           'left' => array(
             'table' => 'node',
             'field' => 'vid',
-          ), 
+          ),
           'right' => array(
             'field' => 'vid',
             'extra' => array('field_name' => $field['field_name']),
-          ), 
+          ),
         ),
         'fields' => array(
           'field_int' => array(
