@@ -663,7 +663,7 @@ function _content_admin_field_add_new_submit($form_id, $form_values) {
 }
 
 /**
- * Menu callback; delete a content type.
+ * Menu callback; present a form for removing a field from a content type.
  */
 function _content_admin_field_remove($type_name, $field_name) {
   $types = _content_types();
@@ -694,6 +694,11 @@ function _content_admin_field_remove_submit($form_id, $form_values) {
     db_query("DELETE FROM {node_field_instance} WHERE type_name = '%s' AND field_name = '%s'", $form_values['type_name'], $form_values['field_name']);
 
     drupal_set_message(t('Removed field %field from %type.', array('%field' => theme('placeholder', $field['widget']['label']), '%type' => theme('placeholder', $type->label))));
+    if (!db_result(db_query("SELECT type_name FROM {node_field_instance} WHERE field_name = '%s'", $form_values['field_name']))) {
+      db_query("DELETE FROM {node_field} WHERE field_name = '%s'", $form_values['field_name']);
+
+      drupal_set_message(t('The field %field no longer exists in any content type, so it was deleted.', array('%field' => theme('placeholder', $field['widget']['label']))));
+    }
     content_clear_type_cache();
     drupal_goto('admin/node/types/'. $form_values['type_name'] .'/fields');
   }
