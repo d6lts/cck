@@ -128,21 +128,21 @@ function number_field($op, &$node, $field, $a2, $a3, $a4) {
         case 'number_integer':
           if ($field['multiple']) {
             foreach ($node_field as $delta => $item) {
-              db_query("INSERT INTO {node_field_int_data} (vid, field_name, delta, field_int) VALUES (%d, '%s', %d, %d)", $node->vid, $field['field_name'], $delta, $item['value']);
+              db_query("INSERT INTO {node_field_int_data} (nid, vid, field_name, delta, field_int) VALUES (%d, %d, '%s', %d, %d)", $node->nid, $node->vid, $field['field_name'], $delta, $item['value']);
             }
           }
           else {
-            db_query("INSERT INTO {node_field_int_data} (vid, field_name, field_int) VALUES (%d, '%s', %d)", $node->vid, $field['field_name'], $node_field['value']);
+            db_query("INSERT INTO {node_field_int_data} (nid, vid, field_name, field_int) VALUES (%d, %d, '%s', %d)", $node->nid, $node->vid, $field['field_name'], $node_field['value']);
           }
           break;
         case 'number_decimal':
           if ($field['multiple']) {
             foreach ($node_field as $delta => $item) {
-              db_query("INSERT INTO {node_field_float_data} (vid, field_name, delta, field_float) VALUES (%d, '%s', %d, %d)", $node->vid, $field['field_name'], $delta, $item['value']);
+              db_query("INSERT INTO {node_field_float_data} (nid, vid, field_name, delta, field_float) VALUES (%d, %d, '%s', %d, %d)", $node->nid, $node->vid, $field['field_name'], $delta, $item['value']);
             }
           }
           else {
-            db_query("INSERT INTO {node_field_float_data} (vid, field_name, field_float) VALUES (%d, '%s', %d)", $node->vid, $field['field_name'], $node_field['value']);
+            db_query("INSERT INTO {node_field_float_data} (nid, vid, field_name, field_float) VALUES (%d, %d, '%s', %d)", $node->nid, $node->vid, $field['field_name'], $node_field['value']);
           }
           break;
       }
@@ -156,34 +156,35 @@ function number_field($op, &$node, $field, $a2, $a3, $a4) {
           db_query("DELETE FROM {node_field_int_data} WHERE vid = %d AND field_name = '%s'", $node->vid, $field['field_name']);
           if ($field['multiple']) {
             foreach ($node_field as $delta => $item) {
-              db_query("INSERT INTO {node_field_int_data} (vid, field_name, delta, field_int) VALUES (%d, '%s', %d, %d)", $node->vid, $field['field_name'], $delta, $item['value']);
+              db_query("INSERT INTO {node_field_int_data} (nid, vid, field_name, delta, field_int) VALUES (%d, %d, '%s', %d, %d)", $node->nid, $node->vid, $field['field_name'], $delta, $item['value']);
             }
           }
           else {
-            db_query("INSERT INTO {node_field_int_data} (vid, field_name, field_int) VALUES (%d, '%s', %d)", $node->vid, $field['field_name'], $node_field['value']);
+            db_query("INSERT INTO {node_field_int_data} (nid, vid, field_name, field_int) VALUES (%d, %d, '%s', %d)", $node->nid, $node->vid, $field['field_name'], $node_field['value']);
           }
           break;
         case 'number_decimal':
           db_query("DELETE FROM {node_field_float_data} WHERE vid = %d AND field_name = '%s'", $node->vid, $field['field_name']);
           if ($field['multiple']) {
             foreach ($node_field as $delta => $item) {
-              db_query("INSERT INTO {node_field_float_data} (vid, field_name, delta, field_float) VALUES (%d, '%s', %d, %d)", $node->vid, $field['field_name'], $delta, $item['value']);
+              db_query("INSERT INTO {node_field_float_data} (nid, vid, field_name, delta, field_float) VALUES (%d, %d, '%s', %d, %d)", $node->nid, $node->vid, $field['field_name'], $delta, $item['value']);
             }
           }
           else {
-            db_query("INSERT INTO {node_field_float_data} (vid, field_name, field_float) VALUES (%d, '%s', %d)", $node->vid, $field['field_name'], $node_field['value']);
+            db_query("INSERT INTO {node_field_float_data} (nid, vid, field_name, field_float) VALUES (%d, %d, '%s', %d)", $node->nid, $node->vid, $field['field_name'], $node_field['value']);
           }
           break;
       }
       return;
 
     case 'delete':
+      // Delete using nid rather than vid to purge all revisions.
       switch($field['type']) {
         case 'number_integer':
-          db_query("DELETE FROM {node_field_int_data} WHERE vid = %d AND field_name = '%s'", $node->vid, $field['field_name']);
+          db_query("DELETE FROM {node_field_int_data} WHERE nid = %d AND field_name = '%s'", $node->nid, $field['field_name']);
           break;
         case 'number_decimal':
-          db_query("DELETE FROM {node_field_float_data} WHERE vid = %d AND field_name = '%s'", $node->vid, $field['field_name']);
+          db_query("DELETE FROM {node_field_float_data} WHERE nid = %d AND field_name = '%s'", $node->nid, $field['field_name']);
           break;
       }
       return;

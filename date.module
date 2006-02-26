@@ -103,11 +103,11 @@ function date_field($op, $node, &$field, $a2, $a3, $a4) {
       $node_field = $node->$field['field_name'];
       if ($field['multiple']) {
         foreach ($node_field as $delta => $item) {
-          db_query("INSERT INTO {node_field_date_data} (vid, field_name, delta, field_date) VALUES (%d, '%s', %d, '%s')", $node->vid, $field['field_name'], $delta, $item['value']);
+          db_query("INSERT INTO {node_field_date_data} (nid, vid, field_name, delta, field_date) VALUES (%d, %d, '%s', %d, '%s')", $node->nid, $node->vid, $field['field_name'], $delta, $item['value']);
         }
       }
       else {
-        db_query("INSERT INTO {node_field_date_data} (vid, field_name, field_date) VALUES (%d, '%s', '%s')", $node->vid, $field['field_name'], $node_field['value']);
+        db_query("INSERT INTO {node_field_date_data} (nid, vid, field_name, field_date) VALUES (%d, %d, '%s', '%s')", $node->nid, $node->vid, $field['field_name'], $node_field['value']);
       }
       return;
 
@@ -117,16 +117,17 @@ function date_field($op, $node, &$field, $a2, $a3, $a4) {
       db_query("DELETE FROM {node_field_date_data} WHERE vid = %d AND field_name = '%s'", $node->vid, $field['field_name']);
       if ($field['multiple']) {
         foreach ($node_field as $delta => $item) {
-          db_query("INSERT INTO {node_field_date_data} (vid, field_name, delta, field_date) VALUES (%d, '%s', %d, '%s')", $node->vid, $field['field_name'], $delta, $item['value']);
+          db_query("INSERT INTO {node_field_date_data} (nid, vid, field_name, delta, field_date) VALUES (%d, %d, '%s', %d, '%s')", $node->nid, $node->vid, $field['field_name'], $delta, $item['value']);
         }
       }
       else {
-        db_query("INSERT INTO {node_field_date_data} (vid, field_name, field_date) VALUES (%d, '%s', '%s')", $node->vid, $field['field_name'], $node_field['value']);
+        db_query("INSERT INTO {node_field_date_data} (nid, vid, field_name, field_date) VALUES (%d, %d, '%s', '%s')", $node->nid, $node->vid, $field['field_name'], $node_field['value']);
       }
       return;
 
     case 'delete':
-      db_query("DELETE FROM {node_field_date_data} WHERE vid = %d AND field_name = '%s'", $node->vid, $field['field_name']);
+      // Delete using nid rather than vid to purge all revisions.
+      db_query("DELETE FROM {node_field_date_data} WHERE nid = %d AND field_name = '%s'", $node->nid, $field['field_name']);
       return;
   }
 }

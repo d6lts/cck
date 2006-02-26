@@ -107,11 +107,11 @@ function nodereference_field($op, &$node, $field, $a2, $a3, $a4) {
 
       if ($field['multiple']) {
         foreach ($node_field['relation'] as $delta => $value) {
-          db_query("INSERT INTO {node_field_nodereference_data} (vid, field_name, delta, field_nid) VALUES (%d, '%s', %d, %d)", $node->vid, $field['field_name'], $delta, $value);
+          db_query("INSERT INTO {node_field_nodereference_data} (nid, vid, field_name, delta, field_nid) VALUES (%d, %d, '%s', %d, %d)", $node->nid, $node->vid, $field['field_name'], $delta, $value);
         }
       }
       else {
-        db_query("INSERT INTO {node_field_nodereference_data} (vid, field_name, delta, field_nid) VALUES (%d, '%s', %d, %d)", $node->vid, $field['field_name'], $delta, $node_field['relation']);
+        db_query("INSERT INTO {node_field_nodereference_data} (nid, vid, field_name, delta, field_nid) VALUES (%d, %d, '%s', %d, %d)", $node->nid, $node->vid, $field['field_name'], $delta, $node_field['relation']);
       }
       break;
 
@@ -123,17 +123,18 @@ function nodereference_field($op, &$node, $field, $a2, $a3, $a4) {
       if ($field['multiple']) {
         foreach ($node_field['relation'] as $delta => $value) {
           if ($value) {
-            db_query("INSERT INTO {node_field_nodereference_data} (vid, field_name, delta, field_nid) VALUES (%d, '%s', %d, %d)", $node->vid, $field['field_name'], $delta, $value);
+            db_query("INSERT INTO {node_field_nodereference_data} (nid, vid, field_name, delta, field_nid) VALUES (%d, %d, '%s', %d, %d)", $node->nid, $node->vid, $field['field_name'], $delta, $value);
           }
         }
       }
       else {
-        db_query("INSERT INTO {node_field_nodereference_data} (vid, field_name, delta, field_nid) VALUES (%d, '%s', %d, %d)", $node->vid, $field['field_name'], 0, $node_field['relation']);
+        db_query("INSERT INTO {node_field_nodereference_data} (nid, vid, field_name, delta, field_nid) VALUES (%d, %d, '%s', %d, %d)", $node->nid, $node->vid, $field['field_name'], 0, $node_field['relation']);
       }
       return;
 
     case 'delete':
-      db_query("DELETE FROM {node_field_nodereference_data} WHERE vid = %d AND field_name = '%s'", $node->vid, $field['field_name']);
+      // Delete using nid rather than vid to purge all revisions.
+      db_query("DELETE FROM {node_field_nodereference_data} WHERE nid = %d AND field_name = '%s'", $node->nid, $field['field_name']);
       return;
   }
 }

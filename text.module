@@ -118,21 +118,21 @@ function text_field($op, &$node, $field, $a2, $a3, $a4) {
         case 'text_shorttext':
           if ($field['multiple']) {
             foreach ($node_field as $delta => $item) {
-              db_query("INSERT INTO {node_field_shorttext_data} (vid, field_name, delta, field_shorttext, format) VALUES (%d, '%s', %d, '%s', %d)", $node->vid, $field['field_name'], $delta, $item['value'], $item['format']);
+              db_query("INSERT INTO {node_field_shorttext_data} (nid, vid, field_name, delta, field_shorttext, format) VALUES (%d, %d, '%s', %d, '%s', %d)", $node->nid, $node->vid, $field['field_name'], $delta, $item['value'], $item['format']);
             }
           }
           else {
-            db_query("INSERT INTO {node_field_shorttext_data} (vid, field_name, field_shorttext, format) VALUES (%d, '%s', '%s', %d)", $node->vid, $field['field_name'], $node_field['value'], $node_field['format']);
+            db_query("INSERT INTO {node_field_shorttext_data} (nid, vid, field_name, field_shorttext, format) VALUES (%d, %d, '%s', '%s', %d)", $node->nid, $node->vid, $field['field_name'], $node_field['value'], $node_field['format']);
           }
           break;
         case 'text_longtext':
           if ($field['multiple']) {
             foreach ($node_field as $delta => $item) {
-              db_query("INSERT INTO {node_field_longtext_data} (vid, field_name, delta, field_longtext, format) VALUES (%d, '%s', %d, '%s', %d)", $node->vid, $field['field_name'], $delta, $item['value'], $item['format']);
+              db_query("INSERT INTO {node_field_longtext_data} (nid, vid, field_name, delta, field_longtext, format) VALUES (%d, %d, '%s', %d, '%s', %d)", $node->nid, $node->vid, $field['field_name'], $delta, $item['value'], $item['format']);
             }
           }
           else {
-            db_query("INSERT INTO {node_field_longtext_data} (vid, field_name, field_longtext, format) VALUES (%d, '%s', '%s', %d)", $node->vid, $field['field_name'], $node_field['value'], $node_field['format']);
+            db_query("INSERT INTO {node_field_longtext_data} (nid, vid, field_name, field_longtext, format) VALUES (%d, %d, '%s', '%s', %d)", $node->nid, $node->vid, $field['field_name'], $node_field['value'], $node_field['format']);
           }
           break;
       }
@@ -146,34 +146,35 @@ function text_field($op, &$node, $field, $a2, $a3, $a4) {
           db_query("DELETE FROM {node_field_shorttext_data} WHERE vid = %d AND field_name = '%s'", $node->vid, $field['field_name']);
           if ($field['multiple']) {
             foreach ($node_field as $delta => $item) {
-              db_query("INSERT INTO {node_field_shorttext_data} (vid, field_name, delta, field_shorttext, format) VALUES (%d, '%s', %d, '%s', %d)", $node->vid, $field['field_name'], $delta, $item['value'], $item['format']);
+              db_query("INSERT INTO {node_field_shorttext_data} (nid, vid, field_name, delta, field_shorttext, format) VALUES (%d, %d, '%s', %d, '%s', %d)", $node->nid, $node->vid, $field['field_name'], $delta, $item['value'], $item['format']);
             }
           }
           else {
-            db_query("INSERT INTO {node_field_shorttext_data} (vid, field_name, field_shorttext, format) VALUES (%d, '%s', '%s', %d)", $node->vid, $field['field_name'], $node_field['value'], $node_field['format']);
+            db_query("INSERT INTO {node_field_shorttext_data} (nid, vid, field_name, field_shorttext, format) VALUES (%d, %d, '%s', '%s', %d)", $node->nid, $node->vid, $field['field_name'], $node_field['value'], $node_field['format']);
           }
           break;
         case 'text_longtext':
           db_query("DELETE FROM {node_field_longtext_data} WHERE vid = %d AND field_name = '%s'", $node->vid, $field['field_name']);
           if ($field['multiple']) {
             foreach ($node_field as $delta => $item) {
-              db_query("INSERT INTO {node_field_longtext_data} (vid, field_name, delta, field_longtext, format) VALUES (%d, '%s', %d, '%s', %d)", $node->vid, $field['field_name'], $delta, $item['value'], $item['format']);
+              db_query("INSERT INTO {node_field_longtext_data} (nid, vid, field_name, delta, field_longtext, format) VALUES (%d, %d, '%s', %d, '%s', %d)", $node->nid, $node->vid, $field['field_name'], $delta, $item['value'], $item['format']);
             }
           }
           else {
-            db_query("INSERT INTO {node_field_longtext_data} (vid, field_name, field_longtext, format) VALUES (%d, '%s', '%s', %d)", $node->vid, $field['field_name'], $node_field['value'], $node_field['format']);
+            db_query("INSERT INTO {node_field_longtext_data} (nid, vid, field_name, field_longtext, format) VALUES (%d, %d, '%s', '%s', %d)", $node->nid, $node->vid, $field['field_name'], $node_field['value'], $node_field['format']);
           }
           break;
       }
       return;
 
     case 'delete':
+      // Delete using nid rather than vid to purge all revisions.
       switch($field['type']) {
-        case 'field_shorttext':
-          db_query("DELETE FROM {node_field_shorttext_data} WHERE vid = %d AND field_name = '%s'", $node->vid, $field['field_name']);
+        case 'text_shorttext':
+          db_query("DELETE FROM {node_field_shorttext_data} WHERE nid = %d AND field_name = '%s'", $node->nid, $field['field_name']);
           break;
-        case 'field_longtext':
-          db_query("DELETE FROM {node_field_longtext_data} WHERE vid = %d AND field_name = '%s'", $node->vid, $field['field_name']);
+        case 'text_longtext':
+          db_query("DELETE FROM {node_field_longtext_data} WHERE nid = %d AND field_name = '%s'", $node->nid, $field['field_name']);
           break;
       }
       return;

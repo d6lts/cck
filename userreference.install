@@ -5,6 +5,7 @@ function userreference_install() {
     case 'mysql':
     case 'mysqli':
       db_query("CREATE TABLE {node_field_userreference_data} (
+          nid int unsigned NOT NULL default '0',
           vid int unsigned NOT NULL default '0',
           field_name varchar(32) NOT NULL default '',
           delta int unsigned NOT NULL default '0',
@@ -15,6 +16,7 @@ function userreference_install() {
 
     case 'pgsql':
       db_query("CREATE TABLE {node_field_userreference_data} (
+          nid integer unsigned NOT NULL default '0',
           vid integer unsigned NOT NULL default '0',
           field_name varchar(32) NOT NULL default '',
           delta integer unsigned NOT NULL default '0',
@@ -25,4 +27,41 @@ function userreference_install() {
   }
 }
 
+function userreference_update_1() {
+  $ret = array();
 
+  switch ($GLOBALS['db_type']) {
+    case 'pgsql':
+      db_add_column($ret, 'node_field_userreference_data', 'nid', 'integer', array('not null' => TRUE, 'default' => 0));
+      break;
+
+    case 'mysql':
+    case 'mysqli':
+      $ret[] = update_sql("ALTER TABLE {node_field_userreference_data} ADD COLUMN nid int(10) NOT NULL DEFAULT 0");
+      break;
+  }
+
+  return $ret;
+}
+
+function userreference_update_2() {
+  // Multi-part update
+  if (!isset($_SESSION['userreference_update_2'])) {
+    $_SESSION['userreference_update_2'] = 0;
+    $_SESSION['userreference_update_2_max'] = db_result(db_query("SELECT COUNT(*) FROM {node_field_userreference_data}"));;
+  }
+
+  $limit = 20;
+  $result = db_query_range("SELECT nr.nid, nfud.vid, nfud.field_name, nfud.delta FROM {node_field_userreference_data} nfud LEFT JOIN {node_revisions} nr ON nr.vid = nfud.vid", $_SESSION['userreference_update_2'], $limit);
+  if (db_num_rows($result) == 0) {
+    unset($_SESSION['userreference_update_2']);
+    unset($_SESSION['userreference_update_2_max']);
+    return array();
+  }
+  while ($data = db_fetch_object($result)) {
+    $_SESSION['userreference_update_2']++;
+    db_query("UPDATE {node_field_userreference_data} SET nid = %d WHERE vid = %d AND field_name = '%s' AND delta = %d", $data->nid, $data->vid, $data->field_name, $data->delta);
+  }
+
+  return array('#finished' => $_SESSION['userreference_update_2'] / $_SESSION['userreference_update_2_max']);
+}

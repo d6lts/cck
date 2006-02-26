@@ -5,6 +5,7 @@ function text_install() {
     case 'mysql':
     case 'mysqli':
       db_query("CREATE TABLE {node_field_longtext_data} (
+          nid int unsigned NOT NULL default '0',
           vid int unsigned NOT NULL default '0',
           field_name varchar(32) NOT NULL default '',
           delta int unsigned NOT NULL default '0',
@@ -14,6 +15,7 @@ function text_install() {
         ) TYPE=MyISAM /*!40100 DEFAULT CHARACTER SET utf8 */;");
 
       db_query("CREATE TABLE {node_field_shorttext_data} (
+          nid int unsigned NOT NULL default '0',
           vid int unsigned NOT NULL default '0',
           field_name varchar(32) NOT NULL default '',
           delta int unsigned NOT NULL default '0',
@@ -25,6 +27,7 @@ function text_install() {
 
     case 'pgsql':
       db_query("CREATE TABLE {node_field_longtext_data} (
+          nid integer unsigned NOT NULL default '0',
           vid integer unsigned NOT NULL default '0',
           field_name varchar(32) NOT NULL default '',
           delta integer unsigned NOT NULL default '0',
@@ -34,6 +37,7 @@ function text_install() {
         )");
 
       db_query("CREATE TABLE {node_field_shorttext_data} (
+          nid integer unsigned NOT NULL default '0',
           vid integer unsigned NOT NULL default '0',
           field_name varchar(32) NOT NULL default '',
           delta integer unsigned NOT NULL default '0',
@@ -45,4 +49,65 @@ function text_install() {
   }
 }
 
+function text_update_1() {
+  $ret = array();
 
+  switch ($GLOBALS['db_type']) {
+    case 'pgsql':
+      db_add_column($ret, 'node_field_shorttext_data', 'nid', 'integer', array('not null' => TRUE, 'default' => 0));
+      db_add_column($ret, 'node_field_longtext_data', 'nid', 'integer', array('not null' => TRUE, 'default' => 0));
+      break;
+
+    case 'mysql':
+    case 'mysqli':
+      $ret[] = update_sql("ALTER TABLE {node_field_shorttext_data} ADD COLUMN nid int(10) NOT NULL DEFAULT 0");
+      $ret[] = update_sql("ALTER TABLE {node_field_longtext_data} ADD COLUMN nid int(10) NOT NULL DEFAULT 0");
+      break;
+  }
+
+  return $ret;
+}
+
+function text_update_2() {
+  // Multi-part update
+  if (!isset($_SESSION['text_update_2'])) {
+    $_SESSION['text_update_2'] = 0;
+    $_SESSION['text_update_2_max'] = db_result(db_query("SELECT COUNT(*) FROM {node_field_shorttext_data}"));;
+  }
+
+  $limit = 20;
+  $result = db_query_range("SELECT nr.nid, nfsd.vid, nfsd.field_name, nfsd.delta FROM {node_field_shorttext_data} nfsd LEFT JOIN {node_revisions} nr ON nr.vid = nfsd.vid", $_SESSION['text_update_2'], $limit);
+  if (db_num_rows($result) == 0) {
+    unset($_SESSION['text_update_2']);
+    unset($_SESSION['text_update_2_max']);
+    return array();
+  }
+  while ($data = db_fetch_object($result)) {
+    $_SESSION['text_update_2']++;
+    db_query("UPDATE {node_field_shorttext_data} SET nid = %d WHERE vid = %d AND field_name = '%s' AND delta = %d", $data->nid, $data->vid, $data->field_name, $data->delta);
+  }
+
+  return array('#finished' => $_SESSION['text_update_2'] / $_SESSION['text_update_2_max']);
+}
+
+function text_update_3() {
+  // Multi-part update
+  if (!isset($_SESSION['text_update_3'])) {
+    $_SESSION['text_update_3'] = 0;
+    $_SESSION['text_update_3_max'] = db_result(db_query("SELECT COUNT(*) FROM {node_field_shorttext_data}"));;
+  }
+
+  $limit = 20;
+  $result = db_query_range("SELECT nr.nid, nfld.vid, nfld.field_name, nfld.delta FROM {node_field_longtext_data} nfld LEFT JOIN {node_revisions} nr ON nr.vid = nfld.vid", $_SESSION['text_update_3'], $limit);
+  if (db_num_rows($result) == 0) {
+    unset($_SESSION['text_update_3']);
+    unset($_SESSION['text_update_3_max']);
+    return array();
+  }
+  while ($data = db_fetch_object($result)) {
+    $_SESSION['text_update_3']++;
+    db_query("UPDATE {node_field_longtext_data} SET nid = %d WHERE vid = %d AND field_name = '%s' AND delta = %d", $data->nid, $data->vid, $data->field_name, $data->delta);
+  }
+
+  return array('#finished' => $_SESSION['text_update_3'] / $_SESSION['text_update_3_max']);
+}
