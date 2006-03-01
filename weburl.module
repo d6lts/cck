@@ -1,0 +1,269 @@
+<?php
+// $Id:
+
+/**
+ * @file
+ * Defines standard simple field types.
+ */
+
+/**
+ * Implementation of hook_help().
+ */
+function weburl_help($section) {
+  switch ($section) {
+    case 'admin/modules#description':
+      return t('Defines simple weburl field types. <em>Note: Requires content.module.</em>');
+  }
+}
+
+/**
+ * Implementation of hook_field_info().
+ */
+function weburl_field_info() {
+  return array(
+    'weburl' => array('label' => 'Web URL'),
+  );
+}
+
+/**
+ * Implementation of hook_field().
+ */
+function weburl_field($op, &$node, $field, $a2, $a3, $a4) {
+  switch ($op) {
+    case 'load':
+      switch($field['type']) {
+        case 'weburl':
+          $result = db_query("SELECT field_weburl FROM {node_field_weburl_data} WHERE vid = %d AND field_name = '%s' ORDER BY delta", $node->vid, $field['field_name']);
+          if ($field['multiple']) {
+            $values = array();
+            while ($value = db_fetch_object($result)) {
+              $values[] = array('value' => $value->field_weburl);
+            }
+            $additions = array($field['field_name'] => $values);
+          }
+          else {
+            $value = db_fetch_object($result);
+            $additions = array($field['field_name'] => array('value' => $value->field_weburl));
+          }
+          break;
+      }
+      return $additions;
+
+    case 'view':
+      $output = '';
+      $node_field = $node->$field['field_name'];
+      if ($field['multiple']) {
+        foreach ($node_field as $delta => $item) {
+          $node_field[$delta]['view'] = weburl_field_view($field, $item['value'], $item, $node);
+        }
+      }
+      else {
+        $node_field['view'] = weburl_field_view($field, $node_field['value'], $node_field, $node);
+      }
+      $node->$field['field_name'] = $node_field;
+      if ($field['multiple']) {
+        $output = '';
+        foreach ($node_field as $delta => $item) {
+          $output .= '<div class="'. $field['field_name'] .'">'. $item['view'] .'</div>';
+        }
+        return $output;
+      }
+      else {
+        return '<div class="'. $field['field_name'] .'">'. $node_field['view'] .'</div>';
+      }
+
+    case 'insert':
+      $node_field = $node->$field['field_name'];
+      switch($field['type']) {
+        case 'weburl':
+          if ($field['multiple']) {
+            foreach ($node_field as $delta => $item) {
+              db_query("INSERT INTO {node_field_weburl_data} (nid, vid, field_name, delta, field_shorttext) VALUES (%d, %d, '%s', %d, '%s')", $node->nid, $node->vid, $field['field_name'], $delta, $item['value']);
+            }
+          }
+          else {
+            db_query("INSERT INTO {node_field_weburl_data} (nid, vid, field_name, field_shorttext) VALUES (%d, %d, '%s', '%s')", $node->nid, $node->vid, $field['field_name'], $node_field['value']);
+          }
+          break;
+      }
+      return;
+
+    case 'update':
+      $node_field = $node->$field['field_name'];
+      // Delete and insert, rather than update, in case a field was added.
+      switch($field['type']) {
+        case 'weburl':
+          db_query("DELETE FROM {node_field_weburl_data} WHERE vid = %d AND field_name = '%s'", $node->vid, $field['field_name']);
+          if ($field['multiple']) {
+            foreach ($node_field as $delta => $item) {
+              db_query("INSERT INTO {node_field_weburl_data} (nid, vid, field_name, delta, field_weburl) VALUES (%d, %d, '%s', %d, '%s')", $node->nid, $node->vid, $field['field_name'], $delta, $item['value']);
+            }
+          }
+          else {
+            db_query("INSERT INTO {node_field_weburl_data} (nid, vid, field_name, field_weburl) VALUES (%d, %d, '%s', '%s')", $node->nid, $node->vid, $field['field_name'], $node_field['value']);
+          }
+          break;
+      }
+      return;
+
+    case 'delete':
+      // Delete using nid rather than vid to purge all revisions.
+      switch($field['type']) {
+        case 'weburl':
+          db_query("DELETE FROM {node_field_weburl_data} WHERE nid = %d AND field_name = '%s'", $node->nid, $field['field_name']);
+          break;
+      }
+      return;
+  }
+}
+
+/**
+ * Implementation of hook_widget_info().
+ */
+function weburl_widget_info() {
+  return array(
+    'weburl' => array(
+      'label' => 'Text Field with URL validation',
+      'field types' => array('weburl'),
+    ),
+  );
+}
+
+/**
+ * Implementation of hook_widget().
+ */
+function weburl_widget($op, &$node, $field) {
+  switch ($op) {
+    case 'form':
+      $form = array();
+      $node_field = $node->$field['field_name'];
+
+      $form[$field['field_name']] = array('#tree' => TRUE);
+
+      if ($field['multiple']) {
+        foreach (range(0, 2) as $delta) {
+          $form[$field['field_name']][$delta]['value'] = array(
+            '#type' => 'textfield',
+            '#title' => t($field['widget']['label']),
+            '#default_value' => $node_field[$delta]['value'],
+            '#required' => ($delta == 0) ? $field['required'] : FALSE,
+          );
+        }
+      }
+      else {
+        $form[$field['field_name']]['value'] = array(
+          '#type' => 'textfield',
+          '#title' => t($field['widget']['label']),
+          '#default_value' => $node_field['value'],
+          '#required' => $field['required'],
+        );
+      }
+      return $form;
+
+    case 'validate': 
+      $node_field = $node->$field['field_name'];
+      if ($field['multiple']) {
+        foreach($node_field as $delta => $value) {
+        	if ($node_field[$delta]['value']) {
+        	  if (!_weburl_validate_weburl($value['value'])) {
+              form_set_error($field['field_name'] .']['. $delta. '][value', t('Not a valid Web URL.'));
+            }
+        	}
+        }
+      }
+      else {
+      	if ($node_field['value']) {
+          if (!_weburl_validate_weburl($node_field['value'])) {
+            form_set_error($field['field_name'] .'][value', t('Not a valid Web URL.'));
+          }
+      	}
+      }
+      return;
+      
+    case 'submit':
+      return;
+  }
+}
+
+/**
+ * Implementation of hook_field_view() which performs any translation necessary.
+ */
+function weburl_field_view($field, $value, $addlfields = array(), $node = NULL) {
+  return check_plain($value);
+}
+
+/**
+ * Implementation of hook_views_tables().
+ */
+function weburl_views_tables() {
+  $tables = array();
+
+  $fields = _content_fields();
+  foreach ($fields as $field) {
+    if ($field['type'] == 'weburl') {
+      $tables['node_field_weburl_data_'. $field['field_name']] = array(
+        'name' => 'node_field_weburl_data',
+        'join' => array(
+          'left' => array(
+            'table' => 'node',
+            'field' => 'vid',
+          ),
+          'right' => array(
+            'field' => 'vid',
+            'extra' => array('field_name' => $field['field_name']),
+          ),
+        ),
+        'fields' => array(
+          'field_weburl' => array(
+            'name' => 'Web URL: '. $field['field_name'],
+            'sortable' => TRUE,
+          ),
+        ),
+        'sorts' => array(
+          'field_shorttext' => array('name' => 'Web URL: '. $field['field_name']),
+        ),
+        'filters' => array(
+          'field_weburl' => array(
+            'name' => 'Web URL: '. $field['field_name'],
+            'operator' => array(
+              '='  => 'is',
+              'contains' => 'contains',
+              'begins' => 'begins with',
+              'ends' => 'ends wth',
+              'LIKE'  => 'matches pattern',
+            ),
+            'operator-handler' => '_text_filter_operator',
+          ),
+        ),
+      );
+    }
+  }
+
+  return $tables;
+}
+
+function _weburl_validate_weburl($text) {
+	if (!preg_match(
+	  // The protocols: http://
+    '/^((https|http|ftp|news):\/\/)?'.
+    // domains
+    '(([a-z]([a-z0-9\-_]*\.)+)(aero|arpa|biz|com|coop|edu|gov|info|int|jobs|mil|museum|name|nato|net|org|pro|travel|[a-z]{2})(\/[a-z0-9_\-\.~]+)*(\/([a-z0-9_\-\.]*)(\?[a-z0-9+_\-\.\/%=&]*)?)?)'.
+    // OR ip addresses
+    '|(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})'.
+    // port number
+    '(:([0-9]{1,4}))'.
+    // forward slash 0 or 1 times
+    '((\/)|(\/(.*)))?'.
+    // end of the expression, case insensitive
+    '$/i', $text, $m)) {
+  	return false;
+  } 
+  else {
+    $protocol = $m[2];
+    $hostname = strtolower($m[5]).strtolower($m[6]);
+    $ip = $m[11]; 
+    $port = $m[13]; 
+    // don't do anything with these at the moment.
+    return true;
+  }
+}
