@@ -210,8 +210,8 @@ function weburl_views_tables() {
           ),
           'right' => array(
             'field' => 'vid',
-            'extra' => array('field_name' => $field['field_name']),
           ),
+            'extra' => array('field_name' => $field['field_name']),
         ),
         'fields' => array(
           'field_weburl' => array(
