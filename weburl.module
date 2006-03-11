@@ -1,9 +1,9 @@
 <?php
-// $Id:
+// $Id$
 
 /**
  * @file
- * Defines standard simple field types.
+ * Defines simple weburl field types. 
  */
 
 /**

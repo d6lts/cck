@@ -548,43 +548,48 @@ function _content_admin_field_add($type_name) {
     $output .= drupal_get_form('_content_admin_field_add_existing', $form);
   }
 
-  $form = array();
-  $form['new'] = array(
-    '#type' => 'fieldset',
-    '#title' => t('Create new field'),
-  );
-  $form['new']['widget']['label'] = array(
-    '#title' => t('Label'),
-    '#type' => 'textfield',
-    '#default_value' => '',
-    '#description' => t('The human-readable name of this field.'),
-    '#required' => TRUE,
-  );
-  $options = array();
+  $field_type_options = array();
   foreach ($field_types as $field_name => $field_type) {
     foreach ($widget_types as $widget_name => $widget_type) {
       if (in_array($field_name, $widget_type['field types'])) {
-        $options[$field_name .'-'. $widget_name] = $widget_type['label'];
+        $field_type_options[$field_name .'-'. $widget_name] = $widget_type['label'];
       }
     }
   }
-  $form['new']['field_widget_type'] = array(
-    '#type' => 'radios',
-    '#title' => t('Field type'),
-    '#required' => TRUE,
-    '#options' => $options,
-    '#theme' => 'content_admin_field_add_new_field_widget_type',
-  );
+  if (count($field_type_options) > 0) {
+    $form = array();
+    $form['new'] = array(
+      '#type' => 'fieldset',
+      '#title' => t('Create new field'),
+    );
+    $form['new']['widget']['label'] = array(
+      '#title' => t('Label'),
+      '#type' => 'textfield',
+      '#default_value' => '',
+      '#description' => t('The human-readable name of this field.'),
+      '#required' => TRUE,
+    );
+    $form['new']['field_widget_type'] = array(
+      '#type' => 'radios',
+      '#title' => t('Field type'),
+      '#required' => TRUE,
+      '#options' => $field_type_options,
+      '#theme' => 'content_admin_field_add_new_field_widget_type',
+    );
 
-  $form['new']['submit'] = array(
-    '#type' => 'submit',
-    '#value' => t('Create field'),
-  );
-  $form['new']['type_name'] = array(
-    '#type' => 'value',
-    '#value' => $type_name,
-  );
-  $output .= drupal_get_form('_content_admin_field_add_new', $form);
+    $form['new']['submit'] = array(
+      '#type' => 'submit',
+      '#value' => t('Create field'),
+    );
+    $form['new']['type_name'] = array(
+      '#type' => 'value',
+      '#value' => $type_name,
+    );
+    $output .= drupal_get_form('_content_admin_field_add_new', $form);
+  }
+  else {
+    drupal_set_message(t('No field modules are enabled. You need to <a href="%modules_url">enable one</a>, such as text.module, before you can add new fields.', array('%modules_url' => url('admin/modules'))), 'error');
+  }
 
   return $output;
 }

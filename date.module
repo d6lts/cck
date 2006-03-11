@@ -3,7 +3,7 @@
 
 /**
  * @file
- * Defines standard simple field types.
+ * Defines a date/time field type.
  */
 
 /**

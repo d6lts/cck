@@ -1,5 +1,9 @@
 <?php
+// $Id$
 
+/**
+ * Implementation of hook_install().
+ */
 function userreference_install() {
   switch ($GLOBALS['db_type']) {
     case 'mysql':
