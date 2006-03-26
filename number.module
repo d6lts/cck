@@ -41,7 +41,7 @@ function number_field_settings($op, $field) {
       $form['max'] = array(
         '#type' => 'textfield',
         '#title' => t('Maximum'),
-        '#default_value' => $field['min'] ? $field['min'] : '',
+        '#default_value' => $field['max'] ? $field['max'] : '',
       );
       return $form;
 
