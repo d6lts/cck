@@ -11,15 +11,15 @@ function content_install() {
       db_query("CREATE TABLE {node_type} (
           type_name varchar(32) NOT NULL default '',
           label varchar(255) NOT NULL default '',
-          description mediumtext NOT NULL default '',
-          help mediumtext NOT NULL default '',
+          description mediumtext NOT NULL,
+          help mediumtext NOT NULL,
           title_label varchar(255) NOT NULL default '',
           PRIMARY KEY  (type_name)
         ) TYPE=MyISAM /*!40100 DEFAULT CHARACTER SET utf8 */;");
       db_query("CREATE TABLE {node_field} (
           field_name varchar(32) NOT NULL default '',
           type varchar(127) NOT NULL default '',
-          global_settings mediumtext NOT NULL default '',
+          global_settings mediumtext NOT NULL,
           required int NOT NULL default '0',
           multiple int NOT NULL default '0',
           PRIMARY KEY  (field_name)
@@ -30,7 +30,7 @@ function content_install() {
         weight int NOT NULL default '0',
         label varchar(255) NOT NULL default '',
         widget_type varchar(32) NOT NULL default '',
-        widget_settings mediumtext NOT NULL default '',
+        widget_settings mediumtext NOT NULL,
         PRIMARY KEY  (field_name,type_name)
       ) TYPE=MyISAM /*!40100 DEFAULT CHARACTER SET utf8 */;");
       break;
@@ -39,15 +39,15 @@ function content_install() {
       db_query("CREATE TABLE {node_type} (
           type_name varchar(32) NOT NULL default '',
           label varchar(255) NOT NULL default '',
-          description text NOT NULL default '',
-          help text NOT NULL default '',
+          description text NOT NULL,
+          help text NOT NULL,
           title_label varchar(255) NOT NULL default '',
           PRIMARY KEY  (type_name)
         )");
       db_query("CREATE TABLE {node_field} (
           field_name varchar(32) NOT NULL default '',
           type varchar(127) NOT NULL default '',
-          global_settings text NOT NULL default '',
+          global_settings text NOT NULL,
           required integer NOT NULL default '0',
           multiple integer NOT NULL default '0',
           PRIMARY KEY  (field_name)
@@ -58,35 +58,11 @@ function content_install() {
           weight integer NOT NULL default '0',
           label varchar(255) NOT NULL default '',
           widget_type varchar(32) NOT NULL default '',
-          widget_settings text NOT NULL default '',
+          widget_settings text NOT NULL,
           PRIMARY KEY  (field_name,type_name)
         )");
       break;
   }
 }
 
-/**
- * Implementation of hook_update_N(). Add default values for fields.
- */
-function content_update_1() {
-  $ret = array();
 
-  switch ($GLOBALS['db_type']) {
-    case 'pgsql':
-      $ret[] = update_sql("ALTER TABLE {node_type} CHANGE description description text NOT NULL default ''");
-      $ret[] = update_sql("ALTER TABLE {node_type} CHANGE help help text NOT NULL default ''");
-      $ret[] = update_sql("ALTER TABLE {node_field} CHANGE global_settings global_settings text NOT NULL default ''");
-      $ret[] = update_sql("ALTER TABLE {node_field_instance} CHANGE widget_settings widget_settings text NOT NULL default ''");
-      break;
-
-    case 'mysql':
-    case 'mysqli':
-      $ret[] = update_sql("ALTER TABLE {node_type} CHANGE description description mediumtext NOT NULL default ''");
-      $ret[] = update_sql("ALTER TABLE {node_type} CHANGE help help mediumtext NOT NULL default ''");
-      $ret[] = update_sql("ALTER TABLE {node_field} CHANGE global_settings global_settings mediumtext NOT NULL default ''");
-      $ret[] = update_sql("ALTER TABLE {node_field_instance} CHANGE widget_settings widget_settings mediumtext NOT NULL default ''");
-      break;
-  }
-
-  return $ret;
-}
