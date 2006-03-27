@@ -394,7 +394,9 @@ function _content_admin_field_add_new_submit($form_id, $form_values) {
   $field_types = _content_field_types();
   $field_type = $field_types[$field_widget_type[0]];
   $fields = _content_fields();
-  $field = _content_fields($field_name);
+
+  $field = $fields[$field_name];
+
   $columns = module_invoke($field_type['module'], 'field_settings', 'database columns', $field);
   content_alter_db_field(array(), array(), $field, $columns);
 
@@ -603,7 +605,7 @@ function _content_admin_field_submit($form_id, $form_values) {
  * new field definitions.
  */
 function content_alter_db_field($prev_field, $previous_columns, $new_field, $new_columns) {
-  if (count($new_field) && !count($prev_field)) {
+  if (count($prev_field) && !count($new_field)) {
     db_query('DROP TABLE {'. 'node_data_'. $prev_field['field_name'] .'}');
     return;
   }
