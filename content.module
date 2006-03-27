@@ -341,7 +341,7 @@ function content_field($op, &$node, $field, $a2, $a3, $a4) {
             }
             $data[] = $node_field[$column];
           }
-          db_query('INSERT INTO {'. $table_name .'} (vid, delta, nid, '. implode(', ', $column_names) .') VALUES (%d, %d, %d, '. $column_placeholders .')', $data);
+          db_query('INSERT INTO {'. $table_name .'} (vid, delta, nid, '. implode(', ', $column_names) .') VALUES (%d, %d, %d, '. implode(', ', $column_placeholders) .')', $data);
         }
       }
       else {
@@ -358,7 +358,7 @@ function content_field($op, &$node, $field, $a2, $a3, $a4) {
           }
           $data[] = $node_field[$column];
         }
-        db_query('INSERT INTO {'. $table_name .'} (vid, nid, '. implode(', ', $column_names) .') VALUES (%d, %d, '. $column_placeholders .')', $data);
+        db_query('INSERT INTO {'. $table_name .'} (vid, nid, '. implode(', ', $column_names) .') VALUES (%d, %d, '. implode(', ', $column_placeholders) .')', $data);
       }
       return;
 
@@ -383,7 +383,7 @@ function content_field($op, &$node, $field, $a2, $a3, $a4) {
             }
             $data[] = $node_field[$column];
           }
-          db_query('INSERT INTO {'. $table_name .'} (vid, delta, nid, '. implode(', ', $column_names) .') VALUES (%d, %d, %d, '. $column_placeholders .')', $data);
+          db_query('INSERT INTO {'. $table_name .'} (vid, delta, nid, '. implode(', ', $column_names) .') VALUES (%d, %d, %d, '. implode(', ', $column_placeholders) .')', $data);
         }
       }
       else {
@@ -400,7 +400,7 @@ function content_field($op, &$node, $field, $a2, $a3, $a4) {
           }
           $data[] = $node_field[$column];
         }
-        db_query('INSERT INTO {'. $table_name .'} (vid, nid, '. implode(', ', $column_names) .') VALUES (%d, %d, '. $column_placeholders .')', $data);
+        db_query('INSERT INTO {'. $table_name .'} (vid, nid, '. implode(', ', $column_names) .') VALUES (%d, %d, '. implode(', ', $column_placeholders) .')', $data);
       }
 
       return;
