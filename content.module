@@ -46,7 +46,7 @@ function content_perm() {
 function content_menu($may_cache) {
   $items = array();
   $access = user_access('administer content types');
-  
+
   // Only include administrative callbacks if we are viewing an admin page.
   if (arg(0) == 'admin' && arg(1) == 'node' && arg(2) == 'types') {
     include_once(drupal_get_path('module', 'content') .'/content_admin.inc');
@@ -218,29 +218,6 @@ function content_load($node) {
 }
 
 /**
- * Implementation of hook_insert().
- */
-function content_insert($node) {
-  _content_field_invoke('insert', $node);
-}
-
-/**
- * Implementation of hook_update().
- */
-function content_update($node) {
-  _content_field_invoke('update', $node);
-  cache_clear_all('content:'. $node->nid);
-}
-
-/**
- * Implementation of hook_delete().
- */
-function content_delete($node) {
-  _content_field_invoke('delete', $node);
-  cache_clear_all('content:'. $node->nid);
-}
-
-/**
  * Implementation of hook_form().
  */
 function content_form(&$node, &$param) {
@@ -277,6 +254,29 @@ function content_submit(&$node) {
 }
 
 /**
+ * Implementation of hook_insert().
+ */
+function content_insert(&$node) {
+  _content_field_invoke('insert', $node);
+}
+
+/**
+ * Implementation of hook_update().
+ */
+function content_update(&$node) {
+  _content_field_invoke('update', $node);
+  cache_clear_all('content:'. $node->nid);
+}
+
+/**
+ * Implementation of hook_delete().
+ */
+function content_delete(&$node) {
+  _content_field_invoke('delete', $node);
+  cache_clear_all('content:'. $node->nid);
+}
+
+/**
  * Implementation of hook_view().
  */
 function content_view(&$node, $teaser = FALSE, $page = FALSE) {
@@ -285,9 +285,139 @@ function content_view(&$node, $teaser = FALSE, $page = FALSE) {
   $node->readmore = ($node->body != $node->teaser);
 }
 
+/**
+ * Implementation of hook_field(). Handles common field housekeeping.
+ *
+ * This implementation is special, as content.module does not define any field
+ * types. Instead, this function gets called after the type-specific hook, and
+ * takes care of the database interface for field types that do not choose to
+ * do their own storage.
+ */
+function content_field($op, &$node, $field, $a2, $a3, $a4) {
+  $field_types = _content_field_types();
+  $module = $field_types[$field['type']]['module'];
+  $columns = module_invoke($module, 'field_settings', 'database columns', $field);
+  $table_name = 'node_data_'. $field['field_name'];
+
+  if (!count($columns)) {
+    return;
+  }
+
+  switch ($op) {
+    case 'load':
+      $column_names = array();
+      foreach ($columns as $column => $attributes) {
+        $column_names[] = $field['field_name'] .'_'. $column .' AS '. $column;
+      }
+      if ($field['multiple']) {
+        $result = db_query('SELECT '. implode(', ', $column_names) .' FROM {'. $table_name .'} WHERE vid = %d ORDER BY delta', $node->vid);
+        $values = array();
+        while ($value = db_fetch_array($result)) {
+          $values[] = $value;
+        }
+        $additions = array($field['field_name'] => $values);
+      }
+      else {
+        $result = db_query('SELECT '. implode(', ', $column_names) .' FROM {'. $table_name .'} WHERE vid = %d', $node->vid);
+        $additions = array($field['field_name'] => db_fetch_array($result));
+      }
+      return $additions;
+
+    case 'insert':
+      $node_field = $node->$field['field_name'];
+
+      if ($field['multiple']) {
+        foreach ($node_field as $delta => $item) {
+          $data = array($node->vid, $delta, $node->nid);
+          $column_names = array();
+          $column_placeholders = array();
+          foreach ($columns as $column => $attributes) {
+            $column_names[] = $field['field_name'] .'_'. $column;
+            if (in_array($attributes['type'], array('int', 'mediumint', 'tinyint', 'bigint', 'float'))) {
+              $column_placeholders[] = '%d';
+            }
+            else {
+              $column_placeholders[] = "'%s'";
+            }
+            $data[] = $node_field[$column];
+          }
+          db_query('INSERT INTO {'. $table_name .'} (vid, delta, nid, '. implode(', ', $column_names) .') VALUES (%d, %d, %d, '. $column_placeholders .')', $data);
+        }
+      }
+      else {
+        $data = array($node->vid, $node->nid);
+        $column_names = array();
+        $column_placeholders = array();
+        foreach ($columns as $column => $attributes) {
+          $column_names[] = $field['field_name'] .'_'. $column;
+          if (in_array($attributes['type'], array('int', 'mediumint', 'tinyint', 'bigint', 'float'))) {
+            $column_placeholders[] = '%d';
+          }
+          else {
+            $column_placeholders[] = "'%s'";
+          }
+          $data[] = $node_field[$column];
+        }
+        db_query('INSERT INTO {'. $table_name .'} (vid, nid, '. implode(', ', $column_names) .') VALUES (%d, %d, '. $column_placeholders .')', $data);
+      }
+      return;
+
+    case 'update':
+      $node_field = $node->$field['field_name'];
+      // Delete and insert, rather than update, in case a field was added.
+
+      db_query('DELETE FROM {'. $table_name .'} WHERE vid = %d', $node->vid);
+
+      if ($field['multiple']) {
+        foreach ($node_field as $delta => $item) {
+          $data = array($node->vid, $delta, $node->nid);
+          $column_names = array();
+          $column_placeholders = array();
+          foreach ($columns as $column => $attributes) {
+            $column_names[] = $field['field_name'] .'_'. $column;
+            if (in_array($attributes['type'], array('int', 'mediumint', 'tinyint', 'bigint', 'float'))) {
+              $column_placeholders[] = '%d';
+            }
+            else {
+              $column_placeholders[] = "'%s'";
+            }
+            $data[] = $node_field[$column];
+          }
+          db_query('INSERT INTO {'. $table_name .'} (vid, delta, nid, '. implode(', ', $column_names) .') VALUES (%d, %d, %d, '. $column_placeholders .')', $data);
+        }
+      }
+      else {
+        $data = array($node->vid, $node->nid);
+        $column_names = array();
+        $column_placeholders = array();
+        foreach ($columns as $column => $attributes) {
+          $column_names[] = $field['field_name'] .'_'. $column;
+          if (in_array($attributes['type'], array('int', 'mediumint', 'tinyint', 'bigint', 'float'))) {
+            $column_placeholders[] = '%d';
+          }
+          else {
+            $column_placeholders[] = "'%s'";
+          }
+          $data[] = $node_field[$column];
+        }
+        db_query('INSERT INTO {'. $table_name .'} (vid, nid, '. implode(', ', $column_names) .') VALUES (%d, %d, '. $column_placeholders .')', $data);
+      }
+
+      return;
+
+    case 'delete':
+      // Delete using nid rather than vid to purge all revisions.
+      db_query('DELETE FROM {'. $table_name .'} WHERE nid = %d', $node->nid);
+      return;
+  }
+}
+
 
 /**
  * Invoke a field hook.
+ *
+ * For each field, first the hook is invoked in the defining module, then
+ * content.module itself gets a chance to do its default processing.
  */
 function _content_field_invoke($op, &$node, $a2 = NULL, $a3 = NULL, $a4 = NULL) {
   $type_name = is_string($node) ? $node : (is_array($node) ? $node['type'] : $node->type);
@@ -307,6 +437,14 @@ function _content_field_invoke($op, &$node, $a2 = NULL, $a3 = NULL, $a4 = NULL) 
       else if (isset($result)) {
         $return[] = $result;
       }
+    }
+
+    $result = content_field($op, $node, $field, $a2, $a3, $a4);
+    if (is_array($result)) {
+      $return = array_merge($return, $result);
+    }
+    else if (isset($result)) {
+      $return[] = $result;
     }
   }
 
@@ -343,9 +481,12 @@ function _content_widget_invoke($op, &$node) {
 /**
  * Return a list of all content types.
  */
-function _content_types() {
+function _content_types($reset = FALSE) {
   static $types;
 
+  if ($reset) {
+    unset($types);
+  }
   if (!isset($types)) {
     if ($cached = cache_get('content_types')) {
       $types = unserialize($cached->data);
@@ -385,9 +526,12 @@ function _content_types() {
 /**
  * Return a list of all fields.
  */
-function _content_fields() {
+function _content_fields($reset = FALSE) {
   static $fields;
 
+  if ($reset) {
+    unset($fields);
+  }
   if (!isset($fields)) {
     $fields = array();
     $field_result = db_query('SELECT * FROM {node_field} nf');
@@ -406,9 +550,12 @@ function _content_fields() {
 /**
  * Return a list of field types.
  */
-function _content_field_types() {
+function _content_field_types($reset = FALSE) {
   static $types;
 
+  if ($reset) {
+    unset($types);
+  }
   if (!isset($types)) {
     $types = array();
     foreach (module_list() as $module) {
@@ -428,9 +575,12 @@ function _content_field_types() {
 /**
  * Return a list of widget types.
  */
-function _content_widget_types() {
+function _content_widget_types($reset = FALSE) {
   static $types;
 
+  if ($reset) {
+    unset($types);
+  }
   if (!isset($types)) {
     $types = array();
     foreach (module_list() as $module) {
@@ -453,6 +603,12 @@ function _content_widget_types() {
  */
 function content_clear_type_cache() {
   cache_clear_all('content_types');
+
+  _content_types(TRUE);
+  _content_fields(TRUE);
+  _content_field_types(TRUE);
+  _content_widget_types(TRUE);
+
   if (module_exist('views')) {
     views_invalidate_cache();
   }

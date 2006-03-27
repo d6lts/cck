@@ -47,7 +47,16 @@ function text_field_settings($op, $field) {
 
     case 'save':
       return array('text_processing');
-      break;
+
+    case 'database columns':
+      $columns = array(
+        'value' => array('type' => 'varchar', 'length' => 255, 'not null' => TRUE, 'default' => "''"),
+        'format' => array('type' => 'int', 'length' => 10, 'unsigned' => TRUE, 'not null' => TRUE, 'default' => 0),
+      );
+      if ($field['text_processing'] == 0) {
+        unset($columns['format']);
+      }
+      return $columns;
   }
 }
 
@@ -56,39 +65,6 @@ function text_field_settings($op, $field) {
  */
 function text_field($op, &$node, $field, $a2, $a3, $a4) {
   switch ($op) {
-    case 'load':
-      switch($field['type']) {
-        case 'text_shorttext':
-          $result = db_query("SELECT field_shorttext, format FROM {node_field_shorttext_data} WHERE vid = %d AND field_name = '%s' ORDER BY delta", $node->vid, $field['field_name']);
-          if ($field['multiple']) {
-            $values = array();
-            while ($value = db_fetch_object($result)) {
-              $values[] = array('value' => $value->field_shorttext, 'format' => $value->format);
-            }
-            $additions = array($field['field_name'] => $values);
-          }
-          else {
-            $value = db_fetch_object($result);
-            $additions = array($field['field_name'] => array('value' => $value->field_shorttext, 'format' => $value->format));
-          }
-          break;
-        case 'text_longtext':
-          $result = db_query("SELECT field_longtext, format FROM {node_field_longtext_data} WHERE vid = %d AND field_name = '%s' ORDER BY delta", $node->vid, $field['field_name']);
-          if ($field['multiple']) {
-            $values = array();
-            while ($value = db_fetch_object($result)) {
-              $values[] = array('value' => $value->field_longtext, 'format' => $value->format);
-            }
-            $additions = array($field['field_name'] => $values);
-          }
-          else {
-            $value = db_fetch_object($result);
-            $additions = array($field['field_name'] => array('value' => $value->field_longtext, 'format' => $value->format));
-          }
-          break;
-      }
-      return $additions;
-
     case 'view':
       $output = '';
       $node_field = $node->$field['field_name'];
@@ -111,73 +87,6 @@ function text_field($op, &$node, $field, $a2, $a3, $a4) {
       else {
         return '<div class="'. $field['field_name'] .'">'. $node_field['view'] .'</div>';
       }
-
-    case 'insert':
-      $node_field = $node->$field['field_name'];
-      switch($field['type']) {
-        case 'text_shorttext':
-          if ($field['multiple']) {
-            foreach ($node_field as $delta => $item) {
-              db_query("INSERT INTO {node_field_shorttext_data} (nid, vid, field_name, delta, field_shorttext, format) VALUES (%d, %d, '%s', %d, '%s', %d)", $node->nid, $node->vid, $field['field_name'], $delta, $item['value'], $item['format']);
-            }
-          }
-          else {
-            db_query("INSERT INTO {node_field_shorttext_data} (nid, vid, field_name, field_shorttext, format) VALUES (%d, %d, '%s', '%s', %d)", $node->nid, $node->vid, $field['field_name'], $node_field['value'], $node_field['format']);
-          }
-          break;
-        case 'text_longtext':
-          if ($field['multiple']) {
-            foreach ($node_field as $delta => $item) {
-              db_query("INSERT INTO {node_field_longtext_data} (nid, vid, field_name, delta, field_longtext, format) VALUES (%d, %d, '%s', %d, '%s', %d)", $node->nid, $node->vid, $field['field_name'], $delta, $item['value'], $item['format']);
-            }
-          }
-          else {
-            db_query("INSERT INTO {node_field_longtext_data} (nid, vid, field_name, field_longtext, format) VALUES (%d, %d, '%s', '%s', %d)", $node->nid, $node->vid, $field['field_name'], $node_field['value'], $node_field['format']);
-          }
-          break;
-      }
-      return;
-
-    case 'update':
-      $node_field = $node->$field['field_name'];
-      // Delete and insert, rather than update, in case a field was added.
-      switch($field['type']) {
-        case 'text_shorttext':
-          db_query("DELETE FROM {node_field_shorttext_data} WHERE vid = %d AND field_name = '%s'", $node->vid, $field['field_name']);
-          if ($field['multiple']) {
-            foreach ($node_field as $delta => $item) {
-              db_query("INSERT INTO {node_field_shorttext_data} (nid, vid, field_name, delta, field_shorttext, format) VALUES (%d, %d, '%s', %d, '%s', %d)", $node->nid, $node->vid, $field['field_name'], $delta, $item['value'], $item['format']);
-            }
-          }
-          else {
-            db_query("INSERT INTO {node_field_shorttext_data} (nid, vid, field_name, field_shorttext, format) VALUES (%d, %d, '%s', '%s', %d)", $node->nid, $node->vid, $field['field_name'], $node_field['value'], $node_field['format']);
-          }
-          break;
-        case 'text_longtext':
-          db_query("DELETE FROM {node_field_longtext_data} WHERE vid = %d AND field_name = '%s'", $node->vid, $field['field_name']);
-          if ($field['multiple']) {
-            foreach ($node_field as $delta => $item) {
-              db_query("INSERT INTO {node_field_longtext_data} (nid, vid, field_name, delta, field_longtext, format) VALUES (%d, %d, '%s', %d, '%s', %d)", $node->nid, $node->vid, $field['field_name'], $delta, $item['value'], $item['format']);
-            }
-          }
-          else {
-            db_query("INSERT INTO {node_field_longtext_data} (nid, vid, field_name, field_longtext, format) VALUES (%d, %d, '%s', '%s', %d)", $node->nid, $node->vid, $field['field_name'], $node_field['value'], $node_field['format']);
-          }
-          break;
-      }
-      return;
-
-    case 'delete':
-      // Delete using nid rather than vid to purge all revisions.
-      switch($field['type']) {
-        case 'text_shorttext':
-          db_query("DELETE FROM {node_field_shorttext_data} WHERE nid = %d AND field_name = '%s'", $node->nid, $field['field_name']);
-          break;
-        case 'text_longtext':
-          db_query("DELETE FROM {node_field_longtext_data} WHERE nid = %d AND field_name = '%s'", $node->nid, $field['field_name']);
-          break;
-      }
-      return;
   }
 }
 
@@ -301,74 +210,3 @@ function text_field_view($field, $value, $addlfields = array(), $node = NULL) {
     return check_plain($value);
   }
 }
-
-/**
- * Implementation of hook_views_tables().
- */
-function text_views_tables() {
-  $tables = array();
-
-  $fields = _content_fields();
-  foreach ($fields as $field) {
-    if ($field['type'] == 'text_shorttext') {
-      $tables['node_field_shorttext_data_'. $field['field_name']] = array(
-        'name' => 'node_field_shorttext_data',
-        'join' => array(
-          'left' => array(
-            'table' => 'node',
-            'field' => 'vid',
-          ),
-          'right' => array(
-            'field' => 'vid',
-          ),
-          'extra' => array('field_name' => $field['field_name']),
-        ),
-        'fields' => array(
-          'field_shorttext' => array(
-            'name' => 'Short Text: '. $field['field_name'],
-            'sortable' => TRUE,
-          ),
-        ),
-        'sorts' => array(
-          'field_shorttext' => array('name' => 'Short Text: '. $field['field_name']),
-        ),
-        'filters' => array(
-          'field_shorttext' => array(
-            'name' => 'Short Text: '. $field['field_name'],
-            'operator' => array(
-              '='  => 'is',
-              'contains' => 'contains',
-              'begins' => 'begins with',
-              'ends' => 'ends wth',
-              'LIKE'  => 'matches pattern',
-            ),
-            'operator-handler' => '_text_filter_operator',
-          ),
-        ),
-      );
-    }
-  }
-
-  return $tables;
-}
-
-/**
- * Format the WHERE portion of a query.
- */
-function _text_filter_operator($field, $operator, $value) {
-  switch ($operator) {
-    case 'contains':
-      $string = $field ." LIKE '%%%s%%'";
-      break;
-    case 'begins':
-      $string = $field ." LIKE '%s%%'";
-      break;
-    case 'ends':
-      $string = $field ." LIKE '%%%s'";
-      break;
-    default:
-      $string = $field ." $operator '%s'";
-  }
-  return array($string, $value);
-}
-

@@ -5,54 +5,11 @@
  * Implementation of hook_install().
  */
 function text_install() {
-  switch ($GLOBALS['db_type']) {
-    case 'mysql':
-    case 'mysqli':
-      db_query("CREATE TABLE {node_field_longtext_data} (
-          nid int unsigned NOT NULL default '0',
-          vid int unsigned NOT NULL default '0',
-          field_name varchar(32) NOT NULL default '',
-          delta int unsigned NOT NULL default '0',
-          field_longtext mediumtext NOT NULL,
-          format int NOT NULL default '0',
-          PRIMARY KEY  (vid,field_name,delta)
-        ) TYPE=MyISAM /*!40100 DEFAULT CHARACTER SET utf8 */;");
-
-      db_query("CREATE TABLE {node_field_shorttext_data} (
-          nid int unsigned NOT NULL default '0',
-          vid int unsigned NOT NULL default '0',
-          field_name varchar(32) NOT NULL default '',
-          delta int unsigned NOT NULL default '0',
-          field_shorttext varchar(255) NOT NULL default '',
-          format int NOT NULL default '0',
-          PRIMARY KEY  (vid,field_name,delta)
-        ) TYPE=MyISAM /*!40100 DEFAULT CHARACTER SET utf8 */;");
-      break;
-
-    case 'pgsql':
-      db_query("CREATE TABLE {node_field_longtext_data} (
-          nid integer unsigned NOT NULL default '0',
-          vid integer unsigned NOT NULL default '0',
-          field_name varchar(32) NOT NULL default '',
-          delta integer unsigned NOT NULL default '0',
-          field_longtext text NOT NULL,
-          format integer NOT NULL default '0',
-          PRIMARY KEY  (vid,field_name,delta)
-        )");
-
-      db_query("CREATE TABLE {node_field_shorttext_data} (
-          nid integer unsigned NOT NULL default '0',
-          vid integer unsigned NOT NULL default '0',
-          field_name varchar(32) NOT NULL default '',
-          delta integer unsigned NOT NULL default '0',
-          field_shorttext varchar(255) NOT NULL default '',
-          format integer NOT NULL default '0',
-          PRIMARY KEY  (vid,field_name,delta)
-        )");
-      break;
-  }
 }
 
+/**
+ * Add node ID column so we can delete old revisions at node delete time.
+ */
 function text_update_1() {
   $ret = array();
 
@@ -72,6 +29,9 @@ function text_update_1() {
   return $ret;
 }
 
+/**
+ * Populate nid column in existing short-text fields.
+ */
 function text_update_2() {
   // Multi-part update
   if (!isset($_SESSION['text_update_2'])) {
@@ -94,6 +54,9 @@ function text_update_2() {
   return array('#finished' => $_SESSION['text_update_2'] / $_SESSION['text_update_2_max']);
 }
 
+/**
+ * Populate nid column in existing long-text fields.
+ */
 function text_update_3() {
   // Multi-part update
   if (!isset($_SESSION['text_update_3'])) {
@@ -114,4 +77,79 @@ function text_update_3() {
   }
 
   return array('#finished' => $_SESSION['text_update_3'] / $_SESSION['text_update_3_max']);
+}
+
+/**
+ * Data is now stored in per-field tables.
+ */
+function text_update_4() {
+  $ret = array();
+
+  include_once(drupal_get_path('module', 'content') .'/content.module');
+  include_once(drupal_get_path('module', 'content') .'/content_admin.inc');
+
+  $fields = _content_fields();
+
+  foreach ($fields as $field) {
+    switch ($field['type']) {
+      case 'text_shorttext':
+        $columns = array(
+          'value' => array('type' => 'varchar', 'length' => 255, 'not null' => TRUE, 'default' => "''"),
+          'format' => array('type' => 'int', 'length' => 10, 'unsigned' => TRUE, 'not null' => TRUE, 'default' => 0),
+        );
+        if ($field['text_processing'] == 0) {
+          unset($columns['format']);
+        }
+        content_alter_db_field($field, array(), $columns);
+        if ($field['multiple']) {
+          if ($field['text_processing']) {
+            $ret[] = update_sql('INSERT INTO {node_data_'. $field['field_name'] .'} (vid, delta, nid, '. $field['field_name'] .'_value, '. $field['field_name'] ."_format) SELECT vid, delta, nid, field_shorttext, format FROM {node_field_shorttext_data} WHERE field_name = '". $field['field_name'] ."'");
+          }
+          else {
+            $ret[] = update_sql('INSERT INTO {node_data_'. $field['field_name'] .'} (vid, delta, nid, '. $field['field_name'] ."_value) SELECT vid, delta, nid, field_shorttext FROM {node_field_shorttext_data} WHERE field_name = '". $field['field_name'] ."'");
+          }
+        }
+        else {
+          if ($field['text_processing']) {
+            $ret[] = update_sql('INSERT INTO {node_data_'. $field['field_name'] .'} (vid, nid, '. $field['field_name'] .'_value, '. $field['field_name'] ."_format) SELECT vid, nid, field_shorttext, format FROM {node_field_shorttext_data} WHERE field_name = '". $field['field_name'] ."'");
+          }
+          else {
+            $ret[] = update_sql('INSERT INTO {node_data_'. $field['field_name'] .'} (vid, nid, '. $field['field_name'] ."_value) SELECT vid, nid, field_shorttext FROM {node_field_shorttext_data} WHERE field_name = '". $field['field_name'] ."'");
+          }
+        }
+        break;
+      case 'text_longtext':
+        $columns = array(
+          'value' => array('type' => 'mediumtext', 'not null' => TRUE, 'default' => "''"),
+          'format' => array('type' => 'int', 'length' => 10, 'unsigned' => TRUE, 'not null' => TRUE, 'default' => 0),
+        );
+        if ($field['text_processing'] == 0) {
+          unset($columns['format']);
+        }
+        content_alter_db_field($field, array(), $columns);
+        if ($field['multiple']) {
+          if ($field['text_processing']) {
+            $ret[] = update_sql('INSERT INTO {node_data_'. $field['field_name'] .'} (vid, delta, nid, '. $field['field_name'] .'_value, '. $field['field_name'] ."_format) SELECT vid, delta, nid, field_longtext, format FROM {node_field_longtext_data} WHERE field_name = '". $field['field_name'] ."'");
+          }
+          else {
+            $ret[] = update_sql('INSERT INTO {node_data_'. $field['field_name'] .'} (vid, delta, nid, '. $field['field_name'] ."_value) SELECT vid, delta, nid, field_longtext FROM {node_field_longtext_data} WHERE field_name = '". $field['field_name'] ."'");
+          }
+        }
+        else {
+          if ($field['text_processing']) {
+            $ret[] = update_sql('INSERT INTO {node_data_'. $field['field_name'] .'} (vid, nid, '. $field['field_name'] .'_value, '. $field['field_name'] ."_format) SELECT vid, nid, field_longtext, format FROM {node_field_longtext_data} WHERE field_name = '". $field['field_name'] ."'");
+          }
+          else {
+            $ret[] = update_sql('INSERT INTO {node_data_'. $field['field_name'] .'} (vid, nid, '. $field['field_name'] ."_value) SELECT vid, nid, field_longtext FROM {node_field_longtext_data} WHERE field_name = '". $field['field_name'] ."'");
+          }
+        }
+        break;
+    }
+  }
+
+  $ret[] = update_sql('DROP TABLE {node_field_shorttext_data}');
+  $ret[] = update_sql('DROP TABLE {node_field_longtext_data}');
+
+  db_query('DELETE FROM {cache}');
+  return $ret;
 }
