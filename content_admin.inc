@@ -502,6 +502,14 @@ function _content_admin_field($type_name, $field_name) {
   if ($additions = module_invoke($widget_type['module'], 'widget_settings', 'form', $field['widget'])) {
     $form['widget'] = array_merge($form['widget'], $additions);
   }
+  $form['widget']['description'] = array(
+    '#type' => 'textarea',
+    '#title' => t('Help text'),
+    '#default_value' => $field['widget']['description'],
+    '#rows' => 5,
+    '#description' => t('Instructions to present to the user below this field on the editing form.'),
+    '#required' => FALSE,
+  );
 
   $form['field'] = array(
     '#type' => 'fieldset',
@@ -583,7 +591,7 @@ function _content_admin_field_submit($form_id, $form_values) {
   $prev_field = $field;
   $prev_columns = module_invoke($field_type['module'], 'field_settings', 'database columns', $field);
 
-  db_query("UPDATE {node_field_instance} SET weight = %d, label = '%s', widget_type = '%s', widget_settings = '%s' WHERE type_name = '%s' AND field_name = '%s'", $form_values['weight'], $form_values['label'], $form_values['widget_type'], serialize($widget_settings), $form_values['type_name'], $form_values['field_name']);
+  db_query("UPDATE {node_field_instance} SET weight = %d, label = '%s', widget_type = '%s', widget_settings = '%s', description = '%s' WHERE type_name = '%s' AND field_name = '%s'", $form_values['weight'], $form_values['label'], $form_values['widget_type'], serialize($widget_settings), $form_values['description'], $form_values['type_name'], $form_values['field_name']);
 
   db_query("UPDATE {node_field} SET required = %d, multiple = %d, global_settings = '%s' WHERE field_name = '%s'", $form_values['required'], $form_values['multiple'], serialize($field_settings), $form_values['field_name']);
 

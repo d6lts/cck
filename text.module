@@ -171,6 +171,7 @@ function text_widget($op, &$node, $field) {
             '#title' => t($field['widget']['label']),
             '#default_value' => $node_field['value'],
             '#required' => $field['required'],
+            '#description' => $field['widget']['description'],
           );
         }
         else {
@@ -180,6 +181,7 @@ function text_widget($op, &$node, $field) {
             '#default_value' => $node_field['value'],
             '#required' => $field['required'],
             '#rows' => $field['widget']['rows'],
+            '#description' => $field['widget']['description'],
           );
         }
         if ($field['text_processing']) {

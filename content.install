@@ -31,6 +31,7 @@ function content_install() {
         label varchar(255) NOT NULL default '',
         widget_type varchar(32) NOT NULL default '',
         widget_settings mediumtext NOT NULL,
+        description mediumtext NOT NULL,
         PRIMARY KEY  (field_name,type_name)
       ) TYPE=MyISAM /*!40100 DEFAULT CHARACTER SET utf8 */;");
       break;
@@ -59,10 +60,30 @@ function content_install() {
           label varchar(255) NOT NULL default '',
           widget_type varchar(32) NOT NULL default '',
           widget_settings text NOT NULL,
+          description text NOT NULL,
           PRIMARY KEY  (field_name,type_name)
         )");
       break;
   }
 }
 
+/**
+ * Add storage for per-field help text.
+ */
+function content_update_2() {
+  $ret = array();
+
+  switch ($GLOBALS['db_type']) {
+    case 'pgsql':
+      db_add_column($ret, 'node_field_instance', 'description', 'text', array('not null' => TRUE, 'default' => ''));
+      break;
+
+    case 'mysql':
+    case 'mysqli':
+      $ret[] = update_sql("ALTER TABLE {node_field_instance} ADD COLUMN description mediumtext NOT NULL");
+      break;
+  }
+
+  return $ret;
+}
 

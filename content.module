@@ -493,7 +493,7 @@ function _content_types($reset = FALSE) {
       $type_result = db_query('SELECT * FROM {node_type} nt ORDER BY nt.type_name ASC');
       while ($type = db_fetch_object($type_result)) {
         $type->fields = array();
-        $field_result = db_query("SELECT nfi.field_name, nfi.weight, nfi.label, nfi.widget_type, nfi.widget_settings, nf.type, nf.global_settings, nf.required, nf.multiple FROM {node_field_instance} nfi LEFT JOIN {node_field} nf ON nfi.field_name = nf.field_name WHERE nfi.type_name = '%s' ORDER BY nfi.weight ASC, nfi.label ASC", $type->type_name);
+        $field_result = db_query("SELECT nfi.field_name, nfi.weight, nfi.label, nfi.widget_type, nfi.widget_settings, nfi.description, nf.type, nf.global_settings, nf.required, nf.multiple FROM {node_field_instance} nfi LEFT JOIN {node_field} nf ON nfi.field_name = nf.field_name WHERE nfi.type_name = '%s' ORDER BY nfi.weight ASC, nfi.label ASC", $type->type_name);
         while ($field = db_fetch_array($field_result)) {
           $field_settings = $field['global_settings'] ? unserialize($field['global_settings']) : array();
           $widget_settings = $field['widget_settings'] ? unserialize($field['widget_settings']) : array();
@@ -507,6 +507,8 @@ function _content_types($reset = FALSE) {
           unset($field['weight']);
           $field['widget']['label'] = $field['label'];
           unset($field['label']);
+          $field['widget']['description'] = $field['description'];
+          unset($field['description']);
           $type->fields[$field['field_name']] = $field;
         }
 
