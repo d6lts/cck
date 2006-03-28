@@ -592,7 +592,7 @@ function _content_admin_field_submit($form_id, $form_values) {
 
   $fields = _content_fields();
   $new_field = $fields[$form_values['field_name']];
-  $new_columns = module_invoke($field_type['module'], 'field_settings', 'database columns', $field);
+  $new_columns = module_invoke($field_type['module'], 'field_settings', 'database columns', $new_field);
 
   content_alter_db_field($prev_field, $prev_columns, $new_field, $new_columns);
 
