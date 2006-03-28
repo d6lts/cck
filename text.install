@@ -172,7 +172,7 @@ function text_update_5() {
     else {
       $global_settings['max_length'] = '';
     }
-    $ret[] = update_sql("UPDATE {node_field} SET type = 'text', global_settings = '". db_escape_string(serialize($global_settings)) ."' WHERE field_name = '". db_escape_string($field->field_name) ."'");
+    db_query("UPDATE {node_field} SET type = 'text', global_settings = '%s' WHERE field_name = '%s'", serialize($global_settings), $field->field_name);
   }
 
   db_query('DELETE FROM {cache}');
