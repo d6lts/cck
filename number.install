@@ -111,3 +111,50 @@ function number_update_3() {
 
   return array('#finished' => $_SESSION['number_update_3'] / $_SESSION['number_update_3_max']);
 }
+
+/**
+ * Data is now stored in per-field tables.
+ */
+function number_update_4() {
+  $ret = array();
+
+  include_once(drupal_get_path('module', 'content') .'/content.module');
+  include_once(drupal_get_path('module', 'content') .'/content_admin.inc');
+
+  $fields = _content_fields();
+
+  foreach ($fields as $field) {
+    switch ($field['type']) {
+      case 'number_integer':
+        $columns = array(
+          'value' => array('type' => 'int', 'not null' => TRUE, 'default' => 0),
+        );
+        content_alter_db_field(array(), array(), $field, $columns);
+        if ($field['multiple']) {
+          $ret[] = update_sql('INSERT INTO {node_data_'. $field['field_name'] .'} (vid, delta, nid, '. $field['field_name'] ."_value) SELECT vid, delta, nid, field_int FROM {node_field_int_data} WHERE field_name = '". $field['field_name'] ."'");
+        }
+        else {
+          $ret[] = update_sql('INSERT INTO {node_data_'. $field['field_name'] .'} (vid, nid, '. $field['field_name'] ."_value) SELECT vid, nid, field_int FROM {node_field_int_data} WHERE field_name = '". $field['field_name'] ."'");
+        }
+        break;
+      case 'number_decimal':
+        $columns = array(
+          'value' => array('type' => 'float', 'not null' => TRUE, 'default' => 0),
+        );
+        content_alter_db_field(array(), array(), $field, $columns);
+        if ($field['multiple']) {
+          $ret[] = update_sql('INSERT INTO {node_data_'. $field['field_name'] .'} (vid, delta, nid, '. $field['field_name'] ."_value) SELECT vid, delta, nid, field_float FROM {node_field_float_data} WHERE field_name = '". $field['field_name'] ."'");
+        }
+        else {
+          $ret[] = update_sql('INSERT INTO {node_data_'. $field['field_name'] .'} (vid, nid, '. $field['field_name'] ."_value) SELECT vid, nid, field_float FROM {node_field_float_data} WHERE field_name = '". $field['field_name'] ."'");
+        }
+        break;
+    }
+  }
+
+  $ret[] = update_sql('DROP TABLE {node_field_int_data}');
+  $ret[] = update_sql('DROP TABLE {node_field_float_data}');
+
+  db_query('DELETE FROM {cache}');
+  return $ret;
+}

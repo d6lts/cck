@@ -587,7 +587,7 @@ function _content_admin_field_submit($form_id, $form_values) {
       $field_settings[$setting] = $form_values[$setting];
     }
   }
-  
+
   $prev_field = $field;
   $prev_columns = module_invoke($field_type['module'], 'field_settings', 'database columns', $field);
 
