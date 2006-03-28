@@ -100,7 +100,7 @@ function text_update_4() {
         if ($field['text_processing'] == 0) {
           unset($columns['format']);
         }
-        content_alter_db_field($field, array(), $columns);
+        content_alter_db_field(array(), array(), $field, $columns);
         if ($field['multiple']) {
           if ($field['text_processing']) {
             $ret[] = update_sql('INSERT INTO {node_data_'. $field['field_name'] .'} (vid, delta, nid, '. $field['field_name'] .'_value, '. $field['field_name'] ."_format) SELECT vid, delta, nid, field_shorttext, format FROM {node_field_shorttext_data} WHERE field_name = '". $field['field_name'] ."'");
@@ -126,7 +126,7 @@ function text_update_4() {
         if ($field['text_processing'] == 0) {
           unset($columns['format']);
         }
-        content_alter_db_field($field, array(), $columns);
+        content_alter_db_field(array(), array(), $field, $columns);
         if ($field['multiple']) {
           if ($field['text_processing']) {
             $ret[] = update_sql('INSERT INTO {node_data_'. $field['field_name'] .'} (vid, delta, nid, '. $field['field_name'] .'_value, '. $field['field_name'] ."_format) SELECT vid, delta, nid, field_longtext, format FROM {node_field_longtext_data} WHERE field_name = '". $field['field_name'] ."'");
