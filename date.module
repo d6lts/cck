@@ -52,6 +52,11 @@ function date_field_settings($op, $field) {
 
     case 'save':
       return array('granularity');
+
+    case 'database columns':
+      return array(
+        'value' => array('type' => 'varchar', 'length' => 17, 'not null' => TRUE, 'default' => '00010101T00:00:00'),
+      );
   }
 }
 
@@ -61,21 +66,6 @@ function date_field_settings($op, $field) {
  */
 function date_field($op, $node, &$field, $a2, $a3, $a4) {
   switch ($op) {
-    case 'load':
-      $result = db_query("SELECT field_date FROM {node_field_date_data} WHERE vid = %d AND field_name = '%s' ORDER BY delta", $node->vid, $field['field_name']);
-      if ($field['multiple']) {
-        $values = array();
-        while ($value = db_fetch_object($result)) {
-          $values[] = array('value' => $value->field_date);
-        }
-        $additions = array($field['field_name'] => $values);
-      }
-      else {
-        $value = db_fetch_object($result);
-        $additions = array($field['field_name'] => array('value' => $value->field_date));
-      }
-      return $additions;
-
     case 'view':
       $output = '';
       $node_field = $node->$field['field_name'];
@@ -98,37 +88,6 @@ function date_field($op, $node, &$field, $a2, $a3, $a4) {
       else {
         return '<div class="'. $field['field_name'] .'">'. $node_field['view'] .'</div>';
       }
-
-    case 'insert':
-      $node_field = $node->$field['field_name'];
-      if ($field['multiple']) {
-        foreach ($node_field as $delta => $item) {
-          db_query("INSERT INTO {node_field_date_data} (nid, vid, field_name, delta, field_date) VALUES (%d, %d, '%s', %d, '%s')", $node->nid, $node->vid, $field['field_name'], $delta, $item['value']);
-        }
-      }
-      else {
-        db_query("INSERT INTO {node_field_date_data} (nid, vid, field_name, field_date) VALUES (%d, %d, '%s', '%s')", $node->nid, $node->vid, $field['field_name'], $node_field['value']);
-      }
-      return;
-
-    case 'update':
-      $node_field = $node->$field['field_name'];
-      // Delete and insert, rather than update, in case a field was added.
-      db_query("DELETE FROM {node_field_date_data} WHERE vid = %d AND field_name = '%s'", $node->vid, $field['field_name']);
-      if ($field['multiple']) {
-        foreach ($node_field as $delta => $item) {
-          db_query("INSERT INTO {node_field_date_data} (nid, vid, field_name, delta, field_date) VALUES (%d, %d, '%s', %d, '%s')", $node->nid, $node->vid, $field['field_name'], $delta, $item['value']);
-        }
-      }
-      else {
-        db_query("INSERT INTO {node_field_date_data} (nid, vid, field_name, field_date) VALUES (%d, %d, '%s', '%s')", $node->nid, $node->vid, $field['field_name'], $node_field['value']);
-      }
-      return;
-
-    case 'delete':
-      // Delete using nid rather than vid to purge all revisions.
-      db_query("DELETE FROM {node_field_date_data} WHERE nid = %d AND field_name = '%s'", $node->nid, $field['field_name']);
-      return;
   }
 }
 
@@ -209,7 +168,7 @@ function date_widget($op, &$node, $field) {
         if (is_array($node_field)) {
           foreach ($node_field as $delta => $item) {
             if ($item['value'] != '') {
-              if (preg_match('/[0-9]{8}T[0-9]{2}:[0-9]{2}:[0-9]{2}/', $item['value'])) {
+              if (!preg_match('/[0-9]{8}T[0-9]{2}:[0-9]{2}:[0-9]{2}/', $item['value'])) {
                 form_set_error($field['field_name'] .']['. $delta .'][value', t('%name must be entered in ISO 8601 format (YYYYMMDDThh:mm:ss).', array('%name' => t($field['widget']['label']))));
               }
             }
@@ -219,7 +178,7 @@ function date_widget($op, &$node, $field) {
       else {
         if (isset($node_field['value'])) {
           if ($node_field['value'] != '') {
-            if (preg_match('/[0-9]{8}T[0-9]{2}:[0-9]{2}:[0-9]{2}/', $node_field['value'])) {
+            if (!preg_match('/[0-9]{8}T[0-9]{2}:[0-9]{2}:[0-9]{2}/', $node_field['value'])) {
               form_set_error($field['field_name'] .'][value', t('%name must be entered in ISO 8601 format (YYYYMMDDThh:mm:ss).', array('%name' => t($field['widget']['label']))));
             }
           }
