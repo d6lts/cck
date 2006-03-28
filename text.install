@@ -153,3 +153,29 @@ function text_update_4() {
   db_query('DELETE FROM {cache}');
   return $ret;
 }
+
+/**
+ * Consolidate into a single text field type.
+ */
+function text_update_5() {
+  $ret = array();
+
+  $result = db_query("SELECT field_name, type, global_settings FROM {node_field} WHERE type IN ('text_shorttext', 'text_longtext')");
+  while ($field = db_fetch_object($result)) {
+    $global_settings = array();
+    if ($field->global_settings) {
+      $global_settings = unserialize($field->global_settings);
+    }
+    if ($field->type == 'text_shorttext') {
+      $global_settings['max_length'] = '255';
+    }
+    else {
+      $global_settings['max_length'] = '';
+    }
+    $ret[] = update_sql("UPDATE {node_field} SET type = 'text', global_settings = '". db_escape_string(serialize($global_settings)) ."' WHERE field_name = '". db_escape_string($field->field_name) ."'");
+  }
+
+  db_query('DELETE FROM {cache}');
+
+  return $ret;
+}
