@@ -55,7 +55,7 @@ function date_field_settings($op, $field) {
 
     case 'database columns':
       return array(
-        'value' => array('type' => 'varchar', 'length' => 17, 'not null' => TRUE, 'default' => '00010101T00:00:00'),
+        'value' => array('type' => 'varchar', 'length' => 17, 'not null' => TRUE, 'default' => "'00010101T00:00:00'"),
       );
   }
 }

@@ -603,3 +603,4 @@ function content_clear_type_cache() {
     views_invalidate_cache();
   }
 }
+
