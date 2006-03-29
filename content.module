@@ -339,7 +339,7 @@ function content_field($op, &$node, $field, $a2, $a3, $a4) {
             else {
               $column_placeholders[] = "'%s'";
             }
-            $data[] = $node_field[$column];
+            $data[] = $item[$column];
           }
           db_query('INSERT INTO {'. $table_name .'} (vid, delta, nid, '. implode(', ', $column_names) .') VALUES (%d, %d, %d, '. implode(', ', $column_placeholders) .')', $data);
         }
@@ -381,7 +381,7 @@ function content_field($op, &$node, $field, $a2, $a3, $a4) {
             else {
               $column_placeholders[] = "'%s'";
             }
-            $data[] = $node_field[$column];
+            $data[] = $item[$column];
           }
           db_query('INSERT INTO {'. $table_name .'} (vid, delta, nid, '. implode(', ', $column_names) .') VALUES (%d, %d, %d, '. implode(', ', $column_placeholders) .')', $data);
         }
