@@ -244,6 +244,7 @@ function content_form(&$node, &$param) {
  */
 function content_validate(&$node) {
   _content_widget_invoke('validate', $node);
+  _content_field_invoke('validate', $node);
 }
 
 /**
@@ -603,4 +604,32 @@ function content_clear_type_cache() {
     views_invalidate_cache();
   }
 }
+
+/**
+ * Manipulate a 2D array to reverse rows and columns.
+ *
+ * The default data storage for multiple-valued fields is delta first,
+ * column names second. This is sometimes inconvenient for field modules,
+ * so this function can be used to present the data in an alternate format.
+ *
+ * @param $array
+ *   The array to be transposed. It must be at least two-dimensional, and
+ *   the subarrays must all have the same keys or behavior is undefined.
+ *
+ * @return
+ *   The transposed array.
+ */
+function content_transpose_array_rows_cols($array) {
+  $result = array();
+  foreach ($array as $key1 => $value1) {
+    foreach ($value1 as $key2 => $value2) {
+      if (!isset($result[$key2])) {
+        $result[$key2] = array();
+      }
+      $result[$key2][$key1] = $value2;
+    }
+  }
+  return $result;
+}
+
 

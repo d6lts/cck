@@ -38,6 +38,12 @@ function userreference_field_settings($op, $field) {
 
     case 'save':
       return array();
+
+    case 'database columns':
+      $columns = array(
+        'uid' => array('type' => 'int', 'not null' => TRUE, 'default' => '0'),
+      );
+      return $columns;
   }
 }
 
@@ -46,73 +52,29 @@ function userreference_field_settings($op, $field) {
  */
 function userreference_field($op, &$node, $field, $a2, $a3, $a4) {
   switch ($op) {
-    case 'load':
-      $result = db_query("SELECT field_uid FROM {node_field_userreference_data} WHERE vid = %d AND field_name = '%s' ORDER BY delta", $node->vid, $field['field_name']);
-
+    case 'view':
+    dprint_r($node);
+      $node_field = $node->$field['field_name'];
       if ($field['multiple']) {
-        $values = array();
-        while ($value = db_fetch_object($result)) {
-          $values[] = $value->field_uid;
-        }
-        $additions = array($field['field_name'] => $values);
+        $node_field_transposed = content_transpose_array_rows_cols($node_field);
+        $uids = $node_field_transposed['uid'];
       }
       else {
-        $value = db_fetch_object($result);
-        $additions = array($field['field_name'] => array($value->field_uid));
+        $uids = array($node_field['uid']);
       }
-
-      return $additions;
-
-    case 'view':
-      $node_field = $node->$field['field_name'];
 
       $user_array = array();
 
-      foreach ($node_field as $referenced_uid) {
-        $referenced_user = user_load(array('uid' => $referenced_uid));
-        $user_array[] = theme('username', $referenced_user);
-      }
-
-      $item['view'] = theme('item_list', $user_array);
-
-      return '<div class="'. $field['field_name'] .'">'. $item['view'] .'</div>';
-
-    case 'insert':
-      $node_field = $node->$field['field_name'];
-
-      if ($field['multiple']) {
-        foreach ($node_field['relation'] as $delta => $value) {
-          db_query("INSERT INTO {node_field_userreference_data} (nid, vid, field_name, delta, field_uid) VALUES (%d, %d, '%s', %d, %d)", $node->nid, $node->vid, $field['field_name'], $delta, $value);
+      foreach ($uids as $referenced_uid) {
+        if ($referenced_uid) {
+          $referenced_user = user_load(array('uid' => $referenced_uid));
+          $user_array[] = theme('username', $referenced_user);
         }
       }
-      else {
-        // Ajax user autocomplete returns the user's name, but we need to save the uid
-        $user_id = db_result(db_query("SELECT uid FROM {users} WHERE name = '%s'", $node_field['relation']));
-        db_query("INSERT INTO {node_field_userreference_data} (nid, vid, field_name, delta, field_uid) VALUES (%d, %d, '%s', %d, %d)", $node->nid, $node->vid, $field['field_name'], $delta, $user_id);
-      }
-      break;
 
-    case 'update':
-      $node_field = $node->$field['field_name'];
-
-      // Delete and insert, rather than update, in case a field was added.
-      db_query("DELETE FROM {node_field_userreference_data} WHERE vid = %d AND field_name = '%s'", $node->vid, $field['field_name']);
-      if ($field['multiple']) {
-        foreach ($node_field['relation'] as $delta => $value) {
-          db_query("INSERT INTO {node_field_userreference_data} (nid, vid, field_name, delta, field_uid) VALUES (%d, %d, '%s', %d, %d)", $node->nid, $node->vid, $field['field_name'], $delta, $value);
-        }
-      }
-      else {
-        // Ajax user autocomplete returns the user's name, but we need to save the uid
-        $user_id = db_result(db_query("SELECT uid FROM {users} WHERE name = '%s'", $node_field['relation']));
-        db_query("INSERT INTO {node_field_userreference_data} (nid, vid, field_name, delta, field_uid) VALUES (%d, %d, '%s', %d, %d)", $node->nid, $node->vid, $field['field_name'], $delta, $user_id);
-      }
-      return;
-
-    case 'delete':
-      // Delete using nid rather than vid to purge all revisions.
-      db_query("DELETE FROM {node_field_userreference_data} WHERE nid = %d AND field_name = '%s'", $node->nid, $field['field_name']);
-      return;
+      $node_field['view'] = theme('item_list', $user_array);
+      $node->$field['field_name'] = $node_field;
+      return '<div class="'. $field['field_name'] .'">'. $node_field['view'] .'</div>';
   }
 }
 
@@ -153,38 +115,83 @@ function userreference_widget_settings($op, $widget) {
  * Implementation of hook_widget().
  */
 function userreference_widget($op, &$node, $field) {
-  switch ($op) {
-    case 'form':
-      $form = array();
-      $node_field = $node->$field['field_name'];
+  if ($field['widget']['type'] == 'userreference_select' || $field['multiple']) {
+    switch ($op) {
+      case 'form':
+        $form = array();
+        $node_field = $node->$field['field_name'];
+        if ($field['multiple']) {
+          $node_field_transposed = content_transpose_array_rows_cols($node_field);
+          $uids = $node_field_transposed['uid'];
+        }
+        else {
+          $uids = array($node_field['uid']);
+        }
 
-      $form[$field['field_name']] = array('#tree' => TRUE);
-
-      if ($field['multiple']) {
-        $form[$field['field_name']]['relation'] = array(
+        $form[$field['field_name']] = array('#tree' => TRUE);
+        $form[$field['field_name']]['uids'] = array(
           '#type' => 'select',
           '#title' => t($field['widget']['label']),
-          '#default_value' => $node_field,
+          '#default_value' => $uids,
           '#multiple' => $field['multiple'],
           '#options' => _userreference_potential_references($field),
+          '#required' => $field['required'],
+          '#description' => $field['widget']['description'],
         );
 
-      }
-      else {
-        $user_name = db_result(db_query("SELECT name FROM {users} WHERE uid = '%d'", $node_field));
-        $form[$field['field_name']]['relation'] = array(
+        return $form;
+
+      case 'validate':
+        return;
+      
+      case 'submit':
+        $node_field = $node->$field['field_name'];
+
+        if ($field['multiple']) {
+          $node_field = content_transpose_array_rows_cols(array('uid' => $node_field['uids']));
+        }
+        else {
+          $node_field['uid'] = array_pop($node_field['uids']);
+        }
+        $node->$field['field_name'] = $node_field;
+    }
+  }
+  else {
+    switch ($op) {
+      case 'form':
+        $form = array();
+        $node_field = $node->$field['field_name'];
+
+        $user_name = db_result(db_query("SELECT name FROM {users} WHERE uid = '%d'", $node_field['uid']));
+        $form[$field['field_name']] = array('#tree' => TRUE);
+        $form[$field['field_name']]['user_name'] = array(
           '#type' => 'textfield',
           '#title' => t($field['widget']['label']),
           '#maxlength' => 60,
           '#autocomplete_path' => 'user/autocomplete',
-          '#default_value' => $user_name ? $user_name : ''
+          '#default_value' => $user_name ? $user_name : '',
+          '#required' => $field['required'],
+          '#description' => $field['widget']['description'],
         );
-      }
+        return $form;
 
-      return $form;
+      case 'validate':
+        $node_field = $node->$field['field_name'];
+        if (!in_array($node_field['user_name'], _userreference_potential_references($field))) {
+          form_set_error($field['field_name'], t('Invalid user name.'));
+        }
+        return;
+      
+      case 'submit':
+        $node_field = $node->$field['field_name'];
+        
+        $uid = db_result(db_query("SELECT uid FROM {users} WHERE name = '%s'", $node_field['user_name']));
+        if ($uid) {
+          $node_field['uid'] = $uid;
+        }
 
-    case 'validate':
-      return;
+        $node->$field['field_name'] = $node_field;
+    }
   }
 }
 
@@ -193,7 +200,7 @@ function userreference_widget($op, &$node, $field) {
  * Fetch an array of all candidate referenced users, for use in presenting the selection form to the user.
  */
 function _userreference_potential_references($field) {
-  $result = db_query("SELECT u.name, u.uid FROM {users} u ORDER BY u.name ASC");
+  $result = db_query("SELECT u.name, u.uid FROM {users} u WHERE uid > 0 ORDER BY u.name ASC");
 
   $rows = array();
 
