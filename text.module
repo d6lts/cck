@@ -153,20 +153,48 @@ function text_widget($op, &$node, $field) {
       $form[$field['field_name']] = array('#tree' => TRUE);
 
       if ($field['multiple']) {
-        foreach (range(0, 2) as $delta) {
+        $form[$field['field_name']]['#type'] = 'fieldset';
+        $form[$field['field_name']]['#title'] = t($field['widget']['label']);
+        $delta = 0;
+        foreach ($node_field as $data) {
+          if ($data['value']) {
+            if ($field['widget']['rows'] == 1) {
+              $form[$field['field_name']][$delta]['value'] = array(
+                '#type' => 'textfield',
+                '#title' => '',
+                '#default_value' => $data['value'],
+                '#required' => ($delta == 0) ? $field['required'] : FALSE,
+              );
+            }
+            else {
+              $form[$field['field_name']][$delta]['value'] = array(
+                '#type' => 'textarea',
+                '#title' => '',
+                '#default_value' => $data['value'],
+                '#required' => ($delta == 0) ? $field['required'] : FALSE,
+                '#rows' => $field['widget']['rows'],
+              );
+            }
+            if ($field['text_processing']) {
+              $form[$field['field_name']][$delta]['format'] = filter_form($data['format'], NULL, array($field['field_name'], $delta, 'format'));
+            }
+            $delta++;
+          }
+        }
+        foreach (range($delta, $delta + 2) as $delta) {
           if ($field['widget']['rows'] == 1) {
             $form[$field['field_name']][$delta]['value'] = array(
               '#type' => 'textfield',
-              '#title' => t($field['widget']['label']),
-              '#default_value' => $node_field[$delta]['value'],
+              '#title' => '',
+              '#default_value' => '',
               '#required' => ($delta == 0) ? $field['required'] : FALSE,
             );
           }
           else {
             $form[$field['field_name']][$delta]['value'] = array(
               '#type' => 'textarea',
-              '#title' => t($field['widget']['label']),
-              '#default_value' => $node_field[$delta]['value'],
+              '#title' => '',
+              '#default_value' => '',
               '#required' => ($delta == 0) ? $field['required'] : FALSE,
               '#rows' => $field['widget']['rows'],
             );
