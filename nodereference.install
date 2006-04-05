@@ -31,6 +31,9 @@ function nodereference_install() {
   }
 }
 
+/**
+ * Add node ID column so we can delete old revisions at node delete time.
+ */
 function nodereference_update_1() {
   $ret = array();
 
@@ -48,6 +51,9 @@ function nodereference_update_1() {
   return $ret;
 }
 
+/**
+ * Populate nid column in existing node reference fields.
+ */
 function nodereference_update_2() {
   // Multi-part update
   if (!isset($_SESSION['nodereference_update_2'])) {
@@ -68,4 +74,38 @@ function nodereference_update_2() {
   }
 
   return array('#finished' => $_SESSION['nodereference_update_2'] / $_SESSION['nodereference_update_2_max']);
+}
+
+/**
+ * Data is now stored in per-field tables.
+ */
+function nodereference_update_3() {
+  $ret = array();
+
+  include_once(drupal_get_path('module', 'content') .'/content.module');
+  include_once(drupal_get_path('module', 'content') .'/content_admin.inc');
+
+  $fields = _content_fields();
+
+  foreach ($fields as $field) {
+    switch ($field['type']) {
+      case 'nodereference':
+        $columns = array(
+          'nid' => array('type' => 'int', 'not null' => TRUE, 'default' => '0'),
+        );
+        content_alter_db_field(array(), array(), $field, $columns);
+        if ($field['multiple']) {
+          $ret[] = update_sql('INSERT INTO {node_data_'. $field['field_name'] .'} (vid, delta, nid, '. $field['field_name'] ."_nid) SELECT vid, delta, nid, field_nid FROM {node_field_nodereference_data} WHERE field_name = '". $field['field_name'] ."'");
+        }
+        else {
+          $ret[] = update_sql('INSERT INTO {node_data_'. $field['field_name'] .'} (vid, nid, '. $field['field_name'] ."_nid) SELECT vid, nid, field_nid FROM {node_field_nodereference_data} WHERE field_name = '". $field['field_name'] ."'");
+        }
+        break;
+    }
+  }
+
+  $ret[] = update_sql('DROP TABLE {node_field_nodereference_data}');
+
+  db_query('DELETE FROM {cache}');
+  return $ret;
 }

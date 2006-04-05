@@ -53,7 +53,6 @@ function userreference_field_settings($op, $field) {
 function userreference_field($op, &$node, $field, $a2, $a3, $a4) {
   switch ($op) {
     case 'view':
-    dprint_r($node);
       $node_field = $node->$field['field_name'];
       if ($field['multiple']) {
         $node_field_transposed = content_transpose_array_rows_cols($node_field);
@@ -177,7 +176,7 @@ function userreference_widget($op, &$node, $field) {
 
       case 'validate':
         $node_field = $node->$field['field_name'];
-        if (!in_array($node_field['user_name'], _userreference_potential_references($field))) {
+        if ($node_field['user_name'] && !in_array($node_field['user_name'], _userreference_potential_references($field))) {
           form_set_error($field['field_name'], t('Invalid user name.'));
         }
         return;
@@ -226,24 +225,4 @@ function userreference_referenced_by_list($uid, $content_type = '') {
   }
 
   return $values;
-}
-
-function userreference_user($op, &$edit, &$user, $category = NULL) {
-  switch ($op) {
-    case 'categories':
-      return array('referenced by');
-      break;
-
-    case 'view':
-      $nodes = userreference_referenced_by_list($user->uid);
-
-      $node_array = array();
-
-      foreach ($nodes as $node) {
-        $node_array[] = '('. str_replace('content-', '', $node->type) .') '. l($node->title, 'node/'. $node->nid);
-      }
-
-      return array('referenced by' => array('view' => '<div class="'. $field['field_name'] .'">'. theme('item_list',  $node_array) .'</div>'));
-      break;
-  }
 }

@@ -60,6 +60,12 @@ function nodereference_field_settings($op, $field) {
 
     case 'save':
       return array('referenceable_types');
+    
+    case 'database columns':
+      $columns = array(
+        'nid' => array('type' => 'int', 'not null' => TRUE, 'default' => '0'),
+      );
+      return $columns;
   }
 }
 
@@ -68,74 +74,28 @@ function nodereference_field_settings($op, $field) {
  */
 function nodereference_field($op, &$node, $field, $a2, $a3, $a4) {
   switch ($op) {
-    case 'load':
-      $result = db_query("SELECT nfnd.field_nid FROM {node_field_nodereference_data} nfnd WHERE nfnd.vid = %d AND nfnd.field_name = '%s' ORDER BY delta", $node->vid, $field['field_name']);
-
-      if ($field['multiple']) {
-        $values = array();
-        while ($value = db_fetch_object($result)) {
-          $values[] = $value->field_nid;
-        }
-        $additions = array($field['field_name'] => array('relation' => $values));
-      }
-      else {
-        $value = db_fetch_object($result);
-        $additions = array($field['field_name'] => array('relation' => array($value->field_nid)));
-      }
-
-      return $additions;
-
     case 'view':
       $node_field = $node->$field['field_name'];
+      if ($field['multiple']) {
+        $node_field_transposed = content_transpose_array_rows_cols($node_field);
+        $nids = $node_field_transposed['nid'];
+      }
+      else {
+        $nids = array($node_field['nid']);
+      }
 
-      $referenced_nodes = array();
+      $node_array = array();
 
-      foreach ($node_field['relation'] as $referenced_nid) {
-        $referenced_node = node_load(array('nid' => $referenced_nid));
-        if ($referenced_node) {
-          $referenced_nodes[] = '('. str_replace('content-', '', $referenced_node->type) .') '. l($referenced_node->title, 'node/'. $referenced_node->nid);
+      foreach ($nids as $referenced_nid) {
+        if ($referenced_nid) {
+          $referenced_node = node_load($referenced_nid);
+          $node_array[] = l($referenced_node->title, 'node/'. $referenced_node->nid);
         }
       }
 
-      $node_field['view'] = theme('item_list', $referenced_nodes);
-
+      $node_field['view'] = theme('item_list', $node_array);
       $node->$field['field_name'] = $node_field;
       return '<div class="'. $field['field_name'] .'">'. $node_field['view'] .'</div>';
-
-    case 'insert':
-      $node_field = $node->$field['field_name'];
-
-      if ($field['multiple']) {
-        foreach ($node_field['relation'] as $delta => $value) {
-          db_query("INSERT INTO {node_field_nodereference_data} (nid, vid, field_name, delta, field_nid) VALUES (%d, %d, '%s', %d, %d)", $node->nid, $node->vid, $field['field_name'], $delta, $value);
-        }
-      }
-      else {
-        db_query("INSERT INTO {node_field_nodereference_data} (nid, vid, field_name, delta, field_nid) VALUES (%d, %d, '%s', %d, %d)", $node->nid, $node->vid, $field['field_name'], $delta, $node_field['relation']);
-      }
-      break;
-
-    case 'update':
-      $node_field = $node->$field['field_name'];
-
-      // Delete and insert, rather than update, in case a field was added.
-      db_query("DELETE FROM {node_field_nodereference_data} WHERE vid = %d AND field_name = '%s'", $node->vid, $field['field_name']);
-      if ($field['multiple']) {
-        foreach ($node_field['relation'] as $delta => $value) {
-          if ($value) {
-            db_query("INSERT INTO {node_field_nodereference_data} (nid, vid, field_name, delta, field_nid) VALUES (%d, %d, '%s', %d, %d)", $node->nid, $node->vid, $field['field_name'], $delta, $value);
-          }
-        }
-      }
-      else {
-        db_query("INSERT INTO {node_field_nodereference_data} (nid, vid, field_name, delta, field_nid) VALUES (%d, %d, '%s', %d, %d)", $node->nid, $node->vid, $field['field_name'], 0, $node_field['relation']);
-      }
-      return;
-
-    case 'delete':
-      // Delete using nid rather than vid to purge all revisions.
-      db_query("DELETE FROM {node_field_nodereference_data} WHERE nid = %d AND field_name = '%s'", $node->nid, $field['field_name']);
-      return;
   }
 }
 
@@ -176,179 +136,91 @@ function nodereference_widget_settings($op, $widget) {
  * Implementation of hook_widget().
  */
 function nodereference_widget($op, &$node, $field) {
-  switch ($op) {
-    case 'form':
-      $form = array();
-      $node_field = $node->$field['field_name'];
-
-      $form[$field['field_name']] = array('#tree' => TRUE);
-
-      if ($field['widget']['type'] == 'nodereference_autocomplete') {
+  if ($field['widget']['type'] == 'nodereference_select' || $field['multiple']) {
+    switch ($op) {
+      case 'form':
+        $form = array();
+        $node_field = $node->$field['field_name'];
         if ($field['multiple']) {
-
-          foreach($node_field['relation'] as $delta => $value) {
-            $display_value = db_result(db_query("SELECT n.title FROM {node} n WHERE n.nid = %d", $value));
-            $form[$field['field_name']]['title'][$delta] = array(
-              '#type' => 'textfield',
-              '#title' => t($field['widget']['label']),
-              '#maxlength' => 128,
-              '#autocomplete_path' => 'nodereference/autocomplete/'. $field['field_name'],
-              '#default_value' => $display_value ? $display_value : ''
-            );
-          }
-
-          $form[$field['field_name']]['title'][$delta + 1] = array(
-            '#type' => 'textfield',
-            '#title' => t($field['widget']['label']),
-            '#maxlength' => 128,
-            '#autocomplete_path' => 'nodereference/autocomplete/'. $field['field_name'],
-            '#default_value' => ''
-          );
-
+          $node_field_transposed = content_transpose_array_rows_cols($node_field);
+          $nids = $node_field_transposed['nid'];
         }
         else {
-          $node_field = db_result(db_query("SELECT n.title FROM {node} n WHERE n.nid = %d", $node->$field['field_name']));
-
-
-          $form[$field['field_name']]['title'] = array(
-            '#type' => 'textfield',
-            '#title' => t($field['widget']['label']),
-            '#maxlength' => 128,
-            '#autocomplete_path' => 'nodereference/autocomplete/'. $field['field_name'],
-            '#default_value' => $node_field ? $node_field : ''
-          );
+          $nids = array($node_field['nid']);
         }
-      }
-      else {
-         $form[$field['field_name']]['relation'] = array(
-            '#type' => 'select',
-            '#title' => t($field['widget']['label']),
-            '#default_value' => $node_field,
-            '#multiple' => $field['multiple'],
-            '#options' => _nodereference_potential_references($field),
-          );
-      }
 
-      return $form;
+        $form[$field['field_name']] = array('#tree' => TRUE);
+        $form[$field['field_name']]['nids'] = array(
+          '#type' => 'select',
+          '#title' => t($field['widget']['label']),
+          '#default_value' => $uids,
+          '#multiple' => $field['multiple'],
+          '#options' => _nodereference_potential_references($field),
+          '#required' => $field['required'],
+          '#description' => $field['widget']['description'],
+        );
 
-    case 'validate':
-      $node_field = $node->$field['field_name'];
+        return $form;
 
-      if ($field['widget']['type'] == 'nodereference_autocomplete') {
+      case 'validate':
+        return;
+      
+      case 'submit':
+        $node_field = $node->$field['field_name'];
+
         if ($field['multiple']) {
-          foreach($node_field['title'] as $delta => $value) {
-            if ($node_field['title'][$delta]) {
-              if (!db_result(db_query("SELECT n.nid FROM {node} n WHERE n.title = '%s'", $node_field['title'][$delta]))) {
-                form_set_error($field['field_name'] .'][title]['. $delta, t('No post with that title exists.'));
-              }
-            }
-          }
+          $node_field = content_transpose_array_rows_cols(array('nid' => $node_field['nids']));
         }
         else {
-          if ($node_field['title']) {
-            if (!db_result(db_query("SELECT n.nid FROM {node} n WHERE n.title = '%s'", $node_field['title']))) {
-              form_set_error($field['field_name'] .'][title', t('No post with that title exists.'));
-            }
-          }
+          $node_field['nid'] = array_pop($node_field['nids']);
         }
-      }
-      return;
-
-    case 'submit':
-      $node_field = $node->$field['field_name'];
-
-      if ($field['widget']['type'] == 'nodereference_autocomplete') {
-        if ($field['multiple']) {
-          foreach($node_field['title'] as $delta => $value) {
-            if ($node_field['title'][$delta]) {
-              $node_field['relation'][$delta] = db_result(db_query("SELECT n.nid FROM {node} n WHERE n.title = '%s'", $node_field['title'][$delta]));
-            }
-          }
-        }
-        else {
-          if ($node_field['title']) {
-            $node_field['relation'] = db_result(db_query("SELECT n.nid FROM {node} n WHERE n.title = '%s'", $node_field['title']));
-          }
-        }
-      }
-
-      $node->$field['field_name'] = $node_field;
-      return;
-  }
-}
-
-
-/**
- * Implementation of hook_views_tables().
- */
-function nodereference_views_tables() {
-  $tables = array();
-
-  $fields = _content_fields();
-  foreach ($fields as $field) {
-    if ($field['type'] == 'nodereference') {
-      $tables['node_field_nodereference_data_'. $field['field_name']] = array(
-        'name' => 'node_field_nodereference_data',
-        'join' => array(
-          'left' => array(
-            'table' => 'node',
-            'field' => 'vid',
-          ),
-          'right' => array(
-            'field' => 'vid',
-          ),
-          'extra' => array('field_name' => $field['field_name']),
-        ),
-        'fields' => array(
-          'field_nid' => array(
-            'name' => 'Node Reference: '. $field['field_name'],
-            'sortable' => TRUE,
-          ),
-        ),
-        'sorts' => array(
-          'field_nid' => array('name' => 'Node Reference: '. $field['field_name']),
-        ),
-        'filters' => array(
-          'field_nid' => array(
-            'name' => 'Node Reference: '. $field['field_name'],
-            'operator' => 'views_handler_operator_eqneq',
-          ),
-        ),
-      );
-      $tables['node_field_nodereference_data_reverse_'. $field['field_name']] = array(
-        'name' => 'node_field_nodereference_data',
-        'join' => array(
-          'left' => array(
-            'table' => 'node',
-            'field' => 'nid',
-          ),
-          'right' => array(
-            'field' => 'field_nid',
-            'extra' => array('field_name' => $field['field_name']),
-          ),
-        ),
-        'fields' => array(
-          'vid' => array(
-            'name' => 'Node Referenced By: '. $field['field_name'],
-          ),
-        ),
-        'filters' => array(
-          'vid' => array(
-            'name' => 'Node Referenced By: '. $field['field_name'],
-            'operator' => 'views_handler_operator_eqneq',
-          ),
-        ),
-      );
+        $node->$field['field_name'] = $node_field;
     }
   }
+  else {
+    switch ($op) {
+      case 'form':
+        $form = array();
+        $node_field = $node->$field['field_name'];
 
-  return $tables;
+        $node_name = db_result(db_query(db_rewrite_sql('SELECT n.title FROM {node} n WHERE n.nid = %d'), $node_field['nid']));
+        $form[$field['field_name']] = array('#tree' => TRUE);
+        $form[$field['field_name']]['node_name'] = array(
+          '#type' => 'textfield',
+          '#title' => t($field['widget']['label']),
+          '#maxlength' => 60,
+          '#autocomplete_path' => 'nodereference/autocomplete/'. $field['field_name'],
+          '#default_value' => $node_name ? $node_name : '',
+          '#required' => $field['required'],
+          '#description' => $field['widget']['description'],
+        );
+        return $form;
+
+      case 'validate':
+        $node_field = $node->$field['field_name'];
+        if ($node_field['node_name'] && !in_array($node_field['node_name'], _nodereference_potential_references($field))) {
+          form_set_error($field['field_name'], t('No post with that title exists.'));
+        }
+        return;
+      
+      case 'submit':
+        $node_field = $node->$field['field_name'];
+
+        $nid = db_result(db_query(db_rewrite_sql("SELECT n.nid FROM {node} n WHERE n.title = '%s'"), $node_field['node_name']));
+        if ($nid) {
+          $node_field['nid'] = $nid;
+        }
+
+        $node->$field['field_name'] = $node_field;
+    }
+  }
 }
+
 
 /**
  * Fetch an array of all candidate referenced nodes, for use in presenting the selection form to the user.
  */
-function _nodereference_potential_references($field, $return_full_nodes = false) {
+function _nodereference_potential_references($field, $return_full_nodes = FALSE) {
   $related_types = array();
 
   foreach ($field['referenceable_types'] as $related_type) {
