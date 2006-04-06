@@ -278,6 +278,7 @@ function nodereference_referenced_by_list($nid, $content_type = '') {
 function nodereference_autocomplete($field_name, $string = '') {
   $fields = _content_fields();
   $field = $fields[$field_name];
+  $matches = array();
 
   foreach (_nodereference_potential_references($field, TRUE) as $key => $value) {
     if (stristr($value->title, $string)) {
@@ -285,12 +286,6 @@ function nodereference_autocomplete($field_name, $string = '') {
     }
   }
 
-  if ($matches) {
-    print drupal_implode_autocomplete($matches);
-  }
-  else {
-    print '|';
-  }
-
+  print drupal_to_js($matches);
   exit();
 }
