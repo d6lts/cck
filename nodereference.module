@@ -55,9 +55,6 @@ function nodereference_field_settings($op, $field) {
       );
       return $form;
 
-    case 'validate':
-      break;
-
     case 'save':
       return array('referenceable_types');
     
@@ -114,22 +111,6 @@ function nodereference_widget_info() {
       'field types' => array('nodereference'),
     ),
   );
-}
-
-/**
- * Implementation of hook_widget_settings().
- */
-function nodereference_widget_settings($op, $widget) {
-  switch ($op) {
-    case 'form':
-      return array();
-
-    case 'validate':
-      break;
-
-    case 'save':
-      return array();
-  }
 }
 
 /**

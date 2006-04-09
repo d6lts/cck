@@ -300,7 +300,7 @@ function content_field($op, &$node, $field, $a2, $a3, $a4) {
   $columns = module_invoke($module, 'field_settings', 'database columns', $field);
   $table_name = 'node_data_'. $field['field_name'];
 
-  if (!count($columns)) {
+  if (!is_array($columns) || !count($columns)) {
     return;
   }
 

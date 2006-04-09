@@ -117,23 +117,6 @@ function number_widget_info() {
 }
 
 /**
- * Implementation of hook_widget_settings().
- */
-function number_widget_settings($op, $widget) {
-  switch ($op) {
-    case 'form':
-      return array();
-
-    case 'validate':
-      break;
-
-    case 'save':
-      return array();
-  }
-}
-
-
-/**
  * Implementation of hook_widget().
  */
 function number_widget($op, &$node, $field) {

@@ -30,15 +30,6 @@ function userreference_field_info() {
  */
 function userreference_field_settings($op, $field) {
   switch ($op) {
-    case 'form':
-      return array();
-
-    case 'validate':
-      break;
-
-    case 'save':
-      return array();
-
     case 'database columns':
       $columns = array(
         'uid' => array('type' => 'int', 'not null' => TRUE, 'default' => '0'),
@@ -92,22 +83,6 @@ function userreference_widget_info() {
       'field types' => array('userreference'),
     ),
   );
-}
-
-/**
- * Implementation of hook_widget_settings().
- */
-function userreference_widget_settings($op, $widget) {
-  switch ($op) {
-    case 'form':
-      return array();
-
-    case 'validate':
-      break;
-
-    case 'save':
-      return array();
-  }
 }
 
 /**

@@ -48,9 +48,6 @@ function text_field_settings($op, $field) {
       );
       return $form;
 
-    case 'validate':
-      break;
-
     case 'save':
       return array('text_processing', 'max_length');
 

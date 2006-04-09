@@ -47,9 +47,6 @@ function date_field_settings($op, $field) {
       );
       return $form;
 
-    case 'validate':
-      break;
-
     case 'save':
       return array('granularity');
 
@@ -121,9 +118,6 @@ function date_widget_settings($op, $widget) {
         '#options' => $options,
       );
       return $form;
-
-    case 'validate':
-      break;
 
     case 'save':
       return array('time_zone');

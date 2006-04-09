@@ -398,7 +398,9 @@ function _content_admin_field_add_new_submit($form_id, $form_values) {
   $field = $fields[$field_name];
 
   $columns = module_invoke($field_type['module'], 'field_settings', 'database columns', $field);
-  content_alter_db_field(array(), array(), $field, $columns);
+  if (is_array($columns) && count($columns)) {
+    content_alter_db_field(array(), array(), $field, $columns);
+  }
 
   drupal_set_message(t('Created field %label.', array('%label' => theme('placeholder', $form_values['label']))));
   drupal_goto('admin/node/types/'. $form_values['type_name'] .'/fields/'. $field_name);
@@ -440,7 +442,9 @@ function _content_admin_field_remove_submit($form_id, $form_values) {
 
     drupal_set_message(t('Removed field %field from %type.', array('%field' => theme('placeholder', $field['widget']['label']), '%type' => theme('placeholder', $type->label))));
     if (!db_result(db_query("SELECT type_name FROM {node_field_instance} WHERE field_name = '%s'", $form_values['field_name']))) {
-      content_alter_db_field($field, $columns, array(), array());
+      if (is_array($columns) && count($columns)) {
+        content_alter_db_field($field, $columns, array(), array());
+      }
       db_query("DELETE FROM {node_field} WHERE field_name = '%s'", $form_values['field_name']);
 
       drupal_set_message(t('The field %field no longer exists in any content type, so it was deleted.', array('%field' => theme('placeholder', $field['widget']['label']))));
@@ -499,7 +503,8 @@ function _content_admin_field($type_name, $field_name) {
     '#default_value' => $field['widget']['weight'],
     '#description' => t('In the node editing form, the heavier fields will sink and the lighter fields will be positioned nearer the top.'),
   );
-  if ($additions = module_invoke($widget_type['module'], 'widget_settings', 'form', $field['widget'])) {
+  $additions = module_invoke($widget_type['module'], 'widget_settings', 'form', $field['widget']);
+  if (is_array($additions)) {
     $form['widget'] = array_merge($form['widget'], $additions);
   }
   $form['widget']['description'] = array(
@@ -527,7 +532,10 @@ function _content_admin_field($type_name, $field_name) {
     '#default_value' => $field['multiple'],
   );
 
-  $form['field'] = array_merge($form['field'], module_invoke($field_type['module'], 'field_settings', 'form', $field));
+  $additions = module_invoke($widget_type['module'], 'field_settings', 'form', $field);
+  if (is_array($additions)) {
+    $form['field'] = array_merge($form['field'], $additions);
+  }
 
   $form['submit'] = array(
     '#type' => 'submit',
@@ -576,13 +584,15 @@ function _content_admin_field_submit($form_id, $form_values) {
   $widget_type = $widget_types[$form_values['widget_type']];
 
   $widget_settings = array();
-  if (is_array($setting_names = module_invoke($widget_type['module'], 'widget_settings', 'save', $field))) {
+  $setting_names = module_invoke($widget_type['module'], 'widget_settings', 'save', $field);
+  if (is_array($setting_names)) {
     foreach ($setting_names as $setting) {
       $widget_settings[$setting] = $form_values[$setting];
     }
   }
   $field_settings = array();
-  if (is_array($setting_names = module_invoke($field_type['module'], 'field_settings', 'save', $field))) {
+  $setting_names = module_invoke($field_type['module'], 'field_settings', 'save', $field);
+  if (is_array($setting_names)) {
     foreach ($setting_names as $setting) {
       $field_settings[$setting] = $form_values[$setting];
     }
