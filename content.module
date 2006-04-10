@@ -204,6 +204,10 @@ function content_access($op, $node) {
 
 /**
  * Implementation of hook_load().
+ *
+ * When loading one of the content.module nodes, we need to let each field handle
+ * its own loading. This can make for a number of queries in some cases, so we
+ * cache the loaded object structure and invalidate it during the update process.
  */
 function content_load($node) {
   $cid = 'content:'. $node->nid;
@@ -219,6 +223,9 @@ function content_load($node) {
 
 /**
  * Implementation of hook_form().
+ *
+ * Each field defines its own component of the content entry form, via its
+ * chosen widget.
  */
 function content_form(&$node, &$param) {
   $form = array();
@@ -241,6 +248,9 @@ function content_form(&$node, &$param) {
 
 /**
  * Implementation of hook_validate().
+ *
+ * Both widgets and fields have a chance to raise error flags when a node is
+ * being validated.
  */
 function content_validate(&$node) {
   _content_widget_invoke('validate', $node);
@@ -249,6 +259,10 @@ function content_validate(&$node) {
 
 /**
  * Implementation of hook_submit().
+ *
+ * At submit time, the widget does whatever data massaging is necessary so that
+ * the field has the content in the expected format and can commit the changes
+ * to the database.
  */
 function content_submit(&$node) {
   _content_widget_invoke('submit', $node);
@@ -453,7 +467,7 @@ function _content_field_invoke($op, &$node, $a2 = NULL, $a3 = NULL, $a4 = NULL) 
 }
 
 /**
- * Invoke a field hook.
+ * Invoke a widget hook.
  */
 function _content_widget_invoke($op, &$node) {
   $type_name = is_string($node) ? $node : (is_array($node) ? $node['type'] : $node->type);
@@ -481,6 +495,9 @@ function _content_widget_invoke($op, &$node) {
 
 /**
  * Return a list of all content types.
+ *
+ * @param $reset
+ *   If TRUE, clear the cache and fetch the information from the database again.
  */
 function _content_types($reset = FALSE) {
   static $types;
@@ -525,6 +542,9 @@ function _content_types($reset = FALSE) {
 
 /**
  * Return a list of all fields.
+ *
+ * @param $reset
+ *   If TRUE, clear the cache and fetch the information from the database again.
  */
 function _content_fields($reset = FALSE) {
   static $fields;
@@ -546,6 +566,9 @@ function _content_fields($reset = FALSE) {
 
 /**
  * Return a list of field types.
+ *
+ * @param $reset
+ *   If TRUE, clear the cache and fetch the information from the database again.
  */
 function _content_field_types($reset = FALSE) {
   static $types;
@@ -568,6 +591,9 @@ function _content_field_types($reset = FALSE) {
 
 /**
  * Return a list of widget types.
+ *
+ * @param $reset
+ *   If TRUE, clear the cache and fetch the information from the database again.
  */
 function _content_widget_types($reset = FALSE) {
   static $types;
@@ -589,8 +615,8 @@ function _content_widget_types($reset = FALSE) {
 }
 
 /**
- * Clear the cache of content_types; called in several places when
- * content information is changed.
+ * Clear the cache of content_types; called in several places when content
+ * information is changed.
  */
 function content_clear_type_cache() {
   cache_clear_all('content_types');
