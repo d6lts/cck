@@ -161,6 +161,7 @@ function text_widget($op, &$node, $field) {
                 '#title' => '',
                 '#default_value' => $data['value'],
                 '#required' => ($delta == 0) ? $field['required'] : FALSE,
+                '#maxlength' => $field['max_length'] ? $field['max_length'] : '',
               );
             }
             else {
@@ -185,6 +186,7 @@ function text_widget($op, &$node, $field) {
               '#title' => '',
               '#default_value' => '',
               '#required' => ($delta == 0) ? $field['required'] : FALSE,
+              '#maxlength' => $field['max_length'] ? $field['max_length'] : '',
             );
           }
           else {
@@ -209,6 +211,7 @@ function text_widget($op, &$node, $field) {
             '#default_value' => $node_field['value'],
             '#required' => $field['required'],
             '#description' => $field['widget']['description'],
+            '#maxlength' => $field['max_length'] ? $field['max_length'] : '',
           );
         }
         else {
