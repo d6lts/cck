@@ -43,6 +43,14 @@ function number_field_settings($op, $field) {
         '#title' => t('Maximum'),
         '#default_value' => $field['max'] ? $field['max'] : '',
       );
+      $form['allowed_values'] = array(
+        '#type' => 'textarea',
+        '#title' => t('Allowed values'),
+        '#default_value' => $field['allowed_values'] ? $field['allowed_values'] : '',
+        '#required' => FALSE,
+        '#rows' => 10,
+        '#description' => t('The possible values this field can contain. Any other values will result in an error. Enter one value per line.'),
+      );
       return $form;
 
     case 'validate':
@@ -55,7 +63,7 @@ function number_field_settings($op, $field) {
       break;
 
     case 'save':
-      return array('min', 'max');
+      return array('min', 'max', 'allowed_values');
 
     case 'database columns':
       if ($field['type'] == 'number_integer') {
@@ -99,6 +107,47 @@ function number_field($op, &$node, $field, $a2, $a3, $a4) {
       }
       else {
         return '<div class="'. $field['field_name'] .'">'. $node_field['view'] .'</div>';
+      }
+      break;
+
+    case 'validate':
+      $node_field = $node->$field['field_name'];
+
+      $allowed_values = explode("\n", $field['allowed_values']);
+      $allowed_values = array_map('trim', $allowed_values);
+      $allowed_values = array_filter($allowed_values, 'strlen');
+
+      if ($field['multiple']) {
+        if (is_array($node_field)) {
+          foreach ($node_field as $delta => $item) {
+            if ($item['value'] != '') {
+              if (is_numeric($field['min']) && $item['value'] < $field['min']) {
+                form_set_error($field['field_name'], t('The value of %name may be no smaller than %min.', array('%name' => t($field['widget']['label']), '%min' => $field['min'])));
+              }
+              if (is_numeric($field['max']) && $item['value'] > $field['max']) {
+                form_set_error($field['field_name'], t('The value of %name may be no larger than %max.', array('%name' => t($field['widget']['label']), '%max' => $field['max'])));
+              }
+              if (count($allowed_values) && !in_array($item['value'], $allowed_values)) {
+                form_set_error($field['field_name'], t('Illegal value for %name.', array('%name' => t($field['widget']['label']))));
+              }
+            }
+          }
+        }
+      }
+      else {
+        if (isset($node_field['value'])) {
+          if ($node_field['value'] != '') {
+            if (is_numeric($field['min']) && $node_field['value'] < $field['min']) {
+              form_set_error($field['field_name'], t('The value of %name may be no smaller than %min.', array('%name' => t($field['widget']['label']), '%min' => $field['min'])));
+            }
+            if (is_numeric($field['max']) && $node_field['value'] > $field['max']) {
+              form_set_error($field['field_name'], t('The value of %name may be no larger than %max.', array('%name' => t($field['widget']['label']), '%max' => $field['max'])));
+            }
+            if (count($allowed_values) && !in_array($node_field['value'], $allowed_values)) {
+              form_set_error($field['field_name'], t('Illegal value for %name.', array('%name' => t($field['widget']['label']))));
+            }
+          }
+        }
       }
       break;
   }
@@ -161,37 +210,6 @@ function number_widget($op, &$node, $field) {
         );
       }
       return $form;
-
-    case 'validate':
-      $node_field = $node->$field['field_name'];
-
-      if ($field['multiple']) {
-        if (is_array($node_field)) {
-          foreach ($node_field as $delta => $item) {
-            if ($item['value'] != '') {
-              if (is_numeric($field['min']) && $item['value'] < $field['min']) {
-                form_set_error($field['field_name'] .']['. $delta .'][value', t('The value of %name may be no smaller than %min.', array('%name' => t($field['widget']['label']), '%min' => $field['min'])));
-              }
-              if (is_numeric($field['max']) && $item['value'] > $field['max']) {
-                form_set_error($field['field_name'] .']['. $delta .'][value', t('The value of %name may be no larger than %max.', array('%name' => t($field['widget']['label']), '%max' => $field['max'])));
-              }
-            }
-          }
-        }
-      }
-      else {
-        if (isset($node_field['value'])) {
-          if ($node_field['value'] != '') {
-            if (is_numeric($field['min']) && $node_field['value'] < $field['min']) {
-              form_set_error($field['field_name'] .'][value', t('The value of %name may be no smaller than %min.', array('%name' => t($field['widget']['label']), '%min' => $field['min'])));
-            }
-            if (is_numeric($field['max']) && $node_field['value'] > $field['max']) {
-              form_set_error($field['field_name'] .'][value', t('The value of %name may be no larger than %max.', array('%name' => t($field['widget']['label']), '%max' => $field['max'])));
-            }
-          }
-        }
-      }
-      return;
   }
 }
 

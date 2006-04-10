@@ -46,10 +46,18 @@ function text_field_settings($op, $field) {
         '#required' => FALSE,
         '#description' => t('The maximum length of the field in characters. Leave blank for an unlimited size.'),
       );
+      $form['allowed_values'] = array(
+        '#type' => 'textarea',
+        '#title' => t('Allowed values'),
+        '#default_value' => $field['allowed_values'] ? $field['allowed_values'] : '',
+        '#required' => FALSE,
+        '#rows' => 10,
+        '#description' => t('The possible values this field can contain. Any other values will result in an error. Enter one value per line.'),
+      );
       return $form;
 
     case 'save':
-      return array('text_processing', 'max_length');
+      return array('text_processing', 'max_length', 'allowed_values');
 
     case 'database columns':
       $columns = array(
@@ -96,6 +104,35 @@ function text_field($op, &$node, $field, $a2, $a3, $a4) {
       else {
         return '<div class="'. $field['field_name'] .'">'. $node_field['view'] .'</div>';
       }
+
+    case 'validate':
+      $node_field = $node->$field['field_name'];
+
+      $allowed_values = explode("\n", $field['allowed_values']);
+      $allowed_values = array_map('trim', $allowed_values);
+      $allowed_values = array_filter($allowed_values, 'strlen');
+
+      if ($field['multiple']) {
+        if (is_array($node_field)) {
+          foreach ($node_field as $delta => $item) {
+            if ($item['value'] != '') {
+              if (count($allowed_values) && !in_array($item['value'], $allowed_values)) {
+                form_set_error($field['field_name'], t('Illegal value for %name.', array('%name' => t($field['widget']['label']))));
+              }
+            }
+          }
+        }
+      }
+      else {
+        if (isset($node_field['value'])) {
+          if ($node_field['value'] != '') {
+            if (count($allowed_values) && !in_array($node_field['value'], $allowed_values)) {
+              form_set_error($field['field_name'], t('Illegal value for %name.', array('%name' => t($field['widget']['label']))));
+            }
+          }
+        }
+      }
+      break;
   }
 }
 
@@ -229,12 +266,6 @@ function text_widget($op, &$node, $field) {
         }
       }
       return $form;
-
-    case 'validate':
-      return;
-
-    case 'submit':
-      return;
   }
 }
 
