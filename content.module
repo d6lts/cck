@@ -658,4 +658,47 @@ function content_transpose_array_rows_cols($array) {
   return $result;
 }
 
+/**
+ * Implementation of hook_views_tables().
+ */
+function content_views_tables() {
+  $field_types = _content_field_types();
+
+  $tables = array();
+  foreach (_content_fields() as $field) {
+
+    $module = $field_types[$field['type']]['module'];
+    $columns = module_invoke($module, 'field_settings', 'database columns', $field);
+
+    if (is_array($columns) && count($columns)) {
+      $table = array();
+
+      $table['name'] = 'node_data_'. $field['field_name'];
+      $table['join'] = array(
+        'left' => array(
+          'table' => 'node',
+          'field' => 'vid',
+        ),
+        'right' => array(
+          'field' => 'vid',
+        ),
+      );
+
+      $table['fields'] = array();
+      $column_names = array_keys($columns);
+      $main_column = $field['field_name'] .'_'. array_shift($column_names);
+      $addlfields = array();
+      foreach ($column_names as $column) {
+        $addlfields[] = $field['field_name'] .'_'. $column;
+      }
+      $table['fields'][$main_column] = array(
+        'name' => $field_types[$field['type']]['label'] .': '. $field['widget']['label'] .' ('. $field['field_name'] .')',
+        'addlfields' => $addlfields,
+      );
+  
+      $tables['node_data_'. $field['field_name']] = $table;
+    }
+  }
+  return $tables;
+}
 
