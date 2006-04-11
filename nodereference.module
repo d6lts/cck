@@ -57,7 +57,7 @@ function nodereference_field_settings($op, $field) {
 
     case 'save':
       return array('referenceable_types');
-    
+
     case 'database columns':
       $columns = array(
         'nid' => array('type' => 'int', 'not null' => TRUE, 'default' => '0'),
@@ -143,9 +143,6 @@ function nodereference_widget($op, &$node, $field) {
 
         return $form;
 
-      case 'validate':
-        return;
-      
       case 'submit':
         $node_field = $node->$field['field_name'];
 
@@ -183,7 +180,7 @@ function nodereference_widget($op, &$node, $field) {
           form_set_error($field['field_name'], t('No post with that title exists.'));
         }
         return;
-      
+
       case 'submit':
         $node_field = $node->$field['field_name'];
 

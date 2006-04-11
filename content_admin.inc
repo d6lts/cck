@@ -532,7 +532,7 @@ function _content_admin_field($type_name, $field_name) {
     '#default_value' => $field['multiple'],
   );
 
-  $additions = module_invoke($widget_type['module'], 'field_settings', 'form', $field);
+  $additions = module_invoke($field_type['module'], 'field_settings', 'form', $field);
   if (is_array($additions)) {
     $form['field'] = array_merge($form['field'], $additions);
   }

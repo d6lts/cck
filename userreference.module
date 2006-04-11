@@ -115,9 +115,6 @@ function userreference_widget($op, &$node, $field) {
 
         return $form;
 
-      case 'validate':
-        return;
-      
       case 'submit':
         $node_field = $node->$field['field_name'];
 
@@ -155,10 +152,10 @@ function userreference_widget($op, &$node, $field) {
           form_set_error($field['field_name'], t('Invalid user name.'));
         }
         return;
-      
+
       case 'submit':
         $node_field = $node->$field['field_name'];
-        
+
         $uid = db_result(db_query("SELECT uid FROM {users} WHERE name = '%s'", $node_field['user_name']));
         if ($uid) {
           $node_field['uid'] = $uid;
