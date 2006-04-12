@@ -119,22 +119,30 @@ function nodereference_widget_info() {
 function nodereference_widget($op, &$node, $field) {
   if ($field['widget']['type'] == 'nodereference_select' || $field['multiple']) {
     switch ($op) {
-      case 'form':
-        $form = array();
+      case 'prepare form values':
         $node_field = $node->$field['field_name'];
+
         if ($field['multiple']) {
           $node_field_transposed = content_transpose_array_rows_cols($node_field);
-          $nids = $node_field_transposed['nid'];
+          $node_field['default nids'] = $node_field_transposed['nid'];
         }
         else {
-          $nids = array($node_field['nid']);
+          $node_field['default nids'] = array($node_field['nid']);
         }
+
+        $node->$field['field_name'] = $node_field;      
+        break;
+
+      case 'form':
+        $node_field = $node->$field['field_name'];
+
+        $form = array();
 
         $form[$field['field_name']] = array('#tree' => TRUE);
         $form[$field['field_name']]['nids'] = array(
           '#type' => 'select',
           '#title' => t($field['widget']['label']),
-          '#default_value' => $uids,
+          '#default_value' => $node_field['default nids'],
           '#multiple' => $field['multiple'],
           '#options' => _nodereference_potential_references($field),
           '#required' => $field['required'],
@@ -143,7 +151,7 @@ function nodereference_widget($op, &$node, $field) {
 
         return $form;
 
-      case 'submit':
+      case 'process form values':
         $node_field = $node->$field['field_name'];
 
         if ($field['multiple']) {
@@ -157,18 +165,25 @@ function nodereference_widget($op, &$node, $field) {
   }
   else {
     switch ($op) {
+      case 'prepare form values':
+        $node_field = $node->$field['field_name'];
+
+        $node_field['default node_name'] = db_result(db_query(db_rewrite_sql('SELECT n.title FROM {node} n WHERE n.nid = %d'), $node_field['nid']));
+
+        $node->$field['field_name'] = $node_field;
+        break;
+
       case 'form':
         $form = array();
         $node_field = $node->$field['field_name'];
 
-        $node_name = db_result(db_query(db_rewrite_sql('SELECT n.title FROM {node} n WHERE n.nid = %d'), $node_field['nid']));
         $form[$field['field_name']] = array('#tree' => TRUE);
         $form[$field['field_name']]['node_name'] = array(
           '#type' => 'textfield',
           '#title' => t($field['widget']['label']),
           '#maxlength' => 60,
           '#autocomplete_path' => 'nodereference/autocomplete/'. $field['field_name'],
-          '#default_value' => $node_name ? $node_name : '',
+          '#default_value' => $node_field['default node_name'],
           '#required' => $field['required'],
           '#description' => $field['widget']['description'],
         );
@@ -181,7 +196,7 @@ function nodereference_widget($op, &$node, $field) {
         }
         return;
 
-      case 'submit':
+      case 'process form values':
         $node_field = $node->$field['field_name'];
 
         $nid = db_result(db_query(db_rewrite_sql("SELECT n.nid FROM {node} n WHERE n.title = '%s'"), $node_field['node_name']));

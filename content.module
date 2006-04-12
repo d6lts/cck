@@ -241,6 +241,8 @@ function content_form(&$node, &$param) {
     '#required' => TRUE,
     '#default_value' => $node->title,
   );
+  
+  _content_widget_invoke('prepare form values', $node);
   $form = array_merge($form, _content_widget_invoke('form', $node));
 
   return $form;
@@ -254,6 +256,7 @@ function content_form(&$node, &$param) {
  */
 function content_validate(&$node) {
   _content_widget_invoke('validate', $node);
+  _content_widget_invoke('process form values', $node);
   _content_field_invoke('validate', $node);
 }
 
@@ -266,6 +269,8 @@ function content_validate(&$node) {
  */
 function content_submit(&$node) {
   _content_widget_invoke('submit', $node);
+  _content_widget_invoke('process form values', $node);
+  _content_field_invoke('submit', $node);
 }
 
 /**
@@ -380,7 +385,6 @@ function content_field($op, &$node, $field, $a2, $a3, $a4) {
     case 'update':
       $node_field = $node->$field['field_name'];
       // Delete and insert, rather than update, in case a field was added.
-
       db_query('DELETE FROM {'. $table_name .'} WHERE vid = %d', $node->vid);
 
       if ($field['multiple']) {

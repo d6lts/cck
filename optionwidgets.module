@@ -37,8 +37,7 @@ function optionwidgets_widget_info() {
  */
 function optionwidgets_widget($op, &$node, $field) {
   switch ($op) {
-    case 'form':
-      $form = array();
+    case 'prepare form values':
       $node_field = $node->$field['field_name'];
 
       $options = _optionwidgets_options($field);
@@ -59,14 +58,32 @@ function optionwidgets_widget($op, &$node, $field) {
         }
       }
 
+      if ($field['widget']['type'] == 'options_buttons' && !$field['multiple']) {
+        // Radio buttons function on a scalar rather than an array.
+        $node_field['default key'] = reset($keys);
+      }
+      else {
+        $node_field['default keys'] = $keys;
+      }
+
+      $node->$field['field_name'] = $node_field;      
+      break;
+
+    case 'form':
+      $node_field = $node->$field['field_name'];
+
+      $options = _optionwidgets_options($field);
+
+      $form = array();
+
       $form[$field['field_name']] = array('#tree' => TRUE);
 
       switch ($field['widget']['type']) {
         case 'options_select':
-          $form[$field['field_name']]['values'] = array(
+          $form[$field['field_name']]['keys'] = array(
             '#type' => 'select',
             '#title' => t($field['widget']['label']),
-            '#default_value' => $keys,
+            '#default_value' => $node_field['default keys'],
             '#multiple' => $field['multiple'],
             '#options' => $options,
             '#required' => $field['required'],
@@ -76,20 +93,20 @@ function optionwidgets_widget($op, &$node, $field) {
 
         case 'options_buttons':
           if ($field['multiple']) {
-            $form[$field['field_name']]['values'] = array(
+            $form[$field['field_name']]['keys'] = array(
               '#type' => 'checkboxes',
               '#title' => t($field['widget']['label']),
-              '#default_value' => $keys,
+              '#default_value' => $node_field['default keys'],
               '#options' => $options,
               '#required' => $field['required'],
               '#description' => $field['widget']['description'],
             );
           }
           else {
-            $form[$field['field_name']]['value'] = array(
+            $form[$field['field_name']]['key'] = array(
               '#type' => 'radios',
               '#title' => t($field['widget']['label']),
-              '#default_value' => $node_field['value'],
+              '#default_value' => $node_field['default key'],
               '#options' => $options,
               '#required' => $field['required'],
               '#description' => $field['widget']['description'],
@@ -99,25 +116,31 @@ function optionwidgets_widget($op, &$node, $field) {
       }
       return $form;
 
-    case 'submit':
-      if ($field['widget']['type'] == 'options_buttons' && !$field['multiple']) {
-        return;
-      }
-
+    case 'process form values':
       $node_field = $node->$field['field_name'];
 
-      if ($field['multiple']) {
-        $options = _optionwidgets_options($field);
-        $values = array();
-        foreach ($node_field['values'] as $value) {
-          if (isset($options[$value])) {
-            $values[] = $options[$value];
-          }
+      $options = _optionwidgets_options($field);
+
+      if ($field['widget']['type'] == 'options_buttons' && !$field['multiple']) {
+        // Radio buttons function on a scalar rather than an array.
+        $keys = array($node_field['key']);
+      }
+      else {
+        $keys = $node_field['keys'];
+      }
+
+      $values = array();
+      foreach ($keys as $key) {
+        if (isset($options[$key])) {
+          $values[] = $options[$key];
         }
+      }
+
+      if ($field['multiple']) {
         $node_field = content_transpose_array_rows_cols(array('value' => $values));
       }
       else {
-        $node_field['value'] = array_pop($node_field['values']);
+        $node_field['value'] = reset($values);
       }
 
       $node->$field['field_name'] = $node_field;

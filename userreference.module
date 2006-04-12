@@ -91,22 +91,30 @@ function userreference_widget_info() {
 function userreference_widget($op, &$node, $field) {
   if ($field['widget']['type'] == 'userreference_select' || $field['multiple']) {
     switch ($op) {
-      case 'form':
-        $form = array();
+      case 'prepare form values':
         $node_field = $node->$field['field_name'];
+
         if ($field['multiple']) {
           $node_field_transposed = content_transpose_array_rows_cols($node_field);
-          $uids = $node_field_transposed['uid'];
+          $node_field['default uids'] = $node_field_transposed['uid'];
         }
         else {
-          $uids = array($node_field['uid']);
+          $node_field['default uids'] = array($node_field['uid']);
         }
+
+        $node->$field['field_name'] = $node_field;      
+        break;
+
+      case 'form':
+        $node_field = $node->$field['field_name'];
+
+        $form = array();
 
         $form[$field['field_name']] = array('#tree' => TRUE);
         $form[$field['field_name']]['uids'] = array(
           '#type' => 'select',
           '#title' => t($field['widget']['label']),
-          '#default_value' => $uids,
+          '#default_value' => $node_field['default uids'],
           '#multiple' => $field['multiple'],
           '#options' => _userreference_potential_references($field),
           '#required' => $field['required'],
@@ -115,7 +123,7 @@ function userreference_widget($op, &$node, $field) {
 
         return $form;
 
-      case 'submit':
+      case 'process form values':
         $node_field = $node->$field['field_name'];
 
         if ($field['multiple']) {
@@ -129,18 +137,25 @@ function userreference_widget($op, &$node, $field) {
   }
   else {
     switch ($op) {
+      case 'prepare form values':
+        $node_field = $node->$field['field_name'];
+
+        $node_field['default user_name'] = db_result(db_query("SELECT name FROM {users} WHERE uid = '%d'", $node_field['uid']));
+
+        $node->$field['field_name'] = $node_field;
+        break;
+
       case 'form':
         $form = array();
         $node_field = $node->$field['field_name'];
 
-        $user_name = db_result(db_query("SELECT name FROM {users} WHERE uid = '%d'", $node_field['uid']));
         $form[$field['field_name']] = array('#tree' => TRUE);
         $form[$field['field_name']]['user_name'] = array(
           '#type' => 'textfield',
           '#title' => t($field['widget']['label']),
           '#maxlength' => 60,
           '#autocomplete_path' => 'user/autocomplete',
-          '#default_value' => $user_name ? $user_name : '',
+          '#default_value' => $node_field['default user_name'],
           '#required' => $field['required'],
           '#description' => $field['widget']['description'],
         );
@@ -153,7 +168,7 @@ function userreference_widget($op, &$node, $field) {
         }
         return;
 
-      case 'submit':
+      case 'process form values':
         $node_field = $node->$field['field_name'];
 
         $uid = db_result(db_query("SELECT uid FROM {users} WHERE name = '%s'", $node_field['user_name']));
