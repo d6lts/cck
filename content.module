@@ -313,7 +313,7 @@ function content_view(&$node, $teaser = FALSE, $page = FALSE) {
  * takes care of the database interface for field types that do not choose to
  * do their own storage.
  */
-function content_field($op, &$node, $field, $a2, $a3, $a4) {
+function content_field($op, &$node, $field, &$node_field, $a2, $a3, $a4) {
   $field_types = _content_field_types();
   $module = $field_types[$field['type']]['module'];
   $columns = module_invoke($module, 'field_settings', 'database columns', $field);
@@ -344,8 +344,6 @@ function content_field($op, &$node, $field, $a2, $a3, $a4) {
       return $additions;
 
     case 'insert':
-      $node_field = $node->$field['field_name'];
-
       if ($field['multiple']) {
         foreach ($node_field as $delta => $item) {
           $data = array($node->vid, $delta, $node->nid);
@@ -383,7 +381,6 @@ function content_field($op, &$node, $field, $a2, $a3, $a4) {
       return;
 
     case 'update':
-      $node_field = $node->$field['field_name'];
       // Delete and insert, rather than update, in case a field was added.
       db_query('DELETE FROM {'. $table_name .'} WHERE vid = %d', $node->vid);
 
@@ -446,10 +443,12 @@ function _content_field_invoke($op, &$node, $a2 = NULL, $a3 = NULL, $a4 = NULL) 
 
   $return = array();
   foreach ($type->fields as $field) {
+    $node_field = isset($node->$field['field_name']) ? $node->$field['field_name'] : array();
+
     $module = $field_types[$field['type']]['module'];
     $function = $module .'_field';
     if (function_exists($function)) {
-      $result = $function($op, $node, $field, $a2, $a3, $a4);
+      $result = $function($op, $node, $field, $node_field, $a2, $a3, $a4);
       if (is_array($result)) {
         $return = array_merge($return, $result);
       }
@@ -458,12 +457,16 @@ function _content_field_invoke($op, &$node, $a2 = NULL, $a3 = NULL, $a4 = NULL) 
       }
     }
 
-    $result = content_field($op, $node, $field, $a2, $a3, $a4);
+    $result = content_field($op, $node, $field, $node_field, $a2, $a3, $a4);
     if (is_array($result)) {
       $return = array_merge($return, $result);
     }
     else if (isset($result)) {
       $return[] = $result;
+    }
+    
+    if (isset($node->$field['field_name'])) {
+      $node->$field['field_name'] = $node_field;
     }
   }
 
@@ -481,16 +484,22 @@ function _content_widget_invoke($op, &$node) {
 
   $return = array();
   foreach ($type->fields as $field) {
+    $node_field = isset($node->$field['field_name']) ? $node->$field['field_name'] : array();
+
     $module = $widget_types[$field['widget']['type']]['module'];
     $function = $module .'_widget';
     if (function_exists($function)) {
-      $result = $function($op, $node, $field);
+      $result = $function($op, $node, $field, $node_field);
       if (is_array($result)) {
         $return = array_merge($return, $result);
       }
       else if (isset($result)) {
         $return[] = $result;
       }
+    }
+
+    if (isset($node->$field['field_name'])) {
+      $node->$field['field_name'] = $node_field;
     }
   }
 

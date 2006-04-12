@@ -80,11 +80,9 @@ function text_field_settings($op, $field) {
 /**
  * Implementation of hook_field().
  */
-function text_field($op, &$node, $field, $a2, $a3, $a4) {
+function text_field($op, &$node, $field, &$node_field, $a2, $a3, $a4) {
   switch ($op) {
     case 'view':
-      $output = '';
-      $node_field = $node->$field['field_name'];
       if ($field['multiple']) {
         foreach ($node_field as $delta => $item) {
           $node_field[$delta]['view'] = text_field_view($field, $item['value'], $item, $node);
@@ -93,7 +91,7 @@ function text_field($op, &$node, $field, $a2, $a3, $a4) {
       else {
         $node_field['view'] = text_field_view($field, $node_field['value'], $node_field, $node);
       }
-      $node->$field['field_name'] = $node_field;
+
       if ($field['multiple']) {
         $output = '';
         foreach ($node_field as $delta => $item) {
@@ -106,8 +104,6 @@ function text_field($op, &$node, $field, $a2, $a3, $a4) {
       }
 
     case 'validate':
-      $node_field = $node->$field['field_name'];
-
       $allowed_values = explode("\n", $field['allowed_values']);
       $allowed_values = array_map('trim', $allowed_values);
       $allowed_values = array_filter($allowed_values, 'strlen');
@@ -178,11 +174,10 @@ function text_widget_settings($op, $widget) {
 /**
  * Implementation of hook_widget().
  */
-function text_widget($op, &$node, $field) {
+function text_widget($op, &$node, $field, &$node_field) {
   switch ($op) {
     case 'form':
       $form = array();
-      $node_field = $node->$field['field_name'];
 
       $form[$field['field_name']] = array('#tree' => TRUE);
 

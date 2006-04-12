@@ -61,11 +61,11 @@ function date_field_settings($op, $field) {
 /**
  * Implementation of hook_field().
  */
-function date_field($op, $node, &$field, $a2, $a3, $a4) {
+function date_field($op, $node, &$field, &$node_field, $a2, $a3, $a4) {
   switch ($op) {
     case 'view':
       $output = '';
-      $node_field = $node->$field['field_name'];
+
       if ($field['multiple']) {
         foreach ($node_field as $delta => $item) {
           $node_field[$delta]['view'] = check_plain($item['value']);
@@ -127,11 +127,10 @@ function date_widget_settings($op, $widget) {
 /**
  * Implementation of hook_widget().
  */
-function date_widget($op, &$node, $field) {
+function date_widget($op, &$node, $field, &$node_field) {
   switch ($op) {
     case 'form':
       $form = array();
-      $node_field = $node->$field['field_name'];
 
       $form[$field['field_name']] = array('#tree' => TRUE);
 
@@ -156,8 +155,6 @@ function date_widget($op, &$node, $field) {
       return $form;
 
     case 'validate':
-      $node_field = $node->$field['field_name'];
-
       if ($field['multiple']) {
         if (is_array($node_field)) {
           foreach ($node_field as $delta => $item) {

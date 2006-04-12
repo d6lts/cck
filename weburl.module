@@ -28,7 +28,7 @@ function weburl_field_info() {
 /**
  * Implementation of hook_field().
  */
-function weburl_field($op, &$node, $field, $a2, $a3, $a4) {
+function weburl_field($op, &$node, $field, &$node_field, $a2, $a3, $a4) {
   switch ($op) {
     case 'load':
       switch($field['type']) {
@@ -51,7 +51,6 @@ function weburl_field($op, &$node, $field, $a2, $a3, $a4) {
 
     case 'view':
       $output = '';
-      $node_field = $node->$field['field_name'];
       if ($field['multiple']) {
         foreach ($node_field as $delta => $item) {
           $node_field[$delta]['view'] = weburl_field_view($field, $item['value'], $item, $node);
@@ -73,7 +72,6 @@ function weburl_field($op, &$node, $field, $a2, $a3, $a4) {
       }
 
     case 'insert':
-      $node_field = $node->$field['field_name'];
       switch($field['type']) {
         case 'weburl':
           if ($field['multiple']) {
@@ -89,7 +87,6 @@ function weburl_field($op, &$node, $field, $a2, $a3, $a4) {
       return;
 
     case 'update':
-      $node_field = $node->$field['field_name'];
       // Delete and insert, rather than update, in case a field was added.
       switch($field['type']) {
         case 'weburl':
@@ -132,11 +129,10 @@ function weburl_widget_info() {
 /**
  * Implementation of hook_widget().
  */
-function weburl_widget($op, &$node, $field) {
+function weburl_widget($op, &$node, $field, &$node_field) {
   switch ($op) {
     case 'form':
       $form = array();
-      $node_field = $node->$field['field_name'];
 
       $form[$field['field_name']] = array('#tree' => TRUE);
 
@@ -161,7 +157,6 @@ function weburl_widget($op, &$node, $field) {
       return $form;
 
     case 'validate':
-      $node_field = $node->$field['field_name'];
       if ($field['multiple']) {
         foreach($node_field as $delta => $value) {
         	if ($node_field[$delta]['value']) {

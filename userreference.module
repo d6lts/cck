@@ -41,10 +41,9 @@ function userreference_field_settings($op, $field) {
 /**
  * Implementation of hook_field().
  */
-function userreference_field($op, &$node, $field, $a2, $a3, $a4) {
+function userreference_field($op, &$node, $field, &$node_field, $a2, $a3, $a4) {
   switch ($op) {
     case 'view':
-      $node_field = $node->$field['field_name'];
       if ($field['multiple']) {
         $node_field_transposed = content_transpose_array_rows_cols($node_field);
         $uids = $node_field_transposed['uid'];
@@ -63,7 +62,6 @@ function userreference_field($op, &$node, $field, $a2, $a3, $a4) {
       }
 
       $node_field['view'] = theme('item_list', $user_array);
-      $node->$field['field_name'] = $node_field;
       return '<div class="'. $field['field_name'] .'">'. $node_field['view'] .'</div>';
   }
 }
@@ -88,12 +86,10 @@ function userreference_widget_info() {
 /**
  * Implementation of hook_widget().
  */
-function userreference_widget($op, &$node, $field) {
+function userreference_widget($op, &$node, $field, &$node_field) {
   if ($field['widget']['type'] == 'userreference_select' || $field['multiple']) {
     switch ($op) {
       case 'prepare form values':
-        $node_field = $node->$field['field_name'];
-
         if ($field['multiple']) {
           $node_field_transposed = content_transpose_array_rows_cols($node_field);
           $node_field['default uids'] = $node_field_transposed['uid'];
@@ -101,13 +97,9 @@ function userreference_widget($op, &$node, $field) {
         else {
           $node_field['default uids'] = array($node_field['uid']);
         }
-
-        $node->$field['field_name'] = $node_field;      
         break;
 
       case 'form':
-        $node_field = $node->$field['field_name'];
-
         $form = array();
 
         $form[$field['field_name']] = array('#tree' => TRUE);
@@ -124,30 +116,22 @@ function userreference_widget($op, &$node, $field) {
         return $form;
 
       case 'process form values':
-        $node_field = $node->$field['field_name'];
-
         if ($field['multiple']) {
           $node_field = content_transpose_array_rows_cols(array('uid' => $node_field['uids']));
         }
         else {
           $node_field['uid'] = array_pop($node_field['uids']);
         }
-        $node->$field['field_name'] = $node_field;
     }
   }
   else {
     switch ($op) {
       case 'prepare form values':
-        $node_field = $node->$field['field_name'];
-
         $node_field['default user_name'] = db_result(db_query("SELECT name FROM {users} WHERE uid = '%d'", $node_field['uid']));
-
-        $node->$field['field_name'] = $node_field;
         break;
 
       case 'form':
         $form = array();
-        $node_field = $node->$field['field_name'];
 
         $form[$field['field_name']] = array('#tree' => TRUE);
         $form[$field['field_name']]['user_name'] = array(
@@ -162,21 +146,16 @@ function userreference_widget($op, &$node, $field) {
         return $form;
 
       case 'validate':
-        $node_field = $node->$field['field_name'];
         if ($node_field['user_name'] && !in_array($node_field['user_name'], _userreference_potential_references($field))) {
           form_set_error($field['field_name'], t('Invalid user name.'));
         }
         return;
 
       case 'process form values':
-        $node_field = $node->$field['field_name'];
-
         $uid = db_result(db_query("SELECT uid FROM {users} WHERE name = '%s'", $node_field['user_name']));
         if ($uid) {
           $node_field['uid'] = $uid;
         }
-
-        $node->$field['field_name'] = $node_field;
     }
   }
 }

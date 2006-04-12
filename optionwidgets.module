@@ -35,11 +35,9 @@ function optionwidgets_widget_info() {
 /**
  * Implementation of hook_widget().
  */
-function optionwidgets_widget($op, &$node, $field) {
+function optionwidgets_widget($op, &$node, $field, &$node_field) {
   switch ($op) {
     case 'prepare form values':
-      $node_field = $node->$field['field_name'];
-
       $options = _optionwidgets_options($field);
 
       if ($field['multiple']) {
@@ -65,13 +63,9 @@ function optionwidgets_widget($op, &$node, $field) {
       else {
         $node_field['default keys'] = $keys;
       }
-
-      $node->$field['field_name'] = $node_field;      
       break;
 
     case 'form':
-      $node_field = $node->$field['field_name'];
-
       $options = _optionwidgets_options($field);
 
       $form = array();
@@ -117,8 +111,6 @@ function optionwidgets_widget($op, &$node, $field) {
       return $form;
 
     case 'process form values':
-      $node_field = $node->$field['field_name'];
-
       $options = _optionwidgets_options($field);
 
       if ($field['widget']['type'] == 'options_buttons' && !$field['multiple']) {
@@ -142,8 +134,6 @@ function optionwidgets_widget($op, &$node, $field) {
       else {
         $node_field['value'] = reset($values);
       }
-
-      $node->$field['field_name'] = $node_field;
       break;
   }
 }

@@ -82,11 +82,10 @@ function number_field_settings($op, $field) {
 /**
  * Implementation of hook_field().
  */
-function number_field($op, &$node, $field, $a2, $a3, $a4) {
+function number_field($op, &$node, $field, &$node_field, $a2, $a3, $a4) {
   switch ($op) {
     case 'view':
       $output = '';
-      $node_field = $node->$field['field_name'];
 
       if ($field['multiple']) {
         foreach ($node_field as $delta => $item) {
@@ -111,8 +110,6 @@ function number_field($op, &$node, $field, $a2, $a3, $a4) {
       break;
 
     case 'validate':
-      $node_field = $node->$field['field_name'];
-
       $allowed_values = explode("\n", $field['allowed_values']);
       $allowed_values = array_map('trim', $allowed_values);
       $allowed_values = array_filter($allowed_values, 'strlen');
@@ -168,11 +165,10 @@ function number_widget_info() {
 /**
  * Implementation of hook_widget().
  */
-function number_widget($op, &$node, $field) {
+function number_widget($op, &$node, $field, &$node_field) {
   switch ($op) {
     case 'form':
       $form = array();
-      $node_field = $node->$field['field_name'];
 
       $form[$field['field_name']] = array('#tree' => TRUE);
 
