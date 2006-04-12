@@ -61,10 +61,10 @@ function text_field_settings($op, $field) {
 
     case 'database columns':
       $columns = array(
-        'value' => array('type' => 'varchar', 'not null' => TRUE, 'default' => "''"),
+        'value' => array('type' => 'varchar', 'not null' => TRUE, 'default' => "''", 'sortable' => TRUE),
         'format' => array('type' => 'int', 'length' => 10, 'unsigned' => TRUE, 'not null' => TRUE, 'default' => 0),
       );
-      if ($field['max_length'] == 0) {
+      if ($field['max_length'] == 0 || $field['max_length'] > 255) {
         $columns['value']['type'] = 'longtext';
       }
       else {

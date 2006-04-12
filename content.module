@@ -685,17 +685,26 @@ function content_views_tables() {
       );
 
       $table['fields'] = array();
-      $column_names = array_keys($columns);
-      $main_column = $field['field_name'] .'_'. array_shift($column_names);
+      reset($columns);
+      $main_column_name = $field['field_name'] .'_'. key($columns);
+      $main_column = array_shift($columns);
       $addlfields = array();
-      foreach ($column_names as $column) {
-        $addlfields[] = $field['field_name'] .'_'. $column;
+      foreach ($columns as $column_name => $column) {
+        $addlfields[] = $field['field_name'] .'_'. $column_name;
       }
-      $table['fields'][$main_column] = array(
+
+      $table['fields'][$main_column_name] = array(
         'name' => $field_types[$field['type']]['label'] .': '. $field['widget']['label'] .' ('. $field['field_name'] .')',
         'addlfields' => $addlfields,
+        'sortable' => isset($main_column['sortable']) ? $main_column['sortable'] : FALSE,
       );
-  
+      if (isset($main_column['sortable']) && $main_column['sortable']) {
+        $table['sorts'][$main_column_name] = array(
+          'name' => $field_types[$field['type']]['label'] .': '. $field['widget']['label'] .' ('. $field['field_name'] .')',
+          'field' => $main_column_name,
+        );
+      }
+
       $tables['node_data_'. $field['field_name']] = $table;
     }
   }

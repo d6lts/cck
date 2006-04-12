@@ -68,12 +68,12 @@ function number_field_settings($op, $field) {
     case 'database columns':
       if ($field['type'] == 'number_integer') {
         return array(
-          'value' => array('type' => 'int', 'not null' => TRUE, 'default' => 0),
+          'value' => array('type' => 'int', 'not null' => TRUE, 'default' => 0, 'sortable' => TRUE),
         );
       }
       if ($field['type'] == 'number_decimal') {
         return array(
-          'value' => array('type' => 'float', 'not null' => TRUE, 'default' => 0),
+          'value' => array('type' => 'float', 'not null' => TRUE, 'default' => 0, 'sortable' => TRUE),
         );
       }
   }
