@@ -660,12 +660,16 @@ function content_clear_type_cache() {
  */
 function content_transpose_array_rows_cols($array) {
   $result = array();
-  foreach ($array as $key1 => $value1) {
-    foreach ($value1 as $key2 => $value2) {
-      if (!isset($result[$key2])) {
-        $result[$key2] = array();
+  if (is_array($array)) {
+    foreach ($array as $key1 => $value1) {
+      if (is_array($value1)) {
+        foreach ($value1 as $key2 => $value2) {
+          if (!isset($result[$key2])) {
+            $result[$key2] = array();
+          }
+          $result[$key2][$key1] = $value2;
+        }
       }
-      $result[$key2][$key1] = $value2;
     }
   }
   return $result;
