@@ -149,7 +149,7 @@ function nodereference_widget($op, &$node, $field, &$node_field) {
           $node_field = content_transpose_array_rows_cols(array('nid' => $node_field['nids']));
         }
         else {
-          $node_field['nid'] = array_pop($node_field['nids']);
+          $node_field['nid'] = is_array($node_field['nids']) ? reset($node_field['nids']) : $node_field['nids'];
         }
     }
   }
