@@ -278,3 +278,14 @@ function text_field_view($field, $value, $addlfields = array(), $node = NULL) {
     return check_plain($value);
   }
 }
+
+/**
+ * Implementation of hook_field_filter_operators().
+ */
+function text_field_filter_operators() {
+  return array(
+    '=' => t('is equal to'),
+    '!=' => t('is not equal to'),
+    'LIKE' => t('matches the pattern'),
+  );
+}

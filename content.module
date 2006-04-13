@@ -722,6 +722,14 @@ function content_views_tables() {
         );
       }
 
+      $operator_function = $module .'_field_filter_operators';
+      if (function_exists($operator_function)) {
+        $table['filters'][$main_column_name] = array(
+          'name' => $field_types[$field['type']]['label'] .': '. $field['widget']['label'] .' ('. $field['field_name'] .')',
+          'operator' => $operator_function,
+        );
+      }
+
       $tables['node_data_'. $field['field_name']] = $table;
     }
   }
