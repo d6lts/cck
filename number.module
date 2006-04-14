@@ -87,60 +87,30 @@ function number_field($op, &$node, $field, &$node_field, $teaser, $page) {
     case 'view':
       $output = '';
 
-      if ($field['multiple']) {
-        foreach ($node_field as $delta => $item) {
-          $node_field[$delta]['view'] = number_field_view($field, $item['value']);
-        }
-      }
-      else {
-        $node_field['view'] = number_field_view($field, $node_field['value']);
+      foreach ($node_field as $delta => $item) {
+        $node_field[$delta]['view'] = number_field_view($field, $item['value']);
       }
 
-      $node->$field['field_name'] = $node_field;
-      if ($field['multiple']) {
-        $output = '';
-        foreach ($node_field as $delta => $item) {
-          $output .= '<div class="'. $field['field_name'] .'">'. $item['view'] .'</div>';
-        }
-        return $output;
+      foreach ($node_field as $delta => $item) {
+        $output .= '<div class="'. $field['field_name'] .'">'. $item['view'] .'</div>';
       }
-      else {
-        return '<div class="'. $field['field_name'] .'">'. $node_field['view'] .'</div>';
-      }
-      break;
+      return $output;
 
     case 'validate':
       $allowed_values = explode("\n", $field['allowed_values']);
       $allowed_values = array_map('trim', $allowed_values);
       $allowed_values = array_filter($allowed_values, 'strlen');
 
-      if ($field['multiple']) {
-        if (is_array($node_field)) {
-          foreach ($node_field as $delta => $item) {
-            if ($item['value'] != '') {
-              if (is_numeric($field['min']) && $item['value'] < $field['min']) {
-                form_set_error($field['field_name'], t('The value of %name may be no smaller than %min.', array('%name' => t($field['widget']['label']), '%min' => $field['min'])));
-              }
-              if (is_numeric($field['max']) && $item['value'] > $field['max']) {
-                form_set_error($field['field_name'], t('The value of %name may be no larger than %max.', array('%name' => t($field['widget']['label']), '%max' => $field['max'])));
-              }
-              if (count($allowed_values) && !in_array($item['value'], $allowed_values)) {
-                form_set_error($field['field_name'], t('Illegal value for %name.', array('%name' => t($field['widget']['label']))));
-              }
-            }
-          }
-        }
-      }
-      else {
-        if (isset($node_field['value'])) {
-          if ($node_field['value'] != '') {
-            if (is_numeric($field['min']) && $node_field['value'] < $field['min']) {
+      if (is_array($node_field)) {
+        foreach ($node_field as $delta => $item) {
+          if ($item['value'] != '') {
+            if (is_numeric($field['min']) && $item['value'] < $field['min']) {
               form_set_error($field['field_name'], t('The value of %name may be no smaller than %min.', array('%name' => t($field['widget']['label']), '%min' => $field['min'])));
             }
-            if (is_numeric($field['max']) && $node_field['value'] > $field['max']) {
+            if (is_numeric($field['max']) && $item['value'] > $field['max']) {
               form_set_error($field['field_name'], t('The value of %name may be no larger than %max.', array('%name' => t($field['widget']['label']), '%max' => $field['max'])));
             }
-            if (count($allowed_values) && !in_array($node_field['value'], $allowed_values)) {
+            if (count($allowed_values) && !in_array($item['value'], $allowed_values)) {
               form_set_error($field['field_name'], t('Illegal value for %name.', array('%name' => t($field['widget']['label']))));
             }
           }
@@ -197,10 +167,10 @@ function number_widget($op, &$node, $field, &$node_field) {
         }
       }
       else {
-        $form[$field['field_name']]['value'] = array(
+        $form[$field['field_name']][0]['value'] = array(
           '#type' => 'textfield',
           '#title' => t($field['widget']['label']),
-          '#default_value' => $node_field['value'],
+          '#default_value' => $node_field[0]['value'],
           '#required' => $field['required'],
           '#description' => $field['widget']['description'],
         );

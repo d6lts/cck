@@ -90,13 +90,8 @@ function userreference_widget($op, &$node, $field, &$node_field) {
   if ($field['widget']['type'] == 'userreference_select' || $field['multiple']) {
     switch ($op) {
       case 'prepare form values':
-        if ($field['multiple']) {
-          $node_field_transposed = content_transpose_array_rows_cols($node_field);
-          $node_field['default uids'] = $node_field_transposed['uid'];
-        }
-        else {
-          $node_field['default uids'] = array($node_field['uid']);
-        }
+        $node_field_transposed = content_transpose_array_rows_cols($node_field);
+        $node_field['default uids'] = $node_field_transposed['uid'];
         break;
 
       case 'form':
@@ -120,8 +115,10 @@ function userreference_widget($op, &$node, $field, &$node_field) {
           $node_field = content_transpose_array_rows_cols(array('uid' => $node_field['uids']));
         }
         else {
-          $node_field['uid'] = array_pop($node_field['uids']);
+          $node_field[0]['uid'] = $node_field['uids'];
         }
+        // Remove the widget's data representation so it isn't saved.
+        unset($node_field['uids']);
     }
   }
   else {
@@ -154,8 +151,10 @@ function userreference_widget($op, &$node, $field, &$node_field) {
       case 'process form values':
         $uid = db_result(db_query("SELECT uid FROM {users} WHERE name = '%s'", $node_field['user_name']));
         if ($uid) {
-          $node_field['uid'] = $uid;
+          $node_field[0]['uid'] = $uid;
         }
+        // Remove the widget's data representation so it isn't saved.
+        unset($node_field['user_name']);
     }
   }
 }

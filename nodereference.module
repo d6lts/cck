@@ -72,13 +72,8 @@ function nodereference_field_settings($op, $field) {
 function nodereference_field($op, &$node, $field, &$node_field, $teaser, $page) {
   switch ($op) {
     case 'view':
-      if ($field['multiple']) {
-        $node_field_transposed = content_transpose_array_rows_cols($node_field);
-        $nids = $node_field_transposed['nid'];
-      }
-      else {
-        $nids = array($node_field['nid']);
-      }
+      $node_field_transposed = content_transpose_array_rows_cols($node_field);
+      $nids = $node_field_transposed['nid'];
 
       $node_array = array();
 
@@ -119,13 +114,8 @@ function nodereference_widget($op, &$node, $field, &$node_field) {
   if ($field['widget']['type'] == 'nodereference_select' || $field['multiple']) {
     switch ($op) {
       case 'prepare form values':
-        if ($field['multiple']) {
-          $node_field_transposed = content_transpose_array_rows_cols($node_field);
-          $node_field['default nids'] = $node_field_transposed['nid'];
-        }
-        else {
-          $node_field['default nids'] = array($node_field['nid']);
-        }
+        $node_field_transposed = content_transpose_array_rows_cols($node_field);
+        $node_field['default nids'] = $node_field_transposed['nid'];
         break;
 
       case 'form':
@@ -149,14 +139,16 @@ function nodereference_widget($op, &$node, $field, &$node_field) {
           $node_field = content_transpose_array_rows_cols(array('nid' => $node_field['nids']));
         }
         else {
-          $node_field['nid'] = is_array($node_field['nids']) ? reset($node_field['nids']) : $node_field['nids'];
+          $node_field[0]['nid'] = $node_field['nids'];
         }
+        // Remove the widget's data representation so it isn't saved.
+        unset($node_field['nids']);
     }
   }
   else {
     switch ($op) {
       case 'prepare form values':
-        $node_field['default node_name'] = db_result(db_query(db_rewrite_sql('SELECT n.title FROM {node} n WHERE n.nid = %d'), $node_field['nid']));
+        $node_field['default node_name'] = db_result(db_query(db_rewrite_sql('SELECT n.title FROM {node} n WHERE n.nid = %d'), $node_field[0]['nid']));
         break;
 
       case 'form':
@@ -183,8 +175,10 @@ function nodereference_widget($op, &$node, $field, &$node_field) {
       case 'process form values':
         $nid = db_result(db_query(db_rewrite_sql("SELECT n.nid FROM {node} n WHERE n.title = '%s'"), $node_field['node_name']));
         if ($nid) {
-          $node_field['nid'] = $nid;
+          $node_field[0]['nid'] = $nid;
         }
+        // Remove the widget's data representation so it isn't saved.
+        unset($node_field['node_name']);
     }
   }
 }

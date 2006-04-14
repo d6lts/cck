@@ -1,7 +1,5 @@
 Content Construction Kit
 ------------------------
-For information about the CCK, see http://drupal.org/cck-status
-
 To install, place the entire cck folder into your modules directory.
 Go to administer -> modules and enable the content module and one or
 more field type modules:

@@ -339,31 +339,19 @@ function content_field($op, &$node, $field, &$node_field, $teaser, $page) {
       }
       else {
         $result = db_query('SELECT '. implode(', ', $column_names) .' FROM {'. $table_name .'} WHERE vid = %d', $node->vid);
-        $additions = array($field['field_name'] => db_fetch_array($result));
+        $additions = array($field['field_name'] => array(db_fetch_array($result)));
       }
       return $additions;
 
     case 'insert':
-      if ($field['multiple']) {
-        foreach ($node_field as $delta => $item) {
+      foreach ($node_field as $delta => $item) {
+        if ($field['multiple']) {
           $data = array($node->vid, $delta, $node->nid);
-          $column_names = array();
-          $column_placeholders = array();
-          foreach ($columns as $column => $attributes) {
-            $column_names[] = $field['field_name'] .'_'. $column;
-            if (in_array($attributes['type'], array('int', 'mediumint', 'tinyint', 'bigint', 'float'))) {
-              $column_placeholders[] = '%d';
-            }
-            else {
-              $column_placeholders[] = "'%s'";
-            }
-            $data[] = $item[$column];
-          }
-          db_query('INSERT INTO {'. $table_name .'} (vid, delta, nid, '. implode(', ', $column_names) .') VALUES (%d, %d, %d, '. implode(', ', $column_placeholders) .')', $data);
         }
-      }
-      else {
-        $data = array($node->vid, $node->nid);
+        else {
+          $data = array($node->vid, $node->nid);
+        }
+
         $column_names = array();
         $column_placeholders = array();
         foreach ($columns as $column => $attributes) {
@@ -374,9 +362,14 @@ function content_field($op, &$node, $field, &$node_field, $teaser, $page) {
           else {
             $column_placeholders[] = "'%s'";
           }
-          $data[] = $node_field[$column];
+          $data[] = $item[$column];
         }
-        db_query('INSERT INTO {'. $table_name .'} (vid, nid, '. implode(', ', $column_names) .') VALUES (%d, %d, '. implode(', ', $column_placeholders) .')', $data);
+        if ($field['multiple']) {
+          db_query('INSERT INTO {'. $table_name .'} (vid, delta, nid, '. implode(', ', $column_names) .') VALUES (%d, %d, %d, '. implode(', ', $column_placeholders) .')', $data);
+        }
+        else {
+          db_query('INSERT INTO {'. $table_name .'} (vid, nid, '. implode(', ', $column_names) .') VALUES (%d, %d, '. implode(', ', $column_placeholders) .')', $data);
+        }
       }
       return;
 
@@ -384,26 +377,14 @@ function content_field($op, &$node, $field, &$node_field, $teaser, $page) {
       // Delete and insert, rather than update, in case a field was added.
       db_query('DELETE FROM {'. $table_name .'} WHERE vid = %d', $node->vid);
 
-      if ($field['multiple']) {
-        foreach ($node_field as $delta => $item) {
+      foreach ($node_field as $delta => $item) {
+        if ($field['multiple']) {
           $data = array($node->vid, $delta, $node->nid);
-          $column_names = array();
-          $column_placeholders = array();
-          foreach ($columns as $column => $attributes) {
-            $column_names[] = $field['field_name'] .'_'. $column;
-            if (in_array($attributes['type'], array('int', 'mediumint', 'tinyint', 'bigint', 'float'))) {
-              $column_placeholders[] = '%d';
-            }
-            else {
-              $column_placeholders[] = "'%s'";
-            }
-            $data[] = $item[$column];
-          }
-          db_query('INSERT INTO {'. $table_name .'} (vid, delta, nid, '. implode(', ', $column_names) .') VALUES (%d, %d, %d, '. implode(', ', $column_placeholders) .')', $data);
         }
-      }
-      else {
-        $data = array($node->vid, $node->nid);
+        else {
+          $data = array($node->vid, $node->nid);
+        }
+
         $column_names = array();
         $column_placeholders = array();
         foreach ($columns as $column => $attributes) {
@@ -414,11 +395,15 @@ function content_field($op, &$node, $field, &$node_field, $teaser, $page) {
           else {
             $column_placeholders[] = "'%s'";
           }
-          $data[] = $node_field[$column];
+          $data[] = $item[$column];
         }
-        db_query('INSERT INTO {'. $table_name .'} (vid, nid, '. implode(', ', $column_names) .') VALUES (%d, %d, '. implode(', ', $column_placeholders) .')', $data);
+        if ($field['multiple']) {
+          db_query('INSERT INTO {'. $table_name .'} (vid, delta, nid, '. implode(', ', $column_names) .') VALUES (%d, %d, %d, '. implode(', ', $column_placeholders) .')', $data);
+        }
+        else {
+          db_query('INSERT INTO {'. $table_name .'} (vid, nid, '. implode(', ', $column_names) .') VALUES (%d, %d, '. implode(', ', $column_placeholders) .')', $data);
+        }
       }
-
       return;
 
     case 'delete':
@@ -647,9 +632,9 @@ function content_clear_type_cache() {
 /**
  * Manipulate a 2D array to reverse rows and columns.
  *
- * The default data storage for multiple-valued fields is delta first,
- * column names second. This is sometimes inconvenient for field modules,
- * so this function can be used to present the data in an alternate format.
+ * The default data storage for fields is delta first, column names second.
+ * This is sometimes inconvenient for field modules, so this function can be
+ * used to present the data in an alternate format.
  *
  * @param $array
  *   The array to be transposed. It must be at least two-dimensional, and

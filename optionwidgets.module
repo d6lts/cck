@@ -40,13 +40,8 @@ function optionwidgets_widget($op, &$node, $field, &$node_field) {
     case 'prepare form values':
       $options = _optionwidgets_options($field);
 
-      if ($field['multiple']) {
-        $node_field_transposed = content_transpose_array_rows_cols($node_field);
-        $values = $node_field_transposed['value'];
-      }
-      else {
-        $values = array($node_field['value']);
-      }
+      $node_field_transposed = content_transpose_array_rows_cols($node_field);
+      $values = $node_field_transposed['value'];
 
       $keys = array();
       foreach ($values as $value) {
@@ -139,12 +134,11 @@ function optionwidgets_widget($op, &$node, $field, &$node_field) {
         }
       }
 
-      if ($field['multiple']) {
-        $node_field = content_transpose_array_rows_cols(array('value' => $values));
-      }
-      else {
-        $node_field['value'] = reset($values);
-      }
+      $node_field = content_transpose_array_rows_cols(array('value' => $values));
+
+      // Remove the widget's data representation so it isn't saved.
+      unset($node_field['keys']);
+      unset($node_field['key']);
       break;
   }
 }
