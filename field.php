@@ -131,7 +131,7 @@ function hook_field_settings($op, $field) {
  * In most cases, only "view" and "validate" are relevant operations; the rest
  * have default implementations in content_field() that usually suffice.
  */
-function hook_field($op, &$node, $field, &$node_field, $a2, $a3, $a4) {
+function hook_field($op, &$node, $field, &$node_field, $teaser, $page) {
   switch ($op) {
     case 'view':
       if ($field['multiple']) {

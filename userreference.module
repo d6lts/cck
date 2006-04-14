@@ -41,7 +41,7 @@ function userreference_field_settings($op, $field) {
 /**
  * Implementation of hook_field().
  */
-function userreference_field($op, &$node, $field, &$node_field, $a2, $a3, $a4) {
+function userreference_field($op, &$node, $field, &$node_field, $teaser, $page) {
   switch ($op) {
     case 'view':
       if ($field['multiple']) {

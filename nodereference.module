@@ -69,7 +69,7 @@ function nodereference_field_settings($op, $field) {
 /**
  * Implementation of hook_field().
  */
-function nodereference_field($op, &$node, $field, &$node_field, $a2, $a3, $a4) {
+function nodereference_field($op, &$node, $field, &$node_field, $teaser, $page) {
   switch ($op) {
     case 'view':
       if ($field['multiple']) {

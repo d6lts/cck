@@ -313,7 +313,7 @@ function content_view(&$node, $teaser = FALSE, $page = FALSE) {
  * takes care of the database interface for field types that do not choose to
  * do their own storage.
  */
-function content_field($op, &$node, $field, &$node_field, $a2, $a3, $a4) {
+function content_field($op, &$node, $field, &$node_field, $teaser, $page) {
   $field_types = _content_field_types();
   $module = $field_types[$field['type']]['module'];
   $columns = module_invoke($module, 'field_settings', 'database columns', $field);
@@ -435,7 +435,7 @@ function content_field($op, &$node, $field, &$node_field, $a2, $a3, $a4) {
  * For each field, first the hook is invoked in the defining module, then
  * content.module itself gets a chance to do its default processing.
  */
-function _content_field_invoke($op, &$node, $a2 = NULL, $a3 = NULL, $a4 = NULL) {
+function _content_field_invoke($op, &$node, $teaser = NULL, $page = NULL) {
   $type_name = is_string($node) ? $node : (is_array($node) ? $node['type'] : $node->type);
   $types = _content_types();
   $type = $types[$type_name];
@@ -448,7 +448,7 @@ function _content_field_invoke($op, &$node, $a2 = NULL, $a3 = NULL, $a4 = NULL) 
     $module = $field_types[$field['type']]['module'];
     $function = $module .'_field';
     if (function_exists($function)) {
-      $result = $function($op, $node, $field, $node_field, $a2, $a3, $a4);
+      $result = $function($op, $node, $field, $node_field, $teaser, $page);
       if (is_array($result)) {
         $return = array_merge($return, $result);
       }
@@ -457,7 +457,7 @@ function _content_field_invoke($op, &$node, $a2 = NULL, $a3 = NULL, $a4 = NULL) 
       }
     }
 
-    $result = content_field($op, $node, $field, $node_field, $a2, $a3, $a4);
+    $result = content_field($op, $node, $field, $node_field, $teaser, $page);
     if (is_array($result)) {
       $return = array_merge($return, $result);
     }
@@ -735,4 +735,3 @@ function content_views_tables() {
   }
   return $tables;
 }
-
