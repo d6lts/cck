@@ -83,13 +83,10 @@ function text_field_settings($op, $field) {
 function text_field($op, &$node, $field, &$node_field, $teaser, $page) {
   switch ($op) {
     case 'view':
-      foreach ($node_field as $delta => $item) {
-        $node_field[$delta]['view'] = text_field_view($field, $item['value'], $item, $node);
-      }
-
       $output = '';
       foreach ($node_field as $delta => $item) {
-        $output .= '<div class="'. $field['field_name'] .'">'. $item['view'] .'</div>';
+        $node_field[$delta]['view'] = text_field_view_item($field, $item, $node);
+        $output .= '<div class="'. $field['field_name'] .'">'. $node_field[$delta]['view'] .'</div>';
       }
       return $output;
 
@@ -108,6 +105,24 @@ function text_field($op, &$node, $field, &$node_field, $teaser, $page) {
         }
       }
       break;
+  }
+}
+
+/**
+ * Implementation of hook_field_view_item().
+ *
+ * The extra $node argument is necessary so that filter access can be checked on
+ * node preview.
+ */
+function text_field_view_item($field, $node_field_item, $node = NULL) {
+  // check permissions in check_markup if previewing.
+  $preview = ($node && isset($node->in_preview));
+
+  if ($field['text_processing']) {
+    return check_markup($node_field_item['value'], $node_field_item['format'], $preview);
+  }
+  else {
+    return check_plain($node_field_item['value']);
   }
 }
 
@@ -240,21 +255,6 @@ function text_widget($op, &$node, $field, &$node_field) {
         }
       }
       return $form;
-  }
-}
-
-/**
- * Implementation of hook_field_view() which performs any translation necessary.
- */
-function text_field_view($field, $value, $addlfields = array(), $node = NULL) {
-  // check permissions in check_markup if previewing.
-  $preview = ($node && isset($node->in_preview));
-
-  if ($field['text_processing']) {
-    return check_markup($value, $addlfields['format'], $preview);
-  }
-  else {
-    return check_plain($value);
   }
 }
 

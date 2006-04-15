@@ -65,17 +65,21 @@ function date_field($op, $node, &$field, &$node_field, $teaser, $page) {
   switch ($op) {
     case 'view':
       $output = '';
-
       foreach ($node_field as $delta => $item) {
-        $node_field[$delta]['view'] = check_plain($item['value']);
-      }
-
-      foreach ($node_field as $delta => $item) {
-        $output .= '<div class="'. $field['field_name'] .'">'. $item['view'] .'</div>';
+        $node_field[$delta]['view'] = date_field_view_item($field, $item);
+        $output .= '<div class="'. $field['field_name'] .'">'. $node_field[$delta]['view'] .'</div>';
       }
       return $output;
   }
 }
+
+/**
+ * Implementation of hook_field_view_item().
+ */
+function date_field_view_item($field, $node_field_item) {
+  return check_plain($node_field_item['value']);
+}
+
 
 /**
  * Implementation of hook_widget_info().

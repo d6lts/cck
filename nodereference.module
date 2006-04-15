@@ -72,21 +72,22 @@ function nodereference_field_settings($op, $field) {
 function nodereference_field($op, &$node, $field, &$node_field, $teaser, $page) {
   switch ($op) {
     case 'view':
-      $node_field_transposed = content_transpose_array_rows_cols($node_field);
-      $nids = $node_field_transposed['nid'];
-
-      $node_array = array();
-
-      foreach ($nids as $referenced_nid) {
-        if ($referenced_nid) {
-          $referenced_node = node_load($referenced_nid);
-          $node_array[] = l($referenced_node->title, 'node/'. $referenced_node->nid);
-        }
+      $output = '';
+      foreach ($node_field as $delta => $item) {
+        $node_field[$delta]['view'] = nodereference_field_view_item($field, $item);
+        $output .= '<div class="'. $field['field_name'] .'">'. $node_field[$delta]['view'] .'</div>';
       }
+      return $output;
+  }
+}
 
-      $node_field['view'] = theme('item_list', $node_array);
-
-      return '<div class="'. $field['field_name'] .'">'. $node_field['view'] .'</div>';
+/**
+ * Implementation of hook_field_view_item().
+ */
+function nodereference_field_view_item($field, $node_field_item) {
+  $referenced_node = node_load($node_field_item['nid']);
+  if ($referenced_node) {
+    return l($referenced_node->title, 'node/'. $referenced_node->nid);
   }
 }
 

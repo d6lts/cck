@@ -44,26 +44,21 @@ function userreference_field_settings($op, $field) {
 function userreference_field($op, &$node, $field, &$node_field, $teaser, $page) {
   switch ($op) {
     case 'view':
-      if ($field['multiple']) {
-        $node_field_transposed = content_transpose_array_rows_cols($node_field);
-        $uids = $node_field_transposed['uid'];
+      $output = '';
+      foreach ($node_field as $delta => $item) {
+        $node_field[$delta]['view'] = userreference_field_view_item($field, $item);
+        $output .= '<div class="'. $field['field_name'] .'">'. $node_field[$delta]['view'] .'</div>';
       }
-      else {
-        $uids = array($node_field['uid']);
-      }
-
-      $user_array = array();
-
-      foreach ($uids as $referenced_uid) {
-        if ($referenced_uid) {
-          $referenced_user = user_load(array('uid' => $referenced_uid));
-          $user_array[] = theme('username', $referenced_user);
-        }
-      }
-
-      $node_field['view'] = theme('item_list', $user_array);
-      return '<div class="'. $field['field_name'] .'">'. $node_field['view'] .'</div>';
+      return $output;
   }
+}
+
+/**
+ * Implementation of hook_field_view_item().
+ */
+function userreference_field_view_item($field, $node_field_item) {
+  $referenced_user = user_load($node_field_item);
+  return theme('username', $referenced_user);
 }
 
 

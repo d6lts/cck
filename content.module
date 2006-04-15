@@ -686,22 +686,31 @@ function content_views_tables() {
         ),
       );
 
-      $table['fields'] = array();
+      $column_mappings = array();
+      foreach ($columns as $column_name => $column) {
+        $column_mappings[$column_name] = $field['field_name'] .'_'. $column_name;
+      }
       reset($columns);
-      $main_column_name = $field['field_name'] .'_'. key($columns);
+      $main_column_name = $column_mappings[key($columns)];
       $main_column = array_shift($columns);
       $addlfields = array();
       foreach ($columns as $column_name => $column) {
-        $addlfields[] = $field['field_name'] .'_'. $column_name;
+        $addlfields[] = $column_mappings[$column_name];
       }
-
+      
+      $table['fields'] = array();
       $table['fields'][$main_column_name] = array(
         'name' => $field_types[$field['type']]['label'] .': '. $field['widget']['label'] .' ('. $field['field_name'] .')',
         'addlfields' => $addlfields,
         'sortable' => isset($main_column['sortable']) ? $main_column['sortable'] : FALSE,
-//        'handler' => 'content_views_field_handler',
+        'handler' => 'content_views_field_handler',
+        'content_table_name' => 'node_data_'. $field['field_name'],
+        'content_column_mappings' => $column_mappings,
+        'content_field' => $field,
+        'content_field_module' => $module,
       );
       if (isset($main_column['sortable']) && $main_column['sortable']) {
+        $table['sorts'] = array();
         $table['sorts'][$main_column_name] = array(
           'name' => $field_types[$field['type']]['label'] .': '. $field['widget']['label'] .' ('. $field['field_name'] .')',
           'field' => $main_column_name,
@@ -710,6 +719,7 @@ function content_views_tables() {
 
       $operator_function = $module .'_field_filter_operators';
       if (function_exists($operator_function)) {
+        $table['filters'] = array();
         $table['filters'][$main_column_name] = array(
           'name' => $field_types[$field['type']]['label'] .': '. $field['widget']['label'] .' ('. $field['field_name'] .')',
           'operator' => $operator_function,
@@ -723,11 +733,19 @@ function content_views_tables() {
 }
 
 function content_views_field_handler($field_info, $field_data, $value, $data) {
-//  dprint_r(array(
-//    'field_info' => $field_info,
-//    'field_data' => $field_data,
-//    'value' => $value,
-//    'data' => $data,
-//  ));
+  $field = $field_info['content_field'];
+  $node_field_item = array();
+  foreach ($field_info['content_column_mappings'] as $column_name => $view_column_name) {
+    $view_column_name = $field_info['content_table_name'] .'_'. $view_column_name;
+    $node_field_item[$column_name] = $data->$view_column_name;
+  }
+  $function = $field_info['content_field_module'] .'_field_view_item';
+  if (function_exists($function)) {
+    $result = $function($field, $node_field_item);
+  }
+  else {
+    $result = implode("\n", $node_field_item);
+  }
+  return $result;
 }
 

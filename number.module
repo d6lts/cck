@@ -86,13 +86,9 @@ function number_field($op, &$node, $field, &$node_field, $teaser, $page) {
   switch ($op) {
     case 'view':
       $output = '';
-
       foreach ($node_field as $delta => $item) {
-        $node_field[$delta]['view'] = number_field_view($field, $item['value']);
-      }
-
-      foreach ($node_field as $delta => $item) {
-        $output .= '<div class="'. $field['field_name'] .'">'. $item['view'] .'</div>';
+        $node_field[$delta]['view'] = number_field_view_item($field, $item);
+        $output .= '<div class="'. $field['field_name'] .'">'. $node_field[$delta]['view'] .'</div>';
       }
       return $output;
 
@@ -119,6 +115,14 @@ function number_field($op, &$node, $field, &$node_field, $teaser, $page) {
       break;
   }
 }
+
+/**
+ * Implementation of hook_field_view_item().
+ */
+function number_field_view_item($field, $node_field_item) {
+  return check_plain($node_field_item['value']);
+}
+
 
 /**
  * Implementation of hook_widget_info().
@@ -179,13 +183,6 @@ function number_widget($op, &$node, $field, &$node_field) {
   }
 }
 
-
-/**
- * Implementation of hook_field_view().
- */
-function number_field_view($field, $value) {
-  return check_plain($value);
-}
 
 /**
  * Implementation of hook_field_filter_operators().
