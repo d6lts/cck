@@ -46,6 +46,10 @@ function hook_field_info() {
  *   - "database columns": Declare the columns that content.module should create
  *     and manage on behalf of the field. If the field module wishes to handle
  *     its own database storage, this should be omitted.
+ *   - "filter operators": If content.module is managing the database storage,
+ *     this operator determines what filter operators are available to views.
+ *     They always apply to the first column listed in the "database columns"
+ *     array.
  * @param $field
  *   The field on which the operation is to be performed.
  * @return
@@ -61,6 +65,8 @@ function hook_field_info() {
  *     include a "sortable" parameter to indicate to views.module that the
  *     column contains ordered information. Details of other information that can
  *     be passed to the database layer can be found at content_db_add_column().
+ *   - The "filter operators" operation should return an array indexed by operator
+ *     with values as translated, human-friendly names of the operations.
  */
 function hook_field_settings($op, $field) {
   switch ($op) {
@@ -90,6 +96,13 @@ function hook_field_settings($op, $field) {
         $columns['value']['length'] = $field['max_length'];
       }
       return $columns;
+
+    case 'filter operators':
+      return array(
+        '=' => t('is equal to'),
+        '!=' => t('is not equal to'),
+        'LIKE' => t('matches the pattern'),
+      );
   }
 }
 
@@ -181,6 +194,28 @@ function hook_field($op, &$node, $field, &$node_field, $teaser, $page) {
       }
       break;
   }
+}
+
+/**
+ * Prepare an individual item for viewing in a browser.
+ *
+ * @param $field
+ *   The field the action is being performed on.
+ * @param $node_field_item
+ *   An array, keyed by column, of the data stored for this item in this field.
+ *
+ * @return
+ *   An HTML string containing the formatted item.
+ *
+ * In a multiple-value field scenario, this function will be called once per
+ * value currently stored in the field. This function is also used as the handler
+ * for viewing a field in a views.module tabular listing.
+ *
+ * It is important that this function at the minimum perform security
+ * transformations such as running check_plain() or check_markup().
+ */
+function hook_field_view_item($field, $node_field_item) {
+  return check_plain($node_field_item['value']);
 }
 
 
@@ -311,17 +346,6 @@ function hook_widget($op, &$node, $field, &$node_field) {
       }
       break;
   }
-}
-
-/**
- * Define the database operators that can be used to filter by this field.
- */
-function hook_field_filter_operators() {
-  return array(
-    '=' => t('is equal to'),
-    '!=' => t('is not equal to'),
-    'LIKE' => t('matches the pattern'),
-  );
 }
 
 
