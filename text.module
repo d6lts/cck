@@ -74,6 +74,13 @@ function text_field_settings($op, $field) {
         unset($columns['format']);
       }
       return $columns;
+
+    case 'filter operators':
+      return array(
+        '=' => t('is equal to'),
+        '!=' => t('is not equal to'),
+        'LIKE' => t('matches the pattern'),
+      );
   }
 }
 
@@ -256,15 +263,4 @@ function text_widget($op, &$node, $field, &$node_field) {
       }
       return $form;
   }
-}
-
-/**
- * Implementation of hook_field_filter_operators().
- */
-function text_field_filter_operators() {
-  return array(
-    '=' => t('is equal to'),
-    '!=' => t('is not equal to'),
-    'LIKE' => t('matches the pattern'),
-  );
 }

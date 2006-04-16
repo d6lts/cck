@@ -148,7 +148,7 @@ function _optionwidgets_options($field) {
   $allowed_values = array_map('trim', $allowed_values);
   $allowed_values = array_filter($allowed_values, 'strlen');
 
-  // Create an array indexed starting at 1 to prevent issues with checkboxes.
+  // Create an array indexed starting at 1; checkboxes cannot have 0 keys.
   $return_array = array();
   $i = 1;
   foreach ($allowed_values as $value) {

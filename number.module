@@ -76,6 +76,17 @@ function number_field_settings($op, $field) {
           'value' => array('type' => 'float', 'not null' => TRUE, 'default' => 0, 'sortable' => TRUE),
         );
       }
+    
+    case 'filter operators':
+      return array(
+        '=' => t('is equal to'),
+        '!=' => t('is not equal to'),
+// TODO: views.module seems to break anything with > or < in it.
+//        '>' => t('is greater than'),
+//        '<' => t('is less than'),
+//        '>=' => t('is greater than or equal to'),
+//        '<=' => t('is less than or equal to'),
+      );
   }
 }
 
@@ -181,19 +192,4 @@ function number_widget($op, &$node, $field, &$node_field) {
       }
       return $form;
   }
-}
-
-
-/**
- * Implementation of hook_field_filter_operators().
- */
-function number_field_filter_operators() {
-  return array(
-    '=' => t('is equal to'),
-    '!=' => t('is not equal to'),
-    '>' => t('is greater than'),
-    '<' => t('is less than'),
-    '>=' => t('is greater than or equal to'),
-    '<=' => t('is less than or equal to'),
-  );
 }

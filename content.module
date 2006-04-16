@@ -241,7 +241,7 @@ function content_form(&$node, &$param) {
     '#required' => TRUE,
     '#default_value' => $node->title,
   );
-  
+
   _content_widget_invoke('prepare form values', $node);
   $form = array_merge($form, _content_widget_invoke('form', $node));
 
@@ -449,7 +449,7 @@ function _content_field_invoke($op, &$node, $teaser = NULL, $page = NULL) {
     else if (isset($result)) {
       $return[] = $result;
     }
-    
+
     if (isset($node->$field['field_name'])) {
       $node->$field['field_name'] = $node_field;
     }
@@ -697,7 +697,7 @@ function content_views_tables() {
       foreach ($columns as $column_name => $column) {
         $addlfields[] = $column_mappings[$column_name];
       }
-      
+
       $table['fields'] = array();
       $table['fields'][$main_column_name] = array(
         'name' => $field_types[$field['type']]['label'] .': '. $field['widget']['label'] .' ('. $field['field_name'] .')',
@@ -717,12 +717,12 @@ function content_views_tables() {
         );
       }
 
-      $operator_function = $module .'_field_filter_operators';
-      if (function_exists($operator_function)) {
+    $operators = module_invoke($module, 'field_settings', 'filter operators', $field);
+      if (is_array($operators) && count($operators)) {
         $table['filters'] = array();
         $table['filters'][$main_column_name] = array(
           'name' => $field_types[$field['type']]['label'] .': '. $field['widget']['label'] .' ('. $field['field_name'] .')',
-          'operator' => $operator_function,
+          'operator' => $operators,
         );
       }
 
