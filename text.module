@@ -258,7 +258,7 @@ function text_widget($op, &$node, $field, &$node_field) {
           );
         }
         if ($field['text_processing']) {
-          $form[$field['field_name']][0]['format'] = filter_form($node_field[0]['format'], NULL, array($field['field_name'], 'format'));
+          $form[$field['field_name']][0]['format'] = filter_form($node_field[0]['format'], NULL, array($field['field_name'], 0, 'format'));
         }
       }
       return $form;

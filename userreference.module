@@ -57,8 +57,10 @@ function userreference_field($op, &$node, $field, &$node_field, $teaser, $page) 
  * Implementation of hook_field_view_item().
  */
 function userreference_field_view_item($field, $node_field_item) {
-  $referenced_user = user_load($node_field_item);
-  return theme('username', $referenced_user);
+  if (isset($node_field_item['uid'])) {
+    $referenced_user = user_load($node_field_item);
+    return theme('username', $referenced_user);
+  }
 }
 
 
