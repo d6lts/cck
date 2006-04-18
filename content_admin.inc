@@ -612,6 +612,12 @@ function _content_admin_field_submit($form_id, $form_values) {
   $new_field = $fields[$form_values['field_name']];
   $new_columns = module_invoke($field_type['module'], 'field_settings', 'database columns', $new_field);
 
+  if (!isset($prev_columns)) {
+    $prev_columns = array();
+  }
+  if (!isset($new_columns)) {
+    $new_columns = array();
+  }
   content_alter_db_field($prev_field, $prev_columns, $new_field, $new_columns);
 
   drupal_goto('admin/node/types/'. $form_values['type_name'] .'/fields');
