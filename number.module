@@ -76,7 +76,7 @@ function number_field_settings($op, $field) {
           'value' => array('type' => 'float', 'not null' => TRUE, 'default' => 0, 'sortable' => TRUE),
         );
       }
-    
+
     case 'filter operators':
       return array(
         '=' => t('is equal to'),

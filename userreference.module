@@ -163,7 +163,11 @@ function userreference_widget($op, &$node, $field, &$node_field) {
 function _userreference_potential_references($field) {
   $result = db_query("SELECT u.name, u.uid FROM {users} u WHERE uid > 0 ORDER BY u.name ASC");
 
-  $rows = array();
+  if (!$field['required']) {
+    $rows = array(0 => '');
+  } else {
+    $rows = array();
+  }
 
   while ($user = db_fetch_object($result)) {
     $rows[$user->uid] = $user->name;
