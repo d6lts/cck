@@ -316,15 +316,11 @@ function content_view(&$node, $teaser = FALSE, $page = FALSE) {
 function content_field($op, &$node, $field, &$node_field, $teaser, $page) {
   $db_info = content_database_info($field);
 
-  if (!count($db_info['columns'])) {
-    return;
-  }
-
   switch ($op) {
     case 'load':
       $column_names = array();
       foreach ($db_info['columns'] as $column => $attributes) {
-        $column_names[] = $attributes['column'];
+        $column_names[] = $attributes['column'] .' AS '. $column;
       }
       if ($field['multiple']) {
         $result = db_query('SELECT '. implode(', ', $column_names) .' FROM {'. $db_info['table'] .'} WHERE vid = %d ORDER BY delta', $node->vid);
@@ -342,63 +338,81 @@ function content_field($op, &$node, $field, &$node_field, $teaser, $page) {
 
     case 'insert':
       foreach ($node_field as $delta => $item) {
-        if ($field['multiple']) {
-          $data = array($node->vid, $delta, $node->nid);
-        }
-        else {
-          $data = array($node->vid, $node->nid);
-        }
-
+        $data = array();
         $column_names = array();
         $column_placeholders = array();
+        $column_assignments = array();
         foreach ($db_info['columns'] as $column => $attributes) {
           $column_names[] = $attributes['column'];
           if (in_array($attributes['type'], array('int', 'mediumint', 'tinyint', 'bigint', 'float'))) {
             $column_placeholders[] = '%d';
+            $column_assignments[] = $attributes['column'] .' = %d';
           }
           else {
             $column_placeholders[] = "'%s'";
+            $column_assignments[] = $attributes['column'] .' = %s';
           }
           $data[] = $item[$column];
         }
+        $data[] = $node->vid;
+        $data[] = $node->nid;
         if ($field['multiple']) {
-          db_query('INSERT INTO {'. $db_info['table'] .'} (vid, delta, nid, '. implode(', ', $column_names) .') VALUES (%d, %d, %d, '. implode(', ', $column_placeholders) .')', $data);
+          $data[] = $delta;
+        }
+
+        if ($field['multiple']) {
+          db_query('INSERT INTO {'. $db_info['table'] .'} ('. implode(', ', $column_names) .', vid, nid, delta) VALUES ('. implode(', ', $column_placeholders) .', %d, %d, %d)', $data);
         }
         else {
-          db_query('INSERT INTO {'. $db_info['table'] .'} (vid, nid, '. implode(', ', $column_names) .') VALUES (%d, %d, '. implode(', ', $column_placeholders) .')', $data);
+          if (db_result(db_query('SELECT COUNT(*) FROM {'. $db_info['table'] .'} WHERE vid = %d AND nid = %d', $node->vid, $node->nid))) {
+            db_query('UPDATE {'. $db_info['table'] .'} SET '. implode(', ', $column_assignments) .' WHERE vid = %d AND nid = %d', $data);
+          }
+          else {
+            db_query('INSERT INTO {'. $db_info['table'] .'} ('. implode(', ', $column_names) .', vid, nid) VALUES ('. implode(', ', $column_placeholders) .', %d, %d)', $data);
+          }
         }
       }
       return;
 
     case 'update':
-      // Delete and insert, rather than update, in case a field was added.
-      db_query('DELETE FROM {'. $db_info['table'] .'} WHERE vid = %d', $node->vid);
+      if ($field['multiple']) {
+        // Delete and insert, rather than update, in case a field was added.
+        db_query('DELETE FROM {'. $db_info['table'] .'} WHERE vid = %d', $node->vid);
+      }
 
       foreach ($node_field as $delta => $item) {
-        if ($field['multiple']) {
-          $data = array($node->vid, $delta, $node->nid);
-        }
-        else {
-          $data = array($node->vid, $node->nid);
-        }
-
+        $data = array();
         $column_names = array();
         $column_placeholders = array();
+        $column_assignments = array();
         foreach ($db_info['columns'] as $column => $attributes) {
           $column_names[] = $attributes['column'];
           if (in_array($attributes['type'], array('int', 'mediumint', 'tinyint', 'bigint', 'float'))) {
             $column_placeholders[] = '%d';
+            $column_assignments[] = $attributes['column'] .' = %d';
           }
           else {
             $column_placeholders[] = "'%s'";
+            $column_assignments[] = $attributes['column'] .' = %s';
           }
           $data[] = $item[$column];
         }
+        $data[] = $node->vid;
+        $data[] = $node->nid;
         if ($field['multiple']) {
-          db_query('INSERT INTO {'. $db_info['table'] .'} (vid, delta, nid, '. implode(', ', $column_names) .') VALUES (%d, %d, %d, '. implode(', ', $column_placeholders) .')', $data);
+          $data[] = $delta;
+        }
+
+        if ($field['multiple']) {
+          db_query('INSERT INTO {'. $db_info['table'] .'} ('. implode(', ', $column_names) .', vid, nid, delta) VALUES ('. implode(', ', $column_placeholders) .', %d, %d, %d)', $data);
         }
         else {
-          db_query('INSERT INTO {'. $db_info['table'] .'} (vid, nid, '. implode(', ', $column_names) .') VALUES (%d, %d, '. implode(', ', $column_placeholders) .')', $data);
+          if (db_result(db_query('SELECT COUNT(*) FROM {'. $db_info['table'] .'} WHERE vid = %d AND nid = %d', $node->vid, $node->nid))) {
+            db_query('UPDATE {'. $db_info['table'] .'} SET '. implode(', ', $column_assignments) .' WHERE vid = %d AND nid = %d', $data);
+          }
+          else {
+            db_query('INSERT INTO {'. $db_info['table'] .'} ('. implode(', ', $column_names) .', vid, nid) VALUES ('. implode(', ', $column_placeholders) .', %d, %d)', $data);
+          }
         }
       }
       return;
@@ -439,12 +453,15 @@ function _content_field_invoke($op, &$node, $teaser = NULL, $page = NULL) {
       }
     }
 
-    $result = content_field($op, $node, $field, $node_field, $teaser, $page);
-    if (is_array($result)) {
-      $return = array_merge($return, $result);
-    }
-    else if (isset($result)) {
-      $return[] = $result;
+    $db_info = content_database_info($field);
+    if (count($db_info['columns'])) {
+      $result = content_field($op, $node, $field, $node_field, $teaser, $page);
+      if (is_array($result)) {
+        $return = array_merge($return, $result);
+      }
+      else if (isset($result)) {
+        $return[] = $result;
+      }
     }
 
     if (isset($node->$field['field_name'])) {
@@ -709,7 +726,7 @@ function content_views_tables() {
     if (count($db_info['columns'])) {
       $table = array();
 
-      $table['name'] = 'node_data_'. $field['field_name'];
+      $table['name'] = $db_info['table'];
       $table['join'] = array(
         'left' => array(
           'table' => 'node',
