@@ -314,23 +314,20 @@ function content_view(&$node, $teaser = FALSE, $page = FALSE) {
  * do their own storage.
  */
 function content_field($op, &$node, $field, &$node_field, $teaser, $page) {
-  $field_types = _content_field_types();
-  $module = $field_types[$field['type']]['module'];
-  $columns = module_invoke($module, 'field_settings', 'database columns', $field);
-  $table_name = 'node_data_'. $field['field_name'];
+  $db_info = content_database_info($field);
 
-  if (!is_array($columns) || !count($columns)) {
+  if (!count($db_info['columns'])) {
     return;
   }
 
   switch ($op) {
     case 'load':
       $column_names = array();
-      foreach ($columns as $column => $attributes) {
-        $column_names[] = $field['field_name'] .'_'. $column .' AS '. $column;
+      foreach ($db_info['columns'] as $column => $attributes) {
+        $column_names[] = $attributes['column'];
       }
       if ($field['multiple']) {
-        $result = db_query('SELECT '. implode(', ', $column_names) .' FROM {'. $table_name .'} WHERE vid = %d ORDER BY delta', $node->vid);
+        $result = db_query('SELECT '. implode(', ', $column_names) .' FROM {'. $db_info['table'] .'} WHERE vid = %d ORDER BY delta', $node->vid);
         $values = array();
         while ($value = db_fetch_array($result)) {
           $values[] = $value;
@@ -338,7 +335,7 @@ function content_field($op, &$node, $field, &$node_field, $teaser, $page) {
         $additions = array($field['field_name'] => $values);
       }
       else {
-        $result = db_query('SELECT '. implode(', ', $column_names) .' FROM {'. $table_name .'} WHERE vid = %d', $node->vid);
+        $result = db_query('SELECT '. implode(', ', $column_names) .' FROM {'. $db_info['table'] .'} WHERE vid = %d', $node->vid);
         $additions = array($field['field_name'] => array(db_fetch_array($result)));
       }
       return $additions;
@@ -354,8 +351,8 @@ function content_field($op, &$node, $field, &$node_field, $teaser, $page) {
 
         $column_names = array();
         $column_placeholders = array();
-        foreach ($columns as $column => $attributes) {
-          $column_names[] = $field['field_name'] .'_'. $column;
+        foreach ($db_info['columns'] as $column => $attributes) {
+          $column_names[] = $attributes['column'];
           if (in_array($attributes['type'], array('int', 'mediumint', 'tinyint', 'bigint', 'float'))) {
             $column_placeholders[] = '%d';
           }
@@ -365,17 +362,17 @@ function content_field($op, &$node, $field, &$node_field, $teaser, $page) {
           $data[] = $item[$column];
         }
         if ($field['multiple']) {
-          db_query('INSERT INTO {'. $table_name .'} (vid, delta, nid, '. implode(', ', $column_names) .') VALUES (%d, %d, %d, '. implode(', ', $column_placeholders) .')', $data);
+          db_query('INSERT INTO {'. $db_info['table'] .'} (vid, delta, nid, '. implode(', ', $column_names) .') VALUES (%d, %d, %d, '. implode(', ', $column_placeholders) .')', $data);
         }
         else {
-          db_query('INSERT INTO {'. $table_name .'} (vid, nid, '. implode(', ', $column_names) .') VALUES (%d, %d, '. implode(', ', $column_placeholders) .')', $data);
+          db_query('INSERT INTO {'. $db_info['table'] .'} (vid, nid, '. implode(', ', $column_names) .') VALUES (%d, %d, '. implode(', ', $column_placeholders) .')', $data);
         }
       }
       return;
 
     case 'update':
       // Delete and insert, rather than update, in case a field was added.
-      db_query('DELETE FROM {'. $table_name .'} WHERE vid = %d', $node->vid);
+      db_query('DELETE FROM {'. $db_info['table'] .'} WHERE vid = %d', $node->vid);
 
       foreach ($node_field as $delta => $item) {
         if ($field['multiple']) {
@@ -387,8 +384,8 @@ function content_field($op, &$node, $field, &$node_field, $teaser, $page) {
 
         $column_names = array();
         $column_placeholders = array();
-        foreach ($columns as $column => $attributes) {
-          $column_names[] = $field['field_name'] .'_'. $column;
+        foreach ($db_info['columns'] as $column => $attributes) {
+          $column_names[] = $attributes['column'];
           if (in_array($attributes['type'], array('int', 'mediumint', 'tinyint', 'bigint', 'float'))) {
             $column_placeholders[] = '%d';
           }
@@ -398,17 +395,17 @@ function content_field($op, &$node, $field, &$node_field, $teaser, $page) {
           $data[] = $item[$column];
         }
         if ($field['multiple']) {
-          db_query('INSERT INTO {'. $table_name .'} (vid, delta, nid, '. implode(', ', $column_names) .') VALUES (%d, %d, %d, '. implode(', ', $column_placeholders) .')', $data);
+          db_query('INSERT INTO {'. $db_info['table'] .'} (vid, delta, nid, '. implode(', ', $column_names) .') VALUES (%d, %d, %d, '. implode(', ', $column_placeholders) .')', $data);
         }
         else {
-          db_query('INSERT INTO {'. $table_name .'} (vid, nid, '. implode(', ', $column_names) .') VALUES (%d, %d, '. implode(', ', $column_placeholders) .')', $data);
+          db_query('INSERT INTO {'. $db_info['table'] .'} (vid, nid, '. implode(', ', $column_names) .') VALUES (%d, %d, '. implode(', ', $column_placeholders) .')', $data);
         }
       }
       return;
 
     case 'delete':
       // Delete using nid rather than vid to purge all revisions.
-      db_query('DELETE FROM {'. $table_name .'} WHERE nid = %d', $node->nid);
+      db_query('DELETE FROM {'. $db_info['table'] .'} WHERE nid = %d', $node->nid);
       return;
   }
 }
@@ -630,6 +627,41 @@ function content_clear_type_cache() {
 }
 
 /**
+ * Retrieve the database storage location(s) for a field.
+ *
+ * @param $field
+ *   The field whose database information is requested.
+ * @return
+ *   An array with the keys:
+ *     "table": The name of the database table where the field data is stored.
+ *     "columns": An array of columns stored for this field. Each is a collection
+ *       of information returned from hook_field_settings('database columns'),
+ *       with the addition of a "column" attribute which holds the name of the
+ *       database column that stores the data.
+ */
+function content_database_info($field) {
+  $field_types = _content_field_types();
+  $module = $field_types[$field['type']]['module'];
+  $columns = module_invoke($module, 'field_settings', 'database columns', $field);
+  
+  $db_info = array();
+  
+  $db_info['table'] = 'node_data_'. $field['field_name'];
+
+  if (is_array($columns) && count($columns)) {
+    $db_info['columns'] = $columns;
+    foreach ($columns as $column_name => $attributes) {
+      $db_info['columns'][$column_name]['column'] = $field['field_name'] .'_'. $column_name;      
+    }
+  }
+  else {
+    $db_info['columns'] = array();
+  }
+  
+  return $db_info;
+}
+
+/**
  * Manipulate a 2D array to reverse rows and columns.
  *
  * The default data storage for fields is delta first, column names second.
@@ -662,17 +694,19 @@ function content_transpose_array_rows_cols($array) {
 
 /**
  * Implementation of hook_views_tables().
+ *
+ * Exposes all fields to the views system if the field has delegated its database
+ * storage to content.module.
  */
 function content_views_tables() {
   $field_types = _content_field_types();
 
   $tables = array();
   foreach (_content_fields() as $field) {
-
+    $db_info = content_database_info($field);
     $module = $field_types[$field['type']]['module'];
-    $columns = module_invoke($module, 'field_settings', 'database columns', $field);
 
-    if (is_array($columns) && count($columns)) {
+    if (count($db_info['columns'])) {
       $table = array();
 
       $table['name'] = 'node_data_'. $field['field_name'];
@@ -686,47 +720,41 @@ function content_views_tables() {
         ),
       );
 
-      $column_mappings = array();
-      foreach ($columns as $column_name => $column) {
-        $column_mappings[$column_name] = $field['field_name'] .'_'. $column_name;
-      }
-      reset($columns);
-      $main_column_name = $column_mappings[key($columns)];
+      $columns = $db_info['columns'];
       $main_column = array_shift($columns);
       $addlfields = array();
-      foreach ($columns as $column_name => $column) {
-        $addlfields[] = $column_mappings[$column_name];
+      foreach ($columns as $column => $attributes) {
+        $addlfields[] = $attributes['column'];
       }
 
       $table['fields'] = array();
-      $table['fields'][$main_column_name] = array(
+      $table['fields'][$main_column['column']] = array(
         'name' => $field_types[$field['type']]['label'] .': '. $field['widget']['label'] .' ('. $field['field_name'] .')',
         'addlfields' => $addlfields,
         'sortable' => isset($main_column['sortable']) ? $main_column['sortable'] : FALSE,
         'handler' => 'content_views_field_handler',
-        'content_table_name' => 'node_data_'. $field['field_name'],
-        'content_column_mappings' => $column_mappings,
+        'content_db_info' => $db_info,
         'content_field' => $field,
         'content_field_module' => $module,
       );
       if (isset($main_column['sortable']) && $main_column['sortable']) {
         $table['sorts'] = array();
-        $table['sorts'][$main_column_name] = array(
+        $table['sorts'][$main_column['column']] = array(
           'name' => $field_types[$field['type']]['label'] .': '. $field['widget']['label'] .' ('. $field['field_name'] .')',
-          'field' => $main_column_name,
+          'field' => $main_column['column'],
         );
       }
 
     $operators = module_invoke($module, 'field_settings', 'filter operators', $field);
       if (is_array($operators) && count($operators)) {
         $table['filters'] = array();
-        $table['filters'][$main_column_name] = array(
+        $table['filters'][$main_column['column']] = array(
           'name' => $field_types[$field['type']]['label'] .': '. $field['widget']['label'] .' ('. $field['field_name'] .')',
           'operator' => $operators,
         );
       }
 
-      $tables['node_data_'. $field['field_name']] = $table;
+      $tables[$db_info['table']] = $table;
     }
   }
   return $tables;
@@ -735,9 +763,9 @@ function content_views_tables() {
 function content_views_field_handler($field_info, $field_data, $value, $data) {
   $field = $field_info['content_field'];
   $node_field_item = array();
-  foreach ($field_info['content_column_mappings'] as $column_name => $view_column_name) {
-    $view_column_name = $field_info['content_table_name'] .'_'. $view_column_name;
-    $node_field_item[$column_name] = $data->$view_column_name;
+  foreach ($field_info['content_db_info']['columns'] as $column => $attributes) {
+    $view_column_name = $field_info['content_db_info']['table'] .'_'. $attributes['column'];
+    $node_field_item[$column] = $data->$view_column_name;
   }
   $function = $field_info['content_field_module'] .'_field_view_item';
   if (function_exists($function)) {
