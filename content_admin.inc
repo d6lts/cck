@@ -150,6 +150,25 @@ function _content_admin_type_edit_submit($form_id, $form_values) {
     }
 
     db_query("INSERT INTO {node_type} (type_name, label, description, help, title_label) VALUES ('%s', '%s', '%s', '%s', '%s')", $form_values['type_name'], $form_values['label'], $form_values['description'], $form_values['help'], $form_values['title_label']);
+
+    switch ($GLOBALS['db_type']) {
+      case 'mysql':
+      case 'mysqli':
+        db_query("CREATE TABLE {node_". strtr($form_values['type_name'], '-', '_') ."} (
+            vid int unsigned NOT NULL default '0',
+            nid int unsigned NOT NULL default '0',
+            PRIMARY KEY (vid)
+          ) TYPE=MyISAM /*!40100 DEFAULT CHARACTER SET utf8 */;");
+        break;
+
+      case 'pgsql':
+        db_query("CREATE TABLE {node_". strtr($form_values['type_name'], '-', '_') ."} (
+            vid integer unsigned NOT NULL default '0',
+            nid integer unsigned NOT NULL default '0',
+            PRIMARY KEY (vid)
+          )");
+        break;
+    }    
   }
   else {
     db_query("UPDATE {node_type} SET label = '%s', description = '%s', help = '%s', title_label = '%s' WHERE type_name = '%s'", $form_values['label'], $form_values['description'], $form_values['help'], $form_values['title_label'], $form_values['type_name']);
@@ -157,7 +176,7 @@ function _content_admin_type_edit_submit($form_id, $form_values) {
 
   if (isset($form_values['original_type_name'])) {
     // Duplicate the field structure from the old content type.
-    db_query("INSERT INTO {node_field_instance} (field_name, type_name, weight, label, widget_type, widget_settings) SELECT field_name, '%s', weight, label, widget_type, widget_settings FROM {node_field_instance} WHERE type_name = '%s'", $form_values['type_name'], $form_values['original_type_name']);
+    db_query("INSERT INTO {node_field_instance} (field_name, type_name, weight, label, widget_type, widget_settings, description) SELECT field_name, '%s', weight, label, widget_type, widget_settings, description FROM {node_field_instance} WHERE type_name = '%s'", $form_values['type_name'], $form_values['original_type_name']);
   }
 
   drupal_set_message(t('Saved content type %type.', array('%type' => theme('placeholder', $form_values['label']))));
@@ -195,6 +214,8 @@ function _content_admin_type_delete_submit($form_id, $form_values) {
     }
     db_query("DELETE FROM {node_field_instance} WHERE type_name = '%s'", $form_values['type_name']);
     db_query("DELETE FROM {node_type} WHERE type_name = '%s'", $form_values['type_name']);
+
+    db_query("DROP TABLE {node_". strtr($form_values['type_name'], '-', '_') ."}");
 
     drupal_set_message(t('Deleted content type %type.', array('%type' => theme('placeholder', $type->label))));
     content_clear_type_cache();
@@ -347,6 +368,21 @@ function theme_content_admin_field_add_new_field_widget_type($form) {
  * Add an existing field to a content type.
  */
 function _content_admin_field_add_existing_submit($form_id, $form_values) {
+  $fields = _content_fields();
+  $field = $fields[$form_values['field_name']];
+  $field_types = _content_field_types();
+  $field_type = $field_types[$field['type']];
+  $columns = module_invoke($field_type['module'], 'field_settings', 'database columns', $field);
+
+  if (is_array($columns) && count($columns)) {
+    if ($field['db_storage'] == CONTENT_DB_STORAGE_PER_CONTENT_TYPE) {
+      $new_field = $field;
+      $new_field['db_storage'] = CONTENT_DB_STORAGE_PER_FIELD;
+      db_query("UPDATE {node_field} SET db_storage = %d WHERE field_name = '%s'", CONTENT_DB_STORAGE_PER_FIELD, $form_values['field_name']);
+      content_alter_db_field($field, $columns, $new_field, $columns);
+    }
+  }
+
   $prior_instance = db_fetch_object(db_query("SELECT weight, label, widget_type, widget_settings FROM {node_field_instance} WHERE field_name = '%s'", $form_values['field_name']));
   if (!$prior_instance) {
     $prior_instance = new stdClass();
@@ -355,7 +391,7 @@ function _content_admin_field_add_existing_submit($form_id, $form_values) {
     $prior_instance->widget_type = '';
     $prior_instance->widget_settings = '';
   }
-  db_query("INSERT INTO {node_field_instance} (field_name, type_name, weight, label, widget_type, widget_settings) VALUES ('%s', '%s', %d, '%s', '%s', '%s')", $form_values['field_name'], $form_values['type_name'], $prior_instance->weight, $prior_instance->label, $prior_instance->widget_type, $prior_instance->widget_settings);
+  db_query("INSERT INTO {node_field_instance} (field_name, type_name, weight, label, widget_type, widget_settings, description) VALUES ('%s', '%s', %d, '%s', '%s', '%s', '%s')", $form_values['field_name'], $form_values['type_name'], $prior_instance->weight, $prior_instance->label, $prior_instance->widget_type, $prior_instance->widget_settings, $prior_instance->description);
 
   drupal_set_message(t('Added field %label.', array('%label' => theme('placeholder', $prior_instance->label))));
   content_clear_type_cache();
@@ -385,8 +421,8 @@ function _content_admin_field_add_new_submit($form_id, $form_values) {
   }
 
   $field_widget_type = explode('-', $form_values['field_widget_type']);
-  db_query("INSERT INTO {node_field} (field_name, type) VALUES ('%s', '%s')", $field_name, $field_widget_type[0]);
-  db_query("INSERT INTO {node_field_instance} (type_name, field_name, label, widget_type) VALUES ('%s', '%s', '%s', '%s')", $form_values['type_name'], $field_name, $form_values['label'], $field_widget_type[1]);
+  db_query("INSERT INTO {node_field} (field_name, type, global_settings, required, multiple, db_storage) VALUES ('%s', '%s', '%s', %d, %d, %d)", $field_name, $field_widget_type[0], serialize(array()), 0, 0, CONTENT_DB_STORAGE_PER_CONTENT_TYPE);
+  db_query("INSERT INTO {node_field_instance} (field_name, type_name, weight, label, widget_type, widget_settings, description) VALUES ('%s', '%s', %d, '%s', '%s', '%s', '%s')", $field_name, $form_values['type_name'], 0, $form_values['label'], $field_widget_type[1], serialize(array()), '');
 
   content_clear_type_cache();
 
@@ -434,14 +470,26 @@ function _content_admin_field_remove_submit($form_id, $form_values) {
   $type = $types[$form_values['type_name']];
   $field = $type->fields[$form_values['field_name']];
   $field_types = _content_field_types();
-  $field_type = $field_types[$form_values['field_name']];
+  $field_type = $field_types[$field['type']];
   $columns = module_invoke($field_type['module'], 'field_settings', 'database columns', $field);
 
   if ($type && $field && $form_values['confirm']) {
     db_query("DELETE FROM {node_field_instance} WHERE type_name = '%s' AND field_name = '%s'", $form_values['type_name'], $form_values['field_name']);
 
     drupal_set_message(t('Removed field %field from %type.', array('%field' => theme('placeholder', $field['widget']['label']), '%type' => theme('placeholder', $type->label))));
-    if (!db_result(db_query("SELECT type_name FROM {node_field_instance} WHERE field_name = '%s'", $form_values['field_name']))) {
+    $instances = db_result(db_query("SELECT COUNT(*) FROM {node_field_instance} WHERE field_name = '%s'", $form_values['field_name']));
+    if ($instances == 1) {
+      if (!($field['multiple'])) {
+        // Multiple-valued fields are always stored per content type.
+        if (is_array($columns) && count($columns)) {
+          $new_field = $field;
+          $new_field['db_storage'] = CONTENT_DB_STORAGE_PER_CONTENT_TYPE;
+          db_query("UPDATE {node_field} SET db_storage = %d WHERE field_name = '%s'", CONTENT_DB_STORAGE_PER_CONTENT_TYPE, $form_values['field_name']);
+          content_alter_db_field($field, $columns, $new_field, $columns);
+        }
+      }
+    }
+    else if ($instances == 0) {
       if (is_array($columns) && count($columns)) {
         content_alter_db_field($field, $columns, array(), array());
       }
@@ -628,108 +676,182 @@ function _content_admin_field_submit($form_id, $form_values) {
  * Perform adds, alters, and drops as needed to synchronize the database with
  * new field definitions.
  */
-function content_alter_db_field($prev_field, $previous_columns, $new_field, $new_columns) {
-  if (count($prev_field) && !count($new_field)) {
-    db_query('DROP TABLE {'. 'node_data_'. $prev_field['field_name'] .'}');
+function content_alter_db_field($previous_field, $previous_columns, $new_field, $new_columns) {
+  // When adding and removing columns, we need to know what content type has an instance of the field.
+  if (count($previous_columns)) {
+    $previous_field['type_name'] = db_result(db_query("SELECT type_name FROM {node_field_instance} WHERE field_name = '%s'", $previous_field['field_name']));
+    $previous_db_info = content_database_info($previous_field);
+  }
+  if (count($new_columns)) {
+    $new_field['type_name'] = db_result(db_query("SELECT type_name FROM {node_field_instance} WHERE field_name = '%s'", $new_field['field_name']));
+    $new_db_info = content_database_info($new_field);
+  }
+
+  if (!count($new_columns)) {
+    if (count($previous_columns)) {
+      if ($previous_field['db_storage'] == CONTENT_DB_STORAGE_PER_FIELD) {
+        db_query('DROP TABLE {'. $previous_db_info['table'] .'}');
+      }
+      else {
+        foreach ($previous_db_info['columns'] as $column => $attributes) {
+          db_query('ALTER TABLE {'. $previous_db_info['table'] .'} DROP '. $attributes['column']);
+        }
+      }
+    }
     return;
   }
 
-  $table_name = 'node_data_'. $new_field['field_name'];
+  if ($new_field['db_storage'] == CONTENT_DB_STORAGE_PER_FIELD) {
+    if (!count($previous_columns) || $previous_field['db_storage'] == CONTENT_DB_STORAGE_PER_CONTENT_TYPE) {
+      // New columns with per-field storage; need to add a table.
+      if ($new_field['multiple']) {
+        switch ($GLOBALS['db_type']) {
+          case 'mysql':
+          case 'mysqli':
+            db_query("CREATE TABLE {". $new_db_info['table'] ."} (
+                vid int unsigned NOT NULL default '0',
+                delta int unsigned NOT NULL default '0',
+                nid int unsigned NOT NULL default '0',
+                PRIMARY KEY (vid,delta)
+              ) TYPE=MyISAM /*!40100 DEFAULT CHARACTER SET utf8 */;");
+            break;
 
-  if (!count($previous_columns) && count($new_columns)) {
-    if ($new_field['multiple']) {
-      switch ($GLOBALS['db_type']) {
-        case 'mysql':
-        case 'mysqli':
-          db_query("CREATE TABLE {". $table_name ."} (
-              vid int unsigned NOT NULL default '0',
-              delta int unsigned NOT NULL default '0',
-              nid int unsigned NOT NULL default '0',
-              PRIMARY KEY (vid,delta)
-            ) TYPE=MyISAM /*!40100 DEFAULT CHARACTER SET utf8 */;");
-          break;
+          case 'pgsql':
+            db_query("CREATE TABLE {". $new_db_info['table'] ."} (
+                vid integer unsigned NOT NULL default '0',
+                delta integer unsigned NOT NULL default '0',
+                nid integer unsigned NOT NULL default '0',
+                PRIMARY KEY (vid,delta)
+              )");
+            break;
+        }
+      }
+      else {
+        switch ($GLOBALS['db_type']) {
+          case 'mysql':
+          case 'mysqli':
+            db_query("CREATE TABLE {". $new_db_info['table'] ."} (
+                vid int unsigned NOT NULL default '0',
+                nid int unsigned NOT NULL default '0',
+                PRIMARY KEY (vid)
+              ) TYPE=MyISAM /*!40100 DEFAULT CHARACTER SET utf8 */;");
+            break;
 
-        case 'pgsql':
-          db_query("CREATE TABLE {". $table_name ."} (
-              vid integer unsigned NOT NULL default '0',
-              delta integer unsigned NOT NULL default '0',
-              nid integer unsigned NOT NULL default '0',
-              PRIMARY KEY (vid,delta)
-            )");
-          break;
+          case 'pgsql':
+            db_query("CREATE TABLE {". $new_db_info['table'] ."} (
+                vid integer unsigned NOT NULL default '0',
+                nid integer unsigned NOT NULL default '0',
+                PRIMARY KEY (vid)
+              )");
+            break;
+        }
       }
     }
-    else {
-      switch ($GLOBALS['db_type']) {
-        case 'mysql':
-        case 'mysqli':
-          db_query("CREATE TABLE {". $table_name ."} (
-              vid int unsigned NOT NULL default '0',
-              nid int unsigned NOT NULL default '0',
-              PRIMARY KEY (vid)
-            ) TYPE=MyISAM /*!40100 DEFAULT CHARACTER SET utf8 */;");
-          break;
 
-        case 'pgsql':
-          db_query("CREATE TABLE {". $table_name ."} (
-              vid integer unsigned NOT NULL default '0',
-              nid integer unsigned NOT NULL default '0',
-              PRIMARY KEY (vid)
-            )");
-          break;
+    if (count($previous_columns) && $previous_field['db_storage'] == CONTENT_DB_STORAGE_PER_FIELD) {
+      // Already using per-field storage; change multiplicity if needed.
+      if ($previous_field['multiple'] && !$new_field['multiple']) {
+        db_query('DELETE FROM {'. $new_db_info['table'] .'} WHERE delta != 0');
+        db_query('ALTER TABLE {'. $new_db_info['table'] .'} DROP delta');
+        switch ($GLOBALS['db_type']) {
+          case 'mysql':
+          case 'mysqli':
+            db_query('ALTER TABLE {'. $new_db_info['table'] .'} DROP PRIMARY KEY');
+            db_query('ALTER TABLE {'. $new_db_info['table'] .'} ADD PRIMARY KEY (vid)');
+            break;
+          case 'pgsql':
+            db_query('ALTER TABLE {'. $new_db_info['table'] .'} DROP CONSTRAINT {'. $new_db_info['table'] .'}_pkey');
+            db_query('ALTER TABLE {'. $new_db_info['table'] .'} ADD PRIMARY KEY (vid)');
+            break;
+        }
+      }
+      else if (!$previous_field['multiple'] && $new_field['multiple']) {
+        content_db_add_column($new_db_info['table'], 'delta', 'int', array('unsigned' => TRUE, 'not null' => TRUE, 'default' => 0));
+        switch ($GLOBALS['db_type']) {
+          case 'mysql':
+          case 'mysqli':
+            db_query('ALTER TABLE {'. $new_db_info['table'] .'} DROP PRIMARY KEY');
+            db_query('ALTER TABLE {'. $new_db_info['table'] .'} ADD PRIMARY KEY (vid,delta)');
+            break;
+          case 'pgsql':
+            db_query('ALTER TABLE {'. $new_db_info['table'] .'} DROP CONSTRAINT {'. $new_db_info['table'] .'}_pkey');
+            db_query('ALTER TABLE {'. $new_db_info['table'] .'} ADD PRIMARY KEY (vid,delta)');
+            break;
+        }
       }
     }
   }
-  else if (count($previous_columns) && count($new_columns)) {
-    if ($prev_field['multiple'] && !$new_field['multiple']) {
-      db_query('DELETE FROM {'. $table_name .'} WHERE delta != 0');
-      db_query('ALTER TABLE {'. $table_name .'} DROP delta');
-      switch ($GLOBALS['db_type']) {
-        case 'mysql':
-        case 'mysqli':
-          db_query('ALTER TABLE {'. $table_name .'} DROP PRIMARY KEY');
-          db_query('ALTER TABLE {'. $table_name .'} ADD PRIMARY KEY (vid)');
-          break;
-        case 'pgsql':
-          db_query('ALTER TABLE {'. $table_name .'} DROP CONSTRAINT {'. $table_name .'}_pkey');
-          db_query('ALTER TABLE {'. $table_name .'} ADD PRIMARY KEY (vid)');
-          break;
-      }
-    }
-    else if (!$prev_field['multiple'] && $new_field['multiple']) {
-      content_db_add_column($table_name, 'delta', 'int', array('unsigned' => TRUE, 'not null' => TRUE, 'default' => 0));
-      switch ($GLOBALS['db_type']) {
-        case 'mysql':
-        case 'mysqli':
-          db_query('ALTER TABLE {'. $table_name .'} DROP PRIMARY KEY');
-          db_query('ALTER TABLE {'. $table_name .'} ADD PRIMARY KEY (vid,delta)');
-          break;
-        case 'pgsql':
-          db_query('ALTER TABLE {'. $table_name .'} DROP CONSTRAINT {'. $table_name .'}_pkey');
-          db_query('ALTER TABLE {'. $table_name .'} ADD PRIMARY KEY (vid,delta)');
-          break;
-      }
-    }
-  }
 
-  foreach ($previous_columns as $column => $attributes) {
-    $column_name = $prev_field['field_name'] .'_'. $column;
-    if (!isset($new_columns[$column])) {
-      db_query('ALTER TABLE {'. $table_name .'} DROP '. $column_name);
-    }
-  }
+  // Add new columns and change modified columns.
   foreach ($new_columns as $column => $attributes) {
     $column_name = $new_field['field_name'] .'_'. $column;
-    if (!isset($previous_columns[$column])) {
-      content_db_add_column($table_name, $column_name, $attributes['type'], $attributes);
+    if (!isset($previous_columns[$column]) || $previous_field['db_storage'] != $new_field['db_storage']) {
+      content_db_add_column($new_db_info['table'], $column_name, $attributes['type'], $attributes);
     }
     else {
       if ($attributes != $previous_columns[$column]) {
-        content_db_change_column($table_name, $column_name, $column_name, $attributes['type'], $attributes);
+        content_db_change_column($new_db_info['table'], $column_name, $column_name, $attributes['type'], $attributes);
       }
     }
   }
 
+  if (count($previous_columns) && count($new_columns)) {
+    // Remove obsolete columns.
+    foreach ($previous_columns as $column => $attributes) {
+      $column_name = $previous_field['field_name'] .'_'. $column;
+      if (!isset($new_columns[$column])) {
+        db_query('ALTER TABLE {'. $new_db_info['table'] .'} DROP '. $column_name);
+      }
+    }
+
+    // Migrate data from per-content-type storage.
+    if ($previous_field['db_storage'] == CONTENT_DB_STORAGE_PER_CONTENT_TYPE && $new_field['db_storage'] == CONTENT_DB_STORAGE_PER_FIELD) {
+      $columns = array();
+      foreach ($previous_db_info['columns'] as $column => $attributes) {
+        $columns[] = $attributes['column'];
+      }
+      if ($new_field['multiple']) {
+        db_query('INSERT INTO {'. $new_db_info['table'] .'} (vid, nid, delta, '. implode(', ', $columns) .') SELECT vid, nid, 0, '. implode(', ', $columns) .' FROM {'. $previous_db_info['table'] .'}');
+      }
+      else {
+        db_query('INSERT INTO {'. $new_db_info['table'] .'} (vid, nid, '. implode(', ', $columns) .') SELECT vid, nid, '. implode(', ', $columns) .' FROM {'. $previous_db_info['table'] .'}');
+      }
+      db_query('ALTER TABLE {'. $previous_db_info['table'] .'} DROP '. implode(', ', $columns));
+    }
+
+    // Migrate data from per-field storage.
+    if ($previous_field['db_storage'] == CONTENT_DB_STORAGE_PER_FIELD && $new_field['db_storage'] == CONTENT_DB_STORAGE_PER_CONTENT_TYPE) {
+      $column_names = array();
+      $column_placeholders = array();
+      $column_assignments = array();
+      foreach ($new_db_info['columns'] as $column => $attributes) {
+        $column_names[] = $attributes['column'];
+        if (in_array($attributes['type'], array('int', 'mediumint', 'tinyint', 'bigint', 'float'))) {
+          $column_placeholders[] = '%d';
+          $column_assignments[] = $attributes['column'] .' = %d';
+        }
+        else {
+          $column_placeholders[] = "'%s'";
+          $column_assignments[] = $attributes['column'] ." = '%s'";
+        }
+      }
+      if ($previous_field['multiple']) {
+        $result = db_query('SELECT '. implode(', ', $column_names) .', vid, nid FROM {'. $previous_db_info['table'] .'} WHERE delta = 0');
+      }
+      else {
+        $result = db_query('SELECT '. implode(', ', $column_names) .', vid, nid FROM {'. $previous_db_info['table'] .'}');
+      }
+      while ($data = db_fetch_array($result)) {
+        if (db_result(db_query('SELECT COUNT(*) FROM {'. $new_db_info['table'] .'} WHERE vid = %d AND nid = %d', $data['vid'], $data['nid']))) {
+          db_query('UPDATE {'. $new_db_info['table'] .'} SET '. implode(', ', $column_assignments) .' WHERE vid = %d AND nid = %d', $data);
+        }
+        else {
+          db_query('INSERT INTO {'. $new_db_info['table'] .'} ('. implode(', ', $column_names) .', vid, nid) VALUES ('. implode(', ', $column_placeholders) .', %d, %d)', $data);
+        }
+      }
+      db_query('DROP TABLE {'. $previous_db_info['table'] .'}');
+    }
+  }
 }
 
 /**

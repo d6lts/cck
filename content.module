@@ -6,6 +6,9 @@
  * Allows administrators to define new content types.
  */
 
+define(CONTENT_DB_STORAGE_PER_FIELD, 0);
+define(CONTENT_DB_STORAGE_PER_CONTENT_TYPE, 1);
+
 /**
  * Implementation of hook_help().
  */
@@ -358,7 +361,7 @@ function content_field($op, &$node, $field, &$node_field, $teaser, $page) {
               break;
             default:
               $column_placeholders[] = "'%s'";
-              $column_assignments[] = $attributes['column'] .' = %s';
+              $column_assignments[] = $attributes['column'] ." = '%s'";
           }
           $data[] = $item[$column];
         }
@@ -395,13 +398,21 @@ function content_field($op, &$node, $field, &$node_field, $teaser, $page) {
         $column_assignments = array();
         foreach ($db_info['columns'] as $column => $attributes) {
           $column_names[] = $attributes['column'];
-          if (in_array($attributes['type'], array('int', 'mediumint', 'tinyint', 'bigint', 'float'))) {
-            $column_placeholders[] = '%d';
-            $column_assignments[] = $attributes['column'] .' = %d';
-          }
-          else {
-            $column_placeholders[] = "'%s'";
-            $column_assignments[] = $attributes['column'] .' = %s';
+          switch ($attributes['type']) {
+            case 'int':
+            case 'mediumint':
+            case 'tinyint': 
+            case 'bigint':
+              $column_placeholders[] = '%d';
+              $column_assignments[] = $attributes['column'] .' = %d';
+              break;
+            case 'float':
+              $column_placeholders[] = '%f';
+              $column_assignments[] = $attributes['column'] .' = %f';
+              break;
+            default:
+              $column_placeholders[] = "'%s'";
+              $column_assignments[] = $attributes['column'] ." = '%s'";
           }
           $data[] = $item[$column];
         }
@@ -531,7 +542,7 @@ function _content_types($reset = FALSE) {
       $type_result = db_query('SELECT * FROM {node_type} nt ORDER BY nt.type_name ASC');
       while ($type = db_fetch_object($type_result)) {
         $type->fields = array();
-        $field_result = db_query("SELECT nfi.field_name, nfi.weight, nfi.label, nfi.widget_type, nfi.widget_settings, nfi.description, nf.type, nf.global_settings, nf.required, nf.multiple FROM {node_field_instance} nfi LEFT JOIN {node_field} nf ON nfi.field_name = nf.field_name WHERE nfi.type_name = '%s' ORDER BY nfi.weight ASC, nfi.label ASC", $type->type_name);
+        $field_result = db_query("SELECT nfi.field_name, nfi.weight, nfi.label, nfi.widget_type, nfi.widget_settings, nfi.description, nf.type, nf.global_settings, nf.required, nf.multiple, nf.db_storage FROM {node_field_instance} nfi LEFT JOIN {node_field} nf ON nfi.field_name = nf.field_name WHERE nfi.type_name = '%s' ORDER BY nfi.weight ASC, nfi.label ASC", $type->type_name);
         while ($field = db_fetch_array($field_result)) {
           $field_settings = $field['global_settings'] ? unserialize($field['global_settings']) : array();
           $widget_settings = $field['widget_settings'] ? unserialize($field['widget_settings']) : array();
@@ -547,6 +558,7 @@ function _content_types($reset = FALSE) {
           unset($field['label']);
           $field['widget']['description'] = $field['description'];
           unset($field['description']);
+          $field['type_name'] = $type->type_name;
           $type->fields[$field['field_name']] = $field;
         }
 
@@ -576,7 +588,9 @@ function _content_fields($reset = FALSE) {
       $global_settings = $field['global_settings'] ? unserialize($field['global_settings']) : array();
       unset($field['global_settings']);
       $field = array_merge($field, $global_settings);
-      $field['widget']['label'] = db_result(db_query("SELECT label FROM {node_field_instance} WHERE field_name = '%s'", $field['field_name']));
+      $instance_info = db_fetch_array(db_query("SELECT type_name, label FROM {node_field_instance} WHERE field_name = '%s'", $field['field_name']));
+      $field['widget']['label'] = $instance_info['label'];
+      $field['type_name'] = $instance_info['type_name'];
       $fields[$field['field_name']] = $field;
     }
   }
@@ -671,7 +685,12 @@ function content_database_info($field) {
   
   $db_info = array();
   
-  $db_info['table'] = 'node_data_'. $field['field_name'];
+  if ($field['db_storage'] == CONTENT_DB_STORAGE_PER_FIELD) {
+    $db_info['table'] = 'node_data_'. $field['field_name'];
+  }
+  else {
+    $db_info['table'] = 'node_'. strtr($field['type_name'], '-', '_');
+  }
 
   if (is_array($columns) && count($columns)) {
     $db_info['columns'] = $columns;
@@ -779,7 +798,10 @@ function content_views_tables() {
         );
       }
 
-      $tables[$db_info['table']] = $table;
+      // We don't use $db_info['table'] for the key, since that may change during
+      // the lifetime of the field and we don't want to require users to redefine
+      // their views. 
+      $tables['node_data_'. $field['field_name']] = $table;
     }
   }
   return $tables;
@@ -789,7 +811,7 @@ function content_views_field_handler($field_info, $field_data, $value, $data) {
   $field = $field_info['content_field'];
   $node_field_item = array();
   foreach ($field_info['content_db_info']['columns'] as $column => $attributes) {
-    $view_column_name = $field_info['content_db_info']['table'] .'_'. $attributes['column'];
+    $view_column_name = 'node_data_'. $field['field_name'] .'_'. $attributes['column'];
     $node_field_item[$column] = $data->$view_column_name;
   }
   $function = $field_info['content_field_module'] .'_field_view_item';
