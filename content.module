@@ -350,7 +350,7 @@ function content_field($op, &$node, $field, &$node_field, $teaser, $page) {
           }
           else {
             $column_placeholders[] = "'%s'";
-            $column_assignments[] = $attributes['column'] .' = %s';
+            $column_assignments[] = $attributes['column'] ." = '%s'";
           }
           $data[] = $item[$column];
         }
