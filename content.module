@@ -344,13 +344,21 @@ function content_field($op, &$node, $field, &$node_field, $teaser, $page) {
         $column_assignments = array();
         foreach ($db_info['columns'] as $column => $attributes) {
           $column_names[] = $attributes['column'];
-          if (in_array($attributes['type'], array('int', 'mediumint', 'tinyint', 'bigint', 'float'))) {
-            $column_placeholders[] = '%d';
-            $column_assignments[] = $attributes['column'] .' = %d';
-          }
-          else {
-            $column_placeholders[] = "'%s'";
-            $column_assignments[] = $attributes['column'] ." = '%s'";
+          switch ($attributes['type']) {
+            case 'int':
+            case 'mediumint':
+            case 'tinyint': 
+            case 'bigint':
+              $column_placeholders[] = '%d';
+              $column_assignments[] = $attributes['column'] .' = %d';
+              break;
+            case 'float':
+              $column_placeholders[] = '%f';
+              $column_assignments[] = $attributes['column'] .' = %f';
+              break;
+            default:
+              $column_placeholders[] = "'%s'";
+              $column_assignments[] = $attributes['column'] .' = %s';
           }
           $data[] = $item[$column];
         }
