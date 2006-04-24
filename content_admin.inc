@@ -168,7 +168,7 @@ function _content_admin_type_edit_submit($form_id, $form_values) {
             PRIMARY KEY (vid)
           )");
         break;
-    }    
+    }
   }
   else {
     db_query("UPDATE {node_type} SET label = '%s', description = '%s', help = '%s', title_label = '%s' WHERE type_name = '%s'", $form_values['label'], $form_values['description'], $form_values['help'], $form_values['title_label'], $form_values['type_name']);
@@ -679,7 +679,9 @@ function _content_admin_field_submit($form_id, $form_values) {
 function content_alter_db_field($previous_field, $previous_columns, $new_field, $new_columns) {
   // When adding and removing columns, we need to know what content type has an instance of the field.
   if (count($previous_columns)) {
-    $previous_field['type_name'] = db_result(db_query("SELECT type_name FROM {node_field_instance} WHERE field_name = '%s'", $previous_field['field_name']));
+    if (!isset($previous_field['type_name'])) {
+      $previous_field['type_name'] = db_result(db_query("SELECT type_name FROM {node_field_instance} WHERE field_name = '%s'", $previous_field['field_name']));
+    }
     $previous_db_info = content_database_info($previous_field);
   }
   if (count($new_columns)) {

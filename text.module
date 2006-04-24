@@ -36,20 +36,20 @@ function text_field_settings($op, $field) {
       $form['text_processing'] = array(
         '#type' => 'radios',
         '#title' => t('Text processing'),
-        '#default_value' => $field['text_processing'] ? $field['text_processing'] : 0,
+        '#default_value' => isset($field['text_processing']) ? $field['text_processing'] : 0,
         '#options' => $options,
       );
       $form['max_length'] = array(
         '#type' => 'textfield',
         '#title' => t('Maximum length'),
-        '#default_value' => $field['max_length'] ? $field['max_length'] : '',
+        '#default_value' => isset($field['max_length']) ? $field['max_length'] : '',
         '#required' => FALSE,
         '#description' => t('The maximum length of the field in characters. Leave blank for an unlimited size.'),
       );
       $form['allowed_values'] = array(
         '#type' => 'textarea',
         '#title' => t('Allowed values'),
-        '#default_value' => $field['allowed_values'] ? $field['allowed_values'] : '',
+        '#default_value' => isset($field['allowed_values']) ? $field['allowed_values'] : '',
         '#required' => FALSE,
         '#rows' => 10,
         '#description' => t('The possible values this field can contain. Any other values will result in an error. Enter one value per line.'),

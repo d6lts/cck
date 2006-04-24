@@ -50,7 +50,7 @@ function nodereference_field_settings($op, $field) {
         '#type' => 'checkboxes',
         '#title' => t('Content types that can be referenced'),
         '#multiple' => TRUE,
-        '#default_value' => $field['referenceable_types'],
+        '#default_value' => isset($field['referenceable_types']) ? $field['referenceable_types'] : array(),
         '#options' => node_get_types(),
       );
       return $form;

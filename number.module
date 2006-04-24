@@ -36,17 +36,17 @@ function number_field_settings($op, $field) {
       $form['min'] = array(
         '#type' => 'textfield',
         '#title' => t('Minimum'),
-        '#default_value' => $field['min'] ? $field['min'] : '',
+        '#default_value' => isset($field['min']) ? $field['min'] : '',
       );
       $form['max'] = array(
         '#type' => 'textfield',
         '#title' => t('Maximum'),
-        '#default_value' => $field['max'] ? $field['max'] : '',
+        '#default_value' => isset($field['max']) ? $field['max'] : '',
       );
       $form['allowed_values'] = array(
         '#type' => 'textarea',
         '#title' => t('Allowed values'),
-        '#default_value' => $field['allowed_values'] ? $field['allowed_values'] : '',
+        '#default_value' => isset($field['allowed_values']) ? $field['allowed_values'] : '',
         '#required' => FALSE,
         '#rows' => 10,
         '#description' => t('The possible values this field can contain. Any other values will result in an error. Enter one value per line.'),

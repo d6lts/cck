@@ -134,7 +134,7 @@ function content_update_4() {
             PRIMARY KEY (vid)
           )");
         break;
-    }    
+    }
   }
 
   return $ret;
@@ -157,7 +157,7 @@ function content_update_5() {
       $_SESSION['content_update_5'] = 0;
       $_SESSION['content_update_5_max'] = db_num_rows($result);
     }
-  
+
     $field = db_fetch_array($result);
     $fields = _content_fields();
     $field = $fields[$field['field_name']];
