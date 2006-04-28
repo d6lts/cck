@@ -651,7 +651,16 @@ function _content_admin_field_submit($form_id, $form_values) {
 
   db_query("UPDATE {node_field_instance} SET weight = %d, label = '%s', widget_type = '%s', widget_settings = '%s', description = '%s' WHERE type_name = '%s' AND field_name = '%s'", $form_values['weight'], $form_values['label'], $form_values['widget_type'], serialize($widget_settings), $form_values['description'], $form_values['type_name'], $form_values['field_name']);
 
-  db_query("UPDATE {node_field} SET required = %d, multiple = %d, global_settings = '%s' WHERE field_name = '%s'", $form_values['required'], $form_values['multiple'], serialize($field_settings), $form_values['field_name']);
+  if ($form_values['multiple']) {
+    $field['db_storage'] = CONTENT_DB_STORAGE_PER_FIELD;
+  }
+  else {
+    $instances = db_result(db_query("SELECT COUNT(*) FROM {node_field_instance} WHERE field_name = '%s'", $form_values['field_name']));
+    if ($instances == 1) {
+      $field['db_storage'] = CONTENT_DB_STORAGE_PER_CONTENT_TYPE;
+    }
+  }
+  db_query("UPDATE {node_field} SET required = %d, multiple = %d, global_settings = '%s', db_storage = %d WHERE field_name = '%s'", $form_values['required'], $form_values['multiple'], serialize($field_settings), $field['db_storage'], $form_values['field_name']);
 
   drupal_set_message(t('Saved field %field.', array('%field' => theme('placeholder', $form_values['label']))));
   content_clear_type_cache();
