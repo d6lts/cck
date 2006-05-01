@@ -122,6 +122,10 @@ function text_field($op, &$node, $field, &$node_field, $teaser, $page) {
  * node preview.
  */
 function text_field_view_item($field, $node_field_item, $node = NULL) {
+  if (!isset($node_field_item['value'])) {
+    return '';
+  }
+
   // check permissions in check_markup if previewing.
   $preview = ($node && isset($node->in_preview));
 
@@ -241,7 +245,7 @@ function text_widget($op, &$node, $field, &$node_field) {
           $form[$field['field_name']][0]['value'] = array(
             '#type' => 'textfield',
             '#title' => t($field['widget']['label']),
-            '#default_value' => $node_field[0]['value'],
+            '#default_value' => isset($node_field[0]['value']) ? $node_field[0]['value'] : '',
             '#required' => $field['required'],
             '#description' => $field['widget']['description'],
             '#maxlength' => $field['max_length'] ? $field['max_length'] : '',

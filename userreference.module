@@ -59,8 +59,11 @@ function userreference_field($op, &$node, $field, &$node_field, $teaser, $page) 
 function userreference_field_view_item($field, $node_field_item) {
   if (isset($node_field_item['uid'])) {
     $referenced_user = user_load(array('uid' => $node_field_item['uid']));
-    return theme('username', $referenced_user);
+    if ($referenced_user) {
+      return theme('username', $referenced_user);
+    }
   }
+  return '';
 }
 
 

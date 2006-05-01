@@ -85,6 +85,9 @@ function nodereference_field($op, &$node, $field, &$node_field, $teaser, $page) 
  * Implementation of hook_field_view_item().
  */
 function nodereference_field_view_item($field, $node_field_item) {
+  if (!isset($node_field_item['nid'])) {
+    return '';
+  }
   $referenced_node = node_load($node_field_item['nid']);
   if ($referenced_node) {
     return l($referenced_node->title, 'node/'. $referenced_node->nid);

@@ -41,7 +41,7 @@ function optionwidgets_widget($op, &$node, $field, &$node_field) {
       $options = _optionwidgets_options($field);
 
       $node_field_transposed = content_transpose_array_rows_cols($node_field);
-      $values = is_array($node_field_transposed['value']) ? $node_field_transposed['value'] : array();
+      $values = (isset($node_field_transposed['value']) && is_array($node_field_transposed['value'])) ? $node_field_transposed['value'] : array();
 
       $keys = array();
       foreach ($values as $value) {
