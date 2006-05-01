@@ -213,7 +213,7 @@ function content_access($op, $node) {
  * cache the loaded object structure and invalidate it during the update process.
  */
 function content_load($node) {
-  $cid = 'content:'. $node->nid;
+  $cid = 'content:'. $node->nid .':'. $node->vid;
   if ($cached = cache_get($cid)) {
     return unserialize($cached->data);
   }
@@ -288,7 +288,7 @@ function content_insert(&$node) {
  */
 function content_update(&$node) {
   _content_field_invoke('update', $node);
-  cache_clear_all('content:'. $node->nid);
+  cache_clear_all('content:'. $node->nid .':'. $node->vid);
 }
 
 /**
@@ -306,6 +306,21 @@ function content_view(&$node, $teaser = FALSE, $page = FALSE) {
   $node->body = implode('', _content_field_invoke('view', $node, FALSE, $page));
   $node->teaser = implode('', _content_field_invoke('view', $node, TRUE, $page));
   $node->readmore = ($node->body != $node->teaser);
+}
+
+/**
+ * Implementation of hook_nodeapi().
+ *
+ * When a revision is deleted, make sure the appropriate cache item is cleared.
+ */
+function content_nodeapi(&$node, $op, $teaser, $page) {
+  switch ($op) {
+    case 'delete revision':
+      if (in_array($node->type, array_keys(_content_types()))) {
+        cache_clear_all('content:'. $node->nid .':'. $node->vid);
+      }
+      break;
+  }
 }
 
 /**

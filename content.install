@@ -177,3 +177,10 @@ function content_update_5() {
     return $ret;
   }
 }
+
+/**
+ * The cache for nodes has changed to account for revisions correctly.
+ */
+function content_update_6() {
+  return array(update_sql('DELETE FROM {cache}'));
+}
