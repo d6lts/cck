@@ -266,5 +266,16 @@ function text_widget($op, &$node, $field, &$node_field) {
         }
       }
       return $form;
+
+    case 'process form values':
+      // Don't save empty fields.
+      if ($field['multiple']) {
+        foreach ($node_field as $delta => $item) {
+          if ($item['value'] == '') {
+            unset($node_field[$delta]);
+          }
+        }
+      }
+      break;
   }
 }
