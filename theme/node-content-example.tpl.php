@@ -8,7 +8,7 @@
     <div class="content">
       Here's the body:
         <?php print $field_body[0]['view']; ?>
-      
+
       And some footnotes:
       <ul>
         <?php
