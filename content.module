@@ -862,7 +862,7 @@ function content_views_field_handler($field_info, $field_data, $value, $data) {
 function theme_field(&$node, &$field, &$items, $teaser, $page) {
   $output = '';
 
-  $output .= '<div class="field field-type-'. $field['type'] .'">';
+  $output .= '<div class="field field-type-'. strtr($field['type'], '_', '-') .' field-'. strtr($field['field_name'], '_', '-') .'">';
   
   $output .= '<h3 class="field-label">'. $field['widget']['label'] .'</h3>';
 
