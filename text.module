@@ -90,12 +90,10 @@ function text_field_settings($op, $field) {
 function text_field($op, &$node, $field, &$node_field, $teaser, $page) {
   switch ($op) {
     case 'view':
-      $output = '';
       foreach ($node_field as $delta => $item) {
         $node_field[$delta]['view'] = text_field_view_item($field, $item, $node);
-        $output .= '<div class="'. $field['field_name'] .'">'. $node_field[$delta]['view'] .'</div>';
       }
-      return $output;
+      return theme('field', $node, $field, $node_field, $teaser, $page);
 
     case 'validate':
       $allowed_values = explode("\n", $field['allowed_values']);
