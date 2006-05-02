@@ -839,3 +839,40 @@ function content_views_field_handler($field_info, $field_data, $value, $data) {
   return $result;
 }
 
+/**
+ * Format an individual field for display.
+ *
+ * @param $node
+ *   The node being displayed (provided for context).
+ * @param $field
+ *   The field that is to be displayed (for information about the label, field
+ *   type, and so forth).
+ * @param $items
+ *   The actual items to theme. This will be a linear array, each element of
+ *   which has a "view" property which contains the filtered, formatted contents
+ *   of the item.
+ * @param $teaser
+ *   Whether the node is being displayed as a teaser or full version.
+ * @param $page
+ *   Whether the node is being displayed as a full web page.
+ *
+ * @return
+ *   An HTML string containing the fully themed field.
+ */
+function theme_field(&$node, &$field, &$items, $teaser, $page) {
+  $output = '';
+
+  $output .= '<div class="field field-type-'. $field['type'] .'">';
+  
+  $output .= '<h3 class="field-label">'. $field['widget']['label'] .'</h3>';
+
+  $output .= '<div class="field-items">';
+  foreach ($items as $item) {
+    $output .= '<div class="field-item">'. $item['view'] .'</div>';
+  }
+  $output .= '</div>';
+  
+  $output .= '</div>';
+
+  return $output;
+}
