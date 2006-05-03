@@ -827,7 +827,9 @@ function content_alter_db_field($previous_field, $previous_columns, $new_field, 
       else {
         db_query('INSERT INTO {'. $new_db_info['table'] .'} (vid, nid, '. implode(', ', $columns) .') SELECT vid, nid, '. implode(', ', $columns) .' FROM {'. $previous_db_info['table'] .'}');
       }
-      db_query('ALTER TABLE {'. $previous_db_info['table'] .'} DROP '. implode(', ', $columns));
+      foreach ($columns as $column_name) {
+        db_query('ALTER TABLE {'. $previous_db_info['table'] .'} DROP '. $column_name);
+      }
     }
 
     // Migrate data from per-field storage.
