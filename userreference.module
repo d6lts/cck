@@ -85,7 +85,7 @@ function userreference_widget_info() {
  * Implementation of hook_widget().
  */
 function userreference_widget($op, &$node, $field, &$node_field) {
-  if ($field['widget']['type'] == 'userreference_select' || $field['multiple']) {
+  if ($field['widget']['type'] == 'userreference_select') {
     switch ($op) {
       case 'prepare form values':
         $node_field_transposed = content_transpose_array_rows_cols($node_field);
@@ -122,37 +122,74 @@ function userreference_widget($op, &$node, $field, &$node_field) {
   else {
     switch ($op) {
       case 'prepare form values':
-        $node_field['default user_name'] = db_result(db_query("SELECT name FROM {users} WHERE uid = '%d'", $node_field['uid']));
+        foreach($node_field as $delta => $item) {
+          $node_field[$delta]['default user_name'] = db_result(db_query("SELECT name FROM {users} WHERE uid = '%d'", $node_field[$delta]['uid']));
+        }
         break;
 
       case 'form':
         $form = array();
-
         $form[$field['field_name']] = array('#tree' => TRUE);
-        $form[$field['field_name']]['user_name'] = array(
-          '#type' => 'textfield',
-          '#title' => t($field['widget']['label']),
-          '#maxlength' => 60,
-          '#autocomplete_path' => 'user/autocomplete',
-          '#default_value' => $node_field['default user_name'],
-          '#required' => $field['required'],
-          '#description' => $field['widget']['description'],
-        );
+
+        if ($field['multiple']) {
+          $form[$field['field_name']]['#type'] = 'fieldset';
+          $form[$field['field_name']]['#title'] = t($field['widget']['label']);
+          $form[$field['field_name']]['#description'] = $field['widget']['description'];
+          $delta = 0;
+          foreach ($node_field as $item) {
+            if ($item['uid']) {
+              $form[$field['field_name']][$delta]['user_name'] = array(
+                '#type' => 'textfield',
+                '#title' => '',
+                '#autocomplete_path' => 'user/autocomplete',
+                '#default_value' => $item['default user_name'],
+                '#required' => ($delta == 0) ? $field['required'] : FALSE,
+              );
+              $delta++;
+            }
+          }
+          foreach (range($delta, $delta + 2) as $delta) {
+            $form[$field['field_name']][$delta]['user_name'] = array(
+              '#type' => 'textfield',
+              '#title' => '',
+              '#autocomplete_path' => 'user/autocomplete',
+              '#default_value' => '',
+              '#required' => ($delta == 0) ? $field['required'] : FALSE,
+            );
+          }
+        }
+        else {
+          $form[$field['field_name']][0]['user_name'] = array(
+            '#type' => 'textfield',
+            '#title' => t($field['widget']['label']),
+            '#autocomplete_path' => 'user/autocomplete',
+            '#default_value' => $node_field[0]['default user_name'],
+            '#required' => $field['required'],
+            '#description' => $field['widget']['description'],
+          );
+        }
         return $form;
 
       case 'validate':
-        if ($node_field['user_name'] && !in_array($node_field['user_name'], _userreference_potential_references($field))) {
-          form_set_error($field['field_name'], t('Invalid user name.'));
+        foreach ($node_field as $delta => $item) {
+          if ($item['user_name'] && !in_array($item['user_name'], _userreference_potential_references($field))) {
+            form_set_error($field['field_name'], t('Invalid user name.'));
+          }
         }
         return;
 
       case 'process form values':
-        $uid = db_result(db_query("SELECT uid FROM {users} WHERE name = '%s'", $node_field['user_name']));
-        if ($uid) {
-          $node_field[0]['uid'] = $uid;
+        foreach ($node_field as $delta => $item) {
+          $uid = db_result(db_query("SELECT uid FROM {users} WHERE name = '%s'", $node_field[$delta]['user_name']));
+          // Remove the widget's data representation so it isn't saved.
+          unset($node_field[$delta]['user_name']);
+          if ($uid) {
+            $node_field[$delta]['uid'] = $uid;
+          }
+          else {
+            unset($node_field[$delta]);
+          }
         }
-        // Remove the widget's data representation so it isn't saved.
-        unset($node_field['user_name']);
     }
   }
 }

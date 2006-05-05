@@ -113,7 +113,7 @@ function nodereference_widget_info() {
  * Implementation of hook_widget().
  */
 function nodereference_widget($op, &$node, $field, &$node_field) {
-  if ($field['widget']['type'] == 'nodereference_select' || $field['multiple']) {
+  if ($field['widget']['type'] == 'nodereference_select') {
     switch ($op) {
       case 'prepare form values':
         $node_field_transposed = content_transpose_array_rows_cols($node_field);
@@ -150,37 +150,74 @@ function nodereference_widget($op, &$node, $field, &$node_field) {
   else {
     switch ($op) {
       case 'prepare form values':
-        $node_field['default node_name'] = db_result(db_query(db_rewrite_sql('SELECT n.title FROM {node} n WHERE n.nid = %d'), $node_field[0]['nid']));
+        foreach ($node_field as $delta => $item) {
+          $node_field[$delta]['default node_name'] = db_result(db_query(db_rewrite_sql('SELECT n.title FROM {node} n WHERE n.nid = %d'), $node_field[$delta]['nid']));
+        }
         break;
 
       case 'form':
         $form = array();
-
         $form[$field['field_name']] = array('#tree' => TRUE);
-        $form[$field['field_name']]['node_name'] = array(
-          '#type' => 'textfield',
-          '#title' => t($field['widget']['label']),
-          '#maxlength' => 60,
-          '#autocomplete_path' => 'nodereference/autocomplete/'. $field['field_name'],
-          '#default_value' => $node_field['default node_name'],
-          '#required' => $field['required'],
-          '#description' => $field['widget']['description'],
-        );
+
+        if ($field['multiple']) {
+          $form[$field['field_name']]['#type'] = 'fieldset';
+          $form[$field['field_name']]['#title'] = t($field['widget']['label']);
+          $form[$field['field_name']]['#description'] = $field['widget']['description'];
+          $delta = 0;
+          foreach ($node_field as $item) {
+            if ($item['nid']) {
+              $form[$field['field_name']][$delta]['node_name'] = array(
+                '#type' => 'textfield',
+                '#title' => '',
+                '#autocomplete_path' => 'nodereference/autocomplete/'. $field['field_name'],
+                '#default_value' => $item['default node_name'],
+                '#required' => ($delta == 0) ? $field['required'] : FALSE,
+              );
+              $delta++;
+            }
+          }
+          foreach (range($delta, $delta + 2) as $delta) {
+            $form[$field['field_name']][$delta]['node_name'] = array(
+              '#type' => 'textfield',
+              '#title' => '',
+              '#autocomplete_path' => 'nodereference/autocomplete/'. $field['field_name'],
+              '#default_value' => '',
+              '#required' => ($delta == 0) ? $field['required'] : FALSE,
+            );
+          }
+        }
+        else {
+          $form[$field['field_name']][0]['node_name'] = array(
+            '#type' => 'textfield',
+            '#title' => t($field['widget']['label']),
+            '#autocomplete_path' => 'nodereference/autocomplete/'. $field['field_name'],
+            '#default_value' => $node_field[0]['default node_name'],
+            '#required' => $field['required'],
+            '#description' => $field['widget']['description'],
+          );
+        }
         return $form;
 
       case 'validate':
-        if ($node_field['node_name'] && !in_array($node_field['node_name'], _nodereference_potential_references($field))) {
-          form_set_error($field['field_name'], t('No post with that title exists.'));
+        foreach ($node_field as $delta => $item) {
+          if ($item['node_name'] && !in_array($item['node_name'], _nodereference_potential_references($field))) {
+            form_set_error($field['field_name'], t('No post with that title exists.'));
+          }
         }
         return;
 
       case 'process form values':
-        $nid = db_result(db_query(db_rewrite_sql("SELECT n.nid FROM {node} n WHERE n.title = '%s'"), $node_field['node_name']));
-        if ($nid) {
-          $node_field[0]['nid'] = $nid;
+        foreach ($node_field as $delta => $item) {
+          $nid = db_result(db_query(db_rewrite_sql("SELECT n.nid FROM {node} n WHERE n.title = '%s'"), $node_field[$delta]['node_name']));
+          // Remove the widget's data representation so it isn't saved.
+          unset($node_field[$delta]['node_name']);
+          if ($nid) {
+            $node_field[$delta]['nid'] = $nid;
+          }
+          else {
+            unset($node_field[$delta]);
+          }
         }
-        // Remove the widget's data representation so it isn't saved.
-        unset($node_field['node_name']);
     }
   }
 }
