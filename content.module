@@ -914,10 +914,26 @@ function content_views_argument_handler($op, &$query, $argtype, $arg = '') {
       break;
 
     case 'link':
-      return l(check_plain($query->$main_column['column']), $arg .'/'. $query->$main_column['column']);
+      $field_types = _content_field_types();
+      $module = $field_types[$field['type']]['module'];
+
+      $item = array();
+      foreach ($db_info['columns'] as $column => $attributes) {
+        $view_column_name = $attributes['column'];
+        $item[$column] = $query->$view_column_name;
+      }
+
+      $view = module_invoke($module, 'field_view_item', $field, $item);
+
+      return l($view, $arg .'/'. $query->$main_column['column'], array(), NULL, NULL, FALSE, TRUE);
 
     case 'title':
-      return check_plain($query);
+      $field_types = _content_field_types();
+      $module = $field_types[$field['type']]['module'];
+
+      $item = array(key($db_info['columns']) => $query);
+
+      return module_invoke($module, 'field_view_item', $field, $item);
   }
 }
 
