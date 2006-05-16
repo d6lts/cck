@@ -218,9 +218,20 @@ function content_load($node) {
     return unserialize($cached->data);
   }
   else {
+    $default_additions = _content_field_invoke_default('load', $node);
+    if ($default_additions) {
+      foreach ($default_additions as $key => $value) {
+        $node->$key = $value;
+      }
+    }
     $additions = _content_field_invoke('load', $node);
-    cache_set($cid, serialize($additions), CACHE_PERMANENT);
-    return $additions;
+    if ($additions) {
+      foreach ($additions as $key => $value) {
+        $default_additions[$key] = $value;
+      }
+    }
+    cache_set($cid, serialize($default_additions), CACHE_PERMANENT);
+    return $default_additions;
   }
 }
 
@@ -261,6 +272,7 @@ function content_validate(&$node) {
   _content_widget_invoke('validate', $node);
   _content_widget_invoke('process form values', $node);
   _content_field_invoke('validate', $node);
+  _content_field_invoke_default('validate', $node);
 }
 
 /**
@@ -274,6 +286,7 @@ function content_submit(&$node) {
   _content_widget_invoke('submit', $node);
   _content_widget_invoke('process form values', $node);
   _content_field_invoke('submit', $node);
+  _content_field_invoke_default('submit', $node);
 }
 
 /**
@@ -281,6 +294,7 @@ function content_submit(&$node) {
  */
 function content_insert(&$node) {
   _content_field_invoke('insert', $node);
+  _content_field_invoke_default('insert', $node);
 }
 
 /**
@@ -288,6 +302,7 @@ function content_insert(&$node) {
  */
 function content_update(&$node) {
   _content_field_invoke('update', $node);
+  _content_field_invoke_default('update', $node);
   cache_clear_all('content:'. $node->nid .':'. $node->vid);
 }
 
@@ -296,6 +311,7 @@ function content_update(&$node) {
  */
 function content_delete(&$node) {
   _content_field_invoke('delete', $node);
+  _content_field_invoke_default('delete', $node);
   cache_clear_all('content:'. $node->nid);
 }
 
@@ -462,8 +478,8 @@ function content_field($op, &$node, $field, &$node_field, $teaser, $page) {
 /**
  * Invoke a field hook.
  *
- * For each field, first the hook is invoked in the defining module, then
- * content.module itself gets a chance to do its default processing.
+ * For each operation, both this function and _content_field_invoke_default() are
+ * called so that the default database handling can occur.
  */
 function _content_field_invoke($op, &$node, $teaser = NULL, $page = NULL) {
   $type_name = is_string($node) ? $node : (is_array($node) ? $node['type'] : $node->type);
@@ -486,6 +502,27 @@ function _content_field_invoke($op, &$node, $teaser = NULL, $page = NULL) {
         $return[] = $result;
       }
     }
+
+    if (isset($node->$field['field_name'])) {
+      $node->$field['field_name'] = $node_field;
+    }
+  }
+
+  return $return;
+}
+
+/**
+ * Invoke content.module's version of a field hook.
+ */
+function _content_field_invoke_default($op, &$node, $teaser = NULL, $page = NULL) {
+  $type_name = is_string($node) ? $node : (is_array($node) ? $node['type'] : $node->type);
+  $types = _content_types();
+  $type = $types[$type_name];
+  $field_types = _content_field_types();
+
+  $return = array();
+  foreach ($type->fields as $field) {
+    $node_field = isset($node->$field['field_name']) ? $node->$field['field_name'] : array();
 
     $db_info = content_database_info($field);
     if (count($db_info['columns'])) {
