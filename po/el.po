@@ -1,0 +1,415 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: Drupal 4.7 - CCK module - Greek\n"
+"POT-Creation-Date: \n"
+"PO-Revision-Date: 2006-05-20 07:44+0200\n"
+"Last-Translator: Cog <cog@cogville.com>\n"
+"Language-Team: Project Cogville <cog@cogville.com>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2;plural=(n!=1);\n"
+"X-Poedit-Language: Greek\n"
+"X-Poedit-SourceCharset: utf-8\n"
+
+#: field.php:77
+#: text.module:44
+msgid "Maximum length"
+msgstr "Μέγιστο μήκος"
+
+#: field.php:80
+#: text.module:47
+msgid "The maximum length of the field in characters. Leave blank for an unlimited size."
+msgstr "Το μέγιστο μήκος του πεδίου σε χαρακτήρες. Αφήστε το κενό για απεριόριστο μήκος."
+
+#: field.php:102
+#: number.module:82
+#: text.module:80
+msgid "is equal to"
+msgstr "είναι ίσο με"
+
+#: field.php:103
+#: number.module:83
+#: text.module:81
+msgid "is not equal to"
+msgstr "δεν είναι ίσο με"
+
+#: field.php:104
+#: text.module:82
+msgid "matches the pattern"
+msgstr "ταυτίζεται με το υπόδειγμα"
+
+#: field.php:180
+#: ;190 number.module:119
+#: text.module:107
+msgid "Illegal value for %name."
+msgstr "Ανεπίτρεπτη τιμή στο %name."
+
+#: field.php:265
+#: text.module:159
+msgid "Rows"
+msgstr "Γραμμές"
+
+#: field.php:273
+#: text.module:167
+msgid "\"Rows\" must be a positive integer."
+msgstr "Οι \"Γραμμές\" πρέπει να είναι θετικός ακέραιος αριθμός."
+
+#: content_admin.inc:24
+#: content.module:128
+msgid "edit"
+msgstr "τροποποίηση"
+
+#: content_admin.inc:25
+#: content.module:119
+msgid "duplicate"
+msgstr "επανάληψη"
+
+#: content_admin.inc:26
+#: content.module:111
+msgid "delete"
+msgstr "διαγραφή"
+
+#: number.module:48
+#: text.module:51
+msgid "Allowed values"
+msgstr "Επιτρεπόμενες τιμές"
+
+#: number.module:52
+#: text.module:55
+msgid "The possible values this field can contain. Any other values will result in an error. Enter one value per line."
+msgstr "Οι τιμές που επιτρέπεται να περιέχει αυτό το πεδίο. Οποιαδήποτε άλλη τιμή θα θεωρηθεί σφάλμα. Δώστε μία τιμή ανά γραμμή."
+
+#: content.module:18
+msgid "Allows administrators to define new content types."
+msgstr "Επιτρέπει στους διαχειριστές να ορίζουν νέους τύπους ύλης."
+
+#: content.module:61
+msgid "content types"
+msgstr "τύποι ύλης"
+
+#: content.module:67
+msgid "list"
+msgstr "λίστα"
+
+#: content.module:73
+msgid "add content type"
+msgstr "νέος τύπος ύλης"
+
+#: content.module:80
+msgid "fields"
+msgstr "πεδία"
+
+#: content.module:135
+msgid "manage fields"
+msgstr "διαχείριση πεδίων"
+
+#: content.module:144
+msgid "add field"
+msgstr "νέο πεδίο"
+
+#: content.module:164
+msgid "remove field"
+msgstr "αφαίρεση πεδίου"
+
+#: content.module:0
+msgid "content"
+msgstr "ύλη"
+
+#: nodereference.module:15
+msgid "Defines a field type for referencing one node from another. <em>Note: Requires content.module.</em>"
+msgstr "Ορίζει έναν τύπο πεδίου για να γίνεται αναφορά από έναν κόμβο σε έναν άλλο. <em>Σημείωση: Απαιτεί τη μονάδα content.</em>"
+
+#: nodereference.module:26
+msgid "node reference autocomplete"
+msgstr "αυτόματη συμπλήρωση αναφοράς κόμβου"
+
+#: nodereference.module:51
+msgid "Content types that can be referenced"
+msgstr "Τύποι ύλης στους οποίους μπορεί να γίνεται αναφορά"
+
+#: nodereference.module:204
+msgid "No post with that title exists."
+msgstr "Δεν υπάρχει καμία καταχώριση με αυτόν τον τίτλο."
+
+#: nodereference.module:0
+msgid "nodereference"
+msgstr "nodereference"
+
+#: number.module:15
+msgid "Defines numeric field types. <em>Note: Requires content.module.</em>"
+msgstr "Ορίζει αριθμητικούς τύπους πεδίων. <em>Σημείωση: Απαιτεί τη μονάδα content.</em>"
+
+#: number.module:38
+msgid "Minimum"
+msgstr "Ελάχιστο"
+
+#: number.module:43
+msgid "Maximum"
+msgstr "Μέγιστο"
+
+#: number.module:58
+msgid "\"Minimum\" must be a number."
+msgstr "Το \"Ελάχιστο\" πρέπει να είναι αριθμός."
+
+#: number.module:61
+msgid "\"Maximum\" must be a number."
+msgstr "Το \"Μέγιστο\" πρέπει να είναι αριθμός."
+
+#: number.module:113
+msgid "The value of %name may be no smaller than %min."
+msgstr "Η τιμή του %name δεν μπορεί να είναι μικρότερη από %min."
+
+#: number.module:116
+msgid "The value of %name may be no larger than %max."
+msgstr "Η τιμή του %name δεν μπορεί να είναι μεγαλύτερη από %max."
+
+#: number.module:0
+msgid "number"
+msgstr "αριθμός"
+
+#: optionwidgets.module:15
+msgid "Defines selection, check box and radio button widgets for text and numeric fields. <em>Note: Requires content.module, text.module and number.module.</em>"
+msgstr "Ορίζει μηχανισμούς όπως τα κουτάκια επιλογής και τα ραδιοπλήκτρα για πεδία κειμένου και αριθμητικά. <em>Σημείωση: Απαιτεί τη μονάδα content, τη μονάδα text και τη μονάδα number.</em>"
+
+#: optionwidgets.module:0
+msgid "optionwidgets"
+msgstr "optionwidgets"
+
+#: text.module:15
+msgid "Defines simple text field types. <em>Note: Requires content.module.</em>"
+msgstr "Ορίζει τύπους πεδίων απλού κειμένου. <em>Σημείωση: Απαιτεί τη μονάδα content.</em>"
+
+#: text.module:35
+msgid "Plain text"
+msgstr "Απλό κείμενο"
+
+#: text.module:35
+msgid "Filtered text (user selects input format)"
+msgstr "Φιλτραρισμένο κείμενο (ο χρήστης επιλέγει μορφή εισόδου κειμένου)"
+
+#: text.module:38
+msgid "Text processing"
+msgstr "Επεξεργασία κειμένου"
+
+#: text.module:0
+msgid "text"
+msgstr "κείμενο"
+
+#: userreference.module:15
+msgid "Defines a field type for referencing a user from a node. <em>Note: Requires content.module.</em>"
+msgstr "Ορίζει έναν τύπο πεδίου για να γίνεται αναφορά σε ένα χρήστη από έναν κόμβο. <em>Σημείωση: Απαιτεί τη μονάδα content.</em>"
+
+#: userreference.module:176
+msgid "Invalid user name."
+msgstr "Ανεπίτρεπτο όνομα χρήστη."
+
+#: userreference.module:0
+msgid "userreference"
+msgstr "userreference"
+
+#: content_admin.inc:16
+#: ;87;235;314;544
+msgid "Label"
+msgstr "Ετικέτα"
+
+#: content_admin.inc:16
+#: ;42;235
+msgid "Name"
+msgstr "Όνομα"
+
+#: content_admin.inc:16
+#: ;94
+msgid "Description"
+msgstr "Περιγραφή"
+
+#: content_admin.inc:16
+#: ;235
+msgid "Operations"
+msgstr "Ενέργειες"
+
+#: content_admin.inc:42
+#: ;235
+msgid "Type"
+msgstr "Τύπος"
+
+#: content_admin.inc:42
+msgid "Content types"
+msgstr "Τύποι ύλης"
+
+#: content_admin.inc:90
+msgid "The human-readable name of this content type."
+msgstr "Το όνομα αυτού του τύπου ύλης για το χρήστη."
+
+#: content_admin.inc:98
+msgid "A brief description of the content type."
+msgstr "Μια σύντομη περιγραφή του τύπου ύλης."
+
+#: content_admin.inc:102
+#: ;560
+msgid "Help text"
+msgstr "Κείμενο οδηγιών"
+
+#: content_admin.inc:106
+msgid "Instructions to present to the user when adding new content of this type."
+msgstr "Οδηγίες που θα παρουσιάζονται στο χρήστη όταν δημιουργεί νέα ύλη αυτού του τύπου."
+
+#: content_admin.inc:110
+msgid "Title field label"
+msgstr "Ετικέτα πεδίου τίτλου"
+
+#: content_admin.inc:113
+msgid "The label for the title field."
+msgstr "Η ετικέτα του πεδίου τίτλου."
+
+#: content_admin.inc:118
+msgid "Save content type"
+msgstr "Αποθήκευση τύπου ύλης"
+
+#: content_admin.inc:182
+msgid "Saved content type %type."
+msgstr "Αποθήκευση του τύπου ύλης %type."
+
+#: content_admin.inc:199
+msgid "Are you sure you want to delete the content type %type?"
+msgstr "Θέλετε σίγουρα να διαγράψετε τον τύπο ύλης %type;"
+
+#: content_admin.inc:199
+msgid "If you have any content left in this content type, it will be permanently deleted. This action cannot be undone."
+msgstr "Αν έχετε ακόμα ύλη αυτού του τύπου, θα διαγραφεί οριστικά. Η ενέργεια αυτή δεν μπορεί να αναιρεθεί."
+
+#: content_admin.inc:199
+msgid "Delete"
+msgstr "Διαγραφή"
+
+#: content_admin.inc:199
+#: ;462
+msgid "Cancel"
+msgstr "Άκυρο"
+
+#: content_admin.inc:220
+msgid "Deleted content type %type."
+msgstr "Διαγράφηκε ο τύπος ύλης %type"
+
+#: content_admin.inc:250
+msgid "configure"
+msgstr "διευθέτηση"
+
+#: content_admin.inc:251
+msgid "remove"
+msgstr "αφαίρεση"
+
+#: content_admin.inc:281
+msgid "Add existing field"
+msgstr "Προσθήκη υπάρχοντος πεδίου"
+
+#: content_admin.inc:290
+msgid "Add field"
+msgstr "Νέο πεδίο"
+
+#: content_admin.inc:311
+msgid "Create new field"
+msgstr "Δημιουργία νέου πεδίου"
+
+#: content_admin.inc:317
+msgid "The human-readable name of this field."
+msgstr "Το όνομα αυτού του πεδίου για το χρήστη."
+
+#: content_admin.inc:322
+msgid "Field type"
+msgstr "Τύπος πεδίου"
+
+#: content_admin.inc:330
+msgid "Create field"
+msgstr "Δημιουργία πεδίου"
+
+#: content_admin.inc:339
+msgid "No field modules are enabled. You need to <a href=\"%modules_url\">enable one</a>, such as text.module, before you can add new fields."
+msgstr "Δεν είναι ενεργοποιημένη καμία μονάδα για πεδία. Θα πρέπει να <a href=\"%modules_url\">ενεργοποιήσετε κάποια</a> όπως, για παράδειγμα, τη μονάδα text, για να μπορέσετε να προσθέσετε νέα πεδία."
+
+#: content_admin.inc:396
+msgid "Added field %label."
+msgstr "Προστέθηκε το πεδίο %label."
+
+#: content_admin.inc:441
+msgid "Created field %label."
+msgstr "Δημιουργήθηκε το πεδίο %label."
+
+#: content_admin.inc:462
+msgid "Are you sure you want to remove the field %field?"
+msgstr "Θέλετε σίγουρα να αφαιρέσετε το πεδίο %field;"
+
+#: content_admin.inc:462
+msgid "If you have any content left in this field, it will be lost. This action cannot be undone."
+msgstr "Αν έχετε ακόμα δεδομένα σε τέτοιο πεδίο, θα χαθούν. Η ενέργεια αυτή δεν μπορεί να αναιρεθεί."
+
+#: content_admin.inc:462
+msgid "Remove"
+msgstr "Αφαίρεση"
+
+#: content_admin.inc:479
+msgid "Removed field %field from %type."
+msgstr "Αφαιρέθηκε το πεδίο %field από %type."
+
+#: content_admin.inc:498
+msgid "The field %field no longer exists in any content type, so it was deleted."
+msgstr "Το πεδίο %field δεν υπάρχει πια σε κανένα τύπο ύλης, γι' αυτό διαγράφηκε."
+
+#: content_admin.inc:522
+msgid "Widget settings"
+msgstr "Ρυθμίσεις για widget"
+
+#: content_admin.inc:523
+msgid "These settings apply only to the %field field as it appears in the %type content type."
+msgstr "Οι ρυθμίσεις αυτές ισχύουν μόνο για το πεδίο %field όπως εμφανίζεται στον τύπο ύλης %type."
+
+#: content_admin.inc:537
+msgid "Widget"
+msgstr "Μηχανισμός"
+
+#: content_admin.inc:550
+msgid "Weight"
+msgstr "Βάρος"
+
+#: content_admin.inc:552
+msgid "In the node editing form, the heavier fields will sink and the lighter fields will be positioned nearer the top."
+msgstr "Στη φόρμα τροποποίησης κόμβου, τα βαρύτερα πεδία θα βουλιάζουν και τα ελαφρύτερα θα τοποθετούνται πιο κοντά στην κορυφή."
+
+#: content_admin.inc:563
+msgid "Instructions to present to the user below this field on the editing form."
+msgstr "Οδηγίες που θα παρουσιάζονται στο χρήστη κάτω από αυτό το πεδίο στη φόρμα τροποποίησης."
+
+#: content_admin.inc:569
+msgid "Data settings"
+msgstr "Ρυθμίσεις για τα δεδομένα"
+
+#: content_admin.inc:570
+msgid "These settings apply to the %field field in every content type in which it appears."
+msgstr "Οι ρυθμίσεις αυτές ισχύουν για το πεδίο %field σε κάθε τύπο ύλης που εμφανίζεται."
+
+#: content_admin.inc:574
+msgid "Required"
+msgstr "Υποχρεωτικό"
+
+#: content_admin.inc:579
+msgid "Multiple values"
+msgstr "Πολλές τιμές"
+
+#: content_admin.inc:590
+msgid "Save field settings"
+msgstr "Αποθήκευση ρυθμίσεων πεδίου"
+
+#: content_admin.inc:665
+msgid "Saved field %field."
+msgstr "Αποθηκεύτηκε το πεδίο %field"
+
+#: content_admin.inc:896
+#: ;985
+msgid "No PostgreSQL mapping found for %type data type."
+msgstr "Δε βρέθηκε καμία αντιστοιχία στην PostgreSQL για τον τύπο δεδομένων %type."
+
+#: content_admin.inc:896
+#: ;985
+msgid "database"
+msgstr "βάση δεδομένων"
+
