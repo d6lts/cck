@@ -19,7 +19,7 @@ function content_help($section) {
   }
 
   if (strpos($section, 'node/add') === 0) {
-    $types = _content_types();
+    $types = content_types();
     foreach ($types as $type_name => $type) {
       if ($section == 'node/add#' . $type_name) {
         return t($types[$type_name]->description);
@@ -36,7 +36,7 @@ function content_help($section) {
  */
 function content_perm() {
   $perms = array('administer content types');
-  foreach (_content_types() as $name => $type) {
+  foreach (content_types() as $name => $type) {
     $perms[] = 'create '. $name .' content';
     $perms[] = 'edit own '. $name .' content';
   }
@@ -83,7 +83,7 @@ function content_menu($may_cache) {
       'type' => MENU_LOCAL_TASK,
     );
 
-    $types = _content_types();
+    $types = content_types();
     foreach ($types as $type_name => $type) {
       $items[] = array(
         'path' => 'node/add/'. $type_name,
@@ -95,12 +95,12 @@ function content_menu($may_cache) {
   else {
     if (arg(0) == 'admin' && arg(1) == 'node' && arg(2) == 'types' && arg(3)) {
 
-      $types = _content_types();
+      $type = content_types(arg(3));
 
-      if (isset($types[arg(3)])) {
+      if ($type) {
         $items[] = array(
           'path' => 'admin/node/types/'. arg(3),
-          'title' => t($types[arg(3)]->label),
+          'title' => t($type->label),
           'callback' => '_content_admin_type_edit',
           'access' => $access,
           'callback arguments' => array(arg(3)),
@@ -150,10 +150,10 @@ function content_menu($may_cache) {
         );
 
         if (arg(4) == 'fields' && arg(5)
-            && isset($types[arg(3)]->fields[arg(5)])) {
+            && isset($type->fields[arg(5)])) {
           $items[] = array(
             'path' => 'admin/node/types/'. arg(3) .'/fields/'. arg(5),
-            'title' => t($types[arg(3)]->fields[arg(5)]['widget']['label']),
+            'title' => t($type->fields[arg(5)]['widget']['label']),
             'callback' => '_content_admin_field',
             'access' => $access,
             'callback arguments' => array(arg(3), arg(5)),
@@ -181,7 +181,7 @@ function content_menu($may_cache) {
  */
 function content_node_info() {
   $types = array();
-  foreach (_content_types() as $name => $type) {
+  foreach (content_types() as $name => $type) {
     $types[$name] = array('name' => t($type->label), 'base' => 'content');
   }
   return $types;
@@ -243,8 +243,7 @@ function content_load($node) {
  */
 function content_form(&$node, &$param) {
   $form = array();
-  $types = _content_types();
-  $type = $types[$node->type];
+  $type = content_types($node->type);
 
   // Set form parameters so we can accept file uploads.
   $form['#attributes'] = array("enctype" => "multipart/form-data");
@@ -332,7 +331,7 @@ function content_view(&$node, $teaser = FALSE, $page = FALSE) {
 function content_nodeapi(&$node, $op, $teaser, $page) {
   switch ($op) {
     case 'delete revision':
-      if (in_array($node->type, array_keys(_content_types()))) {
+      if (content_types($node->type)) {
         cache_clear_all('content:'. $node->nid .':'. $node->vid);
       }
       break;
@@ -483,8 +482,7 @@ function content_field($op, &$node, $field, &$node_field, $teaser, $page) {
  */
 function _content_field_invoke($op, &$node, $teaser = NULL, $page = NULL) {
   $type_name = is_string($node) ? $node : (is_array($node) ? $node['type'] : $node->type);
-  $types = _content_types();
-  $type = $types[$type_name];
+  $type = content_types($type_name);
   $field_types = _content_field_types();
 
   $return = array();
@@ -516,8 +514,7 @@ function _content_field_invoke($op, &$node, $teaser = NULL, $page = NULL) {
  */
 function _content_field_invoke_default($op, &$node, $teaser = NULL, $page = NULL) {
   $type_name = is_string($node) ? $node : (is_array($node) ? $node['type'] : $node->type);
-  $types = _content_types();
-  $type = $types[$type_name];
+  $type = content_types($type_name);
   $field_types = _content_field_types();
 
   $return = array();
@@ -548,8 +545,7 @@ function _content_field_invoke_default($op, &$node, $teaser = NULL, $page = NULL
  */
 function _content_widget_invoke($op, &$node) {
   $type_name = is_string($node) ? $node : (is_array($node) ? $node['type'] : $node->type);
-  $types = _content_types();
-  $type = $types[$type_name];
+  $type = content_types($type_name);
   $widget_types = _content_widget_types();
 
   $return = array();
@@ -579,28 +575,114 @@ function _content_widget_invoke($op, &$node) {
 /**
  * Return a list of all content types.
  *
+ * @param $type_name
+ *   If set, return information on just this type.
+ */
+function content_types($type_name = NULL) {
+  $info = _content_type_info();
+  if (isset($type_name)) {
+    if (isset($info['content types'][$type_name])) {
+      return $info['content types'][$type_name];
+    }
+    else {
+      return NULL;
+    }
+  }
+  return $info['content types'];
+}
+  
+/**
+ * Return a list of all content types.
+ */
+function _content_types() {
+  $info = _content_type_info();
+  return $info['content types'];
+}
+
+/**
+ * Return a list of all fields.
+ */
+function _content_fields() {
+  $info = _content_type_info();
+  return $info['fields'];
+}
+
+/**
+ * Return a list of field types.
+ */
+function _content_field_types() {
+  $info = _content_type_info();
+  return $info['field types'];
+}
+
+/**
+ * Return a list of widget types.
+ */
+function _content_widget_types() {
+  $info = _content_type_info();
+  return $info['widget types'];
+}
+
+/**
+ * Collate all information on content types, fields, and related structures.
+ *
  * @param $reset
  *   If TRUE, clear the cache and fetch the information from the database again.
  */
-function _content_types($reset = FALSE) {
-  static $types;
+function _content_type_info($reset = FALSE) {
+  static $info;
 
-  if ($reset || !isset($types)) {
-    if ($cached = cache_get('content_types')) {
-      $types = unserialize($cached->data);
+  if ($reset || !isset($info)) {
+    if ($cached = cache_get('content_type_info')) {
+      $info = unserialize($cached->data);
     }
     else {
-      $types = array();
+      $info = array(
+        'field types' => array(),
+        'widget types' => array(),
+        'fields' => array(),
+        'content types' => array(),
+      );
+
+      foreach (module_list() as $module) {
+        $module_types = module_invoke($module, 'field_info');
+        if ($module_types) {
+          foreach ($module_types as $name => $field_info) {
+            $info['field types'][$name] = $field_info;
+            $info['field types'][$name]['module'] = $module;
+          }
+        }
+
+        $module_types = module_invoke($module, 'widget_info');
+        if ($module_types) {
+          foreach ($module_types as $name => $widget_info) {
+            $info['widget types'][$name] = $widget_info;
+            $info['widget types'][$name]['module'] = $module;
+          }
+        }
+      }
+
+      $field_result = db_query('SELECT * FROM {node_field} nf');
+      while ($field = db_fetch_array($field_result)) {
+        $global_settings = $field['global_settings'] ? unserialize($field['global_settings']) : array();
+        unset($field['global_settings']);
+        $field = array_merge($field, $global_settings);
+        $instance_info = db_fetch_array(db_query("SELECT type_name, label FROM {node_field_instance} WHERE field_name = '%s'", $field['field_name']));
+        $field['widget']['label'] = $instance_info['label'];
+        $field['type_name'] = $instance_info['type_name'];
+        $info['fields'][$field['field_name']] = $field;
+      }
+
       $type_result = db_query('SELECT * FROM {node_type} nt ORDER BY nt.type_name ASC');
       while ($type = db_fetch_object($type_result)) {
         $type->fields = array();
-        $field_result = db_query("SELECT nfi.field_name, nfi.weight, nfi.label, nfi.widget_type, nfi.widget_settings, nfi.description, nf.type, nf.global_settings, nf.required, nf.multiple, nf.db_storage FROM {node_field_instance} nfi LEFT JOIN {node_field} nf ON nfi.field_name = nf.field_name WHERE nfi.type_name = '%s' ORDER BY nfi.weight ASC, nfi.label ASC", $type->type_name);
+        $field_result = db_query("SELECT nfi.field_name, nfi.weight, nfi.label, nfi.widget_type, nfi.widget_settings, nfi.description FROM {node_field_instance} nfi WHERE nfi.type_name = '%s' ORDER BY nfi.weight ASC, nfi.label ASC", $type->type_name);
         while ($field = db_fetch_array($field_result)) {
-          $field_settings = $field['global_settings'] ? unserialize($field['global_settings']) : array();
+          // Overwrite global field information with specific information
+          $field = array_merge($info['fields'][$field['field_name']], $field);
+
           $widget_settings = $field['widget_settings'] ? unserialize($field['widget_settings']) : array();
-          unset($field['global_settings']);
           unset($field['widget_settings']);
-          $field = array_merge($field, $field_settings);
           $field['widget'] = $widget_settings;
           $field['widget']['type'] = $field['widget_type'];
           unset($field['widget_type']);
@@ -614,90 +696,14 @@ function _content_types($reset = FALSE) {
           $type->fields[$field['field_name']] = $field;
         }
 
-        $types[$type->type_name] = $type;
+        $info['content types'][$type->type_name] = $type;
       }
 
-      cache_set('content_types', serialize($types), CACHE_PERMANENT);
+      cache_set('content_type_info', serialize($info), CACHE_PERMANENT);
     }
   }
 
-  return $types;
-}
-
-/**
- * Return a list of all fields.
- *
- * @param $reset
- *   If TRUE, clear the cache and fetch the information from the database again.
- */
-function _content_fields($reset = FALSE) {
-  static $fields;
-
-  if ($reset || !isset($fields)) {
-    $fields = array();
-    $field_result = db_query('SELECT * FROM {node_field} nf');
-    while ($field = db_fetch_array($field_result)) {
-      $global_settings = $field['global_settings'] ? unserialize($field['global_settings']) : array();
-      unset($field['global_settings']);
-      $field = array_merge($field, $global_settings);
-      $instance_info = db_fetch_array(db_query("SELECT type_name, label FROM {node_field_instance} WHERE field_name = '%s'", $field['field_name']));
-      $field['widget']['label'] = $instance_info['label'];
-      $field['type_name'] = $instance_info['type_name'];
-      $fields[$field['field_name']] = $field;
-    }
-  }
-
-  return $fields;
-}
-
-/**
- * Return a list of field types.
- *
- * @param $reset
- *   If TRUE, clear the cache and fetch the information from the database again.
- */
-function _content_field_types($reset = FALSE) {
-  static $types;
-
-  if ($reset || !isset($types)) {
-    $types = array();
-    foreach (module_list() as $module) {
-      $module_types = module_invoke($module, 'field_info');
-      if ($module_types) {
-        foreach ($module_types as $name => $info) {
-          $types[$name] = $info;
-          $types[$name]['module'] = $module;
-        }
-      }
-    }
-  }
-
-  return $types;
-}
-
-/**
- * Return a list of widget types.
- *
- * @param $reset
- *   If TRUE, clear the cache and fetch the information from the database again.
- */
-function _content_widget_types($reset = FALSE) {
-  static $types;
-
-  if ($reset || !isset($types)) {
-    $types = array();
-    foreach (module_list() as $module) {
-      $module_types = module_invoke($module, 'widget_info');
-      if ($module_types) {
-        foreach ($module_types as $name => $info) {
-          $types[$name] = $info;
-          $types[$name]['module'] = $module;
-        }
-      }
-    }
-  }
-
-  return $types;
+  return $info;
 }
 
 /**
@@ -705,12 +711,9 @@ function _content_widget_types($reset = FALSE) {
  * information is changed.
  */
 function content_clear_type_cache() {
-  cache_clear_all('content_types');
+  cache_clear_all('content_type_info');
 
-  _content_types(TRUE);
-  _content_fields(TRUE);
-  _content_field_types(TRUE);
-  _content_widget_types(TRUE);
+  _content_type_info(TRUE);
 
   if (module_exist('views')) {
     views_invalidate_cache();

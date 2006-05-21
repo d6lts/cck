@@ -11,7 +11,7 @@
  * Menu callback; presents a listing of content types.
  */
 function _content_admin_type_overview() {
-  $types = _content_types();
+  $types = content_types();
 
   $header = array(t('Label'), t('Name'), t('Description'), array('data' => t('Operations'), 'colspan' => 3));
   $rows = array();
@@ -65,7 +65,7 @@ function _content_admin_type_fields() {
  * Menu callback; handles the editing of a content type.
  */
 function _content_admin_type_edit($type_name = '', $original_type_name = '') {
-  $types = _content_types();
+  $types = content_types();
   if (isset($types[$type_name])) {
     $type = $types[$type_name];
   }
@@ -132,7 +132,7 @@ function _content_admin_type_edit($type_name = '', $original_type_name = '') {
  * Save a content type after editing.
  */
 function _content_admin_type_edit_submit($form_id, $form_values) {
-  $types = _content_types();
+  $types = content_types();
   if (!isset($types[$form_values['type_name']])) {
     // Find a valid, computer-friendly type name.
     $form_values['type_name'] = trim($form_values['label']);
@@ -191,8 +191,7 @@ function _content_admin_type_edit_submit($form_id, $form_values) {
  * Menu callback; delete a content type.
  */
 function _content_admin_type_delete($type_name = '') {
-  $types = _content_types();
-  $type = $types[$type_name];
+  $type = content_types($type_name);
 
   $form = array();
   $form['type_name'] = array('#type' => 'value', '#value' => $type_name);
@@ -203,8 +202,7 @@ function _content_admin_type_delete($type_name = '') {
  * Delete a content type.
  */
 function _content_admin_type_delete_submit($form_id, $form_values) {
-  $types = _content_types();
-  $type = $types[$form_values['type_name']];
+  $type = content_types($form_values['type_name']);
 
   if ($type && $form_values['confirm']) {
     // Delete all nodes of this content type.
@@ -228,8 +226,7 @@ function _content_admin_type_delete_submit($form_id, $form_values) {
  * Menu callback; presents a listing of fields for a content type.
  */
 function _content_admin_field_overview($type_name) {
-  $types = _content_types();
-  $type = $types[$type_name];
+  $type = content_types($type_name);
   $field_types = _content_field_types();
 
   $header = array(t('Label'), t('Name'), t('Type'), array('data' => t('Operations'), 'colspan' => 2));
@@ -262,8 +259,7 @@ function _content_admin_field_overview($type_name) {
  * Menu callback; presents the form for adding a new field.
  */
 function _content_admin_field_add($type_name) {
-  $types = _content_types();
-  $type = $types[$type_name];
+  $type = content_types($type_name);
   $field_types = _content_field_types();
   $fields = _content_fields();
   $widget_types = _content_widget_types();
@@ -343,8 +339,7 @@ function _content_admin_field_add($type_name) {
 }
 
 function theme_content_admin_field_add_new_field_widget_type($form) {
-  $types = _content_types();
-  $type = $types[$type_name];
+  $type = content_types($type_name);
   $field_types = _content_field_types();
   $fields = _content_fields();
   $widget_types = _content_widget_types();
@@ -446,8 +441,7 @@ function _content_admin_field_add_new_submit($form_id, $form_values) {
  * Menu callback; present a form for removing a field from a content type.
  */
 function _content_admin_field_remove($type_name, $field_name) {
-  $types = _content_types();
-  $type = $types[$type_name];
+  $type = content_types($type_name);
   $field = $type->fields[$field_name];
 
   $form = array();
@@ -466,8 +460,7 @@ function _content_admin_field_remove($type_name, $field_name) {
  * Remove a field from a content type.
  */
 function _content_admin_field_remove_submit($form_id, $form_values) {
-  $types = _content_types();
-  $type = $types[$form_values['type_name']];
+  $type = content_types($form_values['type_name']);
   $field = $type->fields[$form_values['field_name']];
   $field_types = _content_field_types();
   $field_type = $field_types[$field['type']];
@@ -508,8 +501,8 @@ function _content_admin_field_remove_submit($form_id, $form_values) {
  */
 function _content_admin_field($type_name, $field_name) {
   $output = '';
-  $types = _content_types();
-  $type = $types[$type_name];
+
+  $type = content_types($type_name);
   $field = $type->fields[$field_name];
   $field_types = _content_field_types();
   $field_type = $field_types[$field['type']];
@@ -607,8 +600,7 @@ function _content_admin_field($type_name, $field_name) {
  * Validate a field's settings.
  */
 function _content_admin_field_validate($form_id, $form_values) {
-  $types = _content_types();
-  $type = $types[$form_values['type_name']];
+  $type = content_types($form_values['type_name']);
   $field = $type->fields[$form_values['field_name']];
   $field_types = _content_field_types();
   $field_type = $field_types[$field['type']];
@@ -623,8 +615,7 @@ function _content_admin_field_validate($form_id, $form_values) {
  * Save a field's settings after editing.
  */
 function _content_admin_field_submit($form_id, $form_values) {
-  $types = _content_types();
-  $type = $types[$form_values['type_name']];
+  $type = content_types($form_values['type_name']);
   $field = $type->fields[$form_values['field_name']];
   $field_types = _content_field_types();
   $field_type = $field_types[$field['type']];
