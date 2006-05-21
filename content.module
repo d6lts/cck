@@ -22,10 +22,10 @@ function content_help($section) {
     $types = content_types();
     foreach ($types as $type_name => $type) {
       if ($section == 'node/add#' . $type_name) {
-        return t($types[$type_name]->description);
+        return t($types[$type_name]['description']);
       }
       if ($section == 'node/add/' . $type_name) {
-        return t($types[$type_name]->help);
+        return t($types[$type_name]['help']);
       }
     }
   }
@@ -87,7 +87,7 @@ function content_menu($may_cache) {
     foreach ($types as $type_name => $type) {
       $items[] = array(
         'path' => 'node/add/'. $type_name,
-        'title' => t($type->label),
+        'title' => t($type['label']),
         'access' => user_access('create '. $type_name .' content'),
       );
     }
@@ -100,7 +100,7 @@ function content_menu($may_cache) {
       if ($type) {
         $items[] = array(
           'path' => 'admin/node/types/'. arg(3),
-          'title' => t($type->label),
+          'title' => t($type['label']),
           'callback' => '_content_admin_type_edit',
           'access' => $access,
           'callback arguments' => array(arg(3)),
@@ -150,10 +150,10 @@ function content_menu($may_cache) {
         );
 
         if (arg(4) == 'fields' && arg(5)
-            && isset($type->fields[arg(5)])) {
+            && isset($type['fields'][arg(5)])) {
           $items[] = array(
             'path' => 'admin/node/types/'. arg(3) .'/fields/'. arg(5),
-            'title' => t($type->fields[arg(5)]['widget']['label']),
+            'title' => t($type['fields'][arg(5)]['widget']['label']),
             'callback' => '_content_admin_field',
             'access' => $access,
             'callback arguments' => array(arg(3), arg(5)),
@@ -182,7 +182,7 @@ function content_menu($may_cache) {
 function content_node_info() {
   $types = array();
   foreach (content_types() as $name => $type) {
-    $types[$name] = array('name' => t($type->label), 'base' => 'content');
+    $types[$name] = array('name' => t($type['label']), 'base' => 'content');
   }
   return $types;
 }
@@ -250,7 +250,7 @@ function content_form(&$node, &$param) {
 
   $form['title'] = array(
     '#type' => 'textfield',
-    '#title' => t($type->title_label),
+    '#title' => t($type['title_label']),
     '#required' => TRUE,
     '#default_value' => $node->title,
   );
@@ -486,7 +486,7 @@ function _content_field_invoke($op, &$node, $teaser = NULL, $page = NULL) {
   $field_types = _content_field_types();
 
   $return = array();
-  foreach ($type->fields as $field) {
+  foreach ($type['fields'] as $field) {
     $node_field = isset($node->$field['field_name']) ? $node->$field['field_name'] : array();
 
     $module = $field_types[$field['type']]['module'];
@@ -518,7 +518,7 @@ function _content_field_invoke_default($op, &$node, $teaser = NULL, $page = NULL
   $field_types = _content_field_types();
 
   $return = array();
-  foreach ($type->fields as $field) {
+  foreach ($type['fields'] as $field) {
     $node_field = isset($node->$field['field_name']) ? $node->$field['field_name'] : array();
 
     $db_info = content_database_info($field);
@@ -549,7 +549,7 @@ function _content_widget_invoke($op, &$node) {
   $widget_types = _content_widget_types();
 
   $return = array();
-  foreach ($type->fields as $field) {
+  foreach ($type['fields'] as $field) {
     $node_field = isset($node->$field['field_name']) ? $node->$field['field_name'] : array();
 
     $module = $widget_types[$field['widget']['type']]['module'];
@@ -674,9 +674,9 @@ function _content_type_info($reset = FALSE) {
       }
 
       $type_result = db_query('SELECT * FROM {node_type} nt ORDER BY nt.type_name ASC');
-      while ($type = db_fetch_object($type_result)) {
-        $type->fields = array();
-        $field_result = db_query("SELECT nfi.field_name, nfi.weight, nfi.label, nfi.widget_type, nfi.widget_settings, nfi.description FROM {node_field_instance} nfi WHERE nfi.type_name = '%s' ORDER BY nfi.weight ASC, nfi.label ASC", $type->type_name);
+      while ($type = db_fetch_array($type_result)) {
+        $type['fields'] = array();
+        $field_result = db_query("SELECT nfi.field_name, nfi.weight, nfi.label, nfi.widget_type, nfi.widget_settings, nfi.description FROM {node_field_instance} nfi WHERE nfi.type_name = '%s' ORDER BY nfi.weight ASC, nfi.label ASC", $type['type_name']);
         while ($field = db_fetch_array($field_result)) {
           // Overwrite global field information with specific information
           $field = array_merge($info['fields'][$field['field_name']], $field);
@@ -692,11 +692,11 @@ function _content_type_info($reset = FALSE) {
           unset($field['label']);
           $field['widget']['description'] = $field['description'];
           unset($field['description']);
-          $field['type_name'] = $type->type_name;
-          $type->fields[$field['field_name']] = $field;
+          $field['type_name'] = $type['type_name'];
+          $type['fields'][$field['field_name']] = $field;
         }
 
-        $info['content types'][$type->type_name] = $type;
+        $info['content types'][$type['type_name']] = $type;
       }
 
       cache_set('content_type_info', serialize($info), CACHE_PERMANENT);
