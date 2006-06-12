@@ -575,14 +575,14 @@ function _content_widget_invoke($op, &$node) {
 /**
  * Return a list of all content types.
  *
- * @param $type_name
+ * @param $content_type_name
  *   If set, return information on just this type.
  */
-function content_types($type_name = NULL) {
+function content_types($content_type_name = NULL) {
   $info = _content_type_info();
-  if (isset($type_name)) {
-    if (isset($info['content types'][$type_name])) {
-      return $info['content types'][$type_name];
+  if (isset($content_type_name)) {
+    if (isset($info['content types'][$content_type_name])) {
+      return $info['content types'][$content_type_name];
     }
     else {
       return NULL;
@@ -590,20 +590,36 @@ function content_types($type_name = NULL) {
   }
   return $info['content types'];
 }
-  
-/**
- * Return a list of all content types.
- */
-function _content_types() {
-  $info = _content_type_info();
-  return $info['content types'];
-}
 
 /**
  * Return a list of all fields.
+ *
+ * @param $field_name
+ *   If set, return information on just this field.
+ * @param $content_type_name
+ *   If set, return information of the field within the context of this content
+ *   type.
  */
-function _content_fields() {
+function content_fields($field_name = NULL, $content_type_name = NULL) {
   $info = _content_type_info();
+  if (isset($field_name)) {
+    if (isset($info['fields'][$field_name])) {
+      if (isset($content_type_name)) {
+        if (isset($info['content types'][$content_type_name]['fields'][$field_name])) {
+          return $info['content types'][$content_type_name]['fields'][$field_name];
+        }
+        else {
+          return NULL;
+        }
+      }
+      else {
+        return $info['fields'][$field_name];
+      }
+    }
+    else {
+      return NULL;
+    }
+  }
   return $info['fields'];
 }
 
@@ -801,7 +817,7 @@ function content_views_tables() {
   $field_types = _content_field_types();
 
   $tables = array();
-  foreach (_content_fields() as $field) {
+  foreach (content_fields() as $field) {
     $db_info = content_database_info($field);
     $module = $field_types[$field['type']]['module'];
 
@@ -889,7 +905,7 @@ function content_views_arguments() {
   $field_types = _content_field_types();
   $arguments = array();
 
-  foreach (_content_fields() as $field) {
+  foreach (content_fields() as $field) {
     $db_info = content_database_info($field);
     $module = $field_types[$field['type']]['module'];
     if (count($db_info['columns'])) {
@@ -916,8 +932,7 @@ function content_views_argument_handler($op, &$query, $argtype, $arg = '') {
     $field_name = substr($argtype, 9);
   }
 
-  $fields = _content_fields();
-  $field = $fields[$field_name];
+  $field = content_fields($field_name);
   $db_info = content_database_info($field);
   $main_column = reset($db_info['columns']);
 

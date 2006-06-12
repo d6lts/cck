@@ -193,7 +193,7 @@ function weburl_field_view($field, $value, $addlfields = array(), $node = NULL) 
 function weburl_views_tables() {
   $tables = array();
 
-  $fields = _content_fields();
+  $fields = content_fields();
   foreach ($fields as $field) {
     if ($field['type'] == 'weburl') {
       $tables['node_field_weburl_data_'. $field['field_name']] = array(

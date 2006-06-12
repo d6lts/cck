@@ -37,7 +37,7 @@ function _content_admin_type_overview() {
  * Menu callback; lists all defined fields for quick reference.
  */
 function _content_admin_type_fields() {
-  $fields = _content_fields();
+  $fields = content_fields();
 
   $header = array(t('Name'), t('Type'), t('Content types'));
   $rows = array();
@@ -48,7 +48,7 @@ function _content_admin_type_fields() {
 
     $types = array();
     $result = db_query("SELECT nt.label FROM {node_field_instance} nfi LEFT JOIN {node_type} nt ON nt.type_name = nfi.type_name WHERE nfi.field_name = '%s' ORDER BY nt.label ASC", $field['field_name']);
-    while ($type = db_fetch_object($result)) {
+    while ($type = db_fetch_array($result)) {
       $types[] = $type['label'];
     }
     $row[] = implode (', ', $types);
@@ -74,7 +74,7 @@ function _content_admin_type_edit($type_name = '', $original_type_name = '') {
       $type = $types[$original_type_name];
     }
     else {
-      $type = new stdClass();
+      $type = array();
       $type['label'] = '';
       $type['description'] = '';
       $type['help'] = '';
@@ -261,7 +261,7 @@ function _content_admin_field_overview($type_name) {
 function _content_admin_field_add($type_name) {
   $type = content_types($type_name);
   $field_types = _content_field_types();
-  $fields = _content_fields();
+  $fields = content_fields();
   $widget_types = _content_widget_types();
   $output = '';
 
@@ -339,9 +339,7 @@ function _content_admin_field_add($type_name) {
 }
 
 function theme_content_admin_field_add_new_field_widget_type($form) {
-  $type = content_types($type_name);
   $field_types = _content_field_types();
-  $fields = _content_fields();
   $widget_types = _content_widget_types();
   $output = '';
 
@@ -363,8 +361,7 @@ function theme_content_admin_field_add_new_field_widget_type($form) {
  * Add an existing field to a content type.
  */
 function _content_admin_field_add_existing_submit($form_id, $form_values) {
-  $fields = _content_fields();
-  $field = $fields[$form_values['field_name']];
+  $field = content_fields($form_values['field_name']);
   $field_types = _content_field_types();
   $field_type = $field_types[$field['type']];
   $columns = module_invoke($field_type['module'], 'field_settings', 'database columns', $field);
@@ -400,7 +397,7 @@ function _content_admin_field_add_existing_submit($form_id, $form_values) {
 function _content_admin_field_add_new_submit($form_id, $form_values) {
   // Find a valid, computer-friendly field name.
 
-  $fields = _content_fields();
+  $fields = content_fields();
 
   $field_name = trim($form_values['label']);
   $field_name = drupal_strtolower($field_name);
@@ -425,9 +422,7 @@ function _content_admin_field_add_new_submit($form_id, $form_values) {
   // Create new database columns as necessary.
   $field_types = _content_field_types();
   $field_type = $field_types[$field_widget_type[0]];
-  $fields = _content_fields();
-
-  $field = $fields[$field_name];
+  $field = content_fields($field_name);
 
   $columns = module_invoke($field_type['module'], 'field_settings', 'database columns', $field);
   if (is_array($columns) && count($columns)) {
@@ -657,8 +652,7 @@ function _content_admin_field_submit($form_id, $form_values) {
   drupal_set_message(t('Saved field %field.', array('%field' => theme('placeholder', $form_values['label']))));
   content_clear_type_cache();
 
-  $fields = _content_fields();
-  $new_field = $fields[$form_values['field_name']];
+  $new_field = content_fields($form_values['field_name']);
   $new_columns = module_invoke($field_type['module'], 'field_settings', 'database columns', $new_field);
 
   if (!isset($prev_columns)) {
