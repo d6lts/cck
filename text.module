@@ -197,6 +197,7 @@ function text_widget($op, &$node, $field, &$node_field) {
                 '#default_value' => $data['value'],
                 '#required' => ($delta == 0) ? $field['required'] : FALSE,
                 '#maxlength' => $field['max_length'] ? $field['max_length'] : '',
+                '#weight' => $field['widget']['weight'],
               );
             }
             else {
@@ -206,6 +207,7 @@ function text_widget($op, &$node, $field, &$node_field) {
                 '#default_value' => $data['value'],
                 '#required' => ($delta == 0) ? $field['required'] : FALSE,
                 '#rows' => $field['widget']['rows'],
+                '#weight' => $field['widget']['weight'],
               );
             }
             if ($field['text_processing']) {
@@ -222,6 +224,7 @@ function text_widget($op, &$node, $field, &$node_field) {
               '#default_value' => '',
               '#required' => ($delta == 0) ? $field['required'] : FALSE,
               '#maxlength' => $field['max_length'] ? $field['max_length'] : '',
+              '#weight' => $field['widget']['weight'],
             );
           }
           else {
@@ -231,6 +234,7 @@ function text_widget($op, &$node, $field, &$node_field) {
               '#default_value' => '',
               '#required' => ($delta == 0) ? $field['required'] : FALSE,
               '#rows' => $field['widget']['rows'],
+              '#weight' => $field['widget']['weight'],
             );
           }
           if ($field['text_processing']) {
@@ -247,6 +251,7 @@ function text_widget($op, &$node, $field, &$node_field) {
             '#required' => $field['required'],
             '#description' => $field['widget']['description'],
             '#maxlength' => $field['max_length'] ? $field['max_length'] : '',
+            '#weight' => $field['widget']['weight'],
           );
         }
         else {
@@ -257,6 +262,7 @@ function text_widget($op, &$node, $field, &$node_field) {
             '#required' => $field['required'],
             '#rows' => $field['widget']['rows'],
             '#description' => $field['widget']['description'],
+            '#weight' => $field['widget']['weight'],
           );
         }
         if ($field['text_processing']) {
