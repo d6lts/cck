@@ -282,7 +282,7 @@ function nodereference_referenced_by_list($nid, $content_type = '') {
  * Retrieve a pipe delimited string of autocomplete suggestions
  */
 function nodereference_autocomplete($field_name, $string = '') {
-  $fields = _content_fields();
+  $fields = content_fields();
   $field = $fields[$field_name];
   $matches = array();
 

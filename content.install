@@ -159,7 +159,7 @@ function content_update_5() {
     }
 
     $field = db_fetch_array($result);
-    $fields = _content_fields();
+    $fields = content_fields();
     $field = $fields[$field['field_name']];
     $field_types = _content_field_types();
     $field_type = $field_types[$field['type']];

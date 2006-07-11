@@ -166,6 +166,7 @@ function number_widget($op, &$node, $field, &$node_field) {
               '#title' => '',
               '#default_value' => $data['value'],
               '#required' => ($delta == 0) ? $field['required'] : FALSE,
+              '#maxlength' => 11,
             );
             $delta++;
           }
@@ -176,6 +177,7 @@ function number_widget($op, &$node, $field, &$node_field) {
             '#title' => '',
             '#default_value' => '',
             '#required' => ($delta == 0) ? $field['required'] : FALSE,
+            '#maxlength' => 11,
           );
         }
       }
@@ -186,6 +188,7 @@ function number_widget($op, &$node, $field, &$node_field) {
           '#default_value' => isset($node_field[0]['value']) ? $node_field[0]['value'] : '',
           '#required' => $field['required'],
           '#description' => $field['widget']['description'],
+          '#maxlength' => 11,
         );
       }
       return $form;
