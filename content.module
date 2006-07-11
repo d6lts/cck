@@ -332,6 +332,8 @@ function content_nodeapi(&$node, $op, $teaser, $page) {
   switch ($op) {
     case 'delete revision':
       if (content_types($node->type)) {
+        _content_field_invoke('delete revision', $node);
+        _content_field_invoke_default('delete revision', $node);
         cache_clear_all('content:'. $node->nid .':'. $node->vid);
       }
       break;
@@ -469,6 +471,10 @@ function content_field($op, &$node, $field, &$node_field, $teaser, $page) {
     case 'delete':
       // Delete using nid rather than vid to purge all revisions.
       db_query('DELETE FROM {'. $db_info['table'] .'} WHERE nid = %d', $node->nid);
+      return;
+
+    case 'delete revision':
+      db_query('DELETE FROM {'. $db_info['table'] .'} WHERE vid = %d', $node->vid);
       return;
   }
 }
