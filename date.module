@@ -37,7 +37,6 @@ function date_field_settings($op, $field) {
         1 => t('Year and month'),
         2 => t('Date'),
         3 => t('Date and time'),
-        4 => t('Time only'),
       );
       $form['granularity'] = array(
         '#type' => 'radios',
@@ -149,8 +148,27 @@ function date_widget($op, &$node, $field, &$node_field) {
       if (is_array($node_field)) {
         foreach ($node_field as $delta => $item) {
           if ($item['value'] != '') {
-            if (!preg_match('/[0-9]4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}/', $item['value'])) {
-              form_set_error($field['field_name'] .']['. $delta .'][value', t('%name must be entered in ISO 8601 format (YYYY-MM-DDThh:mm:ss).', array('%name' => t($field['widget']['label']))));
+            switch ($field['granularity']) {
+              case 0: // Year
+                if (!preg_match('/^[0-9]{4}$/', $item['value'])) {
+                  form_set_error($field['field_name'] .']['. $delta .'][value', t('%name must be entered in ISO 8601 format (YYYY).', array('%name' => t($field['widget']['label']))));
+                }
+                break;
+              case 1: // Year and month
+                if (!preg_match('/^[0-9]{4}-[0-9]{2}$/', $item['value'])) {
+                  form_set_error($field['field_name'] .']['. $delta .'][value', t('%name must be entered in ISO 8601 format (YYYY-MM).', array('%name' => t($field['widget']['label']))));
+                }
+                break;
+              case 2: // Date
+                if (!preg_match('/^[0-9]{4}-[0-9]{2}-[0-9]{2}$/', $item['value'])) {
+                  form_set_error($field['field_name'] .']['. $delta .'][value', t('%name must be entered in ISO 8601 format (YYYY-MM-DD).', array('%name' => t($field['widget']['label']))));
+                }
+                break;
+              case 3: // Date and time
+                if (!preg_match('/^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}$/', $item['value'])) {
+                  form_set_error($field['field_name'] .']['. $delta .'][value', t('%name must be entered in ISO 8601 format (YYYY-MM-DDThh:mm:ss).', array('%name' => t($field['widget']['label']))));
+                }
+                break;
             }
           }
         }
