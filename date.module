@@ -52,7 +52,7 @@ function date_field_settings($op, $field) {
 
     case 'database columns':
       return array(
-        'value' => array('type' => 'varchar', 'length' => 17, 'not null' => TRUE, 'default' => "'00010101T00:00:00'", 'sortable' => TRUE),
+        'value' => array('type' => 'varchar', 'length' => 17, 'not null' => TRUE, 'default' => "'0001-01-01T00:00:00'", 'sortable' => TRUE),
       );
   }
 }
@@ -149,8 +149,8 @@ function date_widget($op, &$node, $field, &$node_field) {
       if (is_array($node_field)) {
         foreach ($node_field as $delta => $item) {
           if ($item['value'] != '') {
-            if (!preg_match('/[0-9]{8}T[0-9]{2}:[0-9]{2}:[0-9]{2}/', $item['value'])) {
-              form_set_error($field['field_name'] .']['. $delta .'][value', t('%name must be entered in ISO 8601 format (YYYYMMDDThh:mm:ss).', array('%name' => t($field['widget']['label']))));
+            if (!preg_match('/[0-9]4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}/', $item['value'])) {
+              form_set_error($field['field_name'] .']['. $delta .'][value', t('%name must be entered in ISO 8601 format (YYYY-MM-DDThh:mm:ss).', array('%name' => t($field['widget']['label']))));
             }
           }
         }

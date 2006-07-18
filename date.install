@@ -79,3 +79,45 @@ function date_update_3() {
   db_query('DELETE FROM {cache}');
   return $ret;
 }
+
+function date_update_4() {
+  $ret = array();
+
+  include_once(drupal_get_path('module', 'content') .'/content.module');
+  include_once(drupal_get_path('module', 'content') .'/content_admin.inc');
+  
+  $fields = content_fields();
+  
+  foreach ($fields as $field) {
+    $db_info = content_database_info($field);
+    switch ($field['type']) {
+      case 'date':
+        $old_columns = array(
+          'value' => array('type' => 'varchar', 'length' => 17, 'not null' => TRUE, 'default' => "'00010101T00:00:00'"),
+        );
+        $new_columns = array(
+          'value' => array('type' => 'varchar', 'length' => 20, 'not null' => TRUE, 'default' => "'0001-01-01T00:00:00'"),
+        );
+        content_alter_db_field($field, $old_columns, $field, $new_columns);
+        if ($field['multiple']) {
+          $result = db_query('SELECT vid, delta, '. $db_info['columns']['value']['column'] .' AS value FROM {'. $db_info['table'] .'}');
+          while ($date = db_fetch_object($result)) {
+            $new_date = substr($date->value, 0, 4) .'-'. substr($date->value, 4, 2) .'-'. substr($date->value, 6);
+            $ret[] = update_sql('UPDATE {'. $db_info['table'] .'} SET '. $db_info['columns']['value']['column'] .' = "'. $new_date .'" WHERE vid = '. $date->vid .' AND delta = '. $date->delta);
+          }
+        }
+        else {
+          $result = db_query('SELECT vid, '. $db_info['columns']['value']['column'] .' AS value FROM {'. $db_info['table'] .'}');
+          while ($date = db_fetch_object($result)) {
+            $new_date = substr($date->value, 0, 4) .'-'. substr($date->value, 4, 2) .'-'. substr($date->value, 6);
+            $ret[] = update_sql('UPDATE {'. $db_info['table'] .'} SET '. $db_info['columns']['value']['column'] .' = "'. $new_date .'" WHERE vid = '. $date->vid);
+          }
+        }
+        break;
+    }
+  }
+
+  db_query('DELETE FROM {cache}');
+
+  return $ret;
+}
