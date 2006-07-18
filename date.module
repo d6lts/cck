@@ -51,7 +51,7 @@ function date_field_settings($op, $field) {
 
     case 'database columns':
       return array(
-        'value' => array('type' => 'varchar', 'length' => 17, 'not null' => TRUE, 'default' => "'0001-01-01T00:00:00'", 'sortable' => TRUE),
+        'value' => array('type' => 'varchar', 'length' => 20, 'not null' => TRUE, 'default' => "'0001-01-01T00:00:00'", 'sortable' => TRUE),
       );
   }
 }
