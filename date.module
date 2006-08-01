@@ -176,3 +176,116 @@ function date_widget($op, &$node, $field, &$node_field) {
       return;
   }
 }
+
+/**
+ * Implementation of hook_views_arguments().
+ *
+ * The date module defines custom arguments for more granular date filtering.
+ */
+function date_views_arguments() {
+  $field_types = _content_field_types();
+  $arguments = array();
+
+  foreach (content_fields() as $field) {
+    $db_info = content_database_info($field);
+    switch ($field['type']) {
+      case 'date':
+        $main_column = reset($db_info['columns']);
+        $argument = array();
+        $argument['name'] = 'Date (by year): '. $field['widget']['label'] .' ('. $field['field_name'] .')';
+        $argument['handler'] = 'date_views_argument_handler';
+
+        $arguments['date-year: '. $field['field_name']] = $argument;
+
+        $argument = array();
+        $argument['name'] = 'Date (by month): '. $field['widget']['label'] .' ('. $field['field_name'] .')';
+        $argument['handler'] = 'date_views_argument_handler';
+
+        $arguments['date-month: '. $field['field_name']] = $argument;
+
+        $argument = array();
+        $argument['name'] = 'Date (by day): '. $field['widget']['label'] .' ('. $field['field_name'] .')';
+        $argument['handler'] = 'date_views_argument_handler';
+
+        $arguments['date-day: '. $field['field_name']] = $argument;
+        break;
+    }
+  }
+  return $arguments;
+}
+
+/**
+ * Perform filtering by an argument for field data stored via content.module.
+ */
+function date_views_argument_handler($op, &$query, $argtype, $arg = '') {
+  if ($op == 'filter') {
+    $type = $argtype['type'];
+  }
+  else {
+    $type = $argtype;
+  }
+  if (substr($type, 0, 9) == 'date-year') {
+    $field_name = substr($type, 11);
+    $granularity = 'year';
+  }
+  if (substr($type, 0, 10) == 'date-month') {
+    $field_name = substr($type, 12);
+    $granularity = 'month';
+  }
+  if (substr($type, 0, 8) == 'date-day') {
+    $field_name = substr($type, 10);
+    $granularity = 'day';
+  }
+  
+  $field = content_fields($field_name);
+  $db_info = content_database_info($field);
+  $main_column = reset($db_info['columns']);
+  
+  // The table name used here is the Views alias for the table, not the actual
+  // table name.
+  $table = 'node_data_'. $field['field_name'];  
+  
+  switch ($op) {
+    case 'summary':
+      $query->ensure_table($table);
+      $query->add_field($main_column['column'], $table);
+      switch ($granularity) {
+        case 'year':
+          return array(
+            'field' => 'SUBSTRING('. $table .'.'. $main_column['column'] .', 1, 4)',
+            'fieldname' => $main_column['column'] .'_year',
+          );
+
+        case 'month':
+          return array(
+            'field' => 'SUBSTRING('. $table .'.'. $main_column['column'] .', 1, 7)',
+            'fieldname' => $main_column['column'] .'_month',
+          );
+
+        case 'day':
+          return array(
+            'field' => 'SUBSTRING('. $table .'.'. $main_column['column'] .', 1, 10)',
+            'fieldname' => $main_column['column'] .'_day',
+          );
+      }
+      break;
+  
+    case 'sort':
+      break;
+  
+    case 'filter':
+      $query->ensure_table($table);
+      $query->add_where($table .'.'. $main_column['column'] .' LIKE \'%s%%\'', $arg);
+      break;
+  
+    case 'link':
+      $view_column_name = $main_column['column'] .'_'. $granularity;
+      $time = $query->$view_column_name;
+ 
+      return l($time, $arg .'/'. $time, array(), NULL, NULL, FALSE, TRUE);
+  
+    case 'title':
+      $item = array(key($db_info['columns']) => $query);
+      return date_field_view_item($field, $item);
+  }
+}
