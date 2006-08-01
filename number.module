@@ -11,8 +11,8 @@
  */
 function number_help($section) {
   switch ($section) {
-    case 'admin/modules#description':
-      return t('Defines numeric field types. <em>Note: Requires content.module.</em>');
+    case 'admin/settings/modules#description':
+      return t('<strong>CCK:</strong> Defines numeric field types. <em>Note: Requires content.module.</em>');
   }
 }
 

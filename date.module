@@ -11,8 +11,8 @@
  */
 function date_help($section) {
   switch ($section) {
-    case 'admin/modules#description':
-      return t('Defines a date/time field type. <em>Note: Requires content.module.</em>');
+    case 'admin/settings/modules#description':
+      return t('<strong>CCK:</strong> Defines a date/time field type. <em>Note: Requires content.module.</em>');
   }
 }
 

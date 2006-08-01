@@ -14,8 +14,8 @@ define(CONTENT_DB_STORAGE_PER_CONTENT_TYPE, 1);
  */
 function content_help($section) {
   switch ($section) {
-    case 'admin/modules#description':
-      return t('Allows administrators to define new content types.');
+    case 'admin/settings/modules#description':
+      return t('<strong>CCK:</strong> Allows administrators to define new content types.');
   }
 
   if (strpos($section, 'node/add') === 0) {
