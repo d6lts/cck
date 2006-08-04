@@ -986,6 +986,9 @@ function content_views_argument_handler($op, &$query, $argtype, $arg = '') {
 
       $view = module_invoke($module, 'field_view_item', $field, $item);
 
+      // Strip any links that appear in the view, so that the new link we create works here.
+      $view = preg_replace('!</?a(\s+[^>]*)?>!i', '', $view);
+
       return l($view, $arg .'/'. $query->$main_column['column'], array(), NULL, NULL, FALSE, TRUE);
 
     case 'title':
