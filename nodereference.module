@@ -218,6 +218,7 @@ function nodereference_widget($op, &$node, $field, &$node_field) {
             unset($node_field[$delta]);
           }
         }
+        break;
     }
   }
 }

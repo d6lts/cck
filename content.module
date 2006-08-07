@@ -570,7 +570,7 @@ function _content_widget_invoke($op, &$node) {
       }
     }
 
-    if (is_object($node) && count($node_field)) {
+    if (is_object($node) && isset($node->$field['field_name'])) {
       $node->$field['field_name'] = $node_field;
     }
   }
