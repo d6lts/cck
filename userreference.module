@@ -30,6 +30,20 @@ function userreference_field_info() {
  */
 function userreference_field_settings($op, $field) {
   switch ($op) {
+    case 'form':
+      $form = array();
+      $form['referenceable_roles'] = array(
+        '#type' => 'checkboxes',
+        '#title' => t('User roles that can be referenced'),
+        '#multiple' => TRUE,
+        '#default_value' => isset($field['referenceable_roles']) ? $field['referenceable_roles'] : array(),
+        '#options' => user_roles(1),
+      );
+      return $form;
+
+    case 'save':
+      return array('referenceable_roles');
+
     case 'database columns':
       $columns = array(
         'uid' => array('type' => 'int', 'not null' => TRUE, 'default' => '0'),
@@ -199,7 +213,22 @@ function userreference_widget($op, &$node, $field, &$node_field) {
  * Fetch an array of all candidate referenced users, for use in presenting the selection form to the user.
  */
 function _userreference_potential_references($field) {
-  $result = db_query("SELECT u.name, u.uid FROM {users} u WHERE uid > 0 ORDER BY u.name ASC");
+  $related_roles = array();
+
+  if (!isset($field['referenceable_roles'])){
+    $field['referenceable_roles'] = user_roles(1);
+  }
+
+  if (in_array(2, $field['referenceable_roles'])) {
+    $result = db_query("SELECT u.name, u.uid FROM {users} u WHERE uid > 0 ORDER BY u.name ASC");
+  } else {
+    foreach ($field['referenceable_roles'] as $related_role) {
+      if ($related_role) {
+        $related_roles[] = "'". $related_role ."'";
+      }
+    }
+    $result = db_query("SELECT u.name, u.uid FROM {users} u LEFT JOIN {users_roles} r ON u.uid = r.uid WHERE u.uid > 0 AND r.rid IN (" . implode($related_roles, ',') . ')');
+  }
 
   if (!$field['required']) {
     $rows = array(0 => '');
