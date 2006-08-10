@@ -208,7 +208,10 @@ function nodereference_widget($op, &$node, $field, &$node_field) {
 
       case 'process form values':
         foreach ($node_field as $delta => $item) {
-          $nid = db_result(db_query(db_rewrite_sql("SELECT n.nid FROM {node} n WHERE n.title = '%s'"), $node_field[$delta]['node_name']));
+          $nid = 0;
+          if ($node_field[$delta]['node_name']) {
+            $nid = db_result(db_query(db_rewrite_sql("SELECT n.nid FROM {node} n WHERE n.title = '%s'"), $node_field[$delta]['node_name']));
+          }
           // Remove the widget's data representation so it isn't saved.
           unset($node_field[$delta]['node_name']);
           if ($nid) {
@@ -260,23 +263,6 @@ function _nodereference_potential_references($field, $return_full_nodes = FALSE)
   }
 
   return $rows;
-}
-
-function nodereference_referenced_by_list($nid, $content_type = '') {
-  if ($content_type) {
-    $result = db_query("SELECT n.* FROM {node_field_nodereference_data} node_ref INNER JOIN {node} n ON n.vid = node_ref.vid AND n.type = '%s' WHERE node_ref.field_nid = %d ORDER BY delta", $nid, $content_type);
-  }
-  else {
-    $result = db_query("SELECT n.* FROM {node_field_nodereference_data} node_ref INNER JOIN {node} n ON n.vid = node_ref.vid WHERE node_ref.field_nid = %d ORDER BY delta", $nid);
-  }
-
-  $values = array();
-
-  while ($value = db_fetch_object($result)) {
-    $values[] = $value;
-  }
-
-  return $values;
 }
 
 /**
