@@ -318,6 +318,9 @@ function content_delete(&$node) {
  * Implementation of hook_view().
  */
 function content_view(&$node, $teaser = FALSE, $page = FALSE) {
+  if ($node->in_preview) {
+    _content_widget_invoke('process form values', $node);
+  }
   $node->body = implode('', _content_field_invoke('view', $node, FALSE, $page));
   $node->teaser = implode('', _content_field_invoke('view', $node, TRUE, $page));
   $node->readmore = ($node->body != $node->teaser);
