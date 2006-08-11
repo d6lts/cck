@@ -869,13 +869,22 @@ function content_views_tables() {
         );
       }
 
-    $operators = module_invoke($module, 'field_settings', 'filter operators', $field);
-      if (is_array($operators) && count($operators)) {
+      $filters = module_invoke($module, 'field_settings', 'filters', $field);
+      if (is_array($filters) && count($filters)) {
         $table['filters'] = array();
-        $table['filters'][$main_column['column']] = array(
-          'name' => $field_types[$field['type']]['label'] .': '. $field['widget']['label'] .' ('. $field['field_name'] .')',
-          'operator' => $operators,
-        );
+        foreach ($filters as $key => $filter) {
+          $filter_name = '';
+          if (count($filters) > 1) {
+            $filter_name = (!empty($filter['name'])) ? $filter['name'] : $key;
+            $filter_name = ' - '.$filter_name;
+          }
+          $name = $field_types[$field['type']]['label'] .': '. $field['widget']['label'] . $filter_name .' ('. $field['field_name'] .')';
+          $init = array(
+            'name' => $name,
+            'field' => $main_column['column'],
+          );
+          $table['filters'][$main_column['column'] .'_'. $key] = array_merge($filter, $init);
+        }
       }
 
       // We don't use $db_info['table'] for the key, since that may change during

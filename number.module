@@ -77,15 +77,19 @@ function number_field_settings($op, $field) {
         );
       }
 
-    case 'filter operators':
+    case 'filters':
       return array(
-        '=' => t('is equal to'),
-        '!=' => t('is not equal to'),
+        'default' => array(
+          'operator' => array(
+            '=' => t('is equal to'),
+            '!=' => t('is not equal to'),
 // TODO: views.module seems to break anything with > or < in it.
-//        '>' => t('is greater than'),
-//        '<' => t('is less than'),
-//        '>=' => t('is greater than or equal to'),
-//        '<=' => t('is less than or equal to'),
+//         '>' => t('is greater than'),
+//          '<' => t('is less than'),
+//          '>=' => t('is greater than or equal to'),
+//          '<=' => t('is less than or equal to'),
+          ),
+        ),
       );
   }
 }
