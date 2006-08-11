@@ -75,11 +75,12 @@ function text_field_settings($op, $field) {
       }
       return $columns;
 
-    case 'filter operators':
+    case 'filters':
       return array(
-        '=' => t('is equal to'),
-        '!=' => t('is not equal to'),
-        'LIKE' => t('matches the pattern'),
+        'like' => array(
+          'operator' => 'views_handler_operator_like',
+          'handler' => 'views_handler_filter_like',
+        ),
       );
   }
 }
