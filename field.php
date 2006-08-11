@@ -46,8 +46,8 @@ function hook_field_info() {
  *   - "database columns": Declare the columns that content.module should create
  *     and manage on behalf of the field. If the field module wishes to handle
  *     its own database storage, this should be omitted.
- *   - "filter operators": If content.module is managing the database storage,
- *     this operator determines what filter operators are available to views.
+ *   - "filters": If content.module is managing the database storage,
+ *     this operator determines what filters are available to views.
  *     They always apply to the first column listed in the "database columns"
  *     array.
  * @param $field
@@ -65,8 +65,11 @@ function hook_field_info() {
  *     include a "sortable" parameter to indicate to views.module that the
  *     column contains ordered information. Details of other information that can
  *     be passed to the database layer can be found at content_db_add_column().
- *   - The "filter operators" operation should return an array indexed by operator
- *     with values as translated, human-friendly names of the operations.
+ *   - The "filters" operation should return an array whose values are 'filters' 
+ *     definitions as expected by views.module (see Views Documentation). 
+ *     When proving several filters, it is recommended to use the 'name' 
+ *     attribute in order to let the user distinguish between them. If no 'name'
+ *     is specified for a filter, the key of the filter will be used instead.
  */
 function hook_field_settings($op, $field) {
   switch ($op) {
@@ -97,11 +100,16 @@ function hook_field_settings($op, $field) {
       }
       return $columns;
 
-    case 'filter operators':
+    case 'filters':
       return array(
-        '=' => t('is equal to'),
-        '!=' => t('is not equal to'),
-        'LIKE' => t('matches the pattern'),
+        'substring' => array(
+          'operator' => 'views_handler_operator_like',
+          'handler' => 'views_handler_filter_like',
+        ),
+        'alpha_order' => array(
+          'name' => 'alphabetical order',
+          'operator' => 'views_handler_operator_gtlt',
+        ),
       );
   }
 }
