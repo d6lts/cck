@@ -78,19 +78,27 @@ function number_field_settings($op, $field) {
       }
 
     case 'filters':
-      return array(
-        'default' => array(
-          'operator' => array(
-            '=' => t('is equal to'),
-            '!=' => t('is not equal to'),
-// TODO: views.module seems to break anything with > or < in it.
-//         '>' => t('is greater than'),
-//          '<' => t('is less than'),
-//          '>=' => t('is greater than or equal to'),
-//          '<=' => t('is less than or equal to'),
+      $allowed_values = explode("\n", $field['allowed_values']);
+      $allowed_values = array_map('trim', $allowed_values);
+      $allowed_values = array_filter($allowed_values, 'strlen');
+      if (count($allowed_values)) {
+        return array(
+          'default' => array(
+            'list' => drupal_map_assoc($allowed_values),
+            'list-type' => 'list',
+            'operator' => 'views_handler_operator_or',
+            'value-type' => 'array',
           ),
-        ),
-      );
+        );
+      }
+      else {
+        return array(
+          'default' => array(
+            'operator' => 'views_handler_operator_gtlt',
+          ),
+        );
+      }
+      break;
   }
 }
 

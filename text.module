@@ -76,12 +76,28 @@ function text_field_settings($op, $field) {
       return $columns;
 
     case 'filters':
-      return array(
-        'like' => array(
-          'operator' => 'views_handler_operator_like',
-          'handler' => 'views_handler_filter_like',
-        ),
-      );
+      $allowed_values = explode("\n", $field['allowed_values']);
+      $allowed_values = array_map('trim', $allowed_values);
+      $allowed_values = array_filter($allowed_values, 'strlen');
+      if (count($allowed_values)) {
+        return array(
+          'default' => array(
+            'list' => drupal_map_assoc($allowed_values),
+            'list-type' => 'list',
+            'operator' => 'views_handler_operator_or',
+            'value-type' => 'array',
+          ),
+        );
+      }
+      else {
+        return array(
+          'like' => array(
+            'operator' => 'views_handler_operator_like',
+            'handler' => 'views_handler_filter_like',
+          ),
+        );
+      }
+      break;
   }
 }
 
