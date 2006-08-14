@@ -49,6 +49,17 @@ function userreference_field_settings($op, $field) {
         'uid' => array('type' => 'int', 'not null' => TRUE, 'default' => '0'),
       );
       return $columns;
+
+    case 'filters':
+      return array(
+        'default' => array(
+          'list' => '_userreference_filter_handler',
+          'list-type' => 'list',
+          'operator' => 'views_handler_operator_or',
+          'value-type' => 'array',
+          'extra' => array('field' => $field),
+        ),
+      );
   }
 }
 
@@ -208,54 +219,41 @@ function userreference_widget($op, &$node, $field, &$node_field) {
   }
 }
 
-
 /**
  * Fetch an array of all candidate referenced users, for use in presenting the selection form to the user.
  */
 function _userreference_potential_references($field) {
-  $related_roles = array();
-
-  if (!isset($field['referenceable_roles'])){
-    $field['referenceable_roles'] = user_roles(1);
+  if (!$field['required']) {
+    $users = array(0 => '');
+  } else {
+    $users = array();
   }
 
-  if (in_array(2, $field['referenceable_roles'])) {
+  if (!isset($field['referenceable_roles']) || in_array(DRUPAL_AUTHENTICATED_RID, $field['referenceable_roles'])) {
     $result = db_query("SELECT u.name, u.uid FROM {users} u WHERE uid > 0 ORDER BY u.name ASC");
-  } else {
-    foreach ($field['referenceable_roles'] as $related_role) {
-      if ($related_role) {
-        $related_roles[] = "'". $related_role ."'";
+  }
+  else {
+    $roles = array();
+    foreach ($field['referenceable_roles'] as $role) {
+      if ($role) {
+        $roles[] = $role;
       }
     }
-    $result = db_query("SELECT u.name, u.uid FROM {users} u LEFT JOIN {users_roles} r ON u.uid = r.uid WHERE u.uid > 0 AND r.rid IN (" . implode($related_roles, ',') . ')');
-  }
-
-  if (!$field['required']) {
-    $rows = array(0 => '');
-  } else {
-    $rows = array();
+    $result = db_query("SELECT u.name, u.uid FROM {users} u LEFT JOIN {users_roles} r ON u.uid = r.uid WHERE u.uid > 0 AND r.rid IN (" . implode($roles, ',') . ')');
   }
 
   while ($user = db_fetch_object($result)) {
-    $rows[$user->uid] = $user->name;
+    $users[$user->uid] = $user->name;
   }
 
-  return $rows;
+  return $users;
 }
 
-function userreference_referenced_by_list($uid, $content_type = '') {
-  if ($content_type) {
-    $result = db_query("SELECT n.* FROM {node_field_userreference_data} user_ref INNER JOIN {node} n ON n.vid = user_ref.vid AND n.type = '%s' WHERE user_ref.field_uid = %d ORDER BY n.type, delta", $content_type, $uid);
-  }
-  else {
-    $result = db_query("SELECT n.* FROM {node_field_userreference_data} user_ref INNER JOIN {node} n ON n.vid = user_ref.vid WHERE user_ref.field_uid = %d ORDER BY n.type, delta", $uid);
-  }
-
-  $values = array();
-
-  while ($value = db_fetch_object($result)) {
-    $values[] = $value;
-  }
-
-  return $values;
+/**
+ * Provide a list of users to filter on.
+ */
+function _userreference_filter_handler($op, $filterinfo) {
+  $options = views_handler_filter_usercurrent();
+  $options = array_merge($options, _userreference_potential_references($filterinfo['extra']['field']));
+  return $options;
 }
