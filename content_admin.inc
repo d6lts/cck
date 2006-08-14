@@ -184,7 +184,7 @@ function _content_admin_type_edit_submit($form_id, $form_values) {
   content_clear_type_cache();
   menu_rebuild();
 
-  drupal_goto('admin/node/types/'. $form_values['type_name']);
+  return 'admin/node/types/'. $form_values['type_name'];
 }
 
 /**
@@ -217,7 +217,7 @@ function _content_admin_type_delete_submit($form_id, $form_values) {
 
     drupal_set_message(t('Deleted content type %type.', array('%type' => theme('placeholder', $type['label']))));
     content_clear_type_cache();
-    drupal_goto('admin/node/types');
+    return 'admin/node/types';
   }
 }
 
@@ -388,7 +388,7 @@ function _content_admin_field_add_existing_submit($form_id, $form_values) {
 
   drupal_set_message(t('Added field %label.', array('%label' => theme('placeholder', $prior_instance['label']))));
   content_clear_type_cache();
-  drupal_goto('admin/node/types/'. $form_values['type_name'] .'/fields');
+  return 'admin/node/types/'. $form_values['type_name'] .'/fields';
 }
 
 /**
@@ -430,7 +430,7 @@ function _content_admin_field_add_new_submit($form_id, $form_values) {
   }
 
   drupal_set_message(t('Created field %label.', array('%label' => theme('placeholder', $form_values['label']))));
-  drupal_goto('admin/node/types/'. $form_values['type_name'] .'/fields/'. $field_name);
+  return 'admin/node/types/'. $form_values['type_name'] .'/fields/'. $field_name;
 }
 
 /**
@@ -487,7 +487,7 @@ function _content_admin_field_remove_submit($form_id, $form_values) {
       drupal_set_message(t('The field %field no longer exists in any content type, so it was deleted.', array('%field' => theme('placeholder', $field['widget']['label']))));
     }
     content_clear_type_cache();
-    drupal_goto('admin/node/types/'. $form_values['type_name'] .'/fields');
+    return 'admin/node/types/'. $form_values['type_name'] .'/fields';
   }
 }
 
@@ -663,7 +663,7 @@ function _content_admin_field_submit($form_id, $form_values) {
   }
   content_alter_db_field($prev_field, $prev_columns, $new_field, $new_columns);
 
-  drupal_goto('admin/node/types/'. $form_values['type_name'] .'/fields');
+  return 'admin/node/types/'. $form_values['type_name'] .'/fields';
 }
 
 
