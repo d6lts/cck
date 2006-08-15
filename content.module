@@ -1013,7 +1013,43 @@ function content_views_argument_handler($op, &$query, $argtype, $arg = '') {
   }
 }
 
+/*
+ * Implementation of hook_pathauto_node().
+ *
+ * Allows users to use the textual representation of any field as a component
+ * of pathauto.module paths.
+ */
+function content_pathauto_node($op, $node = NULL) {
+  switch ($op) {
+    case 'placeholders':
+      $placeholders = array();
 
+      foreach (content_fields() as $field) {
+        $placeholders['['. $field['field_name'] .']'] = t($field['widget']['label']);
+      }
+      return $placeholders;
+
+    case 'values':
+      $results = array();
+
+      // Get node output (filtered and with module-specific fields).
+      if (node_hook($node, 'view')) {
+        node_invoke($node, 'view', false, false);
+      }
+      else {
+        $node = node_prepare($node, false);
+      }
+      // Allow modules to change $node->body before viewing.
+      node_invoke_nodeapi($node, 'view', false, false);
+
+      foreach (content_fields() as $field) {
+        $items = $node->$field['field_name'];
+        $results['['. $field['field_name'] .']'] = pathauto_cleanstring($items[0]['view']);
+      }
+
+      return $results;
+  }
+}
 
 /**
  * Format an individual field for display.
