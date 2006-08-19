@@ -769,7 +769,7 @@ function content_database_info($field) {
     $db_info['table'] = 'node_data_'. $field['field_name'];
   }
   else {
-    $db_info['table'] = 'node_'. strtr($field['type_name'], '-', '_');
+    $db_info['table'] = 'node_'. $field['type_name'];
   }
 
   if (is_array($columns) && count($columns)) {
@@ -956,7 +956,7 @@ function content_views_argument_handler($op, &$query, $argtype, $arg = '') {
 
   // The table name used here is the Views alias for the table, not the actual
   // table name.
-  $table = 'node_data_'. $field['field_name'];  
+  $table = 'node_data_'. $field['field_name'];
 
   switch ($op) {
     case 'summary':
@@ -1041,10 +1041,19 @@ function content_pathauto_node($op, $node = NULL) {
       }
       // Allow modules to change $node->body before viewing.
       node_invoke_nodeapi($node, 'view', false, false);
+      // Get node output (filtered and with module-specific fields).
+      if (node_hook($node, 'view')) {
+        node_invoke($node, 'view', false, false);
+      }
+      else {
+        $node = node_prepare($node, false);
+      }
+      // Allow modules to change $node->body before viewing.
+      node_invoke_nodeapi($node, 'view', false, false);
 
       foreach (content_fields() as $field) {
         $items = $node->$field['field_name'];
-        $results['['. $field['field_name'] .']'] = pathauto_cleanstring($items[0]['view']);
+        $results['['. $field['field_name'] .']'] = pathauto_cleanstring(strip_tags($items[0]['view']));
       }
 
       return $results;

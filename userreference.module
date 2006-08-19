@@ -212,7 +212,7 @@ function userreference_widget($op, &$node, $field, &$node_field) {
             $node_field[$delta]['uid'] = $uid;
           }
           else {
-            unset($node_field[$delta]);
+            unset($node_field[$delta]); 
           }
         }
     }

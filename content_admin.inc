@@ -139,7 +139,7 @@ function _content_admin_type_edit_submit($form_id, $form_values) {
     $form_values['type_name'] = drupal_strtolower($form_values['type_name']);
     $form_values['type_name'] = str_replace(array(' ', '-'), '_', $form_values['type_name']);
     $form_values['type_name'] = preg_replace('/[^a-z0-9_]/', '', $form_values['type_name']);
-    $form_values['type_name'] = 'content-'. $form_values['type_name'];
+    $form_values['type_name'] = 'content_'. $form_values['type_name'];
     $form_values['type_name'] = substr($form_values['type_name'], 0, 32);
     if (isset($types[$form_values['type_name']])) {
       $counter = 0;
@@ -154,7 +154,7 @@ function _content_admin_type_edit_submit($form_id, $form_values) {
     switch ($GLOBALS['db_type']) {
       case 'mysql':
       case 'mysqli':
-        db_query("CREATE TABLE {node_". strtr($form_values['type_name'], '-', '_') ."} (
+        db_query("CREATE TABLE {node_". $form_values['type_name'] ."} (
             vid int unsigned NOT NULL default '0',
             nid int unsigned NOT NULL default '0',
             PRIMARY KEY (vid)
@@ -162,7 +162,7 @@ function _content_admin_type_edit_submit($form_id, $form_values) {
         break;
 
       case 'pgsql':
-        db_query("CREATE TABLE {node_". strtr($form_values['type_name'], '-', '_') ."} (
+        db_query("CREATE TABLE {node_". $form_values['type_name'] ."} (
             vid integer unsigned NOT NULL default '0',
             nid integer unsigned NOT NULL default '0',
             PRIMARY KEY (vid)
@@ -213,7 +213,7 @@ function _content_admin_type_delete_submit($form_id, $form_values) {
     db_query("DELETE FROM {node_field_instance} WHERE type_name = '%s'", $form_values['type_name']);
     db_query("DELETE FROM {node_type} WHERE type_name = '%s'", $form_values['type_name']);
 
-    db_query("DROP TABLE {node_". strtr($form_values['type_name'], '-', '_') ."}");
+    db_query("DROP TABLE {node_". $form_values['type_name'] ."}");
 
     drupal_set_message(t('Deleted content type %type.', array('%type' => theme('placeholder', $type['label']))));
     content_clear_type_cache();

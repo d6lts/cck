@@ -275,7 +275,7 @@ function nodereference_autocomplete($field_name, $string = '') {
 
   foreach (_nodereference_potential_references($field, TRUE) as $key => $value) {
     if (stristr($value->title, $string)) {
-      $matches[$value->title] = check_plain('('. str_replace('content-', '', $value->type) .') '. $value->title);
+      $matches[$value->title] = check_plain('('. str_replace('content_', '', $value->type) .') '. $value->title);
     }
   }
 
