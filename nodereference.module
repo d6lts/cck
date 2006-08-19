@@ -233,9 +233,11 @@ function nodereference_widget($op, &$node, $field, &$node_field) {
 function _nodereference_potential_references($field, $return_full_nodes = FALSE) {
   $related_types = array();
 
-  foreach ($field['referenceable_types'] as $related_type) {
-    if ($related_type) {
-      $related_types[] = " type = '". $related_type ."'";
+  if (isset($field['referenceable_types'])) {
+    foreach ($field['referenceable_types'] as $related_type) {
+      if ($related_type) {
+        $related_types[] = " type = '". $related_type ."'";
+      }
     }
   }
 
