@@ -85,9 +85,9 @@ function date_update_4() {
 
   include_once(drupal_get_path('module', 'content') .'/content.module');
   include_once(drupal_get_path('module', 'content') .'/content_admin.inc');
-  
+
   $fields = content_fields();
-  
+
   foreach ($fields as $field) {
     $db_info = content_database_info($field);
     switch ($field['type']) {

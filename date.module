@@ -50,9 +50,28 @@ function date_field_settings($op, $field) {
       return array('granularity');
 
     case 'database columns':
-      return array(
+      $columns = array(
         'value' => array('type' => 'varchar', 'length' => 20, 'not null' => TRUE, 'default' => "'0001-01-01T00:00:00'", 'sortable' => TRUE),
       );
+      switch ($field['granularity']) {
+        case 0:
+          $columns['value']['length'] = 4;
+          $columns['value']['default'] = "'0001'";
+          break;
+        case 1:
+          $columns['value']['length'] = 7;
+          $columns['value']['default'] = "'0001-01'";
+          break;
+        case 2:
+          $columns['value']['length'] = 10;
+          $columns['value']['default'] = "'0001-01-01'";
+          break;
+        default:
+          $columns['value']['length'] = 19;
+          $columns['value']['default'] = "'0001-01-01T00:00:00'";
+          break;
+      }
+      return $columns;
   }
 }
 
@@ -74,7 +93,16 @@ function date_field($op, $node, &$field, &$node_field, $teaser, $page) {
  * Implementation of hook_field_view_item().
  */
 function date_field_view_item($field, $node_field_item) {
-  return check_plain($node_field_item['value']);
+  $year = substr($node_field_item['value'], 2, 2);
+  $month = substr($node_field_item['value'], 5, 2);
+  $day = substr($node_field_item['value'], 8, 2);
+
+  if ($node_field_item['value'] != '0001-01-01T00:00:00' && intval($month) != 0 && intval($day) != 0) {
+    return '<span style="white-space: nowrap;">'. intval($month) .'/'. intval($day) .'/'. $year .'</span>';
+  }
+  else {
+    return '';
+  }
 }
 
 
