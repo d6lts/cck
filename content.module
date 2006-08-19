@@ -323,7 +323,7 @@ function content_view(&$node, $teaser = FALSE, $page = FALSE) {
   }
   $node->body = implode('', _content_field_invoke('view', $node, FALSE, $page));
   $node->teaser = implode('', _content_field_invoke('view', $node, TRUE, $page));
-  $node->readmore = ($node->body != $node->teaser);
+  $node->readmore = (strlen($node->teaser) < strlen($node->body));
 }
 
 /**
