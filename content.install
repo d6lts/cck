@@ -184,3 +184,41 @@ function content_update_5() {
 function content_update_6() {
   return array(update_sql('DELETE FROM {cache}'));
 }
+
+/**
+ * Rename the "content-" prefix to "content_" to aid in form theming.
+ */
+function content_update_7() {
+  $ret = array();
+
+  $type_result = db_query("SELECT type_name FROM {node_type} WHERE type_name LIKE 'content-%%'");
+
+  if (db_num_rows($type_result)) {
+    // Multi-part update
+    if (!isset($_SESSION['content_update_7'])) {
+      $_SESSION['content_update_7'] = 0;
+      $_SESSION['content_update_7_max'] = db_num_rows($type_result);
+    }
+
+    $type = db_fetch_object($type_result);
+    $old_type_name = $type->type_name;
+    $new_type_name = str_replace('content-', 'content_', $old_type_name);
+    $ret[] = update_sql("UPDATE {node} SET type = '". $new_type_name ."' WHERE type = '". $old_type_name ."'");
+    $ret[] = update_sql("UPDATE {node_type} SET type_name = '". $new_type_name ."' WHERE type_name = '". $old_type_name ."'");
+    $ret[] = update_sql("UPDATE {node_field_instance} SET type_name = '". $new_type_name ."' WHERE type_name = '". $old_type_name ."'");
+    $ret[] = update_sql("UPDATE {vocabulary_node_types} SET type = '". $new_type_name ."' WHERE type = '". $old_type_name ."'");
+
+    $variable_result = db_query("SELECT name, value FROM {variable} WHERE name LIKE '%%%s%%' OR value LIKE '%%%s%%'", $old_type_name, $old_type_name);
+    while ($variable = db_fetch_object($variable_result)) {
+      $new_name = str_replace($old_type_name, $new_type_name, $variable->name);
+      $new_value = str_replace($old_type_name, $new_type_name, $variable->value);
+      db_query("UPDATE {variable} SET name = '%s', value = '%s' WHERE name = '%s'", $new_name, $new_value, $variable->name);
+    }
+
+    $ret[] = update_sql('DELETE FROM {cache}');
+
+    $_SESSION['content_update_7']++;
+    $ret['#finished'] = $_SESSION['content_update_7'] / $_SESSION['content_update_7_max'];
+    return $ret;
+  }
+}

@@ -41,8 +41,8 @@ may theme the entire node as a unit. This allows you to affect field order, to
 change the HTML structure to something more complicated, like a table, or even
 to exclude fields from the presentation entirely. The setup for theming a node
 is simpler than for theming a field; simply create a file called
-"node-content-foo.tpl.php" where "content-foo" is the content type name as
+"node-content_foo.tpl.php" where "content_foo" is the content type name as
 listed on the administration page. For an example of the typical contents of
 this file, investigate the included example here
-("node-content-example.tpl.php") or the "node.tpl.php" file that comes with
+("node-content_example.tpl.php") or the "node.tpl.php" file that comes with
 your theme.

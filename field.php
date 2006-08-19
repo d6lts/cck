@@ -65,9 +65,9 @@ function hook_field_info() {
  *     include a "sortable" parameter to indicate to views.module that the
  *     column contains ordered information. Details of other information that can
  *     be passed to the database layer can be found at content_db_add_column().
- *   - The "filters" operation should return an array whose values are 'filters' 
- *     definitions as expected by views.module (see Views Documentation). 
- *     When proving several filters, it is recommended to use the 'name' 
+ *   - The "filters" operation should return an array whose values are 'filters'
+ *     definitions as expected by views.module (see Views Documentation).
+ *     When proving several filters, it is recommended to use the 'name'
  *     attribute in order to let the user distinguish between them. If no 'name'
  *     is specified for a filter, the key of the filter will be used instead.
  */
