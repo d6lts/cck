@@ -723,7 +723,7 @@ function _content_type_info($reset = FALSE) {
 
         $info['content types'][$type['type_name']] = $type;
       }
-dprint_r($info);
+
       cache_set('content_type_info', serialize($info), CACHE_PERMANENT);
     }
   }
