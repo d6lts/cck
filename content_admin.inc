@@ -47,7 +47,7 @@ function _content_admin_type_fields() {
     $row[] = $field['type'];
 
     $types = array();
-    $result = db_query("SELECT nt.label FROM {node_field_instance} nfi LEFT JOIN {node_type} nt ON nt.type_name = nfi.type_name WHERE nfi.field_name = '%s' ORDER BY nt.label ASC", $field['field_name']);
+    $result = db_query("SELECT nt.label FROM {node_field_instance} nfi LEFT JOIN {node_type_content} nt ON nt.type_name = nfi.type_name WHERE nfi.field_name = '%s' ORDER BY nt.label ASC", $field['field_name']);
     while ($type = db_fetch_array($result)) {
       $types[] = $type['label'];
     }
@@ -149,7 +149,7 @@ function _content_admin_type_edit_submit($form_id, $form_values) {
       $form_values['type_name'] = $new_name;
     }
 
-    db_query("INSERT INTO {node_type} (type_name, label, description, help, title_label) VALUES ('%s', '%s', '%s', '%s', '%s')", $form_values['type_name'], $form_values['label'], $form_values['description'], $form_values['help'], $form_values['title_label']);
+    db_query("INSERT INTO {node_type_content} (type_name, label, description, help, title_label) VALUES ('%s', '%s', '%s', '%s', '%s')", $form_values['type_name'], $form_values['label'], $form_values['description'], $form_values['help'], $form_values['title_label']);
 
     switch ($GLOBALS['db_type']) {
       case 'mysql':
@@ -171,7 +171,7 @@ function _content_admin_type_edit_submit($form_id, $form_values) {
     }
   }
   else {
-    db_query("UPDATE {node_type} SET label = '%s', description = '%s', help = '%s', title_label = '%s' WHERE type_name = '%s'", $form_values['label'], $form_values['description'], $form_values['help'], $form_values['title_label'], $form_values['type_name']);
+    db_query("UPDATE {node_type_content} SET label = '%s', description = '%s', help = '%s', title_label = '%s' WHERE type_name = '%s'", $form_values['label'], $form_values['description'], $form_values['help'], $form_values['title_label'], $form_values['type_name']);
   }
 
   if (isset($form_values['original_type_name'])) {
@@ -211,7 +211,7 @@ function _content_admin_type_delete_submit($form_id, $form_values) {
       node_delete($node->nid);
     }
     db_query("DELETE FROM {node_field_instance} WHERE type_name = '%s'", $form_values['type_name']);
-    db_query("DELETE FROM {node_type} WHERE type_name = '%s'", $form_values['type_name']);
+    db_query("DELETE FROM {node_type_content} WHERE type_name = '%s'", $form_values['type_name']);
 
     db_query("DROP TABLE {node_". $form_values['type_name'] ."}");
 

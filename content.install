@@ -8,7 +8,7 @@ function content_install() {
   switch ($GLOBALS['db_type']) {
     case 'mysql':
     case 'mysqli':
-      db_query("CREATE TABLE {node_type} (
+      db_query("CREATE TABLE {node_type_content} (
           type_name varchar(32) NOT NULL default '',
           label varchar(255) NOT NULL default '',
           description mediumtext NOT NULL,
@@ -38,7 +38,7 @@ function content_install() {
       break;
 
     case 'pgsql':
-      db_query("CREATE TABLE {node_type} (
+      db_query("CREATE TABLE {node_type_content} (
           type_name varchar(32) NOT NULL default '',
           label varchar(255) NOT NULL default '',
           description text NOT NULL,
@@ -221,4 +221,24 @@ function content_update_7() {
     $ret['#finished'] = $_SESSION['content_update_7'] / $_SESSION['content_update_7_max'];
     return $ret;
   }
+}
+
+/**
+ * Rename the "node_type" table to avoid a conflict with a later core addition
+ */
+function content_update_8() {
+  $ret = array();
+  
+  switch ($GLOBALS['db_type']) {
+    case 'mysql':
+    case 'mysqli':
+      $ret[] = update_sql('RENAME TABLE {node_type} TO {node_type_content}');
+      break;
+
+    case 'pgsql':
+      $ret[] = update_sql('ALTER TABLE {node_type} RENAME TO {node_type_content}');
+      break;
+  }
+
+  return $ret;
 }
