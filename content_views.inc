@@ -88,19 +88,12 @@ function content_views_tables() {
 
 function content_views_field_handler($field_info, $field_data, $value, $data) {
   $field = $field_info['content_field'];
-  $node_field_item = array();
+  $item = array();
   foreach ($field_info['content_db_info']['columns'] as $column => $attributes) {
     $view_column_name = 'node_data_'. $field['field_name'] .'_'. $attributes['column'];
-    $node_field_item[$column] = $data->$view_column_name;
+    $item[$column] = $data->$view_column_name;
   }
-  $function = $field_info['content_field_module'] .'_field_view_item';
-  if (function_exists($function)) {
-    $result = $function($field, $node_field_item);
-  }
-  else {
-    $result = implode("\n", $node_field_item);
-  }
-  return $result;
+  return content_format($field, $item);
 }
 
 /**
@@ -177,28 +170,17 @@ function content_views_argument_handler($op, &$query, $argtype, $arg = '') {
       break;
 
     case 'link':
-      $field_types = _content_field_types();
-      $module = $field_types[$field['type']]['module'];
-
       $item = array();
       foreach ($db_info['columns'] as $column => $attributes) {
         $view_column_name = $attributes['column'];
         $item[$column] = $query->$view_column_name;
       }
 
-      $view = module_invoke($module, 'field_view_item', $field, $item);
-
-      // Strip any links that appear in the view, so that the new link we create works here.
-      $view = preg_replace('!</?a(\s+[^>]*)?>!i', '', $view);
-
-      return l($view, $arg .'/'. $query->$main_column['column'], array(), NULL, NULL, FALSE, TRUE);
+      return l(content_format($field, $item, 'plain'), $arg .'/'. $query->$main_column['column'], array(), NULL, NULL, FALSE, TRUE);
 
     case 'title':
-      $field_types = _content_field_types();
-      $module = $field_types[$field['type']]['module'];
-
       $item = array(key($db_info['columns']) => $query);
 
-      return module_invoke($module, 'field_view_item', $field, $item);
+      return content_format($field, $item);
   }
 }

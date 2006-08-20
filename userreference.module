@@ -66,29 +66,52 @@ function userreference_field_settings($op, $field) {
 /**
  * Implementation of hook_field().
  */
-function userreference_field($op, &$node, $field, &$node_field, $teaser, $page) {
+function userreference_field($op, &$node, $field, &$items, $teaser, $page) {
   switch ($op) {
     case 'view':
-      foreach ($node_field as $delta => $item) {
-        $node_field[$delta]['view'] = userreference_field_view_item($field, $item, $node);
+      foreach ($items as $delta => $item) {
+        $items[$delta]['view'] = content_format($field, $item, 'default', $node);
       }
-      return theme('field', $node, $field, $node_field, $teaser, $page);
+      return theme('field', $node, $field, $items, $teaser, $page);
   }
 }
 
 /**
- * Implementation of hook_field_view_item().
+ * Implementation of hook_field_format_info().
  */
-function userreference_field_view_item($field, $node_field_item) {
-  if (isset($node_field_item['uid'])) {
-    $referenced_user = user_load(array('uid' => $node_field_item['uid']));
-    if ($referenced_user) {
-      return theme('username', $referenced_user);
-    }
-  }
-  return '';
+function userreference_field_formatter_info() {
+  return array(
+    'default' => array(
+      'label' => 'Default',
+      'field types' => array('userreference'),
+    ),
+    'plain' => array(
+      'label' => 'Plain text',
+      'field types' => array('userreference'),
+    ),
+  );
 }
 
+/**
+ * Implementation of hook_field_formatter().
+ */
+function userreference_field_formatter($field, $item, $formatter, $node) {
+  $text = '';
+  if (isset($item['uid'])) {
+    $referenced_user = user_load(array('uid' => $item['uid']));
+    if ($referenced_user) {
+      $text = theme('username', $referenced_user);
+    }
+  }
+  
+  switch ($formatter) {
+    case 'plain':
+      return strip_tags($text);
+    
+    default:
+      return $text;
+  }
+}
 
 /**
  * Implementation of hook_widget_info().
