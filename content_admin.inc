@@ -179,7 +179,7 @@ function _content_admin_type_edit_submit($form_id, $form_values) {
     db_query("INSERT INTO {node_field_instance} (field_name, type_name, weight, label, widget_type, widget_settings, description) SELECT field_name, '%s', weight, label, widget_type, widget_settings, description FROM {node_field_instance} WHERE type_name = '%s'", $form_values['type_name'], $form_values['original_type_name']);
   }
 
-  drupal_set_message(t('Saved content type %type.', array('%type' => theme('placeholder', $form_values['label']))));
+  drupal_set_message(t('Saved content type %type.', array('%type' => $form_values['label'])));
 
   content_clear_type_cache();
   menu_rebuild();
@@ -195,7 +195,7 @@ function _content_admin_type_delete($type_name = '') {
 
   $form = array();
   $form['type_name'] = array('#type' => 'value', '#value' => $type_name);
-  return confirm_form('_content_admin_type_delete', $form, t('Are you sure you want to delete the content type %type?', array('%type' => theme('placeholder', $type['label']))), 'admin/node/types', t('If you have any content left in this content type, it will be permanently deleted. This action cannot be undone.'), t('Delete'), t('Cancel'));
+  return confirm_form('_content_admin_type_delete', $form, t('Are you sure you want to delete the content type %type?', array('%type' => $type['label'])), 'admin/node/types', t('If you have any content left in this content type, it will be permanently deleted. This action cannot be undone.'), t('Delete'), t('Cancel'));
 }
 
 /**
@@ -215,7 +215,7 @@ function _content_admin_type_delete_submit($form_id, $form_values) {
 
     db_query("DROP TABLE {node_". $form_values['type_name'] ."}");
 
-    drupal_set_message(t('Deleted content type %type.', array('%type' => theme('placeholder', $type['label']))));
+    drupal_set_message(t('Deleted content type %type.', array('%type' => $type['label'])));
     content_clear_type_cache();
     return 'admin/node/types';
   }
@@ -332,7 +332,7 @@ function _content_admin_field_add($type_name) {
     $output .= drupal_get_form('_content_admin_field_add_new', $form);
   }
   else {
-    drupal_set_message(t('No field modules are enabled. You need to <a href="%modules_url">enable one</a>, such as text.module, before you can add new fields.', array('%modules_url' => url('admin/modules'))), 'error');
+    drupal_set_message(t('No field modules are enabled. You need to <a href="%modules_url">enable one</a>, such as text.module, before you can add new fields.', array('!modules_url' => url('admin/modules'))), 'error');
   }
 
   return $output;
@@ -386,7 +386,7 @@ function _content_admin_field_add_existing_submit($form_id, $form_values) {
   }
   db_query("INSERT INTO {node_field_instance} (field_name, type_name, weight, label, widget_type, widget_settings, description) VALUES ('%s', '%s', %d, '%s', '%s', '%s', '%s')", $form_values['field_name'], $form_values['type_name'], $prior_instance['weight'], $prior_instance['label'], $prior_instance['widget_type'], $prior_instance['widget_settings'], $prior_instance['description']);
 
-  drupal_set_message(t('Added field %label.', array('%label' => theme('placeholder', $prior_instance['label']))));
+  drupal_set_message(t('Added field %label.', array('%label' => $prior_instance['label'])));
   content_clear_type_cache();
   return 'admin/node/types/'. $form_values['type_name'] .'/fields';
 }
@@ -429,7 +429,7 @@ function _content_admin_field_add_new_submit($form_id, $form_values) {
     content_alter_db_field(array(), array(), $field, $columns);
   }
 
-  drupal_set_message(t('Created field %label.', array('%label' => theme('placeholder', $form_values['label']))));
+  drupal_set_message(t('Created field %label.', array('%label' => $form_values['label'])));
   return 'admin/node/types/'. $form_values['type_name'] .'/fields/'. $field_name;
 }
 
@@ -449,7 +449,7 @@ function _content_admin_field_remove($type_name, $field_name) {
     '#type' => 'value',
     '#value' => $field_name,
   );
-  return confirm_form('_content_admin_field_remove', $form, t('Are you sure you want to remove the field %field?', array('%field' => theme('placeholder', $field['widget']['label']))), 'admin/node/types/'. $type_name .'/fields', t('If you have any content left in this field, it will be lost. This action cannot be undone.'), t('Remove'), t('Cancel'));
+  return confirm_form('_content_admin_field_remove', $form, t('Are you sure you want to remove the field %field?', array('%field' => $field['widget']['label'])), 'admin/node/types/'. $type_name .'/fields', t('If you have any content left in this field, it will be lost. This action cannot be undone.'), t('Remove'), t('Cancel'));
 }
 
 /**
@@ -465,7 +465,7 @@ function _content_admin_field_remove_submit($form_id, $form_values) {
   if ($type && $field && $form_values['confirm']) {
     db_query("DELETE FROM {node_field_instance} WHERE type_name = '%s' AND field_name = '%s'", $form_values['type_name'], $form_values['field_name']);
 
-    drupal_set_message(t('Removed field %field from %type.', array('%field' => theme('placeholder', $field['widget']['label']), '%type' => theme('placeholder', $type['label']))));
+    drupal_set_message(t('Removed field %field from %type.', array('%field' => $field['widget']['label'], '%type' => $type['label'])));
     $instances = db_result(db_query("SELECT COUNT(*) FROM {node_field_instance} WHERE field_name = '%s'", $form_values['field_name']));
     if ($instances == 1) {
       if (!($field['multiple'])) {
@@ -484,7 +484,7 @@ function _content_admin_field_remove_submit($form_id, $form_values) {
       }
       db_query("DELETE FROM {node_field} WHERE field_name = '%s'", $form_values['field_name']);
 
-      drupal_set_message(t('The field %field no longer exists in any content type, so it was deleted.', array('%field' => theme('placeholder', $field['widget']['label']))));
+      drupal_set_message(t('The field %field no longer exists in any content type, so it was deleted.', array('%field' => $field['widget']['label'])));
     }
     content_clear_type_cache();
     return 'admin/node/types/'. $form_values['type_name'] .'/fields';
@@ -509,7 +509,7 @@ function _content_admin_field($type_name, $field_name) {
   $form['widget'] = array(
     '#type' => 'fieldset',
     '#title' => t('Widget settings'),
-    '#description' => t('These settings apply only to the %field field as it appears in the %type content type.', array('%field' => theme('placeholder', $field['widget']['label']), '%type' => theme('placeholder', $type['label']))),
+    '#description' => t('These settings apply only to the %field field as it appears in the %type content type.', array('%field' => $field['widget']['label'], '%type' => $type['label'])),
   );
   $options = array();
   foreach ($widget_types as $possible_widget_name => $possible_widget_type) {
@@ -556,7 +556,7 @@ function _content_admin_field($type_name, $field_name) {
   $form['field'] = array(
     '#type' => 'fieldset',
     '#title' => t('Data settings'),
-    '#description' => t('These settings apply to the %field field in every content type in which it appears.', array('%field' => theme('placeholder', $field['widget']['label']))),
+    '#description' => t('These settings apply to the %field field in every content type in which it appears.', array('%field' => $field['widget']['label'])),
   );
   $form['field']['required'] = array(
     '#type' => 'checkbox',
@@ -649,7 +649,7 @@ function _content_admin_field_submit($form_id, $form_values) {
   }
   db_query("UPDATE {node_field} SET required = %d, multiple = %d, global_settings = '%s', db_storage = %d WHERE field_name = '%s'", $form_values['required'], $form_values['multiple'], serialize($field_settings), $field['db_storage'], $form_values['field_name']);
 
-  drupal_set_message(t('Saved field %field.', array('%field' => theme('placeholder', $form_values['label']))));
+  drupal_set_message(t('Saved field %field.', array('%field' => $form_values['label'])));
   content_clear_type_cache();
 
   $new_field = content_fields($form_values['field_name']);
@@ -879,7 +879,7 @@ function content_db_add_column($table, $column, $type, $attributes = array()) {
         $type = $mappings[$type];
       }
       else {
-        watchdog('database', t('No PostgreSQL mapping found for %type data type.', array('%type' => theme('placeholder', $type))), WATCHDOG_WARNING);
+        watchdog('database', t('No PostgreSQL mapping found for %type data type.', array('%type' => $type)), WATCHDOG_WARNING);
       }
       if ($type != 'varchar') {
         unset($attributes['length']);
@@ -968,7 +968,7 @@ function content_db_change_column($table, $column, $column_new, $type, $attribut
         $type = $mappings[$type];
       }
       else {
-        watchdog('database', t('No PostgreSQL mapping found for %type data type.', array('%type' => theme('placeholder', $type))), WATCHDOG_WARNING);
+        watchdog('database', t('No PostgreSQL mapping found for %type data type.', array('%type' => $type)), WATCHDOG_WARNING);
       }
       if ($type != 'varchar') {
         unset($attributes['length']);
