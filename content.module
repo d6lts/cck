@@ -182,7 +182,16 @@ function content_menu($may_cache) {
 function content_node_info() {
   $types = array();
   foreach (content_types() as $name => $type) {
-    $types[$name] = array('name' => t($type['label']), 'base' => 'content');
+    $types[$name] = array(
+      'name' => t($type['label']),
+      'module' => 'content',
+      'description' => $type['description'],
+      'help' => $type['help'],
+      'has_title' => TRUE,
+      'title_label' => $type['title_label'],
+      'has_body' => FALSE,
+      'locked' => TRUE,
+    );
   }
   return $types;
 }
