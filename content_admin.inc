@@ -125,7 +125,7 @@ function _content_admin_type_edit($type_name = '', $original_type_name = '') {
     '#type' => 'value',
     '#value' => $original_type_name,
   );
-  return drupal_get_form('_content_admin_type_edit', $form);
+  return $form;
 }
 
 /**
@@ -259,11 +259,16 @@ function _content_admin_field_overview($type_name) {
  * Menu callback; presents the form for adding a new field.
  */
 function _content_admin_field_add($type_name) {
-  $type = content_types($type_name);
-  $field_types = _content_field_types();
-  $fields = content_fields();
-  $widget_types = _content_widget_types();
+  $output = drupal_get_form('_content_admin_field_add_existing', $type_name);
+  $output .= drupal_get_form('_content_admin_field_add_new', $type_name);
+  return $output;
+}
+
+function _content_admin_field_add_existing($type_name) {
   $output = '';
+  $type = content_types($type_name);
+  $fields = content_fields();
+  $form = array();
 
   $options = array();
   foreach ($fields as $field) {
@@ -271,7 +276,6 @@ function _content_admin_field_add($type_name) {
     $options[$field['field_name']] = t($field['widget']['label']) .' ('. $field['field_name'] .')';
   }
   if ($options) {
-    $form = array();
     $form['existing'] = array(
       '#type' => 'fieldset',
       '#title' => t('Add existing field'),
@@ -289,8 +293,14 @@ function _content_admin_field_add($type_name) {
       '#type' => 'value',
       '#value' => $type_name,
     );
-    $output .= drupal_get_form('_content_admin_field_add_existing', $form);
   }
+  return $form;
+}
+
+function _content_admin_field_add_new($type_name) {
+  $field_types = _content_field_types();
+  $widget_types = _content_widget_types();
+  $form = array();
 
   $field_type_options = array();
   foreach ($field_types as $field_name => $field_type) {
@@ -301,7 +311,6 @@ function _content_admin_field_add($type_name) {
     }
   }
   if (count($field_type_options) > 0) {
-    $form = array();
     $form['new'] = array(
       '#type' => 'fieldset',
       '#title' => t('Create new field'),
@@ -329,13 +338,12 @@ function _content_admin_field_add($type_name) {
       '#type' => 'value',
       '#value' => $type_name,
     );
-    $output .= drupal_get_form('_content_admin_field_add_new', $form);
   }
   else {
     drupal_set_message(t('No field modules are enabled. You need to <a href="%modules_url">enable one</a>, such as text.module, before you can add new fields.', array('!modules_url' => url('admin/modules'))), 'error');
   }
 
-  return $output;
+  return $form;
 }
 
 function theme_content_admin_field_add_new_field_widget_type($form) {
@@ -587,9 +595,7 @@ function _content_admin_field($type_name, $field_name) {
     '#value' => $field_name,
   );
 
-  $output .= drupal_get_form('_content_admin_field', $form);
-
-  return $output;
+  return $form;
 }
 
 /**

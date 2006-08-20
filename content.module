@@ -78,7 +78,8 @@ function content_menu($may_cache) {
     $items[] = array(
       'path' => 'admin/node/types/add',
       'title' => t('add content type'),
-      'callback' => '_content_admin_type_edit',
+      'callback' => 'drupal_get_form',
+      'callback arguments' => array('_content_admin_type_edit'),
       'access' => $access,
       'type' => MENU_LOCAL_TASK,
     );
@@ -108,7 +109,8 @@ function content_menu($may_cache) {
         $items[] = array(
           'path' => 'admin/node/types/'. arg(3),
           'title' => t($type['label']),
-          'callback' => '_content_admin_type_edit',
+          'callback' => 'drupal_get_form',
+          'callback arguments' => array('_content_admin_type_edit'),
           'access' => $access,
           'callback arguments' => array(arg(3)),
           'type' => MENU_CALLBACK,
@@ -124,7 +126,8 @@ function content_menu($may_cache) {
         $items[] = array(
           'path' => 'admin/node/types/'. arg(3) .'/duplicate',
           'title' => t('duplicate'),
-          'callback' => '_content_admin_type_edit',
+          'callback' => 'drupal_get_form',
+          'callback arguments' => array('_content_admin_type_edit'),
           'access' => $access,
           'callback arguments' => array('', arg(3)),
           'type' => MENU_CALLBACK,
@@ -161,9 +164,9 @@ function content_menu($may_cache) {
           $items[] = array(
             'path' => 'admin/node/types/'. arg(3) .'/fields/'. arg(5),
             'title' => t($type['fields'][arg(5)]['widget']['label']),
-            'callback' => '_content_admin_field',
+            'callback' => 'drupal_get_form',
             'access' => $access,
-            'callback arguments' => array(arg(3), arg(5)),
+            'callback arguments' => array('_content_admin_field', arg(3), arg(5)),
             'type' => MENU_CALLBACK,
           );
           $items[] = array(
