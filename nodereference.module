@@ -80,7 +80,7 @@ function nodereference_field($op, &$node, $field, &$items, $teaser, $page) {
 }
 
 /**
- * Implementation of hook_field_format_info().
+ * Implementation of hook_field_formatter_info().
  */
 function nodereference_field_formatter_info() {
   return array(

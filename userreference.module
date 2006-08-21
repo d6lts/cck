@@ -77,7 +77,7 @@ function userreference_field($op, &$node, $field, &$items, $teaser, $page) {
 }
 
 /**
- * Implementation of hook_field_format_info().
+ * Implementation of hook_field_formatter_info().
  */
 function userreference_field_formatter_info() {
   return array(

@@ -19,6 +19,11 @@ function content_views_tables() {
   foreach (content_fields() as $field) {
     $db_info = content_database_info($field);
     $module = $field_types[$field['type']]['module'];
+    
+    $formatters = array();
+    foreach ($field_types[$field['type']]['formatters'] as $name => $info) {
+      $formatters[$name] = t($info['label']);
+    }
 
     if (count($db_info['columns'])) {
       $table = array();
@@ -47,6 +52,7 @@ function content_views_tables() {
         'addlfields' => $addlfields,
         'sortable' => isset($main_column['sortable']) ? $main_column['sortable'] : FALSE,
         'handler' => 'content_views_field_handler',
+        'option' => array('#type' => 'select', '#options' => $formatters),
         'content_db_info' => $db_info,
         'content_field' => $field,
         'content_field_module' => $module,
@@ -93,7 +99,7 @@ function content_views_field_handler($field_info, $field_data, $value, $data) {
     $view_column_name = 'node_data_'. $field['field_name'] .'_'. $attributes['column'];
     $item[$column] = $data->$view_column_name;
   }
-  return content_format($field, $item);
+  return content_format($field, $item, $field_data['options']);
 }
 
 /**

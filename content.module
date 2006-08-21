@@ -860,7 +860,7 @@ function content_format($field, $item, $formatter = 'default', $node = NULL) {
   $field_types = _content_field_types();
   $formatters = $field_types[$field['type']]['formatters'];
 
-  if (!in_array($formatter, $formatters)) {
+  if (!isset($formatters[$formatter])) {
     $formatter = 'default';
   }
   return module_invoke($formatters[$formatter]['module'], 'field_formatter', $field, $item, $formatter, $node);
