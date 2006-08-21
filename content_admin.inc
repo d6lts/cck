@@ -163,8 +163,8 @@ function _content_admin_type_edit_submit($form_id, $form_values) {
 
       case 'pgsql':
         db_query("CREATE TABLE {node_". $form_values['type_name'] ."} (
-            vid integer unsigned NOT NULL default '0',
-            nid integer unsigned NOT NULL default '0',
+            vid integer NOT NULL default '0' CHECK (vid >= 0),
+            nid integer NOT NULL default '0' CHECK (nid >= 0),
             PRIMARY KEY (vid)
           )");
         break;
@@ -715,9 +715,9 @@ function content_alter_db_field($previous_field, $previous_columns, $new_field, 
 
           case 'pgsql':
             db_query("CREATE TABLE {". $new_db_info['table'] ."} (
-                vid integer unsigned NOT NULL default '0',
-                delta integer unsigned NOT NULL default '0',
-                nid integer unsigned NOT NULL default '0',
+                vid integer NOT NULL default '0' CHECK(vid >= 0),
+                delta integer NOT NULL default '0' CHECK(delta >= 0),
+                nid integer NOT NULL default '0' CHECK(nid >= 0),
                 PRIMARY KEY (vid,delta)
               )");
             break;
@@ -736,8 +736,8 @@ function content_alter_db_field($previous_field, $previous_columns, $new_field, 
 
           case 'pgsql':
             db_query("CREATE TABLE {". $new_db_info['table'] ."} (
-                vid integer unsigned NOT NULL default '0',
-                nid integer unsigned NOT NULL default '0',
+                vid integer NOT NULL default '0' CHECK(vid >= 0),
+                nid integer NOT NULL default '0' CHECK(nid >= 0),
                 PRIMARY KEY (vid)
               )");
             break;
@@ -854,34 +854,42 @@ function content_alter_db_field($previous_field, $previous_columns, $new_field, 
 }
 
 /**
- * Add a column to a database table.
+ * Handle postgresql column type creation.
+ * Translates int types.
+ * Supports bigint types.
  *
- * @param $table
- *   Name of the table, without {}
  * @param $column
  *   Name of the column
  * @param $type
  *   Type of column
  * @param $attributes
  *   Additional optional attributes. Recognized attributes:
- *     not null => TRUE|FALSE
- *     default  => NULL|FALSE|value (with or without '', it won't be added)
+ *     length
+ *     unsigned
+ * @param &$not_null
+ * @param &$default_val
+ * @param &$default
  */
-function content_db_add_column($table, $column, $type, $attributes = array()) {
+function content_db_construct_column_type($column, $type, &$attributes, &$not_null, &$default_val, &$default) {
+
+  $basetype = $type;
+  $type = '';
   switch ($GLOBALS['db_type']) {
     case 'pgsql':
-      $mappings = array('int' => 'integer', 'mediumint' => 'integer', 'bigint' => 'integer',
+      $mappings = array('int' => 'integer', 'mediumint' => 'integer', 'bigint' => 'bigint',
         'tinyint' => 'smallint',
         'float' => 'float',
         'varchar' => 'varchar',
         'text' => 'text', 'mediumtext' => 'text', 'longtext' => 'text');
-      if (isset($mappings[$type])) {
-        $type = $mappings[$type];
+
+      if (isset($mappings[$basetype])) {
+        $basetype = $mappings[$basetype];
       }
       else {
         watchdog('database', t('No PostgreSQL mapping found for %type data type.', array('%type' => theme('placeholder', $type))), WATCHDOG_WARNING);
       }
-      if ($type != 'varchar') {
+
+      if ($basetype != 'varchar') {
         unset($attributes['length']);
       }
       break;
@@ -911,8 +919,40 @@ function content_db_add_column($table, $column, $type, $attributes = array()) {
     $type .= '('. $attributes['length'] .')';
   }
   if (array_key_exists('unsigned', $attributes) && $attributes['unsigned']) {
-    $type .= ' unsigned';
+    switch ($GLOBALS['db_type']) {
+      case 'pgsql':
+        $basetype .= ' CHECK('.$column.' >= 0)';
+        unset($attributes['unsigned']);
+        break;
+      default:
+        $type .= ' unsigned';
+        break;
+    }
   }
+
+  $type = $basetype . $type;
+  $basetype = '';
+
+  return $type;
+}
+
+
+/**
+ * Add a column to a database table.
+ *
+ * @param $table
+ *   Name of the table, without {}
+ * @param $column
+ *   Name of the column
+ * @param $type
+ *   Type of column
+ * @param $attributes
+ *   Additional optional attributes. Recognized attributes:
+ *     not null => TRUE|FALSE
+ *     default  => NULL|FALSE|value (with or without '', it won't be added)
+ */
+function content_db_add_column($table, $column, $type, $attributes = array()) {
+  $type = content_db_construct_column_type($column, $type, $attributes, &$not_null, &$default_val, &$default);
 
   switch ($GLOBALS['db_type']) {
     case 'pgsql':
@@ -957,51 +997,7 @@ function content_db_add_column($table, $column, $type, $attributes = array()) {
  *     default  => NULL|FALSE|value (with or without '', it won't be added)
  */
 function content_db_change_column($table, $column, $column_new, $type, $attributes = array()) {
-  switch ($GLOBALS['db_type']) {
-    case 'pgsql':
-      $mappings = array('int' => 'integer', 'mediumint' => 'integer', 'bigint' => 'integer',
-        'tinyint' => 'smallint',
-        'float' => 'float',
-        'varchar' => 'varchar',
-        'text' => 'text', 'mediumtext' => 'text', 'longtext' => 'text');
-      if (isset($mappings[$type])) {
-        $type = $mappings[$type];
-      }
-      else {
-        watchdog('database', t('No PostgreSQL mapping found for %type data type.', array('%type' => theme('placeholder', $type))), WATCHDOG_WARNING);
-      }
-      if ($type != 'varchar') {
-        unset($attributes['length']);
-      }
-      break;
-
-    case 'mysql':
-    case 'mysqli':
-      break;
-  }
-
-  if (array_key_exists('not null', $attributes) and $attributes['not null']) {
-    $not_null = 'NOT NULL';
-  }
-  if (array_key_exists('default', $attributes)) {
-    if (is_null($attributes['default'])) {
-      $default_val = 'NULL';
-      $default = 'default NULL';
-    }
-    elseif ($attributes['default'] === FALSE) {
-      $default = '';
-    }
-    else {
-      $default_val = "$attributes[default]";
-      $default = "default $attributes[default]";
-    }
-  }
-  if (array_key_exists('length', $attributes)) {
-    $type .= '('. $attributes['length'] .')';
-  }
-  if (array_key_exists('unsigned', $attributes) && $attributes['unsigned']) {
-    $type .= ' unsigned';
-  }
+  $type = content_db_construct_column_type($column_new, $type, $attributes, &$not_null, &$default_val, &$default);
 
   switch ($GLOBALS['db_type']) {
     case 'pgsql':
@@ -1023,4 +1019,3 @@ function content_db_change_column($table, $column, $column_new, $type, $attribut
       break;
   }
 }
-
