@@ -15,6 +15,7 @@ if (module_exist('views')) {
 if (module_exist('pathauto')) {
   include_once(drupal_get_path('module', 'content') .'/content_pathauto.inc');
 }
+include_once(drupal_get_path('module', 'content') .'/content_crud.inc');
 
 /**
  * Implementation of hook_help().

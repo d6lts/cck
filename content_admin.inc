@@ -458,35 +458,12 @@ function _content_admin_field_remove($type_name, $field_name) {
 function _content_admin_field_remove_submit($form_id, $form_values) {
   $type = content_types($form_values['type_name']);
   $field = $type['fields'][$form_values['field_name']];
-  $field_types = _content_field_types();
-  $field_type = $field_types[$field['type']];
-  $columns = module_invoke($field_type['module'], 'field_settings', 'database columns', $field);
 
   if ($type && $field && $form_values['confirm']) {
-    db_query("DELETE FROM {node_field_instance} WHERE type_name = '%s' AND field_name = '%s'", $form_values['type_name'], $form_values['field_name']);
+    content_field_instance_delete($form_values);
 
     drupal_set_message(t('Removed field %field from %type.', array('%field' => theme('placeholder', $field['widget']['label']), '%type' => theme('placeholder', $type['label']))));
-    $instances = db_result(db_query("SELECT COUNT(*) FROM {node_field_instance} WHERE field_name = '%s'", $form_values['field_name']));
-    if ($instances == 1) {
-      if (!($field['multiple'])) {
-        // Multiple-valued fields are always stored per content type.
-        if (is_array($columns) && count($columns)) {
-          $new_field = $field;
-          $new_field['db_storage'] = CONTENT_DB_STORAGE_PER_CONTENT_TYPE;
-          db_query("UPDATE {node_field} SET db_storage = %d WHERE field_name = '%s'", CONTENT_DB_STORAGE_PER_CONTENT_TYPE, $form_values['field_name']);
-          content_alter_db_field($field, $columns, $new_field, $columns);
-        }
-      }
-    }
-    else if ($instances == 0) {
-      if (is_array($columns) && count($columns)) {
-        content_alter_db_field($field, $columns, array(), array());
-      }
-      db_query("DELETE FROM {node_field} WHERE field_name = '%s'", $form_values['field_name']);
 
-      drupal_set_message(t('The field %field no longer exists in any content type, so it was deleted.', array('%field' => theme('placeholder', $field['widget']['label']))));
-    }
-    content_clear_type_cache();
     return 'admin/node/types/'. $form_values['type_name'] .'/fields';
   }
 }
