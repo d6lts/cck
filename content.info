@@ -1,0 +1,5 @@
+; $Id$
+name = Content
+description = Allows administrators to define new content types.
+version = 1.0
+

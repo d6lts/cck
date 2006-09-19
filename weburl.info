@@ -1,0 +1,5 @@
+; $Id$
+name = Web URL
+description = Defines simple weburl field types.
+version = 1.0
+

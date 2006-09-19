@@ -1,0 +1,5 @@
+; $Id$
+name = Text
+description = Defines simple text field types.
+version = 1.0
+

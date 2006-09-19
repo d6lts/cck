@@ -1,0 +1,5 @@
+; $Id$
+name = Number
+description = Defines numeric field types.
+version = 1.0
+

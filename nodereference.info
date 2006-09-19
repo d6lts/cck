@@ -1,0 +1,5 @@
+; $Id$
+name = Node Reference
+description = Defines a field type for referencing one node from another.
+version = 1.0
+
