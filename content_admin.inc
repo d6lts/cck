@@ -919,7 +919,10 @@ function content_db_construct_column_type($column, $type, &$attributes, &$not_nu
  *     default  => NULL|FALSE|value (with or without '', it won't be added)
  */
 function content_db_add_column($table, $column, $type, $attributes = array()) {
-  $type = content_db_construct_column_type($column, $type, $attributes, &$not_null, &$default_val, &$default);
+  $not_null = NULL;
+  $default_val = NULL;
+  $default = NULL;
+  $type = content_db_construct_column_type($column, $type, $attributes, $not_null, $default_val, $default);
 
   switch ($GLOBALS['db_type']) {
     case 'pgsql':
@@ -964,7 +967,10 @@ function content_db_add_column($table, $column, $type, $attributes = array()) {
  *     default  => NULL|FALSE|value (with or without '', it won't be added)
  */
 function content_db_change_column($table, $column, $column_new, $type, $attributes = array()) {
-  $type = content_db_construct_column_type($column_new, $type, $attributes, &$not_null, &$default_val, &$default);
+  $not_null = NULL;
+  $default_val = NULL;
+  $default = NULL;
+  $type = content_db_construct_column_type($column_new, $type, $attributes, $not_null, $default_val, $default);
 
   switch ($GLOBALS['db_type']) {
     case 'pgsql':
