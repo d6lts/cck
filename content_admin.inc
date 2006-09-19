@@ -205,18 +205,8 @@ function _content_admin_type_delete_submit($form_id, $form_values) {
   $type = content_types($form_values['type_name']);
 
   if ($type && $form_values['confirm']) {
-    // Delete all nodes of this content type.
-    $result = db_query("SELECT nid FROM {node} WHERE type = '%s'", $form_values['type_name']);
-    while ($node = db_fetch_object($result)) {
-      node_delete($node->nid);
-    }
-    db_query("DELETE FROM {node_field_instance} WHERE type_name = '%s'", $form_values['type_name']);
-    db_query("DELETE FROM {node_type_content} WHERE type_name = '%s'", $form_values['type_name']);
-
-    db_query("DROP TABLE {node_". $form_values['type_name'] ."}");
-
+    content_type_delete($form_values);
     drupal_set_message(t('Deleted content type %type.', array('%type' => theme('placeholder', $type['label']))));
-    content_clear_type_cache();
     return 'admin/node/types';
   }
 }

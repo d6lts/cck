@@ -50,17 +50,42 @@ function content_type_update($properties) {
  *
  * @param $properties
  *   An array of properties to use in selecting a content type. Valid keys:
- *   - '' - 
+ *   - 'type_name' - The name of the content type to be deleted.
  * @return
  *   The number of content types deleted.
  */
 function content_type_delete($properties) {
-  // TODO
+  // Delete all nodes of this content type.
+  $result = db_query("SELECT nid FROM {node} WHERE type = '%s'", $properties['type_name']);
+  while ($node = db_fetch_object($result)) {
+    node_delete($node->nid);
+  }
+  
+  $result = db_query("SELECT field_name FROM {node_field_instance} WHERE type_name = '%s'", $properties['type_name']);
+  $field_names = array();
+  while ($type = db_fetch_array($result)) {
+    $field_names[] = $type['field_name'];
+  }
+  foreach ($field_names as $field_name) {
+    content_field_instance_delete(array('type_name' => $properties['type_name'], 'field_name' => $field_name));
+  }
+
+  $number_deleted = db_query("DELETE FROM {node_type_content} WHERE type_name = '%s'", $properties['type_name']);
+
+  db_query("DROP TABLE {node_". $properties['type_name'] ."}");
+
+  content_clear_type_cache();
+  
+  return $number_deleted;
 }
 
 
 /**
  * Create a new field.
+ *
+ * Any call to this function *must* be immediately followed by a call to
+ * content_field_instance_create(), or the database could be left in an
+ * inconsistent state.
  *
  * @param $properties
  *   An array of properties to load the field with. Valid keys:
@@ -103,12 +128,20 @@ function content_field_update($properties) {
  *
  * @param $properties
  *   An array of properties to use in selecting a field. Valid keys:
- *   - '' - 
+ *   - 'field_name' - The name of the field to be deleted.
  * @return
  *   The number of fields deleted.
  */
 function content_field_delete($properties) {
-  // TODO
+  $result = db_query("SELECT type_name FROM {node_field_instance} WHERE field_name = '%s'", $properties['field_name']);
+  $type_names = array();
+  while ($type = db_fetch_array($result)) {
+    $type_names[] = $type['type_name'];
+  }
+  foreach ($type_names as $type_name) {
+    content_field_instance_delete(array('type_name' => $type_name, 'field_name' => $properties['field_name']));
+  }
+  return (count($type_names) ? 1 : 0);
 }
 
 
