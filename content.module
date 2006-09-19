@@ -233,7 +233,7 @@ function content_access($op, $node) {
  */
 function content_load($node) {
   $cid = 'content:'. $node->nid .':'. $node->vid;
-  if ($cached = cache_get($cid)) {
+  if ($cached = cache_get($cid, 'cache')) {
     return unserialize($cached->data);
   }
   else {
@@ -249,7 +249,7 @@ function content_load($node) {
         $default_additions[$key] = $value;
       }
     }
-    cache_set($cid, serialize($default_additions), CACHE_PERMANENT);
+    cache_set($cid, 'cache', serialize($default_additions), CACHE_PERMANENT);
     return $default_additions;
   }
 }
@@ -677,7 +677,7 @@ function _content_type_info($reset = FALSE) {
   static $info;
 
   if ($reset || !isset($info)) {
-    if ($cached = cache_get('content_type_info')) {
+    if ($cached = cache_get('content_type_info', 'cache')) {
       $info = unserialize($cached->data);
     }
     else {
@@ -743,7 +743,7 @@ function _content_type_info($reset = FALSE) {
         $info['content types'][$type['type_name']] = $type;
       }
 
-      cache_set('content_type_info', serialize($info), CACHE_PERMANENT);
+      cache_set('content_type_info', 'cache', serialize($info), CACHE_PERMANENT);
     }
   }
 
