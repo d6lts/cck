@@ -232,3 +232,13 @@ function content_field_instance_delete($properties) {
   
   return $number_deleted;
 }
+
+/**
+ * Implementation of hook_simpletest().
+ */
+function content_simpletest() {
+	$dir = drupal_get_path('module', 'content'). '/tests';
+	$tests = file_scan_directory($dir, '\.test$');
+  return array_keys($tests);
+}
+
