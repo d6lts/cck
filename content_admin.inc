@@ -259,6 +259,10 @@ function _content_admin_field_overview($type_name) {
  * Menu callback; presents the form for adding a new field.
  */
 function _content_admin_field_add($type_name) {
+  // make sure the old field list gets cleared before creating the new one
+  if (!isset($_POST['edit'])) {
+    content_clear_type_cache();
+  }
   $output = drupal_get_form('_content_admin_field_add_existing', $type_name);
   $output .= drupal_get_form('_content_admin_field_add_new', $type_name);
   return $output;
