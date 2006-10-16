@@ -21,8 +21,10 @@ function content_views_tables() {
     $module = $field_types[$field['type']]['module'];
     
     $formatters = array();
-    foreach ($field_types[$field['type']]['formatters'] as $name => $info) {
-      $formatters[$name] = t($info['label']);
+    if (is_array($field_types[$field['type']]['formatters'])) {
+      foreach ($field_types[$field['type']]['formatters'] as $name => $info) {
+        $formatters[$name] = t($info['label']);
+      }
     }
 
     if (count($db_info['columns'])) {
