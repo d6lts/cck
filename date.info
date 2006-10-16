@@ -2,4 +2,7 @@
 name = Date
 description = Defines a date/time field type.
 version = 1.0
+dependencies = content
+package = CCK
+
 
