@@ -61,13 +61,14 @@ function optionwidgets_widget($op, &$node, $field, &$node_field) {
 
     case 'form':
       $options = _optionwidgets_options($field);
-
+      
       $form = array();
 
       $form[$field['field_name']] = array('#tree' => TRUE);
 
       switch ($field['widget']['type']) {
         case 'options_select':
+          if (!$field['required']) $options = array('' => '') + $options;
           if ($field['multiple']) {
             $form[$field['field_name']]['keys'] = array(
               '#type' => 'select',
@@ -155,7 +156,5 @@ function _optionwidgets_options($field) {
     $return_array[$i] = $value;
     $i++;
   }
-
-  return ($return_array);
+  return (drupal_map_assoc($return_array));
 }
-
