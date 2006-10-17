@@ -63,35 +63,69 @@ function nodereference_field_settings($op, $field) {
         'nid' => array('type' => 'int', 'not null' => TRUE, 'default' => '0'),
       );
       return $columns;
+
+    case 'filters':
+      return array(
+        'default' => array(
+        'list' => '_nodereference_filter_handler',
+        'list-type' => 'list',
+        'operator' => 'views_handler_operator_or',
+        'value-type' => 'array',
+        'extra' => array('field' => $field),
+      ),
+    );
   }
 }
 
 /**
  * Implementation of hook_field().
  */
-function nodereference_field($op, &$node, $field, &$node_field, $teaser, $page) {
+function nodereference_field($op, &$node, $field, &$items, $teaser, $page) {
   switch ($op) {
     case 'view':
-      foreach ($node_field as $delta => $item) {
-        $node_field[$delta]['view'] = nodereference_field_view_item($field, $item, $node);
+      foreach ($items as $delta => $item) {
+        $items[$delta]['view'] = content_format($field, $item, 'default', $node);
       }
-      return theme('field', $node, $field, $node_field, $teaser, $page);
+      return theme('field', $node, $field, $items, $teaser, $page);
   }
 }
 
 /**
- * Implementation of hook_field_view_item().
+ * Implementation of hook_field_formatter_info().
  */
-function nodereference_field_view_item($field, $node_field_item) {
-  if (!isset($node_field_item['nid'])) {
-    return '';
-  }
-  $referenced_node = node_load($node_field_item['nid']);
-  if ($referenced_node) {
-    return l($referenced_node->title, 'node/'. $referenced_node->nid);
-  }
+function nodereference_field_formatter_info() {
+  return array(
+    'default' => array(
+      'label' => 'Default',
+      'field types' => array('nodereference'),
+    ),
+    'plain' => array(
+      'label' => 'Plain text',
+      'field types' => array('nodereference'),
+    ),
+  );
 }
 
+/**
+ * Implementation of hook_field_formatter().
+ */
+function nodereference_field_formatter($field, $item, $formatter, $node) {
+  $text = '';
+  if (isset($item['nid'])) {
+    $referenced_node = node_load($item['nid']);
+    if ($referenced_node) {
+      $text = l($referenced_node->title, 'node/'. $referenced_node->nid);
+    }
+  }
+
+  switch ($formatter) {
+    case 'plain':
+      return strip_tags($text);
+    
+    default:
+      return $text;
+  }
+}
 
 /**
  * Implementation of hook_widget_info().
@@ -123,13 +157,16 @@ function nodereference_widget($op, &$node, $field, &$node_field) {
       case 'form':
         $form = array();
 
+        $options = _nodereference_potential_references($field);
+        if (!$field['required']) $options = array('' => '') + $options;
+
         $form[$field['field_name']] = array('#tree' => TRUE);
         $form[$field['field_name']]['nids'] = array(
           '#type' => 'select',
           '#title' => t($field['widget']['label']),
           '#default_value' => $node_field['default nids'],
           '#multiple' => $field['multiple'],
-          '#options' => _nodereference_potential_references($field),
+          '#options' => $options,
           '#required' => $field['required'],
           '#description' => $field['widget']['description'],
         );
@@ -283,4 +320,13 @@ function nodereference_autocomplete($field_name, $string = '') {
 
   print drupal_to_js($matches);
   exit();
+}
+
+/**
+ * Provide a list of users to filter on.
+ */
+function _nodereference_filter_handler($op, $filterinfo) {
+  $options = array('' => '');
+  $options = $options + _nodereference_potential_references($filterinfo['extra']['field']);
+  return $options;
 }
