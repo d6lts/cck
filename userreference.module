@@ -66,29 +66,52 @@ function userreference_field_settings($op, $field) {
 /**
  * Implementation of hook_field().
  */
-function userreference_field($op, &$node, $field, &$node_field, $teaser, $page) {
+function userreference_field($op, &$node, $field, &$items, $teaser, $page) {
   switch ($op) {
     case 'view':
-      foreach ($node_field as $delta => $item) {
-        $node_field[$delta]['view'] = userreference_field_view_item($field, $item, $node);
+      foreach ($items as $delta => $item) {
+        $items[$delta]['view'] = content_format($field, $item, 'default', $node);
       }
-      return theme('field', $node, $field, $node_field, $teaser, $page);
+      return theme('field', $node, $field, $items, $teaser, $page);
   }
 }
 
 /**
- * Implementation of hook_field_view_item().
+ * Implementation of hook_field_formatter_info().
  */
-function userreference_field_view_item($field, $node_field_item) {
-  if (isset($node_field_item['uid'])) {
-    $referenced_user = user_load(array('uid' => $node_field_item['uid']));
-    if ($referenced_user) {
-      return theme('username', $referenced_user);
-    }
-  }
-  return '';
+function userreference_field_formatter_info() {
+  return array(
+    'default' => array(
+      'label' => 'Default',
+      'field types' => array('userreference'),
+    ),
+    'plain' => array(
+      'label' => 'Plain text',
+      'field types' => array('userreference'),
+    ),
+  );
 }
 
+/**
+ * Implementation of hook_field_formatter().
+ */
+function userreference_field_formatter($field, $item, $formatter, $node) {
+  $text = '';
+  if (isset($item['uid'])) {
+    $referenced_user = user_load(array('uid' => $item['uid']));
+    if ($referenced_user) {
+      $text = theme('username', $referenced_user);
+    }
+  }
+  
+  switch ($formatter) {
+    case 'plain':
+      return strip_tags($text);
+    
+    default:
+      return $text;
+  }
+}
 
 /**
  * Implementation of hook_widget_info().
@@ -120,13 +143,15 @@ function userreference_widget($op, &$node, $field, &$node_field) {
       case 'form':
         $form = array();
 
+        $options = _userreference_potential_references($field);
+        
         $form[$field['field_name']] = array('#tree' => TRUE);
         $form[$field['field_name']]['uids'] = array(
           '#type' => 'select',
           '#title' => t($field['widget']['label']),
           '#default_value' => $node_field['default uids'],
           '#multiple' => $field['multiple'],
-          '#options' => _userreference_potential_references($field),
+          '#options' => $options,
           '#required' => $field['required'],
           '#description' => $field['widget']['description'],
         );
@@ -228,24 +253,24 @@ function _userreference_potential_references($field) {
   } else {
     $users = array();
   }
-
-  if (!isset($field['referenceable_roles']) || in_array(DRUPAL_AUTHENTICATED_RID, $field['referenceable_roles'])) {
-    $result = db_query("SELECT u.name, u.uid FROM {users} u WHERE uid > 0 ORDER BY u.name ASC");
-  }
-  else {
-    $roles = array();
+  $roles = array();
+  if (isset($field['referenceable_roles'])) {
     foreach ($field['referenceable_roles'] as $role) {
       if ($role) {
         $roles[] = $role;
       }
     }
+  }
+  if (!$roles || !isset($field['referenceable_roles']) || in_array(DRUPAL_AUTHENTICATED_RID, $field['referenceable_roles'])) {
+    $result = db_query("SELECT u.name, u.uid FROM {users} u WHERE uid > 0 ORDER BY u.name ASC");
+  }
+  else {
     $result = db_query("SELECT u.name, u.uid FROM {users} u LEFT JOIN {users_roles} r ON u.uid = r.uid WHERE u.uid > 0 AND r.rid IN (" . implode($roles, ',') . ')');
   }
 
   while ($user = db_fetch_object($result)) {
     $users[$user->uid] = $user->name;
   }
-
   return $users;
 }
 
@@ -254,6 +279,6 @@ function _userreference_potential_references($field) {
  */
 function _userreference_filter_handler($op, $filterinfo) {
   $options = views_handler_filter_usercurrent();
-  $options = array_merge($options, _userreference_potential_references($filterinfo['extra']['field']));
+  $options = $options + _userreference_potential_references($filterinfo['extra']['field']);
   return $options;
 }
