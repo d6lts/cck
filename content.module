@@ -518,8 +518,8 @@ function _content_field_invoke($op, &$node, $teaser = NULL, $page = NULL) {
         $return[] = $result;
       }
     }
-
-    if (isset($node->$field['field_name'])) {
+    // test for values in $node_field in case modules added items on insert
+    if (isset($node->$field['field_name']) || count($node_field)) {
       $node->$field['field_name'] = $node_field;
     }
   }
@@ -581,8 +581,8 @@ function _content_widget_invoke($op, &$node) {
         $return[] = $result;
       }
     }
-
-    if (is_object($node) && isset($node->$field['field_name'])) {
+    // test for values in $node_field in case modules added items on insert
+    if (is_object($node) && (isset($node->$field['field_name']) || count($node_field))) {
       $node->$field['field_name'] = $node_field;
     }
   }
