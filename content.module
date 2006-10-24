@@ -714,9 +714,8 @@ function _content_type_info($reset = FALSE) {
   	        foreach ($formatter_info['field types'] as $field_type) {
   	          $info['field types'][$field_type]['formatters'][$name] = $formatter_info;
   	          $info['field types'][$field_type]['formatters'][$name]['module'] = $module;
-  	         }
-  	       }
-  	     }
+  	        }
+  	      }
         }
       }
 
