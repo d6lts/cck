@@ -105,21 +105,21 @@ function number_field_settings($op, $field) {
 /**
  * Implementation of hook_field().
  */
-function number_field($op, &$node, $field, &$node_field, $teaser, $page) {
+function number_field($op, &$node, $field, &$items, $teaser, $page) {
   switch ($op) {
     case 'view':
-      foreach ($node_field as $delta => $item) {
-        $node_field[$delta]['view'] = number_field_view_item($field, $item);
+      foreach ($items as $delta => $item) {
+        $items[$delta]['view'] = content_format($field, $item, 'default', $node);
       }
-      return theme('field', $node, $field, $node_field, $teaser, $page);
+      return theme('field', $node, $field, $items, $teaser, $page);
 
     case 'validate':
       $allowed_values = explode("\n", $field['allowed_values']);
       $allowed_values = array_map('trim', $allowed_values);
       $allowed_values = array_filter($allowed_values, 'strlen');
 
-      if (is_array($node_field)) {
-        foreach ($node_field as $delta => $item) {
+      if (is_array($items)) {
+        foreach ($items as $delta => $item) {
           if ($item['value'] != '') {
             if (is_numeric($field['min']) && $item['value'] < $field['min']) {
               form_set_error($field['field_name'], t('The value of %name may be no smaller than %min.', array('%name' => t($field['widget']['label']), '%min' => $field['min'])));
@@ -138,10 +138,22 @@ function number_field($op, &$node, $field, &$node_field, $teaser, $page) {
 }
 
 /**
- * Implementation of hook_field_view_item().
+ * Implementation of hook_field_formatter_info().
  */
-function number_field_view_item($field, $node_field_item) {
-  return check_plain($node_field_item['value']);
+function number_field_formatter_info() {
+  return array(
+    'default' => array(
+      'label' => 'Default',
+      'field types' => array('number_integer', 'number_decimal'),
+    ),
+  );
+}
+
+/**
+ * Implementation of hook_field_formatter().
+ */
+function number_field_formatter($field, $item, $formatter, $node) {
+  return check_plain($item['value']);
 }
 
 

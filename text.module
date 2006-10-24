@@ -104,21 +104,21 @@ function text_field_settings($op, $field) {
 /**
  * Implementation of hook_field().
  */
-function text_field($op, &$node, $field, &$node_field, $teaser, $page) {
+function text_field($op, &$node, $field, &$items, $teaser, $page) {
   switch ($op) {
     case 'view':
-      foreach ($node_field as $delta => $item) {
-        $node_field[$delta]['view'] = text_field_view_item($field, $item, $node);
+      foreach ($items as $delta => $item) {
+        $items[$delta]['view'] = content_format($field, $item, 'default', $node);
       }
-      return theme('field', $node, $field, $node_field, $teaser, $page);
+      return theme('field', $node, $field, $items, $teaser, $page);
 
     case 'validate':
       $allowed_values = explode("\n", $field['allowed_values']);
       $allowed_values = array_map('trim', $allowed_values);
       $allowed_values = array_filter($allowed_values, 'strlen');
 
-      if (is_array($node_field)) {
-        foreach ($node_field as $delta => $item) {
+      if (is_array($items)) {
+        foreach ($items as $delta => $item) {
           if ($item['value'] != '') {
             if (count($allowed_values) && !in_array($item['value'], $allowed_values)) {
               form_set_error($field['field_name'], t('Illegal value for %name.', array('%name' => t($field['widget']['label']))));
@@ -131,26 +131,54 @@ function text_field($op, &$node, $field, &$node_field, $teaser, $page) {
 }
 
 /**
- * Implementation of hook_field_view_item().
+ * Implementation of hook_field_formatter_info().
+ */
+function text_field_formatter_info() {
+  return array(
+    'default' => array(
+      'label' => 'Default',
+      'field types' => array('text'),
+    ),
+    'plain' => array(
+      'label' => 'Plain text',
+      'field types' => array('text'),
+    ),
+    'trimmed' => array(
+      'label' => 'Trimmed',
+      'field types' => array('text'),
+    ),
+  );
+}
+
+/**
+ * Implementation of hook_field_formatter().
  *
- * The extra $node argument is necessary so that filter access can be checked on
+ * The $node argument is necessary so that filter access can be checked on
  * node preview.
  */
-function text_field_view_item($field, $node_field_item, $node = NULL) {
-  if (!isset($node_field_item['value'])) {
+function text_field_formatter($field, $item, $formatter, $node) {
+  if (!isset($item['value'])) {
     return '';
   }
-
-  // check permissions in check_markup if previewing.
-  $preview = ($node && isset($node->in_preview));
-
   if ($field['text_processing']) {
-    return check_markup($node_field_item['value'], $node_field_item['format'], $preview);
+    $text = check_markup($item['value'], $item['format'], is_null($node) || isset($node->in_preview));
   }
   else {
-    return check_plain($node_field_item['value']);
+    $text = check_plain($item['value']);
+  }
+  
+  switch ($formatter) {
+    case 'plain':
+      return strip_tags($text);
+    
+    case 'trimmed':
+      return node_teaser($text, $field['text_processing'] ? $item['format'] : NULL);
+    
+    default:
+      return $text;
   }
 }
+
 
 /**
  * Implementation of hook_widget_info().
@@ -194,7 +222,7 @@ function text_widget_settings($op, $widget) {
 /**
  * Implementation of hook_widget().
  */
-function text_widget($op, &$node, $field, &$node_field) {
+function text_widget($op, &$node, $field, &$items) {
   switch ($op) {
     case 'form':
       $form = array();
@@ -205,7 +233,7 @@ function text_widget($op, &$node, $field, &$node_field) {
         $form[$field['field_name']]['#type'] = 'fieldset';
         $form[$field['field_name']]['#title'] = t($field['widget']['label']);
         $delta = 0;
-        foreach ($node_field as $data) {
+        foreach ($items as $data) {
           if ($data['value']) {
             if ($field['widget']['rows'] == 1) {
               $form[$field['field_name']][$delta]['value'] = array(
@@ -255,7 +283,7 @@ function text_widget($op, &$node, $field, &$node_field) {
             );
           }
           if ($field['text_processing']) {
-            $form[$field['field_name']][$delta]['format'] = filter_form($node_field[$delta]['format'], $form[$field['field_name']][$delta]['value']['#weight'] + 1, array($field['field_name'], $delta, 'format'));
+            $form[$field['field_name']][$delta]['format'] = filter_form($items[$delta]['format'], $form[$field['field_name']][$delta]['value']['#weight'] + 1, array($field['field_name'], $delta, 'format'));
           }
         }
       }
@@ -264,7 +292,7 @@ function text_widget($op, &$node, $field, &$node_field) {
           $form[$field['field_name']][0]['value'] = array(
             '#type' => 'textfield',
             '#title' => t($field['widget']['label']),
-            '#default_value' => isset($node_field[0]['value']) ? $node_field[0]['value'] : '',
+            '#default_value' => isset($items[0]['value']) ? $items[0]['value'] : '',
             '#required' => $field['required'],
             '#description' => $field['widget']['description'],
             '#maxlength' => $field['max_length'] ? $field['max_length'] : '',
@@ -275,7 +303,7 @@ function text_widget($op, &$node, $field, &$node_field) {
           $form[$field['field_name']][0]['value'] = array(
             '#type' => 'textarea',
             '#title' => t($field['widget']['label']),
-            '#default_value' => $node_field[0]['value'],
+            '#default_value' => $items[0]['value'],
             '#required' => $field['required'],
             '#rows' => $field['widget']['rows'],
             '#description' => $field['widget']['description'],
@@ -283,7 +311,7 @@ function text_widget($op, &$node, $field, &$node_field) {
           );
         }
         if ($field['text_processing']) {
-          $form[$field['field_name']][0]['format'] = filter_form($node_field[0]['format'], $form[$field['field_name']][0]['value']['#weight'] + 1, array($field['field_name'], 0, 'format'));
+          $form[$field['field_name']][0]['format'] = filter_form($items[0]['format'], $form[$field['field_name']][0]['value']['#weight'] + 1, array($field['field_name'], 0, 'format'));
         }
       }
       return $form;
@@ -291,9 +319,9 @@ function text_widget($op, &$node, $field, &$node_field) {
     case 'process form values':
       // Don't save empty fields.
       if ($field['multiple']) {
-        foreach ($node_field as $delta => $item) {
+        foreach ($items as $delta => $item) {
           if ($item['value'] == '') {
-            unset($node_field[$delta]);
+            unset($items[$delta]);
           }
         }
       }

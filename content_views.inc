@@ -19,6 +19,13 @@ function content_views_tables() {
   foreach (content_fields() as $field) {
     $db_info = content_database_info($field);
     $module = $field_types[$field['type']]['module'];
+    
+    $formatters = array();
+    if (is_array($field_types[$field['type']]['formatters'])) {
+      foreach ($field_types[$field['type']]['formatters'] as $name => $info) {
+        $formatters[$name] = t($info['label']);
+      }
+    }
 
     if (count($db_info['columns'])) {
       $table = array();
@@ -47,6 +54,7 @@ function content_views_tables() {
         'addlfields' => $addlfields,
         'sortable' => isset($main_column['sortable']) ? $main_column['sortable'] : FALSE,
         'handler' => 'content_views_field_handler',
+        'option' => array('#type' => 'select', '#options' => $formatters),
         'content_db_info' => $db_info,
         'content_field' => $field,
         'content_field_module' => $module,
@@ -88,19 +96,12 @@ function content_views_tables() {
 
 function content_views_field_handler($field_info, $field_data, $value, $data) {
   $field = $field_info['content_field'];
-  $node_field_item = array();
+  $item = array();
   foreach ($field_info['content_db_info']['columns'] as $column => $attributes) {
     $view_column_name = 'node_data_'. $field['field_name'] .'_'. $attributes['column'];
-    $node_field_item[$column] = $data->$view_column_name;
+    $item[$column] = $data->$view_column_name;
   }
-  $function = $field_info['content_field_module'] .'_field_view_item';
-  if (function_exists($function)) {
-    $result = $function($field, $node_field_item);
-  }
-  else {
-    $result = implode("\n", $node_field_item);
-  }
-  return $result;
+  return content_format($field, $item, $field_data['options']);
 }
 
 /**
@@ -177,28 +178,17 @@ function content_views_argument_handler($op, &$query, $argtype, $arg = '') {
       break;
 
     case 'link':
-      $field_types = _content_field_types();
-      $module = $field_types[$field['type']]['module'];
-
       $item = array();
       foreach ($db_info['columns'] as $column => $attributes) {
         $view_column_name = $attributes['column'];
         $item[$column] = $query->$view_column_name;
       }
 
-      $view = module_invoke($module, 'field_view_item', $field, $item);
-
-      // Strip any links that appear in the view, so that the new link we create works here.
-      $view = preg_replace('!</?a(\s+[^>]*)?>!i', '', $view);
-
-      return l($view, $arg .'/'. $query->$main_column['column'], array(), NULL, NULL, FALSE, TRUE);
+      return l(content_format($field, $item, 'plain'), $arg .'/'. $query->$main_column['column'], array(), NULL, NULL, FALSE, TRUE);
 
     case 'title':
-      $field_types = _content_field_types();
-      $module = $field_types[$field['type']]['module'];
-
       $item = array(key($db_info['columns']) => $query);
 
-      return module_invoke($module, 'field_view_item', $field, $item);
+      return content_format($field, $item);
   }
 }

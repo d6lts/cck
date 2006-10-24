@@ -692,20 +692,31 @@ function _content_type_info($reset = FALSE) {
       );
 
       foreach (module_list() as $module) {
-        $module_types = module_invoke($module, 'field_info');
-        if ($module_types) {
-          foreach ($module_types as $name => $field_info) {
+        $module_field_types = module_invoke($module, 'field_info');
+        if ($module_field_types) {
+          foreach ($module_field_types as $name => $field_info) {
             $info['field types'][$name] = $field_info;
             $info['field types'][$name]['module'] = $module;
+            $info['field types'][$name]['formatters'] = array();
           }
         }
 
-        $module_types = module_invoke($module, 'widget_info');
-        if ($module_types) {
-          foreach ($module_types as $name => $widget_info) {
+        $module_widgets = module_invoke($module, 'widget_info');
+        if ($module_widgets) {
+          foreach ($module_widgets as $name => $widget_info) {
             $info['widget types'][$name] = $widget_info;
             $info['widget types'][$name]['module'] = $module;
           }
+        }
+        $module_formatters = module_invoke($module, 'field_formatter_info');
+  	    if ($module_formatters) {
+  	      foreach ($module_formatters as $name => $formatter_info) {
+  	        foreach ($formatter_info['field types'] as $field_type) {
+  	          $info['field types'][$field_type]['formatters'][$name] = $formatter_info;
+  	          $info['field types'][$field_type]['formatters'][$name]['module'] = $module;
+  	         }
+  	       }
+  	     }
         }
       }
 
@@ -836,6 +847,36 @@ function content_transpose_array_rows_cols($array) {
     }
   }
   return $result;
+}
+
+/**
+ * Format a field item for display.
+ *
+ * @param $field
+ *   Either a field array or the name of the field.
+ * @param $item
+ *   The field item to be formatted (such as $node->field_foo[0]).
+ * @param $formatter
+ *   The name of the formatter to use.
+ * @param $node
+ *   Optionally, the containing node object for context purposes.
+ *
+ * @return
+ *   A string containing the contents of the field item sanitized for display.
+ *   It will have been passed through the necessary check_plain() or check_markup()
+ *   functions as necessary.
+ */
+function content_format($field, $item, $formatter = 'default', $node = NULL) {
+  if (!is_array($field)) {
+    $field = content_fields($field);
+  }
+  $field_types = _content_field_types();
+  $formatters = $field_types[$field['type']]['formatters'];
+ 
+  if (!isset($formatter, $formatters)) {
+    $formatter = 'default';
+  }
+  return module_invoke($formatters[$formatter]['module'], 'field_formatter', $field, $item, $formatter, $node);
 }
 
 /**

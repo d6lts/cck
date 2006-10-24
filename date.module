@@ -82,29 +82,40 @@ function date_field_settings($op, $field) {
 function date_field($op, $node, &$field, &$node_field, $teaser, $page) {
   switch ($op) {
     case 'view':
-      foreach ($node_field as $delta => $item) {
-        $node_field[$delta]['view'] = date_field_view_item($field, $item);
+      foreach ($items as $delta => $item) {
+        $items[$delta]['view'] = content_format($field, $item, 'default', $node);
       }
-      return theme('field', $node, $field, $node_field, $teaser, $page);
+      return theme('field', $node, $field, $items, $teaser, $page);
   }
 }
 
 /**
- * Implementation of hook_field_view_item().
+ * Implementation of hook_field_formatter_info().
  */
-function date_field_view_item($field, $node_field_item) {
-  $year = substr($node_field_item['value'], 2, 2);
-  $month = substr($node_field_item['value'], 5, 2);
-  $day = substr($node_field_item['value'], 8, 2);
+function date_field_formatter_info() {
+  return array(
+    'default' => array(
+      'label' => 'Default',
+      'field types' => array('date'),
+    ),
+  );
+}
 
-  if ($node_field_item['value'] != '0001-01-01T00:00:00' && intval($month) != 0 && intval($day) != 0) {
+/**
+ * Implementation of hook_field_formatter().
+ */
+function date_field_formatter($field, $item, $formatter, $node) {
+  $year = substr($item['value'], 2, 2);
+  $month = substr($item['value'], 5, 2);
+  $day = substr($item['value'], 8, 2);
+
+  if ($item['value'] != '0001-01-01T00:00:00' && intval($month) != 0 && intval($day) != 0) {
     return '<span style="white-space: nowrap;">'. intval($month) .'/'. intval($day) .'/'. $year .'</span>';
   }
   else {
     return '';
   }
 }
-
 
 /**
  * Implementation of hook_widget_info().
