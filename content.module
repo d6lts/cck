@@ -3,7 +3,7 @@
 
 /**
  * @file
- * Allows administrators to define new content types.
+ * Allows administrators to associate custom fields to content types.
  */
 
 define(CONTENT_DB_STORAGE_PER_FIELD, 0);
@@ -24,31 +24,6 @@ function content_help($section) {
     case 'admin/settings/modules#description':
       return t('<strong>CCK:</strong> Allows administrators to define new content types.');
   }
-
-  if (strpos($section, 'node/add') === 0) {
-    $types = content_types();
-    foreach ($types as $type_name => $type) {
-      if ($section == 'node/add#' . $type_name) {
-        return t($types[$type_name]['description']);
-      }
-      if ($section == 'node/add/' . $type_name) {
-        return t($types[$type_name]['help']);
-      }
-    }
-  }
-}
-
-/**
- * Implementation of hook_perm().
- */
-function content_perm() {
-  $perms = array('administer content types');
-  foreach (content_types() as $name => $type) {
-    $perms[] = 'create '. $name .' content';
-    $perms[] = 'edit own '. $name .' content';
-    $perms[] = 'edit '. $name .' content';
-  }
-  return $perms;
 }
 
 /**
@@ -59,123 +34,69 @@ function content_menu($may_cache) {
   $access = user_access('administer content types');
 
   // Only include administrative callbacks if we are viewing an admin page.
-  if (arg(0) == 'admin' && arg(1) == 'node' && arg(2) == 'types') {
+  if (arg(0) == 'admin' && arg(1) == 'content' && arg(2) == 'types') {
     include_once(drupal_get_path('module', 'content') .'/content_admin.inc');
   }
 
   if ($may_cache) {
     $items[] = array(
-      'path' => 'admin/node/types',
-      'title' => t('content types'),
-      'callback' => '_content_admin_type_overview',
-      'access' => $access,
-    );
-    $items[] = array(
-      'path' => 'admin/node/types/list',
-      'title' => t('list'),
-      'type' => MENU_DEFAULT_LOCAL_TASK,
-      'weight' => -10,
-    );
-    $items[] = array(
-      'path' => 'admin/node/types/add',
-      'title' => t('add content type'),
-      'callback' => 'drupal_get_form',
-      'callback arguments' => array('_content_admin_type_edit'),
-      'access' => $access,
-      'type' => MENU_LOCAL_TASK,
-    );
-    $items[] = array(
-      'path' => 'admin/node/types/fields',
+      'path' => 'admin/content/types/fields',
       'title' => t('fields'),
       'callback' => '_content_admin_type_fields',
       'access' => $access,
       'type' => MENU_LOCAL_TASK,
     );
-
-    $types = content_types();
-    foreach ($types as $type_name => $type) {
-      $items[] = array(
-        'path' => 'node/add/'. $type_name,
-        'title' => t($type['label']),
-        'access' => user_access('create '. $type_name .' content'),
-      );
-    }
   }
   else {
-    if (arg(0) == 'admin' && arg(1) == 'node' && arg(2) == 'types' && arg(3)) {
+    if (arg(0) == 'admin' && arg(1) == 'content' && arg(2) == 'types' && arg(3)) {
 
-      $type = content_types(arg(3));
-
-      if ($type) {
+      $content_type = content_types(arg(3));
+      $type = node_get_types('type', $content_type['type']);
+      
+      if (!empty($type)) {
+                
         $items[] = array(
-          'path' => 'admin/node/types/'. arg(3),
-          'title' => t($type['label']),
-          'callback' => 'drupal_get_form',
-          'callback arguments' => array('_content_admin_type_edit'),
-          'access' => $access,
-          'callback arguments' => array(arg(3)),
-          'type' => MENU_CALLBACK,
-        );
-        $items[] = array(
-          'path' => 'admin/node/types/'. arg(3) .'/delete',
-          'title' => t('delete'),
-          'callback' => '_content_admin_type_delete',
-          'access' => $access,
-          'callback arguments' => array(arg(3)),
-          'type' => MENU_CALLBACK,
-        );
-        $items[] = array(
-          'path' => 'admin/node/types/'. arg(3) .'/duplicate',
-          'title' => t('duplicate'),
-          'callback' => 'drupal_get_form',
-          'callback arguments' => array('_content_admin_type_edit'),
-          'access' => $access,
-          'callback arguments' => array('', arg(3)),
-          'type' => MENU_CALLBACK,
-        );
-
-        $items[] = array(
-          'path' => 'admin/node/types/'. arg(3) .'/edit',
+          'path' => 'admin/content/types/'. $content_type['url_str'] .'/edit',
           'title' => t('edit'),
+          'callback' => 'drupal_get_form',
+          'callback arguments' => array('node_type_form', $type),
           'type' => MENU_DEFAULT_LOCAL_TASK,
-          'weight' => -10,
         );
-
         $items[] = array(
-          'path' => 'admin/node/types/'. arg(3) .'/fields',
+          'path' => 'admin/content/types/'. $content_type['url_str'] .'/fields',
           'title' => t('manage fields'),
           'callback' => '_content_admin_field_overview',
           'access' => $access,
-          'callback arguments' => array(arg(3)),
+          'callback arguments' => array($content_type['type']),
           'type' => MENU_LOCAL_TASK,
           'weight' => 1,
         );
         $items[] = array(
-          'path' => 'admin/node/types/'. arg(3) .'/add_field',
+          'path' => 'admin/content/types/'. $content_type['url_str'] .'/add_field',
           'title' => t('add field'),
           'callback' => '_content_admin_field_add',
           'access' => $access,
-          'callback arguments' => array(arg(3)),
+          'callback arguments' => array($content_type['type']),
           'type' => MENU_LOCAL_TASK,
           'weight' => 2,
         );
 
         if (arg(4) == 'fields' && arg(5)
-            && isset($type['fields'][arg(5)])) {
+            && isset($content_type['fields'][arg(5)])) {
           $items[] = array(
-            'path' => 'admin/node/types/'. arg(3) .'/fields/'. arg(5),
-            'title' => t($type['fields'][arg(5)]['widget']['label']),
+            'path' => 'admin/content/types/'. $content_type['url_str'] .'/fields/'. arg(5),
+            'title' => t($content_type['fields'][arg(5)]['widget']['label']),
             'callback' => 'drupal_get_form',
             'access' => $access,
-            'callback arguments' => array('_content_admin_field', arg(3), arg(5)),
+            'callback arguments' => array('_content_admin_field', $content_type['type'], arg(5)),
             'type' => MENU_CALLBACK,
           );
           $items[] = array(
-            'path' => 'admin/node/types/'. arg(3) .'/fields/'. arg(5) .'/remove',
+            'path' => 'admin/content/types/'. $content_type['url_str'] .'/fields/'. arg(5) .'/remove',
             'title' => t('remove field'),
-            'callback' => '_content_admin_field_remove',
+            'callback' => 'drupal_get_form',
             'access' => $access,
-            'callback arguments' => array(arg(3), arg(5)),
+            'callback arguments' => array('_content_admin_field_remove', $content_type['type'], arg(5)),
             'type' => MENU_CALLBACK,
           );
         }
@@ -188,46 +109,7 @@ function content_menu($may_cache) {
 }
 
 /**
- * Implementation of hook_node_info().
- */
-function content_node_info() {
-  $types = array();
-  foreach (content_types() as $name => $type) {
-    $types[$name] = array(
-      'name' => t($type['label']),
-      'module' => 'content',
-      'description' => $type['description'],
-      'help' => $type['help'],
-      'has_title' => TRUE,
-      'title_label' => $type['title_label'],
-      'has_body' => FALSE,
-      'locked' => TRUE,
-    );
-  }
-  return $types;
-}
-
-/**
- * Implementation of hook_access().
- */
-function content_access($op, $node) {
-  global $user;
-  $type = is_string($node) ? $node : (is_array($node) ? $node['type'] : $node->type);
-
-  if ($op == 'create') {
-    return user_access('create '. $type .' content');
-  }
-
-  if ($op == 'update' || $op == 'delete') {
-    if (user_access('edit own '. $type .' content') && ($user->uid == $node->uid) ||
-        user_access('edit '. $type .' content')) {
-      return TRUE;
-    }
-  }
-}
-
-/**
- * Implementation of hook_load().
+ * Load data for a node type's fields.
  *
  * When loading one of the content.module nodes, we need to let each field handle
  * its own loading. This can make for a number of queries in some cases, so we
@@ -257,24 +139,17 @@ function content_load($node) {
 }
 
 /**
- * Implementation of hook_form().
+ * Create fields' form for a content type.
  *
  * Each field defines its own component of the content entry form, via its
  * chosen widget.
  */
-function content_form(&$node, &$param) {
+function content_form(&$node) {
   $form = array();
   $type = content_types($node->type);
 
   // Set form parameters so we can accept file uploads.
   $form['#attributes'] = array("enctype" => "multipart/form-data");
-
-  $form['title'] = array(
-    '#type' => 'textfield',
-    '#title' => t($type['title_label']),
-    '#required' => TRUE,
-    '#default_value' => $node->title,
-  );
 
   _content_widget_invoke('prepare form values', $node);
   $form = array_merge($form, _content_widget_invoke('form', $node));
@@ -283,7 +158,7 @@ function content_form(&$node, &$param) {
 }
 
 /**
- * Implementation of hook_validate().
+ * Validate form callback to handle node type fields.
  *
  * Both widgets and fields have a chance to raise error flags when a node is
  * being validated.
@@ -296,7 +171,7 @@ function content_validate(&$node) {
 }
 
 /**
- * Implementation of hook_submit().
+ * Submit form callback for node type fields.
  *
  * At submit time, the widget does whatever data massaging is necessary so that
  * the field has the content in the expected format and can commit the changes
@@ -310,7 +185,7 @@ function content_submit(&$node) {
 }
 
 /**
- * Implementation of hook_insert().
+ * Insert node type fields.
  */
 function content_insert(&$node) {
   _content_field_invoke('insert', $node);
@@ -318,49 +193,98 @@ function content_insert(&$node) {
 }
 
 /**
- * Implementation of hook_update().
+ * Update node type fields.
  */
 function content_update(&$node) {
   _content_field_invoke('update', $node);
   _content_field_invoke_default('update', $node);
-  cache_clear_all('content:'. $node->nid .':'. $node->vid);
+  cache_clear_all('content:'. $node->nid .':'. $node->vid, 'cache');
 }
 
 /**
- * Implementation of hook_delete().
+ * Delete node type fields.
  */
 function content_delete(&$node) {
   _content_field_invoke('delete', $node);
   _content_field_invoke_default('delete', $node);
-  cache_clear_all('content:'. $node->nid);
+  cache_clear_all('content:'. $node->nid, 'cache');
 }
 
 /**
- * Implementation of hook_view().
+ * delete node type fields for a revision.
+ */
+function content_delete_revision(&$node) {
+  if (content_types($node->type)) {
+    _content_field_invoke('delete revision', $node);
+    _content_field_invoke_default('delete revision', $node);
+    cache_clear_all('content:'. $node->nid .':'. $node->vid, 'cache');
+  }
+}
+
+/**
+ * Generate field render arrays.
  */
 function content_view(&$node, $teaser = FALSE, $page = FALSE) {
   if ($node->in_preview) {
     _content_widget_invoke('process form values', $node);
   }
-  $node->body = implode('', _content_field_invoke('view', $node, FALSE, $page));
-  $node->teaser = implode('', _content_field_invoke('view', $node, TRUE, $page));
-  $node->readmore = (strlen($node->teaser) < strlen($node->body));
+  $node->content['cck-fields'] = array (
+    '#value' => implode('', _content_field_invoke('view', $node, $teaser, $page)),
+    '#weight' => 1,
+  );
 }
 
 /**
  * Implementation of hook_nodeapi().
  *
  * When a revision is deleted, make sure the appropriate cache item is cleared.
+ * @todo: deprecate op==validate & op==submit in favor of form callbacks.
  */
 function content_nodeapi(&$node, $op, $teaser, $page) {
   switch ($op) {
-    case 'delete revision':
-      if (content_types($node->type)) {
-        _content_field_invoke('delete revision', $node);
-        _content_field_invoke_default('delete revision', $node);
-        cache_clear_all('content:'. $node->nid .':'. $node->vid);
-      }
+    case 'load':
+      return content_load($node);
+
+    case 'form':
+      return content_form($node);
+
+    case 'validate':
+      content_validate($node);
       break;
+
+    case 'submit':
+      content_submit($node);
+      break;
+
+    case 'insert':
+      content_insert($node);
+      break;
+
+    case 'update':
+      content_update($node);
+      break;
+
+    case 'delete':
+      content_delete($node);
+      break;
+
+     case 'delete revision':
+      content_delete_revision($node);
+      break;
+
+    case 'view':
+      content_view($node, $teaser, $page);
+       break;
+  }
+}
+
+function content_form_alter($form_id, &$form) {
+  if (isset($form['type'])) {
+    $node = $form['#node'];
+    if ($form['type']['#value'] .'_node_form' == $form_id) {
+      $content_form =  content_form($node);
+      $form = array_merge($form, content_form($node));
+    }
   }
 }
 
@@ -516,24 +440,25 @@ function _content_field_invoke($op, &$node, $teaser = NULL, $page = NULL) {
   $field_types = _content_field_types();
 
   $return = array();
-  foreach ($type['fields'] as $field) {
-    $node_field = isset($node->$field['field_name']) ? $node->$field['field_name'] : array();
-
-    $module = $field_types[$field['type']]['module'];
-    $function = $module .'_field';
-    if (function_exists($function)) {
-      $result = $function($op, $node, $field, $node_field, $teaser, $page);
-      if (is_array($result)) {
-        $return = array_merge($return, $result);
+  if (count($type['fields'])) {
+    foreach ($type['fields'] as $field) {
+      $node_field = isset($node->$field['field_name']) ? $node->$field['field_name'] : array();
+ 
+      $module = $field_types[$field['type']]['module'];
+      $function = $module .'_field';
+      if (function_exists($function)) {
+        $result = $function($op, $node, $field, $node_field, $teaser, $page);
+        if (is_array($result)) {
+          $return = array_merge($return, $result);
+        }
+        else if (isset($result)) {
+          $return[] = $result;
+        }
       }
-      else if (isset($result)) {
-        $return[] = $result;
+      // test for values in $node_field in case modules added items on insert
+      if (isset($node->$field['field_name']) || count($node_field)) {
+        $node->$field['field_name'] = $node_field;
       }
-    }
-
-    // test for values in $node_field in case modules added items on insert
-    if (isset($node->$field['field_name']) || count($node_field)) {
-      $node->$field['field_name'] = $node_field;
     }
   }
 
@@ -549,22 +474,23 @@ function _content_field_invoke_default($op, &$node, $teaser = NULL, $page = NULL
   $field_types = _content_field_types();
 
   $return = array();
-  foreach ($type['fields'] as $field) {
-    $node_field = isset($node->$field['field_name']) ? $node->$field['field_name'] : array();
-
-    $db_info = content_database_info($field);
-    if (count($db_info['columns'])) {
-      $result = content_field($op, $node, $field, $node_field, $teaser, $page);
-      if (is_array($result)) {
-        $return = array_merge($return, $result);
+  if (count($type['fields'])) {
+    foreach ($type['fields'] as $field) {
+      $node_field = isset($node->$field['field_name']) ? $node->$field['field_name'] : array();
+ 
+      $db_info = content_database_info($field);
+      if (count($db_info['columns'])) {
+        $result = content_field($op, $node, $field, $node_field, $teaser, $page);
+        if (is_array($result)) {
+          $return = array_merge($return, $result);
+        }
+        else if (isset($result)) {
+          $return[] = $result;
+        }
       }
-      else if (isset($result)) {
-        $return[] = $result;
+      if (isset($node->$field['field_name'])) {
+        $node->$field['field_name'] = $node_field;
       }
-    }
-
-    if (isset($node->$field['field_name'])) {
-      $node->$field['field_name'] = $node_field;
     }
   }
 
@@ -609,11 +535,14 @@ function _content_widget_invoke($op, &$node) {
  * @param $content_type_name
  *   If set, return information on just this type.
  */
-function content_types($content_type_name = NULL) {
+function content_types($type_name = NULL) {
+  // handle type name with either an underscore or a dash
+  $type_name = !empty($type_name) ? str_replace('-', '_', $type_name) : NULL;
+        
   $info = _content_type_info();
-  if (isset($content_type_name)) {
-    if (isset($info['content types'][$content_type_name])) {
-      return $info['content types'][$content_type_name];
+  if (isset($type_name)) {
+    if (isset($info['content types'][$type_name])) {
+      return $info['content types'][$type_name];
     }
     else {
       return NULL;
@@ -678,7 +607,7 @@ function _content_widget_types() {
  */
 function _content_type_info($reset = FALSE) {
   static $info;
-
+  
   if ($reset || !isset($info)) {
     if ($cached = cache_get('content_type_info', 'cache')) {
       $info = unserialize($cached->data);
@@ -708,6 +637,8 @@ function _content_type_info($reset = FALSE) {
             $info['widget types'][$name]['module'] = $module;
           }
         }
+      }
+      foreach (module_list() as $module) {
         $module_formatters = module_invoke($module, 'field_formatter_info');
   	    if ($module_formatters) {
   	      foreach ($module_formatters as $name => $formatter_info) {
@@ -730,10 +661,11 @@ function _content_type_info($reset = FALSE) {
         $info['fields'][$field['field_name']] = $field;
       }
 
-      $type_result = db_query('SELECT * FROM {node_type_content} nt ORDER BY nt.type_name ASC');
+      $type_result = db_query('SELECT * FROM {node_type} nt ORDER BY nt.type ASC');
       while ($type = db_fetch_array($type_result)) {
+        $type['url_str'] = str_replace('_', '-', $type['type']);
         $type['fields'] = array();
-        $field_result = db_query("SELECT nfi.field_name, nfi.weight, nfi.label, nfi.widget_type, nfi.widget_settings, nfi.description FROM {node_field_instance} nfi WHERE nfi.type_name = '%s' ORDER BY nfi.weight ASC, nfi.label ASC", $type['type_name']);
+        $field_result = db_query("SELECT nfi.field_name, nfi.weight, nfi.label, nfi.widget_type, nfi.widget_settings, nfi.description FROM {node_field_instance} nfi WHERE nfi.type_name = '%s' ORDER BY nfi.weight ASC, nfi.label ASC", $type['type']);
         while ($field = db_fetch_array($field_result)) {
           // Overwrite global field information with specific information
           $field = array_merge($info['fields'][$field['field_name']], $field);
@@ -749,17 +681,15 @@ function _content_type_info($reset = FALSE) {
           unset($field['label']);
           $field['widget']['description'] = $field['description'];
           unset($field['description']);
-          $field['type_name'] = $type['type_name'];
+          $field['type_name'] = $type['type'];
           $type['fields'][$field['field_name']] = $field;
         }
-
-        $info['content types'][$type['type_name']] = $type;
+        $info['content types'][$type['type']] = $type;
       }
-
+      
       cache_set('content_type_info', 'cache', serialize($info), CACHE_PERMANENT);
     }
   }
-
   return $info;
 }
 
@@ -768,7 +698,7 @@ function _content_type_info($reset = FALSE) {
  * information is changed.
  */
 function content_clear_type_cache() {
-  cache_clear_all('content_type_info');
+  cache_clear_all('content_type_info', 'cache');
 
   _content_type_info(TRUE);
 

@@ -242,3 +242,16 @@ function content_update_8() {
 
   return $ret;
 }
+
+function content_update_9() {
+  $ret = array();
+  $result = db_query("SELECT type_name, label, description, help, title_label FROM {node_type_content}");
+  while ($data = db_fetch_object($result)) {
+    $ret[] = update_sql("INSERT INTO {node_type} 
+         (type, name, module, description, help, has_title, title_label, has_body, body_label, custom, orig_type) 
+           VALUES ('$data->type_name', '$data->label', 'node', '$data->description', '$data->help', 1, '$data->title_label', 0, '', 1, '$data->type_name')");
+  }
+  return $ret;
+
+}
+

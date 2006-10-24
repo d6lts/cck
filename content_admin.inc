@@ -6,33 +6,6 @@
  * Administrative interface for content type creation.
  */
 
-
-/**
- * Menu callback; presents a listing of content types.
- */
-function _content_admin_type_overview() {
-  $types = content_types();
-
-  $header = array(t('Label'), t('Name'), t('Description'), array('data' => t('Operations'), 'colspan' => 3));
-  $rows = array();
-  foreach ($types as $type) {
-    $row = array();
-    $row[] = l(t($type['label']), 'admin/node/types/'. $type['type_name'] .'/fields');
-    $row[] = $type['type_name'];
-    $row[] = $type['description'];
-
-    $row[] = l(t('edit'), 'admin/node/types/'. $type['type_name']);
-    $row[] = l(t('duplicate'), 'admin/node/types/'. $type['type_name'] .'/duplicate');
-    $row[] = l(t('delete'), 'admin/node/types/'. $type['type_name'] .'/delete');
-
-    $rows[] = $row;
-  }
-
-  $output = theme('table', $header, $rows);
-
-  return $output;
-}
-
 /**
  * Menu callback; lists all defined fields for quick reference.
  */
@@ -47,9 +20,9 @@ function _content_admin_type_fields() {
     $row[] = $field['type'];
 
     $types = array();
-    $result = db_query("SELECT nt.label FROM {node_field_instance} nfi LEFT JOIN {node_type_content} nt ON nt.type_name = nfi.type_name WHERE nfi.field_name = '%s' ORDER BY nt.label ASC", $field['field_name']);
+    $result = db_query("SELECT nt.name FROM {node_field_instance} nfi LEFT JOIN {node_type} nt ON nt.type = nfi.type_name WHERE nfi.field_name = '%s' ORDER BY nt.name ASC", $field['field_name']);
     while ($type = db_fetch_array($result)) {
-      $types[] = $type['label'];
+      $types[] = $type['name'];
     }
     $row[] = implode (', ', $types);
 
@@ -62,173 +35,13 @@ function _content_admin_type_fields() {
 }
 
 /**
- * Menu callback; handles the editing of a content type.
- */
-function _content_admin_type_edit($type_name = '', $original_type_name = '') {
-  $types = content_types();
-  if (isset($types[$type_name])) {
-    $type = $types[$type_name];
-  }
-  else {
-    if (isset($types[$original_type_name])) {
-      $type = $types[$original_type_name];
-    }
-    else {
-      $type = array();
-      $type['label'] = '';
-      $type['description'] = '';
-      $type['help'] = '';
-      $type['title_label'] = 'Title';
-    }
-  }
-
-  $form = array();
-  $form['label'] = array(
-    '#title' => t('Label'),
-    '#type' => 'textfield',
-    '#default_value' => $type['label'],
-    '#description' => t('The human-readable name of this content type.'),
-    '#required' => TRUE,
-  );
-  $form['description'] = array(
-    '#title' => t('Description'),
-    '#type' => 'textarea',
-    '#default_value' => $type['description'],
-    '#rows' => 10,
-    '#description' => t('A brief description of the content type.'),
-    '#required' => FALSE,
-  );
-  $form['help'] = array(
-    '#title' => t('Help text'),
-    '#type' => 'textarea',
-    '#default_value' => $type['help'],
-    '#rows' => 10,
-    '#description' => t('Instructions to present to the user when adding new content of this type.'),
-    '#required' => FALSE,
-  );
-  $form['title_label'] = array(
-    '#title' => t('Title field label'),
-    '#type' => 'textfield',
-    '#default_value' => $type['title_label'],
-    '#description' => t('The label for the title field.'),
-    '#required' => TRUE,
-  );
-  $form['submit'] = array(
-    '#type' => 'submit',
-    '#value' => t('Save content type'),
-  );
-  $form['type_name'] = array(
-    '#type' => 'value',
-    '#value' => $type_name,
-  );
-  $form['original_type_name'] = array(
-    '#type' => 'value',
-    '#value' => $original_type_name,
-  );
-  return $form;
-}
-
-/**
- * Save a content type after editing.
- */
-function _content_admin_type_edit_submit($form_id, $form_values) {
-  $types = content_types();
-  if (!isset($types[$form_values['type_name']])) {
-    // Find a valid, computer-friendly type name.
-    $form_values['type_name'] = trim($form_values['label']);
-    $form_values['type_name'] = drupal_strtolower($form_values['type_name']);
-    $form_values['type_name'] = str_replace(array(' ', '-'), '_', $form_values['type_name']);
-    $form_values['type_name'] = preg_replace('/[^a-z0-9_]/', '', $form_values['type_name']);
-    $form_values['type_name'] = 'content_'. $form_values['type_name'];
-    $form_values['type_name'] = substr($form_values['type_name'], 0, 32);
-    if (isset($types[$form_values['type_name']])) {
-      $counter = 0;
-      do {
-        $new_name = substr($form_values['type_name'], 0, 30) .'_'. $counter++;
-      } while (isset($types[$new_name]));
-      $form_values['type_name'] = $new_name;
-    }
-
-    db_query("INSERT INTO {node_type_content} (type_name, label, description, help, title_label) VALUES ('%s', '%s', '%s', '%s', '%s')", $form_values['type_name'], $form_values['label'], $form_values['description'], $form_values['help'], $form_values['title_label']);
-
-    switch ($GLOBALS['db_type']) {
-      case 'mysql':
-      case 'mysqli':
-        db_query("CREATE TABLE {node_". $form_values['type_name'] ."} (
-            vid int unsigned NOT NULL default '0',
-            nid int unsigned NOT NULL default '0',
-            PRIMARY KEY (vid)
-          ) TYPE=MyISAM /*!40100 DEFAULT CHARACTER SET utf8 */;");
-        break;
-
-      case 'pgsql':
-        db_query("CREATE TABLE {node_". $form_values['type_name'] ."} (
-            vid integer unsigned NOT NULL default '0',
-            nid integer unsigned NOT NULL default '0',
-            PRIMARY KEY (vid)
-          )");
-        break;
-    }
-  }
-  else {
-    db_query("UPDATE {node_type_content} SET label = '%s', description = '%s', help = '%s', title_label = '%s' WHERE type_name = '%s'", $form_values['label'], $form_values['description'], $form_values['help'], $form_values['title_label'], $form_values['type_name']);
-  }
-
-  if (isset($form_values['original_type_name'])) {
-    // Duplicate the field structure from the old content type.
-    db_query("INSERT INTO {node_field_instance} (field_name, type_name, weight, label, widget_type, widget_settings, description) SELECT field_name, '%s', weight, label, widget_type, widget_settings, description FROM {node_field_instance} WHERE type_name = '%s'", $form_values['type_name'], $form_values['original_type_name']);
-  }
-
-  drupal_set_message(t('Saved content type %type.', array('%type' => $form_values['label'])));
-
-  content_clear_type_cache();
-  menu_rebuild();
-
-  return 'admin/node/types/'. $form_values['type_name'];
-}
-
-/**
- * Menu callback; delete a content type.
- */
-function _content_admin_type_delete($type_name = '') {
-  $type = content_types($type_name);
-
-  $form = array();
-  $form['type_name'] = array('#type' => 'value', '#value' => $type_name);
-  return confirm_form('_content_admin_type_delete', $form, t('Are you sure you want to delete the content type %type?', array('%type' => $type['label'])), 'admin/node/types', t('If you have any content left in this content type, it will be permanently deleted. This action cannot be undone.'), t('Delete'), t('Cancel'));
-}
-
-/**
- * Delete a content type.
- */
-function _content_admin_type_delete_submit($form_id, $form_values) {
-  $type = content_types($form_values['type_name']);
-
-  if ($type && $form_values['confirm']) {
-    // Delete all nodes of this content type.
-    $result = db_query("SELECT nid FROM {node} WHERE type = '%s'", $form_values['type_name']);
-    while ($node = db_fetch_object($result)) {
-      node_delete($node->nid);
-    }
-    db_query("DELETE FROM {node_field_instance} WHERE type_name = '%s'", $form_values['type_name']);
-    db_query("DELETE FROM {node_type_content} WHERE type_name = '%s'", $form_values['type_name']);
-
-    db_query("DROP TABLE {node_". $form_values['type_name'] ."}");
-
-    drupal_set_message(t('Deleted content type %type.', array('%type' => $type['label'])));
-    content_clear_type_cache();
-    return 'admin/node/types';
-  }
-}
-
-
-/**
  * Menu callback; presents a listing of fields for a content type.
  */
 function _content_admin_field_overview($type_name) {
+  
   $type = content_types($type_name);
   $field_types = _content_field_types();
-
+  
   $header = array(t('Label'), t('Name'), t('Type'), array('data' => t('Operations'), 'colspan' => 2));
   $rows = array();
   $rows[] = array(t($type['title_label']), 'title', '', '', '');
@@ -244,8 +57,8 @@ function _content_admin_field_overview($type_name) {
     $row[] = $field['field_name'];
     $row[] = $field_types[$field['type']]['label'];
 
-    $row[] = l(t('configure'), 'admin/node/types/'. $type_name .'/fields/'. $field['field_name']);
-    $row[] = l(t('remove'), 'admin/node/types/'. $type_name .'/fields/'. $field['field_name'] .'/remove');
+    $row[] = l(t('configure'), 'admin/content/types/'. $type['url_str'] .'/fields/'. $field['field_name']);
+    $row[] = l(t('remove'), 'admin/content/types/'. $type['url_str'] .'/fields/'. $field['field_name'] .'/remove');
 
     $rows[] = $row;
   }
@@ -360,7 +173,7 @@ function theme_content_admin_field_add_new_field_widget_type($form) {
     $output .= '<dt>'. $field_type['label'] .'</dt>';
     foreach ($widget_types as $widget_name => $widget_type) {
       if (in_array($field_name, $widget_type['field types'])) {
-        $output .= '<dd>'. form_render($form[$field_name .'-'. $widget_name]) .'</dd>';
+        $output .= '<dd>'. drupal_render($form[$field_name .'-'. $widget_name]) .'</dd>';
       }
     }
   }
@@ -373,6 +186,7 @@ function theme_content_admin_field_add_new_field_widget_type($form) {
  * Add an existing field to a content type.
  */
 function _content_admin_field_add_existing_submit($form_id, $form_values) {
+  $type  = content_types($form_values['type_name']);
   $field = content_fields($form_values['field_name']);
   $field_types = _content_field_types();
   $field_type = $field_types[$field['type']];
@@ -400,7 +214,7 @@ function _content_admin_field_add_existing_submit($form_id, $form_values) {
 
   drupal_set_message(t('Added field %label.', array('%label' => $prior_instance['label'])));
   content_clear_type_cache();
-  return 'admin/node/types/'. $form_values['type_name'] .'/fields';
+  return 'admin/content/types/'. $type['url_str'] .'/fields';
 }
 
 /**
@@ -410,6 +224,7 @@ function _content_admin_field_add_new_submit($form_id, $form_values) {
   // Find a valid, computer-friendly field name.
 
   $fields = content_fields();
+  $type   = content_types($form_values['type_name']);
 
   $field_name = trim($form_values['label']);
   $field_name = drupal_strtolower($field_name);
@@ -442,7 +257,7 @@ function _content_admin_field_add_new_submit($form_id, $form_values) {
   }
 
   drupal_set_message(t('Created field %label.', array('%label' => $form_values['label'])));
-  return 'admin/node/types/'. $form_values['type_name'] .'/fields/'. $field_name;
+  return 'admin/content/types/'. $type['url_str'] .'/fields/'. $field_name;
 }
 
 /**
@@ -461,46 +276,48 @@ function _content_admin_field_remove($type_name, $field_name) {
     '#type' => 'value',
     '#value' => $field_name,
   );
-  return confirm_form('_content_admin_field_remove', $form, t('Are you sure you want to remove the field %field?', array('%field' => $field['widget']['label'])), 'admin/node/types/'. $type_name .'/fields', t('If you have any content left in this field, it will be lost. This action cannot be undone.'), t('Remove'), t('Cancel'));
+
+  $output = confirm_form($form,
+    t('Are you sure you want to remove the field %field?', array('%field' => $field['widget']['label'])),
+    'admin/content/types/'. $type_name .'/fields',
+    t('If you have any content left in this field, it will be lost. This action cannot be undone.'),
+    t('Remove'), t('Cancel'),
+    '_content_admin_field_remove'
+  );
+
+  return $output;
 }
 
 /**
  * Remove a field from a content type.
  */
 function _content_admin_field_remove_submit($form_id, $form_values) {
-  $type = content_types($form_values['type_name']);
-  $field = $type['fields'][$form_values['field_name']];
-  $field_types = _content_field_types();
-  $field_type = $field_types[$field['type']];
-  $columns = module_invoke($field_type['module'], 'field_settings', 'database columns', $field);
-
-  if ($type && $field && $form_values['confirm']) {
-    db_query("DELETE FROM {node_field_instance} WHERE type_name = '%s' AND field_name = '%s'", $form_values['type_name'], $form_values['field_name']);
-
-    drupal_set_message(t('Removed field %field from %type.', array('%field' => $field['widget']['label'], '%type' => $type['label'])));
-    $instances = db_result(db_query("SELECT COUNT(*) FROM {node_field_instance} WHERE field_name = '%s'", $form_values['field_name']));
-    if ($instances == 1) {
-      if (!($field['multiple'])) {
-        // Multiple-valued fields are always stored per content type.
-        if (is_array($columns) && count($columns)) {
-          $new_field = $field;
-          $new_field['db_storage'] = CONTENT_DB_STORAGE_PER_CONTENT_TYPE;
-          db_query("UPDATE {node_field} SET db_storage = %d WHERE field_name = '%s'", CONTENT_DB_STORAGE_PER_CONTENT_TYPE, $form_values['field_name']);
-          content_alter_db_field($field, $columns, $new_field, $columns);
-        }
-      }
-    }
-    else if ($instances == 0) {
+  $type   = content_types($form_values['type_name']);
+  db_query("DELETE FROM {node_field_instance} WHERE type_name = '%s' AND field_name = '%s'", $form_values['type_name'], $form_values['field_name']);
+      
+  drupal_set_message(t('Removed field %field from %type.', array('%field' => $field['widget']['label'], '%type' => $type['label'])));
+  $instances = db_result(db_query("SELECT COUNT(*) FROM {node_field_instance} WHERE field_name = '%s'", $form_values['field_name']));
+  if ($instances == 1) {
+    if (!($field['multiple'])) {
+      // Multiple-valued fields are always stored per content type.
       if (is_array($columns) && count($columns)) {
-        content_alter_db_field($field, $columns, array(), array());
+        $new_field = $field;
+        $new_field['db_storage'] = CONTENT_DB_STORAGE_PER_CONTENT_TYPE;
+        db_query("UPDATE {node_field} SET db_storage = %d WHERE field_name = '%s'", CONTENT_DB_STORAGE_PER_CONTENT_TYPE, $form_values['field_name']);
+        content_alter_db_field($field, $columns, $new_field, $columns);
       }
-      db_query("DELETE FROM {node_field} WHERE field_name = '%s'", $form_values['field_name']);
-
-      drupal_set_message(t('The field %field no longer exists in any content type, so it was deleted.', array('%field' => $field['widget']['label'])));
     }
-    content_clear_type_cache();
-    return 'admin/node/types/'. $form_values['type_name'] .'/fields';
   }
+  elseif ($instances == 0) {
+    if (is_array($columns) && count($columns)) {
+      content_alter_db_field($field, $columns, array(), array());
+    }
+    db_query("DELETE FROM {node_field} WHERE field_name = '%s'", $form_values['field_name']);
+
+    drupal_set_message(t('The field %field no longer exists in any content type, so it was deleted.', array('%field' => $field['widget']['label'])));
+  }
+  content_clear_type_cache();
+  return 'admin/content/types/'. $type['url_str'] .'/fields';
 }
 
 
@@ -509,7 +326,7 @@ function _content_admin_field_remove_submit($form_id, $form_values) {
  */
 function _content_admin_field($type_name, $field_name) {
   $output = '';
-
+  
   $type = content_types($type_name);
   $field = $type['fields'][$field_name];
   $field_types = _content_field_types();
@@ -673,7 +490,7 @@ function _content_admin_field_submit($form_id, $form_values) {
   }
   content_alter_db_field($prev_field, $prev_columns, $new_field, $new_columns);
 
-  return 'admin/node/types/'. $form_values['type_name'] .'/fields';
+  return 'admin/content/types/'. $type['url_str'] .'/fields';
 }
 
 
@@ -707,7 +524,7 @@ function content_alter_db_field($previous_field, $previous_columns, $new_field, 
     }
     return;
   }
-
+  
   if ($new_field['db_storage'] == CONTENT_DB_STORAGE_PER_FIELD) {
     if (!count($previous_columns) || $previous_field['db_storage'] == CONTENT_DB_STORAGE_PER_CONTENT_TYPE) {
       // New columns with per-field storage; need to add a table.
@@ -793,7 +610,53 @@ function content_alter_db_field($previous_field, $previous_columns, $new_field, 
   foreach ($new_columns as $column => $attributes) {
     $column_name = $new_field['field_name'] .'_'. $column;
     if (!isset($previous_columns[$column]) || $previous_field['db_storage'] != $new_field['db_storage']) {
-      content_db_add_column($new_db_info['table'], $column_name, $attributes['type'], $attributes);
+      if (!db_table_exists($new_db_info['table'])) {
+        if ($new_field['db_storage'] == CONTENT_DB_STORAGE_PER_CONTENT_TYPE) {
+          if ($new_field['multiple']) {
+            switch ($GLOBALS['db_type']) {
+              case 'mysql':
+              case 'mysqli':
+                db_query("CREATE TABLE {". $new_db_info['table'] ."} (
+                  vid int unsigned NOT NULL default '0',
+                  delta int unsigned NOT NULL default '0',
+                  nid int unsigned NOT NULL default '0',
+                  PRIMARY KEY (vid,delta)
+                ) TYPE=MyISAM /*!40100 DEFAULT CHARACTER SET utf8 */;");
+                break;
+
+              case 'pgsql':
+                db_query("CREATE TABLE {". $new_db_info['table'] ."} (
+                  vid integer unsigned NOT NULL default '0',
+                  delta integer unsigned NOT NULL default '0',
+                  nid integer unsigned NOT NULL default '0',
+                  PRIMARY KEY (vid,delta)
+                )");
+                break;
+            }
+
+          }
+          else {
+            switch ($GLOBALS['db_type']) {
+              case 'mysql':
+              case 'mysqli':
+                db_query("CREATE TABLE {". $new_db_info['table'] ."} (
+                  vid int unsigned NOT NULL default '0',
+                  nid int unsigned NOT NULL default '0',
+                  PRIMARY KEY (vid)
+                ) TYPE=MyISAM /*!40100 DEFAULT CHARACTER SET utf8 */;");
+                break;
+
+                case 'pgsql':
+                  db_query("CREATE TABLE {". $new_db_info['table'] ."} (
+                    vid integer unsigned NOT NULL default '0',
+                    nid integer unsigned NOT NULL default '0',
+                    PRIMARY KEY (vid)
+                  )");
+                  break;
+            }
+          }  // end: if ($new_field['multiple'])
+        }  // end: if ($new_field['db_storage'] == CONTENT_DB_STORAGE_PER_CONTENT_TYPE)
+      }      content_db_add_column($new_db_info['table'], $column_name, $attributes['type'], $attributes);
     }
     else {
       if ($attributes != $previous_columns[$column]) {
@@ -801,7 +664,7 @@ function content_alter_db_field($previous_field, $previous_columns, $new_field, 
       }
     }
   }
-
+  
   if (count($previous_columns) && count($new_columns)) {
     // Remove obsolete columns.
     foreach ($previous_columns as $column => $attributes) {
@@ -1033,4 +896,3 @@ function content_db_change_column($table, $column, $column_new, $type, $attribut
       break;
   }
 }
-
