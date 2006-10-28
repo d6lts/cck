@@ -174,7 +174,7 @@ function _content_admin_type_edit_submit($form_id, $form_values) {
     db_query("UPDATE {node_type_content} SET label = '%s', description = '%s', help = '%s', title_label = '%s' WHERE type_name = '%s'", $form_values['label'], $form_values['description'], $form_values['help'], $form_values['title_label'], $form_values['type_name']);
   }
 
-  if (isset($form_values['original_type_name'])) {
+  if ($form_values['original_type_name'] > '') {
     
     // Duplicate the field structure from the old content type.
     $info   = _content_type_info();
