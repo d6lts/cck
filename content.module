@@ -153,7 +153,6 @@ function content_form(&$node) {
 
   _content_widget_invoke('prepare form values', $node);
   $form = array_merge($form, _content_widget_invoke('form', $node));
-
   return $form;
 }
 
@@ -228,10 +227,7 @@ function content_view(&$node, $teaser = FALSE, $page = FALSE) {
   if ($node->in_preview) {
     _content_widget_invoke('process form values', $node);
   }
-  $node->content['cck-fields'] = array (
-    '#value' => implode('', _content_field_invoke('view', $node, $teaser, $page)),
-    '#weight' => 1,
-  );
+  $node->content += _content_field_invoke('view', $node, $teaser, $page);
 }
 
 /**
@@ -448,7 +444,13 @@ function _content_field_invoke($op, &$node, $teaser = NULL, $page = NULL) {
       $function = $module .'_field';
       if (function_exists($function)) {
         $result = $function($op, $node, $field, $node_field, $teaser, $page);
-        if (is_array($result)) {
+        if ($op == 'view') {
+          if (!is_array($result)) $result = array($result);
+          foreach ($result as $delta => $value) {
+            $return[$field['field_name']][$delta] = array('#value' => $value, '#weight' => $field['widget']['weight']);
+          }
+        }
+        elseif (is_array($result)) {
           $return = array_merge($return, $result);
         }
         else if (isset($result)) {
@@ -461,7 +463,6 @@ function _content_field_invoke($op, &$node, $teaser = NULL, $page = NULL) {
       }
     }
   }
-
   return $return;
 }
 
@@ -481,7 +482,11 @@ function _content_field_invoke_default($op, &$node, $teaser = NULL, $page = NULL
       $db_info = content_database_info($field);
       if (count($db_info['columns'])) {
         $result = content_field($op, $node, $field, $node_field, $teaser, $page);
-        if (is_array($result)) {
+        if ($op == 'view') {
+          // do nothing, handled by field view hook
+          return;
+        }
+        elseif (is_array($result)) {
           $return = array_merge($return, $result);
         }
         else if (isset($result)) {
@@ -513,6 +518,9 @@ function _content_widget_invoke($op, &$node) {
     $function = $module .'_widget';
     if (function_exists($function)) {
       $result = $function($op, $node, $field, $node_field);
+      if (is_array($result) && $op == 'form') {
+        $result[$field['field_name']]['#weight'] = $field['widget']['weight'];
+      }
       if (is_array($result)) {
         $return = array_merge($return, $result);
       }
@@ -525,7 +533,6 @@ function _content_widget_invoke($op, &$node) {
       $node->$field['field_name'] = $node_field;
     }
   }
-
   return $return;
 }
 
