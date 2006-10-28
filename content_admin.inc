@@ -175,8 +175,16 @@ function _content_admin_type_edit_submit($form_id, $form_values) {
   }
 
   if (isset($form_values['original_type_name'])) {
+    
     // Duplicate the field structure from the old content type.
-    db_query("INSERT INTO {node_field_instance} (field_name, type_name, weight, label, widget_type, widget_settings, description) SELECT field_name, '%s', weight, label, widget_type, widget_settings, description FROM {node_field_instance} WHERE type_name = '%s'", $form_values['type_name'], $form_values['original_type_name']);
+    $info   = _content_type_info();
+    $fields = array_keys($info['content types'][$form_values['original_type_name']]['fields']);
+    foreach ($fields as $field) {
+      $field_values = array('field_name' => $field, 'type_name' => $form_values['type_name']);
+      // using this function will both create new field instances 
+      // and move existing fields to separate shared table, if not already shared
+      _content_admin_field_add_existing_submit('_content_admin_field_add_existing', $field_values);
+    }
   }
 
   drupal_set_message(t('Saved content type %type.', array('%type' => theme('placeholder', $form_values['label']))));
