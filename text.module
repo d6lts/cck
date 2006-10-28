@@ -232,6 +232,7 @@ function text_widget($op, &$node, $field, &$items) {
       if ($field['multiple']) {
         $form[$field['field_name']]['#type'] = 'fieldset';
         $form[$field['field_name']]['#title'] = t($field['widget']['label']);
+        $form[$field['field_name']]['#description'] = $field['widget']['description'];
         $delta = 0;
         foreach ($items as $data) {
           if ($data['value']) {
@@ -315,6 +316,16 @@ function text_widget($op, &$node, $field, &$items) {
         }
       }
       return $form;
+
+    case 'validate':
+      if ($field['max_length'] > 0) {
+        foreach ($items as $delta => $data) {
+          if (strlen($data['value']) > $field['max_length']) {
+            form_set_error($field['field_name'], t('%label is longer than %max characters.', array('%label' => $field['widget']['label'],'%max' => $field['max_length'])));
+          }
+        }
+      }
+      break;
 
     case 'process form values':
       // Don't save empty fields.
