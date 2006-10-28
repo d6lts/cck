@@ -75,7 +75,8 @@ function content_type_delete($properties) {
   db_query("DROP TABLE {node_". $properties['type_name'] ."}");
 
   content_clear_type_cache();
-  
+  menu_rebuild();
+
   return $number_deleted;
 }
 
