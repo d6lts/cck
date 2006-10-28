@@ -574,6 +574,9 @@ function _content_widget_invoke($op, &$node) {
     $function = $module .'_widget';
     if (function_exists($function)) {
       $result = $function($op, $node, $field, $node_field);
+      if (is_array($result) && $op == 'form') {
+        $result[$field['field_name']]['#weight'] = $field['widget']['weight'];
+      }
       if (is_array($result)) {
         $return = array_merge($return, $result);
       }
