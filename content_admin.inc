@@ -292,32 +292,16 @@ function _content_admin_field_remove($type_name, $field_name) {
  * Remove a field from a content type.
  */
 function _content_admin_field_remove_submit($form_id, $form_values) {
-  $type   = content_types($form_values['type_name']);
-  db_query("DELETE FROM {node_field_instance} WHERE type_name = '%s' AND field_name = '%s'", $form_values['type_name'], $form_values['field_name']);
-      
-  drupal_set_message(t('Removed field %field from %type.', array('%field' => $field['widget']['label'], '%type' => $type['label'])));
-  $instances = db_result(db_query("SELECT COUNT(*) FROM {node_field_instance} WHERE field_name = '%s'", $form_values['field_name']));
-  if ($instances == 1) {
-    if (!($field['multiple'])) {
-      // Multiple-valued fields are always stored per content type.
-      if (is_array($columns) && count($columns)) {
-        $new_field = $field;
-        $new_field['db_storage'] = CONTENT_DB_STORAGE_PER_CONTENT_TYPE;
-        db_query("UPDATE {node_field} SET db_storage = %d WHERE field_name = '%s'", CONTENT_DB_STORAGE_PER_CONTENT_TYPE, $form_values['field_name']);
-        content_alter_db_field($field, $columns, $new_field, $columns);
-      }
-    }
-  }
-  elseif ($instances == 0) {
-    if (is_array($columns) && count($columns)) {
-      content_alter_db_field($field, $columns, array(), array());
-    }
-    db_query("DELETE FROM {node_field} WHERE field_name = '%s'", $form_values['field_name']);
+  $type = content_types($form_values['type_name']);
+  $field = $type['fields'][$form_values['field_name']];
 
-    drupal_set_message(t('The field %field no longer exists in any content type, so it was deleted.', array('%field' => $field['widget']['label'])));
+  if ($type && $field && $form_values['confirm']) {
+    content_field_instance_delete($form_values);
+
+    drupal_set_message(t('Removed field %field from %type.', array('%field' => theme('placeholder', $field['widget']['label']), '%type' => theme('placeholder', $type['label']))));
+
+    return 'admin/content/types/'. $type['url_str'] .'/fields';
   }
-  content_clear_type_cache();
-  return 'admin/content/types/'. $type['url_str'] .'/fields';
 }
 
 

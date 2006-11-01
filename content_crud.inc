@@ -42,11 +42,11 @@ function content_type_read($info) {
  *   The number of content types updated.
  */
 function content_type_update($info) {
+  
   $updated = 0;
   if ($info->type != $info->old_type) {
     // update all fields that use changed content type
-    db_query("UPDATE {node_field_instance} SET type_name='%new-type' WHERE type_name='%old-type'", 
-        array('%new-type' => $info->type, '%old-type' => $info->old_type));
+    db_query("UPDATE {node_field_instance} SET type_name='%s' WHERE type_name='%s'", array($info->type, $info->old_type));
     $updated = 1;
   }
   // reset all content type info
