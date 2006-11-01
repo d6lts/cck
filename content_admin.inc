@@ -298,7 +298,7 @@ function _content_admin_field_remove_submit($form_id, $form_values) {
   if ($type && $field && $form_values['confirm']) {
     content_field_instance_delete($form_values);
 
-    drupal_set_message(t('Removed field %field from %type.', array('%field' => theme('placeholder', $field['widget']['label']), '%type' => theme('placeholder', $type['label']))));
+    drupal_set_message(t('Removed field %field from %type.', array('%field' => $field['widget']['label'], '%type' => $type['name'])));
 
     return 'admin/content/types/'. $type['url_str'] .'/fields';
   }
