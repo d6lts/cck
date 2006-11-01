@@ -20,11 +20,11 @@ function _content_admin_type_fields() {
     $row[] = $field['type'];
 
     $types = array();
-    $result = db_query("SELECT nt.name FROM {node_field_instance} nfi LEFT JOIN {node_type} nt ON nt.type = nfi.type_name WHERE nfi.field_name = '%s' ORDER BY nt.name ASC", $field['field_name']);
+    $result = db_query("SELECT nt.name, nt.type FROM {node_field_instance} nfi LEFT JOIN {node_type} nt ON nt.type = nfi.type_name WHERE nfi.field_name = '%s' ORDER BY nt.name ASC", $field['field_name']);
     while ($type = db_fetch_array($result)) {
-      $types[] = $type['name'];
+      $types[] = l($type['name'], 'admin/content/types/'. $type['type'] .'/fields');
     }
-    $row[] = implode (', ', $types);
+    $row[] = implode(', ', $types);
 
     $rows[] = $row;
   }
@@ -266,7 +266,7 @@ function _content_admin_field_add_new_submit($form_id, $form_values) {
 function _content_admin_field_remove($type_name, $field_name) {
   $type = content_types($type_name);
   $field = $type['fields'][$field_name];
-
+  
   $form = array();
   $form['type_name'] = array(
     '#type' => 'value',
@@ -279,10 +279,10 @@ function _content_admin_field_remove($type_name, $field_name) {
 
   $output = confirm_form($form,
     t('Are you sure you want to remove the field %field?', array('%field' => $field['widget']['label'])),
-    'admin/content/types/'. $type_name .'/fields',
+    'admin/content/types/'. $type['url_str'] .'/fields',
     t('If you have any content left in this field, it will be lost. This action cannot be undone.'),
     t('Remove'), t('Cancel'),
-    '_content_admin_field_remove'
+    'confirm'
   );
 
   return $output;
@@ -294,7 +294,7 @@ function _content_admin_field_remove($type_name, $field_name) {
 function _content_admin_field_remove_submit($form_id, $form_values) {
   $type = content_types($form_values['type_name']);
   $field = $type['fields'][$form_values['field_name']];
-
+  
   if ($type && $field && $form_values['confirm']) {
     content_field_instance_delete($form_values);
 

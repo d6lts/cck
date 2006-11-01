@@ -40,21 +40,22 @@ function content_menu($may_cache) {
   }
 
   if ($may_cache) {
-    $items[] = array(
-      'path' => 'admin/content/types/fields',
-      'title' => t('fields'),
-      'callback' => '_content_admin_type_fields',
-      'access' => $access,
-      'type' => MENU_LOCAL_TASK,
-    );
+      $items[] = array(
+        'path' => 'admin/content/types/fields',
+        'title' => t('fields'),
+        'callback' => '_content_admin_type_fields',
+        'access' => $access,
+        'type' => MENU_LOCAL_TASK,
+      );
   }
   else {
-    if (arg(0) == 'admin' && arg(1) == 'content' && arg(2) == 'types' && arg(3)) {
+    if (arg(0) == 'admin' && arg(1) == 'content' && arg(2) == 'types') {
 
       $content_type = content_types(arg(3));
       $type = node_get_types('types', $content_type['type']);
       
-      if (!empty($type)) {
+      
+      if (!empty($type) && arg(3) && arg(3) == $content_type['url_str']) {
         $items[] = array(
           'path' => 'admin/content/types/'. $content_type['url_str'] .'/edit',
           'title' => t('edit'),
@@ -81,8 +82,7 @@ function content_menu($may_cache) {
           'weight' => 2,
         );
 
-        if (arg(4) == 'fields' && arg(5)
-            && isset($content_type['fields'][arg(5)])) {
+        if (arg(4) == 'fields' && arg(5) && isset($content_type['fields'][arg(5)])) {
           $items[] = array(
             'path' => 'admin/content/types/'. $content_type['url_str'] .'/fields/'. arg(5),
             'title' => t($content_type['fields'][arg(5)]['widget']['label']),
