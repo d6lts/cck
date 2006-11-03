@@ -362,7 +362,7 @@ function content_nodeapi(&$node, $op, $teaser, $page) {
  */
 function content_field($op, &$node, $field, &$node_field, $teaser, $page) {
   $db_info = content_database_info($field);
-
+  
   switch ($op) {
     case 'load':
       $column_names = array();
@@ -391,8 +391,14 @@ function content_field($op, &$node, $field, &$node_field, $teaser, $page) {
         $column_assignments = array();
         foreach ($db_info['columns'] as $column => $attributes) {
           $column_names[] = $attributes['column'];
-          switch ($attributes['type']) {
-            case 'int':
+          if ($item[$column] == '' && !$attributes['not null'] && !$field['required']) {
+            $column_placeholders[] = '%s';
+            $column_assignments[] = $attributes['column'] .' = %s';
+            $item[$column] = 'NULL';
+          }
+          else {
+           switch ($attributes['type']) {
+           case 'int':
             case 'mediumint':
             case 'tinyint':
             case 'bigint':
@@ -406,6 +412,7 @@ function content_field($op, &$node, $field, &$node_field, $teaser, $page) {
             default:
               $column_placeholders[] = "'%s'";
               $column_assignments[] = $attributes['column'] ." = '%s'";
+           }
           }
           $data[] = $item[$column];
         }
@@ -442,7 +449,13 @@ function content_field($op, &$node, $field, &$node_field, $teaser, $page) {
         $column_assignments = array();
         foreach ($db_info['columns'] as $column => $attributes) {
           $column_names[] = $attributes['column'];
-          switch ($attributes['type']) {
+          if ($item[$column] == '' && !$attributes['not null'] && !$field['required']) {
+            $column_placeholders[] = '%s';
+            $column_assignments[] = $attributes['column'] .' = %s';
+            $item[$column] = 'NULL';
+          }
+          else {
+           switch ($attributes['type']) {
             case 'int':
             case 'mediumint':
             case 'tinyint':
@@ -457,6 +470,7 @@ function content_field($op, &$node, $field, &$node_field, $teaser, $page) {
             default:
               $column_placeholders[] = "'%s'";
               $column_assignments[] = $attributes['column'] ." = '%s'";
+           }
           }
           $data[] = $item[$column];
         }
@@ -752,7 +766,6 @@ function _content_type_info($reset = FALSE) {
       cache_set('content_type_info', serialize($info), CACHE_PERMANENT);
     }
   }
-
   return $info;
 }
 
