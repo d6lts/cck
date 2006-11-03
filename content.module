@@ -323,7 +323,13 @@ function content_field($op, &$node, $field, &$node_field, $teaser, $page) {
         $column_assignments = array();
         foreach ($db_info['columns'] as $column => $attributes) {
           $column_names[] = $attributes['column'];
-          switch ($attributes['type']) {
+          if ($item[$column] == '' && !$attributes['not null'] && !$field['required']) {
+            $column_placeholders[] = '%s';
+            $column_assignments[] = $attributes['column'] .' = %s';
+            $item[$column] = 'NULL';
+          }
+          else {
+            switch ($attributes['type']) {          
             case 'int':
             case 'mediumint':
             case 'tinyint':
@@ -338,6 +344,7 @@ function content_field($op, &$node, $field, &$node_field, $teaser, $page) {
             default:
               $column_placeholders[] = "'%s'";
               $column_assignments[] = $attributes['column'] ." = '%s'";
+            }
           }
           $data[] = $item[$column];
         }
@@ -374,7 +381,13 @@ function content_field($op, &$node, $field, &$node_field, $teaser, $page) {
         $column_assignments = array();
         foreach ($db_info['columns'] as $column => $attributes) {
           $column_names[] = $attributes['column'];
-          switch ($attributes['type']) {
+          if ($item[$column] == '' && !$attributes['not null'] && !$field['required']) {
+            $column_placeholders[] = '%s';
+            $column_assignments[] = $attributes['column'] .' = %s';
+            $item[$column] = 'NULL';
+          }
+          else {
+            switch ($attributes['type']) {
             case 'int':
             case 'mediumint':
             case 'tinyint':
@@ -389,6 +402,7 @@ function content_field($op, &$node, $field, &$node_field, $teaser, $page) {
             default:
               $column_placeholders[] = "'%s'";
               $column_assignments[] = $attributes['column'] ." = '%s'";
+            }
           }
           $data[] = $item[$column];
         }
