@@ -53,10 +53,34 @@ function nodereference_field_settings($op, $field) {
         '#default_value' => isset($field['referenceable_types']) ? $field['referenceable_types'] : array(),
         '#options' => node_get_types(),
       );
+      if (module_exist('views')) {
+        $views = array('--' => '--');
+        $result = db_query("SELECT name FROM {view_view} ORDER BY name");
+        while ($view = db_fetch_array($result)) {
+          $views[$view['name']] = $view['name'];
+        }
+        if (count($views) > 1) {
+          $form['advanced_view'] = array(
+            '#type' => 'select',
+            '#title' => t('Advanced - Nodes that can be referenced'),
+            '#options' => $views,
+            '#default_value' => isset($field['advanced_view']) ? $field['advanced_view'] : '--',
+            '#description' => t('Choose the "Views module" view that selects the nodes that can be referenced.<br>'.
+                                'Note :'.
+                                '<ul><li>This will discard the "Content types" settings above. Use the view\'s "filters" section instead.</li>'.
+                                '<li>Use the view\'s "fields" section to display additional informations about candidate nodes on node creation/edition form.</li>'.
+                                '<li>Use the view\'s "sort criteria" section to determine the order in which candidate nodes will be displayed.</li></ul>'),
+          );
+        }
+      }
       return $form;
 
     case 'save':
-      return array('referenceable_types');
+      $settings = array('referenceable_types');
+      if (module_exist('views')) {
+        $settings[] = 'advanced_view';
+      }
+      return $settings;
 
     case 'database columns':
       $columns = array(
@@ -121,7 +145,7 @@ function nodereference_field_formatter($field, $item, $formatter, $node) {
   switch ($formatter) {
     case 'plain':
       return strip_tags($text);
-    
+
     default:
       return $text;
   }
@@ -157,7 +181,10 @@ function nodereference_widget($op, &$node, $field, &$node_field) {
       case 'form':
         $form = array();
 
-        $options = _nodereference_potential_references($field);
+        $options = _nodereference_potential_references($field, true);
+        foreach ($options as $key => $value) {
+          $options[$key] = _nodereference_item($field, $value);
+        }
         if (!$field['required']) $options = array('' => '') + $options;
 
         $form[$field['field_name']] = array('#tree' => TRUE);
@@ -237,8 +264,11 @@ function nodereference_widget($op, &$node, $field, &$node_field) {
 
       case 'validate':
         foreach ($node_field as $delta => $item) {
-          if ($item['node_name'] && !in_array($item['node_name'], _nodereference_potential_references($field))) {
-            form_set_error($field['field_name'], t('No post with that title exists.'));
+          if (!empty($item['node_name'])) {
+            $refs = _nodereference_potential_references($field, false, $item['node_name'], true);
+            if (empty($refs)) {
+              form_set_error($field['field_name'], t('No post with that title exists.'));
+            }
           }
         }
         return;
@@ -263,28 +293,64 @@ function nodereference_widget($op, &$node, $field, &$node_field) {
   }
 }
 
-
 /**
  * Fetch an array of all candidate referenced nodes, for use in presenting the selection form to the user.
  */
-function _nodereference_potential_references($field, $return_full_nodes = FALSE) {
-  $related_types = array();
+function _nodereference_potential_references($field, $return_full_nodes = FALSE, $string = '', $exact_string = false) {
+  if (module_exist('views') && ($view = views_get_view($field['advanced_view']))) {
+    // advanced field : referenceable nodes defined by a view
+    // let views.module build the query
 
-  if (isset($field['referenceable_types'])) {
-    foreach ($field['referenceable_types'] as $related_type) {
-      if ($related_type) {
-        $related_types[] = " type = '". $related_type ."'";
+    if (isset($string)) {
+      views_view_add_filter($view, 'node', 'title', $exact_string ? '=' : 'contains', $string, null);
+    }
+
+    // we do need title field, so add it if not present (unlikely, but...)
+    $has_title = array_reduce($view->field, create_function('$a, $b', 'return ($b["field"] == "title") || $a;'), false);
+    if (!$has_title) {
+      views_view_add_field($view, 'node', 'title', '');
+    }
+    views_sanitize_view($view);
+
+    // make sure the fields get included in the query
+    $view->page = true;
+    $view->page_type = 'list';
+
+    // make sure the query is not cached
+    unset($view->query);
+
+    $view_result = views_build_view('result', $view);
+    $result = $view_result['result'];
+  }
+  else {
+    // standard field : referenceable nodes defined by content types
+    // build the appropriate query
+    $related_types = array();
+    $args = array();
+
+    if (isset($field['referenceable_types'])) {
+      foreach ($field['referenceable_types'] as $related_type) {
+        if ($related_type) {
+          $related_types[] = " type = '%s'";
+          $args[] = $related_type;
+        }
       }
     }
+
+    $related_clause = implode(' OR ', $related_types);
+
+    if (!count($related_types)) {
+      return array();
+    }
+
+    if (isset($string)) {
+      $string_clause = $exact_string ? " AND title = '%s'" : " AND title LIKE '%%%s%'";
+      $related_clause = "(". $related_clause .")". $string_clause;
+      $args[] = $string;
+    }
+
+    $result = db_query(db_rewrite_sql("SELECT n.nid, n.title AS node_title, n.type AS node_type FROM {node} n WHERE ". $related_clause ." ORDER BY n.title, n.type"), $args);
   }
-
-  $related_clause = implode(' OR ', $related_types);
-
-  if (!count($related_types)) {
-    return array();
-  }
-
-  $result = db_query(db_rewrite_sql("SELECT n.nid, n.title, n.type FROM {node} n WHERE ". $related_clause ." ORDER BY n.title, n.type"));
 
   if (db_num_rows($result) == 0) {
     return array();
@@ -297,7 +363,7 @@ function _nodereference_potential_references($field, $return_full_nodes = FALSE)
       $rows[$node->nid] = $node;
     }
     else {
-      $rows[$node->nid] = $node->title;
+      $rows[$node->nid] = $node->node_title;
     }
   }
 
@@ -312,14 +378,44 @@ function nodereference_autocomplete($field_name, $string = '') {
   $field = $fields[$field_name];
   $matches = array();
 
-  foreach (_nodereference_potential_references($field, TRUE) as $key => $value) {
-    if (stristr($value->title, $string)) {
-      $matches[$value->title] = check_plain('('. str_replace('content_', '', $value->type) .') '. $value->title);
-    }
+  foreach (_nodereference_potential_references($field, TRUE, $string) as $row) {
+    $matches[$row->node_title] = _nodereference_item($field, $row, TRUE);
   }
-
   print drupal_to_js($matches);
   exit();
+}
+
+function _nodereference_item($field, $item, $html = false) {
+  if (module_exist('views') && ($view = views_get_view($field['advanced_view']))) {
+    $output = theme('nodereference_item_advanced', $item, $view);
+    if (!$html) {
+      $output = strip_tags($output);
+    }
+  }
+  else {
+    $output = theme('nodereference_item_simple', $item);
+  }
+  return $output;
+}
+
+function theme_nodereference_item_advanced($item, $view) {
+  $fields = _views_get_fields();
+  $item_fields = array();
+  foreach ($view->field as $field) {
+    $value = views_theme_field('views_handle_field', $field['queryname'], $fields, $field, $item, $view);
+    // remove link tags (ex : for node titles)
+    $value = preg_replace('/<a[^>]*>(.*)<\/a>/iU', '$1', $value);
+    if (!empty($value)) {
+      $item_fields[] = "<span class='view-field view-data-$field[queryname]'>$value</span>";;
+    }
+  }
+  $output = implode(' - ', $item_fields);
+  $output = "<span class='view-item view-item-$view->name'>$output</span>";
+  return $output;
+}
+
+function theme_nodereference_item_simple($item) {
+  return $item->node_title;
 }
 
 /**
