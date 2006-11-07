@@ -57,7 +57,11 @@ function nodereference_field_settings($op, $field) {
         $views = array('--' => '--');
         $result = db_query("SELECT name FROM {view_view} ORDER BY name");
         while ($view = db_fetch_array($result)) {
-          $views[$view['name']] = $view['name'];
+          $views[t('Existing Views')][$view['name']] = $view['name'];
+        }
+        $default_views = _views_get_default_views();
+        foreach ($default_views as $view) {
+          $views[t('Default Views')][$view->name] = $view->name;
         }
         if (count($views) > 1) {
           $form['advanced_view'] = array(
