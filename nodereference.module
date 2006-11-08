@@ -51,14 +51,15 @@ function nodereference_field_settings($op, $field) {
         '#title' => t('Content types that can be referenced'),
         '#multiple' => TRUE,
         '#default_value' => isset($field['referenceable_types']) ? $field['referenceable_types'] : array(),
-        '#options' => node_get_types(),
+        '#options' => node_get_types('names'),
       );
-      if (module_exist('views')) {
+      if (module_exists('views')) {
         $views = array('--' => '--');
         $result = db_query("SELECT name FROM {view_view} ORDER BY name");
         while ($view = db_fetch_array($result)) {
           $views[t('Existing Views')][$view['name']] = $view['name'];
         }
+        views_load_cache();
         $default_views = _views_get_default_views();
         foreach ($default_views as $view) {
           $views[t('Default Views')][$view->name] = $view->name;
@@ -81,7 +82,7 @@ function nodereference_field_settings($op, $field) {
 
     case 'save':
       $settings = array('referenceable_types');
-      if (module_exist('views')) {
+      if (module_exists('views')) {
         $settings[] = 'advanced_view';
       }
       return $settings;
@@ -219,7 +220,10 @@ function nodereference_widget($op, &$node, $field, &$node_field) {
     switch ($op) {
       case 'prepare form values':
         foreach ($node_field as $delta => $item) {
-          $node_field[$delta]['default node_name'] = db_result(db_query(db_rewrite_sql('SELECT n.title FROM {node} n WHERE n.nid = %d'), $node_field[$delta]['nid']));
+          if (!empty($node_field[$delta]['nid'])) {
+            $node_field[$delta]['default node_name'] = db_result(db_query(db_rewrite_sql('SELECT n.title FROM {node} n WHERE n.nid = %d'), $node_field[$delta]['nid']));
+            $node_field[$delta]['default node_name'] .= ' [nid:'. $node_field[$delta]['nid'] .']';
+          }
         }
         break;
 
@@ -268,10 +272,26 @@ function nodereference_widget($op, &$node, $field, &$node_field) {
 
       case 'validate':
         foreach ($node_field as $delta => $item) {
+          $error_field = $field['field_name'].']['.$delta.'][node_name';
           if (!empty($item['node_name'])) {
-            $refs = _nodereference_potential_references($field, false, $item['node_name'], true);
-            if (empty($refs)) {
-              form_set_error($field['field_name'], t('No post with that title exists.'));
+            preg_match('/^(?:\s*|(.*) )?\[\s*nid\s*:\s*(\d+)\s*\]$/', $item['node_name'], $matches);
+            if (!empty($matches)) {
+              // explicit nid
+              list(, $title, $nid) = $matches;
+              $refs = _nodereference_potential_references($field, TRUE);
+              if (!in_array($nid, array_keys($refs))) {
+                form_set_error($error_field, t('This post can\'t be referenced.'));
+              }
+              elseif (!empty($title) && ($n = $refs[$nid]) && $title != $n->node_title) {
+                form_set_error($error_field, t('Title mismatch. Please reiterate your selection.'));
+              }
+            }
+            else {
+              // no explicit nid
+              $refs = _nodereference_potential_references($field, FALSE, $item['node_name'], TRUE);
+              if (empty($refs)) {
+                form_set_error($error_field, t('No post with that title can be referenced.'));
+              }
             }
           }
         }
@@ -279,18 +299,26 @@ function nodereference_widget($op, &$node, $field, &$node_field) {
 
       case 'process form values':
         foreach ($node_field as $delta => $item) {
-          $nid = 0;
-          if ($node_field[$delta]['node_name']) {
-            $nid = db_result(db_query(db_rewrite_sql("SELECT n.nid FROM {node} n WHERE n.title = '%s'"), $node_field[$delta]['node_name']));
+          $nid = '';
+          if (!empty($item['node_name'])) {
+            preg_match('/^(?:\s*|(.*) )?\[\s*nid\s*:\s*(\d+)\s*\]$/', $item['node_name'], $matches);
+            if (!empty($matches)) {
+              // autocomplete-added nid
+              $nid = $matches[2];
+            }
+            else {
+              // no autocomplete-added nid (JS disabled, or the user bypassed the autocompletion list)
+              // TODO :
+              // the best thing would be to present the user with an additional form,
+              // allowing the user to choose between valid candidates with the same title
+              // ATM, we pick the first matching candidate...
+              $nids = _nodereference_potential_references($field, false, $item['node_name'], true);
+              $nid = array_shift(array_keys($nids));
+            }
           }
+          $node_field[$delta]['nid'] = $nid;
           // Remove the widget's data representation so it isn't saved.
           unset($node_field[$delta]['node_name']);
-          if ($nid) {
-            $node_field[$delta]['nid'] = $nid;
-          }
-          else {
-            unset($node_field[$delta]);
-          }
         }
         break;
     }
@@ -301,7 +329,7 @@ function nodereference_widget($op, &$node, $field, &$node_field) {
  * Fetch an array of all candidate referenced nodes, for use in presenting the selection form to the user.
  */
 function _nodereference_potential_references($field, $return_full_nodes = FALSE, $string = '', $exact_string = false) {
-  if (module_exist('views') && ($view = views_get_view($field['advanced_view']))) {
+  if (module_exists('views') && ($view = views_get_view($field['advanced_view']))) {
     // advanced field : referenceable nodes defined by a view
     // let views.module build the query
 
@@ -314,6 +342,7 @@ function _nodereference_potential_references($field, $return_full_nodes = FALSE,
     if (!$has_title) {
       views_view_add_field($view, 'node', 'title', '');
     }
+    views_load_cache();
     views_sanitize_view($view);
 
     // make sure the fields get included in the query
@@ -383,14 +412,14 @@ function nodereference_autocomplete($field_name, $string = '') {
   $matches = array();
 
   foreach (_nodereference_potential_references($field, TRUE, $string) as $row) {
-    $matches[$row->node_title] = _nodereference_item($field, $row, TRUE);
+    $matches[$row->node_title .' [nid:'. $row->nid .']'] = _nodereference_item($field, $row, TRUE);
   }
   print drupal_to_js($matches);
   exit();
 }
 
 function _nodereference_item($field, $item, $html = false) {
-  if (module_exist('views') && ($view = views_get_view($field['advanced_view']))) {
+  if (module_exists('views') && ($view = views_get_view($field['advanced_view']))) {
     $output = theme('nodereference_item_advanced', $item, $view);
     if (!$html) {
       $output = strip_tags($output);
