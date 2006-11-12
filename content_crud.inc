@@ -76,7 +76,9 @@ function content_type_delete($info) {
     $number_deleted++;
   }
 
-  db_query("DROP TABLE {node_". $properties['type_name'] ."}");
+  if (db_table_exists("node_". $properties['type_name'])) {
+    db_query("DROP TABLE {node_". $properties['type_name'] ."}");
+  }
 
   // reset all content type info
   content_clear_type_cache();
