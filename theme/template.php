@@ -12,5 +12,5 @@ function phptemplate_field(&$node, &$field, &$items, $teaser, $page) {
     'page' => $page,
   );
 
-  return _phptemplate_callback('field', $variables, 'field-'. $field['field_name']);
+  return _phptemplate_callback('field', $variables, array('field-'. $field['field_name']));
 }
