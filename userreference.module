@@ -222,8 +222,9 @@ function userreference_widget($op, &$node, $field, &$node_field) {
 
       case 'validate':
         foreach ($node_field as $delta => $item) {
+          $error_field = $field['field_name'].']['.$delta.'][user_name';
           if ($item['user_name'] && !in_array($item['user_name'], _userreference_potential_references($field))) {
-            form_set_error($field['field_name'], t('Invalid user name.'));
+            form_set_error($error_field, t('Invalid user name.'));
           }
         }
         return;

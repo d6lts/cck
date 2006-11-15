@@ -182,10 +182,11 @@ function hook_field($op, &$node, $field, &$node_field, $teaser, $page) {
 
       if ($field['multiple']) {
         if (is_array($node_field)) {
+          $error_field = $field['field_name'].']['.$delta.'][value';
           foreach ($node_field as $delta => $item) {
             if ($item['value'] != '') {
               if (count($allowed_values) && !in_array($item['value'], $allowed_values)) {
-                form_set_error($field['field_name'], t('Illegal value for %name.', array('%name' => t($field['widget']['label']))));
+                form_set_error($error_field, t('Illegal value for %name.', array('%name' => t($field['widget']['label']))));
               }
             }
           }
