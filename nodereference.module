@@ -299,7 +299,7 @@ function nodereference_widget($op, &$node, $field, &$node_field) {
 
       case 'process form values':
         foreach ($node_field as $delta => $item) {
-          $nid = '';
+          $nid = null;
           if (!empty($item['node_name'])) {
             preg_match('/^(?:\s*|(.*) )?\[\s*nid\s*:\s*(\d+)\s*\]$/', $item['node_name'], $matches);
             if (!empty($matches)) {
@@ -316,9 +316,15 @@ function nodereference_widget($op, &$node, $field, &$node_field) {
               $nid = array_shift(array_keys($nids));
             }
           }
-          $node_field[$delta]['nid'] = $nid;
-          // Remove the widget's data representation so it isn't saved.
-          unset($node_field[$delta]['node_name']);
+          if (isset($nid)) {
+            $node_field[$delta]['nid'] = $nid;
+            // Remove the widget's data representation so it isn't saved.
+            unset($node_field[$delta]['node_name']);
+          }
+          else {
+            // Don't save empty fields.
+            unset($node_field[$delta]);
+          }
         }
         break;
     }
