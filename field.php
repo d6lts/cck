@@ -206,12 +206,43 @@ function hook_field($op, &$node, $field, &$node_field, $teaser, $page) {
 }
 
 /**
+ * Declare information about a formatter.
+ *
+ * @return
+ *   An array keyed by formatter name. Each element of the array is an associative
+ *   array with these keys and values:
+ *   - "label": The human-readable label for the formatter.
+ *   - "field types": An array of field type names that can be displayed using
+ *     this formatter.
+ */
+function hook_field_formatter_info() {
+  return array(
+    'default' => array(
+      'label' => 'Default',
+      'field types' => array('text'),
+    ),
+    'plain' => array(
+      'label' => 'Plain text',
+      'field types' => array('text'),
+    ),
+    'trimmed' => array(
+      'label' => 'Trimmed',
+      'field types' => array('text'),
+    ),
+  );
+}
+
+/**
  * Prepare an individual item for viewing in a browser.
  *
  * @param $field
  *   The field the action is being performed on.
- * @param $node_field_item
+ * @param $item
  *   An array, keyed by column, of the data stored for this item in this field.
+ * @param $formatter
+ *   The name of the formatter being used to display the field.
+ * @param $node
+ *   The node object, for context. Will be NULL in some cases.
  *
  * @return
  *   An HTML string containing the formatted item.
@@ -223,8 +254,27 @@ function hook_field($op, &$node, $field, &$node_field, $teaser, $page) {
  * It is important that this function at the minimum perform security
  * transformations such as running check_plain() or check_markup().
  */
-function hook_field_view_item($field, $node_field_item) {
-  return check_plain($node_field_item['value']);
+function hook_field_formatter($field, $item, $formatter, $node) {
+  if (!isset($item['value'])) {
+    return '';
+  }
+  if ($field['text_processing']) {
+    $text = check_markup($item['value'], $item['format'], is_null($node) || isset($node->in_preview));
+  }
+  else {
+    $text = check_plain($item['value']);
+  }
+  
+  switch ($formatter) {
+    case 'plain':
+      return strip_tags($text);
+    
+    case 'trimmed':
+      return node_teaser($text, $field['text_processing'] ? $item['format'] : NULL);
+    
+    default:
+      return $text;
+  }
 }
 
 
