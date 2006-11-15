@@ -120,15 +120,16 @@ function number_field($op, &$node, $field, &$items, $teaser, $page) {
 
       if (is_array($items)) {
         foreach ($items as $delta => $item) {
+          $error_field = $field['field_name'].']['.$delta.'][value';
           if ($item['value'] != '') {
             if (is_numeric($field['min']) && $item['value'] < $field['min']) {
-              form_set_error($field['field_name'], t('The value of %name may be no smaller than %min.', array('%name' => t($field['widget']['label']), '%min' => $field['min'])));
+              form_set_error($error_field, t('The value of %name may be no smaller than %min.', array('%name' => t($field['widget']['label']), '%min' => $field['min'])));
             }
             if (is_numeric($field['max']) && $item['value'] > $field['max']) {
-              form_set_error($field['field_name'], t('The value of %name may be no larger than %max.', array('%name' => t($field['widget']['label']), '%max' => $field['max'])));
+              form_set_error($error_field, t('The value of %name may be no larger than %max.', array('%name' => t($field['widget']['label']), '%max' => $field['max'])));
             }
             if (count($allowed_values) && !in_array($item['value'], $allowed_values)) {
-              form_set_error($field['field_name'], t('Illegal value for %name.', array('%name' => t($field['widget']['label']))));
+              form_set_error($error_field, t('Illegal value for %name.', array('%name' => t($field['widget']['label']))));
             }
           }
         }
