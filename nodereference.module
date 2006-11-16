@@ -140,7 +140,7 @@ function nodereference_field_formatter_info() {
  */
 function nodereference_field_formatter($field, $item, $formatter, $node) {
   $text = '';
-  if (isset($item['nid'])) {
+  if (!empty($item['nid'])) {
     $referenced_node = node_load($item['nid']);
     if ($referenced_node) {
       $text = l($referenced_node->title, 'node/'. $referenced_node->nid);
@@ -190,7 +190,9 @@ function nodereference_widget($op, &$node, $field, &$node_field) {
         foreach ($options as $key => $value) {
           $options[$key] = _nodereference_item($field, $value);
         }
-        if (!$field['required']) $options = array('' => '') + $options;
+        if (!$field['required']) {
+          $options = array(0 => t('<none>')) + $options;
+        }
 
         $form[$field['field_name']] = array('#tree' => TRUE);
         $form[$field['field_name']]['nids'] = array(
@@ -207,6 +209,15 @@ function nodereference_widget($op, &$node, $field, &$node_field) {
 
       case 'process form values':
         if ($field['multiple']) {
+          if (empty($node_field['nids'])) {
+            // if nothing selected, make it 'none'
+            $node_field['nids'] = array('0');
+          }
+
+          if (count($node_field['nids']) > 1) {
+            // drop the 'none' options if other items were also selected
+            unset($node_field['nids'][0]);
+          }
           $node_field = content_transpose_array_rows_cols(array('nid' => $node_field['nids']));
         }
         else {
@@ -299,15 +310,15 @@ function nodereference_widget($op, &$node, $field, &$node_field) {
 
       case 'process form values':
         foreach ($node_field as $delta => $item) {
-          $nid = null;
+          $nid = 0;
           if (!empty($item['node_name'])) {
             preg_match('/^(?:\s*|(.*) )?\[\s*nid\s*:\s*(\d+)\s*\]$/', $item['node_name'], $matches);
             if (!empty($matches)) {
-              // autocomplete-added nid
+              // explicit nid
               $nid = $matches[2];
             }
             else {
-              // no autocomplete-added nid (JS disabled, or the user bypassed the autocompletion list)
+              // no explicit nid
               // TODO :
               // the best thing would be to present the user with an additional form,
               // allowing the user to choose between valid candidates with the same title
@@ -316,14 +327,14 @@ function nodereference_widget($op, &$node, $field, &$node_field) {
               $nid = array_shift(array_keys($nids));
             }
           }
-          if (isset($nid)) {
+          if (!empty($nid)) {
             $node_field[$delta]['nid'] = $nid;
             // Remove the widget's data representation so it isn't saved.
             unset($node_field[$delta]['node_name']);
           }
           else {
-            // Don't save empty fields.
-            unset($node_field[$delta]);
+            // Don't save empty fields when they're not the first value (keep '0' otherwise)
+            if ($delta > 0) {unset($node_field[$delta]);}
           }
         }
         break;
