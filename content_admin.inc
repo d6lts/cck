@@ -38,17 +38,17 @@ function _content_admin_type_fields() {
  * Menu callback; presents a listing of fields for a content type.
  */
 function _content_admin_field_overview($type_name) {
-  
+
   $type = content_types($type_name);
   $field_types = _content_field_types();
   
-  $header = array(t('Label'), t('Name'), t('Type'), array('data' => t('Operations'), 'colspan' => 2));
+  $header = array(t('Label'), t('Name'), t('Type'), t('Weight'), array('data' => t('Operations'), 'colspan' => 2));
   $rows = array();
-  $rows[] = array(t($type['title_label']), 'title', '', '', '');
+  $rows[] = array(t($type->title_label), 'title', '', '-5 '.t('(hardcoded)'), '', '');
 
   $c = db_query(db_rewrite_sql("SELECT v.*, n.type FROM {vocabulary} v INNER JOIN {vocabulary_node_types} n ON v.vid = n.vid WHERE n.type = '%s' ORDER BY v.weight, v.name", 'v', 'vid'), $type_name);
   while ($vocabulary = db_fetch_object($c)) {
-    $rows[] = array(check_plain($vocabulary->name), 'taxonomy', '', '', '');
+    $rows[] = array(check_plain($vocabulary->name), 'taxonomy', '', '', '', '');
   }
 
   foreach ($type['fields'] as $field) {
@@ -56,6 +56,7 @@ function _content_admin_field_overview($type_name) {
     $row[] = $field['widget']['label'];
     $row[] = $field['field_name'];
     $row[] = $field_types[$field['type']]['label'];
+    $row[] = $field['widget']['weight'];
 
     $row[] = l(t('configure'), 'admin/content/types/'. $type['url_str'] .'/fields/'. $field['field_name']);
     $row[] = l(t('remove'), 'admin/content/types/'. $type['url_str'] .'/fields/'. $field['field_name'] .'/remove');
