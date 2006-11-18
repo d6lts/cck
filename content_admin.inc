@@ -41,7 +41,7 @@ function _content_admin_field_overview($type_name) {
 
   $type = content_types($type_name);
   $field_types = _content_field_types();
-  
+
   $header = array(t('Label'), t('Name'), t('Type'), t('Weight'), array('data' => t('Operations'), 'colspan' => 2));
   $rows = array();
   $rows[] = array(t($type->title_label), 'title', '', '-5 '.t('(hardcoded)'), '', '');
@@ -267,7 +267,7 @@ function _content_admin_field_add_new_submit($form_id, $form_values) {
 function _content_admin_field_remove($type_name, $field_name) {
   $type = content_types($type_name);
   $field = $type['fields'][$field_name];
-  
+
   $form = array();
   $form['type_name'] = array(
     '#type' => 'value',
@@ -295,7 +295,7 @@ function _content_admin_field_remove($type_name, $field_name) {
 function _content_admin_field_remove_submit($form_id, $form_values) {
   $type = content_types($form_values['type_name']);
   $field = $type['fields'][$form_values['field_name']];
-  
+
   if ($type && $field && $form_values['confirm']) {
     content_field_instance_delete($form_values);
 
@@ -311,7 +311,7 @@ function _content_admin_field_remove_submit($form_id, $form_values) {
  */
 function _content_admin_field($type_name, $field_name) {
   $output = '';
-  
+
   $type = content_types($type_name);
   $field = $type['fields'][$field_name];
   $field_types = _content_field_types();
@@ -323,7 +323,7 @@ function _content_admin_field($type_name, $field_name) {
   $form['widget'] = array(
     '#type' => 'fieldset',
     '#title' => t('Widget settings'),
-    '#description' => t('These settings apply only to the %field field as it appears in the %type content type.', array('%field' => $field['widget']['label'], '%type' => $type['label'])),
+    '#description' => t('These settings apply only to the %field field as it appears in the %type content type.', array('%field' => $field['widget']['label'], '%type' => $type['name'])),
   );
   $options = array();
   foreach ($widget_types as $possible_widget_name => $possible_widget_type) {
@@ -509,7 +509,7 @@ function content_alter_db_field($previous_field, $previous_columns, $new_field, 
     }
     return;
   }
-  
+
   if ($new_field['db_storage'] == CONTENT_DB_STORAGE_PER_FIELD) {
     if (!count($previous_columns) || $previous_field['db_storage'] == CONTENT_DB_STORAGE_PER_CONTENT_TYPE) {
       // New columns with per-field storage; need to add a table.
@@ -649,7 +649,7 @@ function content_alter_db_field($previous_field, $previous_columns, $new_field, 
       }
     }
   }
-  
+
   if (count($previous_columns) && count($new_columns)) {
     // Remove obsolete columns.
     foreach ($previous_columns as $column => $attributes) {
