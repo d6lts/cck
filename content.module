@@ -42,7 +42,7 @@ function content_menu($may_cache) {
   if ($may_cache) {
       $items[] = array(
         'path' => 'admin/content/types/fields',
-        'title' => t('fields'),
+        'title' => t('Fields'),
         'callback' => '_content_admin_type_fields',
         'access' => $access,
         'type' => MENU_LOCAL_TASK,
@@ -53,19 +53,19 @@ function content_menu($may_cache) {
 
       $content_type = content_types(arg(3));
       $type = node_get_types('types', $content_type['type']);
-      
-      
+
+
       if (!empty($type) && arg(3) && arg(3) == $content_type['url_str']) {
         $items[] = array(
           'path' => 'admin/content/types/'. $content_type['url_str'] .'/edit',
-          'title' => t('edit'),
+          'title' => t('Edit'),
           'callback' => 'drupal_get_form',
           'callback arguments' => array('node_type_form', $type),
           'type' => MENU_DEFAULT_LOCAL_TASK,
         );
         $items[] = array(
           'path' => 'admin/content/types/'. $content_type['url_str'] .'/fields',
-          'title' => t('manage fields'),
+          'title' => t('Manage fields'),
           'callback' => '_content_admin_field_overview',
           'access' => $access,
           'callback arguments' => array($content_type['type']),
@@ -74,7 +74,7 @@ function content_menu($may_cache) {
         );
         $items[] = array(
           'path' => 'admin/content/types/'. $content_type['url_str'] .'/add_field',
-          'title' => t('add field'),
+          'title' => t('Add field'),
           'callback' => '_content_admin_field_add',
           'access' => $access,
           'callback arguments' => array($content_type['type']),
@@ -93,7 +93,7 @@ function content_menu($may_cache) {
           );
           $items[] = array(
             'path' => 'admin/content/types/'. $content_type['url_str'] .'/fields/'. arg(5) .'/remove',
-            'title' => t('remove field'),
+            'title' => t('Remove field'),
             'callback' => 'drupal_get_form',
             'access' => $access,
             'callback arguments' => array('_content_admin_field_remove', $content_type['type'], arg(5)),
@@ -104,7 +104,7 @@ function content_menu($may_cache) {
       }
     }
   }
-  
+
   return $items;
 }
 
@@ -329,7 +329,7 @@ function content_field($op, &$node, $field, &$node_field, $teaser, $page) {
             $item[$column] = 'NULL';
           }
           else {
-            switch ($attributes['type']) {          
+            switch ($attributes['type']) {
             case 'int':
             case 'mediumint':
             case 'tinyint':
@@ -453,7 +453,7 @@ function _content_field_invoke($op, &$node, $teaser = NULL, $page = NULL) {
   if (count($type['fields'])) {
     foreach ($type['fields'] as $field) {
       $node_field = isset($node->$field['field_name']) ? $node->$field['field_name'] : array();
- 
+
       $module = $field_types[$field['type']]['module'];
       $function = $module .'_field';
       if (function_exists($function)) {
@@ -492,7 +492,7 @@ function _content_field_invoke_default($op, &$node, $teaser = NULL, $page = NULL
   if (count($type['fields'])) {
     foreach ($type['fields'] as $field) {
       $node_field = isset($node->$field['field_name']) ? $node->$field['field_name'] : array();
- 
+
       $db_info = content_database_info($field);
       if (count($db_info['columns'])) {
         $result = content_field($op, $node, $field, $node_field, $teaser, $page);
@@ -559,7 +559,7 @@ function _content_widget_invoke($op, &$node) {
 function content_types($type_name = NULL) {
   // handle type name with either an underscore or a dash
   $type_name = !empty($type_name) ? str_replace('-', '_', $type_name) : NULL;
-        
+
   $info = _content_type_info();
   if (isset($type_name)) {
     if (isset($info['content types'][$type_name])) {
@@ -628,7 +628,7 @@ function _content_widget_types() {
  */
 function _content_type_info($reset = FALSE) {
   static $info;
-  
+
   if ($reset || !isset($info)) {
     if ($cached = cache_get('content_type_info', 'cache')) {
       $info = unserialize($cached->data);
@@ -707,7 +707,7 @@ function _content_type_info($reset = FALSE) {
         }
         $info['content types'][$type['type']] = $type;
       }
-      
+
       cache_set('content_type_info', 'cache', serialize($info), CACHE_PERMANENT);
     }
   }
@@ -840,7 +840,7 @@ function content_format($field, $item, $formatter = 'default', $node = NULL) {
   }
   $field_types = _content_field_types();
   $formatters = $field_types[$field['type']]['formatters'];
- 
+
   if (!isset($formatter, $formatters)) {
     $formatter = 'default';
   }
