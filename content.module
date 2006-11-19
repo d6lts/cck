@@ -6,8 +6,8 @@
  * Allows administrators to associate custom fields to content types.
  */
 
-define(CONTENT_DB_STORAGE_PER_FIELD, 0);
-define(CONTENT_DB_STORAGE_PER_CONTENT_TYPE, 1);
+define('CONTENT_DB_STORAGE_PER_FIELD', 0);
+define('CONTENT_DB_STORAGE_PER_CONTENT_TYPE', 1);
 
 if (module_exists('views')) {
   include_once(drupal_get_path('module', 'content') .'/content_views.inc');
