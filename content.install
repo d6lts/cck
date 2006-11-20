@@ -251,6 +251,9 @@ function content_update_9() {
          (type, name, module, description, help, has_title, title_label, has_body, body_label, custom, orig_type) 
            VALUES ('$data->type_name', '$data->label', 'node', '$data->description', '$data->help', 1, '$data->title_label', 0, '', 1, '$data->type_name')");
   }
+  $ret[] = update_sql("DROP TABLE {node_type_content}");
+  $ret[] = update_sql('DELETE FROM {cache}');
+
   return $ret;
 
 }
