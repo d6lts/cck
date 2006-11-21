@@ -9,7 +9,7 @@
 /**
  * Make changes needed when a content type is created.
  *
- * @param $info 
+ * @param $info
  *   value supplied by hook_node_type()
  * @return
  *   The ID of the newly-created content type.
@@ -24,7 +24,7 @@ function content_type_create($info) {
 /**
  * Load a content type.
  *
- * @param $info 
+ * @param $info
  *   value supplied by hook_node_type()
  * @return
  *   The content type array.
@@ -36,13 +36,13 @@ function content_type_read($info) {
 /**
  * Make changes needed when an existing content type is updated.
  *
- * @param $info 
+ * @param $info
  *   value supplied by hook_node_type()
  * @return
  *   The number of content types updated.
  */
 function content_type_update($info) {
-  
+
   $updated = 0;
   if ($info->type != $info->old_type) {
     // update all fields that use changed content type
@@ -58,13 +58,13 @@ function content_type_update($info) {
 /**
  * Make changes needed when a content type is deleted.
  *
- * @param $info 
+ * @param $info
  *   value supplied by hook_node_type()
  * @return
  *   The number of fields deleted.
  */
 function content_type_delete($info) {
-  
+
   $result = db_query("SELECT field_name FROM {node_field_instance} WHERE type_name = '%s'", $info->type);
   $field_names = array();
   while ($type = db_fetch_array($result)) {
@@ -72,17 +72,17 @@ function content_type_delete($info) {
   }
   $number_deleted = 0;
   foreach ($field_names as $field_name) {
-    content_field_instance_delete(array('type_name' => $properties['type_name'], 'field_name' => $field_name));
+    content_field_instance_delete(array('type_name' => $info->type, 'field_name' => $field_name));
     $number_deleted++;
   }
 
-  if (db_table_exists("node_". $properties['type_name'])) {
-    db_query("DROP TABLE {node_". $properties['type_name'] ."}");
+  if (db_table_exists("node_". $info->type)) {
+    db_query("DROP TABLE {node_". $info->type ."}");
   }
 
   // reset all content type info
   content_clear_type_cache();
-  
+
   return $number_deleted;
 }
 
@@ -96,7 +96,7 @@ function content_type_delete($info) {
  *
  * @param $properties
  *   An array of properties to load the field with. Valid keys:
- *   - '' - 
+ *   - '' -
  * @return
  *   The ID of the newly-created field.
  */
@@ -109,7 +109,7 @@ function content_field_create($properties) {
  *
  * @param $properties
  *   An array of properties to use in selecting a field. Valid keys:
- *   - '' - 
+ *   - '' -
  * @return
  *   The field array.
  */
@@ -122,7 +122,7 @@ function content_field_read($properties) {
  *
  * @param $properties
  *   An array of properties to set in the field. Valid keys:
- *   - '' - 
+ *   - '' -
  * @return
  *   The number of fields updated.
  */
@@ -157,7 +157,7 @@ function content_field_delete($properties) {
  *
  * @param $properties
  *   An array of properties to load the field instance with. Valid keys:
- *   - '' - 
+ *   - '' -
  * @return
  *   The ID of the newly-created field instance.
  */
@@ -184,7 +184,7 @@ function content_field_instance_read($properties) {
  *
  * @param $properties
  *   An array of properties to set in the field instance. Valid keys:
- *   - '' - 
+ *   - '' -
  * @return
  *   The number of field instance updated.
  */
@@ -204,7 +204,7 @@ function content_field_instance_update($properties) {
  */
 function content_field_instance_delete($properties) {
   $number_deleted = db_query("DELETE FROM {node_field_instance} WHERE type_name = '%s' AND field_name = '%s'", $properties['type_name'], $properties['field_name']);
-  
+
   $type = content_types($properties['type_name']);
   $field = $type['fields'][$properties['field_name']];
   $field_types = _content_field_types();
@@ -228,7 +228,7 @@ function content_field_instance_delete($properties) {
   }
 
   // If no instances remain, delete the field entirely.
-  else if ($instances == 0) {
+  elseif ($instances == 0) {
     if (is_array($columns) && count($columns)) {
       content_alter_db_field($field, $columns, array(), array());
     }
@@ -236,7 +236,7 @@ function content_field_instance_delete($properties) {
   }
 
   content_clear_type_cache();
-  
+
   return $number_deleted;
 }
 
