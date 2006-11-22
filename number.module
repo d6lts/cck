@@ -68,12 +68,12 @@ function number_field_settings($op, $field) {
     case 'database columns':
       if ($field['type'] == 'number_integer') {
         return array(
-          'value' => array('type' => 'int', 'not null' => TRUE, 'default' => 0, 'sortable' => TRUE),
+          'value' => array('type' => 'int', 'not null' => FALSE, 'default' => NULL, 'sortable' => TRUE),
         );
       }
       if ($field['type'] == 'number_decimal') {
         return array(
-          'value' => array('type' => 'float', 'not null' => TRUE, 'default' => 0, 'sortable' => TRUE),
+          'value' => array('type' => 'float', 'not null' => FALSE, 'default' => NULL, 'sortable' => TRUE),
         );
       }
 
@@ -185,7 +185,7 @@ function number_widget($op, &$node, $field, &$node_field) {
         $form[$field['field_name']]['#title'] = t($field['widget']['label']);
         $delta = 0;
         foreach ($node_field as $data) {
-          if ($data['value']) {
+          if (isset($data['value'])) {
             $form[$field['field_name']][$delta]['value'] = array(
               '#type' => 'textfield',
               '#title' => '',
@@ -222,7 +222,7 @@ function number_widget($op, &$node, $field, &$node_field) {
       // Don't save empty fields.
       if ($field['multiple']) {
         foreach ($node_field as $delta => $item) {
-          if ($item['value'] == '') {
+          if ($item['value'] == '' && $delta > 0) {
             unset($node_field[$delta]);
           }
         }
