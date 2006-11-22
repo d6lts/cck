@@ -209,15 +209,15 @@ function nodereference_widget($op, &$node, $field, &$node_field) {
 
       case 'process form values':
         if ($field['multiple']) {
+          // if nothing selected, make it 'none'
           if (empty($node_field['nids'])) {
-            // if nothing selected, make it 'none'
-            $node_field['nids'] = array('0');
+            $node_field['nids'] = array(0 => '0');
           }
-
-          if (count($node_field['nids']) > 1) {
-            // drop the 'none' options if other items were also selected
+          // drop the 'none' options if other items were also selected
+          elseif (count($node_field['nids']) > 1) {
             unset($node_field['nids'][0]);
           }
+
           $node_field = content_transpose_array_rows_cols(array('nid' => $node_field['nids']));
         }
         else {
@@ -472,7 +472,7 @@ function theme_nodereference_item_simple($item) {
  * Provide a list of users to filter on.
  */
 function _nodereference_filter_handler($op, $filterinfo) {
-  $options = array('' => '');
+  $options = array(0 => t('<empty>'));
   $options = $options + _nodereference_potential_references($filterinfo['extra']['field']);
   return $options;
 }
