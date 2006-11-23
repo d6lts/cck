@@ -641,7 +641,8 @@ function content_alter_db_field($previous_field, $previous_columns, $new_field, 
             }
           }  // end: if ($new_field['multiple'])
         }  // end: if ($new_field['db_storage'] == CONTENT_DB_STORAGE_PER_CONTENT_TYPE)
-      }      content_db_add_column($new_db_info['table'], $column_name, $attributes['type'], $attributes);
+      }
+      content_db_add_column($new_db_info['table'], $column_name, $attributes['type'], $attributes);
     }
     else {
       if ($attributes != $previous_columns[$column]) {
@@ -679,17 +680,17 @@ function content_alter_db_field($previous_field, $previous_columns, $new_field, 
     // Migrate data from per-field storage.
     if ($previous_field['db_storage'] == CONTENT_DB_STORAGE_PER_FIELD && $new_field['db_storage'] == CONTENT_DB_STORAGE_PER_CONTENT_TYPE) {
       $column_names = array();
-      $column_placeholders = array();
-      $column_assignments = array();
+      $column_placeholders_default = array();
+      $column_assignments_default = array();
       foreach ($new_db_info['columns'] as $column => $attributes) {
         $column_names[] = $attributes['column'];
         if (in_array($attributes['type'], array('int', 'mediumint', 'tinyint', 'bigint', 'float'))) {
-          $column_placeholders[] = '%d';
-          $column_assignments[] = $attributes['column'] .' = %d';
+          $column_placeholders_default[] = '%d';
+          $column_assignments_default[] = $attributes['column'] .' = %d';
         }
         else {
-          $column_placeholders[] = "'%s'";
-          $column_assignments[] = $attributes['column'] ." = '%s'";
+          $column_placeholders_default[] = "'%s'";
+          $column_assignments_default[] = $attributes['column'] ." = '%s'";
         }
       }
       if ($previous_field['multiple']) {
@@ -699,6 +700,17 @@ function content_alter_db_field($previous_field, $previous_columns, $new_field, 
         $result = db_query('SELECT '. implode(', ', $column_names) .', vid, nid FROM {'. $previous_db_info['table'] .'}');
       }
       while ($data = db_fetch_array($result)) {
+        $column_assignments = $column_assignments_default;
+        $column_placeholders = $column_placeholders_default;
+        // search for NULL values and replace assignments and placeholders accordingly
+        foreach ($data as $key => $value) {
+          if (is_null($value)) {
+            $pos = array_search($key, $column_names);
+            $column_assignments[$pos] = $key ."= %s";
+            $column_placeholders[$pos] = "%s";
+            $data[$key] = 'NULL';
+          }
+        }
         if (db_result(db_query('SELECT COUNT(*) FROM {'. $new_db_info['table'] .'} WHERE vid = %d AND nid = %d', $data['vid'], $data['nid']))) {
           db_query('UPDATE {'. $new_db_info['table'] .'} SET '. implode(', ', $column_assignments) .' WHERE vid = %d AND nid = %d', $data);
         }
