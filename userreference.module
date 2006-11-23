@@ -46,7 +46,7 @@ function userreference_field_settings($op, $field) {
 
     case 'database columns':
       $columns = array(
-        'uid' => array('type' => 'int', 'not null' => TRUE, 'default' => '0'),
+        'uid' => array('type' => 'int', 'not null' => FALSE, 'default' => NULL),
       );
       return $columns;
 
@@ -103,11 +103,11 @@ function userreference_field_formatter($field, $item, $formatter, $node) {
       $text = theme('username', $referenced_user);
     }
   }
-  
+
   switch ($formatter) {
     case 'plain':
       return strip_tags($text);
-    
+
     default:
       return $text;
   }
@@ -137,14 +137,17 @@ function userreference_widget($op, &$node, $field, &$node_field) {
     switch ($op) {
       case 'prepare form values':
         $node_field_transposed = content_transpose_array_rows_cols($node_field);
-        $node_field['default uids'] = $node_field_transposed['uid'];
+        // get rid of null values
+        $node_field['default uids'] = @array_filter($node_field_transposed['uid']);
         break;
 
       case 'form':
         $form = array();
 
         $options = _userreference_potential_references($field);
-        
+        if (empty($node_field['default uids'])) {
+          $node_field['default uids'][] = 'none';
+        }
         $form[$field['field_name']] = array('#tree' => TRUE);
         $form[$field['field_name']]['uids'] = array(
           '#type' => 'select',
@@ -160,10 +163,17 @@ function userreference_widget($op, &$node, $field, &$node_field) {
 
       case 'process form values':
         if ($field['multiple']) {
-          $node_field = content_transpose_array_rows_cols(array('uid' => $node_field['uids']));
+          // drop the 'none' option
+          unset($node_field['uids']['none']);
+          if (!empty($node_field['uids'])) {
+            $node_field = content_transpose_array_rows_cols(array('uid' => $node_field['uids']));
+          }
+          else {
+            $node_field[0]['uid'] = '';
+          }
         }
         else {
-          $node_field[0]['uid'] = $node_field['uids'];
+          $node_field[0]['uid'] = ($node_field['uids'] != 'none') ? $node_field['uids'] : '';
         }
         // Remove the widget's data representation so it isn't saved.
         unset($node_field['uids']);
@@ -173,7 +183,9 @@ function userreference_widget($op, &$node, $field, &$node_field) {
     switch ($op) {
       case 'prepare form values':
         foreach($node_field as $delta => $item) {
-          $node_field[$delta]['default user_name'] = db_result(db_query("SELECT name FROM {users} WHERE uid = '%d'", $node_field[$delta]['uid']));
+          if (!empty($node_field[$delta]['uid'])) {
+            $node_field[$delta]['default user_name'] = db_result(db_query("SELECT name FROM {users} WHERE uid = '%d'", $node_field[$delta]['uid']));
+          }
         }
         break;
 
@@ -231,14 +243,16 @@ function userreference_widget($op, &$node, $field, &$node_field) {
 
       case 'process form values':
         foreach ($node_field as $delta => $item) {
-          $uid = db_result(db_query("SELECT uid FROM {users} WHERE name = '%s'", $node_field[$delta]['user_name']));
+          $uid = '';
+          if (!empty($node_field[$delta]['user_name'])) {
+            $uid = db_result(db_query("SELECT uid FROM {users} WHERE name = '%s'", $node_field[$delta]['user_name']));
+          }
           // Remove the widget's data representation so it isn't saved.
           unset($node_field[$delta]['user_name']);
-          if ($uid) {
-            $node_field[$delta]['uid'] = $uid;
-          }
-          else {
-            unset($node_field[$delta]); 
+          $node_field[$delta]['uid'] = $uid;
+          // Don't save empty fields when they're not the first value (store NULL otherwise)
+          if (empty($uid) && $delta > 0) {
+            unset($node_field[$delta]);
           }
         }
     }
@@ -250,7 +264,7 @@ function userreference_widget($op, &$node, $field, &$node_field) {
  */
 function _userreference_potential_references($field) {
   if (!$field['required']) {
-    $users = array(0 => '');
+    $users = array('none' => t('<none>'));
   } else {
     $users = array();
   }
