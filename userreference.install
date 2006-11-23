@@ -85,3 +85,44 @@ function userreference_update_3() {
   db_query('DELETE FROM {cache}');
   return $ret;
 }
+
+/**
+ * Set the value columns to accept NULL values
+ * and replace 0 with NULL in the field data tables
+ */
+function userreference_update_4() {
+  $ret = array();
+
+  include_once(drupal_get_path('module', 'content') .'/content.module');
+  include_once(drupal_get_path('module', 'content') .'/content_admin.inc');
+
+  $fields = content_fields();
+
+
+  foreach ($fields as $field) {
+    switch ($field['type']) {
+      case 'userreference':
+        $db_info = content_database_info($field);
+        $columns_old = $db_info['columns'];
+        $columns = $columns_old;
+        $columns['uid']['not null'] = FALSE;
+        $columns['uid']['default'] = NULL;
+        // force the old values : if the db info was rebuilt before the update is run,
+        // it will already contain the new values, and nothing gets changed in content_alter_db_field
+        $columns_old['uid']['not null'] = TRUE;
+        $columns_old['uid']['default'] = 0;
+
+        content_alter_db_field($field, $columns_old, $field, $columns);
+        $ret[] = array(
+          'query' => strtr('The field %field_name has been updated to accept NULL values.', array('%field_name' => $field['field_name'])),
+          'success' => TRUE
+        );
+
+        $ret[] = update_sql("UPDATE {". $db_info['table'] ."} SET ". $db_info['columns']['uid']['column'] ." = NULL WHERE ". $db_info['columns']['uid']['column'] ." = 0");
+        break;
+    }
+  }
+
+  db_query('DELETE FROM {cache}');
+  return $ret;
+}
