@@ -459,8 +459,9 @@ function _content_field_invoke($op, &$node, $teaser = NULL, $page = NULL) {
         $result = $function($op, $node, $field, $node_field, $teaser, $page);
         if ($op == 'view') {
           if (!is_array($result)) $result = array($result);
+          $return[$field['field_name']] = array('#weight' => $field['widget']['weight']);
           foreach ($result as $delta => $value) {
-            $return[$field['field_name']][$delta] = array('#value' => $value, '#weight' => $field['widget']['weight']);
+            $return[$field['field_name']][$delta] = array('#value' => $value);
           }
         }
         elseif (is_array($result)) {
