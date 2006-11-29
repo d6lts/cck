@@ -44,7 +44,12 @@ function _content_admin_field_overview($type_name) {
 
   $header = array(t('Label'), t('Name'), t('Type'), t('Weight'), array('data' => t('Operations'), 'colspan' => 2));
   $rows = array();
-  $rows[] = array(t($type->title_label), 'title', '', '-5 '.t('(hardcoded)'), '', '');
+  if ($type['has_title']) {
+    $rows[] = array(t($type['title_label']), 'title', '', '-5 '.t('(hardcoded)'), '', '');
+  }
+  if ($type['has_body']) {
+    $rows[] = array(t($type['body_label']), 'body', '', '0 '.t('(hardcoded)'), '', '');
+  }
 
   $c = db_query(db_rewrite_sql("SELECT v.*, n.type FROM {vocabulary} v INNER JOIN {vocabulary_node_types} n ON v.vid = n.vid WHERE n.type = '%s' ORDER BY v.weight, v.name", 'v', 'vid'), $type_name);
   while ($vocabulary = db_fetch_object($c)) {
