@@ -241,9 +241,6 @@ function content_nodeapi(&$node, $op, $teaser, $page) {
     case 'load':
       return content_load($node);
 
-    case 'form':
-      return content_form($node);
-
     case 'validate':
       content_validate($node);
       break;
@@ -270,7 +267,7 @@ function content_nodeapi(&$node, $op, $teaser, $page) {
 
     case 'view':
       content_view($node, $teaser, $page);
-       break;
+      break;
   }
 }
 
