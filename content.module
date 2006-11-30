@@ -227,7 +227,8 @@ function content_view(&$node, $teaser = FALSE, $page = FALSE) {
   if ($node->in_preview) {
     _content_widget_invoke('process form values', $node);
   }
-  $node->content += _content_field_invoke('view', $node, $teaser, $page);
+  $content = _content_field_invoke('view', $node, $teaser, $page);
+  $node->content = array_merge((array) $node->content, $content);
 }
 
 /**
