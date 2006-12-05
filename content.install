@@ -3,19 +3,15 @@
 
 /**
  * Implementation of hook_install().
+ * 
+ * The 4.7 install file had creation text for a node_type table that is now created by core.
+ * The install script for that table has been removed from the 5.x branch install file.
+ * Refer to the 4.7 install file to see the original database configuration script.
  */
 function content_install() {
   switch ($GLOBALS['db_type']) {
     case 'mysql':
     case 'mysqli':
-      db_query("CREATE TABLE {node_type_content} (
-          type_name varchar(32) NOT NULL default '',
-          label varchar(255) NOT NULL default '',
-          description mediumtext NOT NULL,
-          help mediumtext NOT NULL,
-          title_label varchar(255) NOT NULL default '',
-          PRIMARY KEY  (type_name)
-        ) TYPE=MyISAM /*!40100 DEFAULT CHARACTER SET utf8 */;");
       db_query("CREATE TABLE {node_field} (
           field_name varchar(32) NOT NULL default '',
           type varchar(127) NOT NULL default '',
@@ -38,14 +34,6 @@ function content_install() {
       break;
 
     case 'pgsql':
-      db_query("CREATE TABLE {node_type_content} (
-          type_name varchar(32) NOT NULL default '',
-          label varchar(255) NOT NULL default '',
-          description text NOT NULL,
-          help text NOT NULL,
-          title_label varchar(255) NOT NULL default '',
-          PRIMARY KEY  (type_name)
-        )");
       db_query("CREATE TABLE {node_field} (
           field_name varchar(32) NOT NULL default '',
           type varchar(127) NOT NULL default '',
@@ -223,38 +211,100 @@ function content_update_7() {
   }
 }
 
+
 /**
  * Rename the "node_type" table to avoid a conflict with a later core addition
  */
 function content_update_8() {
   $ret = array();
+  if (!db_table_exists('node_type_content')) {
+    switch ($GLOBALS['db_type']) {
+      case 'mysql':
+      case 'mysqli':
+        $ret[] = update_sql('RENAME TABLE {node_type} TO {node_type_content}');
+        break;
+
+      case 'pgsql':
+        $ret[] = update_sql('ALTER TABLE {node_type} RENAME TO {node_type_content}');
+        break;
+    }
+  }
+  return $ret;
+}
+
+/**
+ *  Start 5.0 update series
+ * 
+ *  First, catch up for databases which did not get node_type table renamed in 4.7 before updating to 5.0
+ *  We'll know them because update_8 will rename the node_type table to node_content_type leaving no table named node_type
+ *  A core patch has been submitted to get the rename done by the system module, so we need to test whether the table is already renamed 
+ */
+function content_4_7_migration_messages() {
+
+  // if the node_type_content table already exists, and the node_type table got created, there will be no errors and no need for messages
+  // this will be the case if the core patch gets committed and the update is done from a version that has that patch in it
+  if (db_table_exists('node_type_content') && db_table_exists('node_type')) return;
   
-  switch ($GLOBALS['db_type']) {
-    case 'mysql':
-    case 'mysqli':
-      $ret[] = update_sql('RENAME TABLE {node_type} TO {node_type_content}');
+  $op = isset($_REQUEST['op']) ? $_REQUEST['op'] : '';
+  switch ($op) {
+    case 'selection':
+      $_SESSION['content_init_version'] = drupal_get_installed_schema_version('content');
+      $_SESSION['system_init_version'] = drupal_get_installed_schema_version('system');
+      if ($_SESSION['content_init_version'] < 8) {
+        if ($_SESSION['system_init_version'] < 1000) {
+          // both system and content updates will run in the next go
+          drupal_set_message("<h3>Warning :</h3><p>During this upgade, you will most probably encounter <strong>SQL errors</strong>.<br/><strong>Please ignore these errors</strong>, they will get corrected in the subsequent CCK upgrade and <strong>will not affect the migration of your site</strong></p><p>Note : These errors appear because your current CCK database scheme is not the latest 4.7 version. See the UPDATE.txt file in your cck folder.</p>");
+        }
+        else {
+          // system update was run (and errors probably encountered), content update still to go
+          drupal_set_message("<h3>Warning :</h3><p><strong>You may have encountered SQL errors</strong> during the previous system upgrade to 5.0.<br/>Those errors in 'Content update 1005' involved 'node_type' table and 'type' column.<br/>They will get corrected during the CCK upgrade, and <strong>will not affect the migration of your site</strong>.</p><p>Note : These errors appear because your CCK database scheme was not the latest 4.7 version. See the UPDATE.txt file in your cck folder.</p>");
+        }
+      }
       break;
 
-    case 'pgsql':
-      $ret[] = update_sql('ALTER TABLE {node_type} RENAME TO {node_type_content}');
+    case 'finished' :
+      if ($_SESSION['content_init_version'] < 8) {
+        if ($_SESSION['system_init_version'] < 1000 && $_SESSION['system'][1005][0]['success'] == FALSE) {
+          // system and content updates were made in the same go
+          drupal_set_message("<strong>Please ignore the errors in 'System update #1005'.</strong> and SQL errors involving 'node_type' table and 'type' column.<br/>They have been corrected in 'Content update #1001' and <strong>will not affect the migration of your site</strong>.");
+        }
+        else {
+          // system updates were already made in a previous go, content updates jun ran
+          drupal_set_message("The errors you may have previously encountered in 'System update #1005' have been corrected and <strong>will not affect the migration of your site</strong>.");
+        }
+      }
+      unset($_SESSION['content_init_version'], $_SESSION['system_init_version']);
       break;
   }
-
-  return $ret;
 }
+// set message here so it displays ahead of system updates if this module is enabled
+content_4_7_migration_messages();
 
-function content_update_9() {
+function content_update_1000() {
   $ret = array();
-  $result = db_query("SELECT type_name, label, description, help, title_label FROM {node_type_content}");
-  while ($data = db_fetch_object($result)) {
-    $ret[] = update_sql("INSERT INTO {node_type} 
-         (type, name, module, description, help, has_title, title_label, has_body, body_label, custom, orig_type) 
-           VALUES ('$data->type_name', '$data->label', 'node', '$data->description', '$data->help', 1, '$data->title_label', 0, '', 1, '$data->type_name')");
+
+  if (!db_table_exists('node_type')) {
+    // rerun system_update_1005(), if it failed the first time it was run
+    $ret = system_update_1005();
   }
-  $ret[] = update_sql("DROP TABLE {node_type_content}");
-  $ret[] = update_sql('DELETE FROM {cache}');
-
   return $ret;
-
 }
 
+/**
+ *  Copy node_type_content table back to node_type
+ */
+function content_update_1001() {
+  $ret = array();
+  
+  if (db_table_exists('node_type_content')) {
+    $result = db_query("SELECT type_name, label, description, help, title_label FROM {node_type_content}");
+    while ($data = db_fetch_object($result)) {
+      $ret[] = update_sql("INSERT INTO {node_type} 
+         (type, name, module, description, help, has_title, title_label, has_body, body_label, custom, orig_type, min_word_count) 
+           VALUES ('". db_escape_string($data->type_name) ."', '". db_escape_string($data->label) ."', 'node', '". db_escape_string($data->description) ."', '". db_escape_string($data->help) ."', 1, '". db_escape_string($data->title_label) ."', 0, '', 1, '". db_escape_string($data->type_name) ."', 0)");
+    }
+    $ret[] = update_sql("DROP TABLE {node_type_content}");
+    $ret[] = update_sql('DELETE FROM {cache}');
+  }
+  return $ret;
+}
