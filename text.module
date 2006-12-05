@@ -167,14 +167,14 @@ function text_field_formatter($field, $item, $formatter, $node) {
   else {
     $text = check_plain($item['value']);
   }
-  
+
   switch ($formatter) {
     case 'plain':
       return strip_tags($text);
-    
+
     case 'trimmed':
       return node_teaser($text, $field['text_processing'] ? $item['format'] : NULL);
-    
+
     default:
       return $text;
   }
@@ -330,12 +330,10 @@ function text_widget($op, &$node, $field, &$items) {
       break;
 
     case 'process form values':
-      // Don't save empty fields.
-      if ($field['multiple']) {
-        foreach ($items as $delta => $item) {
-          if ($item['value'] == '') {
-            unset($items[$delta]);
-          }
+      // Don't save empty fields except the first value
+      foreach ($items as $delta => $item) {
+        if ($item['value'] == '' && $delta > 0) {
+          unset($items[$delta]);
         }
       }
       break;
