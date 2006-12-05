@@ -13,14 +13,14 @@ function content_install() {
     case 'mysql':
     case 'mysqli':
       db_query("CREATE TABLE {node_field} (
-          field_name varchar(32) NOT NULL default '',
-          type varchar(127) NOT NULL default '',
-          global_settings mediumtext NOT NULL,
-          required int NOT NULL default '0',
-          multiple int NOT NULL default '0',
-          db_storage int NOT NULL default '0',
-          PRIMARY KEY  (field_name)
-        ) TYPE=MyISAM /*!40100 DEFAULT CHARACTER SET utf8 */;");
+        field_name varchar(32) NOT NULL default '',
+        type varchar(127) NOT NULL default '',
+        global_settings mediumtext NOT NULL,
+        required int NOT NULL default '0',
+        multiple int NOT NULL default '0',
+        db_storage int NOT NULL default '0',
+        PRIMARY KEY  (field_name)
+      ) TYPE=MyISAM /*!40100 DEFAULT CHARACTER SET utf8 */;");
       db_query("CREATE TABLE {node_field_instance} (
         field_name varchar(32) NOT NULL default '',
         type_name varchar(32) NOT NULL default '',
@@ -35,24 +35,24 @@ function content_install() {
 
     case 'pgsql':
       db_query("CREATE TABLE {node_field} (
-          field_name varchar(32) NOT NULL default '',
-          type varchar(127) NOT NULL default '',
-          global_settings text NOT NULL,
-          required integer NOT NULL default '0',
-          multiple integer NOT NULL default '0',
-          db_storage integer NOT NULL default '0',
-          PRIMARY KEY  (field_name)
-        )");
+        field_name varchar(32) NOT NULL default '',
+        type varchar(127) NOT NULL default '',
+        global_settings text NOT NULL,
+        required integer NOT NULL default '0',
+        multiple integer NOT NULL default '0',
+        db_storage integer NOT NULL default '0',
+        PRIMARY KEY  (field_name)
+      )");
       db_query("CREATE TABLE {node_field_instance} (
-          field_name varchar(32) NOT NULL default '',
-          type_name varchar(32) NOT NULL default '',
-          weight integer NOT NULL default '0',
-          label varchar(255) NOT NULL default '',
-          widget_type varchar(32) NOT NULL default '',
-          widget_settings text NOT NULL,
-          description text NOT NULL,
-          PRIMARY KEY  (field_name,type_name)
-        )");
+        field_name varchar(32) NOT NULL default '',
+        type_name varchar(32) NOT NULL default '',
+        weight integer NOT NULL default '0',
+        label varchar(255) NOT NULL default '',
+        widget_type varchar(32) NOT NULL default '',
+        widget_settings text NOT NULL,
+        description text NOT NULL,
+        PRIMARY KEY  (field_name,type_name)
+      )");
       break;
   }
 }
@@ -211,7 +211,6 @@ function content_update_7() {
   }
 }
 
-
 /**
  * Rename the "node_type" table to avoid a conflict with a later core addition
  */
@@ -291,20 +290,21 @@ function content_update_1000() {
 }
 
 /**
- *  Copy node_type_content table back to node_type
+ *  Copy node_type_content table back to core node_type table
  */
 function content_update_1001() {
   $ret = array();
-  
+
   if (db_table_exists('node_type_content')) {
     $result = db_query("SELECT type_name, label, description, help, title_label FROM {node_type_content}");
     while ($data = db_fetch_object($result)) {
-      $ret[] = update_sql("INSERT INTO {node_type} 
-         (type, name, module, description, help, has_title, title_label, has_body, body_label, custom, orig_type, min_word_count) 
+      $ret[] = update_sql("INSERT INTO {node_type}
+         (type, name, module, description, help, has_title, title_label, has_body, body_label, custom, orig_type, min_word_count)
            VALUES ('". db_escape_string($data->type_name) ."', '". db_escape_string($data->label) ."', 'node', '". db_escape_string($data->description) ."', '". db_escape_string($data->help) ."', 1, '". db_escape_string($data->title_label) ."', 0, '', 1, '". db_escape_string($data->type_name) ."', 0)");
     }
     $ret[] = update_sql("DROP TABLE {node_type_content}");
     $ret[] = update_sql('DELETE FROM {cache}');
   }
+
   return $ret;
 }
