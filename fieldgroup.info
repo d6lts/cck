@@ -1,0 +1,6 @@
+; $Id$
+name = Fieldgroup
+description = Create field groups for CCK fields.
+version = "$Name$"
+dependencies = content
+package = CCK
