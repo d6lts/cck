@@ -101,7 +101,7 @@ function content_views_field_handler($field_info, $field_data, $value, $data) {
     $view_column_name = 'node_data_'. $field['field_name'] .'_'. $attributes['column'];
     $item[$column] = $data->$view_column_name;
   }
-  return content_format($field, $item, $field_data['options']);
+  return content_format($field, $item, $field_data['options'], $data);
 }
 
 /**
