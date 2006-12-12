@@ -888,6 +888,10 @@ function content_db_construct_column_type($column, $type, &$attributes, &$not_nu
 
     case 'mysql':
     case 'mysqli':
+      // MySQL allows no DEFAULT value for text (and blob) columns
+      if (in_array($type, array('text', 'mediumtext', 'longtext'))) {
+        $default = '';
+      }
       break;
   }
 
