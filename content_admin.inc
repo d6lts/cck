@@ -763,6 +763,10 @@ function content_db_add_column($table, $column, $type, $attributes = array()) {
 
     case 'mysql':
     case 'mysqli':
+      // MySQL allows no DEFAULT value for text (and blob) columns
+      if (in_array($type, array('text', 'mediumtext', 'longtext'))) {
+        $default = '';
+      }
       break;
   }
 
