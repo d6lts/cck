@@ -35,7 +35,7 @@ function content_menu($may_cache) {
   $access = user_access('administer content types');
 
   // Only include administrative callbacks if we are viewing an admin page.
-  if (arg(0) == 'admin' && arg(1) == 'content' && arg(2) == 'types') {
+  if (arg(0) == 'admin') {
     include_once(drupal_get_path('module', 'content') .'/content_admin.inc');
   }
 
