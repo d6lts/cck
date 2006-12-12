@@ -206,6 +206,7 @@ function content_update(&$node) {
 function content_delete(&$node) {
   _content_field_invoke('delete', $node);
   _content_field_invoke_default('delete', $node);
+  db_query('DELETE FROM {'. 'node_'. $node->type .'} WHERE nid = %d', $node->nid);
   cache_clear_all('content:'. $node->nid, 'cache', TRUE);
 }
 
@@ -216,6 +217,7 @@ function content_delete_revision(&$node) {
   if (content_types($node->type)) {
     _content_field_invoke('delete revision', $node);
     _content_field_invoke_default('delete revision', $node);
+    db_query('DELETE FROM {'. 'node_'. $node->type .'} WHERE vid = %d', $node->vid);
     cache_clear_all('content:'. $node->nid .':'. $node->vid, 'cache');
   }
 }
