@@ -13,8 +13,14 @@ Now go to administer -> content -> content types. Create a new
 content type and edit it to add some fields. Then test by creating
 a new node of your new type using the create content menu link.
 
-The included optionswidget,module provides radio and check box selectors
+The included optionswidget.module provides radio and check box selectors
 for text and numeric types.
+
+The included fieldgroup.module allows you to group fields together
+in fieldsets to help organize them.
+
+A comprehensive guide to using CCK is available as a CCK Handbook
+at http://drupal.org/node/101723.
 
 jvandyk [at] iastate.edu
 jchaffer [at] structureinteractive.com
