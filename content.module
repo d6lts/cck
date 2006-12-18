@@ -101,6 +101,9 @@ function content_menu($may_cache) {
     }
   }
   else {
+
+    theme_add_style(drupal_get_path('module', 'content') .'/content.css');
+
     if (arg(0) == 'admin' && arg(1) == 'node' && arg(2) == 'types' && arg(3)) {
 
       $type = content_types(arg(3));
@@ -253,7 +256,7 @@ function content_load($node) {
 function content_form(&$node, &$param) {
   $form = array();
   $type = content_types($node->type);
-
+  
   // Set form parameters so we can accept file uploads.
   $form['#attributes'] = array("enctype" => "multipart/form-data");
 
@@ -266,7 +269,6 @@ function content_form(&$node, &$param) {
 
   _content_widget_invoke('prepare form values', $node);
   $form = array_merge($form, _content_widget_invoke('form', $node));
-
   return $form;
 }
 
