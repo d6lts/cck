@@ -20,16 +20,30 @@ function optionwidgets_help($section) {
  * Implementation of hook_widget_info().
  */
 function optionwidgets_widget_info() {
+  
+  $option_types = array('text', 'number_integer', 'number_decimal');
   return array(
     'options_select' => array(
       'label' => 'Select list',
-      'field types' => array('text', 'number_integer', 'number_decimal'),
+      'field types' => $option_types,
     ),
     'options_buttons' => array(
       'label' => 'Check boxes/radio buttons',
-      'field types' => array('text', 'number_integer', 'number_decimal'),
+      'field types' => $option_types,
     ),
   );
+}
+
+/**
+ * Implementation of hook_widget_settings().
+ */
+function optionwidgets_widget_settings($op, $widget) {
+  $form = array();
+  switch ($op) {
+    case 'form':
+      $form['#prefix'] = t('Create a list of options as a list in Allowed values or as an array in Php code at the bottom of this page. These values will be the same for the %field in all content types. The Check boxes/radio buttons widget will display checkboxes if the multiple values option is selected for this field, otherwise radios will be displayed.', array('%field' => $widget['label']));
+  }
+  return $form;
 }
 
 /**
@@ -39,18 +53,16 @@ function optionwidgets_widget($op, &$node, $field, &$node_field) {
   switch ($op) {
     case 'prepare form values':
       $options = _optionwidgets_options($field);
-
       $node_field_transposed = content_transpose_array_rows_cols($node_field);
       $values = (isset($node_field_transposed['value']) && is_array($node_field_transposed['value'])) ? $node_field_transposed['value'] : array();
-
+      
       $keys = array();
       foreach ($values as $value) {
-        $key = array_search($value, $options);
-        if ($key) {
-          $keys[] = $key;
+        $key = array_search($value, array_keys($options));
+        if (isset($key)) {
+          $keys[] = $value;
         }
       }
-
       if ($field['multiple']) {
         $node_field['default keys'] = $keys;
       }
@@ -63,12 +75,12 @@ function optionwidgets_widget($op, &$node, $field, &$node_field) {
       $options = _optionwidgets_options($field);
       
       $form = array();
-
+            
       $form[$field['field_name']] = array('#tree' => TRUE);
-
+      
       switch ($field['widget']['type']) {
         case 'options_select':
-          if (!$field['required']) $options = array('' => '') + $options;
+          if (!$field['required']) $options = array('' => theme('optionwidgets_none', $field['widget']['type'], $field['field_name'], $node->type)) + $options;
           if ($field['multiple']) {
             $form[$field['field_name']]['keys'] = array(
               '#type' => 'select',
@@ -105,6 +117,7 @@ function optionwidgets_widget($op, &$node, $field, &$node_field) {
             );
           }
           else {
+            if (!$field['required']) $options = array('' => theme('optionwidgets_none', $field['widget']['type'], $field['field_name'], $node->type)) + $options;
             $form[$field['field_name']]['key'] = array(
               '#type' => 'radios',
               '#title' => t($field['widget']['label']),
@@ -116,6 +129,7 @@ function optionwidgets_widget($op, &$node, $field, &$node_field) {
           }
           break;
       }
+      
       return $form;
 
     case 'process form values':
@@ -127,16 +141,16 @@ function optionwidgets_widget($op, &$node, $field, &$node_field) {
       else {
         $keys = array($node_field['key']);
       }
-
+      
       $values = array();
       foreach ($keys as $key) {
         if (isset($options[$key])) {
-          $values[] = $options[$key];
+          $values[] = $key;
         }
       }
-
+      
       $node_field = content_transpose_array_rows_cols(array('value' => $values));
-
+      
       // Remove the widget's data representation so it isn't saved.
       unset($node_field['keys']);
       unset($node_field['key']);
@@ -145,16 +159,27 @@ function optionwidgets_widget($op, &$node, $field, &$node_field) {
 }
 
 function _optionwidgets_options($field) {
-  $allowed_values = explode("\n", $field['allowed_values']);
-  $allowed_values = array_map('trim', $allowed_values);
-  $allowed_values = array_filter($allowed_values, 'strlen');
-
-  // Create an array indexed starting at 1; checkboxes cannot have 0 keys.
-  $return_array = array();
-  $i = 1;
-  foreach ($allowed_values as $value) {
-    $return_array[$i] = $value;
-    $i++;
+  
+  $types = _content_field_types();
+  $field_allowed_values = $types[$field['type']]['module'] .'_allowed_values';
+  if (function_exists($field_allowed_values)) {
+    return $field_allowed_values($field);
   }
-  return (drupal_map_assoc($return_array));
+  else {
+    return array();
+  }
+
+}
+
+/**
+ *  Theme the label for the empty value for options that are not required.
+ *  The default theme will display N/A for a radio list and blank for a select.
+ */
+function theme_optionwidgets_none($widget_type, $field_name, $node_type) {
+  switch ($widget_type) {
+  case 'options_buttons':
+    return t('N/A');
+  default :
+    return '';
+  }
 }

@@ -48,16 +48,29 @@ function text_field_settings($op, $field) {
       );
       $form['allowed_values'] = array(
         '#type' => 'textarea',
-        '#title' => t('Allowed values'),
+        '#title' => t('Allowed values list'),
         '#default_value' => isset($field['allowed_values']) ? $field['allowed_values'] : '',
         '#required' => FALSE,
         '#rows' => 10,
-        '#description' => t('The possible values this field can contain. Any other values will result in an error. Enter one value per line.'),
+        '#description' => t('The possible values this field can contain. Enter one value per line, in the format key|label. The key is the value that will be stored in the database and it must match the field storage type, %type. The label is optional and the key will be used as the label if no label is specified.', array('%type' => $field['type'])),
+      );
+      $form['advanced_options'] = array(
+        '#type' => 'fieldset',
+        '#title' => t('Php code'),
+        '#collapsible' => TRUE,
+        '#collapsed' => TRUE,
+      );
+      $form['advanced_options']['allowed_values_php'] = array(
+        '#type' => 'textarea',
+        '#title' => t('Code'),
+        '#default_value' => $field['allowed_values_php'],
+        '#rows' => 6,
+        '#description' => t('Advanced Usage Only: PHP code that returns a keyed array of allowed values. Should not include &lt;?php ?&gt; delimiters. If this field is filled out, the array returned by this code will override the allowed values list above.'),
       );
       return $form;
 
     case 'save':
-      return array('text_processing', 'max_length', 'allowed_values');
+      return array('text_processing', 'max_length', 'allowed_values', 'allowed_values_php');
 
     case 'database columns':
       $columns = array(
@@ -76,19 +89,17 @@ function text_field_settings($op, $field) {
       return $columns;
 
     case 'filters':
-      $allowed_values = explode("\n", $field['allowed_values']);
-      $allowed_values = array_map('trim', $allowed_values);
-      $allowed_values = array_filter($allowed_values, 'strlen');
-      if (count($allowed_values)) {
-        return array(
-          'default' => array(
-            'list' => drupal_map_assoc($allowed_values),
-            'list-type' => 'list',
-            'operator' => 'views_handler_operator_or',
-            'value-type' => 'array',
-          ),
-        );
-      }
+      $allowed_values = text_allowed_values($field);
+       if (count($allowed_values)) {
+         return array(
+           'default' => array(
+            'list' => $allowed_values,
+             'list-type' => 'list',
+             'operator' => 'views_handler_operator_or',
+             'value-type' => 'array',
+            ),
+          );
+        }
       else {
         return array(
           'like' => array(
@@ -113,15 +124,13 @@ function text_field($op, &$node, $field, &$items, $teaser, $page) {
       return theme('field', $node, $field, $items, $teaser, $page);
 
     case 'validate':
-      $allowed_values = explode("\n", $field['allowed_values']);
-      $allowed_values = array_map('trim', $allowed_values);
-      $allowed_values = array_filter($allowed_values, 'strlen');
+      $allowed_values = text_allowed_values($field);
 
       if (is_array($items)) {
         foreach ($items as $delta => $item) {
           $error_field = $field['field_name'].']['.$delta.'][value';
           if ($item['value'] != '') {
-            if (count($allowed_values) && !in_array($item['value'], $allowed_values)) {
+            if (count($allowed_values) && !array_key_exists($item['value'], $allowed_values)) {
               form_set_error($error_field, t('Illegal value for %name.', array('%name' => t($field['widget']['label']))));
             }
           }
@@ -161,6 +170,11 @@ function text_field_formatter($field, $item, $formatter, $node) {
   if (!isset($item['value'])) {
     return '';
   }
+  
+  if ($allowed_values = text_allowed_values($field)) {
+    return $allowed_values[$item['value']];
+  }
+  
   if ($field['text_processing']) {
     $text = check_markup($item['value'], $item['format'], is_null($node) || isset($node->in_preview));
   }
@@ -338,4 +352,36 @@ function text_widget($op, &$node, $field, &$items) {
       }
       break;
   }
+}
+
+/**
+ *  Create an array of the allowed values for this field
+ */
+function text_allowed_values($field) {
+  static $allowed_values;
+
+  if ($allowed_values[$field['field_name']]) {
+    return $allowed_values[$field['field_name']];
+  }
+
+  $allowed_values[$field['field_name']] = array();
+  if ($field['allowed_values_php']) {
+    ob_start();
+    $result = eval($field['allowed_values_php']);
+    if (is_array($result)) {
+      $allowed_values[$field['field_name']] = $result;
+    }
+    ob_end_clean();
+  }
+  if (!$allowed_values[$field['field_name']]) {
+
+    $list = explode("\n", $field['allowed_values']);
+    $list = array_map('trim', $list);
+    $list = array_filter($list, 'strlen');
+    foreach ($list as $opt) {
+      list ($key, $value) = explode('|', $opt);
+      $allowed_values[$field['field_name']][$key] = $value ? $value : $key;
+    }
+  }
+  return $allowed_values[$field['field_name']];
 }
