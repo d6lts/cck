@@ -49,6 +49,10 @@ function content_menu($may_cache) {
       );
   }
   else {
+
+    // Unconditionally include css exactly once per page.
+    drupal_add_css(drupal_get_path('module', 'content') .'/content.css');
+    
     if (arg(0) == 'admin' && arg(1) == 'content' && arg(2) == 'types') {
 
       $content_type = content_types(arg(3));
@@ -66,9 +70,9 @@ function content_menu($may_cache) {
         $items[] = array(
           'path' => 'admin/content/types/'. $content_type['url_str'] .'/fields',
           'title' => t('Manage fields'),
-          'callback' => '_content_admin_field_overview',
+          'callback' => 'drupal_get_form',
           'access' => $access,
-          'callback arguments' => array($content_type['type']),
+          'callback arguments' => array('content_admin_field_overview_form', $content_type['type']),
           'type' => MENU_LOCAL_TASK,
           'weight' => 1,
         );

@@ -33,15 +33,6 @@ function fieldgroup_menu($may_cache) {
 
       if (!empty($content_type) && arg(3) && arg(3) == $content_type['url_str']) {
         $items[] = array(
-          'path' => 'admin/content/types/'. arg(3) .'/groups',
-          'title' => t('Manage groups'),
-          'callback' => 'fieldgroup_overview',
-          'access' => user_access('administer content types'),
-          'callback arguments' => array($content_type),
-          'type' => MENU_LOCAL_TASK,
-          'weight' => 0,
-          );
-        $items[] = array(
           'path' => 'admin/content/types/'. arg(3) .'/add_group',
           'title' => t('Add group'),
           'callback' => 'fieldgroup_edit_group',
@@ -73,26 +64,6 @@ function fieldgroup_menu($may_cache) {
   }
   return $items;
 
-}
-
-/*
- * Show a list of available groups for a content type
- */
-function fieldgroup_overview($content_type) {
-
-  $groups = fieldgroup_groups($content_type['type'], TRUE);
-
-  foreach ($groups as $group) {
-    $rows[] = array(check_plain($group['label']), $group['weight'],
-                    l(t('configure'), 'admin/content/types/'. $content_type['url_str'] .'/groups/'. $group['group_name'] .'/edit'),
-                    l(t('remove'), 'admin/content/types/'. $content_type['url_str'] .'/groups/'. $group['group_name'] .'/remove'));
-  }
-  if (empty($rows)) {
-    $rows[] = array(array('data' => t('No groups available.'), 'colspan' => '4', 'class' => 'message'));
-  }
-
-  $header = array(t('Label'), t('Weight'), array('data' => t('Operations'), 'colspan' => '2'));
-  return theme('table', $header, $rows, array('id' => 'fieldgroup'));
 }
 
 function fieldgroup_edit_group($content_type, $group_name) {
@@ -188,7 +159,7 @@ function fieldgroup_edit_group_submit($form_id, &$form_values, $content_type, $g
              $form_values['label'], serialize($form_values['settings']), $form_values['description'], $form_values['weight'], $content_type['type'], $group_name);
   }
   cache_clear_all('fieldgroup_data', 'cache');
-  return 'admin/content/types/'. $content_type['url_str'] .'/groups';
+  return 'admin/content/types/'. $content_type['url_str'] .'/fields';
 }
 
 function fieldgroup_remove_group($content_type, $group_name) {
@@ -214,7 +185,7 @@ function fieldgroup_remove_group_submit($form_id, &$form_values, $content_type, 
   cache_clear_all('fieldgroup_data', 'cache');
 
   drupal_set_message('The group has been removed.');
-  return 'admin/content/types/'. $content_type['url_str'] .'/groups';
+  return 'admin/content/types/'. $content_type['url_str'] .'/fields';
 }
 
 
@@ -223,7 +194,6 @@ function fieldgroup_remove_group_submit($form_id, &$form_values, $content_type, 
  * Returns all groups for a content type
  */
 function fieldgroup_groups($content_type, $sorted = FALSE) {
-
   static $groups = array();
   static $groups_sorted = array();
 
@@ -253,7 +223,7 @@ function fieldgroup_groups($content_type, $sorted = FALSE) {
       cache_set('fieldgroup_data', 'cache', serialize(array('groups' => $groups, 'groups_sorted' => $groups_sorted)), CACHE_PERMANENT);
     }
   }
-
+  
   if (!$groups[$content_type]) {
     return array();
   }
@@ -325,19 +295,17 @@ function fieldgroup_form_alter($form_id, &$form) {
 
 function fieldgroup_content_admin_form_submit($form_id, &$form_values, $default) {
 
-  $content_type = content_types(arg(3));
-
   if ($default != $form_values['group']) {
     if ($form_values['group'] && !$default) {
       db_query("INSERT INTO {node_group_fields} (type_name, group_name, field_name) VALUES ('%s', '%s', '%s')",
-                $content_type['type'], $form_values['group'], arg(5));
+                $form_values['type_name'], $form_values['group'], $form_values['field_name']);
     }
     else if ($form_values['group']) {
       db_query("UPDATE {node_group_fields} SET group_name = '%s' WHERE type_name = '%s' AND field_name = '%s'",
-                $form_values['group'], $content_type['type'], arg(5));
+                $form_values['group'], $form_values['type_name'], $form_values['field_name']);
     }
     else {
-      db_query("DELETE FROM {node_group_fields} WHERE type_name = '%s' AND field_name = '%s'", $content_type['type'], arg(5));
+      db_query("DELETE FROM {node_group_fields} WHERE type_name = '%s' AND field_name = '%s'", $form_values['type_name'], $form_values['field_name']);
     }
     cache_clear_all('fieldgroup_data', 'cache');
   }
