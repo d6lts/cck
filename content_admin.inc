@@ -918,6 +918,13 @@ function _content_admin_field_submit($form_id, $form_values) {
   }
   content_alter_db_field($prev_field, $prev_columns, $new_field, $new_columns);
 
+  // regenerate views queries if 'multiple' status was changed
+  if (module_exist('views')) {
+    if ($new_field['multiple'] != $prev_field['multiple']) {
+      _content_views_rebuild_views(array($new_field['field_name']));
+    }
+  }
+
   return 'admin/node/types/'. $form_values['type_name'] .'/fields';
 }
 
