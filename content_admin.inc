@@ -12,7 +12,7 @@
 function _content_admin_type_fields() {
   $fields = content_fields();
 
-  $header = array(t('Name'), t('Type'), t('Content types'));
+  $header = array(t('Field name'), t('Field type'), t('Used in'));
   $rows = array();
   foreach ($fields as $field) {
     $row = array();
@@ -22,7 +22,8 @@ function _content_admin_type_fields() {
     $types = array();
     $result = db_query("SELECT nt.name, nt.type FROM {node_field_instance} nfi LEFT JOIN {node_type} nt ON nt.type = nfi.type_name WHERE nfi.field_name = '%s' ORDER BY nt.name ASC", $field['field_name']);
     while ($type = db_fetch_array($result)) {
-      $types[] = l($type['name'], 'admin/content/types/'. $type['type'] .'/fields');
+      $content_type = content_types($type['type']);
+      $types[] = l($type['name'], 'admin/content/types/'. $content_type['url_str'] .'/fields');
     }
     $row[] = implode(', ', $types);
 
@@ -162,8 +163,7 @@ function content_admin_field_overview_form($type_name) {
         }
         $row['configure'] = '';
         $row['remove']    = '';
-        // use intval on weight because body weight is empty instead of zero
-        $form['#table'][intval($value['#weight'])][] = array($key => $row);
+        $form['#table'][$value['#weight']][] = array($key => $row);
         $form['disabled']['#value'][] = $key;
         
         $form['field-weights'][$key] = array('#type' => 'weight', '#default_value' => $value['#weight'], '#disabled' => TRUE);
@@ -668,7 +668,14 @@ function _content_admin_field($type_name, $field_name) {
     '#type' => 'value',
     '#value' => $field_name,
   );
-
+  $form['field_type'] = array(
+    '#type' => 'value',
+    '#value' => $field['type'],
+    );
+  $form['module'] = array(
+    '#type' => 'value',
+    '#value' => $field_type['module'],
+    );
   return $form;
 }
 
