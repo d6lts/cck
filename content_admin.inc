@@ -350,8 +350,7 @@ function content_admin_field_overview_form($type_name) {
         }
         $row['configure'] = '';
         $row['remove']    = '';
-        // use intval on weight because body weight is empty instead of zero
-        $form['#table'][intval($value['#weight'])][] = array($key => $row);
+        $form['#table'][$value['#weight']][] = array($key => $row);
         $form['disabled']['#value'][] = $key;
         
         $form['field-weights'][$key] = array('#type' => 'weight', '#default_value' => $value['#weight'], '#attributes' => array('disabled' => 'disabled'));
@@ -839,6 +838,14 @@ function _content_admin_field($type_name, $field_name) {
     '#type' => 'value',
     '#value' => $field_name,
   );
+  $form['field_type'] = array(
+    '#type' => 'value',
+    '#value' => $field['type'],
+    );
+  $form['module'] = array(
+    '#type' => 'value',
+    '#value' => $field_type['module'],
+    );
   
   $output .= drupal_get_form('_content_admin_field', $form);
   
