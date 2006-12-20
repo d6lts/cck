@@ -7,30 +7,60 @@
  */
 
 /**
+ * Rebuild content type information from node tables. 
+ * 
+ *  Used to update CCK tables that might have missed changes made when CCK was disabled.
+ *  Called by hook_form_alter() on system modules page whenever CCK is enabled.
+ */
+function content_types_rebuild() {
+  $db_types = content_types();
+    
+  $result = db_query("SELECT type_name FROM {node_field_instance}");
+  while ($type = db_fetch_array($result)) {
+    $field_types[] = $type['type_name'];
+  }
+
+  foreach ($db_types as $content_type) {
+    // Find content types that are missing the node_ table and add it
+    if (!db_table_exists('node_'. $content_type['type']) && !db_table_exists('node_'. $content_type['orig_type'])) {
+      $info = new StdClass();
+      $info->type = $content_type['type'];
+      content_type_create($info);
+    }
+  }
+  content_clear_type_cache();
+}
+
+/**
  * Make changes needed when a content type is created.
  *
  * @param $info
  *   value supplied by hook_node_type()
- * @return
- *   The ID of the newly-created content type.
  */
 function content_type_create($info) {
-  // TODO
-  // reset all content type info
+  
+  if (!db_table_exists('node_'. $info->type)) {
+    switch ($GLOBALS['db_type']) {
+      case 'mysql':
+      case 'mysqli':
+        db_query("CREATE TABLE {node_". $info->type ."} (
+          vid int unsigned NOT NULL default '0',
+          nid int unsigned NOT NULL default '0',
+          PRIMARY KEY (vid)
+        ) TYPE=MyISAM /*!40100 DEFAULT CHARACTER SET utf8 */;");
+      break;
+
+      case 'pgsql':
+        db_query("CREATE TABLE {node_". $info->type ."} (
+          vid integer unsigned NOT NULL default '0',
+          nid integer unsigned NOT NULL default '0',
+          PRIMARY KEY (vid)
+        )");
+      break;
+    }
+    drupal_set_message(t('The content fields table node_%name has been created.', array('%name' => $info->type)));
+  }
   content_clear_type_cache();
-
-}
-
-/**
- * Load a content type.
- *
- * @param $info
- *   value supplied by hook_node_type()
- * @return
- *   The content type array.
- */
-function content_type_read($info) {
-  // TODO
 }
 
 /**
@@ -38,21 +68,30 @@ function content_type_read($info) {
  *
  * @param $info
  *   value supplied by hook_node_type()
- * @return
- *   The number of content types updated.
  */
 function content_type_update($info) {
 
-  $updated = 0;
-  if ($info->type != $info->old_type) {
-    // update all fields that use changed content type
+  if (!empty($info->old_type) && $info->old_type != $info->type) {
+    // rename the content type in all fields that use changed content type.
     db_query("UPDATE {node_field_instance} SET type_name='%s' WHERE type_name='%s'", array($info->type, $info->old_type));
-    $updated = 1;
+
+    // Rename the content fields table to match new content type name.
+    $old_name = 'node_'. $info->old_type;
+    $new_name = 'node_'. $info->type;
+    switch ($GLOBALS['db_type']) {
+      case 'mysql':
+      case 'mysqli':
+        db_query("RENAME TABLE {$old_name} TO {$new_name}");
+        break;
+
+      case 'pgsql':
+        db_query("ALTER TABLE {$old_name} RENAME TO {$new_name}");
+        break;
+    }
+    drupal_set_message(t('Content fields table %old_name has been renamed to %new_name and field instances have been updated.', array('%old_name' => $old_name, '%new_name' => $new_name)));
   }
   // reset all content type info
   content_clear_type_cache();
-
-  return $updated;
 }
 
 /**
@@ -70,20 +109,17 @@ function content_type_delete($info) {
   while ($type = db_fetch_array($result)) {
     $field_names[] = $type['field_name'];
   }
-  $number_deleted = 0;
   foreach ($field_names as $field_name) {
     content_field_instance_delete(array('type_name' => $info->type, 'field_name' => $field_name));
-    $number_deleted++;
   }
 
   if (db_table_exists("node_". $info->type)) {
     db_query("DROP TABLE {node_". $info->type ."}");
+    drupal_set_message(t('The content fields table node_%name has been deleted.', array('%name' => $info->type)));
   }
 
   // reset all content type info
   content_clear_type_cache();
-
-  return $number_deleted;
 }
 
 
@@ -204,13 +240,13 @@ function content_field_instance_update($properties) {
  */
 function content_field_instance_delete($properties) {
   $number_deleted = db_query("DELETE FROM {node_field_instance} WHERE type_name = '%s' AND field_name = '%s'", $properties['type_name'], $properties['field_name']);
-
+  
   $type = content_types($properties['type_name']);
   $field = $type['fields'][$properties['field_name']];
   $field_types = _content_field_types();
   $field_type = $field_types[$field['type']];
   $columns = module_invoke($field_type['module'], 'field_settings', 'database columns', $field);
-
+  
   $instances = db_result(db_query("SELECT COUNT(*) FROM {node_field_instance} WHERE field_name = '%s'", $properties['field_name']));
 
   // If only one instance remains, we may need to change the database

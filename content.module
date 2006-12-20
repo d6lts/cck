@@ -278,12 +278,34 @@ function content_nodeapi(&$node, $op, $teaser, $page) {
   }
 }
 
+/**
+ *  Implementation of hook_form_alter().
+ */
 function content_form_alter($form_id, &$form) {
   if (isset($form['type'])) {
     $node = $form['#node'];
     if ($form['type']['#value'] .'_node_form' == $form_id) {
       $form = array_merge($form, content_form($node));
     }
+  }
+  if ($form_id == 'system_modules') {
+    $form['#submit']['content_system_modules_submit'] = array();
+  }
+}
+
+/**
+ *  Make sure that CCK content type info is synched with node type data 
+ *  any time the content module is submitted on the module installation page.
+ */
+function content_system_modules_submit($form_id, $form_values) {
+  $content_status = $form_values['validation_modules']['content'];
+  if ($content_status->status === 1) {
+    include_once(drupal_get_path('module', 'content') .'/content_admin.inc');
+    include_once(drupal_get_path('module', 'content') .'/content_crud.inc');
+    content_types_rebuild();
+  }
+  else {
+    drupal_set_message(t('The content module is uninstalled. Be aware that you could corrupt your database if you uninstall the content module, make changes to content types while it is uninstalled, and later reinstall it.'), 'error');
   }
 }
 
