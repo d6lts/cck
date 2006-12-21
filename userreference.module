@@ -138,7 +138,7 @@ function userreference_widget($op, &$node, $field, &$node_field) {
       case 'prepare form values':
         $node_field_transposed = content_transpose_array_rows_cols($node_field);
         // get rid of null values
-        $node_field['default uids'] = @array_filter($node_field_transposed['uid']);
+        $node_field['default uids'] = array_filter((array) $node_field_transposed['uid']);
         break;
 
       case 'form':
