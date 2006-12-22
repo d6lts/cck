@@ -299,13 +299,10 @@ function content_form_alter($form_id, &$form) {
  */
 function content_system_modules_submit($form_id, $form_values) {
   $content_status = $form_values['validation_modules']['content'];
-  if ($content_status->status === 1) {
+  if ($content_status->status == 1) {
     include_once(drupal_get_path('module', 'content') .'/content_admin.inc');
     include_once(drupal_get_path('module', 'content') .'/content_crud.inc');
     content_types_rebuild();
-  }
-  else {
-    drupal_set_message(t('The content module is uninstalled. Be aware that you could corrupt your database if you uninstall the content module, make changes to content types while it is uninstalled, and later reinstall it.'), 'error');
   }
 }
 
