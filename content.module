@@ -891,19 +891,18 @@ function content_format($field, $item, $formatter = 'default', $node = NULL) {
  *   An HTML string containing the fully themed field.
  */
 function theme_field(&$node, &$field, &$items, $teaser, $page) {
-  $output = '';
-
-  $output .= '<div class="field field-type-'. strtr($field['type'], '_', '-') .' field-'. strtr($field['field_name'], '_', '-') .'">';
-
-  $output .= '<h3 class="field-label">'. $field['widget']['label'] .'</h3>';
-
-  $output .= '<div class="field-items">';
+  $items_output = '';
   foreach ($items as $item) {
-    $output .= '<div class="field-item">'. $item['view'] .'</div>';
+    if (!empty($item['view'])) {
+      $items_output .= '<div class="field-item">'. $item['view'] .'</div>';
+    }
   }
-  $output .= '</div>';
 
-  $output .= '</div>';
-
-  return $output;
+  if (!empty($items_output)) {
+    $output = '<div class="field field-type-'. strtr($field['type'], '_', '-') .' field-'. strtr($field['field_name'], '_', '-') .'">';
+    $output .= '<h3 class="field-label">'. $field['widget']['label'] .'</h3>';
+    $output .= '<div class="field-items">'. $items_output .'</div>';
+    $output .= '</div';
+    return $output;
+  }
 }
