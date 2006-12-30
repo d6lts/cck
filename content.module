@@ -897,12 +897,12 @@ function theme_field(&$node, &$field, &$items, $teaser, $page) {
       $items_output .= '<div class="field-item">'. $item['view'] .'</div>';
     }
   }
-
+  $output = '';
   if (!empty($items_output)) {
-    $output = '<div class="field field-type-'. strtr($field['type'], '_', '-') .' field-'. strtr($field['field_name'], '_', '-') .'">';
+    $output .= '<div class="field field-type-'. strtr($field['type'], '_', '-') .' field-'. strtr($field['field_name'], '_', '-') .'">';
     $output .= '<h3 class="field-label">'. $field['widget']['label'] .'</h3>';
     $output .= '<div class="field-items">'. $items_output .'</div>';
-    $output .= '</div';
-    return $output;
+    $output .= '</div>';
   }
+  return $output;
 }
