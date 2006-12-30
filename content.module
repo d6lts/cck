@@ -208,9 +208,14 @@ function content_update(&$node) {
  * Delete node type fields.
  */
 function content_delete(&$node) {
-  _content_field_invoke('delete', $node);
-  _content_field_invoke_default('delete', $node);
-  db_query('DELETE FROM {'. 'node_'. $node->type .'} WHERE nid = %d', $node->nid);
+  $type = content_types($node->type);
+  if (!empty($type['fields'])) {
+    _content_field_invoke('delete', $node);
+    _content_field_invoke_default('delete', $node);
+  }
+  if (db_table_exists($type['table'])) {
+    db_query('DELETE FROM {'. $type['table'] .'} WHERE nid = %d', $node->nid);
+  }
   cache_clear_all('content:'. $node->nid, 'cache', TRUE);
 }
 
@@ -218,12 +223,15 @@ function content_delete(&$node) {
  * delete node type fields for a revision.
  */
 function content_delete_revision(&$node) {
-  if (content_types($node->type)) {
+  $type = content_types($node->type);
+  if (!empty($type['fields'])) {
     _content_field_invoke('delete revision', $node);
     _content_field_invoke_default('delete revision', $node);
-    db_query('DELETE FROM {'. 'node_'. $node->type .'} WHERE vid = %d', $node->vid);
-    cache_clear_all('content:'. $node->nid .':'. $node->vid, 'cache');
   }
+  if (db_table_exists($type['table'])) {
+    db_query('DELETE FROM {'. $type['table'] .'} WHERE vid = %d', $node->vid);
+  }
+  cache_clear_all('content:'. $node->nid .':'. $node->vid, 'cache');
 }
 
 /**
@@ -709,6 +717,7 @@ function _content_type_info($reset = FALSE) {
       while ($type = db_fetch_array($type_result)) {
         $type['url_str'] = str_replace('_', '-', $type['type']);
         $type['fields'] = array();
+        $type['table'] = _content_tablename($type['type']);
         $field_result = db_query("SELECT nfi.field_name, nfi.weight, nfi.label, nfi.widget_type, nfi.widget_settings, nfi.description FROM {node_field_instance} nfi WHERE nfi.type_name = '%s' ORDER BY nfi.weight ASC, nfi.label ASC", $type['type']);
         while ($field = db_fetch_array($field_result)) {
           // Overwrite global field information with specific information
@@ -790,10 +799,11 @@ function content_database_info($field) {
   $db_info = array();
 
   if ($field['db_storage'] == CONTENT_DB_STORAGE_PER_FIELD) {
-    $db_info['table'] = 'node_data_'. $field['field_name'];
+    $db_info['table'] = _content_tablename($field['field_name'], 'field');
   }
   else {
-    $db_info['table'] = 'node_'. $field['type_name'];
+    $type = content_types($field['type_name']);
+    $db_info['table'] = $type['table'];
   }
 
   if (is_array($columns) && count($columns)) {
@@ -905,4 +915,24 @@ function theme_field(&$node, &$field, &$items, $teaser, $page) {
     $output .= '</div>';
   }
   return $output;
+}
+
+/**
+ * Generate a table name for a field or a content type.
+ *
+ * @param $name
+ *   The name of the content type or content field
+ * @param $entity
+ *   'field' or 'type'
+ *
+ * @return
+ *   A string containing the generated name for the database table
+ */
+function _content_tablename($name, $entity = 'type') {
+  switch ($entity) {
+    case 'type' :
+      return 'node_'.$name;
+    case 'field' :
+      return 'node_data_'.$name;
+  }
 }

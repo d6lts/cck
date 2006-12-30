@@ -21,11 +21,9 @@ function content_types_rebuild() {
   }
 
   foreach ($db_types as $content_type) {
-    // Find content types that are missing the node_ table and add it
-    if (!db_table_exists('node_'. $content_type['type']) && !db_table_exists('node_'. $content_type['orig_type'])) {
-      $info = new StdClass();
-      $info->type = $content_type['type'];
-      content_type_create($info);
+    // Find content types that are missing the content table and add it
+    if (!db_table_exists($content_type['table'])) {
+      content_type_create((object)array('type' => $content_type['type']));
     }
   }
   content_clear_type_cache();
@@ -38,12 +36,13 @@ function content_types_rebuild() {
  *   value supplied by hook_node_type()
  */
 function content_type_create($info) {
-  
-  if (!db_table_exists('node_'. $info->type)) {
+  content_clear_type_cache();
+  $type = content_types($info->type);
+  if (!db_table_exists($type['table'])) {
     switch ($GLOBALS['db_type']) {
       case 'mysql':
       case 'mysqli':
-        db_query("CREATE TABLE {node_". $info->type ."} (
+        db_query("CREATE TABLE {". $type['table'] ."} (
           vid int unsigned NOT NULL default '0',
           nid int unsigned NOT NULL default '0',
           PRIMARY KEY (vid)
@@ -51,16 +50,15 @@ function content_type_create($info) {
       break;
 
       case 'pgsql':
-        db_query("CREATE TABLE {node_". $info->type ."} (
+        db_query("CREATE TABLE {". $type['table'] ."} (
           vid integer unsigned NOT NULL default '0',
           nid integer unsigned NOT NULL default '0',
           PRIMARY KEY (vid)
         )");
       break;
     }
-    drupal_set_message(t('The content fields table node_%name has been created.', array('%name' => $info->type)));
+    drupal_set_message(t('The content fields table %name has been created.', array('%name' => $type['table'])));
   }
-  content_clear_type_cache();
 }
 
 /**
@@ -76,19 +74,22 @@ function content_type_update($info) {
     db_query("UPDATE {node_field_instance} SET type_name='%s' WHERE type_name='%s'", array($info->type, $info->old_type));
 
     // Rename the content fields table to match new content type name.
-    $old_name = 'node_'. $info->old_type;
-    $new_name = 'node_'. $info->type;
-    switch ($GLOBALS['db_type']) {
-      case 'mysql':
-      case 'mysqli':
-        db_query("RENAME TABLE {$old_name} TO {$new_name}");
-        break;
+    $old_type = content_types($info->old_type);
+    $old_name = $old_type['table'];
+    $new_name = _content_tablename($info->type);
+    if (db_table_exists($old_name)) {
+      switch ($GLOBALS['db_type']) {
+        case 'mysql':
+        case 'mysqli':
+          db_query("RENAME TABLE {$old_name} TO {$new_name}");
+          break;
 
-      case 'pgsql':
-        db_query("ALTER TABLE {$old_name} RENAME TO {$new_name}");
-        break;
+        case 'pgsql':
+          db_query("ALTER TABLE {$old_name} RENAME TO {$new_name}");
+          break;
+      }
+      drupal_set_message(t('Content fields table %old_name has been renamed to %new_name and field instances have been updated.', array('%old_name' => $old_name, '%new_name' => $new_name)));
     }
-    drupal_set_message(t('Content fields table %old_name has been renamed to %new_name and field instances have been updated.', array('%old_name' => $old_name, '%new_name' => $new_name)));
   }
   // reset all content type info
   content_clear_type_cache();
@@ -99,23 +100,17 @@ function content_type_update($info) {
  *
  * @param $info
  *   value supplied by hook_node_type()
- * @return
- *   The number of fields deleted.
  */
 function content_type_delete($info) {
-
-  $result = db_query("SELECT field_name FROM {node_field_instance} WHERE type_name = '%s'", $info->type);
-  $field_names = array();
-  while ($type = db_fetch_array($result)) {
-    $field_names[] = $type['field_name'];
-  }
-  foreach ($field_names as $field_name) {
-    content_field_instance_delete(array('type_name' => $info->type, 'field_name' => $field_name));
+  $type = content_types($info->type);
+ 
+  foreach ($type['fields'] as $field) {
+    content_field_instance_delete(array('type_name' => $info->type, 'field_name' => $field['field_name']));
   }
 
-  if (db_table_exists("node_". $info->type)) {
-    db_query("DROP TABLE {node_". $info->type ."}");
-    drupal_set_message(t('The content fields table node_%name has been deleted.', array('%name' => $info->type)));
+  if (db_table_exists($type['table'])) {
+    db_query('DROP TABLE {'. $type['table'] .'}');
+    drupal_set_message(t('The content fields table %name has been deleted.', array('%name' => $type['table'])));
   }
 
   // reset all content type info
@@ -284,4 +279,3 @@ function content_simpletest() {
 	$tests = file_scan_directory($dir, '\.test$');
   return array_keys($tests);
 }
-
