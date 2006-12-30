@@ -91,7 +91,7 @@ function content_admin_field_overview_form($type_name) {
     
     // Limiting weight to < 10 will keep workflow and submit elements from being added to the overview table.
     // They're outside the weight range allowed for CCK fields, so won't interfere with field placement.
-
+    
     if (is_array($value) && (isset($value['#weight']) || $key == 'body_filter') && $value['#weight'] <= 10) {
       
       // if this item is a group, insert group info into table, then add all the group fields below it
@@ -385,7 +385,7 @@ function _content_admin_field_add_existing($type_name) {
   return $form;
 }
 
-function _content_admin_field_add_new($type_name) {
+function _content_admin_field_add_new($type_name, $new_field_name = '') {
   $field_types = _content_field_types();
   $widget_types = _content_widget_types();
   $form = array();
@@ -425,6 +425,10 @@ function _content_admin_field_add_new($type_name) {
     $form['new']['type_name'] = array(
       '#type' => 'value',
       '#value' => $type_name,
+    );
+    $form['new']['field_name'] = array(
+      '#type' => 'value',
+      '#value' => $new_field_name,
     );
   }
   else {
@@ -489,6 +493,23 @@ function _content_admin_field_add_existing_submit($form_id, $form_values) {
 }
 
 /**
+ *  Field name validation for programmatic field addition that supply the field name.
+ */
+function _content_admin_field_add_new_validate($form_id, $form_values) {
+  if ($form_values['field_name']) {
+    $fields = content_fields();
+    if (!empty($fields[$form_values['field_name']])) {
+      form_set_error('field_name', t('The field name %field_name already exists.', array(
+        '%field_name' => $form_values['field_name'])));
+    }
+    if (!preg_match('!^[a-z0-9_]+$!', $form_values['field_name'])) {
+      form_set_error('field_name', t('The field name %field_name is invalid.', array(
+        '%field_name' => $form_values['field_name'])));
+    }
+  }
+}
+
+/**
  * Create a new field for a content type.
  */
 function _content_admin_field_add_new_submit($form_id, $form_values) {
@@ -497,18 +518,24 @@ function _content_admin_field_add_new_submit($form_id, $form_values) {
   $fields = content_fields();
   $type   = content_types($form_values['type_name']);
 
-  $field_name = trim($form_values['label']);
-  $field_name = drupal_strtolower($field_name);
-  $field_name = str_replace(array(' ', '-'), '_', $field_name);
-  $field_name = preg_replace('/[^a-z0-9_]/', '', $field_name);
-  $field_name = 'field_'. $field_name;
-  $field_name = substr($field_name, 0, 31);
-  if (isset($fields[$field_name])) {
-    $counter = 0;
-    do {
-      $new_name = substr($field_name, 0, 29) .'_'. $counter++;
-    } while (isset($fields[$new_name]));
-    $field_name = $new_name;
+  // Accept field name from programmed submissions if valid and it doesn't already exist.
+  if ($form_values['field_name']) {
+    $field_name = $form_values['field_name'];
+  }
+  else {
+    $field_name = trim($form_values['label']);
+    $field_name = drupal_strtolower($field_name);
+    $field_name = str_replace(array(' ', '-'), '_', $field_name);
+    $field_name = preg_replace('/[^a-z0-9_]/', '', $field_name);
+    $field_name = 'field_'. $field_name;
+    $field_name = substr($field_name, 0, 31);
+    if (isset($fields[$field_name])) {
+      $counter = 0;
+      do {
+        $new_name = substr($field_name, 0, 29) .'_'. $counter++;
+      }   while (isset($fields[$new_name]));
+      $field_name = $new_name;
+    }
   }
 
   $field_widget_type = explode('-', $form_values['field_widget_type']);
@@ -620,7 +647,7 @@ function _content_admin_field($type_name, $field_name) {
   );
   $form['widget']['weight'] = array(
     '#type' => 'hidden',
-    '#value' => $field['widget']['weight'],
+    '#default_value' => $field['widget']['weight'],
   );
   $additions = module_invoke($widget_type['module'], 'widget_settings', 'form', $field['widget']);
   if (is_array($additions)) {
@@ -674,7 +701,7 @@ function _content_admin_field($type_name, $field_name) {
     );
   $form['module'] = array(
     '#type' => 'value',
-    '#value' => $field_type['module'],
+    '#value' => implode(', ', array_unique(array($field_type['module'], $widget_type['module']))),
     );
   return $form;
 }
@@ -698,6 +725,7 @@ function _content_admin_field_validate($form_id, $form_values) {
  * Save a field's settings after editing.
  */
 function _content_admin_field_submit($form_id, $form_values) {
+  
   $type = content_types($form_values['type_name']);
   $field = $type['fields'][$form_values['field_name']];
   $field_types = _content_field_types();

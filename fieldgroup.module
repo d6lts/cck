@@ -37,7 +37,7 @@ function fieldgroup_menu($may_cache) {
           'title' => t('Add group'),
           'callback' => 'fieldgroup_edit_group',
           'access' => user_access('administer content types'),
-          'callback arguments' => array($content_type, 'add_group'),
+          'callback arguments' => array($content_type, '', 'add'),
           'type' => MENU_LOCAL_TASK,
           'weight' => 2,
           );
@@ -47,7 +47,7 @@ function fieldgroup_menu($may_cache) {
             'title' => t('Edit group'),
             'callback' => 'fieldgroup_edit_group',
             'access' => user_access('administer content types'),
-            'callback arguments' => array($content_type, arg(5)),
+            'callback arguments' => array($content_type, arg(5), 'edit'),
             'type' => MENU_CALLBACK_ITEM,
             );
           $items[] = array(
@@ -66,16 +66,17 @@ function fieldgroup_menu($may_cache) {
 
 }
 
-function fieldgroup_edit_group($content_type, $group_name) {
+function fieldgroup_edit_group($content_type, $group_name, $action) {
 
-  return drupal_get_form('fieldgroup_edit_group_form', $content_type, $group_name);
+  return drupal_get_form('fieldgroup_edit_group_form', $content_type, $group_name, $action);
 }
 
-function fieldgroup_edit_group_form($content_type, $group_name) {
+function fieldgroup_edit_group_form($content_type, $group_name, $action) {
+  
   $groups = fieldgroup_groups($content_type['type']);
   $group = $groups[$group_name];
 
-  if ($group_name == 'add_group' && arg(6) != 'edit') {
+  if ($action == 'add') {
     //adding a new one
     $group = array();
     $form['submit'] = array(
@@ -127,27 +128,58 @@ function fieldgroup_edit_group_form($content_type, $group_name) {
     '#default_value' => $group['weight'],
     '#description' => t('In the node editing form, the heavier groups will sink and the lighter groups will be positioned nearer the top.'),
   );
-  $form['#submit'] = array(fieldgroup_edit_group_submit => array($content_type, $group_name));
+  $form['group_name'] = array(
+    '#type' => 'hidden',
+    '#default_value' => $group_name,
+  );
+  $form['#submit'] = array(fieldgroup_edit_group_submit => array($content_type, $action));
   return $form;
 }
 
+/**
+ *  Group name validation for programmatic group addition.
+ */
+function fieldgroup_edit_group_validate($form_id, $form_values, $content_type, $action) {
 
-function fieldgroup_edit_group_submit($form_id, &$form_values, $content_type, $group_name) {
+  if (!empty($form_values['group_name']) && $action == 'add') {
+    
+    $groups = fieldgroup_groups($content_type['type']);
+    $group = $groups[$form_values['group_name']];
+
+    if (isset($group[$form_values['group_name']])) {
+      form_set_error('group_name', t('The group name %name already exists.', array(
+        '%group_name' => $form_values['group_name'])));
+    }
+    if (!preg_match('!^[a-z0-9_]+$!', $form_values['group_name'])) {
+      form_set_error('group_name', t('The group name %name is invalid.', array(
+        '%group_name' => $form_values['group_name'])));
+    }
+  }
+}
+
+function fieldgroup_edit_group_submit($form_id, &$form_values, $content_type, $action) {
+    
   $groups = fieldgroup_groups($content_type['type']);
-  $group = $groups[$group_name];
-
+  $group = $groups[$form_values['group_name']];
+  
   if (!$group) {
-    // Find a valid, computer-friendly name.
-    $group_name = trim($form_values['label']);
-    $group_name = drupal_strtolower($group_name);
-    $group_name = str_replace(array(' ', '-'), '_', $group_name);
-    $group_name = preg_replace('/[^a-z0-9_]/', '', $group_name);
-    $group_name = 'group-'. $group_name;
-    $group_name = substr($group_name, 0, 32);
-    if (isset($groups[$group_name])) {
-      $counter = 0;
-      while (isset($groups[$group_name])) {
-        $group_name = substr($group_name, 0, 30) .'_'. $counter++;
+    // Accept group name from programmed submissions if valid.
+    if (!empty($form_values['group_name'])) {
+      $group_name = $form_values['group_name'];
+    }
+    else {
+      // Otherwise, find a valid, computer-friendly name.
+      $group_name = trim($form_values['label']);
+      $group_name = drupal_strtolower($group_name);
+      $group_name = str_replace(array(' ', '-'), '_', $group_name);
+      $group_name = preg_replace('/[^a-z0-9_]/', '', $group_name);
+      $group_name = 'group-'. $group_name;
+      $group_name = substr($group_name, 0, 32);
+      if (isset($groups[$group_name])) {
+        $counter = 0;
+        while (isset($groups[$group_name])) {
+          $group_name = substr($group_name, 0, 30) .'_'. $counter++;
+        }
       }
     }
     db_query("INSERT INTO {node_group} (type_name, group_name, label, settings, description, weight)
@@ -156,9 +188,10 @@ function fieldgroup_edit_group_submit($form_id, &$form_values, $content_type, $g
   else {
     db_query("UPDATE {node_group} SET label = '%s', settings = '%s', description = '%s', weight = %d ".
              "WHERE type_name = '%s' AND group_name = '%s'",
-             $form_values['label'], serialize($form_values['settings']), $form_values['description'], $form_values['weight'], $content_type['type'], $group_name);
+             $form_values['label'], serialize($form_values['settings']), $form_values['description'], $form_values['weight'], $content_type['type'], $form_values['group_name']);
   }
   cache_clear_all('fieldgroup_data', 'cache');
+  
   return 'admin/content/types/'. $content_type['url_str'] .'/fields';
 }
 
@@ -193,11 +226,11 @@ function fieldgroup_remove_group_submit($form_id, &$form_values, $content_type, 
 /*
  * Returns all groups for a content type
  */
-function fieldgroup_groups($content_type, $sorted = FALSE) {
+function fieldgroup_groups($content_type = '', $sorted = FALSE, $reset = FALSE) {
   static $groups = array();
   static $groups_sorted = array();
 
-  if (empty($groups)) {
+  if (empty($groups) || $reset) {
     if ($cached = cache_get('fieldgroup_data', 'cache')) {
       $data = unserialize($cached->data);
       $groups = &$data['groups'];
@@ -224,7 +257,10 @@ function fieldgroup_groups($content_type, $sorted = FALSE) {
     }
   }
   
-  if (!$groups[$content_type]) {
+  if (empty($content_type)) {
+    return $groups;
+  }
+  elseif (!$groups[$content_type]) {
     return array();
   }
   return $sorted ? $groups_sorted[$content_type] : $groups[$content_type];
@@ -274,13 +310,12 @@ function fieldgroup_form_alter($form_id, &$form) {
 
   }
   else if ($form_id == '_content_admin_field') {
-    $content_type = content_types(arg(3));
-
+    $content_type = content_types($form['type_name']['#value']);
     $form['widget']['group'] = array(
       '#type' => 'select',
       '#title' => t('Display in group'),
       '#options' => _fieldgroup_groups_label($content_type['type']),
-      '#default_value' => _fieldgroup_field_get_group($content_type['type'], arg(5)),
+      '#default_value' => _fieldgroup_field_get_group($content_type['type'], $form['field_name']['#value']),
       '#description' => t('Select a group, in which the field will be displayed on the editing form.'),
       '#weight' => 5,
     );
@@ -294,7 +329,6 @@ function fieldgroup_form_alter($form_id, &$form) {
 }
 
 function fieldgroup_content_admin_form_submit($form_id, &$form_values, $default) {
-
   if ($default != $form_values['group']) {
     if ($form_values['group'] && !$default) {
       db_query("INSERT INTO {node_group_fields} (type_name, group_name, field_name) VALUES ('%s', '%s', '%s')",
