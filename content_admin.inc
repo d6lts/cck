@@ -95,7 +95,7 @@ function content_admin_field_overview_form($type_name) {
     if (is_array($value) && (isset($value['#weight']) || $key == 'body_filter') && $value['#weight'] <= 10) {
       
       // if this item is a group, insert group info into table, then add all the group fields below it
-      if (substr($key, 0, 6) == 'group-' && isset($form['#groups'])) {
+      if (substr($key, 0, 6) == 'group_' && isset($form['#groups'])) {
         $row = $group_form = array();
         $row['label']     = $form['#group_labels'][$form['#groups'][$key]['group_name']];
         $row['name']      = $form['#groups'][$key]['group_name'];

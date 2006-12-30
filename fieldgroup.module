@@ -173,7 +173,7 @@ function fieldgroup_edit_group_submit($form_id, &$form_values, $content_type, $a
       $group_name = drupal_strtolower($group_name);
       $group_name = str_replace(array(' ', '-'), '_', $group_name);
       $group_name = preg_replace('/[^a-z0-9_]/', '', $group_name);
-      $group_name = 'group-'. $group_name;
+      $group_name = 'group_'. $group_name;
       $group_name = substr($group_name, 0, 32);
       if (isset($groups[$group_name])) {
         $counter = 0;
