@@ -1,0 +1,38 @@
+// $Id$
+
+4.7--1.1
+========
+
+This version has database changes in it and requires update.php.
+
+Files added:
+  fieldgroup.module
+  fieldgroup.info
+  fieldgroup.install
+  content.css
+
+- 79887  default field theming : do not display label on empty fields.
+- 103585 userreference: force transposed node_field['uid'] to array when empty.
+- Fix body sort in field overview, add field type and module as hidden fields to 
+  content_admin_field form to make programmatic form submission easier.
+- 88135 Fix Views handling of multiple fields to allow option to group multiple fields together.
+- 89172 Improved handling for optionwidgets, adding ability to create options as an array 
+  in php or as a list of values. Also fixes View handling, making sure the right value is 
+  swapped in for the option in Views tables and lists.
+- 99672 Improved UI for setting weights and groups on field overview page.
+- Added content.css.
+- 89351 Make sure node_content table row gets deleted when no fields are in it.
+- 98895 Always include content_admin.inc file in admin area.
+- 57483 Added the fieldgroup module to core.
+- 101946 Make sure no default value is provided for text and blob fields.
+- 101599 Fixed node not being passed to formatters in view field handler.
+- Fixed text.module storing nothing for empty multiple fields - now stores one '' (empty string).
+- The 'empty' option for nodereference Views filters was not correctly preselected.
+- 98910  Fixed storage issues for empty userreference fields.
+- 82439  Fixed storage issues for empty number fields.
+- When changing storage from 'per field' to 'per content type', NULL values were copied as 0 or string 'NULL'.
+
+4.7--1.0
+========
+
+- initial 4.7 release
