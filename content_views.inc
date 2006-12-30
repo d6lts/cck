@@ -129,7 +129,7 @@ function content_views_field_handler_group($field_info, $field_data, $value, $da
     }
     $query = "SELECT ".implode(', ', $query_columns).
              " FROM {node} node".
-             " LEFT JOIN {node_data_$field[field_name]} node_data_$field[field_name] ON node.vid = node_data_$field[field_name].vid".
+             " LEFT JOIN {". $field_info['content_db_info']['table'] ."} node_data_$field[field_name] ON node.vid = node_data_$field[field_name].vid".
              " WHERE node.nid = ".$data->nid.
              " ORDER BY node_data_$field[field_name].delta";
     $result = db_query(db_rewrite_sql($query, 'node'));
