@@ -134,7 +134,7 @@ function content_views_field_handler_group($field_info, $field_data, $value, $da
              " ORDER BY node_data_$field[field_name].delta";
     $result = db_query(db_rewrite_sql($query, 'node'));
     while ($item = db_fetch_array($result)) {
-      $items[] = content_format($field, $item, $field_data['options']);
+      $items[] = content_format($field, $item, $field_data['options'], $data);
     }
     return theme('content_view_multiple_field', $items, $field, $data);
   }
@@ -143,7 +143,8 @@ function content_views_field_handler_group($field_info, $field_data, $value, $da
   }
 }
 
-function content_views_field_handler_ungroup($field_info, $field_data, $value, $data) {  $field = $field_info['content_field'];
+function content_views_field_handler_ungroup($field_info, $field_data, $value, $data) {
+  $field = $field_info['content_field'];
   $item = array();
   foreach ($field_info['content_db_info']['columns'] as $column => $attributes) {
     $view_column_name = 'node_data_'. $field['field_name'] .'_'. $attributes['column'];
