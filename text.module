@@ -246,7 +246,6 @@ function text_widget($op, &$node, $field, &$items) {
 
       if ($field['multiple']) {
         $form[$field['field_name']]['#type'] = 'fieldset';
-        $form[$field['field_name']]['#title'] = t($field['widget']['label']);
         $form[$field['field_name']]['#description'] = $field['widget']['description'];
         $delta = 0;
         foreach ($items as $data) {
@@ -254,7 +253,7 @@ function text_widget($op, &$node, $field, &$items) {
             if ($field['widget']['rows'] == 1) {
               $form[$field['field_name']][$delta]['value'] = array(
                 '#type' => 'textfield',
-                '#title' => '',
+                '#title' => ($delta == 0) ? t($field['widget']['label']) : '',
                 '#default_value' => $data['value'],
                 '#required' => ($delta == 0) ? $field['required'] : FALSE,
                 '#maxlength' => $field['max_length'] ? $field['max_length'] : '',
@@ -264,7 +263,7 @@ function text_widget($op, &$node, $field, &$items) {
             else {
               $form[$field['field_name']][$delta]['value'] = array(
                 '#type' => 'textarea',
-                '#title' => '',
+                '#title' => ($delta == 0) ? t($field['widget']['label']) : '',
                 '#default_value' => $data['value'],
                 '#required' => ($delta == 0) ? $field['required'] : FALSE,
                 '#rows' => $field['widget']['rows'],
@@ -281,7 +280,7 @@ function text_widget($op, &$node, $field, &$items) {
           if ($field['widget']['rows'] == 1) {
             $form[$field['field_name']][$delta]['value'] = array(
               '#type' => 'textfield',
-              '#title' => '',
+              '#title' => ($delta == 0) ? t($field['widget']['label']) : '',
               '#default_value' => '',
               '#required' => ($delta == 0) ? $field['required'] : FALSE,
               '#maxlength' => $field['max_length'] ? $field['max_length'] : '',
@@ -291,7 +290,7 @@ function text_widget($op, &$node, $field, &$items) {
           else {
             $form[$field['field_name']][$delta]['value'] = array(
               '#type' => 'textarea',
-              '#title' => '',
+              '#title' => ($delta == 0) ? t($field['widget']['label']) : '',
               '#default_value' => '',
               '#required' => ($delta == 0) ? $field['required'] : FALSE,
               '#rows' => $field['widget']['rows'],
