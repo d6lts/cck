@@ -911,7 +911,7 @@ function content_format($field, $item, $formatter = 'default', $node = NULL) {
 function theme_field(&$node, &$field, &$items, $teaser, $page) {
   $items_output = '';
   foreach ($items as $item) {
-    if (!empty($item['view'])) {
+    if (!empty($item['view']) || $item['view'] === "0") {
       $items_output .= '<div class="field-item">'. $item['view'] .'</div>';
     }
   }
