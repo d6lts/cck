@@ -170,11 +170,11 @@ function text_field_formatter($field, $item, $formatter, $node) {
   if (!isset($item['value'])) {
     return '';
   }
-  
+
   if ($allowed_values = text_allowed_values($field)) {
     return $allowed_values[$item['value']];
   }
-  
+
   if ($field['text_processing']) {
     $text = check_markup($item['value'], $item['format'], is_null($node) || isset($node->in_preview));
   }
@@ -256,7 +256,7 @@ function text_widget($op, &$node, $field, &$items) {
                 '#title' => ($delta == 0) ? t($field['widget']['label']) : '',
                 '#default_value' => $data['value'],
                 '#required' => ($delta == 0) ? $field['required'] : FALSE,
-                '#maxlength' => $field['max_length'] ? $field['max_length'] : '',
+                '#maxlength' => $field['max_length'] ? $field['max_length'] : NULL,
                 '#weight' => $field['widget']['weight'],
               );
             }
@@ -283,7 +283,7 @@ function text_widget($op, &$node, $field, &$items) {
               '#title' => ($delta == 0) ? t($field['widget']['label']) : '',
               '#default_value' => '',
               '#required' => ($delta == 0) ? $field['required'] : FALSE,
-              '#maxlength' => $field['max_length'] ? $field['max_length'] : '',
+              '#maxlength' => $field['max_length'] ? $field['max_length'] : NULL,
               '#weight' => $field['widget']['weight'],
             );
           }
