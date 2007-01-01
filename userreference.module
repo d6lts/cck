@@ -280,7 +280,7 @@ function _userreference_potential_references($field) {
     $result = db_query("SELECT u.name, u.uid FROM {users} u WHERE uid > 0 ORDER BY u.name ASC");
   }
   else {
-    $result = db_query("SELECT u.name, u.uid FROM {users} u LEFT JOIN {users_roles} r ON u.uid = r.uid WHERE u.uid > 0 AND r.rid IN (" . implode($roles, ',') . ')');
+    $result = db_query("SELECT u.name, u.uid FROM {users} u LEFT JOIN {users_roles} r ON u.uid = r.uid WHERE u.uid > 0 AND r.rid IN (" . implode($roles, ',') . ') ORDER BY u.name ASC');
   }
 
   while ($user = db_fetch_object($result)) {
