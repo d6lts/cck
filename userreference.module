@@ -195,14 +195,13 @@ function userreference_widget($op, &$node, $field, &$node_field) {
 
         if ($field['multiple']) {
           $form[$field['field_name']]['#type'] = 'fieldset';
-          $form[$field['field_name']]['#title'] = t($field['widget']['label']);
           $form[$field['field_name']]['#description'] = $field['widget']['description'];
           $delta = 0;
           foreach ($node_field as $item) {
             if ($item['uid']) {
               $form[$field['field_name']][$delta]['user_name'] = array(
                 '#type' => 'textfield',
-                '#title' => '',
+                '#title' => ($delta == 0) ? t($field['widget']['label']) : '',
                 '#autocomplete_path' => 'user/autocomplete',
                 '#default_value' => $item['default user_name'],
                 '#required' => ($delta == 0) ? $field['required'] : FALSE,
@@ -213,7 +212,7 @@ function userreference_widget($op, &$node, $field, &$node_field) {
           foreach (range($delta, $delta + 2) as $delta) {
             $form[$field['field_name']][$delta]['user_name'] = array(
               '#type' => 'textfield',
-              '#title' => '',
+              '#title' => ($delta == 0) ? t($field['widget']['label']) : '',
               '#autocomplete_path' => 'user/autocomplete',
               '#default_value' => '',
               '#required' => ($delta == 0) ? $field['required'] : FALSE,
@@ -250,7 +249,7 @@ function userreference_widget($op, &$node, $field, &$node_field) {
           // Remove the widget's data representation so it isn't saved.
           unset($node_field[$delta]['user_name']);
           $node_field[$delta]['uid'] = $uid;
-          // Don't save empty fields when they're not the first value (store NULL otherwise)
+          // Don't save empty fields except the first value
           if (empty($uid) && $delta > 0) {
             unset($node_field[$delta]);
           }
