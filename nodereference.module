@@ -244,14 +244,13 @@ function nodereference_widget($op, &$node, $field, &$node_field) {
 
         if ($field['multiple']) {
           $form[$field['field_name']]['#type'] = 'fieldset';
-          $form[$field['field_name']]['#title'] = t($field['widget']['label']);
           $form[$field['field_name']]['#description'] = $field['widget']['description'];
           $delta = 0;
           foreach ($node_field as $item) {
             if ($item['nid']) {
               $form[$field['field_name']][$delta]['node_name'] = array(
                 '#type' => 'textfield',
-                '#title' => '',
+                '#title' => ($delta == 0) ? t($field['widget']['label']) : '',
                 '#autocomplete_path' => 'nodereference/autocomplete/'. $field['field_name'],
                 '#default_value' => $item['default node_name'],
                 '#required' => ($delta == 0) ? $field['required'] : FALSE,
@@ -262,7 +261,7 @@ function nodereference_widget($op, &$node, $field, &$node_field) {
           foreach (range($delta, $delta + 2) as $delta) {
             $form[$field['field_name']][$delta]['node_name'] = array(
               '#type' => 'textfield',
-              '#title' => '',
+              '#title' => ($delta == 0) ? t($field['widget']['label']) : '',
               '#autocomplete_path' => 'nodereference/autocomplete/'. $field['field_name'],
               '#default_value' => '',
               '#required' => ($delta == 0) ? $field['required'] : FALSE,
