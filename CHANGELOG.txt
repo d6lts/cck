@@ -1,11 +1,11 @@
 // $Id$
 
-5--1.1-beta
-============
+5--1.0
+======
 
 This version has database changes in it and requires update.php.
 
-Files added:
+Files added
   fieldgroup.module
   fieldgroup.info
   fieldgroup.install
@@ -14,45 +14,68 @@ Files added:
   content.css
   UPGRADE.txt
 
-Files removed:
+Files removed
   date.module
   date.info
   date.install
 
-- 99446 Add content_copy module for import/export for type, group, and field definitions.
-- 105270 adapt field and group admin forms to work better with programmatic submissions.
-- 79887  default field theming : do not display label on empty fields.
-- 103585 userreference: force transposed node_field['uid'] to array when empty.
-- 104259 Add code to create node_content tables and function content_types_rebuild()
-  to fix database if content types are added when CCK is not enabled.
-- Fix body sort in field overview, add field type and module as hidden fields to
-  content_admin_field form to make programmatic form submission easier, fix url in fields tab table.
-- 88135 Fix Views handling of multiple fields to allow option to group multiple fields together.
-- 89172 Improved handling for optionwidgets, adding ability to create options as an array
-  in php or as a list of values. Also fixes View handling, making sure the right value is
-  swapped in for the option in Views tables and lists.
-- 99672 Improved UI for setting weights and groups on field overview page.
-- Add content.css.
-- 89351  Make sure node_content table row gets deleted when no fields are in it.
-- 101946 Make sure no default value is provided for text and blob fields.
-- 98895  Always include content_admin.inc file in admin area.
-- 57483  Add the fieldgroup module to core.
-- 101599 Fixed node not being passed to formatters in view field handler.
-- Fix text.module storing nothing for empty multiple fields - now stores one '' (empty string).
-- Change .info files to reflect current version automatically.
-- 100744 Fixed migration path from outdated 4.7 versions.
-- 100742 Add escaping to update sql.
-- Add UPGRADE.txt file.
-- Remove date module from core to match 4.7 version.
-- 100535 Fixed occasional fatal error on node view when $node->content comes empty.
-- 99672  Added body field (if present) to the fields overview.
-- 99672  Fixed title label not appearing.
-- 99713  Fixed field weights not playing correctly with 'non-cck' fields (body...) on node display.
-- 99096  Fixed content_form being called twice on form generation.
-- 98910  Fixed storage issues for empty userreference fields.
-- 82439  Fixed storage issues for empty number fields.
-- When changing storage from 'per field' to 'per content type', NULL values were copied as 0 or string 'NULL'.
-- 5.0 Migration : field instances were not removed on a content type deletion.
+Features
+--------
+
+General
+- 99446   Added content_copy module for import/export for type, group, and field definitions.
+- 57483   Added fieldgroup module to core CCK.
+- 99672   Improved UI for setting weights and groups on field overview page
+- 99672   Added body field (if present) to the fields overview
+- 79887   Default field theming does not display label on empty fields.
+- 88135   Views handling of multiple fields : allow option to group multiple fields together.
+- 105787  Refactor generation of data table names
+-         Slightly optimized .inc files include
+-         Removed hook_simpletest for now
+-         Misc code cleanup
+
+Field / widget modules
+-         Removed original date.module. Use http://drupal.org/project/date instead.
+- 89172   Improved handling for optionwidgets, adding ability to create options as an array
+          in php or as a list of values. Also fixes View handling, making sure the right value
+          is swapped in for the option in Views tables and lists.
+
+Bugfix
+------
+
+General
+- 105270  Adapt field and group admin forms to work better with programmatic submissions.
+-         Add field type and module as hidden fields to content_admin_field form to make
+          programmatic form submission easier
+- 104259  Add code to create node_content tables and function content_types_rebuild()
+          to fix database if content types are added when CCK is not enabled.
+- 89351   Make sure node_content table row gets deleted when no fields are in it.
+-         Fix url in fields tab table.
+- 101599  Fixed node not being passed to formatters in view field handler
+-         When changing storage from 'per field' to 'per content type',NULL values were
+          copied as 0 or string 'NULL'
+- 98895   Always include content_admin.inc file in admin area.
+- 100535  Fix occasional fatal error on node view when $node->content comes empty.
+- 101946  Make sure no default value is provided for MySQL text and blob fields.
+- 81688   Ensure multiple fields have a label to mark "required" asterisk
+- 105603  Make goup names consistent with field names ('group-*' => 'group_*')
+
+Field / widget modules
+- 104598  Text : core now treats maxlength = '' as maxlength = 0
+-         Text : store one '' (empty string) for empty multiple fields (stored nothing previously)
+- 103585  Userreference : force transposed node_field['uid'] to array when empty.
+- 98910   Userreference : Fixed storage issues for empty userreference fields
+- 106150  Userreference : make user list sorting consistent
+- 82439   Number : Fixed storage issues for empty number fields
+
+5.0 migration
+- 106932  Fixed migration path from outdated 4.7 versions
+- 100744  Fixed migration path from outdated 4.7 versions
+- 99713   Fixed field weights not playing correctly with 'non-cck' fields on node display
+- 99096   Fixed content_form being called twice on form generation
+- 100535  Fixed occasional fatal error on node view when $node->content comes empty
+-         Field instances were not removed on a content type deletion
+
 
 5--1.0-beta
 ===========
