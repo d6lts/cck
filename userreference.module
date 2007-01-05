@@ -182,7 +182,7 @@ function userreference_widget($op, &$node, $field, &$node_field) {
   else {
     switch ($op) {
       case 'prepare form values':
-        foreach($node_field as $delta => $item) {
+        foreach ($node_field as $delta => $item) {
           if (!empty($node_field[$delta]['uid'])) {
             $node_field[$delta]['default user_name'] = db_result(db_query("SELECT name FROM {users} WHERE uid = '%d'", $node_field[$delta]['uid']));
           }
@@ -264,7 +264,8 @@ function userreference_widget($op, &$node, $field, &$node_field) {
 function _userreference_potential_references($field) {
   if (!$field['required']) {
     $users = array('none' => t('<none>'));
-  } else {
+  }
+  else {
     $users = array();
   }
   $roles = array();
@@ -276,10 +277,10 @@ function _userreference_potential_references($field) {
     }
   }
   if (!$roles || !isset($field['referenceable_roles']) || in_array(DRUPAL_AUTHENTICATED_RID, $field['referenceable_roles'])) {
-    $result = db_query("SELECT u.name, u.uid FROM {users} u WHERE uid > 0 ORDER BY u.name ASC");
+    $result = db_query('SELECT u.name, u.uid FROM {users} u WHERE uid > 0 ORDER BY u.name ASC');
   }
   else {
-    $result = db_query("SELECT u.name, u.uid FROM {users} u LEFT JOIN {users_roles} r ON u.uid = r.uid WHERE u.uid > 0 AND r.rid IN (" . implode($roles, ',') . ') ORDER BY u.name ASC');
+    $result = db_query('SELECT u.name, u.uid FROM {users} u LEFT JOIN {users_roles} r ON u.uid = r.uid WHERE u.uid > 0 AND r.rid IN ('. implode($roles, ',') .') ORDER BY u.name ASC');
   }
 
   while ($user = db_fetch_object($result)) {
