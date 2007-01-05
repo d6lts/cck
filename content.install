@@ -103,7 +103,15 @@ function content_update_3() {
 function content_update_4() {
   $ret = array();
 
-  $result = db_query("SELECT type_name FROM {node_type}");
+  // Figure out what table to update. If node_type exists and node_type_content does not, this update is
+  // being done by an early version of core that did not rename the node_type table, so use the original name, node_type.
+  // If both table names exist, core has renamed the table, so use the renamed table name, node_type_content.
+  if (!db_table_exists('node_type_content')) {
+    $result = db_query("SELECT type_name FROM {node_type}");
+  }
+  else {
+    $result = db_query("SELECT type_name FROM {node_type_content}");
+  }
   while ($type = db_fetch_object($result)) {
     switch ($GLOBALS['db_type']) {
       case 'mysql':
@@ -179,7 +187,16 @@ function content_update_6() {
 function content_update_7() {
   $ret = array();
 
-  $type_result = db_query("SELECT type_name FROM {node_type} WHERE type_name LIKE 'content-%%'");
+  // Figure out what table to update. If node_type exists and node_type_content does not, this update is
+  // being done by an early version of core that did not rename the node_type table, so use the original name, node_type.
+  // If both table names exist, core has renamed the table, so use the renamed table name, node_type_content.
+  if (!db_table_exists('node_type_content')) {
+    $table_name = 'node_type';
+  }
+  else {
+    $table_name = 'node_content_type';
+  }
+  $type_result = db_query("SELECT type_name FROM {$table_name} WHERE type_name LIKE 'content-%%'");
 
   if (db_num_rows($type_result)) {
     // Multi-part update
@@ -192,7 +209,7 @@ function content_update_7() {
     $old_type_name = $type->type_name;
     $new_type_name = str_replace('content-', 'content_', $old_type_name);
     $ret[] = update_sql("UPDATE {node} SET type = '". $new_type_name ."' WHERE type = '". $old_type_name ."'");
-    $ret[] = update_sql("UPDATE {node_type} SET type_name = '". $new_type_name ."' WHERE type_name = '". $old_type_name ."'");
+    $ret[] = update_sql("UPDATE {$table_name} SET type_name = '". $new_type_name ."' WHERE type_name = '". $old_type_name ."'");
     $ret[] = update_sql("UPDATE {node_field_instance} SET type_name = '". $new_type_name ."' WHERE type_name = '". $old_type_name ."'");
     $ret[] = update_sql("UPDATE {vocabulary_node_types} SET type = '". $new_type_name ."' WHERE type = '". $old_type_name ."'");
 
@@ -238,46 +255,6 @@ function content_update_8() {
  *  We'll know them because update_8 will rename the node_type table to node_content_type leaving no table named node_type
  *  A core patch has been submitted to get the rename done by the system module, so we need to test whether the table is already renamed
  */
-function content_4_7_migration_messages() {
-
-  // if the node_type_content table already exists, and the node_type table got created, there will be no errors and no need for messages
-  // this will be the case if the core patch gets committed and the update is done from a version that has that patch in it
-  if (db_table_exists('node_type_content') && db_table_exists('node_type')) return;
-
-  $op = isset($_REQUEST['op']) ? $_REQUEST['op'] : '';
-  switch ($op) {
-    case 'selection':
-      $_SESSION['content_init_version'] = drupal_get_installed_schema_version('content');
-      $_SESSION['system_init_version'] = drupal_get_installed_schema_version('system');
-      if ($_SESSION['content_init_version'] < 8) {
-        if ($_SESSION['system_init_version'] < 1000) {
-          // both system and content updates will run in the next go
-          drupal_set_message("<h3>Warning :</h3><p>During this upgade, you will most probably encounter <strong>SQL errors</strong>.<br/><strong>Please ignore these errors</strong>, they will get corrected in the subsequent CCK upgrade and <strong>will not affect the migration of your site</strong></p><p>Note : These errors appear because your current CCK database scheme is not the latest 4.7 version. See the UPDATE.txt file in your cck folder.</p>");
-        }
-        else {
-          // system update was run (and errors probably encountered), content update still to go
-          drupal_set_message("<h3>Warning :</h3><p><strong>You may have encountered SQL errors</strong> during the previous system upgrade to 5.0.<br/>Those errors in 'Content update 1005' involved 'node_type' table and 'type' column.<br/>They will get corrected during the CCK upgrade, and <strong>will not affect the migration of your site</strong>.</p><p>Note : These errors appear because your CCK database scheme was not the latest 4.7 version. See the UPDATE.txt file in your cck folder.</p>");
-        }
-      }
-      break;
-
-    case 'finished' :
-      if ($_SESSION['content_init_version'] < 8) {
-        if ($_SESSION['system_init_version'] < 1000 && $_SESSION['system'][1005][0]['success'] == FALSE) {
-          // system and content updates were made in the same go
-          drupal_set_message("<strong>Please ignore the errors in 'System update #1005'.</strong> and SQL errors involving 'node_type' table and 'type' column.<br/>They have been corrected in 'Content update #1001' and <strong>will not affect the migration of your site</strong>.");
-        }
-        else {
-          // system updates were already made in a previous go, content updates jun ran
-          drupal_set_message("The errors you may have previously encountered in 'System update #1005' have been corrected and <strong>will not affect the migration of your site</strong>.");
-        }
-      }
-      unset($_SESSION['content_init_version'], $_SESSION['system_init_version']);
-      break;
-  }
-}
-// set message here so it displays ahead of system updates if this module is enabled
-content_4_7_migration_messages();
 
 function content_update_1000() {
   $ret = array();
