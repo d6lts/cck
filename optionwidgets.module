@@ -20,7 +20,7 @@ function optionwidgets_help($section) {
  * Implementation of hook_widget_info().
  */
 function optionwidgets_widget_info() {
-  
+
   $option_types = array('text', 'number_integer', 'number_decimal');
   return array(
     'options_select' => array(
@@ -55,7 +55,7 @@ function optionwidgets_widget($op, &$node, $field, &$node_field) {
       $options = _optionwidgets_options($field);
       $node_field_transposed = content_transpose_array_rows_cols($node_field);
       $values = (isset($node_field_transposed['value']) && is_array($node_field_transposed['value'])) ? $node_field_transposed['value'] : array();
-      
+
       $keys = array();
       foreach ($values as $value) {
         $key = array_search($value, array_keys($options));
@@ -73,11 +73,11 @@ function optionwidgets_widget($op, &$node, $field, &$node_field) {
 
     case 'form':
       $options = _optionwidgets_options($field);
-      
+
       $form = array();
-            
+
       $form[$field['field_name']] = array('#tree' => TRUE);
-      
+
       switch ($field['widget']['type']) {
         case 'options_select':
           if (!$field['required']) $options = array('' => theme('optionwidgets_none', $field['widget']['type'], $field['field_name'], $node->type)) + $options;
@@ -129,7 +129,7 @@ function optionwidgets_widget($op, &$node, $field, &$node_field) {
           }
           break;
       }
-      
+
       return $form;
 
     case 'process form values':
@@ -141,16 +141,16 @@ function optionwidgets_widget($op, &$node, $field, &$node_field) {
       else {
         $keys = array($node_field['key']);
       }
-      
+
       $values = array();
       foreach ($keys as $key) {
         if (isset($options[$key])) {
           $values[] = $key;
         }
       }
-      
+
       $node_field = content_transpose_array_rows_cols(array('value' => $values));
-      
+
       // Remove the widget's data representation so it isn't saved.
       unset($node_field['keys']);
       unset($node_field['key']);
@@ -159,7 +159,7 @@ function optionwidgets_widget($op, &$node, $field, &$node_field) {
 }
 
 function _optionwidgets_options($field) {
-  
+
   $types = _content_field_types();
   $field_allowed_values = $types[$field['type']]['module'] .'_allowed_values';
   if (function_exists($field_allowed_values)) {

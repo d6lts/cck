@@ -7,14 +7,14 @@
  */
 
 /**
- * Rebuild content type information from node tables. 
- * 
+ * Rebuild content type information from node tables.
+ *
  *  Used to update CCK tables that might have missed changes made when CCK was disabled.
  *  Called by hook_form_alter() on system modules page whenever CCK is enabled.
  */
 function content_types_rebuild() {
   $db_types = content_types();
-    
+
   $result = db_query("SELECT type_name FROM {node_field_instance}");
   while ($type = db_fetch_array($result)) {
     $field_types[] = $type['type_name'];
@@ -103,7 +103,7 @@ function content_type_update($info) {
  */
 function content_type_delete($info) {
   $type = content_types($info->type);
- 
+
   foreach ($type['fields'] as $field) {
     content_field_instance_delete(array('type_name' => $info->type, 'field_name' => $field['field_name']));
   }
@@ -235,13 +235,13 @@ function content_field_instance_update($properties) {
  */
 function content_field_instance_delete($properties) {
   $number_deleted = db_query("DELETE FROM {node_field_instance} WHERE type_name = '%s' AND field_name = '%s'", $properties['type_name'], $properties['field_name']);
-  
+
   $type = content_types($properties['type_name']);
   $field = $type['fields'][$properties['field_name']];
   $field_types = _content_field_types();
   $field_type = $field_types[$field['type']];
   $columns = module_invoke($field_type['module'], 'field_settings', 'database columns', $field);
-  
+
   $instances = db_result(db_query("SELECT COUNT(*) FROM {node_field_instance} WHERE field_name = '%s'", $properties['field_name']));
 
   // If only one instance remains, we may need to change the database

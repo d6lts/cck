@@ -72,7 +72,7 @@ function fieldgroup_edit_group($content_type, $group_name, $action) {
 }
 
 function fieldgroup_edit_group_form($content_type, $group_name, $action) {
-  
+
   $groups = fieldgroup_groups($content_type['type']);
   $group = $groups[$group_name];
 
@@ -142,7 +142,7 @@ function fieldgroup_edit_group_form($content_type, $group_name, $action) {
 function fieldgroup_edit_group_validate($form_id, $form_values, $content_type, $action) {
 
   if (!empty($form_values['group_name']) && $action == 'add') {
-    
+
     $groups = fieldgroup_groups($content_type['type']);
     $group = $groups[$form_values['group_name']];
 
@@ -158,10 +158,10 @@ function fieldgroup_edit_group_validate($form_id, $form_values, $content_type, $
 }
 
 function fieldgroup_edit_group_submit($form_id, &$form_values, $content_type, $action) {
-    
+
   $groups = fieldgroup_groups($content_type['type']);
   $group = $groups[$form_values['group_name']];
-  
+
   if (!$group) {
     // Accept group name from programmed submissions if valid.
     if (!empty($form_values['group_name'])) {
@@ -191,7 +191,7 @@ function fieldgroup_edit_group_submit($form_id, &$form_values, $content_type, $a
              $form_values['label'], serialize($form_values['settings']), $form_values['description'], $form_values['weight'], $content_type['type'], $form_values['group_name']);
   }
   cache_clear_all('fieldgroup_data', 'cache');
-  
+
   return 'admin/content/types/'. $content_type['url_str'] .'/fields';
 }
 
@@ -256,7 +256,7 @@ function fieldgroup_groups($content_type = '', $sorted = FALSE, $reset = FALSE) 
       cache_set('fieldgroup_data', 'cache', serialize(array('groups' => $groups, 'groups_sorted' => $groups_sorted)), CACHE_PERMANENT);
     }
   }
-  
+
   if (empty($content_type)) {
     return $groups;
   }
