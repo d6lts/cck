@@ -72,7 +72,6 @@ function fieldgroup_edit_group($content_type, $group_name, $action) {
 }
 
 function fieldgroup_edit_group_form($content_type, $group_name, $action) {
-
   $groups = fieldgroup_groups($content_type['type']);
   $group = $groups[$group_name];
 
@@ -140,7 +139,6 @@ function fieldgroup_edit_group_form($content_type, $group_name, $action) {
  *  Group name validation for programmatic group addition.
  */
 function fieldgroup_edit_group_validate($form_id, $form_values, $content_type, $action) {
-
   if (!empty($form_values['group_name']) && $action == 'add') {
 
     $groups = fieldgroup_groups($content_type['type']);
