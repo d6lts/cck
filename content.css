@@ -5,11 +5,11 @@ table.content-field-overview td {
   width:14%;
   }
 .content-field-overview .content-field-overview-disabled {
-  filter:alpha(opacity=50);   
-   -moz-opacity: .50;   
-   opacity: .50; 
+  filter:alpha(opacity=50);
+   -moz-opacity: .50;
+   opacity: .50;
   }
 .content-field-overview-empty {
   text-align:center;
-  }  
-    
+  }
+

@@ -25,11 +25,11 @@ Files removed:
 - 103585 userreference: force transposed node_field['uid'] to array when empty.
 - 104259 Add code to create node_content tables and function content_types_rebuild()
   to fix database if content types are added when CCK is not enabled.
-- Fix body sort in field overview, add field type and module as hidden fields to 
+- Fix body sort in field overview, add field type and module as hidden fields to
   content_admin_field form to make programmatic form submission easier, fix url in fields tab table.
 - 88135 Fix Views handling of multiple fields to allow option to group multiple fields together.
-- 89172 Improved handling for optionwidgets, adding ability to create options as an array 
-  in php or as a list of values. Also fixes View handling, making sure the right value is 
+- 89172 Improved handling for optionwidgets, adding ability to create options as an array
+  in php or as a list of values. Also fixes View handling, making sure the right value is
   swapped in for the option in Views tables and lists.
 - 99672 Improved UI for setting weights and groups on field overview page.
 - Add content.css.

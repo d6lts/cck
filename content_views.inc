@@ -19,7 +19,7 @@ function content_views_tables() {
   foreach (content_fields() as $field) {
     $db_info = content_database_info($field);
     $module = $field_types[$field['type']]['module'];
-    
+
     $formatters = array();
     if (is_array($field_types[$field['type']]['formatters'])) {
       foreach ($field_types[$field['type']]['formatters'] as $name => $info) {
