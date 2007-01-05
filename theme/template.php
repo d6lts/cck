@@ -1,3 +1,4 @@
+// $Id$
 <?php
 
 function phptemplate_field(&$node, &$field, &$items, $teaser, $page) {
