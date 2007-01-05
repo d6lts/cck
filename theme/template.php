@@ -1,5 +1,5 @@
-// $Id$
 <?php
+// $Id$
 
 function phptemplate_field(&$node, &$field, &$items, $teaser, $page) {
   $variables = array(
