@@ -41,6 +41,9 @@ function fieldgroup_install() {
   }
 }
 
+/**
+ *  rename groups form "group-*" to "group_*"
+ */
 function fieldgroup_update_1() {
   $ret = array();
   switch ($GLOBALS['db_type']) {
