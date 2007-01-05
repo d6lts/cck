@@ -1,3 +1,4 @@
+# $Id$
 msgid ""
 msgstr ""
 "Project-Id-Version: Drupal 4.7 - CCK module - Greek\n"

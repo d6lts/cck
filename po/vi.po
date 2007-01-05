@@ -1,3 +1,4 @@
+# $Id$
 # LANGUAGE translation of Drupal (general)
 # Copyright YEAR NAME <EMAIL@ADDRESS>
 # Generated from files:
@@ -25,7 +26,7 @@ msgstr ""
 
 #: content.module:18
 msgid "Allows administrators to define new content types."
-msgstr "Cho phép người điều h� nh định nghĩa các kiểu nội dung mới."
+msgstr "Cho phép người điều h`nh định nghĩa các kiểu nội dung mới."
 
 #: content.module:73
 msgid "add content type"
@@ -62,7 +63,7 @@ msgstr "Mô tả ngắn cho kiểu nội dung."
 
 #: content_admin.inc:106
 msgid "Instructions to present to the user when adding new content of this type."
-msgstr "Lời hướng dẫn được hiển thị cho người dùng khi họ thêm một nội dung mới với kiểu nội dung n� y."
+msgstr "Lời hướng dẫn được hiển thị cho người dùng khi họ thêm một nội dung mới với kiểu nội dung n`y."
 
 #: content_admin.inc:110
 msgid "Title field label"
@@ -86,7 +87,7 @@ msgstr "Bạn thật sự muốn xóa kiểu nội dung %type?"
 
 #: content_admin.inc:198
 msgid "If you have any content left in this content type, it will be permanently deleted. This action cannot be undone."
-msgstr "Nếu bạn có nội dung n� o không xuất hiện trong kiểu nội dung n� y, nó sẽ bị xóa. Thao tác n� y không thể được ho� n lại."
+msgstr "Nếu bạn có nội dung n`o không xuất hiện trong kiểu nội dung n`y, nó sẽ bị xóa. Thao tác n`y không thể được ho`n lại."
 
 #: content_admin.inc:218
 msgid "Deleted content type %type."
@@ -110,7 +111,7 @@ msgstr "Tạo trường mới"
 
 #: content_admin.inc:313
 msgid "The human-readable name of this field."
-msgstr "Tên có thể đọc cho trường n� y."
+msgstr "Tên có thể đọc cho trường n`y."
 
 #: content_admin.inc:318
 msgid "Field type"
@@ -122,7 +123,7 @@ msgstr "Tạo trường"
 
 #: content_admin.inc:335
 msgid "No field modules are enabled. You need to <a href=\"%modules_url\">enable one</a>, such as text.module, before you can add new fields."
-msgstr "Không có module tạo ra trường n� o. Bạn cần <a href=\"%modules_url\">kích hoạt một</a>, như l�  text.module, trước khi bạn có thể thêm v� o các trường."
+msgstr "Không có module tạo ra trường n`o. Bạn cần <a href=\"%modules_url\">kích hoạt một</a>, như l` text.module, trước khi bạn có thể thêm v`o các trường."
 
 #: content_admin.inc:389
 msgid "Added field %label."
@@ -138,7 +139,7 @@ msgstr "Bạn thật sự muốn xóa trường $field?"
 
 #: content_admin.inc:452
 msgid "If you have any content left in this field, it will be lost. This action cannot be undone."
-msgstr "Nếu bạn có nội dung n� o không có ở trong trường n� y, nó sẽ bị mất đi. Thao tác n� y không thể ho� n lại."
+msgstr "Nếu bạn có nội dung n`o không có ở trong trường n`y, nó sẽ bị mất đi. Thao tác n`y không thể ho`n lại."
 
 #: content_admin.inc:452
 msgid "Remove"
@@ -150,7 +151,7 @@ msgstr "Đã xóa trường %field khỏi %type"
 
 #: content_admin.inc:487
 msgid "The field %field no longer exists in any content type, so it was deleted."
-msgstr "Trường %field không còn tồn tại trong kiểu nội dung n� o, vì thế nó đã bị xóa."
+msgstr "Trường %field không còn tồn tại trong kiểu nội dung n`o, vì thế nó đã bị xóa."
 
 #: content_admin.inc:511
 msgid "Widget settings"
@@ -166,7 +167,7 @@ msgstr "Widget"
 
 #: content_admin.inc:541
 msgid "In the node editing form, the heavier fields will sink and the lighter fields will be positioned nearer the top."
-msgstr "Trong form soạn thảo node, những trường nặng hơn sẽ chìm xuống v�  những trường nhẹ hơn sẽ nổi lên phía trên."
+msgstr "Trong form soạn thảo node, những trường nặng hơn sẽ chìm xuống v` những trường nhẹ hơn sẽ nổi lên phía trên."
 
 #: content_admin.inc:552
 msgid "Instructions to present to the user below this field on the editing form."
@@ -178,7 +179,7 @@ msgstr "Các thiết lập dữ liệu"
 
 #: content_admin.inc:559
 msgid "These settings apply to the %field field in every content type in which it appears."
-msgstr "Các thiết lập n� y áp dụng v� o trường %field trong mỗi kiểu nội dung m�  nó xuất hiện."
+msgstr "Các thiết lập n`y áp dụng v`o trường %field trong mỗi kiểu nội dung m` nó xuất hiện."
 
 #: content_admin.inc:568
 msgid "Multiple values"
@@ -206,7 +207,7 @@ msgstr "cơ sở dữ liệu"
 
 #: date.module:15
 msgid "Defines a date/time field type. <em>Note: Requires content.module.</em>"
-msgstr "Định nghĩa một kiểu trường ng� y/giờ. <em>Chú ý: Yêu cầu content.module.</em>"
+msgstr "Định nghĩa một kiểu trường ng`y/giờ. <em>Chú ý: Yêu cầu content.module.</em>"
 
 #: date.module:36
 msgid "Year"
@@ -214,11 +215,11 @@ msgstr "Năm"
 
 #: date.module:37
 msgid "Year and month"
-msgstr "Năm v�  tháng"
+msgstr "Năm v` tháng"
 
 #: date.module:39
 msgid "Date and time"
-msgstr "Ng� y v�  giờ"
+msgstr "Ng`y v` giờ"
 
 #: date.module:43
 msgid "Granularity"
@@ -226,11 +227,11 @@ msgstr "Granularity"
 
 #: date.module:101
 msgid "Times are entered and displayed with site's time zone"
-msgstr "Thời gian được gán v� o v�  trình b� y ứng với muối giờ của người dùng."
+msgstr "Thời gian được gán v`o v` trình b`y ứng với muối giờ của người dùng."
 
 #: date.module:102
 msgid "Times are entered and displayed with user's time zone"
-msgstr "Thời gian được gán v� o v�  trình b� y ứng với muối giờ của người dùng."
+msgstr "Thời gian được gán v`o v` trình b`y ứng với muối giờ của người dùng."
 
 #: date.module:106
 msgid "Time zone handling"
@@ -255,12 +256,12 @@ msgstr "%name phải được gán với định dạng ISO 8601 (YYY-MM-DD)."
 #: field.php:77
 #: text.module:44
 msgid "Maximum length"
-msgstr "Độ d� i tối đa"
+msgstr "Độ d`i tối đa"
 
 #: field.php:80
 #: text.module:47
 msgid "The maximum length of the field in characters. Leave blank for an unlimited size."
-msgstr "Số ký tự tối đa cho trường. Để trống nếu muốn độ d� i l�  vô hạn."
+msgstr "Số ký tự tối đa cho trường. Để trống nếu muốn độ d`i l` vô hạn."
 
 #: field.php:102
 #: number.module:82
@@ -287,7 +288,7 @@ msgstr "Số dòng"
 #: field.php:273
 #: text.module:167
 msgid "\"Rows\" must be a positive integer."
-msgstr "\"Số dòng\" phải l�  một số nguyên dương."
+msgstr "\"Số dòng\" phải l` một số nguyên dương."
 
 #: field.php:180;190
 #: number.module:119
@@ -305,7 +306,7 @@ msgstr "Định nghĩa một kiểu trường để tham khảo đến một nod
 
 #: nodereference.module:26
 msgid "node reference autocomplete"
-msgstr "tham khảo node tự động ho� n th� nh"
+msgstr "tham khảo node tự động ho`n th`nh"
 
 #: nodereference.module:51
 msgid "Content types that can be referenced"
@@ -313,7 +314,7 @@ msgstr "Những kiểu nội dung có thể được tham khảo đến"
 
 #: nodereference.module:204
 msgid "No post with that title exists."
-msgstr "Không tồn tại b� i viết n� o với tiêu đề đó."
+msgstr "Không tồn tại b`i viết n`o với tiêu đề đó."
 
 #: number.module:0
 msgid "number"
@@ -339,15 +340,15 @@ msgstr "Các giá trị cho phép"
 #: number.module:52
 #: text.module:55
 msgid "The possible values this field can contain. Any other values will result in an error. Enter one value per line."
-msgstr "Những giá trị m�  trường n� y có thể mang. Những giá trị khác sẽ trả về lỗi. Điền mỗi giá trị v� o mỗi dòng."
+msgstr "Những giá trị m` trường n`y có thể mang. Những giá trị khác sẽ trả về lỗi. Điền mỗi giá trị v`o mỗi dòng."
 
 #: number.module:58
 msgid "\"Minimum\" must be a number."
-msgstr "\"Tối thiểu\" phải l�  một con số."
+msgstr "\"Tối thiểu\" phải l` một con số."
 
 #: number.module:61
 msgid "\"Maximum\" must be a number."
-msgstr "\"Tối đa\" phải l�  một con số."
+msgstr "\"Tối đa\" phải l` một con số."
 
 #: number.module:113
 msgid "The value of %name may be no smaller than %min."
@@ -363,7 +364,7 @@ msgstr "optionwidgets"
 
 #: optionwidgets.module:15
 msgid "Defines selection, check box and radio button widgets for text and numeric fields. <em>Note: Requires content.module, text.module and number.module.</em>"
-msgstr "Định nghĩa hộp select, checkbox v�  nút radio cho văn bản v�  các trường số. <em>Chú ý: Yêu cầu content.module, text.module v�  number.module.</em>"
+msgstr "Định nghĩa hộp select, checkbox v` nút radio cho văn bản v` các trường số. <em>Chú ý: Yêu cầu content.module, text.module v` number.module.</em>"
 
 #: text.module:0
 msgid "text"
@@ -375,7 +376,7 @@ msgstr "Định nghĩa kiểu trường văn bản đơn giản. <em>Chú ý: Y�
 
 #: text.module:35
 msgid "Filtered text (user selects input format)"
-msgstr "Văn bản được lọc (người dùng chọn định dạng dữ liệu v� o)"
+msgstr "Văn bản được lọc (người dùng chọn định dạng dữ liệu v`o)"
 
 #: text.module:35
 msgid "Plain text"
