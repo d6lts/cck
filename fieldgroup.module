@@ -25,7 +25,6 @@ function fieldgroup_help($section) {
 
 
 function fieldgroup_menu($may_cache) {
-
   if (!$may_cache) {
     if (arg(0) == 'admin' && arg(1) == 'content' && arg(2) == 'types' && arg(3)) {
 
@@ -72,7 +71,6 @@ function fieldgroup_edit_group($content_type, $group_name, $action) {
 }
 
 function fieldgroup_edit_group_form($content_type, $group_name, $action) {
-
   $groups = fieldgroup_groups($content_type['type']);
   $group = $groups[$group_name];
 
@@ -140,7 +138,6 @@ function fieldgroup_edit_group_form($content_type, $group_name, $action) {
  *  Group name validation for programmatic group addition.
  */
 function fieldgroup_edit_group_validate($form_id, $form_values, $content_type, $action) {
-
   if (!empty($form_values['group_name']) && $action == 'add') {
 
     $groups = fieldgroup_groups($content_type['type']);
@@ -158,7 +155,6 @@ function fieldgroup_edit_group_validate($form_id, $form_values, $content_type, $
 }
 
 function fieldgroup_edit_group_submit($form_id, &$form_values, $content_type, $action) {
-
   $groups = fieldgroup_groups($content_type['type']);
   $group = $groups[$form_values['group_name']];
 
@@ -285,7 +281,6 @@ function _fieldgroup_field_get_group($content_type, $field_name) {
  * Implementation of hook_form_alter()
  */
 function fieldgroup_form_alter($form_id, &$form) {
-
   if (isset($form['type']) && $form['type']['#value'] .'_node_form' == $form_id) {
     foreach (fieldgroup_groups($form['type']['#value']) as $group_name => $group) {
       $form[$group_name] = array(

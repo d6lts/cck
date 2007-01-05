@@ -35,7 +35,6 @@ function _content_admin_type_fields() {
   return $output;
 }
 
-
 /**
  * Menu callback; presents a listing of fields for a content type.
  *
@@ -725,7 +724,6 @@ function _content_admin_field_validate($form_id, $form_values) {
  * Save a field's settings after editing.
  */
 function _content_admin_field_submit($form_id, $form_values) {
-
   $type = content_types($form_values['type_name']);
   $field = $type['fields'][$form_values['field_name']];
   $field_types = _content_field_types();
@@ -1065,14 +1063,6 @@ function content_db_add_column($table, $column, $type, $attributes = array()) {
         unset($attributes['length']);
       }
       break;
-
-    case 'mysql':
-    case 'mysqli':
-      // MySQL allows no DEFAULT value for text (and blob) columns
-      if (in_array($type, array('text', 'mediumtext', 'longtext'))) {
-        $default = '';
-      }
-      break;
   }
 
   if (array_key_exists('not null', $attributes) && $attributes['not null']) {
@@ -1114,6 +1104,10 @@ function content_db_add_column($table, $column, $type, $attributes = array()) {
 
     case 'mysql':
     case 'mysqli':
+      // MySQL allows no DEFAULT value for text (and blob) columns
+      if (in_array($type, array('text', 'mediumtext', 'longtext'))) {
+        $default = '';
+      }
       db_query('ALTER TABLE {'. $table .'} ADD COLUMN '. $column .' '. $type .' '. $not_null .' '. $default);
       break;
   }

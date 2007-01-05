@@ -68,7 +68,6 @@ function content_type_create($info) {
  *   value supplied by hook_node_type()
  */
 function content_type_update($info) {
-
   if (!empty($info->old_type) && $info->old_type != $info->type) {
     // rename the content type in all fields that use changed content type.
     db_query("UPDATE {node_field_instance} SET type_name='%s' WHERE type_name='%s'", array($info->type, $info->old_type));
