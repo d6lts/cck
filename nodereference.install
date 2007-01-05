@@ -58,8 +58,8 @@ function nodereference_update_2() {
 function nodereference_update_3() {
   $ret = array();
 
-  include_once(drupal_get_path('module', 'content') .'/content.module');
-  include_once(drupal_get_path('module', 'content') .'/content_admin.inc');
+  include_once('./'. drupal_get_path('module', 'content') .'/content.module');
+  include_once('./'. drupal_get_path('module', 'content') .'/content_admin.inc');
 
   $fields = content_fields();
 

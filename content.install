@@ -142,8 +142,8 @@ function content_update_4() {
 function content_update_5() {
   $ret = array();
 
-  include_once(drupal_get_path('module', 'content') .'/content.module');
-  include_once(drupal_get_path('module', 'content') .'/content_admin.inc');
+  include_once('./'. drupal_get_path('module', 'content') .'/content.module');
+  include_once('./'. drupal_get_path('module', 'content') .'/content_admin.inc');
 
   $result = db_query('SELECT nf.field_name FROM {node_field} nf LEFT JOIN {node_field_instance} nfi ON nfi.field_name = nf.field_name WHERE nf.multiple = 0 AND nf.db_storage = 0 GROUP BY nfi.field_name HAVING COUNT(*) = 1');
 
