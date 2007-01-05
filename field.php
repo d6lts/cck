@@ -266,14 +266,14 @@ function hook_field_formatter($field, $item, $formatter, $node) {
   else {
     $text = check_plain($item['value']);
   }
-  
+
   switch ($formatter) {
     case 'plain':
       return strip_tags($text);
-    
+
     case 'trimmed':
       return node_teaser($text, $field['text_processing'] ? $item['format'] : NULL);
-    
+
     default:
       return $text;
   }

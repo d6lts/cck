@@ -19,7 +19,7 @@ function content_views_tables() {
   foreach (content_fields() as $field) {
     $db_info = content_database_info($field);
     $module = $field_types[$field['type']]['module'];
-    
+
     $formatters = array();
     if (is_array($field_types[$field['type']]['formatters'])) {
       foreach ($field_types[$field['type']]['formatters'] as $name => $info) {
@@ -257,7 +257,7 @@ function content_views_argument_handler($op, &$query, $argtype, $arg = '') {
  * @param unknown_type $update_fields
  */
 function _content_views_rebuild_views($update_fields) {
-  
+
   $tables = _views_get_tables();
   $result = db_query("SELECT name, query FROM {view_view} ORDER BY name");
   while ($row = db_fetch_array($result)) {

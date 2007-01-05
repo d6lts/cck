@@ -3,7 +3,7 @@
 class ContentCrudTest extends  DrupalTestCase {
   var $_cleanup_roles = array();
   var $_cleanup_users = array();
-  
+
   /**
    * Implementation of get_info() for information
    */
@@ -14,26 +14,26 @@ class ContentCrudTest extends  DrupalTestCase {
   function setUp() {
     $this->drupalModuleEnable('content');
   }
-  
+
   function testContenTypeCreation() {
     /* Prepare settings */
     #$this->drupalVariableSet('node_options_page', array('status', 'promote'));
-   
+
     /* Prepare a user to do the stuff */
     #$web_user = $this->drupalCreateUserRolePerm(array('administer content types'));
     #$this->drupalLoginUser($web_user);
-    
+
     // $edit = array();
 //     $edit['title']    = '!SimpleTest test node! ' . $this->randomName(10);
 //     $edit['body']     = '!SimpleTest test body! ' . $this->randomName(32) . ' ' . $this->randomName(32);
 //     $this->drupalPostRequest('node/add/page', $edit, 'Submit');
-//     
+//
 //     // see: http://drupal.org/node/37754 why this currently fails
 //     $this->assertWantedText(t('Your %post was created.', array ('%post' => 'page')), 'Page created');
-//     
+//
 //     $node = node_load(array('title' => $edit['title']));
 //     $this->assertNotNull($node, 'Node found in database. %s');
-//     
+//
 //     node_delete($node->nid);
 
     $properties = array();

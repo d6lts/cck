@@ -11,7 +11,7 @@
  *
  * @param $properties
  *   An array of properties to load the content type with. Valid keys:
- *   - '' - 
+ *   - '' -
  * @return
  *   The ID of the newly-created content type.
  */
@@ -24,7 +24,7 @@ function content_type_create($properties) {
  *
  * @param $properties
  *   An array of properties to use in selecting a content type. Valid keys:
- *   - '' - 
+ *   - '' -
  * @return
  *   The content type array.
  */
@@ -37,7 +37,7 @@ function content_type_read($properties) {
  *
  * @param $properties
  *   An array of properties to set in the content type. Valid keys:
- *   - '' - 
+ *   - '' -
  * @return
  *   The number of content types updated.
  */
@@ -60,7 +60,7 @@ function content_type_delete($properties) {
   while ($node = db_fetch_object($result)) {
     node_delete($node->nid);
   }
-  
+
   $result = db_query("SELECT field_name FROM {node_field_instance} WHERE type_name = '%s'", $properties['type_name']);
   $field_names = array();
   while ($type = db_fetch_array($result)) {
@@ -90,7 +90,7 @@ function content_type_delete($properties) {
  *
  * @param $properties
  *   An array of properties to load the field with. Valid keys:
- *   - '' - 
+ *   - '' -
  * @return
  *   The ID of the newly-created field.
  */
@@ -103,7 +103,7 @@ function content_field_create($properties) {
  *
  * @param $properties
  *   An array of properties to use in selecting a field. Valid keys:
- *   - '' - 
+ *   - '' -
  * @return
  *   The field array.
  */
@@ -116,7 +116,7 @@ function content_field_read($properties) {
  *
  * @param $properties
  *   An array of properties to set in the field. Valid keys:
- *   - '' - 
+ *   - '' -
  * @return
  *   The number of fields updated.
  */
@@ -151,7 +151,7 @@ function content_field_delete($properties) {
  *
  * @param $properties
  *   An array of properties to load the field instance with. Valid keys:
- *   - '' - 
+ *   - '' -
  * @return
  *   The ID of the newly-created field instance.
  */
@@ -178,7 +178,7 @@ function content_field_instance_read($properties) {
  *
  * @param $properties
  *   An array of properties to set in the field instance. Valid keys:
- *   - '' - 
+ *   - '' -
  * @return
  *   The number of field instance updated.
  */
@@ -198,7 +198,7 @@ function content_field_instance_update($properties) {
  */
 function content_field_instance_delete($properties) {
   $number_deleted = db_query("DELETE FROM {node_field_instance} WHERE type_name = '%s' AND field_name = '%s'", $properties['type_name'], $properties['field_name']);
-  
+
   $type = content_types($properties['type_name']);
   $field = $type['fields'][$properties['field_name']];
   $field_types = _content_field_types();
@@ -230,7 +230,7 @@ function content_field_instance_delete($properties) {
   }
 
   content_clear_type_cache();
-  
+
   return $number_deleted;
 }
 

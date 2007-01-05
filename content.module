@@ -256,7 +256,7 @@ function content_load($node) {
 function content_form(&$node, &$param) {
   $form = array();
   $type = content_types($node->type);
-  
+
   // Set form parameters so we can accept file uploads.
   $form['#attributes'] = array("enctype" => "multipart/form-data");
 
@@ -366,7 +366,7 @@ function content_nodeapi(&$node, $op, $teaser, $page) {
  */
 function content_field($op, &$node, $field, &$node_field, $teaser, $page) {
   $db_info = content_database_info($field);
-  
+
   switch ($op) {
     case 'load':
       $column_names = array();

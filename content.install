@@ -228,7 +228,7 @@ function content_update_7() {
  */
 function content_update_8() {
   $ret = array();
-  
+
   switch ($GLOBALS['db_type']) {
     case 'mysql':
     case 'mysqli':

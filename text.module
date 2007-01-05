@@ -170,11 +170,11 @@ function text_field_formatter($field, $item, $formatter, $node) {
   if (!isset($item['value'])) {
     return '';
   }
-  
+
   if ($allowed_values = text_allowed_values($field)) {
     return $allowed_values[$item['value']];
   }
-  
+
   if ($field['text_processing']) {
     $text = check_markup($item['value'], $item['format'], is_null($node) || isset($node->in_preview));
   }
