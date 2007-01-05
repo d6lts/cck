@@ -51,7 +51,7 @@ function _content_admin_type_fields() {
     while ($type = db_fetch_array($result)) {
       $types[] = $type['label'];
     }
-    $row[] = implode (', ', $types);
+    $row[] = implode(', ', $types);
 
     $rows[] = $row;
   }
@@ -238,7 +238,7 @@ function content_admin_field_overview_form($type_name) {
 
   // Create a dummy node and form and call hook_form_alter()
   // to produce an array of fields and weights added to the node by all modules.
-  $dummy_node = new StdClass();
+  $dummy_node = new stdClass();
   $dummy_node->type = $type['type_name'];
   $dummy_form_id = $type['type_name'] .'_node_form';
   $dummy_form = node_form_array($dummy_node);
@@ -865,7 +865,6 @@ function _content_admin_field_validate($form_id, $form_values) {
 
   module_invoke($widget_type['module'], 'widget_settings', 'validate', array_merge($field, $form_values));
   module_invoke($field_type['module'], 'field_settings', 'validate', array_merge($field, $form_values));
-
 }
 
 /**

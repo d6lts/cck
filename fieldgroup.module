@@ -35,7 +35,7 @@ function fieldgroup_menu($may_cache) {
           );
         if (arg(4) == 'groups' && arg(5)) {
           $items[] = array(
-            'path' => 'admin/node/types/'. arg(3) .'/groups/'. arg(5). '/edit',
+            'path' => 'admin/node/types/'. arg(3) .'/groups/'. arg(5) .'/edit',
             'title' => t('edit group'),
             'callback' => 'fieldgroup_edit_group',
             'access' => user_access('administer content types'),
@@ -43,7 +43,7 @@ function fieldgroup_menu($may_cache) {
             'type' => MENU_CALLBACK_ITEM,
             );
           $items[] = array(
-            'path' => 'admin/node/types/'. arg(3) .'/groups/'. arg(5). '/remove',
+            'path' => 'admin/node/types/'. arg(3) .'/groups/'. arg(5) .'/remove',
             'title' => t('edit group'),
             'callback' => 'fieldgroup_remove_group',
             'access' => user_access('administer content types'),

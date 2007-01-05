@@ -270,7 +270,7 @@ function number_allowed_values($field) {
     $list = array_map('trim', $list);
     $list = array_filter($list, 'strlen');
     foreach ($list as $opt) {
-      list ($key, $value) = explode('|', $opt);
+      list($key, $value) = explode('|', $opt);
       $allowed_values[$field['field_name']][$key] = $value ? $value : $key;
     }
   }

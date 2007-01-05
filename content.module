@@ -28,10 +28,10 @@ function content_help($section) {
   if (strpos($section, 'node/add') === 0) {
     $types = content_types();
     foreach ($types as $type_name => $type) {
-      if ($section == 'node/add#' . $type_name) {
+      if ($section == 'node/add#'. $type_name) {
         return t($types[$type_name]['description']);
       }
-      if ($section == 'node/add/' . $type_name) {
+      if ($section == 'node/add/'. $type_name) {
         return t($types[$type_name]['help']);
       }
     }
@@ -322,7 +322,7 @@ function content_update(&$node) {
 function content_delete(&$node) {
   _content_field_invoke('delete', $node);
   _content_field_invoke_default('delete', $node);
-  db_query('DELETE FROM {'. 'node_'. $node->type .'} WHERE nid = %d', $node->nid);
+  db_query('DELETE FROM {node_'. $node->type .'} WHERE nid = %d', $node->nid);
   cache_clear_all('content:'. $node->nid, TRUE);
 }
 
@@ -350,7 +350,7 @@ function content_nodeapi(&$node, $op, $teaser, $page) {
         _content_field_invoke('delete revision', $node);
         _content_field_invoke_default('delete revision', $node);
         cache_clear_all('content:'. $node->nid .':'. $node->vid);
-        db_query('DELETE FROM {'. 'node_'. $node->type .'} WHERE vid = %d', $node->vid);
+        db_query('DELETE FROM {node_'. $node->type .'} WHERE vid = %d', $node->vid);
       }
       break;
   }
