@@ -42,7 +42,7 @@ function fieldgroup_menu($may_cache) {
           );
         if (arg(4) == 'groups' && arg(5)) {
           $items[] = array(
-            'path' => 'admin/content/types/'. arg(3) .'/groups/'. arg(5). '/edit',
+            'path' => 'admin/content/types/'. arg(3) .'/groups/'. arg(5) .'/edit',
             'title' => t('Edit group'),
             'callback' => 'fieldgroup_edit_group',
             'access' => user_access('administer content types'),
@@ -50,7 +50,7 @@ function fieldgroup_menu($may_cache) {
             'type' => MENU_CALLBACK_ITEM,
             );
           $items[] = array(
-            'path' => 'admin/content/types/'. arg(3) .'/groups/'. arg(5). '/remove',
+            'path' => 'admin/content/types/'. arg(3) .'/groups/'. arg(5) .'/remove',
             'title' => t('Edit group'),
             'callback' => 'drupal_get_form',
             'callback arguments' => array('fieldgroup_remove_group', $content_type, arg(5)),

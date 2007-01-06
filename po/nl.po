@@ -1,3 +1,4 @@
+# $Id$
 # translation of nl.po to
 # translation of cck.po to
 # LANGUAGE translation of Drupal (cck)

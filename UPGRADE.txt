@@ -1,3 +1,5 @@
+// $Id$
+
 UPDATING FROM VERSION 4.7 TO 5.x
 
 Depending on the exact version of Drupal 5.x and CCK 4.7 you are using,

@@ -1,3 +1,5 @@
+// $Id$
+
 Content Construction Kit
 ------------------------
 To install, place the entire cck folder into your modules directory.

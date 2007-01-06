@@ -50,7 +50,7 @@ function content_admin_field_overview_form($type_name) {
 
   // Create a dummy node and form and call hook_form_alter()
   // to produce an array of fields and weights added to the node by all modules.
-  $dummy_node = new StdClass();
+  $dummy_node = new stdClass();
   $dummy_node->type = $type['type'];
   $dummy_form_id = $type['type'] .'_node_form';
   $dummy_form = node_form($dummy_node);
@@ -185,7 +185,6 @@ function content_admin_field_overview_form($type_name) {
   $form['type_name']['#value']            = $type['type'];
 
   return $form;
-
 }
 
 /**
@@ -697,7 +696,7 @@ function _content_admin_field($type_name, $field_name) {
   $form['field_type'] = array(
     '#type' => 'value',
     '#value' => $field['type'],
-    );
+  );
   $form['module'] = array(
     '#type' => 'value',
     '#value' => implode(', ', array_unique(array($field_type['module'], $widget_type['module']))),

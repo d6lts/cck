@@ -58,8 +58,8 @@ function userreference_update_2() {
 function userreference_update_3() {
   $ret = array();
 
-  include_once(drupal_get_path('module', 'content') .'/content.module');
-  include_once(drupal_get_path('module', 'content') .'/content_admin.inc');
+  include_once('./'. drupal_get_path('module', 'content') .'/content.module');
+  include_once('./'. drupal_get_path('module', 'content') .'/content_admin.inc');
 
   $fields = content_fields();
 
@@ -93,8 +93,8 @@ function userreference_update_3() {
 function userreference_update_4() {
   $ret = array();
 
-  include_once(drupal_get_path('module', 'content') .'/content.module');
-  include_once(drupal_get_path('module', 'content') .'/content_admin.inc');
+  include_once('./'. drupal_get_path('module', 'content') .'/content.module');
+  include_once('./'. drupal_get_path('module', 'content') .'/content_admin.inc');
 
   $fields = content_fields();
 

@@ -1,3 +1,5 @@
+// $Id$
+
 Theming Constructed Content Types
 
 After you have designed your content, you will likely want to lay out the

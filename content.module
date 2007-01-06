@@ -10,12 +10,12 @@ define('CONTENT_DB_STORAGE_PER_FIELD', 0);
 define('CONTENT_DB_STORAGE_PER_CONTENT_TYPE', 1);
 
 if (module_exists('views')) {
-  include_once(drupal_get_path('module', 'content') .'/content_views.inc');
+  include_once('./'. drupal_get_path('module', 'content') .'/content_views.inc');
 }
 if (module_exists('pathauto')) {
-  include_once(drupal_get_path('module', 'content') .'/content_pathauto.inc');
+  include_once('./'. drupal_get_path('module', 'content') .'/content_pathauto.inc');
 }
-include_once(drupal_get_path('module', 'content') .'/content_crud.inc');
+include_once('./'. drupal_get_path('module', 'content') .'/content_crud.inc');
 
 /**
  * Implementation of hook_help().
@@ -36,7 +36,7 @@ function content_menu($may_cache) {
 
   // Only include administrative callbacks if we are viewing an admin page.
   if (arg(0) == 'admin') {
-    include_once(drupal_get_path('module', 'content') .'/content_admin.inc');
+    include_once('./'. drupal_get_path('module', 'content') .'/content_admin.inc');
   }
 
   if ($may_cache) {
@@ -276,7 +276,7 @@ function content_nodeapi(&$node, $op, $teaser, $page) {
       content_delete($node);
       break;
 
-     case 'delete revision':
+    case 'delete revision':
       content_delete_revision($node);
       break;
 
@@ -692,13 +692,13 @@ function _content_type_info($reset = FALSE) {
       }
       foreach (module_list() as $module) {
         $module_formatters = module_invoke($module, 'field_formatter_info');
-  	    if ($module_formatters) {
-  	      foreach ($module_formatters as $name => $formatter_info) {
-  	        foreach ($formatter_info['field types'] as $field_type) {
-  	          $info['field types'][$field_type]['formatters'][$name] = $formatter_info;
-  	          $info['field types'][$field_type]['formatters'][$name]['module'] = $module;
-  	        }
-  	      }
+        if ($module_formatters) {
+          foreach ($module_formatters as $name => $formatter_info) {
+            foreach ($formatter_info['field types'] as $field_type) {
+              $info['field types'][$field_type]['formatters'][$name] = $formatter_info;
+              $info['field types'][$field_type]['formatters'][$name]['module'] = $module;
+            }
+          }
         }
       }
 
@@ -752,13 +752,13 @@ function _content_type_info($reset = FALSE) {
  */
 function content_node_type($op, $info) {
   switch ($op) {
-    case ('insert'):
+    case 'insert':
       content_type_create($info);
       break;
-    case ('update'):
+    case 'update':
       content_type_update($info);
       break;
-    case ('delete'):
+    case 'delete':
       content_type_delete($info);
       break;
   }
