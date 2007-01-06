@@ -245,7 +245,7 @@ function hook_field_formatter_info() {
  *   The node object, for context. Will be NULL in some cases.
  *   Warning : when displaying field retrieved by Views, $node will not
  *   be a "full-fledged" node object, but an object containg the data returned
- *   by the Views query (at least nid, vid, changed
+ *   by the Views query (at least nid, vid, changed)
  * @return
  *   An HTML string containing the formatted item.
  *
