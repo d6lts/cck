@@ -13,13 +13,13 @@ function fieldgroup_install() {
                 `description` mediumtext NOT NULL,
                 `weight` tinyint(4) NOT NULL,
                  PRIMARY KEY(`type_name`, `group_name`)
-              ) /*!40100 DEFAULT CHARACTER SET utf8 */;");
+              ) /*!40100 DEFAULT CHARACTER SET utf8 */");
       db_query("CREATE TABLE {node_group_fields} (
                 `type_name` varchar(32) NOT NULL default '',
                 `group_name` varchar(32) NOT NULL default '',
                 `field_name` varchar(32) NOT NULL default '',
                  PRIMARY KEY(`type_name`, `group_name`, `field_name`)
-              ) /*!40100 DEFAULT CHARACTER SET utf8 */;");
+              ) /*!40100 DEFAULT CHARACTER SET utf8 */");
       break;
     case 'pgsql':
       db_query("CREATE TABLE {node_group} (

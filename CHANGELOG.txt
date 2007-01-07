@@ -19,6 +19,7 @@ General
 - 99672   Improved UI for setting weights and groups on field overview page
 - 79887   Default field theming does not display label on empty fields.
 - 88135   Views handling of multiple fields : allow option to group multiple fields together.
+- 107208  make db tables storage-agnostic (remove MyISAM enforcement)
 -         Slightly optimized .inc files include
 -         Misc code cleanup
 
