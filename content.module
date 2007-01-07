@@ -556,26 +556,28 @@ function _content_widget_invoke($op, &$node) {
   $widget_types = _content_widget_types();
 
   $return = array();
-  foreach ($type['fields'] as $field) {
-    $node_field = isset($node->$field['field_name']) ? $node->$field['field_name'] : array();
+  if (count($type['fields'])) {
+    foreach ($type['fields'] as $field) {
+      $node_field = isset($node->$field['field_name']) ? $node->$field['field_name'] : array();
 
-    $module = $widget_types[$field['widget']['type']]['module'];
-    $function = $module .'_widget';
-    if (function_exists($function)) {
-      $result = $function($op, $node, $field, $node_field);
-      if (is_array($result) && $op == 'form') {
-        $result[$field['field_name']]['#weight'] = $field['widget']['weight'];
+      $module = $widget_types[$field['widget']['type']]['module'];
+      $function = $module .'_widget';
+      if (function_exists($function)) {
+        $result = $function($op, $node, $field, $node_field);
+        if (is_array($result) && $op == 'form') {
+          $result[$field['field_name']]['#weight'] = $field['widget']['weight'];
+        }
+        if (is_array($result)) {
+          $return = array_merge($return, $result);
+        }
+        else if (isset($result)) {
+          $return[] = $result;
+        }
       }
-      if (is_array($result)) {
-        $return = array_merge($return, $result);
+      // test for values in $node_field in case modules added items on insert
+      if (is_object($node) && (isset($node->$field['field_name']) || count($node_field))) {
+        $node->$field['field_name'] = $node_field;
       }
-      else if (isset($result)) {
-        $return[] = $result;
-      }
-    }
-    // test for values in $node_field in case modules added items on insert
-    if (is_object($node) && (isset($node->$field['field_name']) || count($node_field))) {
-      $node->$field['field_name'] = $node_field;
     }
   }
   return $return;
