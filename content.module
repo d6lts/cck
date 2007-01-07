@@ -153,7 +153,9 @@ function content_form(&$node) {
   $type = content_types($node->type);
 
   // Set form parameters so we can accept file uploads.
-  $form['#attributes'] = array("enctype" => "multipart/form-data");
+  if (count($type['fields'])) {
+    $form['#attributes'] = array("enctype" => "multipart/form-data");
+  }
 
   _content_widget_invoke('prepare form values', $node);
   $form = array_merge($form, _content_widget_invoke('form', $node));
