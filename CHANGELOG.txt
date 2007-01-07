@@ -30,8 +30,8 @@ General
 - 79887   Default field theming does not display label on empty fields.
 - 88135   Views handling of multiple fields : allow option to group multiple fields together.
 - 105787  Refactor generation of data table names
-- 107208  make db tables storage-agnostic (remove MyISAM enforcement)
--         Slightly optimized .inc files include
+- 107208  Make db tables storage-agnostic (remove MyISAM enforcement)
+-         Optimized .inc files inclusion
 -         Removed hook_simpletest for now
 -         Misc code cleanup
 
@@ -70,13 +70,14 @@ Field / widget modules
 - 106150  Userreference : make user list sorting consistent
 - 82439   Number : Fixed storage issues for empty number fields
 
-5.0 migration
+5.0 port
 - 106932  Fixed migration path from outdated 4.7 versions
 - 100744  Fixed migration path from outdated 4.7 versions
 - 99713   Fixed field weights not playing correctly with 'non-cck' fields on node display
 - 99096   Fixed content_form being called twice on form generation
 - 100535  Fixed occasional fatal error on node view when $node->content comes empty
 -         Field instances were not removed on a content type deletion
+-         "enctype : multipart" was added to node forms for every content type
 
 
 5--1.0-beta
