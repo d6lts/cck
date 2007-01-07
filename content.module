@@ -10,16 +10,6 @@ define('CONTENT_DB_STORAGE_PER_FIELD', 0);
 define('CONTENT_DB_STORAGE_PER_CONTENT_TYPE', 1);
 
 /**
- * Implementation of hook_help().
- */
-function content_help($section) {
-  switch ($section) {
-    case 'admin/settings/modules#description':
-      return t('<strong>CCK:</strong> Allows administrators to define new content types.');
-  }
-}
-
-/**
  * Implementation of hook_init().
  */
 function content_init() {

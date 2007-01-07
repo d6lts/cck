@@ -7,16 +7,6 @@
  */
 
 /**
- * Implementation of hook_help().
- */
-function number_help($section) {
-  switch ($section) {
-    case 'admin/settings/modules#description':
-      return t('<strong>CCK:</strong> Defines numeric field types. <em>Note: Requires content.module.</em>');
-  }
-}
-
-/**
  * Implementation of hook_field_info().
  */
 function number_field_info() {

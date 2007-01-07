@@ -7,16 +7,6 @@
  */
 
 /**
- * Implementation of hook_help().
- */
-function text_help($section) {
-  switch ($section) {
-    case 'admin/settings/modules#description':
-      return t('<strong>CCK:</strong> Defines simple text field types. <em>Note: Requires content.module.</em>');
-  }
-}
-
-/**
  * Implementation of hook_field_info().
  */
 function text_field_info() {
