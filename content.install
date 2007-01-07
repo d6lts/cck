@@ -20,7 +20,7 @@ function content_install() {
         multiple int NOT NULL default '0',
         db_storage int NOT NULL default '0',
         PRIMARY KEY  (field_name)
-      ) TYPE=MyISAM /*!40100 DEFAULT CHARACTER SET utf8 */;");
+      ) /*!40100 DEFAULT CHARACTER SET utf8 */");
       db_query("CREATE TABLE {node_field_instance} (
         field_name varchar(32) NOT NULL default '',
         type_name varchar(32) NOT NULL default '',
@@ -30,7 +30,7 @@ function content_install() {
         widget_settings mediumtext NOT NULL,
         description mediumtext NOT NULL,
         PRIMARY KEY  (field_name,type_name)
-      ) TYPE=MyISAM /*!40100 DEFAULT CHARACTER SET utf8 */;");
+      ) /*!40100 DEFAULT CHARACTER SET utf8 */");
       break;
 
     case 'pgsql':
@@ -120,7 +120,7 @@ function content_update_4() {
             vid int unsigned NOT NULL default '0',
             nid int unsigned NOT NULL default '0',
             PRIMARY KEY (vid)
-          ) TYPE=MyISAM /*!40100 DEFAULT CHARACTER SET utf8 */;");
+          ) /*!40100 DEFAULT CHARACTER SET utf8 */");
         break;
 
       case 'pgsql':

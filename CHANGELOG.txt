@@ -30,9 +30,11 @@ General
 - 79887   Default field theming does not display label on empty fields.
 - 88135   Views handling of multiple fields : allow option to group multiple fields together.
 - 105787  Refactor generation of data table names
+- 107208  make db tables storage-agnostic (remove MyISAM enforcement)
 -         Slightly optimized .inc files include
 -         Removed hook_simpletest for now
 -         Misc code cleanup
+
 
 Field / widget modules
 -         Removed original date.module. Use http://drupal.org/project/date instead.
