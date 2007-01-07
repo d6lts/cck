@@ -300,7 +300,7 @@ function text_widget($op, &$node, $field, &$items) {
             '#default_value' => isset($items[0]['value']) ? $items[0]['value'] : '',
             '#required' => $field['required'],
             '#description' => $field['widget']['description'],
-            '#maxlength' => $field['max_length'] ? $field['max_length'] : '',
+            '#maxlength' => $field['max_length'] ? $field['max_length'] : NULL,
             '#weight' => $field['widget']['weight'],
           );
         }
