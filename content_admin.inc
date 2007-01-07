@@ -829,7 +829,7 @@ function content_alter_db_field($previous_field, $previous_columns, $new_field, 
                 delta int unsigned NOT NULL default '0',
                 nid int unsigned NOT NULL default '0',
                 PRIMARY KEY (vid,delta)
-              ) TYPE=MyISAM /*!40100 DEFAULT CHARACTER SET utf8 */;");
+              ) /*!40100 DEFAULT CHARACTER SET utf8 */");
             break;
 
           case 'pgsql':
@@ -850,7 +850,7 @@ function content_alter_db_field($previous_field, $previous_columns, $new_field, 
                 vid int unsigned NOT NULL default '0',
                 nid int unsigned NOT NULL default '0',
                 PRIMARY KEY (vid)
-              ) TYPE=MyISAM /*!40100 DEFAULT CHARACTER SET utf8 */;");
+              ) /*!40100 DEFAULT CHARACTER SET utf8 */");
             break;
 
           case 'pgsql':
@@ -913,7 +913,7 @@ function content_alter_db_field($previous_field, $previous_columns, $new_field, 
                   delta int unsigned NOT NULL default '0',
                   nid int unsigned NOT NULL default '0',
                   PRIMARY KEY (vid,delta)
-                ) TYPE=MyISAM /*!40100 DEFAULT CHARACTER SET utf8 */;");
+                ) /*!40100 DEFAULT CHARACTER SET utf8 */");
                 break;
 
               case 'pgsql':
@@ -935,7 +935,7 @@ function content_alter_db_field($previous_field, $previous_columns, $new_field, 
                   vid int unsigned NOT NULL default '0',
                   nid int unsigned NOT NULL default '0',
                   PRIMARY KEY (vid)
-                ) TYPE=MyISAM /*!40100 DEFAULT CHARACTER SET utf8 */;");
+                ) /*!40100 DEFAULT CHARACTER SET utf8 */");
                 break;
 
                 case 'pgsql':

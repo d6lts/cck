@@ -46,7 +46,7 @@ function content_type_create($info) {
           vid int unsigned NOT NULL default '0',
           nid int unsigned NOT NULL default '0',
           PRIMARY KEY (vid)
-        ) TYPE=MyISAM /*!40100 DEFAULT CHARACTER SET utf8 */;");
+        ) /*!40100 DEFAULT CHARACTER SET utf8 */");
       break;
 
       case 'pgsql':
