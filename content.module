@@ -36,7 +36,6 @@ function content_menu($may_cache) {
     if (arg(0) == 'admin') {
       include_once('./'. drupal_get_path('module', 'content') .'/content_admin.inc');
     }
-    include_once('./'. drupal_get_path('module', 'content') .'/content_batch.inc');
     // Unconditionally include css exactly once per page.
     drupal_add_css(drupal_get_path('module', 'content') .'/content.css');
   }
