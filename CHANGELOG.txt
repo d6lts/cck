@@ -39,9 +39,11 @@ General
 -         When changing storage from 'per field' to 'per content type',NULL values were
           copied as 0 or string 'NULL'
 - 98895   Always include content_admin.inc file in admin area.
-- 101946  Make sure no default value is provided for MySQL text and blob fields.
+- 101946  Make sure no default value is provided for MySQL text and blob columns.
 - 81688   Ensure multiple fields have a label to mark "required" asterisk
 - 105603  Make goup names consistent with field names ('group-*' => 'group_*')
+- 84634   Fix (?) some PHP5 array_merge errors
+-         Fixed some invalid t()'ed strings for .pot extractor
 
 Field / widget modules
 -         Text : store one '' (empty string) for empty multiple fields (stored nothing previously)
