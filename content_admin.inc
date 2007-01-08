@@ -213,6 +213,7 @@ function _content_admin_type_delete_submit($form_id, $form_values) {
   $type = content_types($form_values['type_name']);
 
   if ($type && $form_values['confirm']) {
+    include_once('./'. drupal_get_path('module', 'content') .'/content_crud.inc');
     content_type_delete($form_values);
     drupal_set_message(t('Deleted content type %type.', array('%type' => theme('placeholder', $type['label']))));
     return 'admin/node/types';
@@ -736,6 +737,7 @@ function _content_admin_field_remove_submit($form_id, $form_values) {
   $field = $type['fields'][$form_values['field_name']];
 
   if ($type && $field && $form_values['confirm']) {
+    include_once('./'. drupal_get_path('module', 'content') .'/content_crud.inc');
     content_field_instance_delete($form_values);
 
     drupal_set_message(t('Removed field %field from %type.', array('%field' => theme('placeholder', $field['widget']['label']), '%type' => theme('placeholder', $type['label']))));

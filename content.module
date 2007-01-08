@@ -937,3 +937,12 @@ function theme_field(&$node, &$field, &$items, $teaser, $page) {
   }
   return $output;
 }
+
+/**
+ * Implementation of hook_simpletest().
+ */
+function content_simpletest() {
+  $dir = drupal_get_path('module', 'content') .'/tests';
+  $tests = file_scan_directory($dir, '\.test$');
+  return array_keys($tests);
+}
