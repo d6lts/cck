@@ -1,4 +1,4 @@
-; $Id.
+; $Id$
 name = Content Copy
 description = Enables ability to import/export field definitions.
 version = "$Name$"
