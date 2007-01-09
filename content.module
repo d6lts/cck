@@ -556,26 +556,28 @@ function _content_widget_invoke($op, &$node) {
   $widget_types = _content_widget_types();
 
   $return = array();
-  foreach ($type['fields'] as $field) {
-    $node_field = isset($node->$field['field_name']) ? $node->$field['field_name'] : array();
+  if (count($type['fields'])) {
+    foreach ($type['fields'] as $field) {
+      $node_field = isset($node->$field['field_name']) ? $node->$field['field_name'] : array();
 
-    $module = $widget_types[$field['widget']['type']]['module'];
-    $function = $module .'_widget';
-    if (function_exists($function)) {
-      $result = $function($op, $node, $field, $node_field);
-      if (is_array($result) && $op == 'form') {
-        $result[$field['field_name']]['#weight'] = $field['widget']['weight'];
+      $module = $widget_types[$field['widget']['type']]['module'];
+      $function = $module .'_widget';
+      if (function_exists($function)) {
+        $result = $function($op, $node, $field, $node_field);
+        if (is_array($result) && $op == 'form') {
+          $result[$field['field_name']]['#weight'] = $field['widget']['weight'];
+        }
+        if (is_array($result)) {
+          $return = array_merge($return, $result);
+        }
+        else if (isset($result)) {
+          $return[] = $result;
+        }
       }
-      if (is_array($result)) {
-        $return = array_merge($return, $result);
+      // test for values in $node_field in case modules added items on insert
+      if (is_object($node) && (isset($node->$field['field_name']) || count($node_field))) {
+        $node->$field['field_name'] = $node_field;
       }
-      else if (isset($result)) {
-        $return[] = $result;
-      }
-    }
-    // test for values in $node_field in case modules added items on insert
-    if (is_object($node) && (isset($node->$field['field_name']) || count($node_field))) {
-      $node->$field['field_name'] = $node_field;
     }
   }
   return $return;
@@ -706,7 +708,10 @@ function _content_type_info($reset = FALSE) {
       while ($field = db_fetch_array($field_result)) {
         $global_settings = $field['global_settings'] ? unserialize($field['global_settings']) : array();
         unset($field['global_settings']);
-        $field = array_merge($field, $global_settings);
+        // Preventative error handling for PHP5 if field nodule hasn't created an arrray.
+        if (is_array($global_settings)) {
+          $field = array_merge($field, $global_settings);
+        }
         $instance_info = db_fetch_array(db_query("SELECT type_name, label FROM {node_field_instance} WHERE field_name = '%s'", $field['field_name']));
         $field['widget']['label'] = $instance_info['label'];
         $field['type_name'] = $instance_info['type_name'];
