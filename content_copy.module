@@ -78,11 +78,7 @@ function content_copy_export_form($form_values = NULL) {
     '#value' => $step,
   );
 
-  $form['#prefix'] = t('This form will process a content type and one or more fields
-     from that type and export the settings. The export created by this process can be
-     copied and pasted as an import into the current or any other database. The import
-     will add the fields to into an existing content type or create a new content type
-     that includes the selected fields.');
+  $form['#prefix'] = t('This form will process a content type and one or more fields from that type and export the settings. The export created by this process can be copied and pasted as an import into the current or any other database. The import will add the fields to into an existing content type or create a new content type that includes the selected fields.');
   $form['#multistep'] = TRUE;
   $form['#redirect'] = FALSE;
 
@@ -215,17 +211,13 @@ function content_copy_export($form_id, $form_values) {
  */
 function content_copy_import_form($type_name = '') {
 
-  $form['#prefix'] = t('This form will import field definitions exported from another
-       content type or another database. Note that fields cannot be duplicated within the same
-       content type, so imported fields will be added only if they do not already exist in the
-       selected type.');
+  $form['#prefix'] = t('This form will import field definitions exported from another content type or another database.<br/>Note that fields cannot be duplicated within the same content type, so imported fields will be added only if they do not already exist in the selected type.');
   $form['type_name'] = array(
     '#type' => 'select',
     '#options' => array('<create>' => t('<Create>')) + node_get_types('names'),
     '#default_value' => $type_name,
     '#title' => t('Content type'),
-    '#description' => t('Select the content type to import these fields into. Select <Create>
-       to create a new content type to contain the fields.'),
+    '#description' => t('Select the content type to import these fields into.<br/>Select <Create> to create a new content type to contain the fields.'),
     );
   $form['macro'] = array(
     '#type' => 'textarea',
@@ -304,8 +296,7 @@ function content_copy_import_form_submit($form_id, $form_values) {
 
   // If any required module is not enabled, set an error message and exit.
   if ($not_enabled) {
-    form_set_error('macro', t('The following modules must be enabled for this import to work:
-      %modules.', array(
+    form_set_error('macro', t('The following modules must be enabled for this import to work: %modules.', array(
         '%modules' => implode(', ', array_unique($not_enabled))
         )));
   }
@@ -337,8 +328,7 @@ function content_copy_import_form_submit($form_id, $form_values) {
     $content_info = _content_type_info();
 
     if (form_get_errors() || !is_array($content_info['content types'][$type_name])) {
-       drupal_set_message(t("An error has occured adding the content type %type.
-          Please check the errors displayed for more details.", array(
+       drupal_set_message(t("An error has occured adding the content type %type.<br/>Please check the errors displayed for more details.", array(
             '%type' => $imported_type_name
             )));
        return;
@@ -373,8 +363,7 @@ function content_copy_import_form_submit($form_id, $form_values) {
     $field_label  = $field_values['label'];
 
     if (!empty($field['field_name']) && is_array($content_info['content types'][$type_name]['fields'][$field_name])) {
-      drupal_set_message(t("The imported field %field_label (%field_name) was not added to %type
-        because that field already exists in %type.", array(
+      drupal_set_message(t("The imported field %field_label (%field_name) was not added to %type because that field already exists in %type.", array(
           '%field_label' => $field_label,
           '%field_name' => $field_name,
           '%type' => $type_name
@@ -395,8 +384,7 @@ function content_copy_import_form_submit($form_id, $form_values) {
         $values['type_name']         = $type_name;
         $field_url  = drupal_execute('_content_admin_field_add_new', $values, $type_name, $field_name);
         if (form_get_errors()) {
-          drupal_set_message(t("An error has occured adding the field %field_label (%field_name).
-            Please check the errors displayed for more details.", array(
+          drupal_set_message(t("An error has occured adding the field %field_label (%field_name).<br/>Please check the errors displayed for more details.", array(
               '%field_label' => $field_label,
               '%field_name' => $field_name
               )));
@@ -415,8 +403,7 @@ function content_copy_import_form_submit($form_id, $form_values) {
         $values['type_name']         = $type_name;
         drupal_execute('_content_admin_field_add_existing', $values, $type_name);
         if (form_get_errors()) {
-          drupal_set_message(t("An error has occured adding the field %field_label (%field_name).
-            Please check the errors displayed for more details.", array(
+          drupal_set_message(t("An error has occured adding the field %field_label (%field_name).<br/>Please check the errors displayed for more details.", array(
               '%field_label' => $field_label,
               '%field_name' => $field_name
               )));
@@ -430,9 +417,7 @@ function content_copy_import_form_submit($form_id, $form_values) {
         $field_values['type_name']   = $type_name;
         drupal_execute('_content_admin_field', $field_values, $type_name, $field_name);
         if (form_get_errors()) {
-           drupal_set_message(t("The field %field_label (%field_name) was added to the
-             content type %type, but an error has occured updating the field settings.
-             Please check the errors displayed for more details.", array(
+           drupal_set_message(t("The field %field_label (%field_name) was added to the content type %type, but an error has occured updating the field settings.<br/>Please check the errors displayed for more details.", array(
                '%field_label' => $field_label,
                '%field_name' => $field_name,
                '%type' => $type_label
