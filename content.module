@@ -710,7 +710,7 @@ function _content_type_info($reset = FALSE) {
       while ($field = db_fetch_array($field_result)) {
         $global_settings = $field['global_settings'] ? unserialize($field['global_settings']) : array();
         unset($field['global_settings']);
-        // TODO : the test below should not be necessary, but problems were reported with PHP5
+        // Preventative error handling for PHP5 if field nodule hasn't created an arrray.
         if (is_array($global_settings)) {
           $field = array_merge($field, $global_settings);
         }
