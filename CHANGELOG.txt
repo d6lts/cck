@@ -1,6 +1,15 @@
 // $Id$
 
-5--1.0
+5--1.2
+======
+
+Bugfix
+------
+- 107752  Changed JOIN USING to INNER JOIN in fieldgroup for MYSQL 3 compatibility
+- 84634   Added error handling for some PHP5 array_merge errors
+-         Fixed some invalid t()'ed strings for .pot extractor
+
+5--1.1
 ======
 
 This version has database changes in it and requires update.php.
@@ -61,8 +70,6 @@ General
 - 101946  Make sure no default value is provided for MySQL text and blob columns.
 - 81688   Ensure multiple fields have a label to mark "required" asterisk
 - 105603  Make goup names consistent with field names ('group-*' => 'group_*')
-- 84634   Fix (?) some PHP5 array_merge errors
--         Fixed some invalid t()'ed strings for .pot extractor
 
 Field / widget modules
 - 104598  Text : core now treats maxlength = '' as maxlength = 0
