@@ -9,14 +9,21 @@
 define('CONTENT_DB_STORAGE_PER_FIELD', 0);
 define('CONTENT_DB_STORAGE_PER_CONTENT_TYPE', 1);
 
-if (module_exists('views')) {
-  include_once('./'. drupal_get_path('module', 'content') .'/content_views.inc');
-}
-if (module_exists('pathauto')) {
-  include_once('./'. drupal_get_path('module', 'content') .'/content_pathauto.inc');
-}
-include_once('./'. drupal_get_path('module', 'content') .'/content_crud.inc');
-
+/**
+ * Implementation of hook_init().
+ */
+function content_init() {
+  // ensure we are not serving a cached page
+  if (function_exists('drupal_set_content')) {
+    // we don't do this in hook_menu to ensure the files are already included when
+    // views_menu is executed
+    if (module_exists('views')) {
+      include_once('./'. drupal_get_path('module', 'content') .'/content_views.inc');
+    }
+    // according to http://drupal.org/node/60526, this should not go in hook_menu
+    if (module_exists('pathauto')) {
+      include_once('./'. drupal_get_path('module', 'content') .'/content_pathauto.inc');
+    }
   }
 }
 
@@ -24,13 +31,17 @@ include_once('./'. drupal_get_path('module', 'content') .'/content_crud.inc');
  * Implementation of hook_menu().
  */
 function content_menu($may_cache) {
+  if (!$may_cache) {
+    // Only include administrative callbacks if we are viewing an admin page.
+    if (arg(0) == 'admin') {
+      include_once('./'. drupal_get_path('module', 'content') .'/content_admin.inc');
+    }
+    // Unconditionally include css exactly once per page.
+    drupal_add_css(drupal_get_path('module', 'content') .'/content.css');
+  }
+
   $items = array();
   $access = user_access('administer content types');
-
-  // Only include administrative callbacks if we are viewing an admin page.
-  if (arg(0) == 'admin') {
-    include_once('./'. drupal_get_path('module', 'content') .'/content_admin.inc');
-  }
 
   if ($may_cache) {
       $items[] = array(
@@ -42,10 +53,6 @@ function content_menu($may_cache) {
       );
   }
   else {
-
-    // Unconditionally include css exactly once per page.
-    drupal_add_css(drupal_get_path('module', 'content') .'/content.css');
-
     if (arg(0) == 'admin' && arg(1) == 'content' && arg(2) == 'types') {
 
       $content_type = content_types(arg(3));
@@ -753,12 +760,15 @@ function _content_type_info($reset = FALSE) {
 function content_node_type($op, $info) {
   switch ($op) {
     case 'insert':
+      include_once('./'. drupal_get_path('module', 'content') .'/content_crud.inc');
       content_type_create($info);
       break;
     case 'update':
+      include_once('./'. drupal_get_path('module', 'content') .'/content_crud.inc');
       content_type_update($info);
       break;
     case 'delete':
+      include_once('./'. drupal_get_path('module', 'content') .'/content_crud.inc');
       content_type_delete($info);
       break;
   }
