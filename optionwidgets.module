@@ -7,16 +7,6 @@
  */
 
 /**
- * Implementation of hook_help().
- */
-function optionwidgets_help($section) {
-  switch ($section) {
-    case 'admin/settings/modules#description':
-      return t('<strong>CCK:</strong> Defines selection, check box and radio button widgets for text and numeric fields. <em>Note: Requires content.module, text.module and number.module.</em>');
-  }
-}
-
-/**
  * Implementation of hook_widget_info().
  */
 function optionwidgets_widget_info() {
