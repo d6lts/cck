@@ -17,13 +17,6 @@ if (module_exists('pathauto')) {
 }
 include_once('./'. drupal_get_path('module', 'content') .'/content_crud.inc');
 
-/**
- * Implementation of hook_help().
- */
-function content_help($section) {
-  switch ($section) {
-    case 'admin/settings/modules#description':
-      return t('<strong>CCK:</strong> Allows administrators to define new content types.');
   }
 }
 
