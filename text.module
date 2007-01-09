@@ -7,16 +7,6 @@
  */
 
 /**
- * Implementation of hook_help().
- */
-function text_help($section) {
-  switch ($section) {
-    case 'admin/settings/modules#description':
-      return t('<strong>CCK:</strong> Defines simple text field types. <em>Note: Requires content.module.</em>');
-  }
-}
-
-/**
  * Implementation of hook_field_info().
  */
 function text_field_info() {
@@ -310,7 +300,7 @@ function text_widget($op, &$node, $field, &$items) {
             '#default_value' => isset($items[0]['value']) ? $items[0]['value'] : '',
             '#required' => $field['required'],
             '#description' => $field['widget']['description'],
-            '#maxlength' => $field['max_length'] ? $field['max_length'] : '',
+            '#maxlength' => $field['max_length'] ? $field['max_length'] : NULL,
             '#weight' => $field['widget']['weight'],
           );
         }
@@ -336,7 +326,7 @@ function text_widget($op, &$node, $field, &$items) {
         foreach ($items as $delta => $data) {
           $error_field = $field['field_name'].']['.$delta.'][value';
           if (strlen($data['value']) > $field['max_length']) {
-            form_set_error($error_field, t('%label is longer than %max characters.', array('%label' => $field['widget']['label'],'%max' => $field['max_length'])));
+            form_set_error($error_field, t('%label is longer than %max characters.', array('%label' => $field['widget']['label'], '%max' => $field['max_length'])));
           }
         }
       }
@@ -378,7 +368,7 @@ function text_allowed_values($field) {
     $list = array_map('trim', $list);
     $list = array_filter($list, 'strlen');
     foreach ($list as $opt) {
-      list ($key, $value) = explode('|', $opt);
+      list($key, $value) = explode('|', $opt);
       $allowed_values[$field['field_name']][$key] = $value ? $value : $key;
     }
   }
