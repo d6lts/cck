@@ -242,8 +242,8 @@ function fieldgroup_groups($content_type = '', $sorted = FALSE, $reset = FALSE) 
       }
       //load fields
       $result = db_query("SELECT fi.*, g.group_name FROM {node_group} g ".
-                         "JOIN {node_group_fields} f USING(type_name, group_name) ".
-                         "JOIN {node_field_instance} fi USING(field_name, type_name) ".
+                         "INNER JOIN {node_group_fields} f ON f.type_name = g.type_name AND f.group_name = g.group_name ".
+                         "INNER JOIN {node_field_instance} fi ON fi.field_name = f.field_name AND fi.type_name = f.type_name ".
                          "ORDER BY fi.weight");
       while ($field = db_fetch_array($result)) {
         $groups[$field['type_name']][$field['group_name']]['fields'][$field['field_name']] = $field;
