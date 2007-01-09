@@ -310,8 +310,8 @@ function content_form_alter($form_id, &$form) {
 function content_system_modules_submit($form_id, $form_values) {
   $content_status = $form_values['validation_modules']['content'];
   if ($content_status->status == 1) {
-    include_once(drupal_get_path('module', 'content') .'/content_admin.inc');
-    include_once(drupal_get_path('module', 'content') .'/content_crud.inc');
+    include_once('./'. drupal_get_path('module', 'content') .'/content_admin.inc');
+    include_once('./'. drupal_get_path('module', 'content') .'/content_crud.inc');
     content_types_rebuild();
   }
 }
