@@ -1,5 +1,14 @@
 // $Id$
 
+5--1.x
+======
+
+Bugfix
+------
+- 107667  Added missing '#size' for mutliple select widgets (display issues with Opera)
+- 108094  Real fix for "text columns are not allowed defaults values with MySQL" ?
+
+
 5--1.2
 ======
 

@@ -144,6 +144,7 @@ function userreference_widget($op, &$node, $field, &$node_field) {
           '#title' => t($field['widget']['label']),
           '#default_value' => $node_field['default uids'],
           '#multiple' => $field['multiple'],
+          '#size' => min(count($options), 6),
           '#options' => $options,
           '#required' => $field['required'],
           '#description' => $field['widget']['description'],
