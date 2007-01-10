@@ -1197,6 +1197,10 @@ function content_db_change_column($table, $column, $column_new, $type, $attribut
 
     case 'mysql':
     case 'mysqli':
+      // MySQL allows no DEFAULT value for text (and blob) columns
+      if (in_array($type, array('text', 'mediumtext', 'longtext'))) {
+        $default = '';
+      }
       db_query('ALTER TABLE {'. $table .'} CHANGE '. $column .' '. $column_new .' '. $type .' '. $not_null .' '. $default);
       break;
   }
