@@ -1167,19 +1167,11 @@ function content_db_construct_column_type($column, $type, &$attributes, &$not_nu
         $basetype = $mappings[$basetype];
       }
       else {
-        watchdog('database', t('No PostgreSQL mapping found for %type data type.', array('%type' => theme('placeholder', $type))), WATCHDOG_WARNING);
+        watchdog('database', t('No PostgreSQL mapping found for %type data type.', array('%type' => theme('placeholder', $basetype))), WATCHDOG_WARNING);
       }
 
       if ($basetype != 'varchar') {
         unset($attributes['length']);
-      }
-      break;
-
-    case 'mysql':
-    case 'mysqli':
-      // MySQL allows no DEFAULT value for text (and blob) columns
-      if (in_array($type, array('text', 'mediumtext', 'longtext'))) {
-        $default = '';
       }
       break;
   }
@@ -1200,6 +1192,17 @@ function content_db_construct_column_type($column, $type, &$attributes, &$not_nu
       $default = "default $attributes[default]";
     }
   }
+
+  // MySQL allows no DEFAULT value for text (and blob) columns
+  if (in_array($basetype, array('text', 'mediumtext', 'longtext'))) {
+    switch ($GLOBALS['db_type']) {
+      case 'mysql':
+      case 'mysqli':
+        $default = '';
+        break;
+    }
+  }
+
   if (array_key_exists('length', $attributes)) {
     $type .= '('. $attributes['length'] .')';
   }
