@@ -3,11 +3,15 @@
 4.7--1.x
 ========
 
+Features
+--------
+- 108755  Add group name in the 'class' attributes of groups fieldsets
+
 Bugfix
 ------
 - 107667  Added missing '#size' for mutliple select widgets (display issues with Opera)
 - 108094  Real fix for "text columns are not allowed defaults values with MySQL" ?
-
+- 108914  Fixed error when several fieldgroups have the same name
 
 4.7--1.2
 ========
