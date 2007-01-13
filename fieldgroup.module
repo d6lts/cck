@@ -263,7 +263,7 @@ function fieldgroup_groups($content_type = '', $sorted = FALSE, $reset = FALSE) 
 function _fieldgroup_groups_label($content_type) {
   $groups = fieldgroup_groups($content_type);
 
-  $labels[0] = t('No group.');
+  $labels[0] = t('No group');
   foreach ($groups as $group_name => $group) {
     $labels[$group_name] = $group['label'];
   }
@@ -287,6 +287,7 @@ function fieldgroup_form_alter($form_id, &$form) {
         '#collapsible' => $group['settings']['collapsible'],
         '#description' => $group['description'],
         '#weight' => $group['weight'],
+        '#attributes' => array('class' => strtr($group['group_name'], '_', '-')),
       );
       foreach ($group['fields'] as $field_name => $field) {
         if (isset($form[$field_name])) {
