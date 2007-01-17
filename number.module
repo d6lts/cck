@@ -143,10 +143,23 @@ function number_field($op, &$node, $field, &$items, $teaser, $page) {
 function number_field_formatter_info() {
 
   return array(
-    'default' => array(
-      'label' => 'Default',
-      'field types' => array('number_integer', 'number_decimal'),
-    ),
+    'default' => array('label' => 'Default',          'field types' => array('number_integer', 'number_decimal')),
+    'none'    => array('label' => '9999',             'field types' => array('number_integer', 'number_decimal')),
+    'us_0'    => array('label' => '9,999',            'field types' => array('number_integer', 'number_decimal')),
+    'us_1'    => array('label' => '9,999.9',          'field types' => array('number_decimal')),
+    'us_2'    => array('label' => '9,999.99',         'field types' => array('number_decimal')),
+    'be_0'    => array('label' => '9.999',            'field types' => array('number_integer', 'number_decimal')),
+    'be_1'    => array('label' => '9.999, 9',         'field types' => array('number_decimal')),
+    'be_2'    => array('label' => '9.999, 99',        'field types' => array('number_decimal')),
+    'fr_0'    => array('label' => '9 999',            'field types' => array('number_integer', 'number_decimal')),
+    'fr_1'    => array('label' => '9 999, 9',         'field types' => array('number_decimal')),
+    'fr_2'    => array('label' => '9 999, 99',        'field types' => array('number_decimal')),
+    'us_$0'   => array('label' => '$9,999',           'field types' => array('number_integer', 'number_decimal')),
+    'us_$2'   => array('label' => '$9,999.99',        'field types' => array('number_decimal')),
+    'be_$0'   => array('label' => '9.999 EUR',        'field types' => array('number_integer', 'number_decimal')),
+    'be_$2'   => array('label' => '9.999, 99 EUR',    'field types' => array('number_decimal')),
+    'fr_$0'   => array('label' => '9 999 EUR',        'field types' => array('number_integer', 'number_decimal')),
+    'fr_$2'   => array('label' => '9 999, 99 EUR',    'field types' => array('number_decimal')),
   );
 }
 
@@ -157,8 +170,42 @@ function number_field_formatter($field, $item, $formatter, $node) {
   if ($allowed_values = number_allowed_values($field)) {
     return $allowed_values[$item['value']];
   }
-
-  return check_plain($item['value']);
+  switch ($formatter) {
+  case 'none':
+    return number_format($item['value'], 0, '.', '');
+  case 'us_0':
+    return number_format($item['value'], 0, '.', ',');
+  case 'us_1':
+    return number_format($item['value'], 1, '.', ',');
+  case 'us_2':
+    return number_format($item['value'], 2, '.', ',');
+  case 'us_$0':
+    return '$'. number_format($item['value'], 1, '.', ',');
+  case 'us_$2':
+    return '$'. number_format($item['value'], 2, '.', ',');
+  case 'be_0':
+    return number_format($item['value'], 0, ', ', ' ');
+  case 'be_1':
+    return number_format($item['value'], 1, ', ', '.');
+  case 'be_2':
+    return number_format($item['value'], 2, ', ', '.');
+  case 'be_$0':
+    return number_format($item['value'], 1, ', ', '.') .' EUR';
+  case 'be_$2':
+    return number_format($item['value'], 2, ', ', '.') .' EUR';
+  case 'fr_0':
+    return number_format($item['value'], 0, ', ', ' ');
+  case 'fr_1':
+    return number_format($item['value'], 1, ', ', ' ');
+  case 'fr_2':
+    return number_format($item['value'], 2, ', ', ' ');
+  case 'fr_$0':
+    return number_format($item['value'], 1, ', ', ' ') .' EUR';
+  case 'fr_$2':
+    return number_format($item['value'], 2, ', ', ' ') .' EUR';
+  default:
+    return number_format($item['value']);
+  }
 }
 
 
@@ -224,6 +271,9 @@ function number_widget($op, &$node, $field, &$node_field) {
 
     case 'process form values':
       // Don't save empty fields.
+      foreach ($node_field as $delta => $item) {
+        $node_field[$delta]['value'] = preg_replace('@[^0-9\.]@','',$node_field[$delta]['value']);
+      }
       if ($field['multiple']) {
         foreach ($node_field as $delta => $item) {
           if ($item['value'] == '' && $delta > 0) {
