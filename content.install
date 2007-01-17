@@ -242,3 +242,24 @@ function content_update_8() {
 
   return $ret;
 }
+
+/**
+ * Add display_settings column
+ */
+function content_update_9() {
+  $ret = array();
+
+  switch ($GLOBALS['db_type']) {
+    case 'pgsql':
+      db_add_column($ret, 'node_field_instance', 'display_settings', 'text', array('not null' => TRUE, 'default' => ''));
+      break;
+
+    case 'mysql':
+    case 'mysqli':
+      // TODO : why not db_add_column ?
+      $ret[] = update_sql("ALTER TABLE {node_field_instance} ADD COLUMN display_settings mediumtext NOT NULL");
+      break;
+  }
+
+  return $ret;
+}

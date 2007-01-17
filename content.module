@@ -17,6 +17,10 @@ function content_help($section) {
       return t('<strong>CCK:</strong> Allows administrators to define new content types.');
   }
 
+  if (preg_match('!^admin/node/types/.*/display$!', $section)) {
+    return t("Configure how this content type's fields and field labels should be displayed when it's viewed in teaser and full-page mode.");
+  }
+  
   if (strpos($section, 'node/add') === 0) {
     $types = content_types();
     foreach ($types as $type_name => $type) {
@@ -158,6 +162,15 @@ function content_menu($may_cache) {
           'access' => $access,
           'callback arguments' => array(arg(3)),
           'type' => MENU_LOCAL_TASK,
+          'weight' => 0,
+        );
+        $items[] = array(
+          'path' => 'admin/node/types/'. arg(3) .'/display',
+          'title' => t('display fields'),
+          'callback' => 'content_admin_display_overview_form',
+          'access' => $access,
+          'callback arguments' => array(arg(3)),
+          'type' => MENU_LOCAL_TASK,
           'weight' => 1,
         );
         $items[] = array(
@@ -167,7 +180,7 @@ function content_menu($may_cache) {
           'access' => $access,
           'callback arguments' => array(arg(3)),
           'type' => MENU_LOCAL_TASK,
-          'weight' => 2,
+          'weight' => 3,
         );
 
         if (arg(4) == 'fields' && arg(5)
@@ -343,8 +356,9 @@ function content_view(&$node, $teaser = FALSE, $page = FALSE) {
   if ($node->in_preview) {
     _content_widget_invoke('process form values', $node);
   }
-  $node->body = implode('', _content_field_invoke('view', $node, FALSE, $page));
-  $node->teaser = implode('', _content_field_invoke('view', $node, TRUE, $page));
+  $node->body = implode('', _content_field_view($node, FALSE, $page));
+
+  $node->teaser = implode('', _content_field_view($node, TRUE, $page));
   $node->readmore = (strlen($node->teaser) < strlen($node->body));
 }
 
@@ -587,6 +601,42 @@ function _content_field_invoke_default($op, &$node, $teaser = NULL, $page = NULL
 }
 
 /**
+ * Format field output based on display settings.
+ */
+function _content_field_view($node, $teaser = NULL, $page = NULL) {
+  $type_name = is_string($node) ? $node : (is_array($node) ? $node['type'] : $node->type);
+  $type = content_types($type_name);
+  $field_types = _content_field_types();
+  $context = $teaser ? 'teaser' : 'full';
+
+  $return = array();
+  if (count($type['fields'])) {
+    foreach ($type['fields'] as $field) {
+      $node_field = isset($node->$field['field_name']) ? $node->$field['field_name'] : array();
+      $formatter = isset($field['display_settings'][$context]['format']) ? $field['display_settings'][$context]['format'] : 'default';
+      $value = '';
+
+      if ($formatter != 'hidden') {
+        $module = $field_types[$field['type']]['module'];
+        $callbacks = module_invoke($module, 'field_settings', 'callbacks', $field);
+        if (isset($callbacks['view']) && $callbacks['view']) {
+          $value = module_invoke($module, 'field', 'view', $node, $field, $node_field, $teaser, $page);
+        }
+        if (empty($value)) {
+          foreach ($node_field as $delta => $item) {
+            $items[$delta]['view'] = content_format($field, $item, $formatter, $node);
+          }
+          $value = theme('field', $node, $field, $items, $teaser, $page);
+        }
+      }
+      $return[$field['field_name']] = $value;
+    }
+  }
+  return $return;
+}
+
+
+/**
  * Invoke a widget hook.
  */
 function _content_widget_invoke($op, &$node) {
@@ -757,7 +807,7 @@ function _content_type_info($reset = FALSE) {
       $type_result = db_query('SELECT * FROM {node_type_content} nt ORDER BY nt.type_name ASC');
       while ($type = db_fetch_array($type_result)) {
         $type['fields'] = array();
-        $field_result = db_query("SELECT nfi.field_name, nfi.weight, nfi.label, nfi.widget_type, nfi.widget_settings, nfi.description FROM {node_field_instance} nfi WHERE nfi.type_name = '%s' ORDER BY nfi.weight ASC, nfi.label ASC", $type['type_name']);
+        $field_result = db_query("SELECT nfi.field_name, nfi.weight, nfi.label, nfi.widget_type, nfi.widget_settings, nfi.display_settings, nfi.description FROM {node_field_instance} nfi WHERE nfi.type_name = '%s' ORDER BY nfi.weight ASC, nfi.label ASC", $type['type_name']);
         while ($field = db_fetch_array($field_result)) {
           // Overwrite global field information with specific information
           $field = array_merge($info['fields'][$field['field_name']], $field);
@@ -774,6 +824,7 @@ function _content_type_info($reset = FALSE) {
           $field['widget']['description'] = $field['description'];
           unset($field['description']);
           $field['type_name'] = $type['type_name'];
+          $field['display_settings'] = $field['display_settings'] ? unserialize($field['display_settings']) : array();
           $type['fields'][$field['field_name']] = $field;
         }
 
@@ -922,16 +973,31 @@ function content_format($field, $item, $formatter = 'default', $node = NULL) {
  *   An HTML string containing the fully themed field.
  */
 function theme_field(&$node, &$field, &$items, $teaser, $page) {
+  if (isset($field['display_settings']['label']['format'])) {
+    $label = $field['display_settings']['label']['format'] ? $field['display_settings']['label']['format'] : 'header';
+  }
+  else {
+    $label = '';
+  }
+  
   $items_output = '';
-  foreach ($items as $item) {
+  foreach ($items as $delta => $item) {
     if (!empty($item['view']) || $item['view'] === "0") {
-      $items_output .= '<div class="field-item">'. $item['view'] .'</div>';
+      $items_output .= '<div class="field-item">';
+      if ($label == 'inline') {
+        $items_output .= '<div class="field-label-inline'. ($delta ? '' : '-first') .'">';
+        $items_output .= $field['widget']['label'] .':</div> ' ;
+      }
+      $items_output .= $item['view'] .'</div>';
     }
   }
+
   $output = '';
   if (!empty($items_output)) {
     $output .= '<div class="field field-type-'. strtr($field['type'], '_', '-') .' field-'. strtr($field['field_name'], '_', '-') .'">';
-    $output .= '<h3 class="field-label">'. $field['widget']['label'] .'</h3>';
+    if ($label == 'above') {
+      $output .= '<div class="field-label">'. $field['widget']['label'] .':</div>';
+    }
     $output .= '<div class="field-items">'. $items_output .'</div>';
     $output .= '</div>';
   }

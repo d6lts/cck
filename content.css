@@ -15,3 +15,17 @@ table.content-field-overview td {
   text-align:center;
 }
 
+.field .field-label,
+.field .field-label-inline,
+.field .field-label-inline-first {
+  font-weight:bold;
+}
+
+.field .field-label-inline,
+.field .field-label-inline-first {
+  display:inline;
+}
+
+.field .field-label-inline {
+  visibility:hidden;
+}
