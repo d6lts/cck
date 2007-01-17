@@ -191,7 +191,6 @@ function content_admin_field_overview_form($type_name) {
  *  Theme the field overview table by iterating through the form and rendering form elements in table cells
  */
 function theme_content_admin_field_overview_form($form) {
-
   if (!$form['#table']) {
     return;
   }
@@ -297,7 +296,6 @@ function theme_content_admin_field_overview_form($form) {
 }
 
 function content_admin_field_overview_form_submit($form_id, $form_values) {
-
   $msg = FALSE;
   foreach ((array) $form_values['field-groups'] as $key => $value) {
     if ($key && !in_array($key, unserialize($form_values['disabled']))) {
@@ -335,6 +333,110 @@ function content_admin_field_overview_form_submit($form_id, $form_values) {
   content_clear_type_cache();
   cache_clear_all('fieldgroup_data', 'cache');
 
+}
+
+/**
+ * Menu callback; presents a listing of fields display settings for a content type.
+ *
+ * Form includes form widgets to select which fields appear for teaser, full node...
+ * and how the field labels should be rendered
+ */
+function content_admin_display_overview_form($type_name) {
+  $type = content_types($type_name);
+  $field_types = _content_field_types();
+
+  $form = array();
+  if (empty($type['fields'])) {
+    drupal_set_message(t('There are no fields configured for this content type.'));
+    return $form;
+  }
+
+  $form['#tree'] = TRUE;
+  foreach ($type['fields'] as $field) {
+    $form['fields'][$field['field_name']] = _content_admin_display_overview_row($field, $field_types[$field['type']]);
+  }
+
+  $form['type_name'] = array('#type' => 'hidden', '#value' => $type['type']);
+  $form['submit'] = array('#type' => 'submit', '#value' => t('Submit'));
+
+  return $form;
+}
+
+function theme_content_admin_display_overview_form($form) {
+  $header = array(t('Field'), t('Type'), t('Label'));
+  foreach (_content_admin_display_contexts() as $key => $title) {
+    $header[] = $title;
+  }
+  $rows = array();
+
+  foreach (element_children($form['fields']) as $field) {
+    $row = array();
+    foreach (element_children($form['fields'][$field]) as $key) {
+      $row[] = drupal_render($form['fields'][$field][$key]);
+    }
+    $rows[] = $row;
+  }
+
+  $output  = theme('table', $header, $rows, array('class' => 'content-field-display-overview'));
+  $output .= drupal_render($form);
+  return $output;
+}
+
+function content_admin_display_overview_form_submit($form_id, $form_values) {
+  $type = $form_values['type_name'];
+  foreach ($form_values['fields'] as $fieldname => $fieldvalues) {
+    $display_settings = array();
+    foreach ($fieldvalues as $key => $value) {
+      $display_settings[$key] = $value;
+    }
+
+    db_query("UPDATE {node_field_instance} SET display_settings = '%s' WHERE type_name = '%s' AND field_name = '%s'",
+      serialize($display_settings), $form_values['type_name'], $fieldname);
+  }
+
+  drupal_set_message(t('Your settings have been saved.'));
+  content_clear_type_cache();
+}
+
+function _content_admin_display_overview_row($field, $field_type) {
+  $defaults = $field['display_settings'];
+
+  foreach ($field_type['formatters'] as $name => $formatter_info) {
+    $options[$name] = $formatter_info['label'];
+  }
+  $options['hidden'] = t('<Hidden>');
+
+  $label_options = array(
+    'above' => t('Above'),
+    'inline' => t('Inline'),
+    'hidden' => t('<Hidden>'),
+  );
+
+  $row = array();
+  $row['type_label']  = array('#value' => $field['widget']['label']);
+  $row['type']        = array('#value' => $field_type['label']);
+
+  $row['label']['format'] = array(
+    '#type' => 'select',
+    '#options' => $label_options,
+    '#default_value' => isset($defaults['label']['format']) ? $defaults['label']['format'] : 'above',
+  );
+
+  foreach (_content_admin_display_contexts() as $key => $title) {
+    $row[$key]['format'] = array(
+      '#type' => 'select',
+      '#options' => $options,
+      '#default_value' => isset($defaults[$key]['format']) ? $defaults[$key]['format'] : 'default',
+    );
+  }
+  return $row;
+}
+
+function _content_admin_display_contexts() {
+  return array(
+    'teaser' => t('Teaser'),
+    'full' => t('Full'),
+  );
 }
 
 /**
