@@ -180,7 +180,7 @@ function number_field_formatter($field, $item, $formatter, $node) {
   case 'us_2':
     return number_format($item['value'], 2, '.', ',');
   case 'us_$0':
-    return '$'. number_format($item['value'], 1, '.', ',');
+    return '$'. number_format($item['value'], 0, '.', ',');
   case 'us_$2':
     return '$'. number_format($item['value'], 2, '.', ',');
   case 'be_0':
@@ -190,7 +190,7 @@ function number_field_formatter($field, $item, $formatter, $node) {
   case 'be_2':
     return number_format($item['value'], 2, ', ', '.');
   case 'be_$0':
-    return number_format($item['value'], 1, ', ', '.') .' EUR';
+    return number_format($item['value'], 0, ', ', '.') .' EUR';
   case 'be_$2':
     return number_format($item['value'], 2, ', ', '.') .' EUR';
   case 'fr_0':
@@ -200,7 +200,7 @@ function number_field_formatter($field, $item, $formatter, $node) {
   case 'fr_2':
     return number_format($item['value'], 2, ', ', ' ');
   case 'fr_$0':
-    return number_format($item['value'], 1, ', ', ' ') .' EUR';
+    return number_format($item['value'], 0, ', ', ' ') .' EUR';
   case 'fr_$2':
     return number_format($item['value'], 2, ', ', ' ') .' EUR';
   default:
