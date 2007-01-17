@@ -28,6 +28,7 @@ function content_install() {
         label varchar(255) NOT NULL default '',
         widget_type varchar(32) NOT NULL default '',
         widget_settings mediumtext NOT NULL,
+        display_settings mediumtext NOT NULL,
         description mediumtext NOT NULL,
         PRIMARY KEY  (field_name,type_name)
       ) /*!40100 DEFAULT CHARACTER SET utf8 */");
@@ -50,6 +51,7 @@ function content_install() {
         label varchar(255) NOT NULL default '',
         widget_type varchar(32) NOT NULL default '',
         widget_settings text NOT NULL,
+        display_settings text NOT NULL,
         description text NOT NULL,
         PRIMARY KEY  (field_name,type_name)
       )");
@@ -281,6 +283,27 @@ function content_update_1001() {
     }
     $ret[] = update_sql("DROP TABLE {node_type_content}");
     $ret[] = update_sql('DELETE FROM {cache}');
+  }
+
+  return $ret;
+}
+
+/**
+ * Add display_settings column
+ */
+function content_update_1002() {
+  $ret = array();
+
+  switch ($GLOBALS['db_type']) {
+    case 'pgsql':
+      db_add_column($ret, 'node_field_instance', 'display_settings', 'text', array('not null' => TRUE, 'default' => ''));
+      break;
+
+    case 'mysql':
+    case 'mysqli':
+      // TODO : why not db_add_column ?
+      $ret[] = update_sql("ALTER TABLE {node_field_instance} ADD COLUMN display_settings mediumtext NOT NULL");
+      break;
   }
 
   return $ret;

@@ -6,6 +6,7 @@
 Features
 --------
 - 108755  Add group name in the 'class' attributes of groups fieldsets
+- 107128  Added teasers / full nodes support in an overview form for display settings
 
 Bugfix
 ------

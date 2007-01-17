@@ -35,7 +35,7 @@ function fieldgroup_menu($may_cache) {
           'access' => user_access('administer content types'),
           'callback arguments' => array($content_type, '', 'add'),
           'type' => MENU_LOCAL_TASK,
-          'weight' => 2,
+          'weight' => 3,
           );
         if (arg(4) == 'groups' && arg(5)) {
           $items[] = array(
