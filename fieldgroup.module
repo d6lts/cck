@@ -14,8 +14,6 @@ function fieldgroup_help($section) {
   switch ($section) {
     case 'admin/modules#description':
       return t('<strong>CCK:</strong> Create field groups for CCK fields. <em>Note: Requires content.module.</em>');
-    case 'admin/node/types/'. arg(3) .'/groups':
-      return t('Create and order your groups first. Then assign fields to a group by editing the fields.');
   }
 }
 
