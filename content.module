@@ -357,7 +357,6 @@ function content_view(&$node, $teaser = FALSE, $page = FALSE) {
     _content_widget_invoke('process form values', $node);
   }
   $node->body = implode('', _content_field_view($node, FALSE, $page));
-
   $node->teaser = implode('', _content_field_view($node, TRUE, $page));
   $node->readmore = (strlen($node->teaser) < strlen($node->body));
 }
@@ -623,6 +622,7 @@ function _content_field_view($node, $teaser = NULL, $page = NULL) {
           $value = module_invoke($module, 'field', 'view', $node, $field, $node_field, $teaser, $page);
         }
         if (empty($value)) {
+          $items = array();
           foreach ($node_field as $delta => $item) {
             $items[$delta]['view'] = content_format($field, $item, $formatter, $node);
           }
