@@ -196,7 +196,7 @@ function content_update_7() {
     $table_name = 'node_type';
   }
   else {
-    $table_name = 'node_content_type';
+    $table_name = 'node_type_content';
   }
   $type_result = db_query("SELECT type_name FROM {$table_name} WHERE type_name LIKE 'content-%%'");
 
