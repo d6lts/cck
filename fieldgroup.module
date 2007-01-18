@@ -6,21 +6,6 @@
  * Create field groups for CCK fields.
  */
 
-/**
- * Implementation of hook_help().
- */
-function fieldgroup_help($section) {
-  if (arg(0) == 'admin' && arg(1) == 'content' && arg(2) == 'types' && arg(3)) {
-    $content_type = content_types(arg(3));
-  }
-
-  switch ($section) {
-    case 'admin/node/types/'. $content_type['url_str'] .'/groups':
-      return t('Create and order your groups first. Then assign fields to a group by editing the fields.');
-  }
-}
-
-
 function fieldgroup_menu($may_cache) {
   if (!$may_cache) {
     if (arg(0) == 'admin' && arg(1) == 'content' && arg(2) == 'types' && arg(3)) {
@@ -202,7 +187,7 @@ function fieldgroup_remove_group($content_type, $group_name) {
   return confirm_form($form,
                   t('Are you sure you want to remove the group %label?',
                   array('%label' => $group['label'])),
-                  'admin/content/types/'. $content_type['url_str'] .'/groups', t('This action cannot be undone.'),
+                  'admin/content/types/'. $content_type['url_str'] .'/fields', t('This action cannot be undone.'),
                   t('Remove'), t('Cancel'));
 }
 
