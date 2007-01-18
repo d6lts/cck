@@ -574,6 +574,7 @@ function _content_field_view($node, $teaser = NULL, $page = NULL) {
           $value = module_invoke($module, 'field', 'view', $node, $field, $node_field, $teaser, $page);
         }
         if (empty($value)) {
+          $items = array();
           foreach ($node_field as $delta => $item) {
             $items[$delta]['view'] = content_format($field, $item, $formatter, $node);
           }
