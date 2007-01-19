@@ -50,26 +50,32 @@ function hook_field_info() {
  *     this operator determines what filters are available to views.
  *     They always apply to the first column listed in the "database columns"
  *     array.
+ *   - "callbacks": Declare which callbacks are implemented by hook_field.
  * @param $field
  *   The field on which the operation is to be performed.
  * @return
  *   This varies depending on the operation.
- *   - The "form" operation should return an array of form elements to add to
+ *   - "form": an array of form elements to add to
  *     the settings page.
- *   - The "validate" operation has no return value. Use form_set_error().
- *   - The "save" operation should return an array of names of form elements to
+ *   - "validate": no return value. Use form_set_error().
+ *   - "save": an array of names of form elements to
  *     be saved in the database.
- *   - The "database columns" operation should return an array keyed by column
- *     name, with arrays of column information as values. This column information
- *     must include "type", the MySQL data type of the column, and may also
- *     include a "sortable" parameter to indicate to views.module that the
- *     column contains ordered information. Details of other information that can
- *     be passed to the database layer can be found at content_db_add_column().
- *   - The "filters" operation should return an array whose values are 'filters'
+ *   - "database columns": an array keyed by column name, with arrays of column 
+ *     information as values. This column information must include "type", the 
+ *     MySQL data type of the column, and may also include a "sortable" parameter 
+ *     to indicate to views.module that the column contains ordered information. 
+ *     Details of other information that can be passed to the database layer can 
+ *     be found at content_db_add_column().
+ *   - "filters": an array whose values are 'filters'
  *     definitions as expected by views.module (see Views Documentation).
  *     When proving several filters, it is recommended to use the 'name'
  *     attribute in order to let the user distinguish between them. If no 'name'
  *     is specified for a filter, the key of the filter will be used instead.
+ *   - "callbacks": an array keyed by hook_filter operations ('view', 'validate', ...)
+ *     and with TRUE or FALSE as values. TRUE means that the field wants its callback
+ *     executed instead of content.module's default behaviour.
+ *     Note : currently only the 'view' operation implements this feature - all other 
+ *     field operation _will_ be executed no matter what.
  */
 function hook_field_settings($op, $field) {
   switch ($op) {
@@ -111,6 +117,11 @@ function hook_field_settings($op, $field) {
           'operator' => 'views_handler_operator_gtlt',
         ),
       );
+    
+    case 'callbacks':
+      return array(
+        'view' => TRUE,
+      );
   }
 }
 
@@ -124,6 +135,7 @@ function hook_field_settings($op, $field) {
  *   - "view": The node is about to be presented to the user. The module
  *     should prepare and return an HTML string containing a default
  *     representation of the field.
+ *     It will be called only if 'view' was set to TRUE in hook_field_settings('callbacks')
  *   - "validate": The user has just finished editing the node and is
  *     trying to preview or submit it. This hook can be used to check or
  *     even modify the node. Errors should be set with form_set_error().
@@ -149,54 +161,28 @@ function hook_field_settings($op, $field) {
  *   - The "insert", "update", "delete", "validate", and "submit" operations
  *     have no return value.
  *
- * In most cases, only "view" and "validate" are relevant operations; the rest
+ * In most cases, only "validate" operations is relevant ; the rest
  * have default implementations in content_field() that usually suffice.
  */
 function hook_field($op, &$node, $field, &$node_field, $teaser, $page) {
   switch ($op) {
     case 'view':
-      if ($field['multiple']) {
-        foreach ($node_field as $delta => $item) {
-          $node_field[$delta]['view'] = text_field_view($field, $item['value'], $item, $node);
-        }
+      $formatter = isset($field['display_settings'][$context]['format']) ? $field['display_settings'][$context]['format'] : 'default';
+      $items = array();
+      foreach ($node_field as $delta => $item) {
+        $items[$delta]['view'] = content_format($field, $item, $formatter, $node);
       }
-      else {
-        $node_field['view'] = text_field_view($field, $node_field['value'], $node_field, $node);
-      }
-
-      if ($field['multiple']) {
-        $output = '';
-        foreach ($node_field as $delta => $item) {
-          $output .= '<div class="'. $field['field_name'] .'">'. $item['view'] .'</div>';
-        }
-        return $output;
-      }
-      else {
-        return '<div class="'. $field['field_name'] .'">'. $node_field['view'] .'</div>';
-      }
+      return theme('field', $node, $field, $items, $teaser, $page);
 
     case 'validate':
-      $allowed_values = explode("\n", $field['allowed_values']);
-      $allowed_values = array_map('trim', $allowed_values);
-      $allowed_values = array_filter($allowed_values, 'strlen');
+      $allowed_values = text_allowed_values($field);
 
-      if ($field['multiple']) {
-        if (is_array($node_field)) {
+      if (is_array($items)) {
+        foreach ($items as $delta => $item) {
           $error_field = $field['field_name'].']['.$delta.'][value';
-          foreach ($node_field as $delta => $item) {
-            if ($item['value'] != '') {
-              if (count($allowed_values) && !in_array($item['value'], $allowed_values)) {
-                form_set_error($error_field, t('Illegal value for %name.', array('%name' => t($field['widget']['label']))));
-              }
-            }
-          }
-        }
-      }
-      else {
-        if (isset($node_field['value'])) {
-          if ($node_field['value'] != '') {
-            if (count($allowed_values) && !in_array($node_field['value'], $allowed_values)) {
-              form_set_error($field['field_name'], t('Illegal value for %name.', array('%name' => t($field['widget']['label']))));
+          if ($item['value'] != '') {
+            if (count($allowed_values) && !array_key_exists($item['value'], $allowed_values)) {
+              form_set_error($error_field, t('Illegal value for %name.', array('%name' => t($field['widget']['label']))));
             }
           }
         }
