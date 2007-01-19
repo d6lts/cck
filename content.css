@@ -29,3 +29,9 @@ table.content-field-overview td {
 .field .field-label-inline {
   visibility:hidden;
 }
+
+.node-form .number {
+  display: inline;
+  width: auto;
+}
+
