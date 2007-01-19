@@ -107,12 +107,6 @@ function text_field_settings($op, $field) {
  */
 function text_field($op, &$node, $field, &$items, $teaser, $page) {
   switch ($op) {
-    case 'view':
-      foreach ($items as $delta => $item) {
-        $items[$delta]['view'] = content_format($field, $item, 'default', $node);
-      }
-      return theme('field', $node, $field, $items, $teaser, $page);
-
     case 'validate':
       $allowed_values = text_allowed_values($field);
 
