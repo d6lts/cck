@@ -56,15 +56,10 @@ function userreference_field_settings($op, $field) {
 /**
  * Implementation of hook_field().
  */
-function userreference_field($op, &$node, $field, &$items, $teaser, $page) {
-  switch ($op) {
-    case 'view':
-      foreach ($items as $delta => $item) {
-        $items[$delta]['view'] = content_format($field, $item, 'default', $node);
-      }
-      return theme('field', $node, $field, $items, $teaser, $page);
-  }
-}
+//function userreference_field($op, &$node, $field, &$items, $teaser, $page) {
+//  switch ($op) {
+//  }
+//}
 
 /**
  * Implementation of hook_field_formatter_info().
