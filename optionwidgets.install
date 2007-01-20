@@ -19,7 +19,7 @@ function optionwidgets_update_1() {
   $result = db_query("SELECT * FROM {node_field_instance} fi LEFT JOIN {node_field} f ON fi.field_name=f.field_name WHERE widget_type IN ('options_select', 'options_buttons')");
   while ($field_instance = db_fetch_array($result)) {
     $info = content_database_info($field_instance);
-    $result2 = db_query("SELECT DISTINCT ". $info['columns']['value']['column'] ." FROM ". $info['table'] ."");
+    $result2 = db_query("SELECT DISTINCT ". $info['columns']['value']['column'] ." FROM {". $info['table'] ."}");
     while ($value = db_fetch_array($result2)) {
       $values[$field_instance['field_name']][$value[$info['columns']['value']['column']]] = $value[$info['columns']['value']['column']];
     }
