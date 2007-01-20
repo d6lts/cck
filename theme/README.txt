@@ -1,6 +1,7 @@
 // $Id$
 
 Theming Constructed Content Types
+=================================
 
 After you have designed your content, you will likely want to lay out the
 presentation of the content. This is most easily done with PHPtemplate-based
@@ -9,6 +10,7 @@ level of control you need to exert.
 
 
 Theming individual fields
+-------------------------
 
 This method is straightforward and allows for sensible defaults, but requires a
 modest amount of setup. Place the "field.tpl.php" and "template.php" files in
@@ -31,12 +33,25 @@ contents of the item. You should always use this property in your display for
 security reasons, unless you are very familiar with how to properly process
 output and avoid scripting exploits.
 
-The included example here ("field-field_body.tpl.php") illustrates a
+The included example here ("field-field_my_field.tpl.php") illustrates a
 minimalistic approach to field theming, for a single-valued field. For a more
 flexible template, start from the included "field.tpl.php".
 
+Available variables in field templates :
+$items          : an array containg the values of the field.
+                  $items[n]['view'] contains the ready-to-use, filtered, formatted value
+$label          : the label of the field
+$label_display  : the display settings for the label ('hidden', 'above', or 'inline')
+$field_empty    : TRUE if there is nothing to display in the field
+$field_type     : the type of the field,
+$field_name     : the name of the field,
+$field_type_css : same as above, with '-' signs replaced with '_' for use in css properties
+$field_name_css : same as above, with '-' signs replaced with '_' for use in css properties
+$field          : an array containing the full CCK field object
+
 
 Theming the node as a whole
+---------------------------
 
 If you need more flexibility than is afforded by theming individual fields, you
 may theme the entire node as a unit. This allows you to affect field order, to
