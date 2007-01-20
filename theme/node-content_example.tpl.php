@@ -6,13 +6,13 @@
   <span class="submitted"><?php print $submitted?></span>
   <span class="taxonomy"><?php print $terms?></span>
   <div class="content">
-    Here's the body:
-      <?php print $field_body[0]['view']; ?>
+    Here's one field:
+      <?php print $field_my_field[0]['view']; ?>
 
-    And some footnotes:
+    And another:
     <ul>
       <?php
-        foreach ($field_footnotes as $item) {
+        foreach ($field_my_other_field as $item) {
           print '<li>'. $item['view'] .'</li>';
         }
       ?>
