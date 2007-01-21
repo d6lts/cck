@@ -532,7 +532,7 @@ function _content_admin_field_add_new($type_name, $new_field_name = '') {
     );
   }
   else {
-    drupal_set_message(t('No field modules are enabled. You need to <a href="%modules_url">enable one</a>, such as text.module, before you can add new fields.', array('!modules_url' => url('admin/modules'))), 'error');
+    drupal_set_message(t('No field modules are enabled. You need to <a href="!modules_url">enable one</a>, such as text.module, before you can add new fields.', array('!modules_url' => url('admin/build/modules'))), 'error');
   }
 
   return $form;
