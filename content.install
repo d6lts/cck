@@ -301,7 +301,6 @@ function content_update_1002() {
 
     case 'mysql':
     case 'mysqli':
-      // TODO : why not db_add_column ?
       $ret[] = update_sql("ALTER TABLE {node_field_instance} ADD COLUMN display_settings mediumtext NOT NULL");
       break;
   }
