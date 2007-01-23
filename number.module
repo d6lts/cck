@@ -183,7 +183,11 @@ function number_field_formatter_info() {
  * Implementation of hook_field_formatter().
  */
 function number_field_formatter($field, $item, $formatter, $node) {
-  
+  // If the value is empty, we have $item['value'] = NULL
+  if (is_null($item['value'])) {
+    return '';
+  }
+
   if ($allowed_values = number_allowed_values($field)) {
     $item['value'] = $allowed_values[$item['value']];
   }
