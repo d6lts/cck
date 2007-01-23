@@ -576,7 +576,9 @@ function _content_field_view($node, $teaser = NULL, $page = NULL) {
         if (empty($value)) {
           $items = array();
           foreach ($node_field as $delta => $item) {
+            $items[$delta] = $item;
             $items[$delta]['view'] = content_format($field, $item, $formatter, $node);
+            $node->$field['field_name'] = $items;
           }
           $value = theme('field', $node, $field, $items, $teaser, $page);
         }
