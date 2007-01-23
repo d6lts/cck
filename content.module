@@ -973,13 +973,8 @@ function content_format($field, $item, $formatter = 'default', $node = NULL) {
  *   An HTML string containing the fully themed field.
  */
 function theme_field(&$node, &$field, &$items, $teaser, $page) {
-  if (isset($field['display_settings']['label']['format'])) {
-    $label = $field['display_settings']['label']['format'] ? $field['display_settings']['label']['format'] : 'header';
-  }
-  else {
-    $label = '';
-  }
-  
+  $label = isset($field['display_settings']['label']['format']) ? $field['display_settings']['label']['format'] : 'above';
+
   $items_output = '';
   foreach ($items as $delta => $item) {
     if (!empty($item['view']) || $item['view'] === "0") {

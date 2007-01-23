@@ -585,7 +585,7 @@ function content_admin_display_overview_form_submit($form_id, $form_values) {
     db_query("UPDATE {node_field_instance} SET display_settings = '%s' WHERE type_name = '%s' AND field_name = '%s'",
       serialize($display_settings), $form_values['type_name'], $fieldname);
   }
-  drupal_set_message(t('Updated display settings.'));
+  drupal_set_message(t('Your settings have been saved.'));
   content_clear_type_cache();
 }
 
