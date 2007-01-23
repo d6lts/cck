@@ -554,7 +554,7 @@ function _content_field_invoke_default($op, &$node, $teaser = NULL, $page = NULL
 /**
  * Format field output based on display settings.
  */
-function _content_field_view($node, $teaser = NULL, $page = NULL) {
+function _content_field_view(&$node, $teaser = NULL, $page = NULL) {
   $type_name = is_string($node) ? $node : (is_array($node) ? $node['type'] : $node->type);
   $type = content_types($type_name);
   $field_types = _content_field_types();
@@ -571,16 +571,17 @@ function _content_field_view($node, $teaser = NULL, $page = NULL) {
         $module = $field_types[$field['type']]['module'];
         $callbacks = module_invoke($module, 'field_settings', 'callbacks', $field);
         if (isset($callbacks['view']) && $callbacks['view']) {
-          $value = module_invoke($module, 'field', 'view', $node, $field, $node_field, $teaser, $page);
+          $function = $module .'_field';
+          if (function_exists($function)) {
+            $value = $function('view', $node, $field, $node_field, $teaser, $page);
+          }
         }
         if (empty($value)) {
           $items = array();
           foreach ($node_field as $delta => $item) {
-            $items[$delta] = $item;
-            $items[$delta]['view'] = content_format($field, $item, $formatter, $node);
-            $node->$field['field_name'] = $items;
+            $node_field[$delta]['view'] = content_format($field, $item, $formatter, $node);
           }
-          $value = theme('field', $node, $field, $items, $teaser, $page);
+          $value = theme('field', $node, $field, $node_field, $teaser, $page);
         }
       }
       $return[$field['field_name']] = array(
@@ -588,6 +589,10 @@ function _content_field_view($node, $teaser = NULL, $page = NULL) {
         '#value' => $value,
         '#access' => $formatter != 'hidden',
       );
+      // test for values in $node_field in case modules added items
+      if (isset($node->$field['field_name']) || count($node_field)) {
+        $node->$field['field_name'] = $node_field;
+      }
     }
   }
   return $return;
