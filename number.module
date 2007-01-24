@@ -226,7 +226,7 @@ function number_field_formatter($field, $item, $formatter, $node) {
   $prefixes = explode('|', $field['prefix']);
   $suffixes = explode('|', $field['suffix']);
   if ($prefixes) {
-    if (sizeof($prefixes) > 0) {
+    if (sizeof($prefixes) > 1) {
       $prefix = format_plural($item['value'], $prefixes[0], $prefixes[1]);
     }
     else {
@@ -234,7 +234,7 @@ function number_field_formatter($field, $item, $formatter, $node) {
     }
   }
   if ($suffixes) {
-    if (sizeof($suffixes) > 0) {
+    if (sizeof($suffixes) > 1) {
       $suffix = format_plural($item['value'], $suffixes[0], $suffixes[1]);
     }
     else {
@@ -270,7 +270,7 @@ function number_widget($op, &$node, $field, &$items) {
       $prefixes = explode('|', $field['prefix']);
       $suffixes = explode('|', $field['suffix']);
       if ($prefixes) {
-        if (sizeof($prefixes) > 0) {
+        if (sizeof($prefixes) > 1) {
           $prefix = format_plural($item['value'], $prefixes[0], $prefixes[1]);
         }
         else {
@@ -278,7 +278,7 @@ function number_widget($op, &$node, $field, &$items) {
         }
       }
       if ($suffixes) {
-        if (sizeof($suffixes) > 0) {
+        if (sizeof($suffixes) > 1) {
           $suffix = format_plural($item['value'], $suffixes[0], $suffixes[1]);
         }
         else {
