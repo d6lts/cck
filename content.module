@@ -577,7 +577,6 @@ function _content_field_view(&$node, $teaser = NULL, $page = NULL) {
           }
         }
         if (empty($value)) {
-          $items = array();
           foreach ($node_field as $delta => $item) {
             $node_field[$delta]['view'] = content_format($field, $item, $formatter, $node);
           }
