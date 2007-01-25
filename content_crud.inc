@@ -50,8 +50,8 @@ function content_type_create($info) {
 
       case 'pgsql':
         db_query("CREATE TABLE {". $table ."} (
-          vid integer unsigned NOT NULL default '0',
-          nid integer unsigned NOT NULL default '0',
+          vid int_unsigned NOT NULL default '0',
+          nid int_unsigned NOT NULL default '0',
           PRIMARY KEY (vid)
         )");
       break;

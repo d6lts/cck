@@ -127,8 +127,8 @@ function content_update_4() {
 
       case 'pgsql':
         $ret[] = update_sql("CREATE TABLE {node_". strtr($type->type_name, '-', '_') ."} (
-            vid integer unsigned NOT NULL default '0',
-            nid integer unsigned NOT NULL default '0',
+            vid int_unsigned NOT NULL default '0',
+            nid int_unsigned NOT NULL default '0',
             PRIMARY KEY (vid)
           )");
         break;
@@ -301,7 +301,7 @@ function content_update_1002() {
   if (isset($result['display_settings'])) {
     return $ret;
   }
-  
+
   switch ($GLOBALS['db_type']) {
     case 'pgsql':
       db_add_column($ret, 'node_field_instance', 'display_settings', 'text', array('not null' => TRUE, 'default' => ''));
