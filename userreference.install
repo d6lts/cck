@@ -61,6 +61,7 @@ function userreference_update_3() {
   include_once('./'. drupal_get_path('module', 'content') .'/content.module');
   include_once('./'. drupal_get_path('module', 'content') .'/content_admin.inc');
 
+  content_clear_type_cache();
   $fields = content_fields();
 
   foreach ($fields as $field) {
@@ -69,12 +70,16 @@ function userreference_update_3() {
         $columns = array(
           'uid' => array('type' => 'int', 'not null' => TRUE, 'default' => '0'),
         );
-        content_alter_db_field(array(), array(), $field, $columns);
+        // the following line will trigger (negligible) warnings if content_update_5 was run before
+        // (column already exists)
+        @content_alter_db_field(array(), array(), $field, $columns);
+        $db_info = content_database_info($field);
+        $table = $db_info['table'];
         if ($field['multiple']) {
-          $ret[] = update_sql('INSERT INTO {node_data_'. $field['field_name'] .'} (vid, delta, nid, '. $field['field_name'] ."_uid) SELECT vid, delta, nid, field_uid FROM {node_field_userreference_data} WHERE field_name = '". $field['field_name'] ."'");
+          $ret[] = update_sql('INSERT INTO {'. $table .'} (vid, delta, nid, '. $field['field_name'] ."_uid) SELECT vid, delta, nid, field_uid FROM {node_field_userreference_data} WHERE field_name = '". $field['field_name'] ."'");
         }
         else {
-          $ret[] = update_sql('INSERT INTO {node_data_'. $field['field_name'] .'} (vid, nid, '. $field['field_name'] ."_uid) SELECT vid, nid, field_uid FROM {node_field_userreference_data} WHERE field_name = '". $field['field_name'] ."'");
+          $ret[] = update_sql('INSERT INTO {'. $table .'} (vid, nid, '. $field['field_name'] ."_uid) SELECT vid, nid, field_uid FROM {node_field_userreference_data} WHERE field_name = '". $field['field_name'] ."'");
         }
         break;
     }
