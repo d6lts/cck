@@ -120,6 +120,14 @@ function text_field($op, &$node, $field, &$items, $teaser, $page) {
           }
         }
       }
+      if ($field['max_length'] > 0) {
+        foreach ($items as $delta => $data) {
+          $error_field = $field['field_name'].']['.$delta.'][value';
+          if (strlen($data['value']) > $field['max_length']) {
+            form_set_error($error_field, t('%label is longer than %max characters.', array('%label' => $field['widget']['label'], '%max' => $field['max_length'])));
+          }
+        }
+      }
       break;
   }
 }
@@ -314,17 +322,6 @@ function text_widget($op, &$node, $field, &$items) {
         }
       }
       return $form;
-
-    case 'validate':
-      if ($field['max_length'] > 0) {
-        foreach ($items as $delta => $data) {
-          $error_field = $field['field_name'].']['.$delta.'][value';
-          if (strlen($data['value']) > $field['max_length']) {
-            form_set_error($error_field, t('%label is longer than %max characters.', array('%label' => $field['widget']['label'], '%max' => $field['max_length'])));
-          }
-        }
-      }
-      break;
 
     case 'process form values':
       // Don't save empty fields except the first value

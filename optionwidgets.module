@@ -39,12 +39,12 @@ function optionwidgets_widget_settings($op, $widget) {
 /**
  * Implementation of hook_widget().
  */
-function optionwidgets_widget($op, &$node, $field, &$node_field) {
+function optionwidgets_widget($op, &$node, $field, &$items) {
   switch ($op) {
     case 'prepare form values':
       $options = _optionwidgets_options($field);
-      $node_field_transposed = content_transpose_array_rows_cols($node_field);
-      $values = (isset($node_field_transposed['value']) && is_array($node_field_transposed['value'])) ? $node_field_transposed['value'] : array();
+      $items_transposed = content_transpose_array_rows_cols($items);
+      $values = (isset($items_transposed['value']) && is_array($items_transposed['value'])) ? $items_transposed['value'] : array();
 
       $keys = array();
       foreach ($values as $value) {
@@ -54,10 +54,10 @@ function optionwidgets_widget($op, &$node, $field, &$node_field) {
         }
       }
       if ($field['multiple']) {
-        $node_field['default keys'] = $keys;
+        $items['default keys'] = $keys;
       }
       else {
-        $node_field['default key'] = reset($keys);
+        $items['default key'] = reset($keys);
       }
       break;
 
@@ -75,7 +75,7 @@ function optionwidgets_widget($op, &$node, $field, &$node_field) {
             $form[$field['field_name']]['keys'] = array(
               '#type' => 'select',
               '#title' => t($field['widget']['label']),
-              '#default_value' => $node_field['default keys'],
+              '#default_value' => $items['default keys'],
               '#multiple' => TRUE,
               '#size' => min(count($options), 6),
               '#options' => $options,
@@ -87,7 +87,7 @@ function optionwidgets_widget($op, &$node, $field, &$node_field) {
             $form[$field['field_name']]['key'] = array(
               '#type' => 'select',
               '#title' => t($field['widget']['label']),
-              '#default_value' => $node_field['default key'],
+              '#default_value' => $items['default key'],
               '#multiple' => FALSE,
               '#options' => $options,
               '#required' => $field['required'],
@@ -101,7 +101,7 @@ function optionwidgets_widget($op, &$node, $field, &$node_field) {
             $form[$field['field_name']]['keys'] = array(
               '#type' => 'checkboxes',
               '#title' => t($field['widget']['label']),
-              '#default_value' => $node_field['default keys'],
+              '#default_value' => $items['default keys'],
               '#options' => $options,
               '#required' => $field['required'],
               '#description' => $field['widget']['description'],
@@ -112,7 +112,7 @@ function optionwidgets_widget($op, &$node, $field, &$node_field) {
             $form[$field['field_name']]['key'] = array(
               '#type' => 'radios',
               '#title' => t($field['widget']['label']),
-              '#default_value' => $node_field['default key'],
+              '#default_value' => $items['default key'],
               '#options' => $options,
               '#required' => $field['required'],
               '#description' => $field['widget']['description'],
@@ -127,10 +127,10 @@ function optionwidgets_widget($op, &$node, $field, &$node_field) {
       $options = _optionwidgets_options($field);
 
       if ($field['multiple']) {
-        $keys = $node_field['keys'];
+        $keys = $items['keys'];
       }
       else {
-        $keys = array($node_field['key']);
+        $keys = array($items['key']);
       }
 
       $values = array();
@@ -140,11 +140,11 @@ function optionwidgets_widget($op, &$node, $field, &$node_field) {
         }
       }
 
-      $node_field = content_transpose_array_rows_cols(array('value' => $values));
+      $items = content_transpose_array_rows_cols(array('value' => $values));
 
       // Remove the widget's data representation so it isn't saved.
-      unset($node_field['keys']);
-      unset($node_field['key']);
+      unset($items['keys']);
+      unset($items['key']);
       break;
   }
 }
