@@ -147,6 +147,8 @@ function content_update_5() {
   include_once('./'. drupal_get_path('module', 'content') .'/content.module');
   include_once('./'. drupal_get_path('module', 'content') .'/content_admin.inc');
 
+  content_clear_type_cache();
+
   $result = db_query('SELECT nf.field_name FROM {node_field} nf LEFT JOIN {node_field_instance} nfi ON nfi.field_name = nf.field_name WHERE nf.multiple = 0 AND nf.db_storage = 0 GROUP BY nfi.field_name HAVING COUNT(*) = 1');
 
   if (db_num_rows($result)) {
@@ -294,6 +296,12 @@ function content_update_1001() {
 function content_update_1002() {
   $ret = array();
 
+  // See if this column was already added in 4.7.
+  $result = db_fetch_array(db_query_range("SELECT * FROM {node_field_instance}", array(), 0, 1));
+  if (isset($result['display_settings'])) {
+    return $ret;
+  }
+  
   switch ($GLOBALS['db_type']) {
     case 'pgsql':
       db_add_column($ret, 'node_field_instance', 'display_settings', 'text', array('not null' => TRUE, 'default' => ''));
@@ -304,6 +312,78 @@ function content_update_1002() {
       $ret[] = update_sql("ALTER TABLE {node_field_instance} ADD COLUMN display_settings mediumtext NOT NULL");
       break;
   }
+
+  return $ret;
+}
+
+/**
+ *  Rename data tables to avoid collision with core node_* tables
+ */
+function content_update_1003() {
+  $ret = array();
+
+  include_once('./'. drupal_get_path('module', 'content') .'/content.module');
+  include_once('./'. drupal_get_path('module', 'content') .'/content_admin.inc');
+
+  $rename = array();
+
+  $types = content_types();
+  $fields = content_fields();
+
+  // "per content type" tables
+  foreach ($types as $type) {
+    $old_name = _content_tablename($type['type'], CONTENT_DB_STORAGE_PER_CONTENT_TYPE);
+    $new_name = _content_tablename($type['type'], CONTENT_DB_STORAGE_PER_CONTENT_TYPE, 1003);
+    if (db_table_exists($old_name)) {
+      if (!in_array($old_name, array('node_access',  'node_comments_statistics', 'node_counter', 'node_field', 'node_field_instance', 'node_group', 'node_group_fields', 'node_revisions', 'node_type'))) {
+        $rename[$old_name] = $new_name;
+      }
+      else {
+        // TODO : what ? create the table ?
+      }
+    }
+  }
+
+  // "per field" tables
+  foreach ($fields as $field) {
+    $old_name = _content_tablename($field['field_name'], CONTENT_DB_STORAGE_PER_FIELD);
+    $new_name = _content_tablename($field['field_name'], CONTENT_DB_STORAGE_PER_FIELD, 1003);
+    $old_name = 'node_data_'.$field['field_name'];
+    $new_name = 'content_'. $field['field_name'];
+    if (db_table_exists($old_name)) {
+      $rename[$old_name] = $new_name;
+    }
+  }
+
+  // rename
+  foreach ($rename as $old_name => $new_name) {
+    switch ($GLOBALS['db_type']) {
+      case 'mysql':
+      case 'mysqli':
+        $ret[] = update_sql("RENAME TABLE {$old_name} TO {$new_name}");
+        break;
+
+      case 'pgsql':
+        $ret[] = update_sql("ALTER TABLE {$old_name} RENAME TO {$new_name}");
+        break;
+    }
+  }
+
+
+  // regenerate views
+  content_clear_type_cache();
+  if (module_exists('views')) {
+    include_once('./'. drupal_get_path('module', 'content') .'/content_views.inc');
+    $updated_views = _content_views_rebuild_views(array_keys(content_fields()));
+    foreach ($updated_views as $view) {
+      $ret[] = array(
+        'query' => strtr('The views %view has been regenerated.', array('%view' => $view)),
+        'success' => TRUE
+      );
+    }
+  }
+
+  variable_set('content_schema_version', 1003);
 
   return $ret;
 }

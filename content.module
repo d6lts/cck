@@ -230,8 +230,9 @@ function content_delete(&$node) {
     _content_field_invoke('delete', $node);
     _content_field_invoke_default('delete', $node);
   }
-  if (!empty($type['table']) && db_table_exists($type['table'])) {
-    db_query('DELETE FROM {'. $type['table'] .'} WHERE nid = %d', $node->nid);
+  $table = _content_tablename($type['name'], CONTENT_DB_STORAGE_PER_CONTENT_TYPE);
+  if (db_table_exists($table)) {
+    db_query('DELETE FROM {'. $table .'} WHERE nid = %d', $node->nid);
   }
   cache_clear_all('content:'. $node->nid, 'cache', TRUE);
 }
@@ -245,8 +246,9 @@ function content_delete_revision(&$node) {
     _content_field_invoke('delete revision', $node);
     _content_field_invoke_default('delete revision', $node);
   }
-  if (!empty($type['table']) && db_table_exists($type['table'])) {
-    db_query('DELETE FROM {'. $type['table'] .'} WHERE vid = %d', $node->vid);
+  $table = _content_tablename($type['name'], CONTENT_DB_STORAGE_PER_CONTENT_TYPE);
+  if (db_table_exists($table)) {
+    db_query('DELETE FROM {'. $table .'} WHERE vid = %d', $node->vid);
   }
   cache_clear_all('content:'. $node->nid .':'. $node->vid, 'cache');
 }
@@ -754,7 +756,7 @@ function _content_type_info($reset = FALSE) {
         }
       }
 
-      $field_result = db_query('SELECT * FROM {node_field} nf');
+      $field_result = db_query('SELECT * FROM {node_field}');
       while ($field = db_fetch_array($field_result)) {
         $global_settings = $field['global_settings'] ? unserialize($field['global_settings']) : array();
         unset($field['global_settings']);
@@ -768,12 +770,11 @@ function _content_type_info($reset = FALSE) {
         $info['fields'][$field['field_name']] = $field;
       }
 
-      $type_result = db_query('SELECT * FROM {node_type} nt ORDER BY nt.type ASC');
+      $type_result = db_query('SELECT * FROM {node_type} ORDER BY type ASC');
       while ($type = db_fetch_array($type_result)) {
         $type['url_str'] = str_replace('_', '-', $type['type']);
         $type['fields'] = array();
-        $type['table'] = _content_tablename($type['type']);
-        $field_result = db_query("SELECT nfi.field_name, nfi.weight, nfi.label, nfi.widget_type, nfi.widget_settings, nfi.display_settings, nfi.description FROM {node_field_instance} nfi WHERE nfi.type_name = '%s' ORDER BY nfi.weight ASC, nfi.label ASC", $type['type']);
+        $field_result = db_query("SELECT * FROM {node_field_instance} nfi WHERE nfi.type_name = '%s' ORDER BY nfi.weight ASC, nfi.label ASC", $type['type']);
         while ($field = db_fetch_array($field_result)) {
           // Overwrite global field information with specific information
           $field = array_merge($info['fields'][$field['field_name']], $field);
@@ -858,11 +859,10 @@ function content_database_info($field) {
   $db_info = array();
 
   if ($field['db_storage'] == CONTENT_DB_STORAGE_PER_FIELD) {
-    $db_info['table'] = _content_tablename($field['field_name'], 'field');
+    $db_info['table'] = _content_tablename($field['field_name'], CONTENT_DB_STORAGE_PER_FIELD);
   }
   else {
-    $type = content_types($field['type_name']);
-    $db_info['table'] = $type['table'];
+    $db_info['table'] = _content_tablename($field['type_name'], CONTENT_DB_STORAGE_PER_CONTENT_TYPE);
   }
 
   if (is_array($columns) && count($columns)) {
@@ -997,11 +997,28 @@ function theme_field(&$node, &$field, &$items, $teaser, $page) {
  * @return
  *   A string containing the generated name for the database table
  */
-function _content_tablename($name, $entity = 'type') {
-  switch ($entity) {
-    case 'type' :
+function _content_tablename($name, $entity, $version = NULL) {
+  if (is_null($version)) {
+    $version = variable_get('content_schema_version', 0);
+  }
+
+  if ($version < 1003) {
+    $version = 0;
+  }
+  else {
+    $version = 1003;
+  }
+
+  $name = str_replace('-', '_', $name);
+  switch ($version .'-'. $entity) {
+    case '0-'. CONTENT_DB_STORAGE_PER_CONTENT_TYPE :
       return 'node_'.$name;
-    case 'field' :
+    case '0-'. CONTENT_DB_STORAGE_PER_FIELD :
       return 'node_data_'.$name;
+    case '1003-'. CONTENT_DB_STORAGE_PER_CONTENT_TYPE :
+      return 'content_type_'.$name;
+    case '1003-'. CONTENT_DB_STORAGE_PER_FIELD :
+      return 'content_'.$name;
   }
 }
+

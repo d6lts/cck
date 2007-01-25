@@ -235,7 +235,6 @@ function userreference_widget($op, &$node, $field, &$items) {
           unset($items[$delta]['user_name']);
           $items[$delta]['uid'] = $uid;
           // Don't save empty fields except the first value
-
           if (empty($uid) && $delta > 0) {
             unset($items[$delta]);
           }

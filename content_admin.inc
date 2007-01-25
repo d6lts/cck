@@ -532,7 +532,7 @@ function _content_admin_field_add_new($type_name, $new_field_name = '') {
     );
   }
   else {
-    drupal_set_message(t('No field modules are enabled. You need to <a href="%modules_url">enable one</a>, such as text.module, before you can add new fields.', array('!modules_url' => url('admin/modules'))), 'error');
+    drupal_set_message(t('No field modules are enabled. You need to <a href="!modules_url">enable one</a>, such as text.module, before you can add new fields.', array('!modules_url' => url('admin/build/modules'))), 'error');
   }
 
   return $form;
@@ -888,7 +888,6 @@ function _content_admin_field_submit($form_id, $form_values) {
   return 'admin/content/types/'. $type['url_str'] .'/fields';
 }
 
-
 /**
  * Perform adds, alters, and drops as needed to synchronize the database with
  * new field definitions.
@@ -1070,65 +1069,69 @@ function content_alter_db_field($previous_field, $previous_columns, $new_field, 
       }
     }
 
-    // Migrate data from per-content-type storage.
-    if ($previous_field['db_storage'] == CONTENT_DB_STORAGE_PER_CONTENT_TYPE && $new_field['db_storage'] == CONTENT_DB_STORAGE_PER_FIELD) {
-      $columns = array();
-      foreach ($previous_db_info['columns'] as $column => $attributes) {
-        $columns[] = $attributes['column'];
-      }
-      if ($new_field['multiple']) {
-        db_query('INSERT INTO {'. $new_db_info['table'] .'} (vid, nid, delta, '. implode(', ', $columns) .') SELECT vid, nid, 0, '. implode(', ', $columns) .' FROM {'. $previous_db_info['table'] .'}');
-      }
-      else {
-        db_query('INSERT INTO {'. $new_db_info['table'] .'} (vid, nid, '. implode(', ', $columns) .') SELECT vid, nid, '. implode(', ', $columns) .' FROM {'. $previous_db_info['table'] .'}');
-      }
-      foreach ($columns as $column_name) {
-        db_query('ALTER TABLE {'. $previous_db_info['table'] .'} DROP '. $column_name);
-      }
-    }
-
-    // Migrate data from per-field storage.
-    if ($previous_field['db_storage'] == CONTENT_DB_STORAGE_PER_FIELD && $new_field['db_storage'] == CONTENT_DB_STORAGE_PER_CONTENT_TYPE) {
-      $column_names = array();
-      $column_placeholders_default = array();
-      $column_assignments_default = array();
-      foreach ($new_db_info['columns'] as $column => $attributes) {
-        $column_names[] = $attributes['column'];
-        if (in_array($attributes['type'], array('int', 'mediumint', 'tinyint', 'bigint', 'float'))) {
-          $column_placeholders_default[] = '%d';
-          $column_assignments_default[] = $attributes['column'] .' = %d';
+    // Migrate data from one storage type to another
+    // We check if the previous table still exists (avoid problems during upgrades from older db schemes)
+    if (db_table_exists($previous_db_info['table'])) {
+      // Migrate data from per-content-type storage.
+      if ($previous_field['db_storage'] == CONTENT_DB_STORAGE_PER_CONTENT_TYPE && $new_field['db_storage'] == CONTENT_DB_STORAGE_PER_FIELD) {
+        $columns = array();
+        foreach ($previous_db_info['columns'] as $column => $attributes) {
+          $columns[] = $attributes['column'];
+        }
+        if ($new_field['multiple']) {
+          db_query('INSERT INTO {'. $new_db_info['table'] .'} (vid, nid, delta, '. implode(', ', $columns) .') SELECT vid, nid, 0, '. implode(', ', $columns) .' FROM {'. $previous_db_info['table'] .'}');
         }
         else {
-          $column_placeholders_default[] = "'%s'";
-          $column_assignments_default[] = $attributes['column'] ." = '%s'";
+          db_query('INSERT INTO {'. $new_db_info['table'] .'} (vid, nid, '. implode(', ', $columns) .') SELECT vid, nid, '. implode(', ', $columns) .' FROM {'. $previous_db_info['table'] .'}');
+        }
+        foreach ($columns as $column_name) {
+          db_query('ALTER TABLE {'. $previous_db_info['table'] .'} DROP '. $column_name);
         }
       }
-      if ($previous_field['multiple']) {
-        $result = db_query('SELECT '. implode(', ', $column_names) .', vid, nid FROM {'. $previous_db_info['table'] .'} WHERE delta = 0');
-      }
-      else {
-        $result = db_query('SELECT '. implode(', ', $column_names) .', vid, nid FROM {'. $previous_db_info['table'] .'}');
-      }
-      while ($data = db_fetch_array($result)) {
-        $column_assignments = $column_assignments_default;
-        $column_placeholders = $column_placeholders_default;
-        // search for NULL values and replace assignments and placeholders accordingly
-        foreach ($data as $key => $value) {
-          if (is_null($value)) {
-            $pos = array_search($key, $column_names);
-            $column_assignments[$pos] = $key ."= %s";
-            $column_placeholders[$pos] = "%s";
-            $data[$key] = 'NULL';
+
+      // Migrate data from per-field storage.
+      if ($previous_field['db_storage'] == CONTENT_DB_STORAGE_PER_FIELD && $new_field['db_storage'] == CONTENT_DB_STORAGE_PER_CONTENT_TYPE) {
+        $column_names = array();
+        $column_placeholders_default = array();
+        $column_assignments_default = array();
+        foreach ($new_db_info['columns'] as $column => $attributes) {
+          $column_names[] = $attributes['column'];
+          if (in_array($attributes['type'], array('int', 'mediumint', 'tinyint', 'bigint', 'float'))) {
+            $column_placeholders_default[] = '%d';
+            $column_assignments_default[] = $attributes['column'] .' = %d';
+          }
+          else {
+            $column_placeholders_default[] = "'%s'";
+            $column_assignments_default[] = $attributes['column'] ." = '%s'";
           }
         }
-        if (db_result(db_query('SELECT COUNT(*) FROM {'. $new_db_info['table'] .'} WHERE vid = %d AND nid = %d', $data['vid'], $data['nid']))) {
-          db_query('UPDATE {'. $new_db_info['table'] .'} SET '. implode(', ', $column_assignments) .' WHERE vid = %d AND nid = %d', $data);
+        if ($previous_field['multiple']) {
+          $result = db_query('SELECT '. implode(', ', $column_names) .', vid, nid FROM {'. $previous_db_info['table'] .'} WHERE delta = 0');
         }
         else {
-          db_query('INSERT INTO {'. $new_db_info['table'] .'} ('. implode(', ', $column_names) .', vid, nid) VALUES ('. implode(', ', $column_placeholders) .', %d, %d)', $data);
+          $result = db_query('SELECT '. implode(', ', $column_names) .', vid, nid FROM {'. $previous_db_info['table'] .'}');
         }
+        while ($data = db_fetch_array($result)) {
+          $column_assignments = $column_assignments_default;
+          $column_placeholders = $column_placeholders_default;
+          // search for NULL values and replace assignments and placeholders accordingly
+          foreach ($data as $key => $value) {
+            if (is_null($value)) {
+              $pos = array_search($key, $column_names);
+              $column_assignments[$pos] = $key ."= %s";
+              $column_placeholders[$pos] = "%s";
+              $data[$key] = 'NULL';
+            }
+          }
+          if (db_result(db_query('SELECT COUNT(*) FROM {'. $new_db_info['table'] .'} WHERE vid = %d AND nid = %d', $data['vid'], $data['nid']))) {
+            db_query('UPDATE {'. $new_db_info['table'] .'} SET '. implode(', ', $column_assignments) .' WHERE vid = %d AND nid = %d', $data);
+          }
+          else {
+            db_query('INSERT INTO {'. $new_db_info['table'] .'} ('. implode(', ', $column_names) .', vid, nid) VALUES ('. implode(', ', $column_placeholders) .', %d, %d)', $data);
+          }
+        }
+        db_query('DROP TABLE {'. $previous_db_info['table'] .'}');
       }
-      db_query('DROP TABLE {'. $previous_db_info['table'] .'}');
     }
   }
 }

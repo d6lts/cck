@@ -66,6 +66,9 @@ function content_views_tables() {
         $table['sorts'][$main_column['column']] = array(
           'name' => $field_types[$field['type']]['label'] .': '. $field['widget']['label'] .' ('. $field['field_name'] .')',
           'field' => $main_column['column'],
+          'content_db_info' => $db_info,
+          'content_field' => $field,
+          'content_field_module' => $module,
         );
       }
 
@@ -82,6 +85,9 @@ function content_views_tables() {
           $init = array(
             'name' => $name,
             'field' => $main_column['column'],
+            'content_db_info' => $db_info,
+            'content_field' => $field,
+            'content_field_module' => $module,
           );
           $table['filters'][$main_column['column'] .'_'. $key] = array_merge($filter, $init);
         }
@@ -250,30 +256,53 @@ function content_views_argument_handler($op, &$query, $argtype, $arg = '') {
 }
 
 /**
- * Rebuild the cached queries for the views using a given field
- * used when a field changes its 'multiple' status
- * plus helper function for updates
+ * Rebuild the cached queries for the views using a given field.
+ * Called when a field changes its 'multiple' status.
+ * Can also be useful for updates.
  *
  * @param unknown_type $update_fields
  */
+
 function _content_views_rebuild_views($update_fields) {
+  $updated_views = array();
   views_load_cache();
-  $tables = _views_get_tables();
+  $tables = _views_get_tables(true);
   $result = db_query("SELECT name, query FROM {view_view} ORDER BY name");
+  // TODO : do we have to do that for default views as well ?
   while ($row = db_fetch_array($result)) {
     // if a query has been stored for the view
     if (!empty($row['query'])) {
       $view = views_get_view($row['name']);
-      // TODO : check for arguments / sorts / filters as well ?
+      $view_content_fields = array();
+
       foreach ($view->field as $field) {
-        // if the view contains one of the fields that require updating
-        $field_info = $tables[$field['tablename']]['fields'][$field['field']];
-        if (isset($field_info['content_field']) && in_array($field_info['content_field']['field_name'], $update_fields)) {
-          // re-save the view (forces the query to be updated)
-          _views_save_view($view);
-          break;
+        $info = $tables['fields']['base'][$field['fullname']];
+        if (isset($info['content_field'])) {
+          $view_content_fields[] = $info['content_field']['field_name'];
         }
+      }
+
+      foreach ($view->filter as $filter) {
+        $info = $tables['filters']['base'][$filter['field']];
+        if (isset($info['content_field'])) {
+          $view_content_fields[] = $info['content_field']['field_name'];
+        }
+      }
+
+      foreach ($view->sort as $sort) {
+        $info = $tables['sorts']['base'][$sort['field']];
+        if (isset($info['content_field'])) {
+          $view_content_fields[] = $info['content_field']['field_name'];
+        }
+      }
+
+      // no need to check arguments : a view with arguments is not cacheable
+
+      if (count(array_intersect($view_content_fields, $update_fields))) {
+        _views_save_view($view);
+        $updated_views[] = $view->name;
       }
     }
   }
+  return $updated_views;
 }
