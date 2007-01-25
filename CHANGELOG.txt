@@ -5,14 +5,34 @@
 
 Features
 --------
+
+General
 - 108755  Add group name in the 'class' attributes of groups fieldsets
 - 107128  Added teasers / full nodes support in an overview form for display settings
+-         Reworked theming example and instructions accordingly
+-         Removed hook_field('view') for core field modules
+          (default 'view' op is now handled in content.module)
+
+Field / widget modules
+- 108302  Number : Add formatters for numbers (+ be sure non-numeric data is not stored)
+- 110570  Number : add prefix and suffix option
+- 112464  Standardize validation in field rather than widget, 
+          Standardize use of $items rather than $node_field
 
 Bugfix
 ------
-- 107667  Added missing '#size' for mutliple select widgets (display issues with Opera)
+
+General
 - 108094  Real fix for "text columns are not allowed defaults values with MySQL" ?
 - 108914  Fixed error when several fieldgroups have the same name
+- 105787  (critical) move data tables from 'node_*' to 'content_*'
+          to avoid possible clashes with core 'node_*' tables
+- 111276  Fixed link to module page in warning message when no field module is enabled
+-         Remove deprecated help text in fieldgroup.module
+- 109863  Fixed table name error in content.install (4.7 upgrade path)
+
+Field / widget modules
+- 107667  Added missing '#size' for mutliple select widgets (display issues with Opera)
 
 5--1.2
 ======
