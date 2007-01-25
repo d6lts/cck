@@ -936,9 +936,9 @@ function content_alter_db_field($previous_field, $previous_columns, $new_field, 
 
           case 'pgsql':
             db_query("CREATE TABLE {". $new_db_info['table'] ."} (
-                vid integer unsigned NOT NULL default '0',
-                delta integer unsigned NOT NULL default '0',
-                nid integer unsigned NOT NULL default '0',
+                vid int_unsigned NOT NULL default '0',
+                delta int_unsigned NOT NULL default '0',
+                nid int_unsigned NOT NULL default '0',
                 PRIMARY KEY (vid,delta)
               )");
             break;
@@ -957,8 +957,8 @@ function content_alter_db_field($previous_field, $previous_columns, $new_field, 
 
           case 'pgsql':
             db_query("CREATE TABLE {". $new_db_info['table'] ."} (
-                vid integer unsigned NOT NULL default '0',
-                nid integer unsigned NOT NULL default '0',
+                vid int_unsigned NOT NULL default '0',
+                nid int_unsigned NOT NULL default '0',
                 PRIMARY KEY (vid)
               )");
             break;
@@ -1020,9 +1020,9 @@ function content_alter_db_field($previous_field, $previous_columns, $new_field, 
 
               case 'pgsql':
                 db_query("CREATE TABLE {". $new_db_info['table'] ."} (
-                  vid integer unsigned NOT NULL default '0',
-                  delta integer unsigned NOT NULL default '0',
-                  nid integer unsigned NOT NULL default '0',
+                  vid int_unsigned NOT NULL default '0',
+                  delta int_unsigned NOT NULL default '0',
+                  nid int_unsigned NOT NULL default '0',
                   PRIMARY KEY (vid,delta)
                 )");
                 break;
@@ -1042,8 +1042,8 @@ function content_alter_db_field($previous_field, $previous_columns, $new_field, 
 
                 case 'pgsql':
                   db_query("CREATE TABLE {". $new_db_info['table'] ."} (
-                    vid integer unsigned NOT NULL default '0',
-                    nid integer unsigned NOT NULL default '0',
+                    vid int_unsigned NOT NULL default '0',
+                    nid int_unsigned NOT NULL default '0',
                     PRIMARY KEY (vid)
                   )");
                   break;
@@ -1190,7 +1190,14 @@ function content_db_add_column($table, $column, $type, $attributes = array()) {
     $type .= '('. $attributes['length'] .')';
   }
   if (array_key_exists('unsigned', $attributes) && $attributes['unsigned']) {
-    $type .= ' unsigned';
+    switch ($GLOBALS['db_type']) {
+  	  case 'pgsql':
+  	    $type = str_replace('integer', 'int_unsigned', $type);
+  	    break;
+  	  default:
+        $type .= ' unsigned';
+        break;
+    }
   }
 
   switch ($GLOBALS['db_type']) {
@@ -1283,7 +1290,14 @@ function content_db_change_column($table, $column, $column_new, $type, $attribut
     $type .= '('. $attributes['length'] .')';
   }
   if (array_key_exists('unsigned', $attributes) && $attributes['unsigned']) {
-    $type .= ' unsigned';
+    switch ($GLOBALS['db_type']) {
+  	  case 'pgsql':
+  	    $type = str_replace('integer', 'int_unsigned', $type);
+  	    break;
+  	  default:
+        $type .= ' unsigned';
+        break;
+    }
   }
 
   switch ($GLOBALS['db_type']) {
