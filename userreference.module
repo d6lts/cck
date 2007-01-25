@@ -56,10 +56,18 @@ function userreference_field_settings($op, $field) {
 /**
  * Implementation of hook_field().
  */
-//function userreference_field($op, &$node, $field, &$items, $teaser, $page) {
-//  switch ($op) {
-//  }
-//}
+function userreference_field($op, &$node, $field, &$items, $teaser, $page) {
+  switch ($op) {
+    case 'validate':
+      foreach ($items as $delta => $item) {
+        $error_field = $field['field_name'].']['.$delta.'][user_name';
+        if ($item['user_name'] && !in_array($item['user_name'], _userreference_potential_references($field))) {
+          form_set_error($error_field, t('Invalid user name.'));
+        }
+      }
+      return;
+  }
+}
 
 /**
  * Implementation of hook_field_formatter_info().
@@ -117,27 +125,27 @@ function userreference_widget_info() {
 /**
  * Implementation of hook_widget().
  */
-function userreference_widget($op, &$node, $field, &$node_field) {
+function userreference_widget($op, &$node, $field, &$items) {
   if ($field['widget']['type'] == 'userreference_select') {
     switch ($op) {
       case 'prepare form values':
-        $node_field_transposed = content_transpose_array_rows_cols($node_field);
+        $items_transposed = content_transpose_array_rows_cols($items);
         // get rid of null values
-        $node_field['default uids'] = array_filter((array) $node_field_transposed['uid']);
+        $items['default uids'] = array_filter((array) $items_transposed['uid']);
         break;
 
       case 'form':
         $form = array();
 
         $options = _userreference_potential_references($field);
-        if (empty($node_field['default uids'])) {
-          $node_field['default uids'][] = 'none';
+        if (empty($items['default uids'])) {
+          $items['default uids'][] = 'none';
         }
         $form[$field['field_name']] = array('#tree' => TRUE);
         $form[$field['field_name']]['uids'] = array(
           '#type' => 'select',
           '#title' => t($field['widget']['label']),
-          '#default_value' => $node_field['default uids'],
+          '#default_value' => $items['default uids'],
           '#multiple' => $field['multiple'],
           '#size' => min(count($options), 6),
           '#options' => $options,
@@ -150,27 +158,27 @@ function userreference_widget($op, &$node, $field, &$node_field) {
       case 'process form values':
         if ($field['multiple']) {
           // drop the 'none' option
-          unset($node_field['uids']['none']);
-          if (!empty($node_field['uids'])) {
-            $node_field = content_transpose_array_rows_cols(array('uid' => $node_field['uids']));
+          unset($items['uids']['none']);
+          if (!empty($items['uids'])) {
+            $items = content_transpose_array_rows_cols(array('uid' => $items['uids']));
           }
           else {
-            $node_field[0]['uid'] = '';
+            $items[0]['uid'] = '';
           }
         }
         else {
-          $node_field[0]['uid'] = ($node_field['uids'] != 'none') ? $node_field['uids'] : '';
+          $items[0]['uid'] = ($items['uids'] != 'none') ? $items['uids'] : '';
         }
         // Remove the widget's data representation so it isn't saved.
-        unset($node_field['uids']);
+        unset($items['uids']);
     }
   }
   else {
     switch ($op) {
       case 'prepare form values':
-        foreach ($node_field as $delta => $item) {
-          if (!empty($node_field[$delta]['uid'])) {
-            $node_field[$delta]['default user_name'] = db_result(db_query("SELECT name FROM {users} WHERE uid = '%d'", $node_field[$delta]['uid']));
+        foreach ($items as $delta => $item) {
+          if (!empty($items[$delta]['uid'])) {
+            $items[$delta]['default user_name'] = db_result(db_query("SELECT name FROM {users} WHERE uid = '%d'", $items[$delta]['uid']));
           }
         }
         break;
@@ -183,7 +191,7 @@ function userreference_widget($op, &$node, $field, &$node_field) {
           $form[$field['field_name']]['#type'] = 'fieldset';
           $form[$field['field_name']]['#description'] = $field['widget']['description'];
           $delta = 0;
-          foreach ($node_field as $item) {
+          foreach ($items as $item) {
             if ($item['uid']) {
               $form[$field['field_name']][$delta]['user_name'] = array(
                 '#type' => 'textfield',
@@ -210,34 +218,26 @@ function userreference_widget($op, &$node, $field, &$node_field) {
             '#type' => 'textfield',
             '#title' => t($field['widget']['label']),
             '#autocomplete_path' => 'user/autocomplete',
-            '#default_value' => $node_field[0]['default user_name'],
+            '#default_value' => $items[0]['default user_name'],
             '#required' => $field['required'],
             '#description' => $field['widget']['description'],
           );
         }
         return $form;
 
-      case 'validate':
-        foreach ($node_field as $delta => $item) {
-          $error_field = $field['field_name'].']['.$delta.'][user_name';
-          if ($item['user_name'] && !in_array($item['user_name'], _userreference_potential_references($field))) {
-            form_set_error($error_field, t('Invalid user name.'));
-          }
-        }
-        return;
-
       case 'process form values':
-        foreach ($node_field as $delta => $item) {
+        foreach ($items as $delta => $item) {
           $uid = '';
-          if (!empty($node_field[$delta]['user_name'])) {
-            $uid = db_result(db_query("SELECT uid FROM {users} WHERE name = '%s'", $node_field[$delta]['user_name']));
+          if (!empty($items[$delta]['user_name'])) {
+            $uid = db_result(db_query("SELECT uid FROM {users} WHERE name = '%s'", $items[$delta]['user_name']));
           }
           // Remove the widget's data representation so it isn't saved.
-          unset($node_field[$delta]['user_name']);
-          $node_field[$delta]['uid'] = $uid;
+          unset($items[$delta]['user_name']);
+          $items[$delta]['uid'] = $uid;
           // Don't save empty fields except the first value
+
           if (empty($uid) && $delta > 0) {
-            unset($node_field[$delta]);
+            unset($items[$delta]);
           }
         }
     }

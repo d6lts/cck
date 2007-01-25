@@ -95,10 +95,36 @@ function nodereference_field_settings($op, $field) {
 /**
  * Implementation of hook_field().
  */
-//function nodereference_field($op, &$node, $field, &$items, $teaser, $page) {
-//  switch ($op) {
-//  }
-//}
+function nodereference_field($op, &$node, $field, &$items, $teaser, $page) {
+  switch ($op) {
+    case 'validate':
+      foreach ($items as $delta => $item) {
+        $error_field = $field['field_name'].']['.$delta.'][node_name';
+        if (!empty($item['node_name'])) {
+          preg_match('/^(?:\s*|(.*) )?\[\s*nid\s*:\s*(\d+)\s*\]$/', $item['node_name'], $matches);
+          if (!empty($matches)) {
+            // explicit nid
+            list(, $title, $nid) = $matches;
+            $refs = _nodereference_potential_references($field, TRUE);
+            if (!in_array($nid, array_keys($refs))) {
+              form_set_error($error_field, t('This post can\'t be referenced.'));
+            }
+            elseif (!empty($title) && ($n = $refs[$nid]) && $title != $n->node_title) {
+              form_set_error($error_field, t('Title mismatch. Please reiterate your selection.'));
+            }
+          }
+          else {
+            // no explicit nid
+            $refs = _nodereference_potential_references($field, FALSE, $item['node_name'], TRUE);
+            if (empty($refs)) {
+              form_set_error($error_field, t('No post with that title can be referenced.'));
+            }
+          }
+        }
+      }
+      return;
+  }
+}
 
 /**
  * Implementation of hook_field_formatter_info().
@@ -156,12 +182,12 @@ function nodereference_widget_info() {
 /**
  * Implementation of hook_widget().
  */
-function nodereference_widget($op, &$node, $field, &$node_field) {
+function nodereference_widget($op, &$node, $field, &$items) {
   if ($field['widget']['type'] == 'nodereference_select') {
     switch ($op) {
       case 'prepare form values':
-        $node_field_transposed = content_transpose_array_rows_cols($node_field);
-        $node_field['default nids'] = $node_field_transposed['nid'];
+        $items_transposed = content_transpose_array_rows_cols($items);
+        $items['default nids'] = $items_transposed['nid'];
         break;
 
       case 'form':
@@ -179,7 +205,7 @@ function nodereference_widget($op, &$node, $field, &$node_field) {
         $form[$field['field_name']]['nids'] = array(
           '#type' => 'select',
           '#title' => t($field['widget']['label']),
-          '#default_value' => $node_field['default nids'],
+          '#default_value' => $items['default nids'],
           '#multiple' => $field['multiple'],
           '#size' => min(count($options), 6),
           '#options' => $options,
@@ -192,30 +218,30 @@ function nodereference_widget($op, &$node, $field, &$node_field) {
       case 'process form values':
         if ($field['multiple']) {
           // if nothing selected, make it 'none'
-          if (empty($node_field['nids'])) {
-            $node_field['nids'] = array(0 => '0');
+          if (empty($items['nids'])) {
+            $items['nids'] = array(0 => '0');
           }
           // drop the 'none' options if other items were also selected
-          elseif (count($node_field['nids']) > 1) {
-            unset($node_field['nids'][0]);
+          elseif (count($items['nids']) > 1) {
+            unset($items['nids'][0]);
           }
 
-          $node_field = content_transpose_array_rows_cols(array('nid' => $node_field['nids']));
+          $items = content_transpose_array_rows_cols(array('nid' => $items['nids']));
         }
         else {
-          $node_field[0]['nid'] = $node_field['nids'];
+          $items[0]['nid'] = $items['nids'];
         }
         // Remove the widget's data representation so it isn't saved.
-        unset($node_field['nids']);
+        unset($items['nids']);
     }
   }
   else {
     switch ($op) {
       case 'prepare form values':
-        foreach ($node_field as $delta => $item) {
-          if (!empty($node_field[$delta]['nid'])) {
-            $node_field[$delta]['default node_name'] = db_result(db_query(db_rewrite_sql('SELECT n.title FROM {node} n WHERE n.nid = %d'), $node_field[$delta]['nid']));
-            $node_field[$delta]['default node_name'] .= ' [nid:'. $node_field[$delta]['nid'] .']';
+        foreach ($items as $delta => $item) {
+          if (!empty($items[$delta]['nid'])) {
+            $items[$delta]['default node_name'] = db_result(db_query(db_rewrite_sql('SELECT n.title FROM {node} n WHERE n.nid = %d'), $items[$delta]['nid']));
+            $items[$delta]['default node_name'] .= ' [nid:'. $items[$delta]['nid'] .']';
           }
         }
         break;
@@ -228,7 +254,7 @@ function nodereference_widget($op, &$node, $field, &$node_field) {
           $form[$field['field_name']]['#type'] = 'fieldset';
           $form[$field['field_name']]['#description'] = $field['widget']['description'];
           $delta = 0;
-          foreach ($node_field as $item) {
+          foreach ($items as $item) {
             if ($item['nid']) {
               $form[$field['field_name']][$delta]['node_name'] = array(
                 '#type' => 'textfield',
@@ -255,42 +281,15 @@ function nodereference_widget($op, &$node, $field, &$node_field) {
             '#type' => 'textfield',
             '#title' => t($field['widget']['label']),
             '#autocomplete_path' => 'nodereference/autocomplete/'. $field['field_name'],
-            '#default_value' => $node_field[0]['default node_name'],
+            '#default_value' => $items[0]['default node_name'],
             '#required' => $field['required'],
             '#description' => $field['widget']['description'],
           );
         }
         return $form;
 
-      case 'validate':
-        foreach ($node_field as $delta => $item) {
-          $error_field = $field['field_name'].']['.$delta.'][node_name';
-          if (!empty($item['node_name'])) {
-            preg_match('/^(?:\s*|(.*) )?\[\s*nid\s*:\s*(\d+)\s*\]$/', $item['node_name'], $matches);
-            if (!empty($matches)) {
-              // explicit nid
-              list(, $title, $nid) = $matches;
-              $refs = _nodereference_potential_references($field, TRUE);
-              if (!in_array($nid, array_keys($refs))) {
-                form_set_error($error_field, t('This post can\'t be referenced.'));
-              }
-              elseif (!empty($title) && ($n = $refs[$nid]) && $title != $n->node_title) {
-                form_set_error($error_field, t('Title mismatch. Please reiterate your selection.'));
-              }
-            }
-            else {
-              // no explicit nid
-              $refs = _nodereference_potential_references($field, FALSE, $item['node_name'], TRUE);
-              if (empty($refs)) {
-                form_set_error($error_field, t('No post with that title can be referenced.'));
-              }
-            }
-          }
-        }
-        return;
-
       case 'process form values':
-        foreach ($node_field as $delta => $item) {
+        foreach ($items as $delta => $item) {
           $nid = 0;
           if (!empty($item['node_name'])) {
             preg_match('/^(?:\s*|(.*) )?\[\s*nid\s*:\s*(\d+)\s*\]$/', $item['node_name'], $matches);
@@ -309,13 +308,13 @@ function nodereference_widget($op, &$node, $field, &$node_field) {
             }
           }
           if (!empty($nid)) {
-            $node_field[$delta]['nid'] = $nid;
+            $items[$delta]['nid'] = $nid;
             // Remove the widget's data representation so it isn't saved.
-            unset($node_field[$delta]['node_name']);
+            unset($items[$delta]['node_name']);
           }
           else {
             // Don't save empty fields when they're not the first value (keep '0' otherwise)
-            if ($delta > 0) {unset($node_field[$delta]);}
+            if ($delta > 0) {unset($items[$delta]);}
           }
         }
         break;
