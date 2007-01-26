@@ -230,7 +230,7 @@ function content_delete(&$node) {
     _content_field_invoke('delete', $node);
     _content_field_invoke_default('delete', $node);
   }
-  $table = _content_tablename($type['name'], CONTENT_DB_STORAGE_PER_CONTENT_TYPE);
+  $table = _content_tablename($type['type'], CONTENT_DB_STORAGE_PER_CONTENT_TYPE);
   if (db_table_exists($table)) {
     db_query('DELETE FROM {'. $table .'} WHERE nid = %d', $node->nid);
   }
@@ -246,7 +246,7 @@ function content_delete_revision(&$node) {
     _content_field_invoke('delete revision', $node);
     _content_field_invoke_default('delete revision', $node);
   }
-  $table = _content_tablename($type['name'], CONTENT_DB_STORAGE_PER_CONTENT_TYPE);
+  $table = _content_tablename($type['type'], CONTENT_DB_STORAGE_PER_CONTENT_TYPE);
   if (db_table_exists($table)) {
     db_query('DELETE FROM {'. $table .'} WHERE vid = %d', $node->vid);
   }
