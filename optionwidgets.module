@@ -21,6 +21,10 @@ function optionwidgets_widget_info() {
       'label' => 'Check boxes/radio buttons',
       'field types' => $option_types,
     ),
+    'options_onoff' => array(
+      'label' => 'Single on/off checkbox',
+      'field types' => $option_types,
+    ),
   );
 }
 
@@ -31,7 +35,13 @@ function optionwidgets_widget_settings($op, $widget) {
   $form = array();
   switch ($op) {
     case 'form':
-      $form['#prefix'] = t('Create a list of options as a list in Allowed values or as an array in Php code at the bottom of this page. These values will be the same for the %field in all content types. The Check boxes/radio buttons widget will display checkboxes if the multiple values option is selected for this field, otherwise radios will be displayed.', array('%field' => $widget['label']));
+      $form['#prefix'] = t('Create a list of options as a list in <strong>Allowed values</strong> or as an array in Php code at the bottom of this page. These values will be the same for the %field in all content types. ', array('%field' => $widget['label']));
+      if ($widget['type'] == 'options_onoff') {
+        $form['#prefix'] .= t(' For a single on/off checkbox, define the \'off\' value first, then the \'on\' value in the <strong>Allowed values</strong> section.');
+      }
+      else {
+        $form['#prefix'] .= t(' The Check boxes/radio buttons widget will display checkboxes if the multiple values option is selected for this field, otherwise radios will be displayed.');
+      }
   }
   return $form;
 }
@@ -53,7 +63,7 @@ function optionwidgets_widget($op, &$node, $field, &$items) {
           $keys[] = $value;
         }
       }
-      if ($field['multiple']) {
+      if ($field['multiple'] || $field['widget']['type'] == 'options_onoff') {
         $items['default keys'] = $keys;
       }
       else {
@@ -96,6 +106,20 @@ function optionwidgets_widget($op, &$node, $field, &$items) {
           }
           break;
 
+        case 'options_onoff':
+          // Display only the 'On' value of $options;
+          $vals = array_keys($options);
+          $on_value = $vals[1];
+          $form[$field['field_name']]['keys'] = array(
+            '#type' => 'checkbox',
+            '#title' => $options[$on_value],
+            '#default_value' => $items['default keys'][0],
+            '#return_value' => $on_value,
+            '#description' => $field['widget']['description'],
+            '#required' => FALSE,
+          );
+          break;
+
         case 'options_buttons':
           if ($field['multiple']) {
             $form[$field['field_name']]['keys'] = array(
@@ -120,14 +144,13 @@ function optionwidgets_widget($op, &$node, $field, &$items) {
           }
           break;
       }
-
       return $form;
 
     case 'process form values':
       $options = _optionwidgets_options($field);
 
-      if ($field['multiple']) {
-        $keys = $items['keys'];
+      if ($field['multiple'] || $field['widget']['type'] == 'options_onoff') {
+        $keys = (array) $items['keys'];
       }
       else {
         $keys = array($items['key']);
@@ -138,6 +161,11 @@ function optionwidgets_widget($op, &$node, $field, &$items) {
         if (isset($options[$key])) {
           $values[] = $key;
         }
+      }
+
+      if ($field['widget']['type'] == 'options_onoff' && empty($values)) {
+        $keys = array_keys($options);
+        $values[] = $keys[0];
       }
 
       $items = content_transpose_array_rows_cols(array('value' => $values));
