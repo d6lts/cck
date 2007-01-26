@@ -57,6 +57,7 @@ function content_install() {
       )");
       break;
   }
+  variable_set('content_schema_version', 1003);
 }
 
 /**
