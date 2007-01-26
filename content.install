@@ -1,5 +1,4 @@
-<?php
-// $Id$
+<?php// $Id$
 
 /**
  * Implementation of hook_install().
@@ -200,7 +199,7 @@ function content_update_7() {
   else {
     $table_name = 'node_type_content';
   }
-  $type_result = db_query("SELECT type_name FROM {$table_name} WHERE type_name LIKE 'content-%%'");
+  $type_result = db_query("SELECT type_name FROM {". $table_name ."} WHERE type_name LIKE 'content-%%'");
 
   if (db_num_rows($type_result)) {
     // Multi-part update
@@ -213,7 +212,7 @@ function content_update_7() {
     $old_type_name = $type->type_name;
     $new_type_name = str_replace('content-', 'content_', $old_type_name);
     $ret[] = update_sql("UPDATE {node} SET type = '". $new_type_name ."' WHERE type = '". $old_type_name ."'");
-    $ret[] = update_sql("UPDATE {$table_name} SET type_name = '". $new_type_name ."' WHERE type_name = '". $old_type_name ."'");
+    $ret[] = update_sql("UPDATE {". $table_name ."} SET type_name = '". $new_type_name ."' WHERE type_name = '". $old_type_name ."'");
     $ret[] = update_sql("UPDATE {node_field_instance} SET type_name = '". $new_type_name ."' WHERE type_name = '". $old_type_name ."'");
     $ret[] = update_sql("UPDATE {vocabulary_node_types} SET type = '". $new_type_name ."' WHERE type = '". $old_type_name ."'");
 
