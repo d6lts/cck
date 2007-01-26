@@ -77,10 +77,10 @@ function number_field_settings($op, $field) {
 
     case 'validate':
       if ($field['min'] && !is_numeric($field['min'])) {
-        form_set_error('rows', t('"Minimum" must be a number.'));
+        form_set_error('min', t('"Minimum" must be a number.'));
       }
       if ($field['max'] && !is_numeric($field['max'])) {
-        form_set_error('rows', t('"Maximum" must be a number.'));
+        form_set_error('max', t('"Maximum" must be a number.'));
       }
       break;
 
@@ -161,8 +161,8 @@ function number_field_formatter_info() {
     'us_1'    => array('label' => '9,999.9',          'field types' => array('number_decimal')),
     'us_2'    => array('label' => '9,999.99',         'field types' => array('number_decimal')),
     'be_0'    => array('label' => '9.999',            'field types' => array('number_integer', 'number_decimal')),
-    'be_1'    => array('label' => '9.999, 9',         'field types' => array('number_decimal')),
-    'be_2'    => array('label' => '9.999, 99',        'field types' => array('number_decimal')),
+    'be_1'    => array('label' => '9.999,9',          'field types' => array('number_decimal')),
+    'be_2'    => array('label' => '9.999,99',         'field types' => array('number_decimal')),
     'fr_0'    => array('label' => '9 999',            'field types' => array('number_integer', 'number_decimal')),
     'fr_1'    => array('label' => '9 999, 9',         'field types' => array('number_decimal')),
     'fr_2'    => array('label' => '9 999, 99',        'field types' => array('number_decimal')),
@@ -220,7 +220,7 @@ function number_field_formatter($field, $item, $formatter, $node) {
     $value = number_format($item['value'], 2, ', ', ' ');
     break;
   default:
-    $value = number_format($item['value']);
+    $value = ($item['value']);
     break;
   }
   $prefixes = explode('|', $field['prefix']);
@@ -341,7 +341,7 @@ function number_widget($op, &$node, $field, &$items) {
     case 'process form values':
       // Don't save empty fields.
       foreach ($items as $delta => $item) {
-        $items[$delta]['value'] = preg_replace('@[^0-9\.]@','',$items[$delta]['value']);
+        $items[$delta]['value'] = preg_replace('@[^-0-9\.]@','',$items[$delta]['value']);
       }
       if ($field['multiple']) {
         foreach ($items as $delta => $item) {
