@@ -360,11 +360,11 @@ function content_update_1003() {
     switch ($GLOBALS['db_type']) {
       case 'mysql':
       case 'mysqli':
-        $ret[] = update_sql("RENAME TABLE {$old_name} TO {$new_name}");
+        $ret[] = update_sql("RENAME TABLE {". $old_name ."} TO {". $new_name ."}");
         break;
 
       case 'pgsql':
-        $ret[] = update_sql("ALTER TABLE {$old_name} RENAME TO {$new_name}");
+        $ret[] = update_sql("ALTER TABLE {". $old_name ."} RENAME TO {". $new_name ."}");
         break;
     }
   }
