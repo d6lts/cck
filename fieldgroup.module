@@ -228,7 +228,7 @@ function fieldgroup_groups($content_type = '', $sorted = FALSE, $reset = FALSE) 
       $result = db_query("SELECT nfi.*, ng.group_name FROM {node_group} ng ".
                          "INNER JOIN {node_group_fields} ngf ON ngf.type_name = ng.type_name AND ngf.group_name = ng.group_name ".
                          "INNER JOIN {node_field_instance} nfi ON nfi.field_name = ngf.field_name AND nfi.type_name = ngf.type_name ".
-                         "ORDER BY fi.weight");
+                         "ORDER BY nfi.weight");
       while ($field = db_fetch_array($result)) {
         $groups[$field['type_name']][$field['group_name']]['fields'][$field['field_name']] = $field;
       }
