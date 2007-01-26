@@ -202,13 +202,13 @@ function number_field_formatter($field, $item, $formatter, $node) {
     $value = number_format($item['value'], 2, '.', ',');
     break;
   case 'be_0':
-    $value = number_format($item['value'], 0, ', ', ' ');
+    $value = number_format($item['value'], 0, ',', ' ');
     break;
   case 'be_1':
-    $value = number_format($item['value'], 1, ', ', '.');
+    $value = number_format($item['value'], 1, ',', '.');
     break;
   case 'be_2':
-    $value = number_format($item['value'], 2, ', ', '.');
+    $value = number_format($item['value'], 2, ',', '.');
     break;
   case 'fr_0':
     $value = number_format($item['value'], 0, ', ', ' ');
