@@ -79,11 +79,11 @@ function content_type_update($info) {
       switch ($GLOBALS['db_type']) {
         case 'mysql':
         case 'mysqli':
-          db_query("RENAME TABLE {$old_name} TO {$new_name}");
+          db_query("RENAME TABLE {". $old_name ."} TO {". $new_name ."}");
           break;
 
         case 'pgsql':
-          db_query("ALTER TABLE {$old_name} RENAME TO {$new_name}");
+          db_query("ALTER TABLE {". $old_name ."} RENAME TO {". $new_name ."}");
           break;
       }
       drupal_set_message(t('Content fields table %old_name has been renamed to %new_name and field instances have been updated.', array('%old_name' => $old_name, '%new_name' => $new_name)));
