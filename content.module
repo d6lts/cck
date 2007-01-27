@@ -609,6 +609,11 @@ function _content_widget_invoke($op, &$node) {
       $module = $widget_types[$field['widget']['type']]['module'];
       $function = $module .'_widget';
       if (function_exists($function)) {
+        // If we're building a node creation form, pre-fill with default values
+        if ($op == 'prepare form values' && empty($node->nid)) {
+          $node_field = array_merge($node_field, content_default_value($node, $field, $node_field));
+        }
+
         $result = $function($op, $node, $field, $node_field);
         if (is_array($result) && $op == 'form') {
           $result[$field['field_name']]['#weight'] = $field['widget']['weight'];
@@ -1016,3 +1021,75 @@ function _content_tablename($name, $entity, $version = NULL) {
   }
 }
 
+/**
+ *  Helper function for determining if fields are handling default values.
+ *
+ *  @param $field
+ *    The field array, including widget info.
+ *  @param $exclude
+ *    An array of modules that have problems with content module handling of default values.
+ *    Useful if there are known problems and users might be using
+ *    older versions that have not yet been updated with proper callbacks.
+ * @return
+ *    none    - do nothing about default value handling.
+ *    module  - use the module's callback function.
+ *    handle  - content module handles the default value.
+ *
+ * @todo
+ *    eliminate $exclude handling once properly updated code is widely used.
+ */
+function content_handle_default_values($field) {
+
+  $exclude = array('computed_field', 'imagefield', 'filefield');
+
+  $db_info = _content_widget_types();
+  $module = $db_info[$field['widget']['type']]['module'];
+  $callbacks = module_invoke($module, 'widget_settings', 'callbacks', $field);
+  if (isset($callbacks['default_value']) || $callbacks['default_value']) {
+    return 'module';
+  }
+  elseif (in_array($module, $exclude)) {
+    return 'none';
+  }
+  else {
+    return 'handle';
+  }
+}
+
+/**
+ *  Helper function to return the correct default value for a field.
+ *
+ *  @param $field
+ *    The field array.
+ *
+ *  @return
+ *    The default value for that field.
+ */
+function content_default_value($node, $field, $items, $delta = NULL) {
+  $db_info = _content_widget_types();
+  $module = $db_info[$field['widget']['type']]['module'];
+
+  $default_value = array();
+  if (content_handle_default_values($field) == 'module') {
+    $function = $module .'_widget';
+    $default_value = $function('default value', $node, $field, $items, $delta);
+  }
+  elseif (!empty($field['widget']['default_value_php'])) {
+    ob_start();
+    $result = eval($field['widget']['default_value_php']);
+    if (is_array($result)) {
+      $default_value = $result;
+    }
+    ob_end_clean();
+  }
+  elseif (!empty($field['widget']['default_value'])) {
+    $default_value = $field['widget']['default_value'];
+  }
+
+  if (is_null($delta)) {
+    return (array) $default_value;
+  }
+  else {
+    return isset($default_value[$delta]) ? $default_value[$delta] : array();
+  }
+}

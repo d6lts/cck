@@ -763,6 +763,43 @@ function _content_admin_field($type_name, $field_name) {
     '#required' => FALSE,
   );
 
+  // Add handling for default value if not provided by field.
+  if (content_handle_default_values($field) == 'handle') {
+    $form['widget']['default_value_fieldset'] = array(
+      '#type' => 'fieldset',
+      '#title' => t('Default value'),
+      '#collapsible' => TRUE,
+      '#collapsed' => TRUE,
+    );
+    $default_value = is_array($field['widget']['default_value']) ? $field['widget']['default_value'] : array();
+    $module = $widget_types[$field['widget']['type']]['module'];
+    $function = $module .'_widget';
+    if (function_exists($function)) {
+      $node = array(); // TODO are there things we need to add in here ?
+      $function('prepare form values', $node, $field, $default_value);
+      $form_element = $function('form', $node, $field, $default_value);
+    }
+    else {
+      // TODO : generate a series of textfields ?
+      // why would a widget not have a hook_widget implementation ?
+    }
+    $form['widget']['default_value_fieldset'] = array_merge($form['widget']['default_value_fieldset'], $form_element);
+    $form['widget']['default_value_fieldset']['advanced_options'] = array(
+      '#type' => 'fieldset',
+      '#title' => t('Php code'),
+      '#collapsible' => TRUE,
+      '#collapsed' => !isset($field['widget']['default_value_php']),
+    );
+    $form['widget']['default_value_fieldset']['advanced_options']['default_value_php'] = array(
+      '#type' => 'textarea',
+      '#title' => t('Code'),
+      '#default_value' => $field['widget']['default_value_php'],
+      '#rows' => 6,
+      '#tree' => TRUE,
+      '#description' => t('Advanced Usage Only: PHP code that returns a default value. Should not include &lt;?php ?&gt; delimiters.<br/>If this field is filled out, the value returned by this code will override any value in the textfield above.'),
+    );
+  }
+
   $form['field'] = array(
     '#type' => 'fieldset',
     '#title' => t('Data settings'),
@@ -820,12 +857,79 @@ function _content_admin_field_validate($form_id, $form_values) {
 
   module_invoke($widget_type['module'], 'widget_settings', 'validate', array_merge($field, $form_values));
   module_invoke($field_type['module'], 'field_settings', 'validate', array_merge($field, $form_values));
+
+  // If the content module is handling the default value,
+  // validate the result using the field validation.
+  if (content_handle_default_values($field) == 'handle') {
+    if (isset($form_values['default_value_php']) && ($php = trim($form_values['default_value_php']))) {
+      ob_start();
+      $return = eval($php);
+      ob_get_clean();
+      if (!is_array($return)) {
+        $error = TRUE;
+      }
+      else {
+        foreach ($return as $item) {
+          if (!is_array($item)) {
+            $error = TRUE;
+            break;
+          }
+        }
+      }
+      if ($error) {
+        form_set_error('default_value_php', t('The default value php code must return an array like array(0 => array(\'value\' => \'myvalue\')) but returned @value.', array('@value' => print_r($return, true))));
+        return;
+      }
+      else {
+        $default_value = $return;
+        $is_code = TRUE;
+        form_set_value(array('#parents' => array('default_value_php')), $php);
+        form_set_value(array('#parents' => array('default_value')), array());
+      }
+    }
+    else {
+      $default_value = $form_values[$field['field_name']];
+      $is_code = FALSE;
+      form_set_value(array('#parents' => array('default_value_php')), '');
+      form_set_value(array('#parents' => array('default_value')), $default_value);
+    }
+    if (isset($default_value)) {
+      $node = array();
+      $node[$form_values['field_name']] = $default_value;
+      $field['required'] = FALSE;
+      $field_function = $field_type['module'] .'_field';
+      $widget_function = $widget_type['module'] .'_widget';
+
+      // If default_value is created from php code, don't run it through widget processing.
+      // This way the default value code can directly create the correct array without being
+      // mangled by widget processing which sometimes requires an input array in a completely different format.
+      if (function_exists($widget_function) && !$is_code) {
+        $widget_function('validate', $node, $field, $default_value);
+        $widget_function('process form values', $node, $field, $default_value);
+        // The widget processing may have altered the value, save it to be sure.
+        form_set_value(array('#parents' => array('default_value')), $default_value);
+      }
+      if (function_exists($field_function)) {
+        $field_function('validate', $node, $field, $default_value, NULL, NULL);
+      }
+      // The field validation routine won't set an error on the right field, so set it here.
+      if (form_get_errors()) {
+        if (trim($form_values['default_value_php'])) {
+          form_set_error('default_value_php', t('The default value php code created @value which is invalid.', array('@value' => print_r($default_value, true))));
+        }
+        else {
+          form_set_error('default_value', t('The default value is invalid.'));
+        }
+      }
+    }
+  }
 }
 
 /**
  * Save a field's settings after editing.
  */
 function _content_admin_field_submit($form_id, $form_values) {
+
   $type = content_types($form_values['type_name']);
   $field = $type['fields'][$form_values['field_name']];
   $field_types = _content_field_types();
@@ -833,7 +937,15 @@ function _content_admin_field_submit($form_id, $form_values) {
   $widget_types = _content_widget_types();
   $widget_type = $widget_types[$form_values['widget_type']];
 
-  $widget_settings = array();
+  // If the content module is handling the default value,
+  // Initialize $widget_settings with default values,
+  if (content_handle_default_values($field) == 'handle') {
+    $widget_settings = array(
+      'default_value' => $form_values['default_value'],
+      'default_value_php' => $form_values['default_value_php'],
+      );
+  }
+
   $setting_names = module_invoke($widget_type['module'], 'widget_settings', 'save', $field);
   if (is_array($setting_names)) {
     foreach ($setting_names as $setting) {
@@ -1191,15 +1303,14 @@ function content_db_add_column($table, $column, $type, $attributes = array()) {
   }
   if (array_key_exists('unsigned', $attributes) && $attributes['unsigned']) {
     switch ($GLOBALS['db_type']) {
-  	  case 'pgsql':
-  	    $type = str_replace('integer', 'int_unsigned', $type);
-  	    break;
-  	  default:
+      case 'pgsql':
+        $type = str_replace('integer', 'int_unsigned', $type);
+        break;
+      default:
         $type .= ' unsigned';
         break;
     }
   }
-
   switch ($GLOBALS['db_type']) {
     case 'pgsql':
       db_query("ALTER TABLE {". $table ."} ADD $column $type");
@@ -1291,10 +1402,10 @@ function content_db_change_column($table, $column, $column_new, $type, $attribut
   }
   if (array_key_exists('unsigned', $attributes) && $attributes['unsigned']) {
     switch ($GLOBALS['db_type']) {
-  	  case 'pgsql':
-  	    $type = str_replace('integer', 'int_unsigned', $type);
-  	    break;
-  	  default:
+      case 'pgsql':
+        $type = str_replace('integer', 'int_unsigned', $type);
+        break;
+      default:
         $type .= ' unsigned';
         break;
     }
