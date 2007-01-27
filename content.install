@@ -370,6 +370,7 @@ function content_update_1003() {
     }
   }
 
+  variable_set('content_schema_version', 1003);
 
   // regenerate views
   content_clear_type_cache();
@@ -384,7 +385,6 @@ function content_update_1003() {
     }
   }
 
-  variable_set('content_schema_version', 1003);
 
   return $ret;
 }
