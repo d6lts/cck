@@ -1,59 +1,446 @@
-# $Id: ru.po,v 1.1.2.1 2007/01/05 23:33:23 yched Exp $
+# $Id: ru.po,v 1.1.2.1 2007/01/05 23:33:23 maynich Exp $
 #
-# LANGUAGE translation of Drupal (general)
-# Copyright YEAR NAME <EMAIL@ADDRESS>
+# Russian translation of Drupal (content_admin.inc)
+# Copyright 2007 vadbars <vadbars@mail.ru>
+# Generated from file: content_admin.inc,v 1.28.2.14 2007/01/07 03:00:33 yched
+#
+# Russian translation of Drupal (content_copy.module)
+# Copyright 2007 vadbars <vadbars@mail.ru>
+# Generated from file: content_copy.module,v 1.1.2.5 2007/01/07 14:43:32 yched
+#
+# Russian translation of Drupal (fieldgroup.module)
+# Copyright 2007 vadbars <vadbars@mail.ru>
+# Generated from file: fieldgroup.module,v 1.1.4.12 2007/01/09 15:25:03 karens
+#
+# Russian translation of Drupal (general)
+# Copyright 2007 vadbars <vadbars@mail.ru>
 # Generated from files:
 #  field.php,v 1.7.2.3 2007/01/06 16:22:53 yched
-#  text.module,v 1.41.2.5 2007/01/06 17:47:04 yched
-#  number.module,v 1.34.2.5 2007/01/05 20:52:23 yched
+#  text.module,v 1.41.2.7 2007/01/07 16:21:11 yched
+#  number.module,v 1.34.2.6 2007/01/07 14:43:32 yched
 #  content_admin.inc,v 1.28.2.14 2007/01/07 03:00:33 yched
-#  fieldgroup.module,v 1.1.4.10 2007/01/06 16:22:53 yched
-#  content.module,v 1.90.2.21 2007/01/07 03:00:33 yched
-#  content_copy.module,v 1.1.2.4 2007/01/05 20:52:23 yched
-#  nodereference.module,v 1.39.2.2 2007/01/01 16:39:18 yched
-#  userreference.module,v 1.30.2.5 2007/01/05 20:52:23 yched
+#  fieldgroup.module,v 1.1.4.12 2007/01/09 15:25:03 karens
+#  content.module,v 1.90.2.25 2007/01/09 14:54:10 karens
+#  content_copy.module,v 1.1.2.5 2007/01/07 14:43:32 yched
+#  nodereference.module,v 1.39.2.3 2007/01/07 14:43:32 yched
+#  userreference.module,v 1.30.2.6 2007/01/07 14:43:32 yched
 #  content.info,v 1.2.2.2 2007/01/05 11:57:46 yched
+#  content_copy.info,v 1.1.2.4 2007/01/08 13:29:21 karens
 #  fieldgroup.info,v 1.1.2.2 2007/01/05 11:57:46 yched
 #  nodereference.info,v 1.2.2.2 2007/01/05 11:57:46 yched
 #  number.info,v 1.2.2.2 2007/01/05 11:57:46 yched
 #  optionwidgets.info,v 1.2.2.2 2007/01/05 11:57:46 yched
 #  text.info,v 1.2.2.2 2007/01/05 11:57:46 yched
 #  userreference.info,v 1.2.2.2 2007/01/05 11:57:46 yched
+#  extractor.php,v 1.24 2007/01/10 21:45:47 goba
 #  content_crud.inc,v 1.4.2.7 2007/01/07 00:06:36 yched
 #  content_views.inc,v 1.2.2.5 2007/01/05 11:57:46 yched
-#  optionwidgets.module,v 1.10.2.2 2007/01/05 11:57:46 yched
+#  optionwidgets.module,v 1.10.2.3 2007/01/07 14:43:32 yched
 #  optionwidgets.install,v 1.1.4.3 2007/01/05 11:57:46 yched
+#
+# Russian translation of Drupal (nodereference.module)
+# Copyright 2007 vadbars <vadbars@mail.ru>
+# Generated from file: nodereference.module,v 1.39.2.3 2007/01/07 14:43:32 yched
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: CCK 5.x-1.0\n"
-"POT-Creation-Date: 2007-01-07 15:36+0100\n"
-"PO-Revision-Date: 2007-01-27 13:30+0600\n"
+"Project-Id-Version: cck\n"
+"POT-Creation-Date: 2007-01-27 19:44+0500\n"
+"PO-Revision-Date: 2007-01-28 12:56+0600\n"
 "Last-Translator: Maynichev <maynich@gmail.com>\n"
-"Language-Team: Russian <maynich@gmail.com>\n"
+"Language-Team: Russian Drupal Translation Team (RDTT) <translators@drupal.ru>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
 "X-Poedit-Language: Russian\n"
 "X-Poedit-Country: RUSSIAN FEDERATION\n"
 "X-Poedit-SourceCharset: utf-8\n"
-"X-Poedit-Basepath: ../..\n"
-"Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
+
+#: content_admin.inc:15
+msgid "Field name"
+msgstr "Название поля"
+
+#: content_admin.inc:15;413
+msgid "Field type"
+msgstr "Тип поля"
+
+#: content_admin.inc:15
+msgid "Used in"
+msgstr "Используется в"
+
+#: content_admin.inc:68
+msgid "There are no groups configured for this content type."
+msgstr "Нет групп, настроенных для этого типа содержимого."
+
+#: content_admin.inc:78
+msgid "There are no fields configured for this content type."
+msgstr "Нет полей, настроенных для этого типа содержимого."
+
+#: content_admin.inc:101
+msgid "group"
+msgstr "группа"
+
+#: content_admin.inc:104;117;142
+msgid "configure"
+msgstr "настроить"
+
+#: content_admin.inc:105;118;143
+msgid "remove"
+msgstr "удалить"
+
+#: content_admin.inc:156
+msgid "body"
+msgstr "текст"
+
+#: content_admin.inc:177
+msgid "Update"
+msgstr "Обновить"
+
+#: content_admin.inc:202;206
+msgid "Name"
+msgstr "Название"
+
+#: content_admin.inc:202;206
+msgid "Type"
+msgstr "Тип"
 
 #: content_admin.inc:202
-#: ;206;405;643 fieldgroup.module:97
+msgid "Group"
+msgstr "Группа"
+
+#: content_admin.inc:202;206
+msgid "Operations"
+msgstr "Действия"
+
+#: content_admin.inc:270
+msgid "No fields have been added to this group."
+msgstr "Нет полей, добавленных в эту группу."
+
+#: content_admin.inc:275
+msgid "!label (!name)"
+msgstr "!label (!name)"
+
+#: content_admin.inc:311
+msgid "Updated field groups."
+msgstr "Обновлены группы полей."
+
+#: content_admin.inc:322
+msgid "Updated group weights."
+msgstr "Обновлены веса групп."
+
+#: content_admin.inc:333
+msgid "Updated field weights."
+msgstr "Обновлены веса полей."
+
+#: content_admin.inc:367
+msgid "Add existing field"
+msgstr "Добавить существующее поле"
+
+#: content_admin.inc:402
+msgid "Create new field"
+msgstr "Создать новое поле"
+
+#: content_admin.inc:408
+msgid "The human-readable name of this field."
+msgstr "Понятное человеку имя этого поля."
+
+#: content_admin.inc:421
+msgid "Create field"
+msgstr "Создать поле"
+
+#: content_admin.inc:433
+msgid "No field modules are enabled. You need to <a href=\"%modules_url\">enable one</a>, such as text.module, before you can add new fields."
+msgstr "Не включены модули полей. Вам надо <a href=\"%modules_url\">включить их</a>, например, text.module, чтобы иметь возможность добавлять новые поля."
+
+#: content_admin.inc:488
+msgid "Added field %label."
+msgstr "Добавлено поле %label."
+
+#: content_admin.inc:500
+msgid "The field name %field_name already exists."
+msgstr "Имя поля %field_name уже существует."
+
+#: content_admin.inc:504
+msgid "The field name %field_name is invalid."
+msgstr "Название поля %field_name неправильное."
+
+#: content_admin.inc:555
+msgid "Created field %label."
+msgstr "Создано поле %label."
+
+#: content_admin.inc:577
+msgid "Are you sure you want to remove the field %field?"
+msgstr "Вы действительно хотите удалить поле %field?"
+
+#: content_admin.inc:579
+msgid "If you have any content left in this field, it will be lost. This action cannot be undone."
+msgstr "Имеющееся содержание этого поля будет утрачено. Это действие нельзя отменить."
+
+#: content_admin.inc:598
+msgid "Removed field %field from %type."
+msgstr "Поле %field удалено из %type."
+
+#: content_admin.inc:621
+msgid "Widget settings"
+msgstr "Установки элементов выбора"
+
+#: content_admin.inc:622
+msgid "These settings apply only to the %field field as it appears in the %type content type."
+msgstr "Эти настройки относятся только к полю %field, каким оно появляется в типе содержимого %type."
+
+#: content_admin.inc:636
+msgid "Widget"
+msgstr "Элемент"
+
+#: content_admin.inc:660
+msgid "Instructions to present to the user below this field on the editing form."
+msgstr "Инструкции для пользователя, которые будут показаны в форме редактирования."
+
+#: content_admin.inc:666
+msgid "Data settings"
+msgstr "Настройки данных"
+
+#: content_admin.inc:667
+msgid "These settings apply to the %field field in every content type in which it appears."
+msgstr "Эти настройки относятся к полю %field в каждом типе содержимого, в котором оно появляется."
+
+#: content_admin.inc:671
+msgid "Required"
+msgstr "Обязательно"
+
+#: content_admin.inc:676
+msgid "Multiple values"
+msgstr "Множественный выбор"
+
+#: content_admin.inc:687
+msgid "Save field settings"
+msgstr "Сохранить настройки поля"
+
+#: content_admin.inc:765
+msgid "Saved field %field."
+msgstr "Поле %field записано."
+
+#: content_admin.inc:1060;1153
+msgid "No PostgreSQL mapping found for %type data type."
+msgstr "PostgreSQL mapping не найден для типа %type."
+
+#: content_admin.inc:1060;1153
+msgid "database"
+msgstr "база данных"
+
+#: content_copy.module:35
+msgid "Export"
+msgstr "Экспорт"
+
+#: content_copy.module:44
+msgid "Import"
+msgstr "Импорт"
+
+#: content_copy.module:81
+msgid "This form will process a content type and one or more fields from that type and export the settings. The export created by this process can be copied and pasted as an import into the current or any other database. The import will add the fields to into an existing content type or create a new content type that includes the selected fields."
+msgstr "Эта форма обрабатывает тип содержимого и одно или более поле этого типа и экспортирует настройки. Созданные данные экспорта можно скопировать и вставить в текущую или любую другую базу данных. Импорт добавляет поля в существующий тип содержимого или создает новый тип содержимого, который включает выбранные поля."
+
+#: content_copy.module:90
+msgid "Types"
+msgstr "Типы"
+
+#: content_copy.module:94
+msgid "Select the content type to export."
+msgstr "Выберите тип содержимого для экспорта."
+
+#: content_copy.module:119
+msgid "Groups"
+msgstr "Группы"
+
+#: content_copy.module:123
+msgid "Select the group definitions to export from %type."
+msgstr "Выберите определения групп для экспорта из %type."
+
+#: content_copy.module:133
+msgid "Select the field definitions to export from %type."
+msgstr "Выберите определения полей для экспорта из %type."
+
+#: content_copy.module:143
+msgid "Export data"
+msgstr "Экспортировать данные"
+
+#: content_copy.module:148
+msgid "Copy the export text and paste it into another content type using the import function."
+msgstr "Копировать экспортируемый текст и вставить его в другой тип содержимого используя функцию импорта."
+
+#: content_copy.module:158;231
+msgid "Submit"
+msgstr "Отправить"
+
+#: content_copy.module:214
+msgid "This form will import field definitions exported from another content type or another database.<br/>Note that fields cannot be duplicated within the same content type, so imported fields will be added only if they do not already exist in the selected type."
+msgstr "Эта форма позволяет импортировать определения полей из другого типа содержимого или другой базы данных. <br />Обратите внимание, что не должно быть одинаковых полей в одном и том же типе содержимого, поскольку инпортируемые поля добавляются только, если такие не существуют в выбранном типе содержимого."
+
+#: content_copy.module:217
+msgid "<Create>"
+msgstr "<Создать>"
+
+#: content_copy.module:219
+msgid "Content type"
+msgstr "Тип содержимого"
+
+#: content_copy.module:220
+msgid "Select the content type to import these fields into.<br/>Select <Create> to create a new content type to contain the fields."
+msgstr "Выберите типы содержимого для импорта в эти поля.<br/>Выберите <Создать> для создания нового типа содержимого, в котором будут использоваться эти поля."
+
+#: content_copy.module:225
+msgid "Import data"
+msgstr "Импорт данных"
+
+#: content_copy.module:227
+msgid "Paste the text created by a content export into this field."
+msgstr "Вставить в это поле текст, созданный с помощью экспорта."
+
+#: content_copy.module:254
+msgid "The import data is not valid import text."
+msgstr "Импортируемые данные содержат неправильный текст для импорта."
+
+#: content_copy.module:299
+msgid "The following modules must be enabled for this import to work: %modules."
+msgstr "Следующие модули должны быть включены, чтобы работал импорт: %modules."
+
+#: content_copy.module:305;319
+msgid "<create>"
+msgstr "<создать>"
+
+#: content_copy.module:307
+msgid "The content type %type already exists in this database."
+msgstr "Тип содержимого %type уже есть в базе данных."
+
+#: content_copy.module:314
+msgid "Exiting. No import performed."
+msgstr "Выход. Импорт не произведен."
+
+#: content_copy.module:331
+msgid "An error has occured adding the content type %type.<br/>Please check the errors displayed for more details."
+msgstr "Была обнаружена ошибка при добавлении типа содержимого %type.<br/>Подробности в сообщениях об ошибках."
+
+#: content_copy.module:366
+msgid "The imported field %field_label (%field_name) was not added to %type because that field already exists in %type."
+msgstr "Импортируемое поле %field_label (%field_name) не было добавлено в %type, поскольку оно уже существует в  %type."
+
+#: content_copy.module:387;406
+msgid "An error has occured adding the field %field_label (%field_name).<br/>Please check the errors displayed for more details."
+msgstr "Была обнаружена ошибка при добавлении поля %field_label (%field_name).<br/>Подробности в сообщениях об ошибках."
+
+#: content_copy.module:420
+msgid "The field %field_label (%field_name) was added to the content type %type, but an error has occured updating the field settings.<br/>Please check the errors displayed for more details."
+msgstr "Импортируемое поле %field_label (%field_name) было добавлено в %type, но при обновлении поля была обнаружена ошибка.<br/>Подробности в сообщениях об ошибках."
+
+#: fieldgroup.module:19
+msgid "Create and order your groups first. Then assign fields to a group by editing the fields."
+msgstr "Сначала создайте и упорядочите свои группы. Затем распределите поля по группам, путем редактирования полей."
+
+#: fieldgroup.module:33
+msgid "Add group"
+msgstr "Добавить группу"
+
+#: fieldgroup.module:43;51
+msgid "Edit group"
+msgstr "Изменить группу"
+
+#: fieldgroup.module:79
+msgid "Add"
+msgstr "Добавить"
+
+#: fieldgroup.module:86
+msgid "Save"
+msgstr "Сохранить"
+
+#: fieldgroup.module:103
+msgid "Collapsible"
+msgstr "Сворачиваемая"
+
+#: fieldgroup.module:108
+msgid "Collapsed"
+msgstr "Показывать свернутой"
+
+#: fieldgroup.module:117
+msgid "Instructions to present to the user on the editing form."
+msgstr "Инструкции для пользователя, показываемые в форме редактирования."
+
+#: fieldgroup.module:124
+msgid "In the node editing form, the heavier groups will sink and the lighter groups will be positioned nearer the top."
+msgstr "Более легкие группы в форме изменения материала будут всплывать наверх, а тяжелые - опускаться вниз."
+
+#: fieldgroup.module:144
+msgid "The group name %name already exists."
+msgstr "Имя группы %name уже существует."
+
+#: fieldgroup.module:148
+msgid "The group name %name is invalid."
+msgstr "Имя группы %name неверное."
+
+#: fieldgroup.module:202
+msgid "Are you sure you want to remove the group %label?"
+msgstr "Вы уверены, что хотите отменить удаление группы %label?"
+
+#: fieldgroup.module:204
+msgid "This action cannot be undone."
+msgstr "Это действие нельзя отменить."
+
+#: fieldgroup.module:266
+msgid "No group."
+msgstr "Групп нет."
+
+#: fieldgroup.module:308
+msgid "Display in group"
+msgstr "Показывать в группе"
+
+#: fieldgroup.module:311
+msgid "Select a group, in which the field will be displayed on the editing form."
+msgstr "Выберите группу, в которой поле будет показываться в форме редактирования."
+
+#: fieldgroup.module:0
+msgid "fieldgroup"
+msgstr "группа полей"
+
+#: field.php:80
+#: text.module:34
+msgid "Maximum length"
+msgstr "Максимальная длина"
+
+#: field.php:83
+#: text.module:37
+msgid "The maximum length of the field in characters. Leave blank for an unlimited size."
+msgstr "Максимальная длина поля (количество знаков). Оставьте поле пустым для неограниченной длины."
+
+#: field.php:189;199
+#: number.module:131
+#: text.module:124
+msgid "Illegal value for %name."
+msgstr "Неправильное значение для %name."
+
+#: field.php:326
+#: text.module:209
+msgid "Rows"
+msgstr "Колонки"
+
+#: field.php:334
+#: text.module:217
+msgid "\"Rows\" must be a positive integer."
+msgstr "\"Колонок\"должно быть положительным числом."
+
+#: content_admin.inc:202;206;405;643
+#: fieldgroup.module:97
 msgid "Label"
-msgstr "Ярлык"
+msgstr "Заголовок"
 
-#: content_admin.inc:202
-#: ;206 fieldgroup.module:122
+#: content_admin.inc:202;206
+#: fieldgroup.module:122
 msgid "Weight"
 msgstr "Вес"
 
 #: content_admin.inc:376
-#: content.module:82
+#: content.module:81
 msgid "Add field"
-msgstr "Добаввить поле"
+msgstr "Добавить поле"
 
 #: content_admin.inc:580
 #: fieldgroup.module:205
@@ -63,14 +450,14 @@ msgstr "Удалить"
 #: content_admin.inc:580
 #: fieldgroup.module:205
 msgid "Cancel"
-msgstr "Отмена"
+msgstr "Отменить"
 
 #: content_admin.inc:657
 #: fieldgroup.module:114
 msgid "Help text"
 msgstr "Справочный текст"
 
-#: content.module:50
+#: content.module:49
 #: content_copy.module:129
 msgid "Fields"
 msgstr "Поля"
@@ -78,22 +465,22 @@ msgstr "Поля"
 #: nodereference.module:181
 #: userreference.module:256
 msgid "<none>"
-msgstr "<нет>"
+msgstr "нет"
 
 #: number.module:38
 #: text.module:41
 msgid "Allowed values list"
-msgstr "Отрицательные значения запрещены."
+msgstr "Список допустимых значений."
 
 #: number.module:42
 #: text.module:45
 msgid "The possible values this field can contain. Enter one value per line, in the format key|label. The key is the value that will be stored in the database and it must match the field storage type, %type. The label is optional and the key will be used as the label if no label is specified."
-msgstr "Возможные значения, которое это поле может содержать. Вводите по одному значению на строке в формате: key|label. Здесь key - значение, которое будет сохраняться в базе данных и должно соответствовать типу поля %type, а  label - не является обязательным и служит только, как псевдоним."
+msgstr "Значения, которые может принимать полеn. Введите по одному полю на строку в виде key|label. key это значение, которое записывается в базу данных и должно быть типа %type. label - необязательное поле, если его не будет, используется значение key."
 
 #: number.module:46
 #: text.module:49
 msgid "Php code"
-msgstr "PHP код"
+msgstr "Код PHP"
 
 #: number.module:52
 #: text.module:55
@@ -103,7 +490,15 @@ msgstr "Код"
 #: number.module:55
 #: text.module:58
 msgid "Advanced Usage Only: PHP code that returns a keyed array of allowed values. Should not include &lt;?php ?&gt; delimiters. If this field is filled out, the array returned by this code will override the allowed values list above."
-msgstr "Только для продвинутых пользователей: код PHP, который возвращает массив допустимых значений. Не должен содержать  &lt;?php ?&gt; .Если это поле заполнено, значения массива замещают значения из списка."
+msgstr "Только для экспертов: код PHP, который возвращает массив (keyed array) разрешенных значений.  Можно не включать ограничители &lt;?php ?&gt;. Если поле заполнено, то массив, возвращаемый этим кодом, перекроет список разрешенных значений, указанный выше."
+
+#: content.info:0
+msgid "Content"
+msgstr "Содержание"
+
+#: content.info:0
+msgid "Allows administrators to define new content types."
+msgstr "Позволяет администраторам определять новые типы данных."
 
 #: content.info:0
 #: content_copy.info:0
@@ -116,17 +511,116 @@ msgstr "Только для продвинутых пользователей: �
 msgid "CCK"
 msgstr "CCK"
 
+#: content.info:0
+#: content_copy.info:0
+#: fieldgroup.info:0
+#: nodereference.info:0
+#: number.info:0
+#: optionwidgets.info:0
+#: text.info:0
+#: userreference.info:0
+msgid "cck"
+msgstr "cck"
+
+#: content_copy.info:0
+msgid "Content Copy"
+msgstr "Копия содержимого"
+
+#: content_copy.info:0
+msgid "Enables ability to import/export field definitions."
+msgstr "Включает возможность импорта/экспорта определений полей."
+
+#: fieldgroup.info:0
+msgid "Fieldgroup"
+msgstr "Группа полей"
+
+#: fieldgroup.info:0
+msgid "Create field groups for CCK fields."
+msgstr "Создать группу из полей CCK."
+
+#: nodereference.info:0
+msgid "Node Reference"
+msgstr "Связь материала"
+
+#: nodereference.info:0
+msgid "Defines a field type for referencing one node from another."
+msgstr "Определяет тип поля для связи одного материала с другим."
+
+#: number.info:0
+msgid "Number"
+msgstr "Число"
+
+#: number.info:0
+msgid "Defines numeric field types."
+msgstr "Определяет типы числового поля."
+
+#: optionwidgets.info:0
+msgid "Option Widgets"
+msgstr "Выбор опций"
+
+#: optionwidgets.info:0
+msgid "Defines selection, check box and radio button widgets for text and numeric fields."
+msgstr "Определяет выбор, выбор опций или радиокнопки для текстовых и числовых полей."
+
+#: text.info:0
+msgid "Text"
+msgstr "Текст"
+
+#: text.info:0
+msgid "Defines simple text field types."
+msgstr "Определяет типы полец для простого текста."
+
+#: userreference.info:0
+msgid "User Reference"
+msgstr "Ссылка на пользователя"
+
+#: userreference.info:0
+msgid "Defines a field type for referencing a user from a node."
+msgstr "Определяет тип поля для ссылок на пользователя из материала."
+
+#: my_extractor.php:664
+msgid "Help called"
+msgstr "Справочный текст"
+
+#: my_extractor.php:665
+msgid "This is some help"
+msgstr "Здесь какая-нибудь справка"
+
+#: my_extractor.php:664
+msgid "help"
+msgstr "справка"
+
+#: my_extractor.php:660
+msgid "access extrator data"
+msgstr "иметь доступ к данным экстрактора"
+
+#: my_extractor.php:660
+msgid "administer extractor data"
+msgstr "управлять данными экстрактора"
+
+#: my_extractor.php:669
+msgid "extractor-cooltype"
+msgstr "extractor-cooltype"
+
+#: my_extractor.php:669
+msgid "extractor-evencooler"
+msgstr "extractor-evencooler"
+
+#: my_extractor.php:0
+msgid "extractor"
+msgstr "экстрактор"
+
 #: content_crud.inc:60
 msgid "The content fields table %name has been created."
-msgstr "Материал с полями таблищы %name успешно создан."
+msgstr "Таблица полей содержания %name создана."
 
 #: content_crud.inc:90
 msgid "Content fields table %old_name has been renamed to %new_name and field instances have been updated."
-msgstr "Поля таблицы %old_name были переименованы в %new_name и содержимое полей обновлено."
+msgstr "Поля таблицы %old_name переименованы в  %new_name и значения полей обновлены."
 
 #: content_crud.inc:112
 msgid "The content fields table %name has been deleted."
-msgstr ""
+msgstr "Поля таблицы %name удалены."
 
 #: content_views.inc:57
 msgid "Group multiple values"
@@ -136,25 +630,17 @@ msgstr "Группировать множественные значения"
 msgid "Do not group multiple values"
 msgstr "Не группировать множественные значения"
 
-#: content.module:66
+#: content.module:65
 msgid "Edit"
-msgstr "Править"
+msgstr "Изменить"
 
-#: content.module:73
+#: content.module:72
 msgid "Manage fields"
-msgstr "Управление полями"
+msgstr "Управлять полями"
 
-#: content.module:101
+#: content.module:100
 msgid "Remove field"
 msgstr "Удалить поле"
-
-#: content.info:0
-msgid "Content"
-msgstr "Материал"
-
-#: content.info:0
-msgid "Allows administrators to define new content types."
-msgstr "Позволяет администратору определять новые типы материалов."
 
 #: number.module:28
 msgid "Minimum"
@@ -166,509 +652,97 @@ msgstr "Максимум"
 
 #: number.module:61
 msgid "\"Minimum\" must be a number."
-msgstr "\"Minimum\" долен быть числом."
+msgstr "\"Минимум\" должен быть числом."
 
 #: number.module:64
 msgid "\"Maximum\" must be a number."
-msgstr "\"Maximum\" должен быть числом."
+msgstr "\"Максимум\" должен быть числом."
 
 #: number.module:125
 msgid "The value of %name may be no smaller than %min."
-msgstr "Значение %name не может быть меньше чем %min."
+msgstr "Значение %name должно быть не меньше, чем %min."
 
 #: number.module:128
 msgid "The value of %name may be no larger than %max."
-msgstr "Значение %name не может быть больше %max."
-
-#: number.info:0
-msgid "Number"
-msgstr "Число"
-
-#: number.info:0
-msgid "Defines numeric field types."
-msgstr "Определить численный тип поля"
+msgstr "Значение %name должно быть не больше, чем %min."
 
 #: optionwidgets.module:34
 msgid "Create a list of options as a list in Allowed values or as an array in Php code at the bottom of this page. These values will be the same for the %field in all content types. The Check boxes/radio buttons widget will display checkboxes if the multiple values option is selected for this field, otherwise radios will be displayed."
-msgstr ""
+msgstr "Создает список опций, например, как список (типа \"Разрешенные значения\") или как массив в коде PHP внизу данной страницы. Эти значения долджны быть тем же, что %field во всех типах содержимого. Выбор опций/Радиокнопки покажет выбор опций, если для этого поля выбрана опция множественные значения, иначе будут показаны радиокнопки."
 
 #: optionwidgets.module:171
 msgid "N/A"
-msgstr ""
-
-#: optionwidgets.info:0
-msgid "Option Widgets"
-msgstr "Настройка виджета"
-
-#: optionwidgets.info:0
-msgid "Defines selection, check box and radio button widgets for text and numeric fields."
-msgstr ""
+msgstr "нет"
 
 #: text.module:25
 msgid "Plain text"
-msgstr "Обычный текст"
+msgstr "Простой текст"
 
 #: text.module:25
 msgid "Filtered text (user selects input format)"
-msgstr "Отфильтрованный текст (пользователь выбирает формат ввода)"
+msgstr "Фильтрованный текст (пользователь выбирает формат входа)"
 
 #: text.module:28
 msgid "Text processing"
-msgstr "Работа с текстом"
+msgstr "Обработка текста"
 
 #: text.module:329
 msgid "%label is longer than %max characters."
-msgstr ""
-
-#: text.info:0
-msgid "Text"
-msgstr "Текст"
-
-#: text.info:0
-msgid "Defines simple text field types."
-msgstr "Определяет поля простого текстового типа."
+msgstr "%label не длиннее %max знаков."
 
 #: userreference.module:27
 msgid "User roles that can be referenced"
-msgstr ""
+msgstr "Роли пользователей, которые могут ссылаться"
 
 #: userreference.module:228
 msgid "Invalid user name."
 msgstr "Неправильное имя пользователя."
 
-#: userreference.info:0
-msgid "User Reference"
-msgstr "Ссылка пользователя"
-
-#: userreference.info:0
-msgid "Defines a field type for referencing a user from a node."
-msgstr ""
-
 #: optionwidgets.install:77
 msgid "<div>The allowed values list for %field was updated from </div><pre>%start</pre><div> to </div><pre>%end</pre><div>You can go to the field settings page to give each option a more user-friendly label."
-msgstr ""
+msgstr "<div>Список разрешенных значений для поля %field обновлен от </div><pre>%start</pre><div> до </div><pre>%end</pre><div>Вы можете перейти к странице настроек, чтобы задать для каждой опции более понятные человеку названия."
 
 #: optionwidgets.install:80
 msgid "<div>The allowed values list for %field was not changed from </div><pre>%start</pre>"
-msgstr ""
-
-#: content_admin.inc:15
-msgid "Field name"
-msgstr "Имя поля"
-
-#: content_admin.inc:15
-#: ;413
-msgid "Field type"
-msgstr "Тип поля"
-
-#: content_admin.inc:15
-msgid "Used in"
-msgstr "Использовано в"
-
-#: content_admin.inc:68
-msgid "There are no groups configured for this content type."
-msgstr ""
-
-#: content_admin.inc:78
-msgid "There are no fields configured for this content type."
-msgstr "Нет полей, настроенных для этого типа материала."
-
-#: content_admin.inc:101
-msgid "group"
-msgstr "группа"
-
-#: content_admin.inc:104
-#: ;117;142
-msgid "configure"
-msgstr "настроить"
-
-#: content_admin.inc:105
-#: ;118;143
-msgid "remove"
-msgstr "удалить"
-
-#: content_admin.inc:156
-msgid "body"
-msgstr "тело"
-
-#: content_admin.inc:177
-msgid "Update"
-msgstr "Обновить"
-
-#: content_admin.inc:202
-#: ;206
-msgid "Name"
-msgstr "Имя"
-
-#: content_admin.inc:202
-#: ;206
-msgid "Type"
-msgstr "Тип"
-
-#: content_admin.inc:202
-msgid "Group"
-msgstr "Группа"
-
-#: content_admin.inc:202
-#: ;206
-msgid "Operations"
-msgstr "Действия"
-
-#: content_admin.inc:270
-msgid "No fields have been added to this group."
-msgstr ""
-
-#: content_admin.inc:275
-msgid "!label (!name)"
-msgstr "!label (!name)"
-
-#: content_admin.inc:311
-msgid "Updated field groups."
-msgstr "Обновление групп поля."
-
-#: content_admin.inc:322
-msgid "Updated group weights."
-msgstr "Обновлена группа виджетов."
-
-#: content_admin.inc:333
-msgid "Updated field weights."
-msgstr "Обновлена поле виджетов."
-
-#: content_admin.inc:367
-msgid "Add existing field"
-msgstr "Добавить существующее поле"
-
-#: content_admin.inc:402
-msgid "Create new field"
-msgstr "Добавить новое поле"
-
-#: content_admin.inc:408
-msgid "The human-readable name of this field."
-msgstr "Читаемое имя поля."
-
-#: content_admin.inc:421
-msgid "Create field"
-msgstr "Добаввить поле"
-
-#: content_admin.inc:433
-msgid "No field modules are enabled. You need to <a href=\"%modules_url\">enable one</a>, such as text.module, before you can add new fields."
-msgstr ""
-
-#: content_admin.inc:488
-msgid "Added field %label."
-msgstr "Добавлено поле %label."
-
-#: content_admin.inc:500
-msgid "The field name %field_name already exists."
-msgstr "Поле с именем %field_name уже существует."
-
-#: content_admin.inc:504
-msgid "The field name %field_name is invalid."
-msgstr "Поле с именем %field_name не верно."
-
-#: content_admin.inc:555
-msgid "Created field %label."
-msgstr "Поле %label создано."
-
-#: content_admin.inc:577
-msgid "Are you sure you want to remove the field %field?"
-msgstr "Вы действительно хотите удалить поле %field?"
-
-#: content_admin.inc:579
-msgid "If you have any content left in this field, it will be lost. This action cannot be undone."
-msgstr "Если в этом поле имеется какая-либо информация, она будет утрачена.Это действие не может быть отменено."
-
-#: content_admin.inc:598
-msgid "Removed field %field from %type."
-msgstr "Удаленное поле %field из %type."
-
-#: content_admin.inc:621
-msgid "Widget settings"
-msgstr "Настройки Widget-а"
-
-#: content_admin.inc:622
-msgid "These settings apply only to the %field field as it appears in the %type content type."
-msgstr "Эти параметры настройки применяются только к полю %field , поскольку появляется в типе содержания %type."
-
-#: content_admin.inc:636
-msgid "Widget"
-msgstr "Виджет"
-
-#: content_admin.inc:660
-msgid "Instructions to present to the user below this field on the editing form."
-msgstr ""
-
-#: content_admin.inc:666
-msgid "Data settings"
-msgstr "Настройки данных"
-
-#: content_admin.inc:667
-msgid "These settings apply to the %field field in every content type in which it appears."
-msgstr "Эти параметры применяются к полю %field каждый раз, когда оно отображается."
-
-#: content_admin.inc:671
-msgid "Required"
-msgstr "Обязательно"
-
-#: content_admin.inc:676
-msgid "Multiple values"
-msgstr "Множественный выбор"
-
-#: content_admin.inc:687
-msgid "Save field settings"
-msgstr "Сохранить установки полей"
-
-#: content_admin.inc:765
-msgid "Saved field %field."
-msgstr "Сохраненное поле %field."
-
-#: content_admin.inc:1060
-#: ;1153
-msgid "No PostgreSQL mapping found for %type data type."
-msgstr "В PostgreSQL нет типа данных, соответстующего %type."
-
-#: content_admin.inc:1060
-#: ;1153
-msgid "database"
-msgstr "база данных"
+msgstr "<div>Список разрешенных значений для поля %field не обновлен от </div><pre>%start</pre><div> до </div><pre>%end</pre><div>"
 
 #: nodereference.module:17
 msgid "node reference autocomplete"
-msgstr "автозаполнение ссылки"
+msgstr "автозаполнение ссылок на материал"
 
 #: nodereference.module:42
 msgid "Content types that can be referenced"
-msgstr ""
+msgstr "Типы содержимого, на которые можно ссылаться"
 
 #: nodereference.module:51
 msgid "Existing Views"
-msgstr "Число просмотров"
+msgstr "Существующие виды"
 
 #: nodereference.module:56
 msgid "Default Views"
-msgstr "Просмотр по умолчанию"
+msgstr "Виды по умолчанию"
 
 #: nodereference.module:61
 msgid "Advanced - Nodes that can be referenced"
-msgstr ""
+msgstr "Дополнительно - Материалы, на которые можно ссылаться"
 
 #: nodereference.module:64
 msgid "Choose the \"Views module\" view that selects the nodes that can be referenced.<br>Note :<ul><li>This will discard the \"Content types\" settings above. Use the view's \"filters\" section instead.</li><li>Use the view's \"fields\" section to display additional informations about candidate nodes on node creation/edition form.</li><li>Use the view's \"sort criteria\" section to determine the order in which candidate nodes will be displayed.</li></ul>"
-msgstr ""
+msgstr "Выберите \"Модуль Виды (Views)\" показывает, на какие материалы можно ссылаться.<br>Обратите внимание:<ul><li>Это отменит  настройки \"Типы содержимого\" выше. Вместо этого используйте раздел \"фильтры\" видов.</li><li>Используйте раздел \"поля\" для показа дополнительной информации о материалах в форме создания/изменения материалов.</li><li>Используйте раздел \"критерии сортировки\" для определения порядка, в каком материалы будут показаны.</li></ul>"
 
 #: nodereference.module:280
 msgid "This post can't be referenced."
-msgstr "Ссылка на это сообщение невозможна."
+msgstr "На это сообщение нельзя сослаться."
 
 #: nodereference.module:283
 msgid "Title mismatch. Please reiterate your selection."
-msgstr ""
+msgstr "Несовпадение названия. Пожалуйста, повторите ваш выбор."
 
 #: nodereference.module:290
 msgid "No post with that title can be referenced."
-msgstr "Нет сообщений с таким заголовком."
+msgstr "Нет сообщений с таким название, на которые можно сослаться."
 
 #: nodereference.module:461
 msgid "<empty>"
 msgstr "<пусто>"
-
-#: nodereference.info:0
-msgid "Node Reference"
-msgstr "Ссылка на материал"
-
-#: nodereference.info:0
-msgid "Defines a field type for referencing one node from another."
-msgstr ""
-
-#: fieldgroup.module:19
-msgid "Create and order your groups first. Then assign fields to a group by editing the fields."
-msgstr ""
-
-#: fieldgroup.module:33
-msgid "Add group"
-msgstr "Добавить группу"
-
-#: fieldgroup.module:43
-#: ;51
-msgid "Edit group"
-msgstr "изменить группу"
-
-#: fieldgroup.module:79
-msgid "Add"
-msgstr "Добавить"
-
-#: fieldgroup.module:86
-msgid "Save"
-msgstr "Сохранить"
-
-#: fieldgroup.module:103
-msgid "Collapsible"
-msgstr ""
-
-#: fieldgroup.module:108
-msgid "Collapsed"
-msgstr "Свернутый"
-
-#: fieldgroup.module:117
-msgid "Instructions to present to the user on the editing form."
-msgstr ""
-
-#: fieldgroup.module:124
-msgid "In the node editing form, the heavier groups will sink and the lighter groups will be positioned nearer the top."
-msgstr ""
-
-#: fieldgroup.module:144
-msgid "The group name %name already exists."
-msgstr "Группа с именем %name  уже существует."
-
-#: fieldgroup.module:148
-msgid "The group name %name is invalid."
-msgstr "Группа с именем %name не допускается."
-
-#: fieldgroup.module:202
-msgid "Are you sure you want to remove the group %label?"
-msgstr "Вы действительно хотите удалить группу %label?"
-
-#: fieldgroup.module:204
-msgid "This action cannot be undone."
-msgstr "Эта операция не может быть отменена."
-
-#: fieldgroup.module:266
-msgid "No group."
-msgstr "Нет групп."
-
-#: fieldgroup.module:308
-msgid "Display in group"
-msgstr "Показывать а гуппе."
-
-#: fieldgroup.module:311
-msgid "Select a group, in which the field will be displayed on the editing form."
-msgstr ""
-
-#: fieldgroup.module:0
-msgid "fieldgroup"
-msgstr "группы полей"
-
-#: fieldgroup.info:0
-msgid "Fieldgroup"
-msgstr ""
-
-#: fieldgroup.info:0
-msgid "Create field groups for CCK fields."
-msgstr ""
-
-#: content_copy.module:35
-msgid "Export"
-msgstr "Экспорт"
-
-#: content_copy.module:44
-msgid "Import"
-msgstr "Импорт"
-
-#: content_copy.module:81
-msgid "This form will process a content type and one or more fields from that type and export the settings. The export created by this process can be copied and pasted as an import into the current or any other database. The import will add the fields to into an existing content type or create a new content type that includes the selected fields."
-msgstr ""
-
-#: content_copy.module:90
-msgid "Types"
-msgstr "Типы"
-
-#: content_copy.module:94
-msgid "Select the content type to export."
-msgstr "Выбрать материал для экспорта."
-
-#: content_copy.module:119
-msgid "Groups"
-msgstr "Группы"
-
-#: content_copy.module:123
-msgid "Select the group definitions to export from %type."
-msgstr ""
-
-#: content_copy.module:133
-msgid "Select the field definitions to export from %type."
-msgstr ""
-
-#: content_copy.module:143
-msgid "Export data"
-msgstr "Экспорт данных"
-
-#: content_copy.module:148
-msgid "Copy the export text and paste it into another content type using the import function."
-msgstr ""
-
-#: content_copy.module:158
-#: ;231
-msgid "Submit"
-msgstr "Подтвердить"
-
-#: content_copy.module:214
-msgid "This form will import field definitions exported from another content type or another database.<br/>Note that fields cannot be duplicated within the same content type, so imported fields will be added only if they do not already exist in the selected type."
-msgstr ""
-
-#: content_copy.module:217
-msgid "<Create>"
-msgstr "<Создать>"
-
-#: content_copy.module:219
-msgid "Content type"
-msgstr "Тип материала"
-
-#: content_copy.module:220
-msgid "Select the content type to import these fields into.<br/>Select <Create> to create a new content type to contain the fields."
-msgstr ""
-
-#: content_copy.module:225
-msgid "Import data"
-msgstr "Импорт данных"
-
-#: content_copy.module:227
-msgid "Paste the text created by a content export into this field."
-msgstr ""
-
-#: content_copy.module:254
-msgid "The import data is not valid import text."
-msgstr "Импортируемые данные содержат недопустимый текст"
-
-#: content_copy.module:299
-msgid "The following modules must be enabled for this import to work: %modules."
-msgstr ""
-
-#: content_copy.module:305
-#: ;319
-msgid "<create>"
-msgstr "<создать>"
-
-#: content_copy.module:307
-msgid "The content type %type already exists in this database."
-msgstr ""
-
-#: content_copy.module:314
-msgid "Exiting. No import performed."
-msgstr ""
-
-#: content_copy.module:331
-msgid "An error has occured adding the content type %type.<br/>Please check the errors displayed for more details."
-msgstr "Возникла ошибка при добавлении типа материала %type.<br/>Пожалуйста, проверьте сообщения об ошибках и устраните проблему."
-
-#: content_copy.module:366
-msgid "The imported field %field_label (%field_name) was not added to %type because that field already exists in %type."
-msgstr ""
-
-#: content_copy.module:387
-#: ;406
-msgid "An error has occured adding the field %field_label (%field_name).<br/>Please check the errors displayed for more details."
-msgstr "Возникла ошибка при добавлении поля %field_label (%field_name).<br/>Пожалуйста, проверьте сообщения об ошибках и устраните проблему."
-
-#: content_copy.module:420
-msgid "The field %field_label (%field_name) was added to the content type %type, but an error has occured updating the field settings.<br/>Please check the errors displayed for more details."
-msgstr "Поле %field_label (%field_name) добавлено в тип материала %type, но возникла ошибка при обновлении свойств поля.<br/>Пожалуйста, проверьте сообщения об ошибках и устраните проблему."
-
-#: content_copy.info:0
-msgid "Content Copy"
-msgstr "Копия материалов"
-
-#: content_copy.info:0
-msgid "Enables ability to import/export field definitions."
-msgstr "Включить возможность импорта/экспорта определения полей."
 
