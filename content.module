@@ -9,6 +9,10 @@
 define('CONTENT_DB_STORAGE_PER_FIELD', 0);
 define('CONTENT_DB_STORAGE_PER_CONTENT_TYPE', 1);
 
+define('CONTENT_CALLBACK_NONE', 0x0001);
+define('CONTENT_CALLBACK_DEFAULT', 0x0002);
+define('CONTENT_CALLBACK_CUSTOM', 0x0004);
+
 function content_help($section) {
   if (preg_match('!^admin/content/types/.*/display$!', $section)) {
     return t("Configure how this content type's fields and field labels should be displayed when it's viewed in teaser and full-page mode.");
@@ -564,15 +568,14 @@ function _content_field_view(&$node, $teaser = NULL, $page = NULL) {
       $value = '';
 
       if ($formatter != 'hidden') {
-        $module = $field_types[$field['type']]['module'];
-        $callbacks = module_invoke($module, 'field_settings', 'callbacks', $field);
-        if (isset($callbacks['view']) && $callbacks['view']) {
+        if (content_handle('field', 'view', $field) == CONTENT_CALLBACK_CUSTOM) {
+          $module = $field_types[$field['type']]['module'];
           $function = $module .'_field';
           if (function_exists($function)) {
             $value = $function('view', $node, $field, $node_field, $teaser, $page);
           }
         }
-        if (empty($value)) {
+        else {
           foreach ($node_field as $delta => $item) {
             $node_field[$delta]['view'] = content_format($field, $item, $formatter, $node);
           }
@@ -625,7 +628,7 @@ function _content_widget_invoke($op, &$node) {
           $return[] = $result;
         }
       }
-      // test for values in $node_field in case modules added items on insert
+      // test for values in $node_field in case modules added items
       if (is_object($node) && (isset($node->$field['field_name']) || count($node_field))) {
         $node->$field['field_name'] = $node_field;
       }
@@ -1022,74 +1025,76 @@ function _content_tablename($name, $entity, $version = NULL) {
 }
 
 /**
- *  Helper function for determining if fields are handling default values.
+ *  Helper function for determining the behaviour of a field or a widget
+ *  with respect to a given operation
+ *  (currently only used for 'view' field op and 'default value' widegt op)
+ *
+ *  @param $entity
+ *    'field' or 'widget'
+ *
+ *  @param $op
+ *    the name of the operation ('view', 'validate'...)
  *
  *  @param $field
  *    The field array, including widget info.
- *  @param $exclude
- *    An array of modules that have problems with content module handling of default values.
- *    Useful if there are known problems and users might be using
- *    older versions that have not yet been updated with proper callbacks.
+ 
  * @return
- *    none    - do nothing about default value handling.
- *    module  - use the module's callback function.
- *    handle  - content module handles the default value.
+ *    CONTENT_CALLBACK_NONE    - do nothing for this operation
+ *    CONTENT_CALLBACK_CUSTOM  - use the module's callback function.
+ *    CONTENT_CALLBACK_DEFAULT - use content module default behaviour
  *
- * @todo
- *    eliminate $exclude handling once properly updated code is widely used.
  */
-function content_handle_default_values($field) {
-
-  $exclude = array('computed_field');
-
-  $db_info = _content_widget_types();
-  $module = $db_info[$field['widget']['type']]['module'];
-  $callbacks = module_invoke($module, 'widget_settings', 'callbacks', $field);
-  if (isset($callbacks['default_value']) || $callbacks['default_value']) {
-    return 'module';
-  }
-  elseif (in_array($module, $exclude)) {
-    return 'none';
+function content_handle($entity, $op, $field) {
+  $entity_types = ($entity == 'field') ? _content_field_types() : _content_widget_types();
+  $entity_type = ($entity == 'field') ? $field['type'] : $field['widget']['type'];
+  $module = $entity_types[$entity_type]['module'];
+  
+  if ($op == 'default value' && $module == 'computed_field') {
+    $callback_value =   CONTENT_CALLBACK_NONE;
   }
   else {
-    return 'handle';
+    $callbacks = module_invoke($module, "{$entity}_settings", 'callbacks', $field);
+    $callback_value = (isset($callbacks[$op])) ? $callbacks[$op] : CONTENT_CALLBACK_DEFAULT;
   }
+
+  return $callback_value;
 }
 
 /**
  *  Helper function to return the correct default value for a field.
  *
+ *  @param $node
+ *    The node.
+ *
  *  @param $field
  *    The field array.
+ *
+ *  @param $items
+ *    The value of the field in the node.
  *
  *  @return
  *    The default value for that field.
  */
-function content_default_value($node, $field, $items, $delta = NULL) {
-  $db_info = _content_widget_types();
-  $module = $db_info[$field['widget']['type']]['module'];
+function content_default_value($node, $field, $items) {
+  $widget_types = _content_widget_types();
+  $module = $widget_types[$field['widget']['type']]['module'];
 
   $default_value = array();
-  if (content_handle_default_values($field) == 'module') {
+  if (content_handle('widget', 'default value', $field) == CONTENT_CALLBACK_CUSTOM) {
     $function = $module .'_widget';
-    $default_value = $function('default value', $node, $field, $items, $delta);
+    $default_value = $function('default value', $node, $field, $items);
   }
   elseif (!empty($field['widget']['default_value_php'])) {
     ob_start();
     $result = eval($field['widget']['default_value_php']);
+    ob_end_clean();
     if (is_array($result)) {
       $default_value = $result;
     }
-    ob_end_clean();
   }
   elseif (!empty($field['widget']['default_value'])) {
     $default_value = $field['widget']['default_value'];
   }
 
-  if (is_null($delta)) {
-    return (array) $default_value;
-  }
-  else {
-    return isset($default_value[$delta]) ? $default_value[$delta] : array();
-  }
+  return (array) $default_value;
 }
