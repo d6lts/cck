@@ -1040,7 +1040,7 @@ function _content_tablename($name, $entity, $version = NULL) {
  */
 function content_handle_default_values($field) {
 
-  $exclude = array('computed_field', 'imagefield', 'filefield');
+  $exclude = array('computed_field');
 
   $db_info = _content_widget_types();
   $module = $db_info[$field['widget']['type']]['module'];

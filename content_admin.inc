@@ -765,6 +765,7 @@ function _content_admin_field($type_name, $field_name) {
 
   // Add handling for default value if not provided by field.
   if (content_handle_default_values($field) == 'handle') {
+    $form['#attributes'] = array("enctype" => "multipart/form-data");
     $form['widget']['default_value_fieldset'] = array(
       '#type' => 'fieldset',
       '#title' => t('Default value'),
