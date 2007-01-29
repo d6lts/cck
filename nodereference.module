@@ -99,28 +99,12 @@ function nodereference_field_settings($op, $field) {
 function nodereference_field($op, &$node, $field, &$items, $teaser, $page) {
   switch ($op) {
     case 'validate':
+      $refs = _nodereference_potential_references($field, TRUE);
       foreach ($items as $delta => $item) {
-        $error_field = $field['field_name'].']['.$delta.'][node_name';
-        if (!empty($item['node_name'])) {
-          preg_match('/^(?:\s*|(.*) )?\[\s*nid\s*:\s*(\d+)\s*\]$/', $item['node_name'], $matches);
-          if (!empty($matches)) {
-            // explicit nid
-            list(, $title, $nid) = $matches;
-            $refs = _nodereference_potential_references($field, TRUE);
-            if (!in_array($nid, array_keys($refs))) {
-              form_set_error($error_field, t('This post can\'t be referenced.'));
-            }
-            elseif (!empty($title) && ($n = $refs[$nid]) && $title != $n->node_title) {
-              form_set_error($error_field, t('Title mismatch. Please reiterate your selection.'));
-            }
-          }
-          else {
-            // no explicit nid
-            $refs = _nodereference_potential_references($field, FALSE, $item['node_name'], TRUE);
-            if (empty($refs)) {
-              form_set_error($error_field, t('No post with that title can be referenced.'));
-            }
-          }
+        $error_field = isset($item['error_field']) ? $item['error_field'] : '';
+        unset($item['error_field']);
+        if (!in_array($item['nid'], array_keys($refs))) {
+          form_set_error($error_field, t('This post can\'t be referenced.'));
         }
       }
       return;
@@ -234,6 +218,9 @@ function nodereference_widget($op, &$node, $field, &$items) {
         }
         // Remove the widget's data representation so it isn't saved.
         unset($items['nids']);
+        foreach($items as $delta => $item) {
+          $items[$delta]['error_field'] =  $field['field_name'].'][nids';
+        }
     }
   }
   else {
@@ -289,6 +276,22 @@ function nodereference_widget($op, &$node, $field, &$items) {
         }
         return $form;
 
+      case 'validate':
+        foreach ($items as $delta => $item) {
+          $error_field = $field['field_name'].']['.$delta.'][node_name';
+          if (!empty($item['node_name'])) {
+            preg_match('/^(?:\s*|(.*) )?\[\s*nid\s*:\s*(\d+)\s*\]$/', $item['node_name'], $matches);
+            if (!empty($matches)) {
+              // explicit nid
+              list(, $title, $nid) = $matches;
+              if (!empty($title) && ($n = node_load($nid)) && $title != $n->title) {
+                form_set_error($error_field, t('Title mismatch. Please check your selection.'));
+              }
+            }
+          }
+        }
+        return;
+
       case 'process form values':
         foreach ($items as $delta => $item) {
           $nid = 0;
@@ -304,18 +307,19 @@ function nodereference_widget($op, &$node, $field, &$items) {
               // the best thing would be to present the user with an additional form,
               // allowing the user to choose between valid candidates with the same title
               // ATM, we pick the first matching candidate...
-              $nids = _nodereference_potential_references($field, false, $item['node_name'], true);
-              $nid = array_shift(array_keys($nids));
+              $nids = _nodereference_potential_references($field, FALSE, $item['node_name'], TRUE);
+              $nid = (!empty($nids)) ? array_shift(array_keys($nids)) : 0;
             }
           }
           if (!empty($nid)) {
             $items[$delta]['nid'] = $nid;
             // Remove the widget's data representation so it isn't saved.
             unset($items[$delta]['node_name']);
+            $items[$delta]['error_field'] = $field['field_name'].']['.$delta.'][node_name';
           }
-          else {
+          elseif ($delta > 0) {
             // Don't save empty fields when they're not the first value (keep '0' otherwise)
-            if ($delta > 0) {unset($items[$delta]);}
+            unset($items[$delta]);
           }
         }
         break;

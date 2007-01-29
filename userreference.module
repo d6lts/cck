@@ -60,9 +60,10 @@ function userreference_field($op, &$node, $field, &$items, $teaser, $page) {
   switch ($op) {
     case 'validate':
       foreach ($items as $delta => $item) {
-        $error_field = $field['field_name'].']['.$delta.'][user_name';
-        if ($item['user_name'] && !in_array($item['user_name'], _userreference_potential_references($field))) {
-          form_set_error($error_field, t('Invalid user name.'));
+        $error_field = isset($item['error_field']) ? $item['error_field'] : '';
+        unset($item['error_field']);
+        if (!empty($item['uid']) && !in_array($item['uid'], array_keys(_userreference_potential_references($field)))) {
+          form_set_error($error_field, t('Invalid user.'));
         }
       }
       return;
@@ -138,6 +139,9 @@ function userreference_widget($op, &$node, $field, &$items) {
         $form = array();
 
         $options = _userreference_potential_references($field);
+        if (!$field['required']) {
+          $options = array('none' => t('<none>')) + $options;
+        }
         if (empty($items['default uids'])) {
           $items['default uids'][] = 'none';
         }
@@ -147,7 +151,7 @@ function userreference_widget($op, &$node, $field, &$items) {
           '#title' => t($field['widget']['label']),
           '#default_value' => $items['default uids'],
           '#multiple' => $field['multiple'],
-          '#size' => $field['multiple'] ? min(count($options), 6) : 0, 
+          '#size' => $field['multiple'] ? min(count($options), 6) : 0,
           '#options' => $options,
           '#required' => $field['required'],
           '#description' => $field['widget']['description'],
@@ -171,6 +175,9 @@ function userreference_widget($op, &$node, $field, &$items) {
         }
         // Remove the widget's data representation so it isn't saved.
         unset($items['uids']);
+        foreach($items as $delta => $item) {
+          $items[$delta]['error_field'] =  $field['field_name'].'][uids';
+        }
     }
   }
   else {
@@ -234,6 +241,7 @@ function userreference_widget($op, &$node, $field, &$items) {
           // Remove the widget's data representation so it isn't saved.
           unset($items[$delta]['user_name']);
           $items[$delta]['uid'] = $uid;
+          $items[$delta]['error_field'] = $field['field_name'].']['.$delta.'][user_name';
           // Don't save empty fields except the first value
           if (empty($uid) && $delta > 0) {
             unset($items[$delta]);
@@ -247,27 +255,20 @@ function userreference_widget($op, &$node, $field, &$items) {
  * Fetch an array of all candidate referenced users, for use in presenting the selection form to the user.
  */
 function _userreference_potential_references($field) {
-  if (!$field['required']) {
-    $users = array('none' => t('<none>'));
-  }
-  else {
-    $users = array();
-  }
   $roles = array();
   if (isset($field['referenceable_roles'])) {
-    foreach ($field['referenceable_roles'] as $role) {
-      if ($role) {
-        $roles[] = $role;
-      }
-    }
+    // filter invalid values that seems to get through sometimes ??
+    $field['referenceable_roles'] = array_intersect(user_roles(1), $field['referenceable_roles']);
+    $roles = array_keys(array_filter($field['referenceable_roles']));
   }
-  if (!$roles || !isset($field['referenceable_roles']) || in_array(DRUPAL_AUTHENTICATED_RID, $field['referenceable_roles'])) {
+  if (empty($roles) || in_array(DRUPAL_AUTHENTICATED_RID, $roles)) {
     $result = db_query('SELECT u.name, u.uid FROM {users} u WHERE uid > 0 ORDER BY u.name ASC');
   }
   else {
     $result = db_query('SELECT u.name, u.uid FROM {users} u LEFT JOIN {users_roles} r ON u.uid = r.uid WHERE u.uid > 0 AND r.rid IN ('. implode($roles, ',') .') ORDER BY u.name ASC');
   }
 
+  $users = array();
   while ($user = db_fetch_object($result)) {
     $users[$user->uid] = $user->name;
   }
