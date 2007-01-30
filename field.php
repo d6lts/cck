@@ -50,7 +50,7 @@ function hook_field_info() {
  *     this operator determines what filters are available to views.
  *     They always apply to the first column listed in the "database columns"
  *     array.
- *   - "callbacks": Declare which callbacks are implemented by hook_field.
+ *   - "callbacks": Describe the field's behaviour regarding hook_field operations.
  * @param $field
  *   The field on which the operation is to be performed.
  * @return
@@ -71,11 +71,15 @@ function hook_field_info() {
  *     When proving several filters, it is recommended to use the 'name'
  *     attribute in order to let the user distinguish between them. If no 'name'
  *     is specified for a filter, the key of the filter will be used instead.
- *   - "callbacks": an array keyed by hook_filter operations ('view', 'validate', ...)
- *     and with TRUE or FALSE as values. TRUE means that the field wants its callback
- *     executed instead of content.module's default behaviour.
- *     Note : currently only the 'view' operation implements this feature - all other 
- *     field operation _will_ be executed no matter what.
+ *   - "callbacks": an array describing the field's behaviour regarding hook_field 
+ *     operations. The array is keyed by hook_field operations ('view', 'validate'...)
+ *     and has the following possible values : 
+ *       CONTENT_CALLBACK_NONE     : do nothing for this operation 
+ *       CONTENT_CALLBACK_CUSTOM   : use the behaviour in hook_field(operation)
+ *       CONTENT_CALLBACK_DEFAULT  : use content.module's default bahaviour
+ *     Note : currently only the 'view' operation implements this feature. 
+ *     All other field operation implemented by the module _will_ be executed 
+ *     no matter what.
  */
 function hook_field_settings($op, $field) {
   switch ($op) {
@@ -120,7 +124,7 @@ function hook_field_settings($op, $field) {
     
     case 'callbacks':
       return array(
-        'view' => TRUE,
+        'view' => CONTENT_CALLBACK_CUSTOM,
       );
   }
 }
@@ -293,15 +297,23 @@ function hook_widget_info() {
  *   - "form": Display the widget settings form.
  *   - "validate": Check the widget settings form for errors.
  *   - "save": Declare which pieces of information to save back to the database.
+ *   - "callbacks": Describe the widget's behaviour regarding hook_widget operations.
  * @param $widget
  *   The widget on which the operation is to be performed.
  * @return
  *   This varies depending on the operation.
- *   - The "form" operation should return an array of form elements to add to
- *     the settings page.
- *   - The "validate" operation has no return value. Use form_set_error().
- *   - The "save" operation should return an array of names of form elements to
- *     be saved in the database.
+ *   - "form": an array of form elements to add to the settings page.
+ *   - "validate": no return value. Use form_set_error().
+ *   - "save": an array of names of form elements to be saved in the database.
+ *   - "callbacks": an array describing the widget's behaviour regarding hook_widget 
+ *     operations. The array is keyed by hook_widget operations ('form', 'validate'...)
+ *     and has the following possible values : 
+ *       CONTENT_CALLBACK_NONE     : do nothing for this operation 
+ *       CONTENT_CALLBACK_CUSTOM   : use the behaviour in hook_widget(operation)
+ *       CONTENT_CALLBACK_DEFAULT  : use content.module's default bahaviour
+ *     Note : currently only the 'default value' operation implements this feature.
+ *     All other widget operation implemented by the module _will_ be executed 
+ *     no matter what.
  */
 function hook_widget_settings($op, $widget) {
   switch ($op) {
@@ -323,6 +335,11 @@ function hook_widget_settings($op, $widget) {
 
     case 'save':
       return array('rows');
+            
+    case 'callbacks':
+      return array(
+        'default value' => CONTENT_CALLBACK_NONE,
+      );
   }
 }
 
