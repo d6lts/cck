@@ -39,7 +39,7 @@ General
 
 Field / widget modules
 - 107667  Added missing '#size' for mutliple select widgets (display issues with Opera)
-
+- 108037  Optionwidgets : (update function) Added missing curly braces around table name
 
 5--1.2
 ======
