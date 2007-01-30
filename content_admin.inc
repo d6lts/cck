@@ -82,6 +82,8 @@ function content_admin_field_overview_form($type_name) {
     return $form;
   }
 
+  $form['disabled']['#value'] = array();
+  
   // Iterate through the dummy form and add top-level fields and weights to a table.
   // Construct the table values in an array '#table' that FAPI will ignore, keyed on the item's weight.
   // Create separate form elements for each weight and group value and put a placeholder for each in #table.
