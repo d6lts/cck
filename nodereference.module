@@ -101,10 +101,12 @@ function nodereference_field($op, &$node, $field, &$items, $teaser, $page) {
     case 'validate':
       $refs = _nodereference_potential_references($field, TRUE);
       foreach ($items as $delta => $item) {
-        $error_field = isset($item['error_field']) ? $item['error_field'] : '';
-        unset($item['error_field']);
-        if (!in_array($item['nid'], array_keys($refs))) {
-          form_set_error($error_field, t('This post can\'t be referenced.'));
+        if (isset($item['nid'])) {
+          $error_field = isset($item['error_field']) ? $item['error_field'] : '';
+          unset($item['error_field']);
+          if (!in_array($item['nid'], array_keys($refs))) {
+            form_set_error($error_field, t('This post can\'t be referenced.'));
+          }
         }
       }
       return;
@@ -311,10 +313,10 @@ function nodereference_widget($op, &$node, $field, &$items) {
               $nid = (!empty($nids)) ? array_shift(array_keys($nids)) : 0;
             }
           }
+          // Remove the widget's data representation so it isn't saved.
+          unset($items[$delta]['node_name']);
           if (!empty($nid)) {
             $items[$delta]['nid'] = $nid;
-            // Remove the widget's data representation so it isn't saved.
-            unset($items[$delta]['node_name']);
             $items[$delta]['error_field'] = $field['field_name'].']['.$delta.'][node_name';
           }
           elseif ($delta > 0) {
