@@ -7,15 +7,18 @@ Features
 --------
 
 General
-- 108755  Add group name in the 'class' attributes of groups fieldsets
+- 59451   Added management of default values for fields
 - 107128  Added teasers / full nodes support in an overview form for display settings
 -         Reworked theming example and instructions accordingly
 -         Removed hook_field('view') for core field modules
           (default 'view' op is now handled in content.module)
+- 108755  Add group name in the 'class' attributes of groups fieldsets
+- 112225  Moved content_types_rebuild to hook_enable
 
 Field / widget modules
-- 108302  Number : Add formatters for numbers (+ be sure non-numeric data is not stored)
-- 110570  Number : add prefix and suffix option
+- 108302  Number : Added formatters for numbers (+ be sure non-numeric data is not stored)
+- 110570  Number : Added prefix and suffix option
+- 111129  Optionwidgets : Added widget to handle single on/off checkbox
 - 112464  Standardize validation in field rather than widget, 
           Standardize use of $items rather than $node_field
 
@@ -23,16 +26,20 @@ Bugfix
 ------
 
 General
-- 108094  Real fix for "text columns are not allowed defaults values with MySQL" ?
-- 108914  Fixed error when several fieldgroups have the same name
 - 105787  (critical) move data tables from 'node_*' to 'content_*'
           to avoid possible clashes with core 'node_*' tables
+- 104229  Fixed occasional 'wrong datatype' error on field overview
+- 108914  Fixed error when several fieldgroups have the same name
 - 111276  Fixed link to module page in warning message when no field module is enabled
 -         Remove deprecated help text in fieldgroup.module
 - 109863  Fixed table name error in content.install (4.7 upgrade path)
+- 108094  (incomplete) fix for "text columns are not allowed defaults values with MySQL(5)" ?
+- 100546  Postgres compatibility, change integer unsigned to int_unsigned
+
 
 Field / widget modules
 - 107667  Added missing '#size' for mutliple select widgets (display issues with Opera)
+
 
 5--1.2
 ======
