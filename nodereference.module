@@ -313,10 +313,10 @@ function nodereference_widget($op, &$node, $field, &$items) {
               $nid = (!empty($nids)) ? array_shift(array_keys($nids)) : 0;
             }
           }
+          // Remove the widget's data representation so it isn't saved.
+          unset($items[$delta]['node_name']);
           if (!empty($nid)) {
             $items[$delta]['nid'] = $nid;
-            // Remove the widget's data representation so it isn't saved.
-            unset($items[$delta]['node_name']);
             $items[$delta]['error_field'] = $field['field_name'].']['.$delta.'][node_name';
           }
           elseif ($delta > 0) {
