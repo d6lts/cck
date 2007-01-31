@@ -153,7 +153,7 @@ function content_views_field_handler_ungroup($field_info, $field_data, $value, $
   $field = $field_info['content_field'];
   $item = array();
   foreach ($field_info['content_db_info']['columns'] as $column => $attributes) {
-    $view_column_name = 'node_data_'. $field['field_name'] .'_'. $attributes['column'];
+    $view_column_name = $field_data['tablename'] .'_'. $attributes['column'];
     $item[$column] = $data->$view_column_name;
   }
   return content_format($field, $item, $field_data['options'], $data);
