@@ -83,7 +83,7 @@ function content_admin_field_overview_form($type_name) {
   }
 
   $form['disabled']['#value'] = array();
-  
+
   // Iterate through the dummy form and add top-level fields and weights to a table.
   // Construct the table values in an array '#table' that FAPI will ignore, keyed on the item's weight.
   // Create separate form elements for each weight and group value and put a placeholder for each in #table.
@@ -779,8 +779,11 @@ function _content_admin_field($type_name, $field_name) {
     $function = $module .'_widget';
     if (function_exists($function)) {
       $node = array(); // TODO are there things we need to add in here ?
-      $function('prepare form values', $node, $field, $default_value);
-      $form_element = $function('form', $node, $field, $default_value);
+      // Make sure the default value is not a required field.
+      $widget_field = $field;
+      $widget_field['required'] = FALSE;
+      $function('prepare form values', $node, $widget_field, $default_value);
+      $form_element = $function('form', $node, $widget_field, $default_value);
     }
     else {
       // TODO : generate a series of textfields ?
