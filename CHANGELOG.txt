@@ -30,10 +30,13 @@ General
 - 108094  (incomplete) fix for "text columns are not allowed defaults values with MySQL(5)" ?
 - 108914  Fixed error when several fieldgroups have the same name
 -         Remove deprecated help text in fieldgroup.module
+- 108226  make cck view field handler play nicely with Views Fusion module ('ungroup' handler)
+- 114936  make sure default value form element is not required
 
 Field / widget modules
 - 107667  Added missing '#size' for mutliple select widgets (display issues with Opera)
 - 108037  Optionwidgets : (update function) Added missing curly braces around table name
+- 114346  fix error on empty noderef fields
 
 4.7--1.2
 ========
