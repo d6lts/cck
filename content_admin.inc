@@ -489,7 +489,6 @@ function theme_content_admin_field_overview_form($form) {
 }
 
 function content_admin_field_overview_form_submit($form_id, $form_values) {
-
   $msg = FALSE;
   foreach ((array) $form_values['field-groups'] as $key => $value) {
     if ($key && !in_array($key, unserialize($form_values['disabled']))) {
@@ -758,16 +757,17 @@ function _content_admin_field_add_existing_submit($form_id, $form_values) {
     }
   }
 
-  $prior_instance = db_fetch_array(db_query("SELECT weight, label, widget_type, widget_settings, description FROM {node_field_instance} WHERE field_name = '%s'", $form_values['field_name']));
+  $prior_instance = db_fetch_array(db_query("SELECT * FROM {node_field_instance} WHERE field_name = '%s'", $form_values['field_name']));
   if (!$prior_instance) {
     $prior_instance = array();
     $prior_instance['weight'] = 0;
     $prior_instance['label'] = $form_values['field_name'];
     $prior_instance['widget_type'] = '';
     $prior_instance['widget_settings'] = '';
+    $prior_instance['display_settings'] = '';
     $prior_instance['description'] = '';
   }
-  db_query("INSERT INTO {node_field_instance} (field_name, type_name, weight, label, widget_type, widget_settings, description) VALUES ('%s', '%s', %d, '%s', '%s', '%s', '%s')", $form_values['field_name'], $form_values['type_name'], $prior_instance['weight'], $prior_instance['label'], $prior_instance['widget_type'], $prior_instance['widget_settings'], $prior_instance['description']);
+  db_query("INSERT INTO {node_field_instance} (field_name, type_name, weight, label, widget_type, widget_settings, display_settings, description) VALUES ('%s', '%s', %d, '%s', '%s', '%s', '%s', '%s')", $form_values['field_name'], $form_values['type_name'], $prior_instance['weight'], $prior_instance['label'], $prior_instance['widget_type'], $prior_instance['widget_settings'], $prior_instance['display_settings'], $prior_instance['description']);
 
   drupal_set_message(t('Added field %label.', array('%label' => theme('placeholder', $prior_instance['label']))));
   content_clear_type_cache();
@@ -798,7 +798,7 @@ function _content_admin_field_add_new_submit($form_id, $form_values) {
 
   $field_widget_type = explode('-', $form_values['field_widget_type']);
   db_query("INSERT INTO {node_field} (field_name, type, global_settings, required, multiple, db_storage) VALUES ('%s', '%s', '%s', %d, %d, %d)", $field_name, $field_widget_type[0], serialize(array()), 0, 0, CONTENT_DB_STORAGE_PER_CONTENT_TYPE);
-  db_query("INSERT INTO {node_field_instance} (field_name, type_name, weight, label, widget_type, widget_settings, description) VALUES ('%s', '%s', %d, '%s', '%s', '%s', '%s')", $field_name, $form_values['type_name'], 0, $form_values['label'], $field_widget_type[1], serialize(array()), '');
+  db_query("INSERT INTO {node_field_instance} (field_name, type_name, weight, label, widget_type, widget_settings, display_settings, description) VALUES ('%s', '%s', %d, '%s', '%s', '%s', '%s', '%s')", $field_name, $form_values['type_name'], 0, $form_values['label'], $field_widget_type[1], serialize(array()), serialize(array()), '');
 
   content_clear_type_cache();
 
