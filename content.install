@@ -388,3 +388,24 @@ function content_update_1003() {
 
   return $ret;
 }
+
+function content_update_1004() {
+  $ret = array();
+
+  include_once('./'. drupal_get_path('module', 'content') .'/content.module');
+
+  $fields = array();
+  $result = db_query("SELECT DISTINCT(field_name) FROM {node_field_instance}");
+  while($row = db_fetch_array($result)) {
+    $fields[] = "'". $row['field_name'] ."'";
+  }
+  $ret[] = update_sql("DELETE FROM {node_field} WHERE field_name NOT IN (". implode(', ', $fields) .")");
+
+  // drop
+  $table = _content_tablename('', CONTENT_DB_STORAGE_PER_CONTENT_TYPE);
+  if (db_table_exists($table)) {
+    $ret[] = update_sql("DROP TABLE {".$table."}");
+  }
+
+  return $ret;
+}
