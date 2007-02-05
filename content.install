@@ -264,3 +264,36 @@ function content_update_9() {
 
   return $ret;
 }
+
+/**
+ *  Fix corrupted db due to a bug in 1.3 release (http://drupal.org/node/115332)
+ */
+function content_update_10() {
+  $ret = array();
+
+  include_once('./'. drupal_get_path('module', 'content') .'/content.module');
+  include_once('./'. drupal_get_path('module', 'content') .'/content_admin.inc');
+
+  // drop fields with no field instances
+  $fields = array();
+  $result = db_query("SELECT DISTINCT(field_name)  FROM {node_field_instance}");
+  while ($row = db_fetch_array($result)) {
+    $fields[] = "'". $row['field_name'] ."'";
+  }
+  $ret[] = update_sql("DELETE FROM {node_field} WHERE field_name NOT IN (". implode(', ', $fields) .")");
+
+  // set invalid 'per field storage' back to 'per content type'
+  $result = db_query("SELECT field_name FROM {node_field} WHERE multiple = 0 AND db_storage = %d", CONTENT_DB_STORAGE_PER_FIELD);
+  while ($row = db_fetch_array($result)) {
+    $count = db_num_rows(db_query("SELECT field_name FROM {node_field_instance} WHERE field_name = '%s'", $row['field_name']));
+    if ($count == 1) {
+      $field = content_fields($row['field_name']);
+      $db_info = content_database_info($field);
+      $new_field = $field;
+      $new_field['db_storage'] = CONTENT_DB_STORAGE_PER_CONTENT_TYPE;
+      content_alter_db_field($field, $db_info['columns'], $new_field, $db_info['columns']);
+    }
+  }
+
+  return $ret;
+}
