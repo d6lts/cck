@@ -403,6 +403,7 @@ function content_admin_display_overview_form_submit($form_id, $form_values) {
 function _content_admin_display_overview_row($field, $field_type) {
   $defaults = $field['display_settings'];
 
+  $options = array();
   foreach ($field_type['formatters'] as $name => $formatter_info) {
     $options[$name] = $formatter_info['label'];
   }
