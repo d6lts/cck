@@ -83,25 +83,53 @@ function fieldgroup_edit_group_form($content_type, $group_name, $action) {
     '#default_value' => $group['label'],
     '#required' => TRUE,
   );
-  $form['settings']['collapsible'] = array(
+  $form['settings']['form'] = array(
+    '#type' => 'fieldset',
+    '#title' => 'form settings',
+    '#description' => t('These settings apply to the group in the node editing form'),
+  );
+  $form['settings']['form']['collapsible'] = array(
     '#type' => 'checkbox',
     '#title' => t('Collapsible'),
-    '#default_value' => $group['settings']['collapsible'],
+    '#default_value' => $group['settings']['form']['collapsible'],
   );
-  $form['settings']['collapsed'] = array(
+  $form['settings']['form']['collapsed'] = array(
     '#type' => 'checkbox',
     '#title' => t('Collapsed'),
-    '#default_value' => $group['settings']['collapsed'],
+    '#default_value' => $group['settings']['form']['collapsed'],
   );
-  $form['settings']['#tree'] = TRUE;
-  $form['description'] = array(
+  $form['settings']['form']['description'] = array(
     '#type' => 'textarea',
     '#title' => t('Help text'),
-    '#default_value' => $group['description'],
+    '#default_value' => $group['settings']['form']['description'],
     '#rows' => 5,
     '#description' => t('Instructions to present to the user on the editing form.'),
     '#required' => FALSE,
   );
+  $form['settings']['display'] = array(
+    '#type' => 'fieldset',
+    '#title' => 'display settings',
+    '#description' => t('These settings apply to the group on node display.'),
+  );
+  $form['settings']['display']['collapsible'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Collapsible'),
+    '#default_value' => $group['settings']['display']['collapsible'],
+  );
+  $form['settings']['display']['collapsed'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Collapsed'),
+    '#default_value' => $group['settings']['display']['collapsed'],
+  );
+  $form['settings']['display']['description'] = array(
+    '#type' => 'textarea',
+    '#title' => t('Description'),
+    '#default_value' => $group['settings']['display']['description'],
+    '#rows' => 5,
+    '#description' => t('A description of the group.'),
+    '#required' => FALSE,
+  );
+  $form['settings']['#tree'] = TRUE;
   $form['weight'] = array(
     '#type' => 'weight',
     '#title' => t('Weight'),
@@ -161,13 +189,13 @@ function fieldgroup_edit_group_submit($form_id, &$form_values, $content_type, $a
         }
       }
     }
-    db_query("INSERT INTO {node_group} (type_name, group_name, label, settings, description, weight)
-              VALUES ('%s', '%s', '%s', '%s', '%s', %d)", $content_type['type'], $group_name, $form_values['label'], serialize($form_values['settings']), $form_values['description'], $form_values['weight']);
+    db_query("INSERT INTO {node_group} (type_name, group_name, label, settings, weight)
+              VALUES ('%s', '%s', '%s', '%s', '%s', %d)", $content_type['type'], $group_name, $form_values['label'], serialize($form_values['settings']), $form_values['weight']);
   }
   else {
-    db_query("UPDATE {node_group} SET label = '%s', settings = '%s', description = '%s', weight = %d ".
+    db_query("UPDATE {node_group} SET label = '%s', settings = '%s', weight = %d ".
              "WHERE type_name = '%s' AND group_name = '%s'",
-             $form_values['label'], serialize($form_values['settings']), $form_values['description'], $form_values['weight'], $content_type['type'], $form_values['group_name']);
+             $form_values['label'], serialize($form_values['settings']), $form_values['weight'], $content_type['type'], $form_values['group_name']);
   }
   cache_clear_all('fieldgroup_data', 'cache');
 
@@ -269,9 +297,9 @@ function fieldgroup_form_alter($form_id, &$form) {
       $form[$group_name] = array(
         '#type' => 'fieldset',
         '#title' => t($group['label']),
-        '#collapsed' => $group['settings']['collapsed'],
-        '#collapsible' => $group['settings']['collapsible'],
-        '#description' => $group['description'],
+        '#collapsed' => $group['settings']['form']['collapsed'],
+        '#collapsible' => $group['settings']['form']['collapsible'],
+        '#description' => $group['settings']['form']['description'],
         '#weight' => $group['weight'],
         '#attributes' => array('class' => strtr($group['group_name'], '_', '-')),
       );
@@ -328,6 +356,40 @@ function fieldgroup_content_admin_field_remove_submit($form_id, &$form_values) {
   db_query("DELETE FROM {node_group_fields} WHERE type_name = '%s' AND field_name = '%s'", $form_values['type_name'], $form_values['field_name']);
 }
 
+function fieldgroup_nodeapi(&$node, $op, $teaser, $page) {
+  switch ($op) {
+    case 'view':
+      foreach (fieldgroup_groups($node->type) as $group_name => $group) {
+        $node->content[$group_name] = array(
+          '#type' => 'fieldgroup_display',
+          '#title' => t($group['label']),
+          '#collapsed' => $group['settings']['form']['collapsed'],
+          '#collapsible' => $group['settings']['form']['collapsible'],
+          '#description' => $group['settings']['form']['description'],
+          '#weight' => $group['weight'],
+          '#attributes' => array('class' => strtr($group['group_name'], '_', '-')),
+        );
+        $visible = FALSE;
+        foreach ($group['fields'] as $field_name => $field) {
+          if (isset($node->content[$field_name])) {
+            $node->content[$group_name][$field_name] = $node->content[$field_name];
+            if ($node->content[$field_name]['#access'] && !empty($node->content[$field_name]['#value'])) {
+              $visible = TRUE;
+            }
+            unset($node->content[$field_name]);
+          }
+        }
+        if (!$visible) {
+          //hide the group, because the fields are empty or not accessible
+          unset($node->content[$group_name]);
+        }
+      }
+  }
+}
+
+function theme_fieldgroup_display($element) {
+  return theme('fieldset', $element);
+}
 
 /*
  * Gets the group name for a field

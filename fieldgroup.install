@@ -9,8 +9,7 @@ function fieldgroup_install() {
                 `type_name` varchar(32) NOT NULL default '',
                 `group_name` varchar(32) NOT NULL default '',
                 `label` varchar(255) NOT NULL default '',
-                `settings` varchar(255) NOT NULL default '',
-                `description` mediumtext NOT NULL,
+                `settings` mediumtext NOT NULL,
                 `weight` tinyint(4) NOT NULL,
                  PRIMARY KEY(`type_name`, `group_name`)
               ) /*!40100 DEFAULT CHARACTER SET utf8 */");
@@ -26,8 +25,7 @@ function fieldgroup_install() {
                 type_name varchar(32) NOT NULL default '',
                 group_name varchar(32) NOT NULL default '',
                 label varchar(255) NOT NULL default '',
-                settings varchar(255) NOT NULL default '',
-                description text NOT NULL,
+                settings text NOT NULL,
                 weight smallint NOT NULL,
                 PRIMARY KEY(type_name, group_name)
       )");
@@ -58,6 +56,48 @@ function fieldgroup_update_1() {
       $ret[] = update_sql("UPDATE {node_group_fields} SET group_name = CONCAT('group_', SUBSTRING(group_name FROM 7))");
       break;
   }
-  cache_clear_all('fieldgroup_data', 'cache');
+  return $ret;
+}
+
+/**
+ * add display settings for the group
+ */
+function fieldgroup_update_2() {
+  $ret = array();
+
+  // set settings column to accept larger values
+  switch ($GLOBALS['db_type']) {
+    case 'mysql':
+    case 'mysqli':
+      $ret[] = update_sql('ALTER TABLE {node_group} CHANGE settings settings mediumtext NOT NULL');
+      break;
+
+    case 'pgsql':
+      db_change_column($ret, 'node_group', 'settings', 'settings', 'text', array('not null' => TRUE));
+      break;
+  }
+
+  // move description into the settings array, and add new settings
+  $result = db_query("SELECT * FROM {node_group}");
+  while ($group = db_fetch_array($result)) {
+    $settings = array();
+    $settings['form'] = unserialize($group['settings']);
+    $settings['form']['description'] = $group['description'];
+    $settings['display'] = array('collapsible' => 0, 'collapsed' => 0, 'description' => '');
+    $ret[] = update_sql("UPDATE {node_group} SET settings = '". serialize($settings) ."', description = '' WHERE group_name = '". $group['group_name'] ."'");
+  }
+
+  // drop description column
+  switch ($GLOBALS['db_type']) {
+    case 'mysql':
+    case 'mysqli':
+      $ret[] = update_sql('ALTER TABLE {node_group} DROP description');
+      break;
+
+    case 'pgsql':
+      // Postgres only supports dropping of columns since 7.4
+      break;
+  }
+
   return $ret;
 }
