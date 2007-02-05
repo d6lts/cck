@@ -443,7 +443,8 @@ function content_update_1004() {
   $table = _content_tablename('', CONTENT_DB_STORAGE_PER_CONTENT_TYPE);
   if (db_table_exists($table)) {
     $ret[] = update_sql("DROP TABLE {".$table."}");
-
+  }
+  
   // set invalid 'per field storage' back to 'per content type'
   $result = db_query("SELECT field_name FROM {node_field} WHERE multiple = 0 AND db_storage = %d", CONTENT_DB_STORAGE_PER_FIELD);
   while ($row = db_fetch_array($result)) {
