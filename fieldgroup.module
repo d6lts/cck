@@ -190,7 +190,7 @@ function fieldgroup_edit_group_submit($form_id, &$form_values, $content_type, $a
       }
     }
     db_query("INSERT INTO {node_group} (type_name, group_name, label, settings, weight)
-              VALUES ('%s', '%s', '%s', '%s', '%s', %d)", $content_type['type'], $group_name, $form_values['label'], serialize($form_values['settings']), $form_values['weight']);
+              VALUES ('%s', '%s', '%s', '%s', %d)", $content_type['type'], $group_name, $form_values['label'], serialize($form_values['settings']), $form_values['weight']);
   }
   else {
     db_query("UPDATE {node_group} SET label = '%s', settings = '%s', weight = %d ".
