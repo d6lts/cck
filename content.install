@@ -338,7 +338,7 @@ function content_update_1002() {
 
   switch ($GLOBALS['db_type']) {
     case 'pgsql':
-      db_add_column($ret, 'node_field_instance', 'display_settings', 'text', array('not null' => TRUE, 'default' => ''));
+      db_add_column($ret, 'node_field_instance', 'display_settings', 'text', array('not null' => TRUE, 'default' => "''"));
       break;
 
     case 'mysql':
