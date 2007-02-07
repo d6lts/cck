@@ -367,7 +367,7 @@ function fieldgroup_nodeapi(&$node, $op, $teaser, $page) {
           '#collapsible' => $group['settings']['form']['collapsible'],
           '#description' => $group['settings']['form']['description'],
           '#weight' => $group['weight'],
-          '#attributes' => array('class' => strtr($group['group_name'], '_', '-')),
+          '#attributes' => array('class' => 'fieldgroup '. strtr($group['group_name'], '_', '-')),
         );
         $visible = FALSE;
         foreach ($group['fields'] as $field_name => $field) {
