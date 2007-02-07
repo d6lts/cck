@@ -363,9 +363,9 @@ function fieldgroup_nodeapi(&$node, $op, $teaser, $page) {
         $node->content[$group_name] = array(
           '#type' => 'fieldgroup_display',
           '#title' => t($group['label']),
-          '#collapsed' => $group['settings']['form']['collapsed'],
-          '#collapsible' => $group['settings']['form']['collapsible'],
-          '#description' => $group['settings']['form']['description'],
+          '#collapsed' => $group['settings']['display']['collapsed'],
+          '#collapsible' => $group['settings']['display']['collapsible'],
+          '#description' => $group['settings']['display']['description'],
           '#weight' => $group['weight'],
           '#attributes' => array('class' => 'fieldgroup '. strtr($group['group_name'], '_', '-')),
         );
