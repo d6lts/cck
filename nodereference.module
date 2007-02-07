@@ -56,12 +56,25 @@ function nodereference_field_settings($op, $field) {
           $views[t('Default Views')][$view->name] = $view->name;
         }
         if (count($views) > 1) {
-          $form['advanced_view'] = array(
+          $form['advanced'] = array(
+             '#type' => 'fieldset',
+             '#title' => t('Advanced - Nodes that can be referenced (View)'),
+             '#collapsible' => TRUE,
+             '#collapsed' => !isset($field['advanced_view']) || $field['advanced_view'] == '--',
+           );
+          $form['advanced']['advanced_view'] = array(
             '#type' => 'select',
-            '#title' => t('Advanced - Nodes that can be referenced'),
+            '#title' => t('View'),
             '#options' => $views,
             '#default_value' => isset($field['advanced_view']) ? $field['advanced_view'] : '--',
             '#description' => t('Choose the "Views module" view that selects the nodes that can be referenced.<br>Note :<ul><li>This will discard the "Content types" settings above. Use the view\'s "filters" section instead.</li><li>Use the view\'s "fields" section to display additional informations about candidate nodes on node creation/edition form.</li><li>Use the view\'s "sort criteria" section to determine the order in which candidate nodes will be displayed.</li></ul>'),
+          );
+          $form['advanced']['advanced_view_args'] = array(
+            '#type' => 'textfield',
+            '#title' => t('View arguments'),
+            '#default_value' => isset($field['advanced_view_args']) ? $field['advanced_view_args'] : '',
+            '#required' => FALSE,
+            '#description' => t('Provide a comma separated list of arguments to pass to the view.'),
           );
         }
       }
@@ -71,6 +84,7 @@ function nodereference_field_settings($op, $field) {
       $settings = array('referenceable_types');
       if (module_exists('views')) {
         $settings[] = 'advanced_view';
+        $settings[] = 'advanced_view_args';
       }
       return $settings;
 
@@ -337,6 +351,13 @@ function _nodereference_potential_references($field, $return_full_nodes = FALSE,
     // advanced field : referenceable nodes defined by a view
     // let views.module build the query
 
+    // arguments for the view
+    $view_args = array();
+    if (isset($field['view_args'])) {
+      // TODO: Support Tokens using token.module ?
+      $view_args = array_map(trim, explode(',', $field['view_args']));
+    }
+
     if (isset($string)) {
       views_view_add_filter($view, 'node', 'title', $exact_string ? '=' : 'contains', $string, null);
     }
@@ -356,7 +377,7 @@ function _nodereference_potential_references($field, $return_full_nodes = FALSE,
     // make sure the query is not cached
     unset($view->query);
 
-    $view_result = views_build_view('result', $view);
+    $view_result = views_build_view('result', $view, $view_args);
     $result = $view_result['result'];
   }
   else {
