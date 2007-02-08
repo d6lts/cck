@@ -101,3 +101,34 @@ function fieldgroup_update_2() {
 
   return $ret;
 }
+
+
+/**
+ * converts group settings collapsible/collapsed => style
+ */
+function fieldgroup_update_3() {
+  $ret = array();
+  $result = db_query("SELECT * FROM {node_group}");
+  while ($group = db_fetch_array($result)) {
+    if (!isset($group['settings']['form']['style'])) {
+      foreach (array('form', 'display') as $context) {
+        if (isset($group['settings'][$context]['collapsible']) && $group['settings'][$context]['collapsible']) {
+          if (isset($group['settings'][$context]['collapsed']) && $group['settings'][$context]['collapsed']) {
+            $group['settings'][$context]['style'] = 'fieldset_collapsed';
+          }
+          else {
+            $group['settings'][$context]['style'] = 'fieldset_collapsible';
+          }
+        }
+        else {
+          $group['settings'][$context]['style'] = 'fieldset';
+        }
+        unset($group['settings'][$context]['collapsible'], $group['settings'][$context]['collapsed']);
+      }
+
+      $ret[] = update_sql("UPDATE {node_group} SET settings = '". serialize($settings) ."' WHERE group_name = '". $group['group_name'] ."'");
+    }
+  }
+
+  return $ret;
+}
