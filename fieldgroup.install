@@ -123,10 +123,9 @@ function fieldgroup_update_3() {
         else {
           $group['settings'][$context]['style'] = 'fieldset';
         }
-        unset($group['settings'][$context]['collapsible'], $group['settings'][$context]['collapsed']);
       }
 
-      $ret[] = update_sql("UPDATE {node_group} SET settings = '". serialize($settings) ."' WHERE group_name = '". $group['group_name'] ."'");
+      $ret[] = update_sql("UPDATE {node_group} SET settings = '". serialize($group['settings']) ."' WHERE group_name = '". $group['group_name'] ."'");
     }
   }
 
