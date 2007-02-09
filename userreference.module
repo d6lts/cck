@@ -153,7 +153,7 @@ function userreference_widget($op, &$node, $field, &$items) {
           '#size' => $field['multiple'] ? min(count($options), 6) : 0,
           '#options' => $options,
           '#required' => $field['required'],
-          '#description' => $field['widget']['description'],
+          '#description' => t($field['widget']['description']),
         );
 
         return $form;
@@ -195,7 +195,7 @@ function userreference_widget($op, &$node, $field, &$items) {
 
         if ($field['multiple']) {
           $form[$field['field_name']]['#type'] = 'fieldset';
-          $form[$field['field_name']]['#description'] = $field['widget']['description'];
+          $form[$field['field_name']]['#description'] = t($field['widget']['description']);
           $delta = 0;
           foreach ($items as $item) {
             if ($item['uid']) {
@@ -226,7 +226,7 @@ function userreference_widget($op, &$node, $field, &$items) {
             '#autocomplete_path' => 'user/autocomplete',
             '#default_value' => $items[0]['default user_name'],
             '#required' => $field['required'],
-            '#description' => $field['widget']['description'],
+            '#description' => t($field['widget']['description']),
           );
         }
         return $form;

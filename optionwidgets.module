@@ -90,7 +90,7 @@ function optionwidgets_widget($op, &$node, $field, &$items) {
               '#size' => min(count($options), 6),
               '#options' => $options,
               '#required' => $field['required'],
-              '#description' => $field['widget']['description'],
+              '#description' => t($field['widget']['description']),
             );
           }
           else {
@@ -101,7 +101,7 @@ function optionwidgets_widget($op, &$node, $field, &$items) {
               '#multiple' => FALSE,
               '#options' => $options,
               '#required' => $field['required'],
-              '#description' => $field['widget']['description'],
+              '#description' => t($field['widget']['description']),
             );
           }
           break;
@@ -115,7 +115,7 @@ function optionwidgets_widget($op, &$node, $field, &$items) {
             '#title' => $options[$on_value],
             '#default_value' => $items['default keys'][0],
             '#return_value' => $on_value,
-            '#description' => $field['widget']['description'],
+            '#description' => t($field['widget']['description']),
             '#required' => FALSE,
           );
           break;
@@ -128,7 +128,7 @@ function optionwidgets_widget($op, &$node, $field, &$items) {
               '#default_value' => $items['default keys'],
               '#options' => $options,
               '#required' => $field['required'],
-              '#description' => $field['widget']['description'],
+              '#description' => t($field['widget']['description']),
             );
           }
           else {
@@ -139,7 +139,7 @@ function optionwidgets_widget($op, &$node, $field, &$items) {
               '#default_value' => $items['default key'],
               '#options' => $options,
               '#required' => $field['required'],
-              '#description' => $field['widget']['description'],
+              '#description' => t($field['widget']['description']),
             );
           }
           break;

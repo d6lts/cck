@@ -161,8 +161,8 @@ function number_field_formatter_info() {
     'us_1'    => array('label' => '9,999.9',          'field types' => array('number_decimal')),
     'us_2'    => array('label' => '9,999.99',         'field types' => array('number_decimal')),
     'be_0'    => array('label' => '9.999',            'field types' => array('number_integer', 'number_decimal')),
-    'be_1'    => array('label' => '9.999,9',          'field types' => array('number_decimal')),
-    'be_2'    => array('label' => '9.999,99',         'field types' => array('number_decimal')),
+    'be_1'    => array('label' => '9.999,9',         'field types' => array('number_decimal')),
+    'be_2'    => array('label' => '9.999,99',        'field types' => array('number_decimal')),
     'fr_0'    => array('label' => '9 999',            'field types' => array('number_integer', 'number_decimal')),
     'fr_1'    => array('label' => '9 999, 9',         'field types' => array('number_decimal')),
     'fr_2'    => array('label' => '9 999, 99',        'field types' => array('number_decimal')),
@@ -290,7 +290,7 @@ function number_widget($op, &$node, $field, &$items) {
 
       if ($field['multiple']) {
         $form[$field['field_name']]['#type'] = 'fieldset';
-        $form[$field['field_name']]['#description'] = $field['widget']['description'];
+        $form[$field['field_name']]['#description'] = t($field['widget']['description']);
         $delta = 0;
         foreach ($items as $data) {
           if (isset($data['value'])) {
@@ -328,7 +328,7 @@ function number_widget($op, &$node, $field, &$items) {
           '#title' => t($field['widget']['label']),
           '#default_value' => isset($items[0]['value']) ? $items[0]['value'] : '',
           '#required' => $field['required'],
-          '#description' => $field['widget']['description'],
+          '#description' => t($field['widget']['description']),
           '#size' => 20,
           '#maxlength' => 11,
           '#attributes' => array('class' => 'number'),
