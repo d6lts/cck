@@ -245,7 +245,7 @@ function fieldgroup_form_alter($form_id, &$form) {
         '#title' => t($group['label']),
         '#collapsed' => $group['settings']['collapsed'],
         '#collapsible' => $group['settings']['collapsible'],
-        '#description' => $group['description'],
+        '#description' => t($group['description']),
         '#weight' => $group['weight'],
         '#attributes' => array('class' => strtr($group['group_name'], '_', '-')),
       );
