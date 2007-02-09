@@ -25,7 +25,6 @@ function userreference_field_settings($op, $field) {
       $form['referenceable_roles'] = array(
         '#type' => 'checkboxes',
         '#title' => t('User roles that can be referenced'),
-        '#multiple' => TRUE,
         '#default_value' => isset($field['referenceable_roles']) ? $field['referenceable_roles'] : array(),
         '#options' => user_roles(1),
       );
@@ -256,10 +255,11 @@ function userreference_widget($op, &$node, $field, &$items) {
  */
 function _userreference_potential_references($field) {
   $roles = array();
-  if (isset($field['referenceable_roles'])) {
+  if (is_array($field['referenceable_roles'])) {
+    // keep only selected checkboxes
+    $roles = array_filter($field['referenceable_roles']);
     // filter invalid values that seems to get through sometimes ??
-    $field['referenceable_roles'] = array_intersect(user_roles(1), $field['referenceable_roles']);
-    $roles = array_keys(array_filter($field['referenceable_roles']));
+    $roles = array_intersect(array_keys(user_roles(1)), $roles);
   }
   if (empty($roles) || in_array(DRUPAL_AUTHENTICATED_RID, $roles)) {
     $result = db_query('SELECT u.name, u.uid FROM {users} u WHERE uid > 0 ORDER BY u.name ASC');
