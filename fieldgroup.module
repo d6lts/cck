@@ -322,3 +322,18 @@ function fieldgroup_get_group($content_type, $field_name) {
   }
   return FALSE;
 }
+
+/*
+ * Duplicates all fieldgroups, used when content types are duplicated
+ */
+function fieldgroup_duplicate($original_content_type, $content_type) {
+  foreach (fieldgroup_groups($original_content_type) as $group_name => $group) {
+    db_query("INSERT INTO {node_group} (type_name, group_name, label, settings, description, weight)
+              VALUES ('%s', '%s', '%s', '%s', '%s', %d)", $content_type, $group_name, $group['label'], serialize($group['settings']), $group['description'], $group['weight']);
+    foreach ($group['fields'] as $field_name => $field) {
+      db_query("INSERT INTO {node_group_fields} (type_name, group_name, field_name) VALUES ('%s', '%s', '%s')",
+            $content_type, $group_name, $field_name);
+    }
+  }
+  cache_clear_all('fieldgroup_data');
+}

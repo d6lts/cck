@@ -185,6 +185,9 @@ function _content_admin_type_edit_submit($form_id, $form_values) {
       // and move existing fields to separate shared table, if not already shared
       _content_admin_field_add_existing_submit('_content_admin_field_add_existing', $field_values);
     }
+    if (module_exist('fieldgroup')) {
+      fieldgroup_duplicate($form_values['original_type_name'], $form_values['type_name']);
+    }
   }
 
   drupal_set_message(t('Saved content type %type.', array('%type' => theme('placeholder', $form_values['label']))));
