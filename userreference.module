@@ -163,7 +163,7 @@ function userreference_widget($op, &$node, $field, &$items) {
           // drop the 'none' option
           unset($items['uids']['none']);
           if (!empty($items['uids'])) {
-            $items = content_transpose_array_rows_cols(array('uid' => $items['uids']));
+            $items = array_values(content_transpose_array_rows_cols(array('uid' => $items['uids'])));
           }
           else {
             $items[0]['uid'] = '';

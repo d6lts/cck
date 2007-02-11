@@ -227,7 +227,7 @@ function nodereference_widget($op, &$node, $field, &$items) {
             unset($items['nids'][0]);
           }
 
-          $items = content_transpose_array_rows_cols(array('nid' => $items['nids']));
+          $items = array_values(content_transpose_array_rows_cols(array('nid' => $items['nids'])));
         }
         else {
           $items[0]['nid'] = $items['nids'];
