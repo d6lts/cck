@@ -110,11 +110,10 @@ function fieldgroup_update_3() {
   $ret = array();
   $result = db_query("SELECT * FROM {node_group}");
   while ($group = db_fetch_array($result)) {
+    $group['settings'] = unserialize($group['settings']);
+
     if (!isset($group['settings']['form']['style'])) {
       foreach (array('form', 'display') as $context) {
-        if (!isset($group['settings'][$context])) {
-          $group['settings'][$context] = array();
-        }
         if (isset($group['settings'][$context]['collapsible']) && $group['settings'][$context]['collapsible']) {
           if (isset($group['settings'][$context]['collapsed']) && $group['settings'][$context]['collapsed']) {
             $group['settings'][$context]['style'] = 'fieldset_collapsed';
