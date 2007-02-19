@@ -507,10 +507,10 @@ function _content_admin_field_add_new($type_name, $new_field_name = '') {
       '#title' => t('Create new field'),
     );
     $form['new']['widget']['label'] = array(
-      '#title' => t('Label'),
+      '#title' => t('Name'),
       '#type' => 'textfield',
       '#default_value' => '',
-      '#description' => t('The human-readable name of this field.'),
+      '#description' => t('The machine-readable name of the field.<br/>Allowed characters : unaccentuated a-z, numbers and _. All other characters will be discarded.<br/>You\'ll be able to choose a human-readable label for the field on next page'),
       '#required' => TRUE,
     );
     $form['new']['field_widget_type'] = array(
