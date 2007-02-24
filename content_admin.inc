@@ -1337,6 +1337,8 @@ function content_db_add_column($table, $column, $type, $attributes = array()) {
       // MySQL allows no DEFAULT value for text (and blob) columns
       if (in_array($type, array('text', 'mediumtext', 'longtext'))) {
         $default = '';
+        // We also allow NULL values to account for CCK's per field INSERTs
+        $not_null = '';
       }
       db_query('ALTER TABLE {'. $table .'} ADD COLUMN '. $column .' '. $type .' '. $not_null .' '. $default);
       break;
@@ -1437,6 +1439,8 @@ function content_db_change_column($table, $column, $column_new, $type, $attribut
       // MySQL allows no DEFAULT value for text (and blob) columns
       if (in_array($type, array('text', 'mediumtext', 'longtext'))) {
         $default = '';
+        // We also allow NULL values to account for CCK's per field INSERTs
+        $not_null = '';
       }
       db_query('ALTER TABLE {'. $table .'} CHANGE '. $column .' '. $column_new .' '. $type .' '. $not_null .' '. $default);
       break;

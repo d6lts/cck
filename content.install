@@ -471,3 +471,35 @@ function content_update_1005() {
 
   return $ret;
 }
+
+/**
+ *  Set text db columns to accept NULL values for mysql (see http://drupal.org/node/108094)
+ */
+function content_update_1006() {
+  $ret = array();
+
+  switch ($GLOBALS['db_type']) {
+    case 'mysql':
+    case 'mysqli':
+      include_once('./'. drupal_get_path('module', 'content') .'/content.module');
+      include_once('./'. drupal_get_path('module', 'content') .'/content_admin.inc');
+
+      $types = content_types();
+      $fields = content_fields();
+
+      foreach ($fields as $field) {
+        $db_info = content_database_info($field);
+        foreach ($db_info['columns'] as $column => $attributes) {
+          if (in_array($attributes['type'], array('text', 'mediumtext', 'longtext'))) {
+            content_db_change_column($db_info['table'], $attributes['column'], $attributes['column'], $attributes['type'], $attributes);
+            $ret[] = array(
+              'query' => strtr('The text field %field has been updated to accept NULL values.', array('%field' => $field['field_name'])),
+              'success' => TRUE
+            );
+          }
+        }
+      }
+  }
+
+  return $ret;
+}
