@@ -9,15 +9,39 @@
 /**
  * Implementation of hook_views_tables().
  *
- * Exposes all fields to the views system if the field has delegated its database
- * storage to content.module.
+ * Exposes all fields to the views system.
  */
 function content_views_tables() {
   $field_types = _content_field_types();
-
-  $tables = array();
+  $return = array();
   foreach (content_fields() as $field) {
-    $db_info = content_database_info($field);
+    $module = $field_types[$field['type']]['module'];
+    $result = module_invoke($module, 'field_settings', 'tables', $field);
+    if (empty($result)) {
+      $result = content_views_field_tables($field);
+    }
+    $return = array_merge($return, $result);
+  }
+  return $return;
+}
+
+function content_views_field_tables($field) {
+  $db_info = content_database_info($field);
+
+  if (count($db_info['columns'])) {
+    $table = array();
+
+    $table['name'] = $db_info['table'];
+    $table['join'] = array(
+      'left' => array(
+        'table' => 'node',
+        'field' => 'vid',
+      ),
+      'right' => array(
+        'field' => 'vid',
+      ),
+    );
+
     $module = $field_types[$field['type']]['module'];
 
     $formatters = array();
@@ -27,79 +51,63 @@ function content_views_tables() {
       }
     }
 
-    if (count($db_info['columns'])) {
-      $table = array();
+    $columns = $db_info['columns'];
+    $main_column = array_shift($columns);
+    $addlfields = array();
+    foreach ($columns as $column => $attributes) {
+      $addlfields[] = $attributes['column'];
+    }
 
-      $table['name'] = $db_info['table'];
-      $table['join'] = array(
-        'left' => array(
-          'table' => 'node',
-          'field' => 'vid',
-        ),
-        'right' => array(
-          'field' => 'vid',
-        ),
-      );
-
-      $columns = $db_info['columns'];
-      $main_column = array_shift($columns);
-      $addlfields = array();
-      foreach ($columns as $column => $attributes) {
-        $addlfields[] = $attributes['column'];
-      }
-
-      $table['fields'] = array();
-      $table['fields'][$main_column['column']] = array(
+    $table['fields'] = array();
+    $table['fields'][$main_column['column']] = array(
+      'name' => $field_types[$field['type']]['label'] .': '. $field['widget']['label'] .' ('. $field['field_name'] .')',
+      'addlfields' => $addlfields,
+      'sortable' => isset($main_column['sortable']) ? $main_column['sortable'] : FALSE,
+      'query_handler' => 'content_views_field_query_handler',
+      'handler' => array('content_views_field_handler_group' => t('Group multiple values'),
+                         'content_views_field_handler_ungroup' => t('Do not group multiple values')),
+      'option' => array('#type' => 'select', '#options' => $formatters),
+      'content_db_info' => $db_info,
+      'content_field' => $field,
+      'content_field_module' => $module,
+    );
+    if (isset($main_column['sortable']) && $main_column['sortable']) {
+      $table['sorts'] = array();
+      $table['sorts'][$main_column['column']] = array(
         'name' => $field_types[$field['type']]['label'] .': '. $field['widget']['label'] .' ('. $field['field_name'] .')',
-        'addlfields' => $addlfields,
-        'sortable' => isset($main_column['sortable']) ? $main_column['sortable'] : FALSE,
-        'query_handler' => 'content_views_field_query_handler',
-        'handler' => array('content_views_field_handler_group' => t('Group multiple values'),
-                           'content_views_field_handler_ungroup' => t('Do not group multiple values')),
-        'option' => array('#type' => 'select', '#options' => $formatters),
+        'field' => $main_column['column'],
         'content_db_info' => $db_info,
         'content_field' => $field,
         'content_field_module' => $module,
       );
-      if (isset($main_column['sortable']) && $main_column['sortable']) {
-        $table['sorts'] = array();
-        $table['sorts'][$main_column['column']] = array(
-          'name' => $field_types[$field['type']]['label'] .': '. $field['widget']['label'] .' ('. $field['field_name'] .')',
+    }
+
+    $filters = module_invoke($module, 'field_settings', 'filters', $field);
+    if (is_array($filters) && count($filters)) {
+      $table['filters'] = array();
+      foreach ($filters as $key => $filter) {
+        $filter_name = '';
+        if (count($filters) > 1) {
+          $filter_name = (!empty($filter['name'])) ? $filter['name'] : $key;
+          $filter_name = ' - '.$filter_name;
+        }
+        $name = $field_types[$field['type']]['label'] .': '. $field['widget']['label'] . $filter_name .' ('. $field['field_name'] .')';
+        $init = array(
+          'name' => $name,
           'field' => $main_column['column'],
           'content_db_info' => $db_info,
           'content_field' => $field,
           'content_field_module' => $module,
         );
+        $table['filters'][$main_column['column'] .'_'. $key] = array_merge($filter, $init);
       }
-
-      $filters = module_invoke($module, 'field_settings', 'filters', $field);
-      if (is_array($filters) && count($filters)) {
-        $table['filters'] = array();
-        foreach ($filters as $key => $filter) {
-          $filter_name = '';
-          if (count($filters) > 1) {
-            $filter_name = (!empty($filter['name'])) ? $filter['name'] : $key;
-            $filter_name = ' - '.$filter_name;
-          }
-          $name = $field_types[$field['type']]['label'] .': '. $field['widget']['label'] . $filter_name .' ('. $field['field_name'] .')';
-          $init = array(
-            'name' => $name,
-            'field' => $main_column['column'],
-            'content_db_info' => $db_info,
-            'content_field' => $field,
-            'content_field_module' => $module,
-          );
-          $table['filters'][$main_column['column'] .'_'. $key] = array_merge($filter, $init);
-        }
-      }
-
-      // We don't use $db_info['table'] for the key, since that may change during
-      // the lifetime of the field and we don't want to require users to redefine
-      // their views.
-      $tables['node_data_'. $field['field_name']] = $table;
     }
+
+    // We don't use $db_info['table'] for the key, since that may change during
+    // the lifetime of the field and we don't want to require users to redefine
+    // their views.
+    return array('node_data_'. $field['field_name'] => $table);
   }
-  return $tables;
 }
 
 function content_views_field_query_handler($field, &$fieldinfo, &$query) {
@@ -169,27 +177,31 @@ function theme_content_view_multiple_field($items, $field, $data) {
 /**
  * Implementation of hook_views_arguments().
  *
- * Exposes all fields as filterable arguments if the field has delegated its database
- * storage to content.module.
+ * Exposes all fields as filterable arguments.
  */
 function content_views_arguments() {
   $field_types = _content_field_types();
-  $arguments = array();
-
+  $return = array();
   foreach (content_fields() as $field) {
-    $db_info = content_database_info($field);
     $module = $field_types[$field['type']]['module'];
-    if (count($db_info['columns'])) {
-      $main_column = reset($db_info['columns']);
-      $default_arguments = isset($main_column['default arguments']) ? $main_column['default arguments'] : TRUE;
-      $argument = array();
-      $argument['name'] = $field_types[$field['type']]['label'] .': '. $field['widget']['label'] .' ('. $field['field_name'] .')';
-      $argument['handler'] = 'content_views_argument_handler';
-
-      $arguments['content: '. $field['field_name']] = $argument;
+    $result = module_invoke($module, 'field_settings', 'arguments', $field);
+    if (empty($result)) {
+      $result = content_views_field_arguments($field);
     }
+    $return = array_merge($return, $result);
   }
-  return $arguments;
+  return $return;
+}
+
+function content_views_field_arguments($field) {
+  $db_info = content_database_info($field);
+  if (count($db_info['columns'])) {
+    $argument = array();
+    $argument['name'] = $field_types[$field['type']]['label'] .': '. $field['widget']['label'] .' ('. $field['field_name'] .')';
+    $argument['handler'] = 'content_views_argument_handler';
+
+    return array('content: '. $field['field_name'] => $argument);
+  }
 }
 
 /**
