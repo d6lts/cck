@@ -210,7 +210,7 @@ function hook_field($op, &$node, $field, &$node_field, $teaser, $page) {
 
       if (is_array($items)) {
         foreach ($items as $delta => $item) {
-          $error_field = $field['field_name'].']['.$delta.'][value';
+          $error_field = $field['field_name']. ']['. $delta.'][value';
           if ($item['value'] != '') {
             if (count($allowed_values) && !array_key_exists($item['value'], $allowed_values)) {
               form_set_error($error_field, t('Illegal value for %name.', array('%name' => t($field['widget']['label']))));

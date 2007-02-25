@@ -1012,15 +1012,15 @@ function _content_tablename($name, $entity, $version = NULL) {
   }
 
   $name = str_replace('-', '_', $name);
-  switch ($version .'-'. $entity) {
+  switch ("$version-$entity") {
     case '0-'. CONTENT_DB_STORAGE_PER_CONTENT_TYPE :
-      return 'node_'.$name;
+      return "node_$name";
     case '0-'. CONTENT_DB_STORAGE_PER_FIELD :
-      return 'node_data_'.$name;
+      return "node_data_$name";
     case '1003-'. CONTENT_DB_STORAGE_PER_CONTENT_TYPE :
-      return 'content_type_'.$name;
+      return "content_type_$name";
     case '1003-'. CONTENT_DB_STORAGE_PER_FIELD :
-      return 'content_'.$name;
+      return "content_$name";
   }
 }
 
@@ -1037,7 +1037,7 @@ function _content_tablename($name, $entity, $version = NULL) {
  *
  *  @param $field
  *    The field array, including widget info.
- 
+
  * @return
  *    CONTENT_CALLBACK_NONE    - do nothing for this operation
  *    CONTENT_CALLBACK_CUSTOM  - use the module's callback function.
@@ -1048,7 +1048,7 @@ function content_handle($entity, $op, $field) {
   $entity_types = ($entity == 'field') ? _content_field_types() : _content_widget_types();
   $entity_type = ($entity == 'field') ? $field['type'] : $field['widget']['type'];
   $module = $entity_types[$entity_type]['module'];
-  
+
   if ($op == 'default value' && $module == 'computed_field') {
     $callback_value =   CONTENT_CALLBACK_NONE;
   }
