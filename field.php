@@ -46,11 +46,23 @@ function hook_field_info() {
  *   - "database columns": Declare the columns that content.module should create
  *     and manage on behalf of the field. If the field module wishes to handle
  *     its own database storage, this should be omitted.
- *   - "filters": If content.module is managing the database storage,
- *     this operator determines what filters are available to views.
+ *   - "callbacks": Describe the field's behaviour regarding hook_field operations.
+ *   - "tables" : Declare the Views tables informations for the field.
+ *     Use this operator only if you need to override CCK's default general-purpose
+ *     implementation.
+ *     In this case, it is probably a good idea to use the default definitions
+ *     returned by content_views_field_tables($field) as a start point for your own
+ *     definitions.
+ *   - "arguments" : Declare the Views arguments informations for the field.
+ *     Use this operator only if you need to override CCK's default general-purpose
+ *     implementation.
+ *     In this case, it is probably a good idea to use the default definitions
+ *     returned by content_views_field_arguments($field) as a start point for your own
+ *     definitions.
+ *   - "filters": Declare the Views filters available for the field.
+ *     (this is used in CCK's default Views tables definition)
  *     They always apply to the first column listed in the "database columns"
  *     array.
- *   - "callbacks": Describe the field's behaviour regarding hook_field operations.
  * @param $field
  *   The field on which the operation is to be performed.
  * @return
@@ -60,26 +72,30 @@ function hook_field_info() {
  *   - "validate": no return value. Use form_set_error().
  *   - "save": an array of names of form elements to
  *     be saved in the database.
- *   - "database columns": an array keyed by column name, with arrays of column 
- *     information as values. This column information must include "type", the 
- *     MySQL data type of the column, and may also include a "sortable" parameter 
- *     to indicate to views.module that the column contains ordered information. 
- *     Details of other information that can be passed to the database layer can 
+ *   - "database columns": an array keyed by column name, with arrays of column
+ *     information as values. This column information must include "type", the
+ *     MySQL data type of the column, and may also include a "sortable" parameter
+ *     to indicate to views.module that the column contains ordered information.
+ *     Details of other information that can be passed to the database layer can
  *     be found at content_db_add_column().
- *   - "filters": an array whose values are 'filters'
- *     definitions as expected by views.module (see Views Documentation).
- *     When proving several filters, it is recommended to use the 'name'
- *     attribute in order to let the user distinguish between them. If no 'name'
- *     is specified for a filter, the key of the filter will be used instead.
- *   - "callbacks": an array describing the field's behaviour regarding hook_field 
+ *   - "callbacks": an array describing the field's behaviour regarding hook_field
  *     operations. The array is keyed by hook_field operations ('view', 'validate'...)
- *     and has the following possible values : 
- *       CONTENT_CALLBACK_NONE     : do nothing for this operation 
+ *     and has the following possible values :
+ *       CONTENT_CALLBACK_NONE     : do nothing for this operation
  *       CONTENT_CALLBACK_CUSTOM   : use the behaviour in hook_field(operation)
  *       CONTENT_CALLBACK_DEFAULT  : use content.module's default bahaviour
- *     Note : currently only the 'view' operation implements this feature. 
- *     All other field operation implemented by the module _will_ be executed 
+ *     Note : currently only the 'view' operation implements this feature.
+ *     All other field operation implemented by the module _will_ be executed
  *     no matter what.
+ *   - "tables": an array of 'tables' definitions as expected by views.module
+ *     (see Views Documentation).
+ *   - "arguments": an array of 'arguments' definitions as expected by views.module
+ *     (see Views Documentation).
+ *   - "filters": an array of 'filters' definitions as expected by views.module
+ *     (see Views Documentation).
+ *     When providing several filters, it is recommended to use the 'name'
+ *     attribute in order to let the user distinguish between them. If no 'name'
+ *     is specified for a filter, the key of the filter will be used instead.
  */
 function hook_field_settings($op, $field) {
   switch ($op) {
@@ -110,6 +126,21 @@ function hook_field_settings($op, $field) {
       }
       return $columns;
 
+    case 'callbacks':
+      return array(
+        'view' => CONTENT_CALLBACK_CUSTOM,
+      );
+
+    case 'tables':
+      $tables = content_views_field_tables($field);
+      // whatever additions / modifications needed on the default definitions
+      return $tables;
+
+    case 'arguments':
+      $arguments = content_views_field_arguments($field);
+      // whatever additions / modifications needed on the default definitions
+      return $arguments;
+
     case 'filters':
       return array(
         'substring' => array(
@@ -121,11 +152,7 @@ function hook_field_settings($op, $field) {
           'operator' => 'views_handler_operator_gtlt',
         ),
       );
-    
-    case 'callbacks':
-      return array(
-        'view' => CONTENT_CALLBACK_CUSTOM,
-      );
+
   }
 }
 
@@ -305,14 +332,14 @@ function hook_widget_info() {
  *   - "form": an array of form elements to add to the settings page.
  *   - "validate": no return value. Use form_set_error().
  *   - "save": an array of names of form elements to be saved in the database.
- *   - "callbacks": an array describing the widget's behaviour regarding hook_widget 
+ *   - "callbacks": an array describing the widget's behaviour regarding hook_widget
  *     operations. The array is keyed by hook_widget operations ('form', 'validate'...)
- *     and has the following possible values : 
- *       CONTENT_CALLBACK_NONE     : do nothing for this operation 
+ *     and has the following possible values :
+ *       CONTENT_CALLBACK_NONE     : do nothing for this operation
  *       CONTENT_CALLBACK_CUSTOM   : use the behaviour in hook_widget(operation)
  *       CONTENT_CALLBACK_DEFAULT  : use content.module's default bahaviour
  *     Note : currently only the 'default value' operation implements this feature.
- *     All other widget operation implemented by the module _will_ be executed 
+ *     All other widget operation implemented by the module _will_ be executed
  *     no matter what.
  */
 function hook_widget_settings($op, $widget) {
@@ -335,7 +362,7 @@ function hook_widget_settings($op, $widget) {
 
     case 'save':
       return array('rows');
-            
+
     case 'callbacks':
       return array(
         'default value' => CONTENT_CALLBACK_NONE,
