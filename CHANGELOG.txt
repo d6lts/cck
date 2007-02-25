@@ -1,5 +1,33 @@
 // $Id$
 
+4.7--1.x
+========
+
+Features
+--------
+
+General
+- 117621  Allow field modules to provide their own views integration data
+- 120172  String update - make field name / label workflow clearer on 'add new field' form
+- 107320  Added fieldgroup support for content type duplication
+- 115425  Allow field descriptions to be translated
+
+Field / widget modules
+- 114145  Noderef : Add 'view arguments' setting for view-defined referenceable nodes
+
+Bugfix
+------
+
+General
+- 108226  (minor) ungroup field handler : no need to rebuild the field queryname
+- 116058  (PgSQL) Wrong use of db_add_column in content_update_9
+- 115332  MySQL5 : fix errors when adding new or existing field
+
+Field / widget modules
+- 108094  Text : fix MySQL5 error on text field creation.
+- 117813  Noderef / Userref : Fix select list widget filling 'delta' column with the nid / uid
+- 117031  Userref : Fix broken "roles that can be referenced"
+
 4.7--1.3
 ========
 
