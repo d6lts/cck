@@ -20,14 +20,17 @@ function content_views_tables() {
     if (empty($result)) {
       $result = content_views_field_tables($field);
     }
-    $return = array_merge($return, $result);
+    if (is_array($result)) {
+      $return = array_merge($return, $result);
+    }
   }
   return $return;
 }
 
 function content_views_field_tables($field) {
+  $field_types = _content_field_types();
   $db_info = content_database_info($field);
-
+  
   if (count($db_info['columns'])) {
     $table = array();
 
@@ -141,10 +144,10 @@ function content_views_field_handler_group($field_info, $field_data, $value, $da
     foreach ($field_info['content_db_info']['columns'] as $column => $attributes) {
       $query_columns[] = "node_data_$field[field_name].$attributes[column] AS $column";
     }
-    $query = "SELECT ".implode(', ', $query_columns).
+    $query = "SELECT ". implode(', ', $query_columns) .
              " FROM {node} node".
              " LEFT JOIN {". $field_info['content_db_info']['table'] ."} node_data_$field[field_name] ON node.vid = node_data_$field[field_name].vid".
-             " WHERE node.nid = ".$data->nid.
+             " WHERE node.nid = ". $data->nid .
              " ORDER BY node_data_$field[field_name].delta";
     $result = db_query(db_rewrite_sql($query, 'node'));
     while ($item = db_fetch_array($result)) {
@@ -187,12 +190,15 @@ function content_views_arguments() {
     if (empty($result)) {
       $result = content_views_field_arguments($field);
     }
-    $return = array_merge($return, $result);
+    if (is_array($result)) {
+      $return = array_merge($return, $result);
+    }
   }
   return $return;
 }
 
 function content_views_field_arguments($field) {
+  $field_types = _content_field_types();
   $db_info = content_database_info($field);
   if (count($db_info['columns'])) {
     $argument = array();
