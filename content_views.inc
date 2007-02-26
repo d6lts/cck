@@ -20,14 +20,17 @@ function content_views_tables() {
     if (empty($result)) {
       $result = content_views_field_tables($field);
     }
-    $return = array_merge($return, $result);
+    if (is_array($result)) {
+      $return = array_merge($return, $result);
+    }
   }
   return $return;
 }
 
 function content_views_field_tables($field) {
+  $field_types = _content_field_types();
   $db_info = content_database_info($field);
-
+  
   if (count($db_info['columns'])) {
     $table = array();
 
@@ -187,12 +190,15 @@ function content_views_arguments() {
     if (empty($result)) {
       $result = content_views_field_arguments($field);
     }
-    $return = array_merge($return, $result);
+    if (is_array($result)) {
+      $return = array_merge($return, $result);
+    }
   }
   return $return;
 }
 
 function content_views_field_arguments($field) {
+  $field_types = _content_field_types();
   $db_info = content_database_info($field);
   if (count($db_info['columns'])) {
     $argument = array();
