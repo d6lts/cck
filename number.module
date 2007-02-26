@@ -132,7 +132,7 @@ function number_field($op, &$node, $field, &$items, $teaser, $page) {
 
       if (is_array($items)) {
         foreach ($items as $delta => $item) {
-          $error_field = $field['field_name'].']['.$delta.'][value';
+          $error_field = $field['field_name'] .']['. $delta .'][value';
           if ($item['value'] != '') {
             if (is_numeric($field['min']) && $item['value'] < $field['min']) {
               form_set_error($error_field, t('The value of %name may be no smaller than %min.', array('%name' => t($field['widget']['label']), '%min' => $field['min'])));
@@ -161,8 +161,8 @@ function number_field_formatter_info() {
     'us_1'    => array('label' => '9,999.9',          'field types' => array('number_decimal')),
     'us_2'    => array('label' => '9,999.99',         'field types' => array('number_decimal')),
     'be_0'    => array('label' => '9.999',            'field types' => array('number_integer', 'number_decimal')),
-    'be_1'    => array('label' => '9.999,9',         'field types' => array('number_decimal')),
-    'be_2'    => array('label' => '9.999,99',        'field types' => array('number_decimal')),
+    'be_1'    => array('label' => '9.999,9',          'field types' => array('number_decimal')),
+    'be_2'    => array('label' => '9.999,99',         'field types' => array('number_decimal')),
     'fr_0'    => array('label' => '9 999',            'field types' => array('number_integer', 'number_decimal')),
     'fr_1'    => array('label' => '9 999, 9',         'field types' => array('number_decimal')),
     'fr_2'    => array('label' => '9 999, 99',        'field types' => array('number_decimal')),
@@ -341,7 +341,7 @@ function number_widget($op, &$node, $field, &$items) {
     case 'process form values':
       // Don't save empty fields.
       foreach ($items as $delta => $item) {
-        $items[$delta]['value'] = preg_replace('@[^-0-9\.]@','',$items[$delta]['value']);
+        $items[$delta]['value'] = preg_replace('@[^-0-9\.]@', '', $items[$delta]['value']);
       }
       if ($field['multiple']) {
         foreach ($items as $delta => $item) {

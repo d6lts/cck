@@ -413,11 +413,11 @@ function fieldgroup_nodeapi(&$node, $op, $teaser, $page) {
 function theme_fieldgroup_simple($element) {
   $output = '<div'. drupal_attributes($element['#attributes']) .'>';
   if ($element['#title']) {
-    $output.= '<h2>'. $element['#title'] .'</h2>';
-    $output.= ($element['#description'] ? '<div class="description">'. $element['#description'] .'</div>' : '');
+    $output .= '<h2>'. $element['#title'] .'</h2>';
+    $output .= ($element['#description'] ? '<div class="description">'. $element['#description'] .'</div>' : '');
   }
-  $output.= '<div class="content">'. $element['#children'] .'</div>';
-  $output.= '</div>';
+  $output .= '<div class="content">'. $element['#children'] .'</div>';
+  $output .= '</div>';
 
   return $output;
 }
