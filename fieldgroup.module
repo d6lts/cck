@@ -530,12 +530,14 @@ function fieldgroup_display_overview_form_submit($form_id, $form_values) {
   $type = $form_values['type_name'];
   $groups = fieldgroup_groups($type);
 
-  foreach ($form_values['groups'] as $group_name => $groupvalues) {
-    $group = &$groups[$group_name];
-    foreach ($groupvalues as $key => $value) {
-      $group['settings']['display'][$key] = $value;
+  if (isset($form_values['groups'])) {
+    foreach ($form_values['groups'] as $group_name => $groupvalues) {
+      $group = &$groups[$group_name];
+      foreach ($groupvalues as $key => $value) {
+        $group['settings']['display'][$key] = $value;
+      }
+      fieldgroup_save_group($type, $group);
     }
-    fieldgroup_save_group($type, $group);
+    cache_clear_all('fieldgroup_data', 'cache');
   }
-  cache_clear_all('fieldgroup_data', 'cache');
 }
