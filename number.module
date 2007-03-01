@@ -265,26 +265,11 @@ function number_widget($op, &$node, $field, &$items) {
     case 'form':
       $form = array();
 
-      $prefix = '';
-      $suffix = '';
       $prefixes = explode('|', $field['prefix']);
       $suffixes = explode('|', $field['suffix']);
-      if ($prefixes) {
-        if (sizeof($prefixes) > 1) {
-          $prefix = format_plural($item['value'], $prefixes[0], $prefixes[1]);
-        }
-        else {
-          $prefix = $field['prefix'];
-        }
-      }
-      if ($suffixes) {
-        if (sizeof($suffixes) > 1) {
-          $suffix = format_plural($item['value'], $suffixes[0], $suffixes[1]);
-        }
-        else {
-          $suffix = $field['suffix'];
-        }
-      }
+      // We take the plural form (if any) for forms.
+      $prefix = array_pop($prefixes);
+      $suffix = array_pop($suffixes);
 
       $form[$field['field_name']] = array('#tree' => TRUE);
 
