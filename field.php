@@ -198,6 +198,7 @@ function hook_field_settings($op, $field) {
 function hook_field($op, &$node, $field, &$node_field, $teaser, $page) {
   switch ($op) {
     case 'view':
+      $context = $teaser ? 'teaser' : 'full';
       $formatter = isset($field['display_settings'][$context]['format']) ? $field['display_settings'][$context]['format'] : 'default';
       $items = array();
       foreach ($node_field as $delta => $item) {
