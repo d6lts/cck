@@ -1,34 +1,33 @@
 # $Id$
-#
 # LANGUAGE translation of Drupal (general)
 # Copyright YEAR NAME <EMAIL@ADDRESS>
 # Generated from files:
-#  field.php,v 1.7.2.3 2007/01/06 16:22:53 yched
-#  text.module,v 1.41.2.5 2007/01/06 17:47:04 yched
-#  number.module,v 1.34.2.5 2007/01/05 20:52:23 yched
-#  content_admin.inc,v 1.28.2.14 2007/01/07 03:00:33 yched
-#  fieldgroup.module,v 1.1.4.10 2007/01/06 16:22:53 yched
-#  content.module,v 1.90.2.21 2007/01/07 03:00:33 yched
-#  content_copy.module,v 1.1.2.4 2007/01/05 20:52:23 yched
-#  nodereference.module,v 1.39.2.2 2007/01/01 16:39:18 yched
-#  userreference.module,v 1.30.2.5 2007/01/05 20:52:23 yched
+#  text.module,v 1.41.2.11 2007/02/25 23:57:55 yched
+#  number.module,v 1.34.2.20 2007/03/01 04:51:54 yched
+#  content_admin.inc,v 1.28.2.29 2007/02/24 03:06:45 yched
+#  fieldgroup.module,v 1.1.4.26 2007/02/27 02:45:37 yched
+#  content_copy.module,v 1.1.2.6 2007/03/01 00:28:01 yched
+#  content.module,v 1.90.2.38 2007/03/05 22:09:33 yched
+#  nodereference.module,v 1.39.2.17 2007/03/05 21:58:47 yched
+#  userreference.module,v 1.30.2.16 2007/03/05 21:58:47 yched
 #  content.info,v 1.2.2.2 2007/01/05 11:57:46 yched
+#  content_copy.info,v 1.1.2.4 2007/01/08 13:29:21 karens
 #  fieldgroup.info,v 1.1.2.2 2007/01/05 11:57:46 yched
 #  nodereference.info,v 1.2.2.2 2007/01/05 11:57:46 yched
 #  number.info,v 1.2.2.2 2007/01/05 11:57:46 yched
 #  optionwidgets.info,v 1.2.2.2 2007/01/05 11:57:46 yched
 #  text.info,v 1.2.2.2 2007/01/05 11:57:46 yched
 #  userreference.info,v 1.2.2.2 2007/01/05 11:57:46 yched
-#  content_crud.inc,v 1.4.2.7 2007/01/07 00:06:36 yched
-#  content_views.inc,v 1.2.2.5 2007/01/05 11:57:46 yched
-#  optionwidgets.module,v 1.10.2.2 2007/01/05 11:57:46 yched
-#  optionwidgets.install,v 1.1.4.3 2007/01/05 11:57:46 yched
+#  content_crud.inc,v 1.4.2.11 2007/01/26 12:34:56 karens
+#  content_views.inc,v 1.2.2.11 2007/02/26 13:52:04 yched
+#  optionwidgets.module,v 1.10.2.7 2007/02/09 19:36:39 yched
+#  optionwidgets.install,v 1.1.4.5 2007/01/25 17:23:26 yched
 #
 #, fuzzy
 msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
-"POT-Creation-Date: 2007-01-07 15:36+0100\n"
+"POT-Creation-Date: 2007-03-05 23:30+0100\n"
 "PO-Revision-Date: YYYY-mm-DD HH:MM+ZZZZ\n"
 "Last-Translator: NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <EMAIL@ADDRESS>\n"
@@ -37,55 +36,67 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=INTEGER; plural=EXPRESSION;\n"
 
-#: content_admin.inc:202;206;405;643 fieldgroup.module:97
+#: content_admin.inc:203;207;368;749 fieldgroup.module:84;510
 msgid "Label"
 msgstr ""
 
-#: content_admin.inc:202;206 fieldgroup.module:122
-msgid "Weight"
+#: content_admin.inc:203 fieldgroup.module:510
+msgid "Group"
 msgstr ""
 
-#: content_admin.inc:376 content.module:82
+#: content_admin.inc:362 content_copy.module:158;231
+msgid "Submit"
+msgstr ""
+
+#: content_admin.inc:410;415 fieldgroup.module:477;485
+msgid "<Hidden>"
+msgstr ""
+
+#: content_admin.inc:413 fieldgroup.module:476
+msgid "Above"
+msgstr ""
+
+#: content_admin.inc:481 content.module:100
 msgid "Add field"
 msgstr ""
 
-#: content_admin.inc:580 fieldgroup.module:205
+#: content_admin.inc:686 fieldgroup.module:216
 msgid "Remove"
 msgstr ""
 
-#: content_admin.inc:580 fieldgroup.module:205
+#: content_admin.inc:686 fieldgroup.module:216
 msgid "Cancel"
 msgstr ""
 
-#: content_admin.inc:657 fieldgroup.module:114
+#: content_admin.inc:763 fieldgroup.module:106
 msgid "Help text"
 msgstr ""
 
-#: content.module:50 content_copy.module:129
-msgid "Fields"
-msgstr ""
-
-#: nodereference.module:181 userreference.module:256
-msgid "<none>"
-msgstr ""
-
-#: number.module:38 text.module:41
-msgid "Allowed values list"
-msgstr ""
-
-#: number.module:42 text.module:45
-msgid "The possible values this field can contain. Enter one value per line, in the format key|label. The key is the value that will be stored in the database and it must match the field storage type, %type. The label is optional and the key will be used as the label if no label is specified."
-msgstr ""
-
-#: number.module:46 text.module:49
+#: content_admin.inc:797 number.module:65 text.module:49
 msgid "Php code"
 msgstr ""
 
-#: number.module:52 text.module:55
+#: content_admin.inc:803 number.module:71 text.module:55
 msgid "Code"
 msgstr ""
 
-#: number.module:55 text.module:58
+#: content.module:59 content_copy.module:129
+msgid "Fields"
+msgstr ""
+
+#: nodereference.module:202 userreference.module:142
+msgid "<none>"
+msgstr ""
+
+#: number.module:57 text.module:41
+msgid "Allowed values list"
+msgstr ""
+
+#: number.module:61 text.module:45
+msgid "The possible values this field can contain. Enter one value per line, in the format key|label. The key is the value that will be stored in the database and it must match the field storage type, %type. The label is optional and the key will be used as the label if no label is specified."
+msgstr ""
+
+#: number.module:74 text.module:58
 msgid "Advanced Usage Only: PHP code that returns a keyed array of allowed values. Should not include &lt;?php ?&gt; delimiters. If this field is filled out, the array returned by this code will override the allowed values list above."
 msgstr ""
 
@@ -93,36 +104,48 @@ msgstr ""
 msgid "CCK"
 msgstr ""
 
-#: content_crud.inc:60
+#: content_crud.inc:59
 msgid "The content fields table %name has been created."
 msgstr ""
 
-#: content_crud.inc:90
+#: content_crud.inc:89
 msgid "Content fields table %old_name has been renamed to %new_name and field instances have been updated."
 msgstr ""
 
-#: content_crud.inc:112
+#: content_crud.inc:111
 msgid "The content fields table %name has been deleted."
 msgstr ""
 
-#: content_views.inc:57
+#: content_views.inc:70
 msgid "Group multiple values"
 msgstr ""
 
-#: content_views.inc:58
+#: content_views.inc:71
 msgid "Do not group multiple values"
 msgstr ""
 
-#: content.module:66
+#: content.module:18
+msgid "Configure how this content type's fields and field labels should be displayed when it's viewed in teaser and full-page mode."
+msgstr ""
+
+#: content.module:75
 msgid "Edit"
 msgstr ""
 
-#: content.module:73
+#: content.module:82
 msgid "Manage fields"
 msgstr ""
 
-#: content.module:101
+#: content.module:91
+msgid "Display fields"
+msgstr ""
+
+#: content.module:119
 msgid "Remove field"
+msgstr ""
+
+#: content.module:0
+msgid "content"
 msgstr ""
 
 #: content.info:0
@@ -133,43 +156,19 @@ msgstr ""
 msgid "Allows administrators to define new content types."
 msgstr ""
 
-#: number.module:28
-msgid "Minimum"
+#: optionwidgets.module:38
+msgid "Create a list of options as a list in <strong>Allowed values</strong> or as an array in Php code at the bottom of this page. These values will be the same for the %field in all content types. "
 msgstr ""
 
-#: number.module:33
-msgid "Maximum"
+#: optionwidgets.module:40
+msgid " For a single on/off checkbox, define the 'off' value first, then the 'on' value in the <strong>Allowed values</strong> section."
 msgstr ""
 
-#: number.module:61
-msgid "\"Minimum\" must be a number."
+#: optionwidgets.module:43
+msgid " The Check boxes/radio buttons widget will display checkboxes if the multiple values option is selected for this field, otherwise radios will be displayed."
 msgstr ""
 
-#: number.module:64
-msgid "\"Maximum\" must be a number."
-msgstr ""
-
-#: number.module:125
-msgid "The value of %name may be no smaller than %min."
-msgstr ""
-
-#: number.module:128
-msgid "The value of %name may be no larger than %max."
-msgstr ""
-
-#: number.info:0
-msgid "Number"
-msgstr ""
-
-#: number.info:0
-msgid "Defines numeric field types."
-msgstr ""
-
-#: optionwidgets.module:34
-msgid "Create a list of options as a list in Allowed values or as an array in Php code at the bottom of this page. These values will be the same for the %field in all content types. The Check boxes/radio buttons widget will display checkboxes if the multiple values option is selected for this field, otherwise radios will be displayed."
-msgstr ""
-
-#: optionwidgets.module:171
+#: optionwidgets.module:200
 msgid "N/A"
 msgstr ""
 
@@ -193,7 +192,7 @@ msgstr ""
 msgid "Text processing"
 msgstr ""
 
-#: text.module:329
+#: text.module:127
 msgid "%label is longer than %max characters."
 msgstr ""
 
@@ -209,8 +208,8 @@ msgstr ""
 msgid "User roles that can be referenced"
 msgstr ""
 
-#: userreference.module:228
-msgid "Invalid user name."
+#: userreference.module:65
+msgid "%name : Invalid user."
 msgstr ""
 
 #: userreference.info:0
@@ -233,7 +232,7 @@ msgstr ""
 msgid "Field name"
 msgstr ""
 
-#: content_admin.inc:15;413
+#: content_admin.inc:15;518
 msgid "Field type"
 msgstr ""
 
@@ -245,51 +244,51 @@ msgstr ""
 msgid "There are no groups configured for this content type."
 msgstr ""
 
-#: content_admin.inc:78
+#: content_admin.inc:78;352
 msgid "There are no fields configured for this content type."
 msgstr ""
 
-#: content_admin.inc:101
+#: content_admin.inc:103
 msgid "group"
 msgstr ""
 
-#: content_admin.inc:104;117;142
+#: content_admin.inc:106;119;144
 msgid "configure"
 msgstr ""
 
-#: content_admin.inc:105;118;143
+#: content_admin.inc:107;120;145
 msgid "remove"
 msgstr ""
 
-#: content_admin.inc:156
+#: content_admin.inc:158
 msgid "body"
 msgstr ""
 
-#: content_admin.inc:177
+#: content_admin.inc:179
 msgid "Update"
 msgstr ""
 
-#: content_admin.inc:202;206
+#: content_admin.inc:203;207;510
 msgid "Name"
 msgstr ""
 
-#: content_admin.inc:202;206
+#: content_admin.inc:203;207;368
 msgid "Type"
 msgstr ""
 
-#: content_admin.inc:202
-msgid "Group"
+#: content_admin.inc:203;207
+msgid "Weight"
 msgstr ""
 
-#: content_admin.inc:202;206
+#: content_admin.inc:203;207
 msgid "Operations"
 msgstr ""
 
-#: content_admin.inc:270
+#: content_admin.inc:271
 msgid "No fields have been added to this group."
 msgstr ""
 
-#: content_admin.inc:275
+#: content_admin.inc:276
 msgid "!label (!name)"
 msgstr ""
 
@@ -305,224 +304,140 @@ msgstr ""
 msgid "Updated field weights."
 msgstr ""
 
-#: content_admin.inc:367
+#: content_admin.inc:368
+msgid "Field"
+msgstr ""
+
+#: content_admin.inc:399
+msgid "Your settings have been saved."
+msgstr ""
+
+#: content_admin.inc:414
+msgid "Inline"
+msgstr ""
+
+#: content_admin.inc:440
+msgid "Teaser"
+msgstr ""
+
+#: content_admin.inc:441
+msgid "Full"
+msgstr ""
+
+#: content_admin.inc:472
 msgid "Add existing field"
 msgstr ""
 
-#: content_admin.inc:402
+#: content_admin.inc:507
 msgid "Create new field"
 msgstr ""
 
-#: content_admin.inc:408
-msgid "The human-readable name of this field."
+#: content_admin.inc:513
+msgid "The machine-readable name of the field.<br/>Allowed characters : unaccentuated a-z, numbers and _. All other characters will be discarded.<br/>You'll be able to choose a human-readable label for the field on next page"
 msgstr ""
 
-#: content_admin.inc:421
+#: content_admin.inc:526
 msgid "Create field"
 msgstr ""
 
-#: content_admin.inc:433
-msgid "No field modules are enabled. You need to <a href=\"%modules_url\">enable one</a>, such as text.module, before you can add new fields."
+#: content_admin.inc:538
+msgid "No field modules are enabled. You need to <a href=\"!modules_url\">enable one</a>, such as text.module, before you can add new fields."
 msgstr ""
 
-#: content_admin.inc:488
+#: content_admin.inc:594
 msgid "Added field %label."
 msgstr ""
 
-#: content_admin.inc:500
+#: content_admin.inc:606
 msgid "The field name %field_name already exists."
 msgstr ""
 
-#: content_admin.inc:504
+#: content_admin.inc:610
 msgid "The field name %field_name is invalid."
 msgstr ""
 
-#: content_admin.inc:555
+#: content_admin.inc:661
 msgid "Created field %label."
 msgstr ""
 
-#: content_admin.inc:577
+#: content_admin.inc:683
 msgid "Are you sure you want to remove the field %field?"
 msgstr ""
 
-#: content_admin.inc:579
+#: content_admin.inc:685
 msgid "If you have any content left in this field, it will be lost. This action cannot be undone."
 msgstr ""
 
-#: content_admin.inc:598
+#: content_admin.inc:704
 msgid "Removed field %field from %type."
 msgstr ""
 
-#: content_admin.inc:621
+#: content_admin.inc:727
 msgid "Widget settings"
 msgstr ""
 
-#: content_admin.inc:622
+#: content_admin.inc:728
 msgid "These settings apply only to the %field field as it appears in the %type content type."
 msgstr ""
 
-#: content_admin.inc:636
+#: content_admin.inc:742
 msgid "Widget"
 msgstr ""
 
-#: content_admin.inc:660
+#: content_admin.inc:766
 msgid "Instructions to present to the user below this field on the editing form."
 msgstr ""
 
-#: content_admin.inc:666
+#: content_admin.inc:775
+msgid "Default value"
+msgstr ""
+
+#: content_admin.inc:807
+msgid "Advanced Usage Only: PHP code that returns a default value. Should not include &lt;?php ?&gt; delimiters.<br/>If this field is filled out, the value returned by this code will override any value in the textfield above."
+msgstr ""
+
+#: content_admin.inc:813
 msgid "Data settings"
 msgstr ""
 
-#: content_admin.inc:667
+#: content_admin.inc:814
 msgid "These settings apply to the %field field in every content type in which it appears."
 msgstr ""
 
-#: content_admin.inc:671
+#: content_admin.inc:818
 msgid "Required"
 msgstr ""
 
-#: content_admin.inc:676
+#: content_admin.inc:823
 msgid "Multiple values"
 msgstr ""
 
-#: content_admin.inc:687
+#: content_admin.inc:834
 msgid "Save field settings"
 msgstr ""
 
-#: content_admin.inc:765
+#: content_admin.inc:888
+msgid "The default value php code must return an array like array(0 => array('value' => 'myvalue')) but returned @value."
+msgstr ""
+
+#: content_admin.inc:926
+msgid "The default value php code created @value which is invalid."
+msgstr ""
+
+#: content_admin.inc:929
+msgid "The default value is invalid."
+msgstr ""
+
+#: content_admin.inc:986
 msgid "Saved field %field."
 msgstr ""
 
-#: content_admin.inc:1060;1153
+#: content_admin.inc:1284;1381
 msgid "No PostgreSQL mapping found for %type data type."
 msgstr ""
 
-#: content_admin.inc:1060;1153
+#: content_admin.inc:1284;1381
 msgid "database"
-msgstr ""
-
-#: nodereference.module:17
-msgid "node reference autocomplete"
-msgstr ""
-
-#: nodereference.module:42
-msgid "Content types that can be referenced"
-msgstr ""
-
-#: nodereference.module:51
-msgid "Existing Views"
-msgstr ""
-
-#: nodereference.module:56
-msgid "Default Views"
-msgstr ""
-
-#: nodereference.module:61
-msgid "Advanced - Nodes that can be referenced"
-msgstr ""
-
-#: nodereference.module:64
-msgid "Choose the \"Views module\" view that selects the nodes that can be referenced.<br>Note :<ul><li>This will discard the \"Content types\" settings above. Use the view's \"filters\" section instead.</li><li>Use the view's \"fields\" section to display additional informations about candidate nodes on node creation/edition form.</li><li>Use the view's \"sort criteria\" section to determine the order in which candidate nodes will be displayed.</li></ul>"
-msgstr ""
-
-#: nodereference.module:280
-msgid "This post can't be referenced."
-msgstr ""
-
-#: nodereference.module:283
-msgid "Title mismatch. Please reiterate your selection."
-msgstr ""
-
-#: nodereference.module:290
-msgid "No post with that title can be referenced."
-msgstr ""
-
-#: nodereference.module:461
-msgid "<empty>"
-msgstr ""
-
-#: nodereference.info:0
-msgid "Node Reference"
-msgstr ""
-
-#: nodereference.info:0
-msgid "Defines a field type for referencing one node from another."
-msgstr ""
-
-#: fieldgroup.module:19
-msgid "Create and order your groups first. Then assign fields to a group by editing the fields."
-msgstr ""
-
-#: fieldgroup.module:33
-msgid "Add group"
-msgstr ""
-
-#: fieldgroup.module:43;51
-msgid "Edit group"
-msgstr ""
-
-#: fieldgroup.module:79
-msgid "Add"
-msgstr ""
-
-#: fieldgroup.module:86
-msgid "Save"
-msgstr ""
-
-#: fieldgroup.module:103
-msgid "Collapsible"
-msgstr ""
-
-#: fieldgroup.module:108
-msgid "Collapsed"
-msgstr ""
-
-#: fieldgroup.module:117
-msgid "Instructions to present to the user on the editing form."
-msgstr ""
-
-#: fieldgroup.module:124
-msgid "In the node editing form, the heavier groups will sink and the lighter groups will be positioned nearer the top."
-msgstr ""
-
-#: fieldgroup.module:144
-msgid "The group name %name already exists."
-msgstr ""
-
-#: fieldgroup.module:148
-msgid "The group name %name is invalid."
-msgstr ""
-
-#: fieldgroup.module:202
-msgid "Are you sure you want to remove the group %label?"
-msgstr ""
-
-#: fieldgroup.module:204
-msgid "This action cannot be undone."
-msgstr ""
-
-#: fieldgroup.module:266
-msgid "No group."
-msgstr ""
-
-#: fieldgroup.module:308
-msgid "Display in group"
-msgstr ""
-
-#: fieldgroup.module:311
-msgid "Select a group, in which the field will be displayed on the editing form."
-msgstr ""
-
-#: fieldgroup.module:0
-msgid "fieldgroup"
-msgstr ""
-
-#: fieldgroup.info:0
-msgid "Fieldgroup"
-msgstr ""
-
-#: fieldgroup.info:0
-msgid "Create field groups for CCK fields."
 msgstr ""
 
 #: content_copy.module:35
@@ -565,10 +480,6 @@ msgstr ""
 msgid "Copy the export text and paste it into another content type using the import function."
 msgstr ""
 
-#: content_copy.module:158;231
-msgid "Submit"
-msgstr ""
-
 #: content_copy.module:214
 msgid "This form will import field definitions exported from another content type or another database.<br/>Note that fields cannot be duplicated within the same content type, so imported fields will be added only if they do not already exist in the selected type."
 msgstr ""
@@ -593,39 +504,39 @@ msgstr ""
 msgid "Paste the text created by a content export into this field."
 msgstr ""
 
-#: content_copy.module:254
+#: content_copy.module:255
 msgid "The import data is not valid import text."
 msgstr ""
 
-#: content_copy.module:299
+#: content_copy.module:300
 msgid "The following modules must be enabled for this import to work: %modules."
 msgstr ""
 
-#: content_copy.module:305;319
+#: content_copy.module:306;320
 msgid "<create>"
 msgstr ""
 
-#: content_copy.module:307
+#: content_copy.module:308
 msgid "The content type %type already exists in this database."
 msgstr ""
 
-#: content_copy.module:314
+#: content_copy.module:315
 msgid "Exiting. No import performed."
 msgstr ""
 
-#: content_copy.module:331
+#: content_copy.module:332
 msgid "An error has occured adding the content type %type.<br/>Please check the errors displayed for more details."
 msgstr ""
 
-#: content_copy.module:366
+#: content_copy.module:367
 msgid "The imported field %field_label (%field_name) was not added to %type because that field already exists in %type."
 msgstr ""
 
-#: content_copy.module:387;406
+#: content_copy.module:388;407
 msgid "An error has occured adding the field %field_label (%field_name).<br/>Please check the errors displayed for more details."
 msgstr ""
 
-#: content_copy.module:420
+#: content_copy.module:421
 msgid "The field %field_label (%field_name) was added to the content type %type, but an error has occured updating the field settings.<br/>Please check the errors displayed for more details."
 msgstr ""
 
@@ -635,4 +546,216 @@ msgstr ""
 
 #: content_copy.info:0
 msgid "Enables ability to import/export field definitions."
+msgstr ""
+
+#: fieldgroup.module:18
+msgid "Add group"
+msgstr ""
+
+#: fieldgroup.module:28;36
+msgid "Edit group"
+msgstr ""
+
+#: fieldgroup.module:66
+msgid "Add"
+msgstr ""
+
+#: fieldgroup.module:73
+msgid "Save"
+msgstr ""
+
+#: fieldgroup.module:92
+msgid "These settings apply to the group in the node editing form"
+msgstr ""
+
+#: fieldgroup.module:96
+msgid "style"
+msgstr ""
+
+#: fieldgroup.module:99
+msgid "always open"
+msgstr ""
+
+#: fieldgroup.module:100
+msgid "collapsible"
+msgstr ""
+
+#: fieldgroup.module:101
+msgid "collapsed"
+msgstr ""
+
+#: fieldgroup.module:109
+msgid "Instructions to present to the user on the editing form."
+msgstr ""
+
+#: fieldgroup.module:115
+msgid "These settings apply to the group on node display."
+msgstr ""
+
+#: fieldgroup.module:119
+msgid "Description"
+msgstr ""
+
+#: fieldgroup.module:122
+msgid "A description of the group."
+msgstr ""
+
+#: fieldgroup.module:144
+msgid "The group name %name already exists."
+msgstr ""
+
+#: fieldgroup.module:148
+msgid "The group name %name is invalid."
+msgstr ""
+
+#: fieldgroup.module:213
+msgid "Are you sure you want to remove the group %label?"
+msgstr ""
+
+#: fieldgroup.module:215
+msgid "This action cannot be undone."
+msgstr ""
+
+#: fieldgroup.module:277
+msgid "No group"
+msgstr ""
+
+#: fieldgroup.module:319
+msgid "Display in group"
+msgstr ""
+
+#: fieldgroup.module:322
+msgid "Select a group, in which the field will be displayed on the editing form."
+msgstr ""
+
+#: fieldgroup.module:480
+msgid "no styling"
+msgstr ""
+
+#: fieldgroup.module:481
+msgid "simple"
+msgstr ""
+
+#: fieldgroup.module:482
+msgid "fieldset"
+msgstr ""
+
+#: fieldgroup.module:483
+msgid "fieldset - collapsible"
+msgstr ""
+
+#: fieldgroup.module:484
+msgid "fieldset - collapsed"
+msgstr ""
+
+#: fieldgroup.info:0
+msgid "Fieldgroup"
+msgstr ""
+
+#: fieldgroup.info:0
+msgid "Create field groups for CCK fields."
+msgstr ""
+
+#: nodereference.module:17
+msgid "node reference autocomplete"
+msgstr ""
+
+#: nodereference.module:42
+msgid "Content types that can be referenced"
+msgstr ""
+
+#: nodereference.module:51
+msgid "Existing Views"
+msgstr ""
+
+#: nodereference.module:56
+msgid "Default Views"
+msgstr ""
+
+#: nodereference.module:61
+msgid "Advanced - Nodes that can be referenced (View)"
+msgstr ""
+
+#: nodereference.module:67
+msgid "View"
+msgstr ""
+
+#: nodereference.module:70
+msgid "Choose the \"Views module\" view that selects the nodes that can be referenced.<br>Note :<ul><li>This will discard the \"Content types\" settings above. Use the view's \"filters\" section instead.</li><li>Use the view's \"fields\" section to display additional informations about candidate nodes on node creation/edition form.</li><li>Use the view's \"sort criteria\" section to determine the order in which candidate nodes will be displayed.</li></ul>"
+msgstr ""
+
+#: nodereference.module:74
+msgid "View arguments"
+msgstr ""
+
+#: nodereference.module:77
+msgid "Provide a comma separated list of arguments to pass to the view."
+msgstr ""
+
+#: nodereference.module:122
+msgid "%name : This post can't be referenced."
+msgstr ""
+
+#: nodereference.module:304
+msgid "%name : Title mismatch. Please check your selection."
+msgstr ""
+
+#: nodereference.module:483
+msgid "<empty>"
+msgstr ""
+
+#: nodereference.info:0
+msgid "Node Reference"
+msgstr ""
+
+#: nodereference.info:0
+msgid "Defines a field type for referencing one node from another."
+msgstr ""
+
+#: number.module:33
+msgid "Minimum"
+msgstr ""
+
+#: number.module:38
+msgid "Maximum"
+msgstr ""
+
+#: number.module:43
+msgid "Prefix"
+msgstr ""
+
+#: number.module:46
+msgid "Define a string that should be prefixed to the value, like $ or €. Leave blank for none. Separate singular and plural values with a pipe (pound|pounds)."
+msgstr ""
+
+#: number.module:50
+msgid "Suffix"
+msgstr ""
+
+#: number.module:53
+msgid "Define a string that should suffixed to the value, like m², m/s², kb/s. Leave blank for none. Separate singular and plural values with a pipe (pound|pounds). "
+msgstr ""
+
+#: number.module:80
+msgid "\"Minimum\" must be a number."
+msgstr ""
+
+#: number.module:83
+msgid "\"Maximum\" must be a number."
+msgstr ""
+
+#: number.module:138
+msgid "The value of %name may be no smaller than %min."
+msgstr ""
+
+#: number.module:141
+msgid "The value of %name may be no larger than %max."
+msgstr ""
+
+#: number.info:0
+msgid "Number"
+msgstr ""
+
+#: number.info:0
+msgid "Defines numeric field types."
 msgstr ""
