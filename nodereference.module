@@ -127,7 +127,7 @@ function nodereference_field($op, &$node, $field, &$items, $teaser, $page) {
         unset($item['error_field']);
         if (!empty($item['nid'])) {
           if (!in_array($item['nid'], array_keys($refs))) {
-            form_set_error($error_field, t('This post can\'t be referenced.'));
+            form_set_error($error_field, t('%name : This post can\'t be referenced.', array('%name' => t($field['widget']['label']))));
           }
         }
       }
@@ -242,8 +242,8 @@ function nodereference_widget($op, &$node, $field, &$items) {
         }
         // Remove the widget's data representation so it isn't saved.
         unset($items['nids']);
-        foreach($items as $delta => $item) {
-          $items[$delta]['error_field'] =  $field['field_name'].'][nids';
+        foreach ($items as $delta => $item) {
+          $items[$delta]['error_field'] =  $field['field_name'] .'][nids';
         }
     }
   }
@@ -302,14 +302,14 @@ function nodereference_widget($op, &$node, $field, &$items) {
 
       case 'validate':
         foreach ($items as $delta => $item) {
-          $error_field = $field['field_name'].']['.$delta.'][node_name';
+          $error_field = $field['field_name'] .']['. $delta .'][node_name';
           if (!empty($item['node_name'])) {
             preg_match('/^(?:\s*|(.*) )?\[\s*nid\s*:\s*(\d+)\s*\]$/', $item['node_name'], $matches);
             if (!empty($matches)) {
               // explicit nid
               list(, $title, $nid) = $matches;
               if (!empty($title) && ($n = node_load($nid)) && $title != $n->title) {
-                form_set_error($error_field, t('Title mismatch. Please check your selection.'));
+                form_set_error($error_field, t('%name : Title mismatch. Please check your selection.'), array('%name' => t($field['widget']['label'])));
               }
             }
           }
@@ -339,7 +339,7 @@ function nodereference_widget($op, &$node, $field, &$items) {
           unset($items[$delta]['node_name']);
           if (!empty($nid)) {
             $items[$delta]['nid'] = $nid;
-            $items[$delta]['error_field'] = $field['field_name'].']['.$delta.'][node_name';
+            $items[$delta]['error_field'] = $field['field_name'] .']['. $delta .'][node_name';
           }
           elseif ($delta > 0) {
             // Don't save empty fields when they're not the first value (keep '0' otherwise)
