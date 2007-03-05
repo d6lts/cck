@@ -962,15 +962,16 @@ function content_format($field, $item, $formatter = 'default', $node = NULL) {
  *   An HTML string containing the fully themed field.
  */
 function theme_field(&$node, &$field, &$items, $teaser, $page) {
-  $label = isset($field['display_settings']['label']['format']) ? $field['display_settings']['label']['format'] : 'above';
-
+  $label_display = isset($field['display_settings']['label']['format']) ? $field['display_settings']['label']['format'] : 'above';
+  $label = t($field['widget']['label']);
   $items_output = '';
+
   foreach ($items as $delta => $item) {
     if (!empty($item['view']) || $item['view'] === "0") {
       $items_output .= '<div class="field-item">';
-      if ($label == 'inline') {
+      if ($label_display == 'inline') {
         $items_output .= '<div class="field-label-inline'. ($delta ? '' : '-first') .'">';
-        $items_output .= $field['widget']['label'] .':</div> ' ;
+        $items_output .= $label .':</div> ' ;
       }
       $items_output .= $item['view'] .'</div>';
     }
@@ -979,8 +980,8 @@ function theme_field(&$node, &$field, &$items, $teaser, $page) {
   $output = '';
   if (!empty($items_output)) {
     $output .= '<div class="field field-type-'. strtr($field['type'], '_', '-') .' field-'. strtr($field['field_name'], '_', '-') .'">';
-    if ($label == 'above') {
-      $output .= '<div class="field-label">'. $field['widget']['label'] .':</div>';
+    if ($label_display == 'above') {
+      $output .= '<div class="field-label">'. $label .':</div>';
     }
     $output .= '<div class="field-items">'. $items_output .'</div>';
     $output .= '</div>';
