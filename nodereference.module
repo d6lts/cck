@@ -119,7 +119,7 @@ function nodereference_field($op, &$node, $field, &$items, $teaser, $page) {
         unset($item['error_field']);
         if (!empty($item['nid'])) {
           if (!in_array($item['nid'], array_keys($refs))) {
-            form_set_error($error_field, t('This post can\'t be referenced.'));
+            form_set_error($error_field, t('%name : This post can\'t be referenced.', array('%name' => t($field['widget']['label']))));
           }
         }
       }
@@ -301,7 +301,7 @@ function nodereference_widget($op, &$node, $field, &$items) {
               // explicit nid
               list(, $title, $nid) = $matches;
               if (!empty($title) && ($n = node_load($nid)) && $title != $n->title) {
-                form_set_error($error_field, t('Title mismatch. Please check your selection.'));
+                form_set_error($error_field, t('%name : Title mismatch. Please check your selection.'), array('%name' => t($field['widget']['label'])));
               }
             }
           }
