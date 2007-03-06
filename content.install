@@ -280,7 +280,9 @@ function content_update_10() {
   while ($row = db_fetch_array($result)) {
     $fields[] = "'". $row['field_name'] ."'";
   }
-  $ret[] = update_sql("DELETE FROM {node_field} WHERE field_name NOT IN (". implode(', ', $fields) .")");
+  if ($fields) {
+    $ret[] = update_sql("DELETE FROM {node_field} WHERE field_name NOT IN (". implode(', ', $fields) .")");
+  }
 
   // set invalid 'per field storage' back to 'per content type'
   $result = db_query("SELECT field_name FROM {node_field} WHERE multiple = 0 AND db_storage = %d", CONTENT_DB_STORAGE_PER_FIELD);
