@@ -297,6 +297,7 @@ function fieldgroup_form_alter($form_id, &$form) {
         '#collapsed' => $group['settings']['form']['style'] == 'fieldset_collapsed',
         '#collapsible' => in_array($group['settings']['form']['style'], array('fieldset_collapsed', 'fieldset_collapsible')),
         '#weight' => $group['weight'],
+        '#description' => t($group['settings']['form']['description']),
         '#attributes' => array('class' => strtr($group['group_name'], '_', '-')),
       );
       foreach ($group['fields'] as $field_name => $field) {
@@ -366,7 +367,7 @@ function fieldgroup_nodeapi(&$node, $op, $teaser, $page) {
         $label = $group['settings']['display']['label'] == 'above';
         $element = array(
           '#title' => $label ? t($group['label']) : '',
-          '#description' => $label ? t($group['settings']['form']['description']) : '',
+          '#description' => $label ? t($group['settings']['display']['description']) : '',
           '#weight' => $group['weight'],
           '#attributes' => array('class' => 'fieldgroup '. strtr($group['group_name'], '_', '-')),
         );
