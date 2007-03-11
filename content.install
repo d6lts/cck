@@ -32,6 +32,15 @@ function content_install() {
         description mediumtext NOT NULL,
         PRIMARY KEY  (field_name,type_name)
       ) /*!40100 DEFAULT CHARACTER SET utf8 */");
+      db_query("CREATE TABLE {cache_content} (
+        cid varchar(255) NOT NULL default '',
+        data longblob,
+        expire int NOT NULL default '0',
+        created int NOT NULL default '0',
+        headers text,
+        PRIMARY KEY (cid),
+        INDEX expire (expire)
+      ) /*!40100 DEFAULT CHARACTER SET UTF8 */ ");
       break;
 
     case 'pgsql':
@@ -55,6 +64,15 @@ function content_install() {
         description text NOT NULL,
         PRIMARY KEY  (field_name,type_name)
       )");
+      db_query("CREATE TABLE {cache_content} (
+        cid varchar(255) NOT NULL default '',
+        data bytea,
+        expire int NOT NULL default '0',
+        created int NOT NULL default '0',
+        headers text,
+        PRIMARY KEY (cid)
+      )");
+      db_query("CREATE INDEX {cache_content}_expire_idx ON {cache_content} (expire)");
       break;
   }
   variable_set('content_schema_version', 1003);
@@ -501,6 +519,42 @@ function content_update_1006() {
           }
         }
       }
+  }
+
+  return $ret;
+}
+
+
+/**
+ *  Add separate cache_content table
+ */
+function content_update_1007() {
+  $ret = array();
+
+  switch ($GLOBALS['db_type']) {
+    case 'mysql':
+    case 'mysqli':
+      $ret[] = update_sql("CREATE TABLE {cache_content} (
+        cid varchar(255) NOT NULL default '',
+        data longblob,
+        expire int NOT NULL default '0',
+        created int NOT NULL default '0',
+        headers text,
+        PRIMARY KEY (cid),
+        INDEX expire (expire)
+      ) /*!40100 DEFAULT CHARACTER SET UTF8 */ ");
+      break;
+    case 'pgsql':
+      $ret[] = update_sql("CREATE TABLE {cache_content} (
+        cid varchar(255) NOT NULL default '',
+        data bytea,
+        expire int NOT NULL default '0',
+        created int NOT NULL default '0',
+        headers text,
+        PRIMARY KEY (cid)
+      )");
+      $ret[] = update_sql("CREATE INDEX {cache_content}_expire_idx ON {cache_content} (expire)");
+      break;
   }
 
   return $ret;
