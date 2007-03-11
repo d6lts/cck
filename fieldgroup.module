@@ -211,7 +211,7 @@ function fieldgroup_remove_group($content_type, $group_name) {
   $form['#submit'] = array(fieldgroup_remove_group_submit => array($content_type, $group_name));
   return confirm_form($form,
                   t('Are you sure you want to remove the group %label?',
-                  array('%label' => $group['label'])),
+                  array('%label' => t($group['label']))),
                   'admin/content/types/'. $content_type['url_str'] .'/fields', t('This action cannot be undone.'),
                   t('Remove'), t('Cancel'));
 }
@@ -276,7 +276,7 @@ function _fieldgroup_groups_label($content_type) {
 
   $labels[0] = t('No group');
   foreach ($groups as $group_name => $group) {
-    $labels[$group_name] = $group['label'];
+    $labels[$group_name] = t($group['label']);
   }
   return $labels;
 }
