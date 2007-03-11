@@ -798,13 +798,19 @@ function _content_admin_field($type_name, $field_name) {
       '#collapsible' => TRUE,
       '#collapsed' => !isset($field['widget']['default_value_php']),
     );
+    $db_info = content_database_info($field);
+    $columns = array_keys($db_info['columns']);
+    foreach ($columns as $key => $column) {
+      $columns[$key] = "'$column' => ...";
+    }
+    $sample = 'array( 0 => array('. implode(', ', $columns) .'), 1 => ...)';
     $form['widget']['default_value_fieldset']['advanced_options']['default_value_php'] = array(
       '#type' => 'textarea',
       '#title' => t('Code'),
       '#default_value' => $field['widget']['default_value_php'],
       '#rows' => 6,
       '#tree' => TRUE,
-      '#description' => t('Advanced Usage Only: PHP code that returns a default value. Should not include &lt;?php ?&gt; delimiters.<br/>If this field is filled out, the value returned by this code will override any value in the textfield above.'),
+      '#description' => t('Advanced Usage Only: PHP code that returns a default value. Should not include &lt;?php ?&gt; delimiters.<br/>If this field is filled out, the value returned by this code will override any value in the textfield above.<br/>Expected format : @sample.', array('@sample' => $sample)),
     );
   }
 
@@ -885,7 +891,13 @@ function _content_admin_field_validate($form_id, $form_values, $form) {
         }
       }
       if ($error) {
-        form_set_error('default_value_php', t('The default value php code must return an array like array(0 => array(\'value\' => \'myvalue\')) but returned @value.', array('@value' => print_r($return, true))));
+        $db_info = content_database_info($field);
+        $columns = array_keys($db_info['columns']);
+        foreach ($columns as $key => $column) {
+          $columns[$key] = "'$column' => ...";
+        }
+        $sample = 'array( 0 => array('. implode(', ', $columns) .'), 1 => ...)';
+        form_set_error('default_value_php', t('The default value php code returned an incorrect value<br/>Expected format : @sample<br/>Returned value : @value', array('@sample' => $sample, '@value' => print_r($return, true))));
         return;
       }
       else {
