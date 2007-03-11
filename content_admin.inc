@@ -796,7 +796,7 @@ function _content_admin_field($type_name, $field_name) {
       '#type' => 'fieldset',
       '#title' => t('Php code'),
       '#collapsible' => TRUE,
-      '#collapsed' => !isset($field['widget']['default_value_php']),
+      '#collapsed' => empty($field['widget']['default_value_php']),
     );
     $db_info = content_database_info($field);
     $columns = array_keys($db_info['columns']);
