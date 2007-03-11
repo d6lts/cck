@@ -20,6 +20,14 @@ function content_help($section) {
 }
 
 /**
+ * Implementation of hook_devel_caches().
+ * Include {cache_content} in the list of tables cleared by devel's 'empty cache'
+ */
+function content_devel_caches() {
+  return array('cache_content');
+}
+
+/**
  * Implementation of hook_init().
  */
 function content_init() {
@@ -140,7 +148,7 @@ function content_menu($may_cache) {
  */
 function content_load($node) {
   $cid = 'content:'. $node->nid .':'. $node->vid;
-  if ($cached = cache_get($cid, 'cache')) {
+  if ($cached = cache_get($cid, 'cache_content')) {
     return unserialize($cached->data);
   }
   else {
@@ -156,7 +164,7 @@ function content_load($node) {
         $default_additions[$key] = $value;
       }
     }
-    cache_set($cid, 'cache', serialize($default_additions), CACHE_PERMANENT);
+    cache_set($cid, 'cache_content', serialize($default_additions));
     return $default_additions;
   }
 }
@@ -222,7 +230,7 @@ function content_insert(&$node) {
 function content_update(&$node) {
   _content_field_invoke('update', $node);
   _content_field_invoke_default('update', $node);
-  cache_clear_all('content:'. $node->nid .':'. $node->vid, 'cache');
+  cache_clear_all('content:'. $node->nid .':'. $node->vid, 'cache_content');
 }
 
 /**
@@ -238,7 +246,7 @@ function content_delete(&$node) {
   if (db_table_exists($table)) {
     db_query('DELETE FROM {'. $table .'} WHERE nid = %d', $node->nid);
   }
-  cache_clear_all('content:'. $node->nid, 'cache', TRUE);
+  cache_clear_all('content:'. $node->nid, 'cache_content', TRUE);
 }
 
 /**
@@ -254,7 +262,7 @@ function content_delete_revision(&$node) {
   if (db_table_exists($table)) {
     db_query('DELETE FROM {'. $table .'} WHERE vid = %d', $node->vid);
   }
-  cache_clear_all('content:'. $node->nid .':'. $node->vid, 'cache');
+  cache_clear_all('content:'. $node->nid .':'. $node->vid, 'cache_content');
 }
 
 /**
@@ -717,7 +725,7 @@ function _content_type_info($reset = FALSE) {
   static $info;
 
   if ($reset || !isset($info)) {
-    if ($cached = cache_get('content_type_info', 'cache')) {
+    if ($cached = cache_get('content_type_info', 'cache_content')) {
       $info = unserialize($cached->data);
     }
     else {
@@ -799,7 +807,7 @@ function _content_type_info($reset = FALSE) {
         $info['content types'][$type['type']] = $type;
       }
 
-      cache_set('content_type_info', 'cache', serialize($info), CACHE_PERMANENT);
+      cache_set('content_type_info', 'cache_content', serialize($info));
     }
   }
   return $info;
@@ -831,7 +839,7 @@ function content_node_type($op, $info) {
  * information is changed.
  */
 function content_clear_type_cache() {
-  cache_clear_all('content_type_info', 'cache');
+  cache_clear_all('content_type_info', 'cache_content');
 
   _content_type_info(TRUE);
 

@@ -349,7 +349,7 @@ function content_copy_import_form_submit($form_id, $form_values) {
         drupal_execute('fieldgroup_edit_group_form', $values, $content_type, $group_name, 'add');
       }
     }
-    cache_clear_all('fieldgroup_data', 'cache');
+    cache_clear_all('fieldgroup_data', 'cache_content');
     // Reset the static variable in fieldgroup_groups() with new data.
     fieldgroup_groups('', FALSE, TRUE);
   }

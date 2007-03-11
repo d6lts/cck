@@ -155,7 +155,7 @@ function fieldgroup_edit_group_submit($form_id, &$form_values, $content_type, $a
   $groups = fieldgroup_groups($content_type['type']);
   $group = $groups[$form_values['group_name']];
   fieldgroup_save_group($content_type['type'], $form_values);
-  cache_clear_all('fieldgroup_data', 'cache');
+  cache_clear_all('fieldgroup_data', 'cache_content');
   return 'admin/content/types/'. $content_type['url_str'] .'/fields';
 }
 
@@ -219,7 +219,7 @@ function fieldgroup_remove_group($content_type, $group_name) {
 function fieldgroup_remove_group_submit($form_id, &$form_values, $content_type, $group_name) {
   db_query("DELETE FROM {node_group} WHERE  type_name = '%s' AND group_name = '%s'", $content_type['type'], $group_name);
   db_query("DELETE FROM {node_group_fields} WHERE  type_name = '%s' AND group_name = '%s'", $content_type['type'], $group_name);
-  cache_clear_all('fieldgroup_data', 'cache');
+  cache_clear_all('fieldgroup_data', 'cache_content');
 
   drupal_set_message('The group has been removed.');
   return 'admin/content/types/'. $content_type['url_str'] .'/fields';
@@ -235,7 +235,7 @@ function fieldgroup_groups($content_type = '', $sorted = FALSE, $reset = FALSE) 
   static $groups_sorted = array();
 
   if (empty($groups) || $reset) {
-    if ($cached = cache_get('fieldgroup_data', 'cache')) {
+    if ($cached = cache_get('fieldgroup_data', 'cache_content')) {
       $data = unserialize($cached->data);
       $groups = &$data['groups'];
       $groups_sorted = &$data['groups_sorted'];
@@ -257,7 +257,7 @@ function fieldgroup_groups($content_type = '', $sorted = FALSE, $reset = FALSE) 
       while ($field = db_fetch_array($result)) {
         $groups[$field['type_name']][$field['group_name']]['fields'][$field['field_name']] = $field;
       }
-      cache_set('fieldgroup_data', 'cache', serialize(array('groups' => $groups, 'groups_sorted' => $groups_sorted)), CACHE_PERMANENT);
+      cache_set('fieldgroup_data', 'cache_content', serialize(array('groups' => $groups, 'groups_sorted' => $groups_sorted)));
     }
   }
 
@@ -351,7 +351,7 @@ function fieldgroup_content_admin_form_submit($form_id, &$form_values, $default)
     else {
       db_query("DELETE FROM {node_group_fields} WHERE type_name = '%s' AND field_name = '%s'", $form_values['type_name'], $form_values['field_name']);
     }
-    cache_clear_all('fieldgroup_data', 'cache');
+    cache_clear_all('fieldgroup_data', 'cache_content');
   }
 }
 
@@ -446,7 +446,7 @@ function fieldgroup_node_type($op, $info) {
     // update the tables
     db_query("UPDATE {node_group} SET type_name='%s' WHERE type_name='%s'", array($info->type, $info->old_type));
     db_query("UPDATE {node_group_fields} SET type_name='%s' WHERE type_name='%s'", array($info->type, $info->old_type));
-    cache_clear_all('fieldgroup_data', 'cache');
+    cache_clear_all('fieldgroup_data', 'cache_content');
   }
   else if ($op == 'delete') {
     db_query("DELETE FROM {node_group_fields} WHERE type_name = '%s'", $info->type);
@@ -539,6 +539,6 @@ function fieldgroup_display_overview_form_submit($form_id, $form_values) {
       }
       fieldgroup_save_group($type, $group);
     }
-    cache_clear_all('fieldgroup_data', 'cache');
+    cache_clear_all('fieldgroup_data', 'cache_content');
   }
 }

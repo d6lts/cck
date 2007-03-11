@@ -333,7 +333,7 @@ function content_admin_field_overview_form_submit($form_id, $form_values) {
     drupal_set_message(t('Updated field weights.'));
   }
   content_clear_type_cache();
-  cache_clear_all('fieldgroup_data', 'cache');
+  cache_clear_all('fieldgroup_data', 'cache_content');
 
 }
 
