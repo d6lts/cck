@@ -122,7 +122,7 @@ function text_field($op, &$node, $field, &$items, $teaser, $page) {
 
       if (is_array($items)) {
         foreach ($items as $delta => $item) {
-          $error_field = $field['field_name'].']['.$delta.'][value';
+          $error_field = $field['field_name'] .']['. $delta .'][value';
           if ($item['value'] != '') {
             if (count($allowed_values) && !array_key_exists($item['value'], $allowed_values)) {
               form_set_error($error_field, t('Illegal value for %name.', array('%name' => t($field['widget']['label']))));
@@ -132,7 +132,7 @@ function text_field($op, &$node, $field, &$items, $teaser, $page) {
       }
       if ($field['max_length'] > 0) {
         foreach ($items as $delta => $data) {
-          $error_field = $field['field_name'].']['.$delta.'][value';
+          $error_field = $field['field_name'] .']['. $delta .'][value';
           if (strlen($data['value']) > $field['max_length']) {
             form_set_error($error_field, t('%label is longer than %max characters.', array('%label' => $field['widget']['label'], '%max' => $field['max_length'])));
           }
@@ -177,22 +177,24 @@ function text_field_formatter($field, $item, $formatter, $node) {
     return $allowed_values[$item['value']];
   }
 
-  if ($field['text_processing']) {
-    $text = check_markup($item['value'], $item['format'], is_null($node) || isset($node->in_preview));
-  }
-  else {
-    $text = check_plain($item['value']);
-  }
-
   switch ($formatter) {
     case 'plain':
-      return strip_tags($text);
+      $text = strip_tags($item['value']);
+      break;
 
     case 'trimmed':
-      return node_teaser($text, $field['text_processing'] ? $item['format'] : NULL);
+      $text = node_teaser($item['value'], $field['text_processing'] ? $item['format'] : NULL);
+      break;
 
-    default:
-      return $text;
+    case 'default':
+      $text = $item['value'];
+  }
+
+  if ($field['text_processing']) {
+    return check_markup($text, $item['format'], is_null($node) || isset($node->in_preview));
+  }
+  else {
+    return check_plain($text);
   }
 }
 
@@ -234,7 +236,6 @@ function text_widget_settings($op, $widget) {
       return array('rows');
   }
 }
-
 
 /**
  * Implementation of hook_widget().
