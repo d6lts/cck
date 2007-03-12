@@ -330,8 +330,10 @@ function fieldgroup_form_alter($form_id, &$form) {
   else if ($form_id == 'content_admin_display_overview_form') {
     $form['groups'] = fieldgroup_display_overview_form($form['type_name']['#value']);
     $form['groups']['#theme'] = 'fieldgroup_display_overview_form';
-    $form['submit']['#weight'] = 10;
     $form['#submit']['fieldgroup_display_overview_form_submit'] = array();
+    if (!is_array($form['submit']) && count(fieldgroup_groups($form['type_name']['#value']))) {
+      $form['submit'] = array('#type' => 'submit', '#value' => t('Submit'), '#weight' => 10);
+    }
   }
   else if ($form_id == '_content_admin_field_remove') {
     $form['#submit']['fieldgroup_content_admin_field_remove_submit'] = array();
@@ -460,7 +462,6 @@ function fieldgroup_node_type($op, $info) {
  */
 function fieldgroup_display_overview_form($content_type) {
   $groups = fieldgroup_groups($content_type);
-
   $form = array();
   $form['#tree'] = TRUE;
   foreach ($groups as $group_name => $group) {
@@ -521,8 +522,10 @@ function theme_fieldgroup_display_overview_form($form) {
     }
     $rows[] = $row;
   }
-
-  $output  = theme('table', $header, $rows, array('class' => 'content-group-display-overview'));
+  $output = '';
+  if (!empty($rows)) {
+    $output  = theme('table', $header, $rows, array('class' => 'content-group-display-overview'));
+  }
   $output .= drupal_render($form);
   return $output;
 }

@@ -348,19 +348,18 @@ function content_admin_display_overview_form($type_name) {
   $field_types = _content_field_types();
 
   $form = array();
+  $form['type_name'] = array('#type' => 'hidden', '#value' => $type['type']);
+
   if (empty($type['fields'])) {
     drupal_set_message(t('There are no fields configured for this content type.'));
     return $form;
   }
-
   $form['#tree'] = TRUE;
   foreach ($type['fields'] as $field) {
     $form['fields'][$field['field_name']] = _content_admin_display_overview_row($field, $field_types[$field['type']]);
   }
 
-  $form['type_name'] = array('#type' => 'hidden', '#value' => $type['type']);
-  $form['submit'] = array('#type' => 'submit', '#value' => t('Submit'));
-
+  $form['submit'] = array('#type' => 'submit', '#value' => t('Submit'), '#weight' => 10);
   return $form;
 }
 
@@ -370,7 +369,6 @@ function theme_content_admin_display_overview_form($form) {
     $header[] = $title;
   }
   $rows = array();
-
   foreach (element_children($form['fields']) as $field) {
     $row = array();
     foreach (element_children($form['fields'][$field]) as $key) {
@@ -378,26 +376,30 @@ function theme_content_admin_display_overview_form($form) {
     }
     $rows[] = $row;
   }
-
-  $output  = theme('table', $header, $rows, array('class' => 'content-field-display-overview'));
+  $output = '';
+  if (!empty($rows)) {
+    $output  = theme('table', $header, $rows, array('class' => 'content-field-display-overview'));
+  }
   $output .= drupal_render($form);
   return $output;
 }
 
 function content_admin_display_overview_form_submit($form_id, $form_values) {
   $type = $form_values['type_name'];
-  foreach ($form_values['fields'] as $fieldname => $fieldvalues) {
-    $display_settings = array();
-    foreach ($fieldvalues as $key => $value) {
-      $display_settings[$key] = $value;
+
+  if (isset($form_values['fields'])) {
+    foreach ($form_values['fields'] as $fieldname => $fieldvalues) {
+      $display_settings = array();
+      foreach ($fieldvalues as $key => $value) {
+        $display_settings[$key] = $value;
+      }
+
+      db_query("UPDATE {node_field_instance} SET display_settings = '%s' WHERE type_name = '%s' AND field_name = '%s'",
+        serialize($display_settings), $form_values['type_name'], $fieldname);
     }
-
-    db_query("UPDATE {node_field_instance} SET display_settings = '%s' WHERE type_name = '%s' AND field_name = '%s'",
-      serialize($display_settings), $form_values['type_name'], $fieldname);
+    content_clear_type_cache();
   }
-
   drupal_set_message(t('Your settings have been saved.'));
-  content_clear_type_cache();
 }
 
 function _content_admin_display_overview_row($field, $field_type) {
