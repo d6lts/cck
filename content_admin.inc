@@ -793,7 +793,8 @@ function _content_admin_field($type_name, $field_name) {
       // TODO : generate a series of textfields ?
       // why would a widget not have a hook_widget implementation ?
     }
-    $form['widget']['default_value_fieldset'] = array_merge($form['widget']['default_value_fieldset'], $form_element);
+    $form['widget']['default_value_fieldset']['default_value_widget'] = $form_element;
+    $form['widget']['default_value_fieldset']['default_value_widget']['#tree'] = TRUE;
     $form['widget']['default_value_fieldset']['advanced_options'] = array(
       '#type' => 'fieldset',
       '#title' => t('Php code'),
@@ -874,7 +875,7 @@ function _content_admin_field_validate($form_id, $form_values, $form) {
   module_invoke($widget_type['module'], 'widget_settings', 'validate', array_merge($field, $form_values));
   module_invoke($field_type['module'], 'field_settings', 'validate', array_merge($field, $form_values));
 
-  // If the content module is handling the default value,
+  // If content.module is handling the default value,
   // validate the result using the field validation.
   if (content_handle('widget', 'default value', $field) == CONTENT_CALLBACK_DEFAULT) {
     if (isset($form_values['default_value_php']) && ($php = trim($form_values['default_value_php']))) {
@@ -910,7 +911,7 @@ function _content_admin_field_validate($form_id, $form_values, $form) {
       }
     }
     else {
-      $default_value = $form_values[$field['field_name']];
+      $default_value = $form_values['default_value_widget'][$field['field_name']];
       $is_code = FALSE;
       form_set_value(array('#parents' => array('default_value_php')), '');
       form_set_value(array('#parents' => array('default_value')), $default_value);
@@ -958,8 +959,8 @@ function _content_admin_field_submit($form_id, $form_values) {
   $widget_types = _content_widget_types();
   $widget_type = $widget_types[$form_values['widget_type']];
 
-  // If the content module is handling the default value,
-  // Initialize $widget_settings with default values,
+  // If content.module is handling the default value,
+  // initialize $widget_settings with default values,
   if (content_handle('widget', 'default value', $field) == CONTENT_CALLBACK_DEFAULT) {
     $widget_settings = array(
       'default_value' => $form_values['default_value'],
