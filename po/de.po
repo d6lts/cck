@@ -15,15 +15,18 @@
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: PACKAGE VERSION\n"
+"Project-Id-Version: CCK\n"
 "POT-Creation-Date: 2006-07-27 08:09-0400\n"
-"PO-Revision-Date: 2007-03-05 13:21+0100\n"
-"Last-Translator: Raimund Bauer <ray007@gmx.net>\n"
+"PO-Revision-Date: 2007-03-25 22:18+0100\n"
+"Last-Translator: Alexander Hass\n"
 "Language-Team: German <lukas.gangoly@univie.ac.at>\n"
 "MIME-Version: 1.0\n"
-"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+"Plural-Forms: nplurals=2; plural=(n!=1);\n"
+"X-Poedit-Language: German\n"
+"X-Poedit-Country: GERMANY\n"
+"X-Poedit-SourceCharset: utf-8\n"
 
 #: content_admin.inc:202
 #: ;206;405;643 fieldgroup.module:97
@@ -33,7 +36,7 @@ msgstr "Bezeichnung"
 #: content_admin.inc:202
 #: ;206 fieldgroup.module:122
 msgid "Weight"
-msgstr "Gewicht"
+msgstr "Reihenfolge"
 
 #: content_admin.inc:376
 #: content.module:82
@@ -63,13 +66,12 @@ msgstr "Felder"
 #: nodereference.module:181
 #: userreference.module:256
 msgid "<none>"
-msgstr ""
+msgstr "<keins>"
 
 #: number.module:38
 #: text.module:41
-#, fuzzy
 msgid "Allowed values list"
-msgstr "Gültige Werte"
+msgstr "Gültige Werteliste"
 
 #: number.module:42
 #: text.module:45
@@ -79,12 +81,12 @@ msgstr ""
 #: number.module:46
 #: text.module:49
 msgid "Php code"
-msgstr ""
+msgstr "PHP-Code"
 
 #: number.module:52
 #: text.module:55
 msgid "Code"
-msgstr ""
+msgstr "Kürzel"
 
 #: number.module:55
 #: text.module:58
@@ -100,7 +102,7 @@ msgstr ""
 #: text.info:0
 #: userreference.info:0
 msgid "CCK"
-msgstr ""
+msgstr "CCK"
 
 #: content_crud.inc:60
 msgid "The content fields table %name has been created."
@@ -115,12 +117,10 @@ msgid "The content fields table %name has been deleted."
 msgstr "Die Inhaltsfeld Tabelle %name wurde gelöscht."
 
 #: content_views.inc:57
-#, fuzzy
 msgid "Group multiple values"
 msgstr "Mehrfach-Werte gruppieren"
 
 #: content_views.inc:58
-#, fuzzy
 msgid "Do not group multiple values"
 msgstr "Mehrfach-Werte nicht gruppieren"
 
@@ -182,7 +182,7 @@ msgstr ""
 
 #: optionwidgets.module:171
 msgid "N/A"
-msgstr ""
+msgstr "k.A."
 
 #: optionwidgets.info:0
 msgid "Option Widgets"
@@ -234,7 +234,7 @@ msgstr "Definiert ein Feldtyp für den Verweis von einem Node zu einem Benutzer.
 
 #: optionwidgets.install:77
 msgid "<div>The allowed values list for %field was updated from </div><pre>%start</pre><div> to </div><pre>%end</pre><div>You can go to the field settings page to give each option a more user-friendly label."
-msgstr ""
+msgstr "<div>Die zulässige Werteliste für %field wurde aktualisiert von </div><pre>%start</pre><div> zu </div><pre>%end</pre>.<div>Auf der Feld-Einstellungsseite können nun benutzerfreundlichere Bezeichnungen vergeben werden."
 
 #: optionwidgets.install:80
 msgid "<div>The allowed values list for %field was not changed from </div><pre>%start</pre>"
@@ -251,7 +251,7 @@ msgstr "Feldtyp"
 
 #: content_admin.inc:15
 msgid "Used in"
-msgstr "verwendet in"
+msgstr "Verwendet in"
 
 #: content_admin.inc:68
 msgid "There are no groups configured for this content type."
@@ -273,15 +273,15 @@ msgstr "Konfigurieren"
 #: content_admin.inc:105
 #: ;118;143
 msgid "remove"
-msgstr "entfernen"
+msgstr "Entfernen"
 
 #: content_admin.inc:156
 msgid "body"
-msgstr ""
+msgstr "Textkörper"
 
 #: content_admin.inc:177
 msgid "Update"
-msgstr "aktualisieren"
+msgstr "Aktualisieren"
 
 #: content_admin.inc:202
 #: ;206
@@ -300,7 +300,7 @@ msgstr "Gruppe"
 #: content_admin.inc:202
 #: ;206
 msgid "Operations"
-msgstr "Aktionen"
+msgstr "Operationen"
 
 #: content_admin.inc:270
 msgid "No fields have been added to this group."
@@ -308,7 +308,7 @@ msgstr "Der Gruppe wurden keine Felder hinzugefügt."
 
 #: content_admin.inc:275
 msgid "!label (!name)"
-msgstr ""
+msgstr "!label (!name)"
 
 #: content_admin.inc:311
 msgid "Updated field groups."
@@ -396,7 +396,7 @@ msgstr "Diese Einstellungen werden auf das Feld %field in jedem Inhaltstyp angew
 
 #: content_admin.inc:671
 msgid "Required"
-msgstr "notwendig"
+msgstr "Erforderlich"
 
 #: content_admin.inc:676
 msgid "Multiple values"
@@ -434,7 +434,7 @@ msgstr "Existierende Views"
 
 #: nodereference.module:56
 msgid "Default Views"
-msgstr ""
+msgstr "Standardansichten"
 
 #: nodereference.module:61
 msgid "Advanced - Nodes that can be referenced"
@@ -450,7 +450,7 @@ msgstr "Auf diesen Beitrag kann nicht verwiesen werden."
 
 #: nodereference.module:283
 msgid "Title mismatch. Please reiterate your selection."
-msgstr ""
+msgstr "Titel falsch. Bitte die Auswahl wiederholen."
 
 #: nodereference.module:290
 msgid "No post with that title can be referenced."
@@ -461,7 +461,6 @@ msgid "<empty>"
 msgstr "<leer>"
 
 #: nodereference.info:0
-#, fuzzy
 msgid "Node Reference"
 msgstr "Nodeverweis"
 
@@ -484,19 +483,19 @@ msgstr "Gruppe bearbeiten"
 
 #: fieldgroup.module:79
 msgid "Add"
-msgstr "hinzufügen"
+msgstr "Hinzufügen"
 
 #: fieldgroup.module:86
 msgid "Save"
-msgstr "speichern"
+msgstr "Speichern"
 
 #: fieldgroup.module:103
 msgid "Collapsible"
-msgstr "zusammenklappbar"
+msgstr "Zusammenklappbar"
 
 #: fieldgroup.module:108
 msgid "Collapsed"
-msgstr "zusammengeklappt"
+msgstr "Zusammengeklappt"
 
 #: fieldgroup.module:117
 msgid "Instructions to present to the user on the editing form."
@@ -520,7 +519,7 @@ msgstr "Sind Sie sicher, dass die Gruppe %label gelöscht werden soll?"
 
 #: fieldgroup.module:204
 msgid "This action cannot be undone."
-msgstr "Diese Aktion kann nicht rückgängig gemacht werden."
+msgstr "Diese Vorgang kann nicht rückgängig gemacht werden."
 
 #: fieldgroup.module:266
 msgid "No group."
@@ -589,7 +588,7 @@ msgstr "Kopieren Sie den exportierten Text und fügen Sie ihn mit der Importfunk
 #: content_copy.module:158
 #: ;231
 msgid "Submit"
-msgstr "Absenden"
+msgstr "Speichern"
 
 #: content_copy.module:214
 msgid "This form will import field definitions exported from another content type or another database.<br/>Note that fields cannot be duplicated within the same content type, so imported fields will be added only if they do not already exist in the selected type."
@@ -597,23 +596,21 @@ msgstr ""
 
 #: content_copy.module:217
 msgid "<Create>"
-msgstr "<Anlegen>"
+msgstr "<Erstellen>"
 
 #: content_copy.module:219
 msgid "Content type"
 msgstr "Inhaltstyp"
 
 #: content_copy.module:220
-#, fuzzy
 msgid "Select the content type to import these fields into.<br/>Select <Create> to create a new content type to contain the fields."
-msgstr "Wählen Sie den Inhaltstyp zum Aufnehmen der importierten Felder aus.<br/>Wählen Sie <Anlegen> zum Anlegen eines neuen Inhaltstyps für die zu importierenden Felder."
+msgstr "Wählen Sie den Inhaltstyp zum Aufnehmen der importierten Felder aus.<br/>Wählen Sie <Erstellen> zum Erstellen eines neuen Inhaltstyps für die zu importierenden Felder."
 
 #: content_copy.module:225
 msgid "Import data"
 msgstr "Daten importieren"
 
 #: content_copy.module:227
-#, fuzzy
 msgid "Paste the text created by a content export into this field."
 msgstr "Fügen Sie den Text aus einem Inhaltsexport in dieses Feld ein."
 
@@ -628,7 +625,7 @@ msgstr "Die folgenden Module müssen eingeschaltet sein damit dieser Import erfo
 #: content_copy.module:305
 #: ;319
 msgid "<create>"
-msgstr "<anlegen>"
+msgstr "<erstellen>"
 
 #: content_copy.module:307
 msgid "The content type %type already exists in this database."
@@ -656,7 +653,6 @@ msgid "The field %field_label (%field_name) was added to the content type %type,
 msgstr "Das Feld %field_label (%field_name) wurde zum Inhaltstyp %type hinzugefügt, aber beim Aktualisieren der Feldeinstellungen trat ein Fehler auf.<br/>Bitte überprüfen Sie die angezeigten Fehler für weitere Details."
 
 #: content_copy.info:0
-#, fuzzy
 msgid "Content Copy"
 msgstr "Inhalts-Kopie"
 
