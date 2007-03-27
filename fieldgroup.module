@@ -231,18 +231,18 @@ function fieldgroup_remove_group_submit($form_id, &$form_values, $content_type, 
  * Returns all groups for a content type
  */
 function fieldgroup_groups($content_type = '', $sorted = FALSE, $reset = FALSE) {
-  static $groups = array();
-  static $groups_sorted = array();
+  static $groups, $groups_sorted;
 
-  if (empty($groups) || $reset) {
+  if (!isset($groups) || $reset) {
     if ($cached = cache_get('fieldgroup_data', 'cache_content')) {
       $data = unserialize($cached->data);
-      $groups = &$data['groups'];
-      $groups_sorted = &$data['groups_sorted'];
+      $groups = $data['groups'];
+      $groups_sorted = $data['groups_sorted'];
     }
     else {
       $result = db_query("SELECT * FROM {node_group} ORDER BY weight, group_name");
-
+      $groups = array();
+      $groups_sorted = array();
       while ($group = db_fetch_array($result)) {
         $group['settings'] = unserialize($group['settings']);
         $group['fields'] = array();
