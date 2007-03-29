@@ -52,7 +52,7 @@ function optionwidgets_widget_settings($op, $widget) {
 function optionwidgets_widget($op, &$node, $field, &$items) {
   switch ($op) {
     case 'prepare form values':
-      $options = _optionwidgets_options($field);
+      $options = _optionwidgets_options($field, $node);
       $items_transposed = content_transpose_array_rows_cols($items);
       $values = (isset($items_transposed['value']) && is_array($items_transposed['value'])) ? $items_transposed['value'] : array();
 
@@ -72,7 +72,7 @@ function optionwidgets_widget($op, &$node, $field, &$items) {
       break;
 
     case 'form':
-      $options = _optionwidgets_options($field);
+      $options = _optionwidgets_options($field, $node);
 
       $form = array();
 
@@ -80,7 +80,6 @@ function optionwidgets_widget($op, &$node, $field, &$items) {
 
       switch ($field['widget']['type']) {
         case 'options_select':
-          if (!$field['required']) $options = array('' => theme('optionwidgets_none', $field['widget']['type'], $field['field_name'], $node->type)) + $options;
           if ($field['multiple']) {
             $form[$field['field_name']]['keys'] = array(
               '#type' => 'select',
@@ -132,7 +131,6 @@ function optionwidgets_widget($op, &$node, $field, &$items) {
             );
           }
           else {
-            if (!$field['required']) $options = array('' => theme('optionwidgets_none', $field['widget']['type'], $field['field_name'], $node->type)) + $options;
             $form[$field['field_name']]['key'] = array(
               '#type' => 'radios',
               '#title' => t($field['widget']['label']),
@@ -147,7 +145,7 @@ function optionwidgets_widget($op, &$node, $field, &$items) {
       return $form;
 
     case 'process form values':
-      $options = _optionwidgets_options($field);
+      $options = _optionwidgets_options($field, $node);
 
       if ($field['multiple'] || $field['widget']['type'] == 'options_onoff') {
         $keys = (array) $items['keys'];
@@ -177,17 +175,25 @@ function optionwidgets_widget($op, &$node, $field, &$items) {
   }
 }
 
-function _optionwidgets_options($field) {
+function _optionwidgets_options($field, $node) {
 
   $types = _content_field_types();
   $field_allowed_values = $types[$field['type']]['module'] .'_allowed_values';
   if (function_exists($field_allowed_values)) {
-    return $field_allowed_values($field);
+    $allowed_values = $field_allowed_values($field);
   }
   else {
-    return array();
+    $allowed_values = array();
   }
 
+  if ($field['widget']['type'] == 'options_select' ||
+     ($field['widget']['type'] == 'options_buttons' && !$field['multiple'])) {
+    if (!$field['required']) {
+      $allowed_values = array('' => theme('optionwidgets_none', $field['widget']['type'], $field['field_name'], $node->type)) + $allowed_values;
+    }
+  }
+
+  return $allowed_values;
 }
 
 /**
