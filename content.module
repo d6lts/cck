@@ -237,7 +237,7 @@ function content_delete_revision(&$node) {
  * Generate field render arrays.
  */
 function content_view(&$node, $teaser = FALSE, $page = FALSE) {
-  if ($node->in_preview) {
+  if (isset($node->in_preview) && $node->in_preview) {
     _content_widget_invoke('process form values', $node);
   }
   $content = _content_field_view($node, $teaser, $page);
