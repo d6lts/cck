@@ -30,7 +30,7 @@ function content_views_tables() {
 function content_views_field_tables($field) {
   $field_types = _content_field_types();
   $db_info = content_database_info($field);
-  
+
   if (count($db_info['columns'])) {
     $table = array();
 

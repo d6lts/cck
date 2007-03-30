@@ -82,7 +82,7 @@ function fieldgroup_update_2() {
   while ($group = db_fetch_array($result)) {
     $settings = array();
     $settings['form'] = unserialize($group['settings']);
-    $settings['form']['description'] = db_escape_sql($group['description']);
+    $settings['form']['description'] = $group['description'];
     $settings['display'] = array('collapsible' => 0, 'collapsed' => 0, 'description' => '');
     $ret[] = update_sql("UPDATE {node_group} SET settings = '". db_escape_string(serialize($settings)) ."', description = '' WHERE group_name = '". $group['group_name'] ."'");
   }

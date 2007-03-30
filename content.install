@@ -445,7 +445,7 @@ function content_update_1004() {
   }
   if ($fields) {
     $ret[] = update_sql("DELETE FROM {node_field} WHERE field_name NOT IN (". implode(', ', $fields) .")");
-  } 
+  }
 
   // drop 'content_type_' table
   $table = _content_tablename('', CONTENT_DB_STORAGE_PER_CONTENT_TYPE);
