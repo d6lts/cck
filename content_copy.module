@@ -25,30 +25,24 @@
 /**
  * Implementation of hook_menu().
  */
-function content_copy_menu($may_cache) {
+function content_copy_menu() {
   $items = array();
-  $access = user_access('administer content types');
-
-  if ($may_cache) {
-    $items[] = array(
-      'path' => 'admin/content/types/export',
-      'title' => t('Export'),
-      'callback' => 'drupal_get_form',
-      'callback arguments' => 'content_copy_export_form',
-      'access' => $access,
-      'type' => MENU_LOCAL_TASK,
-      'weight' => 3,
-    );
-    $items[] = array(
-      'path' => 'admin/content/types/import',
-      'title' => t('Import'),
-      'callback' => 'drupal_get_form',
-      'callback arguments' => 'content_copy_import_form',
-      'access' => $access,
-      'type' => MENU_LOCAL_TASK,
-      'weight' => 4,
-    );
-  }
+  $items['admin/content/types/export'] = array(
+    'title' => t('Export'),
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('content_copy_export_form'),
+    'access arguments' => array('administer content types'),
+    'type' => MENU_LOCAL_TASK,
+    'weight' => 3,
+  );
+  $items['admin/content/types/import'] = array(
+    'title' => t('Import'),
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('content_copy_import_form'),
+    'access arguments' => array('administer content types'),
+    'type' => MENU_LOCAL_TASK,
+    'weight' => 4,
+  );
   return $items;
 }
 
@@ -441,7 +435,7 @@ function content_copy_import_form_submit($form_id, $form_values) {
  * Implementation of hook_form_alter().
  * Intervene to run form through macro when doing export
  */
-function content_copy_form_alter($form_id, &$form) {
+function content_copy_form_alter(&$form, $form_id) {
   $alter_forms = array('node_type_form', '_content_admin_field', 'fieldgroup_edit_group_form');
   if ($GLOBALS['content_copy']['status'] == 'export' && in_array($form_id, $alter_forms)) {
     $form['#submit'] = array('content_copy_record_macro' => array($form));

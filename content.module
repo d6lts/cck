@@ -31,108 +31,76 @@ function content_devel_caches() {
  * Implementation of hook_init().
  */
 function content_init() {
-  // ensure we are not serving a cached page
-  if (function_exists('drupal_set_content')) {
-    // we don't do this in hook_menu to ensure the files are already included when
-    // views_menu is executed
-    if (module_exists('views')) {
-      include_once('./'. drupal_get_path('module', 'content') .'/content_views.inc');
-    }
-    // according to http://drupal.org/node/60526, this should not go in hook_menu
-    if (module_exists('pathauto')) {
-      include_once('./'. drupal_get_path('module', 'content') .'/content_pathauto.inc');
-    }
+  drupal_add_css(drupal_get_path('module', 'content') .'/content.css');
+  if (arg(0) == 'admin') {
+    include_once('./'. drupal_get_path('module', 'content') .'/content_admin.inc');
+  }
+  if (module_exists('views')) {
+    include_once('./'. drupal_get_path('module', 'content') .'/content_views.inc');
+  }
+  if (module_exists('pathauto')) {
+    include_once('./'. drupal_get_path('module', 'content') .'/content_pathauto.inc');
   }
 }
 
 /**
  * Implementation of hook_menu().
  */
-function content_menu($may_cache) {
-  if (!$may_cache) {
-    // Only include administrative callbacks if we are viewing an admin page.
-    if (arg(0) == 'admin') {
-      include_once('./'. drupal_get_path('module', 'content') .'/content_admin.inc');
-    }
-    // Unconditionally include css exactly once per page.
-    drupal_add_css(drupal_get_path('module', 'content') .'/content.css');
-  }
-
+function content_menu() {
   $items = array();
   $access = user_access('administer content types');
 
-  if ($may_cache) {
-      $items[] = array(
-        'path' => 'admin/content/types/fields',
-        'title' => t('Fields'),
-        'callback' => '_content_admin_type_fields',
-        'access' => $access,
-        'type' => MENU_LOCAL_TASK,
+  $items['admin/content/types/fields'] = array(
+    'title' => t('Fields'),
+    'page callback' => '_content_admin_type_fields',
+    'access arguments' => array('administer content types'),
+    'type' => MENU_LOCAL_TASK,
+  );
+  foreach (node_get_types() as $type) {
+    $type_name = $type->type;
+    $content_type = content_types($type_name);
+    $type_url_str = $content_type['url_str'];
+
+    $items['admin/content/types/'. $type_url_str .'/fields'] = array(
+      'title' => t('Manage fields'),
+      'page callback' => 'drupal_get_form',
+      'page arguments' => array('content_admin_field_overview_form', $type_name),
+      'access arguments' => array('administer content types'),
+      'type' => MENU_LOCAL_TASK,
+      'weight' => 0,
+    );
+    $items['admin/content/types/'. $type_url_str .'/display'] = array(
+      'title' => t('Display fields'),
+      'page callback' => 'drupal_get_form',
+      'page arguments' => array('content_admin_display_overview_form', $type_name),
+      'access arguments' => array('administer content types'),
+      'type' => MENU_LOCAL_TASK,
+      'weight' => 1,
+    );
+    $items['admin/content/types/'. $type_url_str .'/add_field'] = array(
+      'title' => t('Add field'),
+      'page callback' => '_content_admin_field_add',
+      'page arguments' => array($type_name),
+      'access arguments' => array('administer content types'),
+      'type' => MENU_LOCAL_TASK,
+      'weight' => 2,
+    );
+    foreach ($content_type['fields'] as $field) {
+      $field_name = $field['name'];
+      $items['admin/content/types/'. $type_url_str .'/fields/'. $field_name] = array(
+        'title' => t($field['widget']['label']),
+        'page callback' => 'drupal_get_form',
+        'page arguments' => array('_content_admin_field', $type_name, $field_name),
+        'access arguments' => array('administer content types'),
+        'type' => MENU_CALLBACK,
       );
-  }
-  else {
-    if (arg(0) == 'admin' && arg(1) == 'content' && arg(2) == 'types') {
-
-      $content_type = content_types(arg(3));
-      $type = node_get_types('types', $content_type['type']);
-
-
-      if (!empty($type) && arg(3) && arg(3) == $content_type['url_str']) {
-        $items[] = array(
-          'path' => 'admin/content/types/'. $content_type['url_str'] .'/edit',
-          'title' => t('Edit'),
-          'callback' => 'drupal_get_form',
-          'callback arguments' => array('node_type_form', $type),
-          'type' => MENU_DEFAULT_LOCAL_TASK,
-        );
-        $items[] = array(
-          'path' => 'admin/content/types/'. $content_type['url_str'] .'/fields',
-          'title' => t('Manage fields'),
-          'callback' => 'drupal_get_form',
-          'access' => $access,
-          'callback arguments' => array('content_admin_field_overview_form', $content_type['type']),
-          'type' => MENU_LOCAL_TASK,
-          'weight' => 0,
-        );
-        $items[] = array(
-          'path' => 'admin/content/types/'. $content_type['url_str'] .'/display',
-          'title' => t('Display fields'),
-          'callback' => 'drupal_get_form',
-          'access' => $access,
-          'callback arguments' => array('content_admin_display_overview_form', $content_type['type']),
-          'type' => MENU_LOCAL_TASK,
-          'weight' => 1,
-        );
-        $items[] = array(
-          'path' => 'admin/content/types/'. $content_type['url_str'] .'/add_field',
-          'title' => t('Add field'),
-          'callback' => '_content_admin_field_add',
-          'access' => $access,
-          'callback arguments' => array($content_type['type']),
-          'type' => MENU_LOCAL_TASK,
-          'weight' => 2,
-        );
-
-        if (arg(4) == 'fields' && arg(5) && isset($content_type['fields'][arg(5)])) {
-          $items[] = array(
-            'path' => 'admin/content/types/'. $content_type['url_str'] .'/fields/'. arg(5),
-            'title' => t($content_type['fields'][arg(5)]['widget']['label']),
-            'callback' => 'drupal_get_form',
-            'access' => $access,
-            'callback arguments' => array('_content_admin_field', $content_type['type'], arg(5)),
-            'type' => MENU_CALLBACK,
-          );
-          $items[] = array(
-            'path' => 'admin/content/types/'. $content_type['url_str'] .'/fields/'. arg(5) .'/remove',
-            'title' => t('Remove field'),
-            'callback' => 'drupal_get_form',
-            'access' => $access,
-            'callback arguments' => array('_content_admin_field_remove', $content_type['type'], arg(5)),
-            'type' => MENU_CALLBACK,
-          );
-        }
-
-      }
+      $items['admin/content/types/'. $type_url_str .'/fields/'. $field_name .'/remove'] = array(
+        'title' => t('Remove field'),
+        'page callback' => 'drupal_get_form',
+        'page arguments' => array('_content_admin_field_remove', $type_name, $field_name),
+        'access arguments' => array('administer content types'),
+        'type' => MENU_CALLBACK,
+      );
     }
   }
 
@@ -320,7 +288,7 @@ function content_nodeapi(&$node, $op, $teaser, $page) {
 /**
  *  Implementation of hook_form_alter().
  */
-function content_form_alter($form_id, &$form) {
+function content_form_alter(&$form, $form_id) {
   if (isset($form['type'])) {
     $node = $form['#node'];
     if ($form['type']['#value'] .'_node_form' == $form_id) {

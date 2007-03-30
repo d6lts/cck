@@ -10,14 +10,14 @@
 /**
  * Implementation of hook_menu().
  */
-function nodereference_menu($may_cache) {
+function nodereference_menu() {
   $items = array();
-
-  if ($may_cache) {
-    $items[] = array('path' => 'nodereference/autocomplete', 'title' => t('node reference autocomplete'),
-      'callback' => 'nodereference_autocomplete', 'access' => user_access('access content'), 'type' => MENU_CALLBACK);
-  }
-
+  $items['nodereference/autocomplete'] = array(
+    'title' => t('Nodereference autocomplete'),
+    'page callback' => 'nodereference_autocomplete',
+    'access arguments' => array('access content'),
+    'type' => MENU_CALLBACK
+  );
   return $items;
 }
 

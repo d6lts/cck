@@ -264,7 +264,7 @@ function content_views_argument_handler($op, &$query, $argtype, $arg = '') {
         $item[$column] = $query->$view_column_name;
       }
 
-      return l(content_format($field, $item, 'plain'), $arg .'/'. $query->$main_column['column'], array(), NULL, NULL, FALSE, TRUE);
+      return l(content_format($field, $item, 'plain'), $arg .'/'. $query->$main_column['column'], array('html' => TRUE));
 
     case 'title':
       $item = array(key($db_info['columns']) => $query);
