@@ -78,7 +78,7 @@ function content_admin_field_overview_form($type_name) {
     drupal_set_message(t('There are no fields configured for this content type.'));
   }
 
-  if (!$type['fields'] && !$form['#groups']) {
+  if (empty($type['fields']) && empty($form['#groups'])) {
     return $form;
   }
 
@@ -193,7 +193,7 @@ function content_admin_field_overview_form($type_name) {
  *  Theme the field overview table by iterating through the form and rendering form elements in table cells
  */
 function theme_content_admin_field_overview_form($form) {
-  if (!$form['#table']) {
+  if (empty($form['#table'])) {
     return;
   }
 
@@ -369,12 +369,14 @@ function theme_content_admin_display_overview_form($form) {
     $header[] = $title;
   }
   $rows = array();
-  foreach (element_children($form['fields']) as $field) {
-    $row = array();
-    foreach (element_children($form['fields'][$field]) as $key) {
-      $row[] = drupal_render($form['fields'][$field][$key]);
+  if (isset($form['fields'])) {
+    foreach (element_children($form['fields']) as $field) {
+      $row = array();
+      foreach (element_children($form['fields'][$field]) as $key) {
+        $row[] = drupal_render($form['fields'][$field][$key]);
+      }
+      $rows[] = $row;
     }
-    $rows[] = $row;
   }
   $output = '';
   if (!empty($rows)) {
@@ -520,6 +522,7 @@ function _content_admin_field_add_new($type_name, $new_field_name = '') {
       '#title' => t('Field type'),
       '#required' => TRUE,
       '#options' => $field_type_options,
+      '#default_value' => array(),
       '#theme' => 'content_admin_field_add_new_field_widget_type',
     );
 
