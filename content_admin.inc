@@ -56,7 +56,7 @@ function content_admin_field_overview_form($type_name) {
   $dummy_form = node_form($dummy_node);
   foreach (module_implements('form_alter') as $module) {
     $function = $module .'_form_alter';
-    $function($dummy_form_id, $dummy_form);
+    $function($dummy_form, $dummy_form_id);
   }
 
   // Move group fields into a 'fields' subgroup to make them easier to identify.

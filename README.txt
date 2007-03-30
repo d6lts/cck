@@ -1,5 +1,8 @@
 // $Id$
 
+IMPORTANT : this is experimental Drupal 6 code, not ready for any kind of use.
+Use 4.7 or 5 branch releases instead !
+
 Content Construction Kit
 ------------------------
 To install, place the entire cck folder into your modules directory.
