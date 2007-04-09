@@ -422,9 +422,6 @@ function content_update_1003() {
   }
 
   variable_set('content_schema_version', 1003);
-  // Set a followup flag for content_update_1005.
-  $_SESSION['content_update_1003_followup'] = TRUE;
-
   return $ret;
 }
 
@@ -470,26 +467,9 @@ function content_update_1004() {
 }
 
 /**
- *  Regenerate views (was in content_update_1003, but was later moved out in a separate update
+ *  Empty update - Was regenerating views after update_1003, but is not needed with Views 1.6
  */
 function content_update_1005() {
-  $ret = array();
-
-  if (isset($_SESSION['content_update_1003_followup'])) {
-    content_clear_type_cache();
-    if (module_exists('views')) {
-      include_once('./'. drupal_get_path('module', 'content') .'/content_views.inc');
-      $updated_views = _content_views_rebuild_views(array_keys(content_fields()));
-      foreach ($updated_views as $view) {
-        $ret[] = array(
-          'query' => strtr('The views %view has been regenerated.', array('%view' => $view)),
-          'success' => TRUE
-        );
-      }
-    }
-  }
-
-  return $ret;
 }
 
 /**
