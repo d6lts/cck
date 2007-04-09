@@ -273,32 +273,3 @@ function content_views_argument_handler($op, &$query, $argtype, $arg = '') {
   }
 }
 
-/**
- * Rebuild the cached queries for the views using a given field
- * used when a field changes its 'multiple' status
- * plus helper function for updates
- *
- * @param unknown_type $update_fields
- */
-function _content_views_rebuild_views($update_fields) {
-
-  $tables = _views_get_tables();
-  $result = db_query("SELECT name FROM {view_view} ORDER BY name");
-  while ($row = db_fetch_array($result)) {
-    // if a query has been stored for the view
-    if (!empty($row['name'])) {
-      $view = views_get_view($row['name']);
-      // TODO : check for arguments / sorts / filters as well ?
-      foreach ($view->field as $field) {
-        // if the view contains one of the fields that require updating
-        $field_info = $tables[$field['tablename']]['fields'][$field['field']];
-        if (isset($field_info['content_field']) && in_array($field_info['content_field']['field_name'], $update_fields)) {
-          // re-save the view (forces the query to be updated)
-          _views_save_view($view);
-          break;
-        }
-      }
-    }
-  }
-}
-
