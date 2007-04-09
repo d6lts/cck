@@ -30,7 +30,7 @@ function content_views_tables() {
 function content_views_field_tables($field) {
   $field_types = _content_field_types();
   $db_info = content_database_info($field);
-  
+
   if (count($db_info['columns'])) {
     $table = array();
 
@@ -283,10 +283,10 @@ function content_views_argument_handler($op, &$query, $argtype, $arg = '') {
 function _content_views_rebuild_views($update_fields) {
 
   $tables = _views_get_tables();
-  $result = db_query("SELECT name, query FROM {view_view} ORDER BY name");
+  $result = db_query("SELECT name FROM {view_view} ORDER BY name");
   while ($row = db_fetch_array($result)) {
     // if a query has been stored for the view
-    if (!empty($row['query'])) {
+    if (!empty($row['name'])) {
       $view = views_get_view($row['name']);
       // TODO : check for arguments / sorts / filters as well ?
       foreach ($view->field as $field) {

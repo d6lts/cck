@@ -3,6 +3,7 @@
 Bugfix
 ------
 
+- #134812 Fix Unknown column 'query' in 'field list' query: _content_views_rebuild_views
 - curly quotes fixes in German translation
 - #130230 - optionwidgets : allow setting back to 'no value' for non required fields
 - #130545: Core translation destroyed by German translation
