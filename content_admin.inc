@@ -395,7 +395,7 @@ function content_admin_display_overview_form_submit($form_id, $form_values) {
       }
 
       db_query("UPDATE {node_field_instance} SET display_settings = '%s' WHERE type_name = '%s' AND field_name = '%s'",
-        serialize($display_settings), $form_values['type_name'], $fieldname);
+        serialize($display_settings), $type, $fieldname);
     }
     content_clear_type_cache();
   }
@@ -1011,13 +1011,6 @@ function _content_admin_field_submit($form_id, $form_values) {
     $new_columns = array();
   }
   content_alter_db_field($prev_field, $prev_columns, $new_field, $new_columns);
-
-  // regenerate views queries if 'multiple' status was changed
-  if (module_exists('views')) {
-    if ($new_field['multiple'] != $prev_field['multiple']) {
-      _content_views_rebuild_views(array($new_field['field_name']));
-    }
-  }
 
   return 'admin/content/types/'. $type['url_str'] .'/fields';
 }
