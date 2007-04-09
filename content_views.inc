@@ -285,11 +285,11 @@ function _content_views_rebuild_views($update_fields) {
   $updated_views = array();
   views_load_cache();
   $tables = _views_get_tables(true);
-  $result = db_query("SELECT name, query FROM {view_view} ORDER BY name");
+  $result = db_query("SELECT name FROM {view_view} ORDER BY name");
   // TODO : do we have to do that for default views as well ?
   while ($row = db_fetch_array($result)) {
     // if a query has been stored for the view
-    if (!empty($row['query'])) {
+    if (!empty($row['name'])) {
       $view = views_get_view($row['name']);
       $view_content_fields = array();
 
