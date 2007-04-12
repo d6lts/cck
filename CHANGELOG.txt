@@ -1,26 +1,27 @@
 // $Id$
 
+4.7--1.5
+========
+
+Features 
+--------
+- #126333  Update to Views 1.6 API 
+           (no need to update cached queries on field setup changes anymore)
+- #126776  Enhance 'default value php code' help text and error message.
+-          minor - collapse 'default value php code' if empty
+           
 Bugfix
 ------
 
-- #134812 Fix Unknown column 'query' in 'field list' query: _content_views_rebuild_views
-- curly quotes fixes in German translation
-- #130230 - optionwidgets : allow setting back to 'no value' for non required fields
-- #130545: Core translation destroyed by German translation
-- fieldgroup_data cache was fetched every time from the database -> fixed static caching
-- #128994 - fix for 'ungroup multiple values' views handler populating every 'column'
-   of the values with the first column (revert http://drupal.org/cvs?commit=58000) 
-- #116775 - stupid conflict on field form when field_name == 'name'
-- #122991: fixes further display page issues with no fields / groups
-- #127010 (followup to #125661) - proper escaping in update_sql
-- #123970 - text field / 'trimmed' formatter : trim first, then check_markup
-- forgot some t() labels in fieldgroups
-- #115848 - use dedicated cache table
-- minor - collapse 'default value php code' if empty
-- #126776 enhance 'default value php code' help text and error message.
-- #125661 escape group description in update_sql
-- #125536 fixed descriptions on node forms and node display
-- #125185 fix miner error in update_1004.
+General
+- #128994  Fix for 'ungroup multiple values' views handler populating every 'column'
+           of the values with the first column (revert http://drupal.org/cvs?commit=58000) 
+- #116775  Stupid conflict on field form when field_name == 'name'
+- #125185 fix minor error in update_10.
+
+Field / widget modules
+- #130230  Optionwidgets : allow setting back to 'no value' for non required fields
+- #123970  Text : 'trimmed' formatter : trim first, then check_markup
 
 4.7--1.4
 ========
