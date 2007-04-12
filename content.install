@@ -539,3 +539,13 @@ function content_update_1007() {
 
   return $ret;
 }
+
+/**
+ *  CCK 1.5 / Views 1.6 message
+ */
+function content_update_1008() {
+  if (module_exists('views') && !function_exists('views_update_12')) {
+    drupal_set_message('CCK 1.5 is targetted to work with Views 1.6. For a better CCK / Views integration, it is advised you update your Views installation.', 'error');
+  }
+  return array();
+}
