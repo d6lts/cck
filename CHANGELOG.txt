@@ -1,5 +1,12 @@
 // $Id$
 
+4.7--1.5-1
+==========
+
+Bugfix
+------
+- #136191  Fix fatal error in update_12 : module_exist instead of module_exists
+
 4.7--1.5
 ========
 
