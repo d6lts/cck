@@ -37,6 +37,7 @@ function fieldgroup_install() {
       )");
     break;
   }
+  db_query("UPDATE {system} SET weight = 9 WHERE name = 'fieldgroup'");
 }
 
 /**
@@ -131,5 +132,15 @@ function fieldgroup_update_3() {
     }
   }
 
+  return $ret;
+}
+
+/*
+ * Increases module weight, so that other modules can form_alter() cck forms before the fields
+ * are moved in groups
+ */
+function fieldgroup_update_4() {
+  $ret = array();
+  $ret[] = update_sql("UPDATE {system} SET weight = 9 WHERE name = 'fieldgroup'");
   return $ret;
 }
