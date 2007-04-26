@@ -333,11 +333,9 @@ function content_update_11() {
 }
 
 /**
- *  CCK 1.5 / Views 1.6 message
+ *  Empty update - Was : Message encouraging Views 1.6 upgrade
+ *  Removed until Views 1.6 gets out of beta
  */
 function content_update_12() {
-  if (module_exist('views') && !function_exists('views_update_12')) {
-    drupal_set_message('CCK 1.5 is targetted to work with Views 1.6. For a better CCK / Views integration, it is advised you update your Views installation.', 'error');
-  }
   return array();
 }
