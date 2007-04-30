@@ -17,7 +17,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: CCK\n"
 "POT-Creation-Date: 2006-07-27 08:09-0400\n"
-"PO-Revision-Date: 2007-04-02 20:00+0100\n"
+"PO-Revision-Date: 2007-04-30 14:36+0100\n"
 "Last-Translator: Alexander Hass\n"
 "Language-Team: German <lukas.gangoly@univie.ac.at>\n"
 "MIME-Version: 1.0\n"
@@ -368,7 +368,7 @@ msgstr "Falls sich Daten in diesem Feld befinden, gehen diese verloren. Diese Ak
 
 #: content_admin.inc:598
 msgid "Removed field %field from %type."
-msgstr "Feld %field von \"%type\" entfernt."
+msgstr "Feld %field von %type entfernt."
 
 #: content_admin.inc:621
 msgid "Widget settings"
