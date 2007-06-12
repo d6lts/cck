@@ -269,7 +269,7 @@ function content_views_argument_handler($op, &$query, $argtype, $arg = '') {
     case 'title':
       $item = array(key($db_info['columns']) => $query);
 
-      return content_format($field, $item);
+      return content_format($field, $item, 'plain');
   }
 }
 
