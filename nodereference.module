@@ -133,11 +133,11 @@ function nodereference_field($op, &$node, $field, &$items, $teaser, $page) {
 function nodereference_field_formatter_info() {
   return array(
     'default' => array(
-      'label' => 'Default',
+      'label' => 'Title (link)',
       'field types' => array('nodereference'),
     ),
     'plain' => array(
-      'label' => 'Plain text',
+      'label' => 'Title (no link)',
       'field types' => array('nodereference'),
     ),
   );
@@ -147,20 +147,23 @@ function nodereference_field_formatter_info() {
  * Implementation of hook_field_formatter().
  */
 function nodereference_field_formatter($field, $item, $formatter, $node) {
-  $text = '';
-  if (!empty($item['nid'])) {
-    $referenced_node = node_load($item['nid']);
-    if ($referenced_node) {
-      $text = l($referenced_node->title, 'node/'. $referenced_node->nid);
-    }
+  static $titles = array();
+
+  if (empty($item['nid'])) {
+    return '';
   }
 
+  if (!isset($titles[$item['nid']])) {
+    $title = db_result(db_query("SELECT title FROM {node} WHERE nid=%d", $item['nid']));
+    $titles[$item['nid']] = $title ? $title : '';
+  }
+  
   switch ($formatter) {
     case 'plain':
-      return strip_tags($text);
+      return $titles[$item['nid']];
 
     default:
-      return $text;
+      return l($titles[$item['nid']], 'node/'. $item['nid']);
   }
 }
 
