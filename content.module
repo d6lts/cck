@@ -324,17 +324,16 @@ function content_field($op, &$node, $field, &$node_field, $teaser, $page) {
       foreach ($db_info['columns'] as $column => $attributes) {
         $column_names[] = $attributes['column'] .' AS '. $column;
       }
+      $query = 'SELECT '. implode(', ', $column_names) .' FROM {'. $db_info['table'] .'} WHERE vid = %d';
       if ($field['multiple']) {
-        $result = db_query('SELECT '. implode(', ', $column_names) .' FROM {'. $db_info['table'] .'} WHERE vid = %d ORDER BY delta', $node->vid);
-        $values = array();
-        while ($value = db_fetch_array($result)) {
-          $values[] = $value;
-        }
-        $additions = array($field['field_name'] => $values);
+        $result = db_query($query .' ORDER BY delta'. $compl, $node->vid);
       }
       else {
-        $result = db_query('SELECT '. implode(', ', $column_names) .' FROM {'. $db_info['table'] .'} WHERE vid = %d', $node->vid);
-        $additions = array($field['field_name'] => array(db_fetch_array($result)));
+        $result = db_query_range($query, $node->vid, 0, 1);
+      }
+      $additions = array();
+      while ($value = db_fetch_array($result)) {
+        $additions[$field['field_name']][] = $value;
       }
       return $additions;
 
