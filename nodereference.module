@@ -149,7 +149,7 @@ function nodereference_field_formatter_info() {
 function nodereference_field_formatter($field, $item, $formatter, $node) {
   static $titles = array();
 
-  if (empty($item['nid']) || !is_numeric($item['nid']) {
+  if (empty($item['nid']) || !is_numeric($item['nid'])) {
     return '';
   }
 
