@@ -450,7 +450,9 @@ function _nodereference_item($field, $item, $html = false) {
   if (module_exists('views') && ($view = views_get_view($field['advanced_view']))) {
     $output = theme('nodereference_item_advanced', $item, $view);
     if (!$html) {
-      $output = strip_tags($output);
+      // Views theming runs check_plain (htmlentities) on the values.
+      // We reverse that with html_entity_decode.
+      $output = html_entity_decode(strip_tags($output), ENT_QUOTES);
     }
   }
   else {
