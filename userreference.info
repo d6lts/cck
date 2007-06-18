@@ -1,7 +1,6 @@
 ; $Id$
 name = User Reference
 description = Defines a field type for referencing a user from a node.
-version = "$Name$"
 dependencies = content
 package = CCK
 
