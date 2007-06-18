@@ -1,7 +1,6 @@
 ; $Id$
 name = Number
 description = Defines numeric field types.
-version = "$Name$"
 dependencies = content
 package = CCK
 

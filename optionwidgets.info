@@ -1,7 +1,6 @@
 ; $Id$
 name = Option Widgets
 description = Defines selection, check box and radio button widgets for text and numeric fields.
-version = "$Name$"
 dependencies = content
 package = CCK
 
