@@ -371,7 +371,7 @@ function nodereference_widget($op, &$node, $field, &$items) {
  * Fetch an array of all candidate referenced nodes, for use in presenting the selection form to the user.
  */
 function _nodereference_potential_references($field, $return_full_nodes = FALSE, $string = '', $exact_string = false) {
-  if (module_exists('views') && ($view = views_get_view($field['advanced_view']))) {
+  if (module_exists('views') && $field['advanced_view'] != '--' && ($view = views_get_view($field['advanced_view']))) {
     // advanced field : referenceable nodes defined by a view
     // let views.module build the query
 
@@ -468,7 +468,7 @@ function nodereference_autocomplete($field_name, $string = '') {
 }
 
 function _nodereference_item($field, $item, $html = false) {
-  if (module_exists('views') && ($view = views_get_view($field['advanced_view']))) {
+  if (module_exists('views') && $field['advanced_view'] != '--' && ($view = views_get_view($field['advanced_view']))) {
     $output = theme('nodereference_item_advanced', $item, $view);
     if (!$html) {
       // Views theming runs check_plain (htmlentities) on the values.
