@@ -326,7 +326,7 @@ function content_field($op, &$node, $field, &$node_field, $teaser, $page) {
       }
       $query = 'SELECT '. implode(', ', $column_names) .' FROM {'. $db_info['table'] .'} WHERE vid = %d';
       if ($field['multiple']) {
-        $result = db_query($query .' ORDER BY delta'. $compl, $node->vid);
+        $result = db_query($query .' ORDER BY delta', $node->vid);
       }
       else {
         $result = db_query_range($query, $node->vid, 0, 1);
