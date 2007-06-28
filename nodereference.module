@@ -413,7 +413,7 @@ function _nodereference_potential_references($field, $return_full_nodes = FALSE,
     if (isset($field['referenceable_types'])) {
       foreach ($field['referenceable_types'] as $related_type) {
         if ($related_type) {
-          $related_types[] = " type = '%s'";
+          $related_types[] = " n.type = '%s'";
           $args[] = $related_type;
         }
       }
@@ -426,7 +426,7 @@ function _nodereference_potential_references($field, $return_full_nodes = FALSE,
     }
 
     if (isset($string)) {
-      $string_clause = $exact_string ? " AND title = '%s'" : " AND title LIKE '%%%s%'";
+      $string_clause = $exact_string ? " AND n.title = '%s'" : " AND n.title LIKE '%%%s%'";
       $related_clause = "(". $related_clause .")". $string_clause;
       $args[] = $string;
     }
