@@ -52,6 +52,7 @@ function content_admin_field_overview_form($type_name) {
   // to produce an array of fields and weights added to the node by all modules.
   $dummy_node = new stdClass();
   $dummy_node->type = $type['type'];
+  $dummy_node->name = '';
   $dummy_form_id = $type['type'] .'_node_form';
   $dummy_form = node_form($dummy_node);
   foreach (module_implements('form_alter') as $module) {
