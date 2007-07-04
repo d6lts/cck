@@ -1,0 +1,36 @@
+<?php
+
+/**
+ * Implementation of hook_schema.
+ */
+function content_schema() {
+  $schema['node_field'] = array(
+    'fields' => array(
+      'field_name'      => array('type' => 'varchar', 'length' => 32, 'not null' => TRUE, 'default' => ''),
+      'type'            => array('type' => 'varchar', 'length' => 127, 'not null' => TRUE, 'default' => ''),
+      'global_settings' => array('type' => 'text', 'size' => 'medium', 'not null' => TRUE, 'default' => ''),
+      'required'        => array('type' => 'int', 'size' => 'tiny', 'not null' => TRUE, 'default' => '0'),
+      'multiple'        => array('type' => 'int', 'size' => 'tiny', 'not null' => TRUE, 'default' => '0'),
+      'db_storage'      => array('type' => 'int', 'size' => 'tiny', 'not null' => TRUE, 'default' => '0'),
+    ),
+    'primary key' => array('field_name'),
+  );
+
+  $schema['node_field_instance'] = array(
+    'fields' => array(
+      'field_name'       => array('type' => 'varchar', 'length' => 32, 'not null' => TRUE, 'default' => ''),
+      'type_name'        => array('type' => 'varchar', 'length' => 32, 'not null' => TRUE, 'default' => ''),
+      'weight'           => array('type' => 'int', 'not null' => TRUE, 'default' => '0'),
+      'label'            => array('type' => 'varchar', 'length' => 255, 'not null' => TRUE, 'default' => ''),
+      'widget_type'      => array('type' => 'varchar', 'length' => 32, 'not null' => TRUE, 'default' => ''),
+      'widget_settings'  => array('type' => 'text', 'size' => 'medium', 'not null' => TRUE, 'default' => ''),
+      'display_settings' => array('type' => 'text', 'size' => 'medium', 'not null' => TRUE, 'default' => ''),
+      'description'      => array('type' => 'text', 'size' => 'medium', 'not null' => TRUE, 'default' => ''),
+    ),
+    'primary key' => array('field_name', 'type_name'),
+  );
+
+  $schema['cache_content'] = drupal_get_schema_unprocessed('system', 'cache');
+
+  return $schema;
+}

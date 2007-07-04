@@ -9,72 +9,6 @@
  * Refer to the 4.7 install file to see the original database configuration script.
  */
 function content_install() {
-  switch ($GLOBALS['db_type']) {
-    case 'mysql':
-    case 'mysqli':
-      db_query("CREATE TABLE {node_field} (
-        field_name varchar(32) NOT NULL default '',
-        type varchar(127) NOT NULL default '',
-        global_settings mediumtext NOT NULL,
-        required int NOT NULL default '0',
-        multiple int NOT NULL default '0',
-        db_storage int NOT NULL default '0',
-        PRIMARY KEY  (field_name)
-      ) /*!40100 DEFAULT CHARACTER SET utf8 */");
-      db_query("CREATE TABLE {node_field_instance} (
-        field_name varchar(32) NOT NULL default '',
-        type_name varchar(32) NOT NULL default '',
-        weight int NOT NULL default '0',
-        label varchar(255) NOT NULL default '',
-        widget_type varchar(32) NOT NULL default '',
-        widget_settings mediumtext NOT NULL,
-        display_settings mediumtext NOT NULL,
-        description mediumtext NOT NULL,
-        PRIMARY KEY  (field_name,type_name)
-      ) /*!40100 DEFAULT CHARACTER SET utf8 */");
-      db_query("CREATE TABLE {cache_content} (
-        cid varchar(255) NOT NULL default '',
-        data longblob,
-        expire int NOT NULL default '0',
-        created int NOT NULL default '0',
-        headers text,
-        PRIMARY KEY (cid),
-        INDEX expire (expire)
-      ) /*!40100 DEFAULT CHARACTER SET UTF8 */ ");
-      break;
-
-    case 'pgsql':
-      db_query("CREATE TABLE {node_field} (
-        field_name varchar(32) NOT NULL default '',
-        type varchar(127) NOT NULL default '',
-        global_settings text NOT NULL,
-        required integer NOT NULL default '0',
-        multiple integer NOT NULL default '0',
-        db_storage integer NOT NULL default '0',
-        PRIMARY KEY  (field_name)
-      )");
-      db_query("CREATE TABLE {node_field_instance} (
-        field_name varchar(32) NOT NULL default '',
-        type_name varchar(32) NOT NULL default '',
-        weight integer NOT NULL default '0',
-        label varchar(255) NOT NULL default '',
-        widget_type varchar(32) NOT NULL default '',
-        widget_settings text NOT NULL,
-        display_settings text NOT NULL,
-        description text NOT NULL,
-        PRIMARY KEY  (field_name,type_name)
-      )");
-      db_query("CREATE TABLE {cache_content} (
-        cid varchar(255) NOT NULL default '',
-        data bytea,
-        expire int NOT NULL default '0',
-        created int NOT NULL default '0',
-        headers text,
-        PRIMARY KEY (cid)
-      )");
-      db_query("CREATE INDEX {cache_content}_expire_idx ON {cache_content} (expire)");
-      break;
-  }
   variable_set('content_schema_version', 1003);
 }
 
@@ -422,6 +356,9 @@ function content_update_1003() {
   }
 
   variable_set('content_schema_version', 1003);
+  // Set a followup flag for content_update_1005.
+  $_SESSION['content_update_1003_followup'] = TRUE;
+
   return $ret;
 }
 
@@ -467,9 +404,26 @@ function content_update_1004() {
 }
 
 /**
- *  Empty update - Was regenerating views after update_1003, but is not needed with Views 1.6
+ *  Regenerate views (was in content_update_1003, but was later moved out in a separate update
  */
 function content_update_1005() {
+  $ret = array();
+
+  if (isset($_SESSION['content_update_1003_followup'])) {
+    content_clear_type_cache();
+    if (module_exists('views')) {
+      include_once('./'. drupal_get_path('module', 'content') .'/content_views.inc');
+      $updated_views = _content_views_rebuild_views(array_keys(content_fields()));
+      foreach ($updated_views as $view) {
+        $ret[] = array(
+          'query' => strtr('The views %view has been regenerated.', array('%view' => $view)),
+          'success' => TRUE
+        );
+      }
+    }
+  }
+
+  return $ret;
 }
 
 /**
@@ -538,14 +492,4 @@ function content_update_1007() {
   }
 
   return $ret;
-}
-
-/**
- *  CCK 1.5 / Views 1.6 message
- */
-function content_update_1008() {
-  if (module_exists('views') && !function_exists('views_update_12')) {
-    drupal_set_message('CCK 1.5 is targetted to work with Views 1.6. For a better CCK / Views integration, it is advised you update your Views installation.', 'error');
-  }
-  return array();
 }

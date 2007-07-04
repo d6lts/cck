@@ -1,45 +1,6 @@
 <?php
 // $Id$
 
-function fieldgroup_install() {
-  switch ($GLOBALS['db_type']) {
-    case 'mysql':
-    case 'mysqli':
-      db_query("CREATE TABLE {node_group} (
-                `type_name` varchar(32) NOT NULL default '',
-                `group_name` varchar(32) NOT NULL default '',
-                `label` varchar(255) NOT NULL default '',
-                `settings` mediumtext NOT NULL,
-                `weight` tinyint(4) NOT NULL,
-                 PRIMARY KEY(`type_name`, `group_name`)
-              ) /*!40100 DEFAULT CHARACTER SET utf8 */");
-      db_query("CREATE TABLE {node_group_fields} (
-                `type_name` varchar(32) NOT NULL default '',
-                `group_name` varchar(32) NOT NULL default '',
-                `field_name` varchar(32) NOT NULL default '',
-                 PRIMARY KEY(`type_name`, `group_name`, `field_name`)
-              ) /*!40100 DEFAULT CHARACTER SET utf8 */");
-      break;
-    case 'pgsql':
-      db_query("CREATE TABLE {node_group} (
-                type_name varchar(32) NOT NULL default '',
-                group_name varchar(32) NOT NULL default '',
-                label varchar(255) NOT NULL default '',
-                settings text NOT NULL,
-                weight smallint NOT NULL,
-                PRIMARY KEY(type_name, group_name)
-      )");
-      db_query("CREATE TABLE {node_group_fields} (
-                type_name varchar(32) NOT NULL default '',
-                group_name varchar(32) NOT NULL default '',
-                field_name varchar(32) NOT NULL default '',
-                PRIMARY KEY(type_name, group_name, field_name)
-      )");
-    break;
-  }
-  db_query("UPDATE {system} SET weight = 9 WHERE name = 'fieldgroup'");
-}
-
 /**
  *  rename groups form "group-*" to "group_*"
  */
@@ -134,7 +95,6 @@ function fieldgroup_update_3() {
 
   return $ret;
 }
-
 /*
  * Increases module weight, so that other modules can form_alter() cck forms before the fields
  * are moved in groups
