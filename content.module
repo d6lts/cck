@@ -288,7 +288,7 @@ function content_nodeapi(&$node, $op, $teaser, $page) {
 /**
  *  Implementation of hook_form_alter().
  */
-function content_form_alter(&$form, $form_id) {
+function content_form_alter(&$form, $form_state, $form_id) {
   if (isset($form['type'])) {
     $node = $form['#node'];
     if ($form['type']['#value'] .'_node_form' == $form_id) {

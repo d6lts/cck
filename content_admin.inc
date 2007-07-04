@@ -298,8 +298,9 @@ function theme_content_admin_field_overview_form($form) {
 
 }
 
-function content_admin_field_overview_form_submit($form_id, $form_values) {
+function content_admin_field_overview_form_submit($form, &$form_state) {
   $msg = FALSE;
+  $form_values = $form_state['values'];
   foreach ((array) $form_values['field-groups'] as $key => $value) {
     if ($key && !in_array($key, unserialize($form_values['disabled']))) {
       $values  = array('field_name' => $key, 'group' => $value, 'type_name' => $form_values['type_name']);
@@ -387,7 +388,8 @@ function theme_content_admin_display_overview_form($form) {
   return $output;
 }
 
-function content_admin_display_overview_form_submit($form_id, $form_values) {
+function content_admin_display_overview_form_submit($form, &$form_state) {
+  $form_values = $form_state['values'];
   $type = $form_values['type_name'];
 
   if (isset($form_values['fields'])) {
@@ -569,7 +571,8 @@ function theme_content_admin_field_add_new_field_widget_type($form) {
 /**
  * Add an existing field to a content type.
  */
-function _content_admin_field_add_existing_submit($form_id, $form_values) {
+function _content_admin_field_add_existing_submit($form, &$form_state) {
+  $form_values = $form_state['values'];
   $type  = content_types($form_values['type_name']);
   $field = content_fields($form_values['field_name']);
   $field_types = _content_field_types();
@@ -599,13 +602,15 @@ function _content_admin_field_add_existing_submit($form_id, $form_values) {
 
   drupal_set_message(t('Added field %label.', array('%label' => $prior_instance['label'])));
   content_clear_type_cache();
-  return 'admin/content/types/'. $type['url_str'] .'/fields';
+
+  $form_state['redirect'] = 'admin/content/types/'. $type['url_str'] .'/fields';
 }
 
 /**
  *  Field name validation for programmatic field addition that supply the field name.
  */
-function _content_admin_field_add_new_validate($form_id, $form_values) {
+function _content_admin_field_add_new_validate($form, &$form_state) {
+  $form_values = $form_state['values'];
   if ($form_values['field_name']) {
     $fields = content_fields();
     if (!empty($fields[$form_values['field_name']])) {
@@ -622,7 +627,8 @@ function _content_admin_field_add_new_validate($form_id, $form_values) {
 /**
  * Create a new field for a content type.
  */
-function _content_admin_field_add_new_submit($form_id, $form_values) {
+function _content_admin_field_add_new_submit($form, &$form_state) {
+  $form_values = $form_state['values'];
   // Find a valid, computer-friendly field name.
 
   $fields = content_fields();
@@ -665,7 +671,8 @@ function _content_admin_field_add_new_submit($form_id, $form_values) {
   }
 
   drupal_set_message(t('Created field %label.', array('%label' => $form_values['label'])));
-  return 'admin/content/types/'. $type['url_str'] .'/fields/'. $field_name;
+
+  $form_state['redirect'] = 'admin/content/types/'. $type['url_str'] .'/fields/'. $field_name;
 }
 
 /**
@@ -699,7 +706,8 @@ function _content_admin_field_remove($type_name, $field_name) {
 /**
  * Remove a field from a content type.
  */
-function _content_admin_field_remove_submit($form_id, $form_values) {
+function _content_admin_field_remove_submit($form, &$form_state) {
+  $form_values = $form_state['values'];
   $type = content_types($form_values['type_name']);
   $field = $type['fields'][$form_values['field_name']];
 
@@ -709,7 +717,7 @@ function _content_admin_field_remove_submit($form_id, $form_values) {
 
     drupal_set_message(t('Removed field %field from %type.', array('%field' => $field['widget']['label'], '%type' => $type['name'])));
 
-    return 'admin/content/types/'. $type['url_str'] .'/fields';
+    $form_state['redirect'] = 'admin/content/types/'. $type['url_str'] .'/fields';
   }
 }
 
@@ -868,7 +876,9 @@ function _content_admin_field($type_name, $field_name) {
 /**
  * Validate a field's settings.
  */
-function _content_admin_field_validate($form_id, $form_values, $form) {
+function _content_admin_field_validate($form, &$form_state) {
+  $form_values = $form_state['values'];
+
   $type = content_types($form_values['type_name']);
   $field = $type['fields'][$form_values['field_name']];
   $field_types = _content_field_types();
@@ -955,7 +965,9 @@ function _content_admin_field_validate($form_id, $form_values, $form) {
 /**
  * Save a field's settings after editing.
  */
-function _content_admin_field_submit($form_id, $form_values) {
+function _content_admin_field_($form, &$form_state) {
+  $form_values = $form_state['values'];
+
   $type = content_types($form_values['type_name']);
   $field = $type['fields'][$form_values['field_name']];
   $field_types = _content_field_types();

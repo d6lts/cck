@@ -50,7 +50,6 @@ function fieldgroup_menu($may_cache) {
 }
 
 function fieldgroup_edit_group($content_type, $group_name, $action) {
-
   return drupal_get_form('fieldgroup_edit_group_form', $content_type, $group_name, $action);
 }
 
@@ -127,14 +126,21 @@ function fieldgroup_edit_group_form($content_type, $group_name, $action) {
   }
   $form['weight'] = array('#type' => 'value', '#value' => $group['weight']);
   $form['group_name'] = array('#type' => 'hidden', '#default_value' => $group_name);
-  $form['#submit'] = array('fieldgroup_edit_group_submit' => array($content_type, $action));
+
+  $form['#content_type'] = $content_type;
+  $form['#action'] = $action;
+  $form['#submit'][] = 'fieldgroup_edit_group_submit';
   return $form;
 }
 
 /**
  *  Group name validation for programmatic group addition.
  */
-function fieldgroup_edit_group_validate($form_id, $form_values, $content_type, $action) {
+function fieldgroup_edit_group_validate($form, &$form_state) {
+  $form_values = $form_state['values'];
+  $content_type = $form['#content_type'];
+  $action = $form['#action'];
+
   if (!empty($form_values['group_name']) && $action == 'add') {
 
     $groups = fieldgroup_groups($content_type['type']);
@@ -151,12 +157,16 @@ function fieldgroup_edit_group_validate($form_id, $form_values, $content_type, $
   }
 }
 
-function fieldgroup_edit_group_submit($form_id, &$form_values, $content_type, $action) {
+function fieldgroup_edit_group_submit($form, &$form_state) {
+  $form_values = $form_state['values'];
+  $content_type = $form['#content_type'];
+
   $groups = fieldgroup_groups($content_type['type']);
   $group = $groups[$form_values['group_name']];
   fieldgroup_save_group($content_type['type'], $form_values);
   cache_clear_all('fieldgroup_data', 'cache_content');
-  return 'admin/content/types/'. $content_type['url_str'] .'/fields';
+
+  $form_state['redirect'] = 'admin/content/types/'. $content_type['url_str'] .'/fields';
 }
 
 /*
@@ -208,7 +218,10 @@ function fieldgroup_remove_group($content_type, $group_name) {
     exit;
   }
 
-  $form['#submit'] = array(fieldgroup_remove_group_submit => array($content_type, $group_name));
+  $form['#submit'][] = 'fieldgroup_remove_group_submit';
+  $form['#content_type'] = $content_type;
+  $form['#group_name'] = $group_name;
+
   return confirm_form($form,
                   t('Are you sure you want to remove the group %label?',
                   array('%label' => t($group['label']))),
@@ -216,13 +229,18 @@ function fieldgroup_remove_group($content_type, $group_name) {
                   t('Remove'), t('Cancel'));
 }
 
-function fieldgroup_remove_group_submit($form_id, &$form_values, $content_type, $group_name) {
+function fieldgroup_remove_group_submit($form, &$form_state) {
+  $form_values = $form_state['values'];
+  $content_type = $form['#content_type'];
+  $group_name = $form['#group_name'];
+
   db_query("DELETE FROM {node_group} WHERE  type_name = '%s' AND group_name = '%s'", $content_type['type'], $group_name);
   db_query("DELETE FROM {node_group_fields} WHERE  type_name = '%s' AND group_name = '%s'", $content_type['type'], $group_name);
   cache_clear_all('fieldgroup_data', 'cache_content');
 
   drupal_set_message('The group has been removed.');
-  return 'admin/content/types/'. $content_type['url_str'] .'/fields';
+
+  $form_state['redirect'] = 'admin/content/types/'. $content_type['url_str'] .'/fields';
 }
 
 
@@ -288,7 +306,7 @@ function _fieldgroup_field_get_group($content_type, $field_name) {
 /*
  * Implementation of hook_form_alter()
  */
-function fieldgroup_form_alter(&$form, $form_id) {
+function fieldgroup_form_alter(&$form, $form_state, $form_id) {
   if (isset($form['type']) && $form['type']['#value'] .'_node_form' == $form_id) {
     foreach (fieldgroup_groups($form['type']['#value']) as $group_name => $group) {
       $form[$group_name] = array(
@@ -325,22 +343,26 @@ function fieldgroup_form_alter(&$form, $form_id) {
     );
     $form['widget']['weight']['#weight'] = 5;
     $form['widget']['description']['#weight'] = 7;
-    $form['#submit']['fieldgroup_content_admin_form_submit'] = array($form['widget']['group']['#default_value']);
+    $form['#default'] = $form['widget']['group']['#default_value'];
+    $form['#submit'][] = 'fieldgroup_content_admin_form_submit';
   }
   else if ($form_id == 'content_admin_display_overview_form') {
     $form['groups'] = fieldgroup_display_overview_form($form['type_name']['#value']);
     $form['groups']['#theme'] = 'fieldgroup_display_overview_form';
-    $form['#submit']['fieldgroup_display_overview_form_submit'] = array();
+    $form['#submit'][] = 'fieldgroup_display_overview_form_submit';
     if (!is_array($form['submit']) && count(fieldgroup_groups($form['type_name']['#value']))) {
       $form['submit'] = array('#type' => 'submit', '#value' => t('Submit'), '#weight' => 10);
     }
   }
   else if ($form_id == '_content_admin_field_remove') {
-    $form['#submit']['fieldgroup_content_admin_field_remove_submit'] = array();
+    $form['#submit'][] = 'fieldgroup_content_admin_field_remove_submit';
   }
 }
 
-function fieldgroup_content_admin_form_submit($form_id, &$form_values, $default) {
+function fieldgroup_content_admin_form_submit($form, &$form_state) {
+  $form_values = $form_state['values'];
+  $default = $form['#default'];
+
   if ($default != $form_values['group']) {
     if ($form_values['group'] && !$default) {
       db_query("INSERT INTO {node_group_fields} (type_name, group_name, field_name) VALUES ('%s', '%s', '%s')",
@@ -357,7 +379,9 @@ function fieldgroup_content_admin_form_submit($form_id, &$form_values, $default)
   }
 }
 
-function fieldgroup_content_admin_field_remove_submit($form_id, &$form_values) {
+function fieldgroup_content_admin_field_remove_submit($form, &$form_state) {
+  $form_values = $form_state['values'];
+
   db_query("DELETE FROM {node_group_fields} WHERE type_name = '%s' AND field_name = '%s'", $form_values['type_name'], $form_values['field_name']);
 }
 
@@ -472,8 +496,8 @@ function fieldgroup_display_overview_form($content_type) {
 }
 
 function fieldgroup_display_overview_form_row($group) {
+  $defaults = $group['settings']['display'];
 
-  $defaults = &$group['settings']['display']; //shortcut
   $label_options = array(
     'above' => t('Above'),
     'hidden' => t('<Hidden>'),
@@ -530,7 +554,9 @@ function theme_fieldgroup_display_overview_form($form) {
   return $output;
 }
 
-function fieldgroup_display_overview_form_submit($form_id, $form_values) {
+function fieldgroup_display_overview_form_submit($form, &$form_state) {
+  $form_values = $form_state['values'];
+
   $type = $form_values['type_name'];
   $groups = fieldgroup_groups($type);
 
