@@ -4,6 +4,8 @@
  * Implementation of hook_schema.
  */
 function content_schema() {
+
+  // Add the node_field table schemas.
   $schema['node_field'] = array(
     'fields' => array(
       'field_name'      => array('type' => 'varchar', 'length' => 32, 'not null' => TRUE, 'default' => ''),
@@ -30,7 +32,58 @@ function content_schema() {
     'primary key' => array('field_name', 'type_name'),
   );
 
+  // Create a table for the cache.
   $schema['cache_content'] = drupal_get_schema_unprocessed('system', 'cache');
+
+  // Add a table for each content type.
+  $content_type_info = _content_type_info();
+  foreach (content_types() as $type_name => $content_type) {
+    $content_tablename = _content_tablename($type_name, CONTENT_DB_STORAGE_PER_CONTENT_TYPE);
+    $schema[$content_tablename] = array(
+      'fields' => array(
+        'nid'     => array('type' => 'int', 'unsigned' => TRUE, 'not null' => TRUE),
+        'vid'     => array('type' => 'int', 'unsigned' => TRUE, 'not null' => FALSE, 'default' => 0),
+      ),
+      'indexes' => array(
+        'nid'     => array('nid'),
+      ),
+      'unique keys' => array(
+        'nid_vid' => array('nid', 'vid'),
+        'vid'     => array('vid')
+      ),
+      'primary key' => array('nid'),
+    );
+    // Add per content type fields to content table schema.
+    foreach ($content_type_info['content type'][$type_name]['fields'] as $field_name => $field) {
+      $db_info = content_database_info($field);
+      if ($db_info['table'] == $content_table) {
+        $schema[$content_tablename]['fields'] += $db_info['columns'];
+      }
+    }
+  }
+
+  // Add a table for each field that has its own table.
+  foreach ($content_type_info['fields'] as $field_name => $field) {
+    $field_tablename = _content_tablename($field_name, CONTENT_DB_STORAGE_PER_FIELD);
+    $db_info = content_database_info($field);
+    if ($db_info['table'] == $field_tablename) {
+      $schema[$field_tablename] = array(
+        'fields' => array(
+          'nid'     => array('type' => 'int', 'unsigned' => TRUE, 'not null' => TRUE),
+          'vid'     => array('type' => 'int', 'unsigned' => TRUE, 'not null' => FALSE, 'default' => 0),
+        ),
+        'indexes' => array(
+          'nid'     => array('nid'),
+        ),
+        'unique keys' => array(
+          'nid_vid' => array('nid', 'vid'),
+          'vid'     => array('vid')
+        ),
+        'primary key' => array('nid'),
+      );
+      $schema[$field_tablename]['fields'] += $db_info['columns'];
+    }
+  }
 
   return $schema;
 }
