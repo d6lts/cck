@@ -7,6 +7,17 @@
  */
 
 /**
+ * Implementation of hook_theme().
+ */
+function optionwidgets_theme() {
+  return array(
+    'optionwidgets_none' => array(
+      'arguments' => array('widget_type', 'field_name', 'node_type'),
+      ),
+  );
+}
+
+/**
  * Implementation of hook_widget_info().
  */
 function optionwidgets_widget_info() {

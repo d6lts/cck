@@ -2,6 +2,22 @@
 // $Id$
 
 /**
+ * Implementation of hook_install().
+ */
+function fieldgroup_install() {
+  drupal_install_schema('fieldgroup');
+}
+
+
+/**
+ * Implementation of hook_uninstall().
+ */
+function fieldgroup_uninstall() {
+  drupal_uninstall_schema('fieldgroup');
+}
+
+
+/**
  *  rename groups form "group-*" to "group_*"
  */
 function fieldgroup_update_1() {

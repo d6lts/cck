@@ -24,7 +24,5 @@ function fieldgroup_schema() {
     'primary key' => array('type_name', 'group_name'),
   );
 
-  $schema['cache_content'] = drupal_get_schema_unprocessed('system', 'cache');
-
   return $schema;
 }

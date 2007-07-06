@@ -3,13 +3,19 @@
 
 /**
  * Implementation of hook_install().
- *
- * The 4.7 install file had creation text for a node_type table that is now created by core.
- * The install script for that table has been removed from the 5.x branch install file.
- * Refer to the 4.7 install file to see the original database configuration script.
  */
 function content_install() {
   variable_set('content_schema_version', 1003);
+  drupal_install_schema('content');
+}
+
+
+/**
+ * Implementation of hook_uninstall().
+ */
+function content_uninstall() {
+  variable_del('content_schema_version');
+  drupal_uninstall_schema('content');
 }
 
 /**

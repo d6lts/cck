@@ -53,11 +53,12 @@ function content_admin_field_overview_form($type_name) {
   $dummy_node = new stdClass();
   $dummy_node->type = $type['type'];
   $dummy_node->name = '';
-  $dummy_form_id = $type['type'] .'_node_form';
-  $dummy_form = node_form($dummy_node);
+  $form_state = array();
+  $dummy_form = array();
+  $dummy_form = node_form($form_state, $dummy_form);
   foreach (module_implements('form_alter') as $module) {
     $function = $module .'_form_alter';
-    $function($dummy_form, $dummy_form_id);
+    $function($dummy_form, $form_state);
   }
 
   // Move group fields into a 'fields' subgroup to make them easier to identify.
@@ -712,7 +713,7 @@ function _content_admin_field_remove_submit($form, &$form_state) {
   $field = $type['fields'][$form_values['field_name']];
 
   if ($type && $field && $form_values['confirm']) {
-    include_once('./'. drupal_get_path('module', 'content') .'/content_crud.inc');
+    module_load_include('inc', 'content', 'content_crud');
     content_field_instance_delete($form_values);
 
     drupal_set_message(t('Removed field %field from %type.', array('%field' => $field['widget']['label'], '%type' => $type['name'])));

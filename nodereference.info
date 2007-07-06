@@ -1,6 +1,6 @@
 ; $Id$
 name = Node Reference
 description = Defines a field type for referencing one node from another.
-dependencies = content
+dependencies[] = content
 package = CCK
 core = 6.x

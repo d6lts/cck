@@ -5,48 +5,59 @@
  * @file
  * Create field groups for CCK fields.
  */
+function fieldgroup_init() {
+  drupal_add_css(drupal_get_path('module', 'fieldgroup') .'/fieldgroup.css');
+}
 
-function fieldgroup_menu($may_cache) {
-  if (!$may_cache) {
-    if (arg(0) == 'admin' && arg(1) == 'content' && arg(2) == 'types' && arg(3)) {
+/**
+ * Implementation of hook_menu().
+ */
+function fieldgroup_menu() {
+  $items = array();
 
-      $content_type = content_types(arg(3));
+  foreach (node_get_types() as $type) {
+    $type_name = $type->type;
+    $content_type = content_types($type_name);
+    $type_url_str = $content_type['url_str'];
 
-      if (!empty($content_type) && arg(3) && arg(3) == $content_type['url_str']) {
-        $items[] = array(
-          'path' => 'admin/content/types/'. arg(3) .'/add_group',
-          'title' => t('Add group'),
-          'callback' => 'fieldgroup_edit_group',
-          'access' => user_access('administer content types'),
-          'callback arguments' => array($content_type, '', 'add'),
-          'type' => MENU_LOCAL_TASK,
-          'weight' => 3,
-          );
-        if (arg(4) == 'groups' && arg(5)) {
-          $items[] = array(
-            'path' => 'admin/content/types/'. arg(3) .'/groups/'. arg(5) .'/edit',
-            'title' => t('Edit group'),
-            'callback' => 'fieldgroup_edit_group',
-            'access' => user_access('administer content types'),
-            'callback arguments' => array($content_type, arg(5), 'edit'),
-            'type' => MENU_CALLBACK_ITEM,
-            );
-          $items[] = array(
-            'path' => 'admin/content/types/'. arg(3) .'/groups/'. arg(5) .'/remove',
-            'title' => t('Edit group'),
-            'callback' => 'drupal_get_form',
-            'callback arguments' => array('fieldgroup_remove_group', $content_type, arg(5)),
-            'access' => user_access('administer content types'),
-            'type' => MENU_CALLBACK_ITEM,
-            );
-        }
-      }
-    }
-
-    drupal_add_css(drupal_get_path('module', 'fieldgroup') .'/fieldgroup.css');
+    $items['admin/content/types/'. $type_url_str .'/add_group'] = array(
+      'title' => 'Add group',
+      'page callback' => 'drupal_get_form',
+      'page arguments' => array($content_type, '', 'add'),
+      'access arguments' => array('administer content types'),
+      'type' => MENU_LOCAL_TASK,
+      'weight' => 3,
+    );
+    $items['admin/content/types/'. $type_url_str .'/groups/%/edit'] = array(
+      'title' => 'Edit group',
+      'page callback' => 'fieldgroup_edit_group',
+      'page arguments' => array($content_type, 5, 'edit'),
+      'access arguments' => array('administer content types'),
+      'type' => MENU_CALLBACK,
+    );
+    $items['admin/content/types/'. $type_url_str .'/groups/%/remove'] = array(
+      'title' => 'Edit group',
+      'page callback' => 'drupal_get_form',
+      'page arguments' => array('fieldgroup_remove_group', $content_type, 5),
+      'access arguments' => array('administer content types'),
+      'type' => MENU_CALLBACK,
+    );
   }
   return $items;
+}
 
+/**
+ * Implementation of hook_theme().
+ */
+function fieldgroup_theme() {
+  return array(
+    'fieldgroup_simple' => array(
+      'arguments' => array('element'),
+      ),
+    'fieldgroup_display_overview_form' => array(
+      'arguments' => array('form'),
+      ),
+  );
 }
 
 function fieldgroup_edit_group($content_type, $group_name, $action) {
@@ -253,7 +264,7 @@ function fieldgroup_groups($content_type = '', $sorted = FALSE, $reset = FALSE) 
 
   if (!isset($groups) || $reset) {
     if ($cached = cache_get('fieldgroup_data', 'cache_content')) {
-      $data = unserialize($cached->data);
+      $data = $cached->data;
       $groups = $data['groups'];
       $groups_sorted = $data['groups_sorted'];
     }
@@ -275,7 +286,7 @@ function fieldgroup_groups($content_type = '', $sorted = FALSE, $reset = FALSE) 
       while ($field = db_fetch_array($result)) {
         $groups[$field['type_name']][$field['group_name']]['fields'][$field['field_name']] = $field;
       }
-      cache_set('fieldgroup_data', 'cache_content', serialize(array('groups' => $groups, 'groups_sorted' => $groups_sorted)));
+      cache_set('fieldgroup_data', array('groups' => $groups, 'groups_sorted' => $groups_sorted), 'cache_content');
     }
   }
 

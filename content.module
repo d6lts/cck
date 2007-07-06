@@ -13,8 +13,8 @@ define('CONTENT_CALLBACK_NONE', 0x0001);
 define('CONTENT_CALLBACK_DEFAULT', 0x0002);
 define('CONTENT_CALLBACK_CUSTOM', 0x0004);
 
-function content_help($section) {
-  if (preg_match('!^admin/content/types/.*/display$!', $section)) {
+function content_help($path, $arg) {
+  if (preg_match('!^admin/content/types/.*/display$!', $path)) {
     return t("Configure how this content type's fields and field labels should be displayed when it's viewed in teaser and full-page mode.");
   }
 }
@@ -33,13 +33,13 @@ function content_devel_caches() {
 function content_init() {
   drupal_add_css(drupal_get_path('module', 'content') .'/content.css');
   if (arg(0) == 'admin') {
-    include_once('./'. drupal_get_path('module', 'content') .'/content_admin.inc');
+    module_load_include('inc', 'content', 'content_admin');
   }
   if (module_exists('views')) {
-    include_once('./'. drupal_get_path('module', 'content') .'/content_views.inc');
+    module_load_include('inc', 'content', 'content_views');
   }
   if (module_exists('pathauto')) {
-    include_once('./'. drupal_get_path('module', 'content') .'/content_pathauto.inc');
+    module_load_include('inc', 'content', 'content_pathauto');
   }
 }
 
@@ -48,10 +48,8 @@ function content_init() {
  */
 function content_menu() {
   $items = array();
-  $access = user_access('administer content types');
-
   $items['admin/content/types/fields'] = array(
-    'title' => t('Fields'),
+    'title' => 'Fields',
     'page callback' => '_content_admin_type_fields',
     'access arguments' => array('administer content types'),
     'type' => MENU_LOCAL_TASK,
@@ -62,49 +60,81 @@ function content_menu() {
     $type_url_str = $content_type['url_str'];
 
     $items['admin/content/types/'. $type_url_str .'/fields'] = array(
-      'title' => t('Manage fields'),
+      'title' => 'Manage fields',
       'page callback' => 'drupal_get_form',
       'page arguments' => array('content_admin_field_overview_form', $type_name),
       'access arguments' => array('administer content types'),
+      'file' => 'content_admin.inc',
+      'file path' => drupal_get_path('module', 'content'),
       'type' => MENU_LOCAL_TASK,
       'weight' => 0,
     );
     $items['admin/content/types/'. $type_url_str .'/display'] = array(
-      'title' => t('Display fields'),
+      'title' => 'Display fields',
       'page callback' => 'drupal_get_form',
       'page arguments' => array('content_admin_display_overview_form', $type_name),
       'access arguments' => array('administer content types'),
+      'file' => 'content_admin.inc',
+      'file path' => drupal_get_path('module', 'content'),
       'type' => MENU_LOCAL_TASK,
       'weight' => 1,
     );
     $items['admin/content/types/'. $type_url_str .'/add_field'] = array(
-      'title' => t('Add field'),
+      'title' => 'Add field',
       'page callback' => '_content_admin_field_add',
       'page arguments' => array($type_name),
       'access arguments' => array('administer content types'),
+      'file' => 'content_admin.inc',
+      'file path' => drupal_get_path('module', 'content'),
       'type' => MENU_LOCAL_TASK,
       'weight' => 2,
     );
     foreach ($content_type['fields'] as $field) {
       $field_name = $field['name'];
       $items['admin/content/types/'. $type_url_str .'/fields/'. $field_name] = array(
-        'title' => t($field['widget']['label']),
+        'title' => $field['widget']['label'],
         'page callback' => 'drupal_get_form',
         'page arguments' => array('_content_admin_field', $type_name, $field_name),
+        'file' => 'content_admin.inc',
+        'file path' => drupal_get_path('module', 'content'),
         'access arguments' => array('administer content types'),
         'type' => MENU_CALLBACK,
       );
       $items['admin/content/types/'. $type_url_str .'/fields/'. $field_name .'/remove'] = array(
-        'title' => t('Remove field'),
+        'title' => 'Remove field',
         'page callback' => 'drupal_get_form',
         'page arguments' => array('_content_admin_field_remove', $type_name, $field_name),
         'access arguments' => array('administer content types'),
+        'file' => 'content_admin.inc',
+        'file path' => drupal_get_path('module', 'content'),
         'type' => MENU_CALLBACK,
       );
     }
   }
-
   return $items;
+}
+
+/**
+ * Implementation of hook_theme().
+ */
+function content_theme() {
+  return array(
+    'content_field' => array(
+      'arguments' => array('node', 'field', 'items', 'teaser', 'page'),
+      ),
+    'content_admin_field_overview_form' => array(
+      'arguments' => array('form'),
+      ),
+    'content_admin_display_overview_form' => array(
+      'arguments' => array('form'),
+      ),
+    'content_admin_field_add_new_field_widget_type' => array(
+      'arguments' => array('form'),
+      ),
+    'content_view_multiple_field' => array(
+      'arguments' => array('items', 'field', 'data'),
+      ),
+    );
 }
 
 /**
@@ -117,7 +147,7 @@ function content_menu() {
 function content_load($node) {
   $cid = 'content:'. $node->nid .':'. $node->vid;
   if ($cached = cache_get($cid, 'cache_content')) {
-    return unserialize($cached->data);
+    return $cached->data;
   }
   else {
     $default_additions = _content_field_invoke_default('load', $node);
@@ -132,7 +162,7 @@ function content_load($node) {
         $default_additions[$key] = $value;
       }
     }
-    cache_set($cid, 'cache_content', serialize($default_additions));
+    cache_set($cid, $default_additions, 'cache_content');
     return $default_additions;
   }
 }
@@ -302,8 +332,8 @@ function content_form_alter(&$form, $form_state, $form_id) {
  *  any time the content module is enabled.
  */
 function content_enable() {
-  include_once('./'. drupal_get_path('module', 'content') .'/content_admin.inc');
-  include_once('./'. drupal_get_path('module', 'content') .'/content_crud.inc');
+  module_load_include('inc', 'content', 'content_admin');
+  module_load_include('inc', 'content', 'content_crud');
   content_types_rebuild();
 }
 
@@ -693,7 +723,7 @@ function _content_type_info($reset = FALSE) {
 
   if ($reset || !isset($info)) {
     if ($cached = cache_get('content_type_info', 'cache_content')) {
-      $info = unserialize($cached->data);
+      $info = $cached->data;
     }
     else {
       $info = array(
@@ -774,7 +804,7 @@ function _content_type_info($reset = FALSE) {
         $info['content types'][$type['type']] = $type;
       }
 
-      cache_set('content_type_info', 'cache_content', serialize($info));
+      cache_set('content_type_info', $info, 'cache_content');
     }
   }
   return $info;
@@ -787,15 +817,15 @@ function _content_type_info($reset = FALSE) {
 function content_node_type($op, $info) {
   switch ($op) {
     case 'insert':
-      include_once('./'. drupal_get_path('module', 'content') .'/content_crud.inc');
+      module_load_include('inc', 'content', 'content_crud');
       content_type_create($info);
       break;
     case 'update':
-      include_once('./'. drupal_get_path('module', 'content') .'/content_crud.inc');
+      module_load_include('inc', 'content', 'content_crud');
       content_type_update($info);
       break;
     case 'delete':
-      include_once('./'. drupal_get_path('module', 'content') .'/content_crud.inc');
+      module_load_include('inc', 'content', 'content_crud');
       content_type_delete($info);
       break;
   }

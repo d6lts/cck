@@ -22,6 +22,20 @@ function nodereference_menu() {
 }
 
 /**
+ * Implementation of hook_theme().
+ */
+function nodereference_theme() {
+  return array(
+    'nodereference_simple' => array(
+      'arguments' => array('item'),
+      ),
+    'nodereference_advanced' => array(
+      'arguments' => array('item', 'view'),
+      ),
+  );
+}
+
+/**
  * Implementation of hook_field_info().
  */
 function nodereference_field_info() {
