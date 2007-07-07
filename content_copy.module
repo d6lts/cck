@@ -49,9 +49,9 @@ function content_copy_menu() {
 /**
  *  A form to export field definitions.
  */
-function content_copy_export_form($form_values = NULL) {
-
-  $step = intval($form_values['step'] + 1);
+function content_copy_export_form(&$form_state) {
+  $form_values = $form_state['values'];
+  $form_state['storage']['step'] = isset($form_state['storage']['step']) ? $form_state['storage']['step'] + 1 : 1;
 
   $type_name = $form_values['type_name'];
   $types  = content_copy_types();
@@ -67,14 +67,7 @@ function content_copy_export_form($form_values = NULL) {
     $step = 3;
   }
 
-  $form['step'] = array(
-    '#type' => 'hidden',
-    '#value' => $step,
-  );
-
   $form['#prefix'] = t('This form will process a content type and one or more fields from that type and export the settings. The export created by this process can be copied and pasted as an import into the current or any other database. The import will add the fields to into an existing content type or create a new content type that includes the selected fields.');
-  $form['#multistep'] = TRUE;
-  $form['#redirect'] = FALSE;
 
   switch ($step) {
 
@@ -203,7 +196,7 @@ function content_copy_export($form_id, $form_values) {
 /**
  *  A form to import formatted text created with export.
  */
-function content_copy_import_form($type_name = '') {
+function content_copy_import_form(&$form_state, $type_name = '') {
 
   $form['#prefix'] = t('This form will import field definitions exported from another content type or another database.<br/>Note that fields cannot be duplicated within the same content type, so imported fields will be added only if they do not already exist in the selected type.');
   $form['type_name'] = array(
@@ -233,7 +226,8 @@ function content_copy_import_form($type_name = '') {
  *     1) add new field to the database
  *     2) execute the imported field macro to update the settings to the imported values
  */
-function content_copy_import_form_submit($form_id, $form_values) {
+function content_copy_import_form_submit($form, &$form_state) {
+  $form_values = $form_state['values'];
 
   // Get the content type we are importing into.
   $type_name = $form_values['type_name'];
@@ -438,7 +432,7 @@ function content_copy_import_form_submit($form_id, $form_values) {
 function content_copy_form_alter(&$form, $form_id) {
   $alter_forms = array('node_type_form', '_content_admin_field', 'fieldgroup_edit_group_form');
   if ($GLOBALS['content_copy']['status'] == 'export' && in_array($form_id, $alter_forms)) {
-    $form['#submit'] = array('content_copy_record_macro' => array($form));
+    $form['#submit'][] = 'content_copy_record_macro';
   }
 }
 

@@ -42,7 +42,7 @@ function _content_admin_type_fields() {
  * and displays other form elements and their weights to make it
  * easier to place CCK fields in the form and see where they will appear.
  */
-function content_admin_field_overview_form($type_name) {
+function content_admin_field_overview_form(&$form_state, $type_name) {
   $form = array();
 
   $type = content_types($type_name);
@@ -58,7 +58,7 @@ function content_admin_field_overview_form($type_name) {
   $dummy_form = node_form($form_state, $dummy_form);
   foreach (module_implements('form_alter') as $module) {
     $function = $module .'_form_alter';
-    $function($dummy_form, $form_state);
+    $function($dummy_form, $form_state, $dummy_form['#id']);
   }
 
   // Move group fields into a 'fields' subgroup to make them easier to identify.
@@ -346,7 +346,7 @@ function content_admin_field_overview_form_submit($form, &$form_state) {
  * Form includes form widgets to select which fields appear for teaser, full node...
  * and how the field labels should be rendered
  */
-function content_admin_display_overview_form($type_name) {
+function content_admin_display_overview_form(&$form_state, $type_name) {
   $type = content_types($type_name);
   $field_types = _content_field_types();
 
@@ -463,7 +463,7 @@ function _content_admin_field_add($type_name) {
   return $output;
 }
 
-function _content_admin_field_add_existing($type_name) {
+function _content_admin_field_add_existing(&$form_state, $type_name) {
   $output = '';
   $type = content_types($type_name);
   $fields = content_fields();
@@ -496,7 +496,7 @@ function _content_admin_field_add_existing($type_name) {
   return $form;
 }
 
-function _content_admin_field_add_new($type_name, $new_field_name = '') {
+function _content_admin_field_add_new(&$form_state, $type_name, $new_field_name = '') {
   $field_types = _content_field_types();
   $widget_types = _content_widget_types();
   $form = array();
@@ -660,6 +660,7 @@ function _content_admin_field_add_new_submit($form, &$form_state) {
   db_query("INSERT INTO {node_field_instance} (field_name, type_name, weight, label, widget_type, widget_settings, display_settings, description) VALUES ('%s', '%s', %d, '%s', '%s', '%s', '%s', '%s')", $field_name, $form_values['type_name'], 0, $form_values['label'], $field_widget_type[1], serialize(array()), serialize(array()), '');
 
   content_clear_type_cache();
+  menu_rebuild();
 
   // Create new database columns as necessary.
   $field_types = _content_field_types();
@@ -679,7 +680,7 @@ function _content_admin_field_add_new_submit($form, &$form_state) {
 /**
  * Menu callback; present a form for removing a field from a content type.
  */
-function _content_admin_field_remove($type_name, $field_name) {
+function _content_admin_field_remove(&$form_state, $type_name, $field_name) {
   $type = content_types($type_name);
   $field = $type['fields'][$field_name];
 
@@ -726,7 +727,7 @@ function _content_admin_field_remove_submit($form, &$form_state) {
 /**
  * Menu callback; presents the field editing page.
  */
-function _content_admin_field($type_name, $field_name) {
+function _content_admin_field(&$form_state, $type_name, $field_name) {
   $output = '';
 
   $type = content_types($type_name);

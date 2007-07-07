@@ -32,15 +32,18 @@ function content_devel_caches() {
  */
 function content_init() {
   drupal_add_css(drupal_get_path('module', 'content') .'/content.css');
-  if (arg(0) == 'admin') {
-    module_load_include('inc', 'content', 'content_admin');
-  }
-  if (module_exists('views')) {
-    module_load_include('inc', 'content', 'content_views');
-  }
-  if (module_exists('pathauto')) {
-    module_load_include('inc', 'content', 'content_pathauto');
-  }
+// This should not be needed anymore ?
+//  if (arg(0) == 'admin') {
+//    module_load_include('inc', 'content', 'content_admin');
+//  }
+
+// We should really get rid of those...
+//  if (module_exists('views')) {
+//    module_load_include('inc', 'content', 'content_views');
+//  }
+//  if (module_exists('pathauto')) {
+//    module_load_include('inc', 'content', 'content_pathauto');
+//  }
 }
 
 /**
@@ -52,6 +55,8 @@ function content_menu() {
     'title' => 'Fields',
     'page callback' => '_content_admin_type_fields',
     'access arguments' => array('administer content types'),
+    'file' => 'content_admin.inc',
+    'file path' => drupal_get_path('module', 'content'),
     'type' => MENU_LOCAL_TASK,
   );
   foreach (node_get_types() as $type) {
@@ -90,7 +95,7 @@ function content_menu() {
       'weight' => 2,
     );
     foreach ($content_type['fields'] as $field) {
-      $field_name = $field['name'];
+      $field_name = $field['field_name'];
       $items['admin/content/types/'. $type_url_str .'/fields/'. $field_name] = array(
         'title' => $field['widget']['label'],
         'page callback' => 'drupal_get_form',
