@@ -53,7 +53,7 @@ function text_field_settings($op, $field) {
       $form['advanced_options']['allowed_values_php'] = array(
         '#type' => 'textarea',
         '#title' => t('Code'),
-        '#default_value' => $field['allowed_values_php'],
+        '#default_value' => isset($field['allowed_values_php']) ? $field['allowed_values_php'] : '',
         '#rows' => 6,
         '#description' => t('Advanced Usage Only: PHP code that returns a keyed array of allowed values. Should not include &lt;?php ?&gt; delimiters. If this field is filled out, the array returned by this code will override the allowed values list above.'),
       );
@@ -67,13 +67,13 @@ function text_field_settings($op, $field) {
         'value' => array('type' => 'varchar', 'not null' => TRUE, 'default' => "''", 'sortable' => TRUE),
         'format' => array('type' => 'int', 'length' => 10, 'unsigned' => TRUE, 'not null' => TRUE, 'default' => 0),
       );
-      if ($field['max_length'] == 0 || $field['max_length'] > 255) {
+      if (empty($field['max_length']) || $field['max_length'] > 255) {
         $columns['value']['type'] = 'longtext';
       }
       else {
         $columns['value']['length'] = $field['max_length'];
       }
-      if ($field['text_processing'] == 0) {
+      if (empty($field['text_processing'])) {
         unset($columns['format']);
       }
       return $columns;
@@ -120,7 +120,7 @@ function text_field($op, &$node, $field, &$items, $teaser, $page) {
           }
         }
       }
-      if ($field['max_length'] > 0) {
+      if (isset($field['max_length'])) {
         foreach ($items as $delta => $data) {
           $error_field = $field['field_name'] .']['. $delta .'][value';
           if (strlen($data['value']) > $field['max_length']) {
@@ -180,8 +180,9 @@ function text_field_formatter($field, $item, $formatter, $node) {
       $text = $item['value'];
   }
 
+  // TODO : undefined index text_processing / format on node preview
   if ($field['text_processing']) {
-    return check_markup($text, $item['format'], is_null($node) || isset($node->in_preview));
+    return check_markup($text, $item['format'], is_null($node) || $node->build_mode == NODE_BUILD_PREVIEW);
   }
   else {
     return check_plain($text);
@@ -211,7 +212,7 @@ function text_widget_settings($op, $widget) {
       $form['rows'] = array(
         '#type' => 'textfield',
         '#title' => t('Rows'),
-        '#default_value' => $widget['rows'] ? $widget['rows'] : 1,
+        '#default_value' => isset($widget['rows']) ? $widget['rows'] : 1,
         '#required' => TRUE,
       );
       return $form;
@@ -237,19 +238,20 @@ function text_widget($op, &$node, $field, &$items) {
 
       $form[$field['field_name']] = array('#tree' => TRUE);
 
+      $rows = isset($field['widget']['rows']) ? $field['widget']['rows'] : 1;
       if ($field['multiple']) {
         $form[$field['field_name']]['#type'] = 'fieldset';
         $form[$field['field_name']]['#description'] = t($field['widget']['description']);
         $delta = 0;
         foreach ($items as $data) {
           if ($data['value']) {
-            if ($field['widget']['rows'] == 1) {
+            if ($rows == 1) {
               $form[$field['field_name']][$delta]['value'] = array(
                 '#type' => 'textfield',
                 '#title' => ($delta == 0) ? t($field['widget']['label']) : '',
                 '#default_value' => $data['value'],
                 '#required' => ($delta == 0) ? $field['required'] : FALSE,
-                '#maxlength' => $field['max_length'] ? $field['max_length'] : NULL,
+                '#maxlength' => isset($field['max_length']) ? $field['max_length'] : NULL,
                 '#weight' => $field['widget']['weight'],
               );
             }
@@ -259,24 +261,25 @@ function text_widget($op, &$node, $field, &$items) {
                 '#title' => ($delta == 0) ? t($field['widget']['label']) : '',
                 '#default_value' => $data['value'],
                 '#required' => ($delta == 0) ? $field['required'] : FALSE,
-                '#rows' => $field['widget']['rows'],
+                '#rows' => $rows,
                 '#weight' => $field['widget']['weight'],
               );
             }
-            if ($field['text_processing']) {
+            if (!empty($field['text_processing'])) {
+              $format = $data['format'];
               $form[$field['field_name']][$delta]['format'] = filter_form($data['format'], $form[$field['field_name']][$delta]['value']['#weight'] + 1, array($field['field_name'], $delta, 'format'));
             }
             $delta++;
           }
         }
         foreach (range($delta, $delta + 2) as $delta) {
-          if ($field['widget']['rows'] == 1) {
+          if ($rows == 1) {
             $form[$field['field_name']][$delta]['value'] = array(
               '#type' => 'textfield',
               '#title' => ($delta == 0) ? t($field['widget']['label']) : '',
               '#default_value' => '',
               '#required' => ($delta == 0) ? $field['required'] : FALSE,
-              '#maxlength' => $field['max_length'] ? $field['max_length'] : NULL,
+              '#maxlength' => isset($field['max_length']) ? $field['max_length'] : NULL,
               '#weight' => $field['widget']['weight'],
             );
           }
@@ -286,24 +289,25 @@ function text_widget($op, &$node, $field, &$items) {
               '#title' => ($delta == 0) ? t($field['widget']['label']) : '',
               '#default_value' => '',
               '#required' => ($delta == 0) ? $field['required'] : FALSE,
-              '#rows' => $field['widget']['rows'],
+              '#rows' => $rows,
               '#weight' => $field['widget']['weight'],
             );
           }
-          if ($field['text_processing']) {
-            $form[$field['field_name']][$delta]['format'] = filter_form($items[$delta]['format'], $form[$field['field_name']][$delta]['value']['#weight'] + 1, array($field['field_name'], $delta, 'format'));
+          if (!empty($field['text_processing'])) {
+            $format = FILTER_FORMAT_DEFAULT;
+            $form[$field['field_name']][$delta]['format'] = filter_form($format, $form[$field['field_name']][$delta]['value']['#weight'] + 1, array($field['field_name'], $delta, 'format'));
           }
         }
       }
       else {
-        if ($field['widget']['rows'] == 1) {
+        if ($rows == 1) {
           $form[$field['field_name']][0]['value'] = array(
             '#type' => 'textfield',
             '#title' => t($field['widget']['label']),
             '#default_value' => isset($items[0]['value']) ? $items[0]['value'] : '',
             '#required' => $field['required'],
             '#description' => t($field['widget']['description']),
-            '#maxlength' => $field['max_length'] ? $field['max_length'] : NULL,
+            '#maxlength' => isset($field['max_length']) ? $field['max_length'] : NULL,
             '#weight' => $field['widget']['weight'],
           );
         }
@@ -313,13 +317,14 @@ function text_widget($op, &$node, $field, &$items) {
             '#title' => t($field['widget']['label']),
             '#default_value' => $items[0]['value'],
             '#required' => $field['required'],
-            '#rows' => $field['widget']['rows'],
+            '#rows' => $rows,
             '#description' => t($field['widget']['description']),
             '#weight' => $field['widget']['weight'],
           );
         }
-        if ($field['text_processing']) {
-          $form[$field['field_name']][0]['format'] = filter_form($items[0]['format'], $form[$field['field_name']][0]['value']['#weight'] + 1, array($field['field_name'], 0, 'format'));
+        if (!empty($field['text_processing'])) {
+          $format = isset($items[0]['format']) ? $items[0]['format'] : FILTER_FORMAT_DEFAULT;
+          $form[$field['field_name']][0]['format'] = filter_form($format , $form[$field['field_name']][0]['value']['#weight'] + 1, array($field['field_name'], 0, 'format'));
         }
       }
       return $form;
@@ -341,12 +346,13 @@ function text_widget($op, &$node, $field, &$items) {
 function text_allowed_values($field) {
   static $allowed_values;
 
-  if ($allowed_values[$field['field_name']]) {
+  if (isset($allowed_values[$field['field_name']])) {
     return $allowed_values[$field['field_name']];
   }
 
   $allowed_values[$field['field_name']] = array();
-  if ($field['allowed_values_php']) {
+
+  if (isset($field['allowed_values_php'])) {
     ob_start();
     $result = eval($field['allowed_values_php']);
     if (is_array($result)) {
@@ -354,8 +360,8 @@ function text_allowed_values($field) {
     }
     ob_end_clean();
   }
-  if (!$allowed_values[$field['field_name']]) {
 
+  if (empty($allowed_values[$field['field_name']]) && isset($field['allowed_values'])) {
     $list = explode("\n", $field['allowed_values']);
     $list = array_map('trim', $list);
     $list = array_filter($list, 'strlen');

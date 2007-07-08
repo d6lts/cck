@@ -279,7 +279,7 @@ function hook_field_formatter($field, $item, $formatter, $node) {
     return '';
   }
   if ($field['text_processing']) {
-    $text = check_markup($item['value'], $item['format'], is_null($node) || isset($node->in_preview));
+    $text = check_markup($item['value'], $item['format'], is_null($node) || $node->build_mode == NODE_BUILD_PREVIEW);
   }
   else {
     $text = check_plain($item['value']);

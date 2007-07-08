@@ -55,10 +55,10 @@ function content_admin_field_overview_form(&$form_state, $type_name) {
   $dummy_node->name = '';
   $form_state = array();
   $dummy_form = array();
-  $dummy_form = node_form($form_state, $dummy_form);
+  $dummy_form = node_form($form_state, $dummy_node);
   foreach (module_implements('form_alter') as $module) {
     $function = $module .'_form_alter';
-    $function($dummy_form, $form_state, $dummy_form['#id']);
+    $function($dummy_form, $form_state, $dummy_node->type .'_node_form');
   }
 
   // Move group fields into a 'fields' subgroup to make them easier to identify.
@@ -94,8 +94,9 @@ function content_admin_field_overview_form(&$form_state, $type_name) {
 
     // Limiting weight to < 10 will keep workflow and submit elements from being added to the overview table.
     // They're outside the weight range allowed for CCK fields, so won't interfere with field placement.
+    // Currently the 'menu' fieldset is at weight -2, so add a special check for that one.
 
-    if (is_array($value) && (isset($value['#weight']) || $key == 'body_filter') && $value['#weight'] <= 10) {
+    if (is_array($value) && (isset($value['#weight']) || $key == 'body_filter') && $key != 'menu' && $value['#weight'] <= 10) {
 
       // if this item is a group, insert group info into table, then add all the group fields below it
       if (substr($key, 0, 6) == 'group_' && isset($form['#groups'])) {
@@ -119,7 +120,7 @@ function content_admin_field_overview_form(&$form_state, $type_name) {
           $row['weights']   = 'form-field-weights';
           $row['groups']    = 'form-field-groups';
           $row['configure'] = l(t('configure'), 'admin/content/types/'. $type['url_str'] .'/fields/'. $field_name);
-          $row['remove']    = l(t('remove'), 'admin/content/types/'. $type['url_str'] .'/fields/'. $field_name .'/remove');
+          $row['remove']    = l(t('remove'), 'admin/content/types/'. $type['url_str'] .'/'. $field_name .'/remove');
           $group_form[$field['widget']['weight']][] = array($field_name => $row);
 
           $form['field-weights'][$field_name] = array('#type' => 'weight', '#default_value' => $field['widget']['weight']);
@@ -737,6 +738,8 @@ function _content_admin_field(&$form_state, $type_name, $field_name) {
   $widget_types = _content_widget_types();
   $widget_type = $widget_types[$field['widget']['type']];
 
+  drupal_set_title($field['widget']['label']);
+
   $form = array();
   $form['widget'] = array(
     '#type' => 'fieldset',
@@ -792,7 +795,7 @@ function _content_admin_field(&$form_state, $type_name, $field_name) {
       '#collapsible' => TRUE,
       '#collapsed' => TRUE,
     );
-    $default_value = is_array($field['widget']['default_value']) ? $field['widget']['default_value'] : array();
+    $default_value = isset($field['widget']['default_value']) ? $field['widget']['default_value'] : array();
     $module = $widget_types[$field['widget']['type']]['module'];
     $function = $module .'_widget';
     if (function_exists($function)) {
@@ -824,7 +827,7 @@ function _content_admin_field(&$form_state, $type_name, $field_name) {
     $form['widget']['default_value_fieldset']['advanced_options']['default_value_php'] = array(
       '#type' => 'textarea',
       '#title' => t('Code'),
-      '#default_value' => $field['widget']['default_value_php'],
+      '#default_value' => isset($field['widget']['default_value_php']) ? $field['widget']['default_value_php'] : '',
       '#rows' => 6,
       '#tree' => TRUE,
       '#description' => t('Advanced Usage Only: PHP code that returns a default value. Should not include &lt;?php ?&gt; delimiters.<br/>If this field is filled out, the value returned by this code will override any value in the textfield above.<br/>Expected format : @sample.', array('@sample' => $sample)),
@@ -922,15 +925,15 @@ function _content_admin_field_validate($form, &$form_state) {
       else {
         $default_value = $return;
         $is_code = TRUE;
-        form_set_value(array('#parents' => array('default_value_php')), $php);
-        form_set_value(array('#parents' => array('default_value')), array());
+        form_set_value(array('#parents' => array('default_value_php')), $php, $form_state);
+        form_set_value(array('#parents' => array('default_value')), array(), $form_state);
       }
     }
     else {
       $default_value = $form_values['default_value_widget'][$field['field_name']];
       $is_code = FALSE;
-      form_set_value(array('#parents' => array('default_value_php')), '');
-      form_set_value(array('#parents' => array('default_value')), $default_value);
+      form_set_value(array('#parents' => array('default_value_php')), '', $form_state);
+      form_set_value(array('#parents' => array('default_value')), $default_value, $form_state);
     }
     if (isset($default_value)) {
       $node = array();
@@ -946,7 +949,7 @@ function _content_admin_field_validate($form, &$form_state) {
         $widget_function('validate', $node, $field, $default_value);
         $widget_function('process form values', $node, $field, $default_value);
         // The widget processing may have altered the value, save it to be sure.
-        form_set_value(array('#parents' => array('default_value')), $default_value);
+        form_set_value(array('#parents' => array('default_value')), $default_value, $form_state);
       }
       if (function_exists($field_function)) {
         $field_function('validate', $node, $field, $default_value, NULL, NULL);
@@ -967,7 +970,7 @@ function _content_admin_field_validate($form, &$form_state) {
 /**
  * Save a field's settings after editing.
  */
-function _content_admin_field_($form, &$form_state) {
+function _content_admin_field_submit($form, &$form_state) {
   $form_values = $form_state['values'];
 
   $type = content_types($form_values['type_name']);
@@ -1030,7 +1033,7 @@ function _content_admin_field_($form, &$form_state) {
   }
   content_alter_db_field($prev_field, $prev_columns, $new_field, $new_columns);
 
-  return 'admin/content/types/'. $type['url_str'] .'/fields';
+  $form_state['redirect'] = 'admin/content/types/'. $type['url_str'] .'/fields';
 }
 
 /**
@@ -1307,7 +1310,7 @@ function content_db_add_column($table, $column, $type, $attributes = array()) {
         $type = $mappings[$type];
       }
       else {
-        watchdog('database', t('No PostgreSQL mapping found for %type data type.', array('%type' => $type)), WATCHDOG_WARNING);
+        watchdog('database', 'No PostgreSQL mapping found for %type data type.', array('%type' => $type), WATCHDOG_WARNING);
       }
       if ($type != 'varchar') {
         unset($attributes['length']);
@@ -1404,7 +1407,7 @@ function content_db_change_column($table, $column, $column_new, $type, $attribut
         $type = $mappings[$type];
       }
       else {
-        watchdog('database', t('No PostgreSQL mapping found for %type data type.', array('%type' => $type)), WATCHDOG_WARNING);
+        watchdog('database', 'No PostgreSQL mapping found for %type data type.', array('%type' => $type), WATCHDOG_WARNING);
       }
       if ($type != 'varchar') {
         unset($attributes['length']);
