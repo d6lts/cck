@@ -84,7 +84,6 @@ function optionwidgets_widget($op, &$node, $field, &$items) {
 
     case 'form':
       $options = _optionwidgets_options($field, $node);
-
       $form = array();
 
       $form[$field['field_name']] = array('#tree' => TRUE);
@@ -157,7 +156,6 @@ function optionwidgets_widget($op, &$node, $field, &$items) {
 
     case 'process form values':
       $options = _optionwidgets_options($field, $node);
-
       if ($field['multiple'] || $field['widget']['type'] == 'options_onoff') {
         $keys = (array) $items['keys'];
       }

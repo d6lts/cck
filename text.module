@@ -120,7 +120,7 @@ function text_field($op, &$node, $field, &$items, $teaser, $page) {
           }
         }
       }
-      if (isset($field['max_length'])) {
+      if (!empty($field['max_length'])) {
         foreach ($items as $delta => $data) {
           $error_field = $field['field_name'] .']['. $delta .'][value';
           if (strlen($data['value']) > $field['max_length']) {

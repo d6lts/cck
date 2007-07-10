@@ -69,7 +69,7 @@ function number_field_settings($op, $field) {
       $form['advanced_options']['allowed_values_php'] = array(
         '#type' => 'textarea',
         '#title' => t('Code'),
-        '#default_value' => $field['allowed_values_php'],
+        '#default_value' => isset($field['allowed_values_php']) ? $field['allowed_values_php'] : '',
         '#rows' => 6,
         '#description' => t('Advanced Usage Only: PHP code that returns a keyed array of allowed values. Should not include &lt;?php ?&gt; delimiters. If this field is filled out, the array returned by this code will override the allowed values list above.'),
       );
@@ -264,9 +264,14 @@ function number_widget($op, &$node, $field, &$items) {
   switch ($op) {
     case 'form':
       $form = array();
-
-      $prefixes = explode('|', $field['prefix']);
-      $suffixes = explode('|', $field['suffix']);
+      $prefixes = array();
+      $suffixes = array();
+      if (!empty($field['prefix'])) {
+        $prefixes = explode('|', $field['prefix']);
+      }
+      if (!empty($field['suffix'])) {
+        $suffixes = explode('|', $field['suffix']);
+      }
       // We take the plural form (if any) for forms.
       $prefix = array_pop($prefixes);
       $suffix = array_pop($suffixes);
@@ -350,7 +355,7 @@ function number_allowed_values($field) {
   }
 
   $allowed_values[$field['field_name']] = array();
-  if ($field['allowed_values_php']) {
+  if (isset($field['allowed_values_php'])) {
     ob_start();
     $result = eval($field['allowed_values_php']);
     if (is_array($result)) {

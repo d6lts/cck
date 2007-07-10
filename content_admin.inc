@@ -992,14 +992,14 @@ function _content_admin_field_submit($form, &$form_state) {
   $setting_names = module_invoke($widget_type['module'], 'widget_settings', 'save', $field);
   if (is_array($setting_names)) {
     foreach ($setting_names as $setting) {
-      $widget_settings[$setting] = $form_values[$setting];
+      $widget_settings[$setting] = isset($form_values[$setting]) ? $form_values[$setting] : '';
     }
   }
   $field_settings = array();
   $setting_names = module_invoke($field_type['module'], 'field_settings', 'save', $field);
   if (is_array($setting_names)) {
     foreach ($setting_names as $setting) {
-      $field_settings[$setting] = $form_values[$setting];
+      $field_settings[$setting] = isset($form_values[$setting]) ? $form_values[$setting] : '';
     }
   }
 

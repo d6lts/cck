@@ -32,18 +32,12 @@ function content_devel_caches() {
  */
 function content_init() {
   drupal_add_css(drupal_get_path('module', 'content') .'/content.css');
-// This should not be needed anymore ?
-//  if (arg(0) == 'admin') {
-//    module_load_include('inc', 'content', 'content_admin');
-//  }
-
-// We should really get rid of those...
-//  if (module_exists('views')) {
-//    module_load_include('inc', 'content', 'content_views');
-//  }
-//  if (module_exists('pathauto')) {
-//    module_load_include('inc', 'content', 'content_pathauto');
-//  }
+  if (module_exists('views')) {
+    module_load_include('inc', 'content', 'content_views');
+  }
+  if (module_exists('pathauto')) {
+    module_load_include('inc', 'content', 'content_pathauto');
+  }
 }
 
 /**
@@ -129,19 +123,19 @@ function content_menu() {
 function content_theme() {
   return array(
     'field' => array(
-      'arguments' => array('node', 'field', 'items', 'teaser', 'page'),
+      'arguments' => array('node' => NULL, 'field' => NULL, 'items' => NULL, 'teaser' => FALSE, 'page' => FALSE),
     ),
     'content_admin_field_overview_form' => array(
-      'arguments' => array('form'),
+      'arguments' => array('form' => NULL),
     ),
     'content_admin_display_overview_form' => array(
-      'arguments' => array('form'),
+      'arguments' => array('form' => NULL),
     ),
     'content_admin_field_add_new_field_widget_type' => array(
-      'arguments' => array('form'),
+      'arguments' => array('form' => NULL),
     ),
     'content_view_multiple_field' => array(
-      'arguments' => array('items', 'field', 'data'),
+      'arguments' => array('items' => NULL, 'field' => NULL, 'data' => NULL),
     ),
   );
 }
@@ -210,11 +204,10 @@ function content_validate(&$node) {
 }
 
 /**
- * Submit form callback for node type fields.
+ * Validate form callback to handle node type fields.
  *
- * At submit time, the widget does whatever data massaging is necessary so that
- * the field has the content in the expected format and can commit the changes
- * to the database.
+ * Both widgets and fields have a chance to raise error flags when a node is
+ * being validated.
  */
 function content_submit(&$node) {
   _content_widget_invoke('submit', $node);
@@ -285,23 +278,20 @@ function content_view(&$node, $teaser = FALSE, $page = FALSE) {
 
 /**
  * Implementation of hook_nodeapi().
- *
- * When a revision is deleted, make sure the appropriate cache item is cleared.
- * @todo: deprecate op==validate & op==submit in favor of form callbacks.
  */
 function content_nodeapi(&$node, $op, $teaser, $page) {
   switch ($op) {
     case 'load':
       return content_load($node);
 
-    case 'validate':
-      content_validate($node);
-      break;
-
-    case 'submit':
-      content_submit($node);
-      break;
-
+//    case 'validate':
+//      content_validate($node);
+//      break;
+//
+//    case 'submit':
+//      content_submit($node);
+//      break;
+//
     case 'insert':
       content_insert($node);
       break;
@@ -332,6 +322,8 @@ function content_form_alter(&$form, $form_state, $form_id) {
     $node = $form['#node'];
     if ($form['type']['#value'] .'_node_form' == $form_id) {
       $form = array_merge($form, content_form($node));
+      $form['#validate'][] = 'content_validate';
+      $form['#submit'][] = 'content_submit';
     }
   }
 }
@@ -356,7 +348,6 @@ function content_enable() {
  */
 function content_field($op, &$node, $field, &$node_field, $teaser, $page) {
   $db_info = content_database_info($field);
-
   switch ($op) {
     case 'load':
       $column_names = array();
@@ -442,7 +433,7 @@ function content_field($op, &$node, $field, &$node_field, $teaser, $page) {
         $column_assignments = array();
         foreach ($db_info['columns'] as $column => $attributes) {
           $column_names[] = $attributes['column'];
-          if ($item[$column] == '' && !$attributes['not null'] && !$field['required']) {
+          if (empty($item[$column]) && !$attributes['not null'] && !$field['required']) {
             $column_placeholders[] = '%s';
             $column_assignments[] = $attributes['column'] .' = %s';
             $item[$column] = 'NULL';

@@ -289,7 +289,7 @@ function fieldgroup_groups($content_type = '', $sorted = FALSE, $reset = FALSE) 
   if (empty($content_type)) {
     return $groups;
   }
-  elseif (!$groups[$content_type]) {
+  elseif (empty($groups[$content_type])) {
     return array();
   }
   return $sorted ? $groups_sorted[$content_type] : $groups[$content_type];
@@ -357,7 +357,7 @@ function fieldgroup_form_alter(&$form, $form_state, $form_id) {
     $form['groups'] = fieldgroup_display_overview_form($form['type_name']['#value']);
     $form['groups']['#theme'] = 'fieldgroup_display_overview_form';
     $form['#submit'][] = 'fieldgroup_display_overview_form_submit';
-    if (!is_array($form['submit']) && count(fieldgroup_groups($form['type_name']['#value']))) {
+    if ((!array_key_exists('submit', $form) || is_array($form['submit'])) && count(fieldgroup_groups($form['type_name']['#value']))) {
       $form['submit'] = array('#type' => 'submit', '#value' => t('Submit'), '#weight' => 10);
     }
   }
