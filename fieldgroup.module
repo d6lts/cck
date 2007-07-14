@@ -94,12 +94,12 @@ function fieldgroup_edit_group_form(&$form_state, $content_type, $group_name, $a
   $form['settings']['#tree'] = TRUE;
   $form['settings']['form'] = array(
     '#type' => 'fieldset',
-    '#title' => 'form settings',
+    '#title' => 'Form settings',
     '#description' => t('These settings apply to the group in the node editing form'),
   );
   $form['settings']['form']['style'] = array(
     '#type' => 'radios',
-    '#title' => t('style'),
+    '#title' => t('Style'),
     '#default_value' => $group['settings']['form']['style'] ? $group['settings']['form']['style'] : 'fieldset',
     '#options' => array(
       'fieldset' => t('always open'),
@@ -117,7 +117,7 @@ function fieldgroup_edit_group_form(&$form_state, $content_type, $group_name, $a
   );
   $form['settings']['display'] = array(
     '#type' => 'fieldset',
-    '#title' => 'display settings',
+    '#title' => 'Display settings',
     '#description' => t('These settings apply to the group on node display.'),
   );
   $form['settings']['display']['description'] = array(
