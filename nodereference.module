@@ -171,15 +171,33 @@ function nodereference_field_formatter_info() {
 function nodereference_field_formatter($field, $item, $formatter, $node) {
   static $titles = array();
 
+  // We store the rendered nids in order to prevent infinite recursion
+  // when using the 'full node' / 'teaser' formatters.
+  static $recursion_queue = array();
+
   if (empty($item['nid']) || !is_numeric($item['nid'])) {
     return '';
   }
 
+
   if ($formatter == 'full' || $formatter == 'teaser') {
-    $referenced_node = node_load($item['nid']);
-    $referenced_node->referencing_node = $node;
-    $referenced_node->referencing_field = $field;
-    $titles[$item['nid']] = $referenced_node->title;
+    // If no 'referencing node' is set, we are starting a new 'reference thread'
+    if (!isset($node->referencing_node)) {
+      $recursion_queue = array();
+    }
+    $recursion_queue[] = $node->nid;
+    if (in_array($item['nid'], $recursion_queue)) {
+      // Prevent infinite recursion caused by reference cycles :
+      // if the node has already been rendered earlier in this 'thread',
+      // we fall back to 'default' (node title) formatter.
+      $formatter = 'default';
+    }
+    else {
+      $referenced_node = node_load($item['nid']);
+      $referenced_node->referencing_node = $node;
+      $referenced_node->referencing_field = $field;
+      $titles[$item['nid']] = $referenced_node->title;
+    }
   }
 
   if (!isset($titles[$item['nid']])) {
@@ -232,7 +250,7 @@ function nodereference_widget($op, &$node, $field, &$items) {
       case 'form':
         $form = array();
 
-        $options = _nodereference_potential_references($field, true);
+        $options = _nodereference_potential_references($field, TRUE);
         foreach ($options as $key => $value) {
           $options[$key] = _nodereference_item($field, $value);
         }
