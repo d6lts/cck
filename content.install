@@ -499,3 +499,10 @@ function content_update_1007() {
 
   return $ret;
 }
+
+/**
+ *  Placeholder for CCK 1.5 / Views 1.6 message - not relevant for D6 ?
+ */
+function content_update_1008() {
+  return array();
+}
