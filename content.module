@@ -191,32 +191,44 @@ function content_form(&$node) {
 }
 
 /**
- * Validate form callback to handle node type fields.
+ * Node form 'validate' handler.
  *
  * Both widgets and fields have a chance to raise error flags when a node is
  * being validated.
  */
-function content_validate(&$node) {
+function content_node_form_validate($form, &$form_state) {
+  // TODO : the widget ops could probably go with new widget FAPIsation ?
+  // TODO : $node <-> $form_state...
+  $node = (object)$form_state['values'];
   _content_widget_invoke('validate', $node);
   _content_widget_invoke('process form values', $node);
   _content_field_invoke('validate', $node);
   _content_field_invoke_default('validate', $node);
+  $form_state['values'] = (array)$node;
 }
 
 /**
- * Validate form callback to handle node type fields.
+ * Node form 'submit' handler.
  *
- * Both widgets and fields have a chance to raise error flags when a node is
- * being validated.
+ * At submit time, the widget does whatever data massaging is necessary so that
+ * the field has the content in the expected format and can commit the changes
+ * to the database.
  */
-function content_submit(&$node) {
+//
+function content_node_form_submit($form, &$form_state) {
+  // TODO : the widget ops could probably go with new widget FAPIsation ?
+  // TODO : $node <-> $form_state...
+  $node = (object)$form_state['values'];
   _content_widget_invoke('submit', $node);
   _content_widget_invoke('process form values', $node);
   _content_field_invoke('submit', $node);
   _content_field_invoke_default('submit', $node);
+  $form_state['values'] = (array)$node;
 }
 
 /**
+ * Nodeapi 'insert' op.
+ *
  * Insert node type fields.
  */
 function content_insert(&$node) {
@@ -225,6 +237,8 @@ function content_insert(&$node) {
 }
 
 /**
+ * Nodeapi 'update' op.
+ *
  * Update node type fields.
  */
 function content_update(&$node) {
@@ -234,6 +248,8 @@ function content_update(&$node) {
 }
 
 /**
+ * Nodeapi 'delete' op.
+ *
  * Delete node type fields.
  */
 function content_delete(&$node) {
@@ -250,7 +266,9 @@ function content_delete(&$node) {
 }
 
 /**
- * delete node type fields for a revision.
+ * Nodeapi 'delete_revision' op.
+ *
+ * Delete node type fields for a revision.
  */
 function content_delete_revision(&$node) {
   $type = content_types($node->type);
@@ -266,6 +284,8 @@ function content_delete_revision(&$node) {
 }
 
 /**
+ * Nodeapi 'view' op.
+ *
  * Generate field render arrays.
  */
 function content_view(&$node, $teaser = FALSE, $page = FALSE) {
@@ -284,14 +304,17 @@ function content_nodeapi(&$node, $op, $teaser, $page) {
     case 'load':
       return content_load($node);
 
+// Moved as a node form #validate handler (to stay consistent with 'submit')
 //    case 'validate':
 //      content_validate($node);
 //      break;
-//
+
+// Does not exist anymore as a nodeapi hook
+// Moved as a node form #submit handler.
 //    case 'submit':
 //      content_submit($node);
 //      break;
-//
+
     case 'insert':
       content_insert($node);
       break;
@@ -322,8 +345,8 @@ function content_form_alter(&$form, $form_state, $form_id) {
     $node = $form['#node'];
     if ($form['type']['#value'] .'_node_form' == $form_id) {
       $form = array_merge($form, content_form($node));
-      $form['#validate'][] = 'content_validate';
-      $form['#submit'][] = 'content_submit';
+      $form['#validate'][] = 'content_node_form_validate';
+      $form['#submit'][] = 'content_node_form_submit';
     }
   }
 }

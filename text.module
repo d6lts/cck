@@ -163,7 +163,7 @@ function text_field_formatter($field, $item, $formatter, $node) {
     return '';
   }
 
-  if ($allowed_values = text_allowed_values($field)) {
+  if ($allowed_values = text_allowed_values($field) && isset($allowed_values[$item['value']])) {
     return $allowed_values[$item['value']];
   }
 
@@ -366,8 +366,13 @@ function text_allowed_values($field) {
     $list = array_map('trim', $list);
     $list = array_filter($list, 'strlen');
     foreach ($list as $opt) {
-      list($key, $value) = explode('|', $opt);
-      $allowed_values[$field['field_name']][$key] = $value ? $value : $key;
+      if (strpos($opt, '|') !== FALSE) {
+        list($key, $value) = explode('|', $opt);
+        $allowed_values[$field['field_name']][$key] = $value ? $value : $key;
+      }
+      else {
+        $allowed_values[$field['field_name']][$opt] = $opt;
+      }
     }
   }
   return $allowed_values[$field['field_name']];
