@@ -426,10 +426,10 @@ function content_copy_import_form_submit($form, &$form_state) {
   }
   if (!form_get_errors()) {
     if (sizeof($imported_fields) > 0 || sizeof($imported_groups) > 0) {
-      drupal_goto('admin/content/types/'. $content_info['content types'][$type_name]['url_str'] .'/fields');
+      $form_state['#redirect'] = 'admin/content/types/'. $content_info['content types'][$type_name]['url_str'] .'/fields';
     }
     else {
-      drupal_goto('admin/content/types');
+      $form_state['#redirect'] = 'admin/content/types';
     }
   }
 }
