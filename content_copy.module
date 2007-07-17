@@ -429,10 +429,10 @@ function content_copy_import_form_submit($form_id, $form_values) {
   }
   if (!form_get_errors()) {
     if (sizeof($imported_fields) > 0 || sizeof($imported_groups) > 0) {
-      drupal_goto('admin/content/types/'. $content_info['content types'][$type_name]['url_str'] .'/fields');
+      return 'admin/content/types/'. $content_info['content types'][$type_name]['url_str'] .'/fields';
     }
     else {
-      drupal_goto('admin/content/types');
+      return 'admin/content/types';
     }
   }
 }
