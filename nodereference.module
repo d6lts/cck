@@ -409,9 +409,9 @@ function _nodereference_potential_references($field, $return_full_nodes = FALSE,
 
     // arguments for the view
     $view_args = array();
-    if (isset($field['view_args'])) {
+    if (isset($field['advanced_view_args'])) {
       // TODO: Support Tokens using token.module ?
-      $view_args = array_map(trim, explode(',', $field['view_args']));
+      $view_args = array_map(trim, explode(',', $field['advanced_view_args']));
     }
 
     if (isset($string)) {
