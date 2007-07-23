@@ -821,16 +821,22 @@ function _content_admin_field(&$form_state, $type_name, $field_name) {
     $db_info = content_database_info($field);
     $columns = array_keys($db_info['columns']);
     foreach ($columns as $key => $column) {
-      $columns[$key] = "'$column' => ...";
+      $columns[$key] = "'$column' => value for $column";
     }
-    $sample = 'array( 0 => array('. implode(', ', $columns) .'), 1 => ...)';
+    $sample = 'array(
+  0 => array('. implode(', ', $columns) .'),
+  // You\'ll usually want to stop here. Provide more values
+  // if you want your \'default value\' to be multi-valued :
+  1 => array('. implode(', ', $columns) .'),
+  2 => ...
+);';
     $form['widget']['default_value_fieldset']['advanced_options']['default_value_php'] = array(
       '#type' => 'textarea',
       '#title' => t('Code'),
       '#default_value' => isset($field['widget']['default_value_php']) ? $field['widget']['default_value_php'] : '',
       '#rows' => 6,
       '#tree' => TRUE,
-      '#description' => t('Advanced Usage Only: PHP code that returns a default value. Should not include &lt;?php ?&gt; delimiters.<br/>If this field is filled out, the value returned by this code will override any value in the textfield above.<br/>Expected format : @sample.', array('@sample' => $sample)),
+      '#description' => t('Advanced Usage Only: PHP code that returns a default value. Should not include &lt;?php ?&gt; delimiters. If this field is filled out, the value returned by this code will override any value specified above. Expected format :<pre>!sample</pre>Using !link_devel\'s \'devel load\' tab on a %type content page might help you figure out the expected format.', array('!sample' => $sample, '!link_devel' => l('devel.module', 'http://www.drupal.org/project/devel'), '%type' => $type_name)),
     );
   }
 
@@ -916,10 +922,16 @@ function _content_admin_field_validate($form, &$form_state) {
         $db_info = content_database_info($field);
         $columns = array_keys($db_info['columns']);
         foreach ($columns as $key => $column) {
-          $columns[$key] = "'$column' => ...";
+          $columns[$key] = "'$column' => value for $column";
         }
-        $sample = 'array( 0 => array('. implode(', ', $columns) .'), 1 => ...)';
-        form_set_error('default_value_php', t('The default value php code returned an incorrect value<br/>Expected format : @sample<br/>Returned value : @value', array('@sample' => $sample, '@value' => print_r($return, true))));
+        $sample = 'array(
+  0 => array('. implode(', ', $columns) .'),
+  // You\'ll usually want to stop here. Provide more values
+  // if you want your \'default value\' to be multi-valued :
+  1 => array('. implode(', ', $columns) .'),
+  2 => ...
+);';
+        form_set_error('default_value_php', t('The default value php code returned an incorrect value<br/>Expected format : <pre>!sample</pre>Returned value : @value', array('!sample' => $sample, '@value' => print_r($return, true))));
         return;
       }
       else {
