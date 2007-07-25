@@ -244,6 +244,11 @@ function content_admin_field_overview_form($type_name) {
   // to produce an array of fields and weights added to the node by all modules.
   $dummy_node = new stdClass();
   $dummy_node->type = $type['type_name'];
+  
+  // Some modules (userreview...) "hide" their node forms, resulting in no field 
+  // being listed. We set a special flag to inform them this form is special.
+  $dummy_node->cck_dummy_node_form = TRUE;
+  
   $dummy_form_id = $type['type_name'] .'_node_form';
   $dummy_form = node_form_array($dummy_node);
   foreach (module_implements('form_alter') as $module) {
