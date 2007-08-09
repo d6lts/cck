@@ -350,11 +350,12 @@ function number_widget($op, &$node, $field, &$items) {
 function number_allowed_values($field) {
   static $allowed_values;
 
-  if ($allowed_values[$field['field_name']]) {
+  if (isset($allowed_values[$field['field_name']])) {
     return $allowed_values[$field['field_name']];
   }
 
   $allowed_values[$field['field_name']] = array();
+
   if (isset($field['allowed_values_php'])) {
     ob_start();
     $result = eval($field['allowed_values_php']);
@@ -363,8 +364,8 @@ function number_allowed_values($field) {
     }
     ob_end_clean();
   }
-  if (!$allowed_values[$field['field_name']]) {
 
+  if (empty($allowed_values[$field['field_name']]) && isset($field['allowed_values'])) {
     $list = explode("\n", $field['allowed_values']);
     $list = array_map('trim', $list);
     $list = array_filter($list, 'strlen');

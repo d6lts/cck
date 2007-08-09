@@ -54,10 +54,10 @@ function content_admin_field_overview_form(&$form_state, $type_name) {
   $dummy_node->type = $type['type'];
   $dummy_node->name = '';
 
-  // Some modules (userreview...) "hide" their node forms, resulting in no field 
+  // Some modules (userreview...) "hide" their node forms, resulting in no field
   // being listed. We set a special flag to inform them this form is special.
   $dummy_node->cck_dummy_node_form = TRUE;
-  
+
   $form_state = array();
   $dummy_form = array();
   $dummy_form = node_form($form_state, $dummy_node);
@@ -1334,7 +1334,7 @@ function content_db_add_column($table, $column, $type, $attributes = array()) {
       }
       break;
   }
-
+  $not_null = '';
   if (array_key_exists('not null', $attributes) && $attributes['not null']) {
     $not_null = 'NOT NULL';
   }
