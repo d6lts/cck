@@ -52,11 +52,11 @@ function content_admin_field_overview_form($type_name) {
   // to produce an array of fields and weights added to the node by all modules.
   $dummy_node = new stdClass();
   $dummy_node->type = $type['type'];
-  
-  // Some modules (userreview...) "hide" their node forms, resulting in no field 
+
+  // Some modules (userreview...) "hide" their node forms, resulting in no field
   // being listed. We set a special flag to inform them this form is special.
   $dummy_node->cck_dummy_node_form = TRUE;
-  
+
   $dummy_form_id = $type['type'] .'_node_form';
   $dummy_form = node_form($dummy_node);
   foreach (module_implements('form_alter') as $module) {
@@ -201,6 +201,10 @@ function theme_content_admin_field_overview_form($form) {
   if (!$form['#table']) {
     return;
   }
+
+  // The css for this form contains non-validating styles,
+  // so we use a separate file, included only on the relevant page.
+  drupal_add_css(drupal_get_path('module', 'content') .'/content_admin.css');
 
   $disabled = unserialize($form['disabled']['#value']);
 
