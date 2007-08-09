@@ -391,10 +391,13 @@ function content_admin_field_overview_form($type_name) {
  *  Theme the field overview table by iterating through the form and rendering form elements in table cells
  */
 function theme_content_admin_field_overview_form($form) {
-
   if (!$form['#table']) {
     return;
   }
+
+  // The css for this form contains non-validating styles,
+  // so we use a separate file, included only on the relevant page.
+  theme_add_style(drupal_get_path('module', 'content') .'/content_admin.css');
 
   $disabled = unserialize($form['disabled']['#value']);
 
