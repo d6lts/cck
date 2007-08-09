@@ -205,6 +205,10 @@ function theme_content_admin_field_overview_form($form) {
     return;
   }
 
+  // The css for this form contains non-validating styles,
+  // so we use a separate file, included only on the relevant page.
+  drupal_add_css(drupal_get_path('module', 'content') .'/content_admin.css');
+
   $disabled = unserialize($form['disabled']['#value']);
 
   if (module_exists('fieldgroup')) {
