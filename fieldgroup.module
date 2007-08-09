@@ -50,7 +50,6 @@ function fieldgroup_menu($may_cache) {
 }
 
 function fieldgroup_edit_group($content_type, $group_name, $action) {
-
   return drupal_get_form('fieldgroup_edit_group_form', $content_type, $group_name, $action);
 }
 
@@ -125,7 +124,7 @@ function fieldgroup_edit_group_form($content_type, $group_name, $action) {
   foreach (array_merge(array_keys(_content_admin_display_contexts()), array('label')) as $key) {
     $form['settings']['display'][$key] = array('#type' => 'value', '#value' => $group['settings']['display'][$key]);
   }
-  $form['weight'] = array('#type' => 'value', '#value' => $group['weight']);
+  $form['weight'] = array('#type' => 'hidden', '#default_value' => $group['weight']);
   $form['group_name'] = array('#type' => 'hidden', '#default_value' => $group_name);
   $form['#submit'] = array('fieldgroup_edit_group_submit' => array($content_type, $action));
   return $form;
