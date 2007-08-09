@@ -26,10 +26,10 @@ function nodereference_menu() {
  */
 function nodereference_theme() {
   return array(
-    'nodereference_simple' => array(
+    'nodereference_item_simple' => array(
       'arguments' => array('item'),
       ),
-    'nodereference_advanced' => array(
+    'nodereference_item_advanced' => array(
       'arguments' => array('item', 'view'),
       ),
   );
@@ -129,11 +129,13 @@ function nodereference_field($op, &$node, $field, &$items, $teaser, $page) {
     case 'validate':
       $refs = _nodereference_potential_references($field, TRUE);
       foreach ($items as $delta => $item) {
-        $error_field = isset($item['error_field']) ? $item['error_field'] : '';
-        unset($item['error_field']);
-        if (!empty($item['nid'])) {
-          if (!in_array($item['nid'], array_keys($refs))) {
-            form_set_error($error_field, t('%name : This post can\'t be referenced.', array('%name' => t($field['widget']['label']))));
+        if (is_array($item) && !empty($item['error_field'])) {
+          $error_field = $item['error_field'];
+          unset($item['error_field']);
+          if (!empty($item['nid'])) {
+            if (!in_array($item['nid'], array_keys($refs))) {
+              form_set_error($error_field, t('%name : This post can\'t be referenced.', array('%name' => t($field['widget']['label']))));
+            }
           }
         }
       }
@@ -244,13 +246,14 @@ function nodereference_widget($op, &$node, $field, &$items) {
     switch ($op) {
       case 'prepare form values':
         $items_transposed = content_transpose_array_rows_cols($items);
-        $items['default nids'] = $items_transposed['nid'];
+        $items['default nids'] = isset($items_transposed['nid']) ? $items_transposed['nid'] : 0;
         break;
 
       case 'form':
         $form = array();
 
         $options = _nodereference_potential_references($field, TRUE);
+
         foreach ($options as $key => $value) {
           $options[$key] = _nodereference_item($field, $value);
         }

@@ -155,7 +155,8 @@ function text_field_formatter($field, $item, $formatter, $node) {
     return '';
   }
 
-  if ($allowed_values = text_allowed_values($field) && isset($allowed_values[$item['value']])) {
+  $allowed_values = number_allowed_values($field);
+  if (!empty($allowed_values) && isset($allowed_values[$item['value']])) {
     return $allowed_values[$item['value']];
   }
 

@@ -160,7 +160,7 @@ function optionwidgets_widget($op, &$node, $field, &$items) {
         $keys = (array) $items['keys'];
       }
       else {
-        $keys = array($items['key']);
+        $keys = array(!empty($items['key']) ? $items['key'] : '');
       }
 
       $values = array();

@@ -59,10 +59,12 @@ function userreference_field($op, &$node, $field, &$items, $teaser, $page) {
   switch ($op) {
     case 'validate':
       foreach ($items as $delta => $item) {
-        $error_field = isset($item['error_field']) ? $item['error_field'] : '';
-        unset($item['error_field']);
-        if (!empty($item['uid']) && !in_array($item['uid'], array_keys(_userreference_potential_references($field)))) {
-          form_set_error($error_field, t('%name : Invalid user.', array('%name' => t($field['widget']['label']))));
+        if (is_array($item) && !empty($item['error_field'])) {
+          $error_field = $item['error_field'];
+          unset($item['error_field']);
+          if (!empty($item['uid']) && !in_array($item['uid'], array_keys(_userreference_potential_references($field)))) {
+            form_set_error($error_field, t('%name : Invalid user.', array('%name' => t($field['widget']['label']))));
+          }
         }
       }
       return;
@@ -131,7 +133,7 @@ function userreference_widget($op, &$node, $field, &$items) {
       case 'prepare form values':
         $items_transposed = content_transpose_array_rows_cols($items);
         // get rid of null values
-        $items['default uids'] = array_filter((array) $items_transposed['uid']);
+        $items['default uids'] = array_filter((array) (isset($items_transposed['uid']) ? $items_transposed['uid'] : 0));
         break;
 
       case 'form':
@@ -255,7 +257,7 @@ function userreference_widget($op, &$node, $field, &$items) {
  */
 function _userreference_potential_references($field) {
   $roles = array();
-  if (is_array($field['referenceable_roles'])) {
+  if (isset($field['referenceable_roles']) && is_array($field['referenceable_roles'])) {
     // keep only selected checkboxes
     $roles = array_filter($field['referenceable_roles']);
     // filter invalid values that seems to get through sometimes ??

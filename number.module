@@ -184,8 +184,8 @@ function number_field_formatter($field, $item, $formatter, $node) {
   if ($formatter == 'unformatted') {
     return $item['value'];
   }
-
-  if ($allowed_values = number_allowed_values($field) && isset($allowed_values[$item['value']])) {
+  $allowed_values = number_allowed_values($field);
+  if (!empty($allowed_values) && isset($allowed_values[$item['value']])) {
     if ($allowed_values[$item['value']] != $item['value']) {
       return $allowed_values[$item['value']];
     }
