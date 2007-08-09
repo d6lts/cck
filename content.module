@@ -192,9 +192,6 @@ function content_form(&$node) {
 
 /**
  * Node form 'validate' handler.
- *
- * Both widgets and fields have a chance to raise error flags when a node is
- * being validated.
  */
 function content_node_form_validate($form, &$form_state) {
   // TODO : the widget ops could probably go with new widget FAPIsation ?
@@ -202,8 +199,6 @@ function content_node_form_validate($form, &$form_state) {
   $node = (object)$form_state['values'];
   _content_widget_invoke('validate', $node);
   _content_widget_invoke('process form values', $node);
-  _content_field_invoke('validate', $node);
-  _content_field_invoke_default('validate', $node);
   $form_state['values'] = (array)$node;
 }
 
@@ -220,10 +215,25 @@ function content_node_form_submit($form, &$form_state) {
   // TODO : $node <-> $form_state...
   $node = (object)$form_state['values'];
   _content_widget_invoke('submit', $node);
-  _content_widget_invoke('process form values', $node);
-  _content_field_invoke('submit', $node);
-  _content_field_invoke_default('submit', $node);
   $form_state['values'] = (array)$node;
+}
+
+/**
+ * Nodeapi 'validate' op.
+ *
+ */
+function content_validate(&$node) {
+  _content_field_invoke('validate', $node);
+  _content_field_invoke_default('validate', $node);
+}
+
+/**
+ * Nodeapi 'presave' op.
+ *
+ */
+function content_presave(&$node) {
+  _content_field_invoke('presave', $node);
+  _content_field_invoke_default('presave', $node);
 }
 
 /**
@@ -304,16 +314,13 @@ function content_nodeapi(&$node, $op, $teaser, $page) {
     case 'load':
       return content_load($node);
 
-// Moved as a node form #validate handler (to stay consistent with 'submit')
-//    case 'validate':
-//      content_validate($node);
-//      break;
+    case 'validate':
+      content_validate($node);
+      break;
 
-// Does not exist anymore as a nodeapi hook
-// Moved as a node form #submit handler.
-//    case 'submit':
-//      content_submit($node);
-//      break;
+    case 'presave':
+      content_presave($node);
+      break;
 
     case 'insert':
       content_insert($node);
