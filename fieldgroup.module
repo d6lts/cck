@@ -131,7 +131,7 @@ function fieldgroup_edit_group_form(&$form_state, $content_type, $group_name, $a
   foreach (array_merge(array_keys(_content_admin_display_contexts()), array('label')) as $key) {
     $form['settings']['display'][$key] = array('#type' => 'value', '#value' => $group['settings']['display'][$key]);
   }
-  $form['weight'] = array('#type' => 'value', '#value' => $group['weight']);
+  $form['weight'] = array('#type' => 'hidden', '#default_value' => $group['weight']);
   $form['group_name'] = array('#type' => 'hidden', '#default_value' => $group_name);
 
   $form['#content_type'] = $content_type;
