@@ -112,7 +112,7 @@ function content_admin_field_overview_form(&$form_state, $type_name) {
         $row['weights']   = 'form-group-weights';
         $row['groups']    = '';
         $row['configure'] = l(t('configure'), 'admin/content/types/'. $type['url_str'] .'/groups/'. $form['#groups'][$key]['group_name'] .'/edit');
-        $row['remove']    = l(t('remove'), 'admin/content/types/'. $type['url_str'] .'/groups/'. $form['#groups'][$key]['group_name'] .'/remove');
+        $row['remove']    = l(t('remove'), 'admin/content/types/'. $type['url_str'] .'/'. $form['#groups'][$key]['group_name'] .'/remove_group');
         $data = $row;
 
         $form['group-weights'][$key] = array('#type' => 'weight', '#default_value' => $value['#weight']);
@@ -125,12 +125,12 @@ function content_admin_field_overview_form(&$form_state, $type_name) {
           $row['weights']   = 'form-field-weights';
           $row['groups']    = 'form-field-groups';
           $row['configure'] = l(t('configure'), 'admin/content/types/'. $type['url_str'] .'/fields/'. $field_name);
-          $row['remove']    = l(t('remove'), 'admin/content/types/'. $type['url_str'] .'/'. $field_name .'/remove');
+          $row['remove']    = l(t('remove'), 'admin/content/types/'. $type['url_str'] .'/'. $field_name .'/remove_field');
           $group_form[$field['widget']['weight']][] = array($field_name => $row);
 
           $form['field-weights'][$field_name] = array('#type' => 'weight', '#default_value' => $field['widget']['weight']);
           $form['field-groups'][$field_name]  = array('#type' => 'select', '#options' => $form['#group_labels'], '#default_value' => fieldgroup_get_group($type['type'], $field_name));
-          $form['field-groups-defaults'][$field_name]  = array('#type' => 'hidden', '#value' => fieldgroup_get_group($type['type'], $field_name));
+          $form['field-groups-defaults'][$field_name]  = array('#type' => 'hidden', '#default_value' => fieldgroup_get_group($type['type'], $field_name));
         }
         // sort the group fields by weight
         ksort($group_form);
@@ -150,7 +150,7 @@ function content_admin_field_overview_form(&$form_state, $type_name) {
           $row['groups']  = 'form-field-groups';
         }
         $row['configure'] = l(t('configure'), 'admin/content/types/'. $type['url_str'] .'/fields/'. $key);
-        $row['remove']    = l(t('remove'), 'admin/content/types/'. $type['url_str'] .'/fields/'. $key .'/remove');
+        $row['remove']    = l(t('remove'), 'admin/content/types/'. $type['url_str'] .'/'. $key .'/remove_field');
         $form['#table'][$field['widget']['weight']][] = array($key => $row);
 
         $form['field-weights'][$key] = array('#type' => 'weight', '#default_value' => $field['widget']['weight']);
@@ -310,44 +310,38 @@ function theme_content_admin_field_overview_form($form) {
 }
 
 function content_admin_field_overview_form_submit($form, &$form_state) {
-  $msg = FALSE;
   $form_values = $form_state['values'];
-  foreach ((array) $form_values['field-groups'] as $key => $value) {
-    if ($key && !in_array($key, unserialize($form_values['disabled']))) {
-      $values  = array('field_name' => $key, 'group' => $value, 'type_name' => $form_values['type_name']);
-      $default = $form_values['field-groups-defaults'][$key];
-      fieldgroup_content_admin_form_submit('_content_admin_field', $values, $default);
-      $msg = TRUE;
-    }
-  }
-  if ($msg) {
-    drupal_set_message(t('Updated field groups.'));
-  }
-  $msg = FALSE;
-  foreach ((array) $form_values['group-weights'] as $key => $value) {
-    if ($key && !in_array($key, unserialize($form_values['disabled']))) {
-      db_query("UPDATE {node_group} SET weight = %d WHERE type_name = '%s' AND group_name = '%s'",
-        $value, $form_values['type_name'], $key);
-      $msg = TRUE;
-    }
-  }
-  if ($msg) {
-    drupal_set_message(t('Updated group weights.'));
-  }
-  $msg = FALSE;
+
+  // Update field weights.
   foreach ((array) $form_values['field-weights'] as $key => $value) {
     if ($key && !in_array($key, unserialize($form_values['disabled']))) {
       db_query("UPDATE {node_field_instance} SET weight = %d WHERE type_name = '%s' AND field_name = '%s'",
         $value, $form_values['type_name'], $key);
-      $msg = TRUE;
     }
   }
-  if ($msg) {
-    drupal_set_message(t('Updated field weights.'));
+
+  // TODO : the following ops should be moved to fieldgroup.module...
+  // Update groups.
+  foreach ((array) $form_values['field-groups'] as $key => $value) {
+    if ($key && !in_array($key, unserialize($form_values['disabled']))) {
+      // TODO : really hackish now...
+      // This should be refactored, and not be based on the field settings form anymore
+      $fake_form = array('#default' => isset($form_values['field-groups-defaults'][$key]) ? $form_values['field-groups-defaults'][$key] : NULL);
+      $fake_values = array('values' => array('field_name' => $key, 'group' => $value, 'type_name' => $form_values['type_name']));
+      fieldgroup_content_admin_form_submit($fake_form, $fake_values);
+    }
   }
+
+  // Update group weights.
+  foreach ((array) $form_values['group-weights'] as $key => $value) {
+    if ($key && !in_array($key, unserialize($form_values['disabled']))) {
+      db_query("UPDATE {node_group} SET weight = %d WHERE type_name = '%s' AND group_name = '%s'",
+        $value, $form_values['type_name'], $key);
+    }
+  }
+
   content_clear_type_cache();
   cache_clear_all('fieldgroup_data', 'cache_content');
-
 }
 
 /**
@@ -1320,6 +1314,8 @@ function content_alter_db_field($previous_field, $previous_columns, $new_field, 
  *     default  => NULL|FALSE|value (with or without '', it won't be added)
  */
 function content_db_add_column($table, $column, $type, $attributes = array()) {
+  $not_null = '';
+  $default = '';
   switch ($GLOBALS['db_type']) {
     case 'pgsql':
       $mappings = array('int' => 'integer', 'mediumint' => 'integer', 'bigint' => 'integer',
@@ -1338,7 +1334,7 @@ function content_db_add_column($table, $column, $type, $attributes = array()) {
       }
       break;
   }
-  $not_null = '';
+
   if (array_key_exists('not null', $attributes) && $attributes['not null']) {
     $not_null = 'NOT NULL';
   }
@@ -1417,6 +1413,8 @@ function content_db_add_column($table, $column, $type, $attributes = array()) {
  *     default  => NULL|FALSE|value (with or without '', it won't be added)
  */
 function content_db_change_column($table, $column, $column_new, $type, $attributes = array()) {
+  $not_null = '';
+  $default = '';
   switch ($GLOBALS['db_type']) {
     case 'pgsql':
       $mappings = array('int' => 'integer', 'mediumint' => 'integer', 'bigint' => 'integer',

@@ -21,7 +21,7 @@ function fieldgroup_schema() {
       'group_name' => array('type' => 'varchar', 'length' => 32, 'not null' => TRUE, 'default' => ''),
       'field_name' => array('type' => 'varchar', 'length' => 32, 'not null' => TRUE, 'default' => ''),
     ),
-    'primary key' => array('type_name', 'group_name'),
+    'primary key' => array('type_name', 'group_name', 'field_name'),
   );
 
   return $schema;
