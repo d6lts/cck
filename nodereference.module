@@ -27,11 +27,11 @@ function nodereference_menu() {
 function nodereference_theme() {
   return array(
     'nodereference_item_simple' => array(
-      'arguments' => array('item'),
-      ),
+      'arguments' => array('item' => NULL),
+    ),
     'nodereference_item_advanced' => array(
-      'arguments' => array('item', 'view'),
-      ),
+      'arguments' => array('item' => NULL, 'view' => NULL),
+    ),
   );
 }
 
@@ -111,13 +111,13 @@ function nodereference_field_settings($op, $field) {
     case 'filters':
       return array(
         'default' => array(
-        'list' => '_nodereference_filter_handler',
-        'list-type' => 'list',
-        'operator' => 'views_handler_operator_or',
-        'value-type' => 'array',
-        'extra' => array('field' => $field),
-      ),
-    );
+          'list' => '_nodereference_filter_handler',
+          'list-type' => 'list',
+          'operator' => 'views_handler_operator_or',
+          'value-type' => 'array',
+          'extra' => array('field' => $field),
+        ),
+      );
   }
 }
 
@@ -180,7 +180,6 @@ function nodereference_field_formatter($field, $item, $formatter, $node) {
   if (empty($item['nid']) || !is_numeric($item['nid'])) {
     return '';
   }
-
 
   if ($formatter == 'full' || $formatter == 'teaser') {
     // If no 'referencing node' is set, we are starting a new 'reference thread'
@@ -246,14 +245,13 @@ function nodereference_widget($op, &$node, $field, &$items) {
     switch ($op) {
       case 'prepare form values':
         $items_transposed = content_transpose_array_rows_cols($items);
-        $items['default nids'] = isset($items_transposed['nid']) ? $items_transposed['nid'] : 0;
+        $items['default nids'] = isset($items_transposed['nid']) ? $items_transposed['nid'] : array();
         break;
 
       case 'form':
         $form = array();
 
         $options = _nodereference_potential_references($field, TRUE);
-
         foreach ($options as $key => $value) {
           $options[$key] = _nodereference_item($field, $value);
         }
@@ -296,6 +294,7 @@ function nodereference_widget($op, &$node, $field, &$items) {
         foreach ($items as $delta => $item) {
           $items[$delta]['error_field'] =  $field['field_name'] .'][nids';
         }
+        break;
     }
   }
   else {
@@ -323,7 +322,7 @@ function nodereference_widget($op, &$node, $field, &$items) {
                 '#type' => 'textfield',
                 '#title' => ($delta == 0) ? t($field['widget']['label']) : '',
                 '#autocomplete_path' => 'nodereference/autocomplete/'. $field['field_name'],
-                '#default_value' => $item['default node_name'],
+                '#default_value' => isset($item['default node_name']) ? $item['default node_name'] : '',
                 '#required' => ($delta == 0) ? $field['required'] : FALSE,
               );
               $delta++;
@@ -344,7 +343,7 @@ function nodereference_widget($op, &$node, $field, &$items) {
             '#type' => 'textfield',
             '#title' => t($field['widget']['label']),
             '#autocomplete_path' => 'nodereference/autocomplete/'. $field['field_name'],
-            '#default_value' => $items[0]['default node_name'],
+            '#default_value' => isset($items[0]['default node_name']) ? $items[0]['default node_name'] : '',
             '#required' => $field['required'],
             '#description' => t($field['widget']['description']),
           );
@@ -387,6 +386,8 @@ function nodereference_widget($op, &$node, $field, &$items) {
             }
           }
           // Remove the widget's data representation so it isn't saved.
+          // TODO : problem when saving an empty noderef field :
+          // conflicts with line $data[] = $item[$column]; in content.module
           unset($items[$delta]['node_name']);
           if (!empty($nid)) {
             $items[$delta]['nid'] = $nid;

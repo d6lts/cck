@@ -195,7 +195,6 @@ function content_form(&$node) {
  */
 function content_node_form_validate($form, &$form_state) {
   // TODO : the widget ops could probably go with new widget FAPIsation ?
-  // TODO : $node <-> $form_state...
   $node = (object)$form_state['values'];
   _content_widget_invoke('validate', $node);
   _content_widget_invoke('process form values', $node);
@@ -212,7 +211,6 @@ function content_node_form_validate($form, &$form_state) {
 //
 function content_node_form_submit($form, &$form_state) {
   // TODO : the widget ops could probably go with new widget FAPIsation ?
-  // TODO : $node <-> $form_state...
   $node = (object)$form_state['values'];
   _content_widget_invoke('submit', $node);
   $form_state['values'] = (array)$node;
@@ -486,7 +484,8 @@ function content_field($op, &$node, $field, &$node_field, $teaser, $page) {
               $column_assignments[] = $attributes['column'] ." = '%s'";
             }
           }
-          $data[] = $item[$column];
+          // TODO : is that right ? (isset / NULL...)
+          $data[] = isset($item[$column]) ? $item[$column] : NULL;
         }
         $data[] = $node->vid;
         $data[] = $node->nid;
