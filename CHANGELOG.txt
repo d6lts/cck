@@ -1,5 +1,39 @@
 // $Id$
 
+4.7--1.x-dev
+============
+
+Features 
+--------
+
+General
+- #154827  Let modules know the 'dummy' node form built on the 'manage fields' tab
+           is requested by CCK admin UI (problem with userreviewmodule).
+- #153101  Provide better explanation on the 'default value - php code' expected format.
+- #151347  Refactor content_field('load') to make it more legible.
+
+Field / widget modules
+- #152892  Optionwidgets : Better help text for 'single on/off checkbox' widget label.    
+- #65133 / #152016  Nodereference : Added 'full node' and 'teaser' formatters.
+- #126926  Skip node_load in noderef formatter.
+
+Bugfix
+------
+
+General
+- #155416  Limit non standard CSS (transparency) to the field overview page.
+- #149832  Use 'plain' format for views argument handler ($op = 'title').
+-          Added whitespace after field labels on node display
+
+Field / widget modules
+- #147205  Nodereference : Fixed 'advanced settings - view arguments' not working.
+- #155327  Nodereference : Added missing "n." table aliases in 'referenceable nodes' query.
+- #153284  Nodereference : Fix unneeded and repeating {view_view} queries when 
+           'advanced (Views) node selection' is *not* used.
+- #150297  Nodereference : Fix encoded raw htmlentities appearing in select widgets when using 
+           'advanced (Views) node selection' is used.
+- #129016  Nodereference : Prevent possible errors when formatter gets called with non numeric 'nid'.
+
 4.7--1.5-1
 ==========
 
