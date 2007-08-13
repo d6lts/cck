@@ -1005,7 +1005,7 @@ function theme_field(&$node, &$field, &$items, $teaser, $page) {
       $items_output .= '<div class="field-item">';
       if ($label_display == 'inline') {
         $items_output .= '<div class="field-label-inline'. ($delta ? '' : '-first') .'">';
-        $items_output .= $label .': </div> ' ;
+        $items_output .= $label .':&nbsp</div>' ;
       }
       $items_output .= $item['view'] .'</div>';
     }
@@ -1015,7 +1015,7 @@ function theme_field(&$node, &$field, &$items, $teaser, $page) {
   if (!empty($items_output)) {
     $output .= '<div class="field field-type-'. strtr($field['type'], '_', '-') .' field-'. strtr($field['field_name'], '_', '-') .'">';
     if ($label_display == 'above') {
-      $output .= '<div class="field-label">'. $label .': </div>';
+      $output .= '<div class="field-label">'. $label .':&nbsp</div>';
     }
     $output .= '<div class="field-items">'. $items_output .'</div>';
     $output .= '</div>';
