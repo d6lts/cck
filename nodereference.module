@@ -97,13 +97,13 @@ function nodereference_field_settings($op, $field) {
     case 'filters':
       return array(
         'default' => array(
-        'list' => '_nodereference_filter_handler',
-        'list-type' => 'list',
-        'operator' => 'views_handler_operator_or',
-        'value-type' => 'array',
-        'extra' => array('field' => $field),
-      ),
-    );
+          'list' => '_nodereference_filter_handler',
+          'list-type' => 'list',
+          'operator' => 'views_handler_operator_or',
+          'value-type' => 'array',
+          'extra' => array('field' => $field),
+        ),
+      );
   }
 }
 
@@ -199,7 +199,7 @@ function nodereference_field_formatter($field, $item, $formatter, $node) {
       return node_view($referenced_node, TRUE);
 
     case 'plain':
-      return $titles[$item['nid']];
+      return check_plain($titles[$item['nid']]);
 
     default:
       return l($titles[$item['nid']], 'node/'. $item['nid']);
@@ -517,7 +517,7 @@ function theme_nodereference_item_advanced($item, $view) {
 }
 
 function theme_nodereference_item_simple($item) {
-  return $item->node_title;
+  return check_plain($item->node_title);
 }
 
 /**

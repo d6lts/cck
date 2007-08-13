@@ -1,7 +1,16 @@
 // $Id$
 
-5--1.x-dev
-==========
+5--1.6
+======
+
+IMPORTANT : this release fixes two cross-site scripting (XSS) vulnerabilities 
+in nodereference.module :
+- when a nodereference field is displayed using the 'plain' formatter
+- when a nodereference field is edited using the 'autocomplete text field' widget 
+  (only when _not_ using the 'advanced options - Views.module' for the field) 
+  
+All sites using CCK / nodereference.module should consider upgrading to this release
+as soon as possible.
 
 Features 
 --------
@@ -16,7 +25,7 @@ General
 Field / widget modules
 - #152892  Optionwidgets : Better help text for 'single on/off checkbox' widget label.   
 - #65133 / #152016  Nodereference : Added 'full node' and 'teaser' formatters.
-- #126926  Skip node_load in noderef formatter.
+- #126926  Nodereference : Skip node_load in 'title'-based formatters.
 
 Bugfix
 ------
@@ -28,16 +37,17 @@ General
 - #157786  Fix capitalization on fieldgroup edit form.
 - #136229  Fieldgroup weights not correctly imported when using content_copy.module.
 - #149832  Use 'plain' format for views argument handler ($op = 'title').
--          Added whitespace after field labels on node display
+- #137900  Added whitespace after field labels on node display
 
 Field / widget modules
+-          Nodereference : Fixed XSS vulnerabilities (missing check_plain's around node titles).
 - #147205  Nodereference : Fixed 'advanced settings - view arguments' not working.
 - #155327  Nodereference : Added missing "n." table aliases in 'referenceable nodes' query.
 - #153284  Nodereference : Fix unneeded and repeating {view_view} queries when 
            'advanced (Views) node selection' is *not* used.
 - #150297  Nodereference : Fix encoded raw htmlentities appearing in select widgets when using 
            'advanced (Views) node selection' is used.
-- #129016  Nodereference : Prevent possible errors when formatter gets called with non numeric 'nid'.
+- #129016  Nodereference : Prevent possible errors if formatter is called with non numeric 'nid'.
    
 5--1.5
 ======
