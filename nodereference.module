@@ -165,7 +165,6 @@ function nodereference_field_formatter($field, $item, $formatter, $node) {
     return '';
   }
 
-
   if ($formatter == 'full' || $formatter == 'teaser') {
     // If no 'referencing node' is set, we are starting a new 'reference thread'
     if (!isset($node->referencing_node)) {
@@ -417,7 +416,8 @@ function _nodereference_potential_references($field, $return_full_nodes = FALSE,
     $view->page_type = 'list';
 
     // make sure the query is not cached
-    unset($view->query);
+    unset($view->query); // Views 1.5-
+    $view->is_cacheable = FALSE; // Views 1.6+
 
     $view_result = views_build_view('result', $view, $view_args);
     $result = $view_result['result'];

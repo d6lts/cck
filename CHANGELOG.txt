@@ -1,5 +1,21 @@
 // $Id$
 
+5--1.6-1
+========
+
+Hotfix release for CCK 1.6.
+
+Bugfix
+------
+
+General
+- #167607  Fix '&nbsp' (missing ';') on field display.
+
+Field / widget modules
+- #167468  Fix noderef autocomplete widget w/ 'advanced (Views) mode' and Views 1.6 :
+           the first set of matches is repeated for subsequent edits (Views query cache)
+
+
 5--1.6
 ======
 
