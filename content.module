@@ -911,6 +911,17 @@ function content_database_info($field) {
     $db_info['columns'] = array();
   }
 
+  // TODO : temporarily add 'columns_schema', while old-style CRUD and new schema-api code coexist.
+  $columns_schema = module_invoke($module, 'field_settings', 'database columns schema', $field);
+  if (is_array($columns_schema) && count($columns_schema)) {
+    $db_info['columns schema'] = $columns_schema;
+    foreach ($columns_schema as $column_name => $attributes) {
+      $db_info['columns schema'][$column_name]['column'] = $field['field_name'] .'_'. $column_name;
+    }
+  }
+  else {
+    $db_info['columns_schema'] = array();
+  }
   return $db_info;
 }
 
@@ -1028,13 +1039,13 @@ function theme_field(&$node, &$field, &$items, $teaser, $page) {
  *
  * @param $name
  *   The name of the content type or content field
- * @param $entity
- *   'field' or 'type'
+ * @param $storage
+ *   CONTENT_DB_STORAGE_PER_FIELD or CONTENT_DB_STORAGE_PER_CONTENT_TYPE
  *
  * @return
  *   A string containing the generated name for the database table
  */
-function _content_tablename($name, $entity, $version = NULL) {
+function _content_tablename($name, $storage, $version = NULL) {
   if (is_null($version)) {
     $version = variable_get('content_schema_version', 0);
   }
@@ -1047,7 +1058,7 @@ function _content_tablename($name, $entity, $version = NULL) {
   }
 
   $name = str_replace('-', '_', $name);
-  switch ("$version-$entity") {
+  switch ("$version-$storage") {
     case '0-'. CONTENT_DB_STORAGE_PER_CONTENT_TYPE :
       return "node_$name";
     case '0-'. CONTENT_DB_STORAGE_PER_FIELD :
@@ -1057,6 +1068,21 @@ function _content_tablename($name, $entity, $version = NULL) {
     case '1003-'. CONTENT_DB_STORAGE_PER_FIELD :
       return "content_$name";
   }
+}
+
+function _content_table_schema($field = NULL) {
+  $base_schema = array(
+    'fields' => array(
+      'vid' => array('type' => 'int', 'unsigned' => TRUE, 'not null' => TRUE, 'default' => 0),
+      'nid' => array('type' => 'int', 'unsigned' => TRUE, 'not null' => TRUE, 'default' => 0)
+    ),
+    'primary key' => array('vid'),
+  );
+  if (isset($field['multiple'])) {
+    $base_schema['fields']['delta'] = array('type' => 'int', 'unsigned' => TRUE, 'not null' => TRUE, 'default' => 0);
+    $base_schema['primary key'][] = 'delta';
+  }
+  return $base_schema;
 }
 
 /**

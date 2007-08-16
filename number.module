@@ -23,11 +23,6 @@ function number_field_settings($op, $field) {
   switch ($op) {
     case 'form':
       $form = array();
-      foreach (number_field_formatter_info() as $format => $opt) {
-        if (in_array($field['type'], $opt['field types'])) {
-          $options[$format] = $opt['label'];
-        }
-      }
       $form['min'] = array(
         '#type' => 'textfield',
         '#title' => t('Minimum'),
@@ -96,6 +91,19 @@ function number_field_settings($op, $field) {
       if ($field['type'] == 'number_decimal') {
         return array(
           'value' => array('type' => 'float', 'not null' => FALSE, 'default' => NULL, 'sortable' => TRUE),
+        );
+      }
+
+    // TODO : temporary, while old-style CRUD and new schema-api code coexist.
+    case 'database columns schema':
+      if ($field['type'] == 'number_integer') {
+        return array(
+          'value' => array('type' => 'int', 'not null' => FALSE, 'sortable' => TRUE),
+        );
+      }
+      if ($field['type'] == 'number_decimal') {
+        return array(
+          'value' => array('type' => 'float', 'not null' => FALSE, 'sortable' => TRUE),
         );
       }
 

@@ -76,7 +76,7 @@ function hook_field_info() {
  *     information as values. This column information must include "type", the
  *     MySQL data type of the column, and may also include a "sortable" parameter
  *     to indicate to views.module that the column contains ordered information.
- *     Details of other information that can be passed to the database layer can
+ *     TODO : Details of other information that can be passed to the database layer can
  *     be found at content_db_add_column().
  *   - "callbacks": an array describing the field's behaviour regarding hook_field
  *     operations. The array is keyed by hook_field operations ('view', 'validate'...)

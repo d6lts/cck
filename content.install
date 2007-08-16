@@ -451,7 +451,7 @@ function content_update_1006() {
         $db_info = content_database_info($field);
         foreach ($db_info['columns'] as $column => $attributes) {
           if (in_array($attributes['type'], array('text', 'mediumtext', 'longtext'))) {
-            content_db_change_column($db_info['table'], $attributes['column'], $attributes['column'], $attributes['type'], $attributes);
+            db_change_field($ret, $db_info['table'], $attributes['column'], $attributes['column'], $attributes);
             $ret[] = array(
               'query' => strtr('The text field %field has been updated to accept NULL values.', array('%field' => $field['field_name'])),
               'success' => TRUE

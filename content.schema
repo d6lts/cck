@@ -5,24 +5,24 @@
  */
 function content_schema() {
 
-  // Add the node_field table schemas.
+  // Static (meta) tables.
+
   $schema['node_field'] = array(
     'fields' => array(
       'field_name'      => array('type' => 'varchar', 'length' => 32, 'not null' => TRUE, 'default' => ''),
       'type'            => array('type' => 'varchar', 'length' => 127, 'not null' => TRUE, 'default' => ''),
       'global_settings' => array('type' => 'text', 'size' => 'medium', 'not null' => TRUE, 'default' => ''),
-      'required'        => array('type' => 'int', 'size' => 'tiny', 'not null' => TRUE, 'default' => '0'),
-      'multiple'        => array('type' => 'int', 'size' => 'tiny', 'not null' => TRUE, 'default' => '0'),
-      'db_storage'      => array('type' => 'int', 'size' => 'tiny', 'not null' => TRUE, 'default' => '0'),
+      'required'        => array('type' => 'int', 'size' => 'tiny', 'not null' => TRUE, 'default' => 0),
+      'multiple'        => array('type' => 'int', 'size' => 'tiny', 'not null' => TRUE, 'default' => 0),
+      'db_storage'      => array('type' => 'int', 'size' => 'tiny', 'not null' => TRUE, 'default' => 0),
     ),
     'primary key' => array('field_name'),
   );
-
   $schema['node_field_instance'] = array(
     'fields' => array(
       'field_name'       => array('type' => 'varchar', 'length' => 32, 'not null' => TRUE, 'default' => ''),
       'type_name'        => array('type' => 'varchar', 'length' => 32, 'not null' => TRUE, 'default' => ''),
-      'weight'           => array('type' => 'int', 'not null' => TRUE, 'default' => '0'),
+      'weight'           => array('type' => 'int', 'not null' => TRUE, 'default' => 0),
       'label'            => array('type' => 'varchar', 'length' => 255, 'not null' => TRUE, 'default' => ''),
       'widget_type'      => array('type' => 'varchar', 'length' => 32, 'not null' => TRUE, 'default' => ''),
       'widget_settings'  => array('type' => 'text', 'size' => 'medium', 'not null' => TRUE, 'default' => ''),
@@ -31,9 +31,39 @@ function content_schema() {
     ),
     'primary key' => array('field_name', 'type_name'),
   );
-
-  // Create a table for the cache.
   $schema['cache_content'] = drupal_get_schema_unprocessed('system', 'cache');
+
+  // Dynamic (data) tables.
+
+  // TODO : we build from the existing content_database_info().
+  // Maybe this should be refactored the other way around : remove content_database_info
+  // and use content_schema as reference ?
+  foreach (content_types() as $type) {
+    // We always add a 'per content type' table.
+    // TODO : is that really still needed ?
+    $table = _content_tablename($type['type'], CONTENT_DB_STORAGE_PER_CONTENT_TYPE);
+    $schema[$table] = _content_table_schema();
+
+    foreach ($type['fields'] as $field) {
+      $db_info = content_database_info($field);
+      $table = $db_info['table'];
+
+      // Add the 'per field' table if needed.
+      if ($field['db_storage'] == CONTENT_DB_STORAGE_PER_FIELD && !isset($schema[$table])) {
+        $schema[$table] = _content_table_schema($field['multiple']);
+      }
+
+      // Add the data columns.
+      // TODO : we use 'columns schema' instead of 'columns' while old-style CRUD
+      // and new schema-api code coexist.
+      foreach ($db_info['columns schema'] as $column => $attributes) {
+        $column_name = $attributes['column'];
+        unset($attributes['column']);
+        unset($attributes['sortable']);
+        $schema[$table]['fields'][$column_name] = $attributes;
+      }
+    }
+  }
 
   return $schema;
 }

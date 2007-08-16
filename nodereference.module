@@ -108,6 +108,13 @@ function nodereference_field_settings($op, $field) {
       );
       return $columns;
 
+    // TODO : temporary, while old-style CRUD and new schema-api code coexist.
+    case 'database columns schema':
+      $columns = array(
+        'nid' => array('type' => 'int', 'unsigned' => TRUE, 'not null' => TRUE, 'default' => '0'),
+      );
+      return $columns;
+
     case 'filters':
       return array(
         'default' => array(
@@ -468,10 +475,6 @@ function _nodereference_potential_references($field, $return_full_nodes = FALSE,
     }
 
     $result = db_query(db_rewrite_sql("SELECT n.nid, n.title AS node_title, n.type AS node_type FROM {node} n WHERE ". $related_clause ." ORDER BY n.title, n.type"), $args);
-  }
-
-  if (db_num_rows($result) == 0) {
-    return array();
   }
 
   $rows = array();

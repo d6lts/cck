@@ -1038,7 +1038,8 @@ function _content_admin_field_submit($form, &$form_state) {
   content_clear_type_cache();
 
   $new_field = content_fields($form_values['field_name']);
-  $new_columns = module_invoke($field_type['module'], 'field_settings', 'database columns', $new_field);
+//$new_columns = module_invoke($field_type['module'], 'field_settings', 'database columns', $new_field);
+  $new_columns = module_invoke($field_type['module'], 'field_settings', 'database columns schema', $new_field);
 
   if (!isset($prev_columns)) {
     $prev_columns = array();
@@ -1056,6 +1057,7 @@ function _content_admin_field_submit($form, &$form_state) {
  * new field definitions.
  */
 function content_alter_db_field($previous_field, $previous_columns, $new_field, $new_columns) {
+  $ret = array();
   // When adding and removing columns, we need to know what content type has an instance of the field.
   if (count($previous_columns)) {
     if (!isset($previous_field['type_name'])) {
@@ -1071,11 +1073,11 @@ function content_alter_db_field($previous_field, $previous_columns, $new_field, 
   if (!count($new_columns)) {
     if (count($previous_columns)) {
       if ($previous_field['db_storage'] == CONTENT_DB_STORAGE_PER_FIELD) {
-        db_query('DROP TABLE {'. $previous_db_info['table'] .'}');
+        db_drop_table($ret, $previous_db_info['table']);
       }
       else {
         foreach ($previous_db_info['columns'] as $column => $attributes) {
-          db_query('ALTER TABLE {'. $previous_db_info['table'] .'} DROP '. $attributes['column']);
+          db_drop_field($ret, $previous_db_info['table'], $attributes['column']);
         }
       }
     }
@@ -1085,80 +1087,22 @@ function content_alter_db_field($previous_field, $previous_columns, $new_field, 
   if ($new_field['db_storage'] == CONTENT_DB_STORAGE_PER_FIELD) {
     if (!count($previous_columns) || $previous_field['db_storage'] == CONTENT_DB_STORAGE_PER_CONTENT_TYPE) {
       // New columns with per-field storage; need to add a table.
-      if ($new_field['multiple']) {
-        switch ($GLOBALS['db_type']) {
-          case 'mysql':
-          case 'mysqli':
-            db_query("CREATE TABLE {". $new_db_info['table'] ."} (
-                vid int unsigned NOT NULL default '0',
-                delta int unsigned NOT NULL default '0',
-                nid int unsigned NOT NULL default '0',
-                PRIMARY KEY (vid,delta)
-              ) /*!40100 DEFAULT CHARACTER SET utf8 */");
-            break;
-
-          case 'pgsql':
-            db_query("CREATE TABLE {". $new_db_info['table'] ."} (
-                vid int_unsigned NOT NULL default '0',
-                delta int_unsigned NOT NULL default '0',
-                nid int_unsigned NOT NULL default '0',
-                PRIMARY KEY (vid,delta)
-              )");
-            break;
-        }
-      }
-      else {
-        switch ($GLOBALS['db_type']) {
-          case 'mysql':
-          case 'mysqli':
-            db_query("CREATE TABLE {". $new_db_info['table'] ."} (
-                vid int unsigned NOT NULL default '0',
-                nid int unsigned NOT NULL default '0',
-                PRIMARY KEY (vid)
-              ) /*!40100 DEFAULT CHARACTER SET utf8 */");
-            break;
-
-          case 'pgsql':
-            db_query("CREATE TABLE {". $new_db_info['table'] ."} (
-                vid int_unsigned NOT NULL default '0',
-                nid int_unsigned NOT NULL default '0',
-                PRIMARY KEY (vid)
-              )");
-            break;
-        }
-      }
+      $base_table = _content_table_schema($new_field);
+      db_create_table($ret, $new_db_info['table'], $base_table);
     }
 
     if (count($previous_columns) && $previous_field['db_storage'] == CONTENT_DB_STORAGE_PER_FIELD) {
       // Already using per-field storage; change multiplicity if needed.
       if ($previous_field['multiple'] && !$new_field['multiple']) {
         db_query('DELETE FROM {'. $new_db_info['table'] .'} WHERE delta != 0');
-        db_query('ALTER TABLE {'. $new_db_info['table'] .'} DROP delta');
-        switch ($GLOBALS['db_type']) {
-          case 'mysql':
-          case 'mysqli':
-            db_query('ALTER TABLE {'. $new_db_info['table'] .'} DROP PRIMARY KEY');
-            db_query('ALTER TABLE {'. $new_db_info['table'] .'} ADD PRIMARY KEY (vid)');
-            break;
-          case 'pgsql':
-            db_query('ALTER TABLE {'. $new_db_info['table'] .'} DROP CONSTRAINT {'. $new_db_info['table'] .'}_pkey');
-            db_query('ALTER TABLE {'. $new_db_info['table'] .'} ADD PRIMARY KEY (vid)');
-            break;
-        }
+        db_drop_field($ret, $new_db_info['table'], 'delta');
+        db_drop_primary_key($ret, $new_db_info['table']);
+        db_add_primary_key($ret, $new_db_info['table'], array('vid'));
       }
       else if (!$previous_field['multiple'] && $new_field['multiple']) {
-        content_db_add_column($new_db_info['table'], 'delta', 'int', array('unsigned' => TRUE, 'not null' => TRUE, 'default' => 0));
-        switch ($GLOBALS['db_type']) {
-          case 'mysql':
-          case 'mysqli':
-            db_query('ALTER TABLE {'. $new_db_info['table'] .'} DROP PRIMARY KEY');
-            db_query('ALTER TABLE {'. $new_db_info['table'] .'} ADD PRIMARY KEY (vid,delta)');
-            break;
-          case 'pgsql':
-            db_query('ALTER TABLE {'. $new_db_info['table'] .'} DROP CONSTRAINT {'. $new_db_info['table'] .'}_pkey');
-            db_query('ALTER TABLE {'. $new_db_info['table'] .'} ADD PRIMARY KEY (vid,delta)');
-            break;
-        }
+        db_add_field($ret, $new_db_info['table'], 'delta', array('type' => 'int', 'unsigned' => TRUE, 'not null' => TRUE, 'default' => 0));
+        db_drop_primary_key($ret, $new_db_info['table']);
+        db_add_primary_key($ret, $new_db_info['table'], array('vid', 'delta'));
       }
     }
   }
@@ -1169,56 +1113,15 @@ function content_alter_db_field($previous_field, $previous_columns, $new_field, 
     if (!isset($previous_columns[$column]) || $previous_field['db_storage'] != $new_field['db_storage']) {
       if (!db_table_exists($new_db_info['table'])) {
         if ($new_field['db_storage'] == CONTENT_DB_STORAGE_PER_CONTENT_TYPE) {
-          if ($new_field['multiple']) {
-            switch ($GLOBALS['db_type']) {
-              case 'mysql':
-              case 'mysqli':
-                db_query("CREATE TABLE {". $new_db_info['table'] ."} (
-                  vid int unsigned NOT NULL default '0',
-                  delta int unsigned NOT NULL default '0',
-                  nid int unsigned NOT NULL default '0',
-                  PRIMARY KEY (vid,delta)
-                ) /*!40100 DEFAULT CHARACTER SET utf8 */");
-                break;
-
-              case 'pgsql':
-                db_query("CREATE TABLE {". $new_db_info['table'] ."} (
-                  vid int_unsigned NOT NULL default '0',
-                  delta int_unsigned NOT NULL default '0',
-                  nid int_unsigned NOT NULL default '0',
-                  PRIMARY KEY (vid,delta)
-                )");
-                break;
-            }
-
-          }
-          else {
-            switch ($GLOBALS['db_type']) {
-              case 'mysql':
-              case 'mysqli':
-                db_query("CREATE TABLE {". $new_db_info['table'] ."} (
-                  vid int unsigned NOT NULL default '0',
-                  nid int unsigned NOT NULL default '0',
-                  PRIMARY KEY (vid)
-                ) /*!40100 DEFAULT CHARACTER SET utf8 */");
-                break;
-
-                case 'pgsql':
-                  db_query("CREATE TABLE {". $new_db_info['table'] ."} (
-                    vid int_unsigned NOT NULL default '0',
-                    nid int_unsigned NOT NULL default '0',
-                    PRIMARY KEY (vid)
-                  )");
-                  break;
-            }
-          }  // end: if ($new_field['multiple'])
-        }  // end: if ($new_field['db_storage'] == CONTENT_DB_STORAGE_PER_CONTENT_TYPE)
+          $base_table = _content_table_schema($new_field);
+          db_create_table($ret, $new_db_info['table'], $base_table);
+        }
       }
-      content_db_add_column($new_db_info['table'], $column_name, $attributes['type'], $attributes);
+      db_add_field($ret, $new_db_info['table'], $column_name, $attributes);
     }
     else {
       if ($attributes != $previous_columns[$column]) {
-        content_db_change_column($new_db_info['table'], $column_name, $column_name, $attributes['type'], $attributes);
+        db_change_field($ret, $new_db_info['table'], $column_name, $column_name, $attributes);
       }
     }
   }
@@ -1228,7 +1131,7 @@ function content_alter_db_field($previous_field, $previous_columns, $new_field, 
     foreach ($previous_columns as $column => $attributes) {
       $column_name = $previous_field['field_name'] .'_'. $column;
       if (!isset($new_columns[$column])) {
-        db_query('ALTER TABLE {'. $new_db_info['table'] .'} DROP '. $column_name);
+        db_drop_field($ret, $new_db_info['table'], $column_name);
       }
     }
 
@@ -1248,7 +1151,7 @@ function content_alter_db_field($previous_field, $previous_columns, $new_field, 
           db_query('INSERT INTO {'. $new_db_info['table'] .'} (vid, nid, '. implode(', ', $columns) .') SELECT vid, nid, '. implode(', ', $columns) .' FROM {'. $previous_db_info['table'] .'}');
         }
         foreach ($columns as $column_name) {
-          db_query('ALTER TABLE {'. $previous_db_info['table'] .'} DROP '. $column_name);
+          db_drop_field($ret, $previous_db_info['table'], $column_name);
         }
       }
 
@@ -1259,7 +1162,7 @@ function content_alter_db_field($previous_field, $previous_columns, $new_field, 
         $column_assignments_default = array();
         foreach ($new_db_info['columns'] as $column => $attributes) {
           $column_names[] = $attributes['column'];
-          if (in_array($attributes['type'], array('int', 'mediumint', 'tinyint', 'bigint', 'float'))) {
+          if (in_array($attributes['type'], array('int', 'float'))) {
             $column_placeholders_default[] = '%d';
             $column_assignments_default[] = $attributes['column'] .' = %d';
           }
@@ -1293,204 +1196,11 @@ function content_alter_db_field($previous_field, $previous_columns, $new_field, 
             db_query('INSERT INTO {'. $new_db_info['table'] .'} ('. implode(', ', $column_names) .', vid, nid) VALUES ('. implode(', ', $column_placeholders) .', %d, %d)', $data);
           }
         }
-        db_query('DROP TABLE {'. $previous_db_info['table'] .'}');
+        db_drop_table($ret, $previous_db_info['table']);
       }
     }
   }
-}
-
-/**
- * Add a column to a database table.
- *
- * @param $table
- *   Name of the table, without {}
- * @param $column
- *   Name of the column
- * @param $type
- *   Type of column
- * @param $attributes
- *   Additional optional attributes. Recognized attributes:
- *     not null => TRUE|FALSE
- *     default  => NULL|FALSE|value (with or without '', it won't be added)
- */
-function content_db_add_column($table, $column, $type, $attributes = array()) {
-  $not_null = '';
-  $default = '';
-  switch ($GLOBALS['db_type']) {
-    case 'pgsql':
-      $mappings = array('int' => 'integer', 'mediumint' => 'integer', 'bigint' => 'integer',
-        'tinyint' => 'smallint',
-        'float' => 'float',
-        'varchar' => 'varchar',
-        'text' => 'text', 'mediumtext' => 'text', 'longtext' => 'text');
-      if (isset($mappings[$type])) {
-        $type = $mappings[$type];
-      }
-      else {
-        watchdog('database', 'No PostgreSQL mapping found for %type data type.', array('%type' => $type), WATCHDOG_WARNING);
-      }
-      if ($type != 'varchar') {
-        unset($attributes['length']);
-      }
-      break;
-  }
-
-  if (array_key_exists('not null', $attributes) && $attributes['not null']) {
-    $not_null = 'NOT NULL';
-  }
-  if (array_key_exists('default', $attributes)) {
-    if (is_null($attributes['default'])) {
-      $default_val = 'NULL';
-      $default = 'default NULL';
-    }
-    elseif ($attributes['default'] === FALSE) {
-      $default = '';
-    }
-    else {
-      $default_val = "$attributes[default]";
-      $default = "default $attributes[default]";
-    }
-  }
-  if (array_key_exists('length', $attributes)) {
-    $type .= '('. $attributes['length'] .')';
-  }
-  if (array_key_exists('unsigned', $attributes) && $attributes['unsigned']) {
-    switch ($GLOBALS['db_type']) {
-      case 'pgsql':
-        $type = str_replace('integer', 'int_unsigned', $type);
-        break;
-      default:
-        $type .= ' unsigned';
-        break;
-    }
-  }
-  switch ($GLOBALS['db_type']) {
-    case 'pgsql':
-      db_query("ALTER TABLE {". $table ."} ADD $column $type");
-      if ($default) {
-        db_query("ALTER TABLE {". $table ."} ALTER $column SET $default");
-      }
-      if ($not_null) {
-        if ($default) {
-          db_query("UPDATE {". $table ."} SET $column = $default_val");
-        }
-        db_query("ALTER TABLE {". $table ."} ALTER $column SET NOT NULL");
-      }
-      break;
-
-    case 'mysql':
-    case 'mysqli':
-      // MySQL allows no DEFAULT value for text (and blob) columns
-      if (in_array($type, array('text', 'mediumtext', 'longtext'))) {
-        $default = '';
-        // We also allow NULL values to account for CCK's per field INSERTs
-        $not_null = '';
-      }
-      db_query('ALTER TABLE {'. $table .'} ADD COLUMN '. $column .' '. $type .' '. $not_null .' '. $default);
-      break;
-  }
-}
-
-/**
- * Change a column definition.
- *
- * Remember that changing a column definition involves adding a new column
- * and dropping an old one. This means that any indices, primary keys and
- * sequences from serial-type columns are dropped and might need to be
- * recreated.
- *
- * @param $table
- *   Name of the table, without {}
- * @param $column
- *   Name of the column to change
- * @param $column_new
- *   New name for the column (set to the same as $column if you don't want to change the name)
- * @param $type
- *   Type of column
- * @param $attributes
- *   Additional optional attributes. Recognized attributes:
- *     not null => TRUE|FALSE
- *     default  => NULL|FALSE|value (with or without '', it won't be added)
- */
-function content_db_change_column($table, $column, $column_new, $type, $attributes = array()) {
-  $not_null = '';
-  $default = '';
-  switch ($GLOBALS['db_type']) {
-    case 'pgsql':
-      $mappings = array('int' => 'integer', 'mediumint' => 'integer', 'bigint' => 'integer',
-        'tinyint' => 'smallint',
-        'float' => 'float',
-        'varchar' => 'varchar',
-        'text' => 'text', 'mediumtext' => 'text', 'longtext' => 'text');
-      if (isset($mappings[$type])) {
-        $type = $mappings[$type];
-      }
-      else {
-        watchdog('database', 'No PostgreSQL mapping found for %type data type.', array('%type' => $type), WATCHDOG_WARNING);
-      }
-      if ($type != 'varchar') {
-        unset($attributes['length']);
-      }
-      break;
-
-    case 'mysql':
-    case 'mysqli':
-      break;
-  }
-
-  if (array_key_exists('not null', $attributes) and $attributes['not null']) {
-    $not_null = 'NOT NULL';
-  }
-  if (array_key_exists('default', $attributes)) {
-    if (is_null($attributes['default'])) {
-      $default_val = 'NULL';
-      $default = 'default NULL';
-    }
-    elseif ($attributes['default'] === FALSE) {
-      $default = '';
-    }
-    else {
-      $default_val = "$attributes[default]";
-      $default = "default $attributes[default]";
-    }
-  }
-  if (array_key_exists('length', $attributes)) {
-    $type .= '('. $attributes['length'] .')';
-  }
-  if (array_key_exists('unsigned', $attributes) && $attributes['unsigned']) {
-    switch ($GLOBALS['db_type']) {
-      case 'pgsql':
-        $type = str_replace('integer', 'int_unsigned', $type);
-        break;
-      default:
-        $type .= ' unsigned';
-        break;
-    }
-  }
-
-  switch ($GLOBALS['db_type']) {
-    case 'pgsql':
-      db_query("ALTER TABLE {". $table ."} RENAME $column TO ". $column ."_old");
-      db_query("ALTER TABLE {". $table ."} ADD $column_new $type");
-      db_query("UPDATE {". $table ."} SET $column_new = ". $column ."_old");
-      if ($default) {
-        db_query("ALTER TABLE {". $table ."} ALTER $column_new SET $default");
-      }
-      if ($not_null) {
-        db_query("ALTER TABLE {". $table ."} ALTER $column_new SET NOT NULL");
-      }
-      db_query("ALTER TABLE {". $table ."} DROP ". $column ."_old");
-      break;
-
-    case 'mysql':
-    case 'mysqli':
-      // MySQL allows no DEFAULT value for text (and blob) columns
-      if (in_array($type, array('text', 'mediumtext', 'longtext'))) {
-        $default = '';
-        // We also allow NULL values to account for CCK's per field INSERTs
-        $not_null = '';
-      }
-      db_query('ALTER TABLE {'. $table .'} CHANGE '. $column .' '. $column_new .' '. $type .' '. $not_null .' '. $default);
-      break;
+  if (module_exists('devel')) {
+    dsm($ret);
   }
 }
