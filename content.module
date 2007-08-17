@@ -379,7 +379,8 @@ function content_field($op, &$node, $field, &$node_field, $teaser, $page) {
   switch ($op) {
     case 'load':
       $column_names = array();
-      foreach ($db_info['columns'] as $column => $attributes) {
+//    foreach ($db_info['columns'] as $column => $attributes) {
+      foreach ($db_info['columns schema'] as $column => $attributes) {
         $column_names[] = $attributes['column'] .' AS '. $column;
       }
       $query = 'SELECT '. implode(', ', $column_names) .' FROM {'. $db_info['table'] .'} WHERE vid = %d';
@@ -402,6 +403,7 @@ function content_field($op, &$node, $field, &$node_field, $teaser, $page) {
         $column_placeholders = array();
         $column_assignments = array();
         foreach ($db_info['columns'] as $column => $attributes) {
+        foreach ($db_info['columns schema'] as $column => $attributes) {
           $column_names[] = $attributes['column'];
           if ($item[$column] == '' && !$attributes['not null'] && !$field['required']) {
             $column_placeholders[] = '%s';
@@ -411,9 +413,6 @@ function content_field($op, &$node, $field, &$node_field, $teaser, $page) {
           else {
             switch ($attributes['type']) {
             case 'int':
-            case 'mediumint':
-            case 'tinyint':
-            case 'bigint':
               $column_placeholders[] = '%d';
               $column_assignments[] = $attributes['column'] .' = %d';
               break;
@@ -459,7 +458,8 @@ function content_field($op, &$node, $field, &$node_field, $teaser, $page) {
         $column_names = array();
         $column_placeholders = array();
         $column_assignments = array();
-        foreach ($db_info['columns'] as $column => $attributes) {
+//      foreach ($db_info['columns'] as $column => $attributes) {
+        foreach ($db_info['columns schema'] as $column => $attributes) {
           $column_names[] = $attributes['column'];
           if (empty($item[$column]) && !$attributes['not null'] && !$field['required']) {
             $column_placeholders[] = '%s';
@@ -469,9 +469,6 @@ function content_field($op, &$node, $field, &$node_field, $teaser, $page) {
           else {
             switch ($attributes['type']) {
             case 'int':
-            case 'mediumint':
-            case 'tinyint':
-            case 'bigint':
               $column_placeholders[] = '%d';
               $column_assignments[] = $attributes['column'] .' = %d';
               break;
@@ -567,7 +564,8 @@ function _content_field_invoke_default($op, &$node, $teaser = NULL, $page = NULL
       $node_field = isset($node->$field['field_name']) ? $node->$field['field_name'] : array();
 
       $db_info = content_database_info($field);
-      if (count($db_info['columns'])) {
+//    if (count($db_info['columns'])) {
+      if (count($db_info['columns schema'])) {
         $result = content_field($op, $node, $field, $node_field, $teaser, $page);
         if (is_array($result)) {
           $return = array_merge($return, $result);
@@ -920,7 +918,7 @@ function content_database_info($field) {
     }
   }
   else {
-    $db_info['columns_schema'] = array();
+    $db_info['columns schema'] = array();
   }
   return $db_info;
 }
