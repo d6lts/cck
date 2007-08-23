@@ -582,7 +582,7 @@ function _content_admin_field_add_existing_submit($form, &$form_state) {
   $field = content_fields($form_values['field_name']);
   $field_types = _content_field_types();
   $field_type = $field_types[$field['type']];
-  $columns = module_invoke($field_type['module'], 'field_settings', 'database columns schema', $field);
+  $columns = module_invoke($field_type['module'], 'field_settings', 'database columns', $field);
 
   if (is_array($columns) && count($columns)) {
     if ($field['db_storage'] == CONTENT_DB_STORAGE_PER_CONTENT_TYPE) {
@@ -671,8 +671,7 @@ function _content_admin_field_add_new_submit($form, &$form_state) {
   $field_type = $field_types[$field_widget_type[0]];
   $field = content_fields($field_name);
 
-//$columns = module_invoke($field_type['module'], 'field_settings', 'database columns', $field);
-  $columns = module_invoke($field_type['module'], 'field_settings', 'database columns schema', $field);
+  $columns = module_invoke($field_type['module'], 'field_settings', 'database columns', $field);
   if (is_array($columns) && count($columns)) {
     content_alter_db_field(array(), array(), $field, $columns);
   }
@@ -823,8 +822,7 @@ function _content_admin_field(&$form_state, $type_name, $field_name) {
       '#collapsed' => empty($field['widget']['default_value_php']),
     );
     $db_info = content_database_info($field);
-//  $columns = array_keys($db_info['columns']);
-    $columns = array_keys($db_info['columns schema']);
+    $columns = array_keys($db_info['columns']);
     foreach ($columns as $key => $column) {
       $columns[$key] = "'$column' => value for $column";
     }
@@ -925,8 +923,7 @@ function _content_admin_field_validate($form, &$form_state) {
       }
       if ($error) {
         $db_info = content_database_info($field);
-//      $columns = array_keys($db_info['columns']);
-        $columns = array_keys($db_info['columns schema']);
+        $columns = array_keys($db_info['columns']);
         foreach ($columns as $key => $column) {
           $columns[$key] = "'$column' => value for $column";
         }
@@ -1022,8 +1019,7 @@ function _content_admin_field_submit($form, &$form_state) {
   }
 
   $prev_field = $field;
-//$prev_columns = module_invoke($field_type['module'], 'field_settings', 'database columns', $field);
-  $prev_columns = module_invoke($field_type['module'], 'field_settings', 'database columns schema', $field);
+  $prev_columns = module_invoke($field_type['module'], 'field_settings', 'database columns', $field);
 
   db_query("UPDATE {node_field_instance} SET weight = %d, label = '%s', widget_type = '%s', widget_settings = '%s', description = '%s' WHERE type_name = '%s' AND field_name = '%s'", $form_values['weight'], $form_values['label'], $form_values['widget_type'], serialize($widget_settings), $form_values['description'], $form_values['type_name'], $form_values['field_name']);
 
@@ -1042,8 +1038,7 @@ function _content_admin_field_submit($form, &$form_state) {
   content_clear_type_cache();
 
   $new_field = content_fields($form_values['field_name']);
-//$new_columns = module_invoke($field_type['module'], 'field_settings', 'database columns', $new_field);
-  $new_columns = module_invoke($field_type['module'], 'field_settings', 'database columns schema', $new_field);
+  $new_columns = module_invoke($field_type['module'], 'field_settings', 'database columns', $new_field);
 
   if (!isset($prev_columns)) {
     $prev_columns = array();
@@ -1080,8 +1075,7 @@ function content_alter_db_field($previous_field, $previous_columns, $new_field, 
         db_drop_table($ret, $previous_db_info['table']);
       }
       else {
-//      foreach ($previous_db_info['columns'] as $column => $attributes) {
-        foreach ($previous_db_info['columns schema'] as $column => $attributes) {
+      foreach ($previous_db_info['columns'] as $column => $attributes) {
           db_drop_field($ret, $previous_db_info['table'], $attributes['column']);
         }
       }
@@ -1140,13 +1134,13 @@ function content_alter_db_field($previous_field, $previous_columns, $new_field, 
       }
     }
 
-    // Migrate data from one storage type to another
+    // Migrate data from one storage type to another.
     // We check if the previous table still exists (avoid problems during upgrades from older db schemes)
     if (db_table_exists($previous_db_info['table'])) {
       // Migrate data from per-content-type storage.
       if ($previous_field['db_storage'] == CONTENT_DB_STORAGE_PER_CONTENT_TYPE && $new_field['db_storage'] == CONTENT_DB_STORAGE_PER_FIELD) {
         $columns = array();
-        $migrate_columns = array_intersect_assoc($new_db_info['columns schema'], $previous_db_info['columns schema']);
+        $migrate_columns = array_intersect_assoc($new_db_info['columns'], $previous_db_info['columns']);
         foreach ($migrate_columns as $column => $attributes) {
           $columns[] = $attributes['column'];
         }
@@ -1166,7 +1160,7 @@ function content_alter_db_field($previous_field, $previous_columns, $new_field, 
         $column_names = array();
         $column_placeholders_default = array();
         $column_assignments_default = array();
-        $migrate_columns = array_intersect_assoc($new_db_info['columns schema'], $previous_db_info['columns schema']);
+        $migrate_columns = array_intersect_assoc($new_db_info['columns'], $previous_db_info['columns']);
         foreach ($migrate_columns as $column => $attributes) {
           $column_names[] = $attributes['column'];
           if (in_array($attributes['type'], array('int', 'float'))) {

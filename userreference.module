@@ -35,13 +35,6 @@ function userreference_field_settings($op, $field) {
 
     case 'database columns':
       $columns = array(
-        'uid' => array('type' => 'int', 'not null' => FALSE, 'default' => NULL),
-      );
-      return $columns;
-
-      // TODO : temporary, while old-style CRUD and new schema-api code coexist.
-    case 'database columns schema':
-      $columns = array(
         'uid' => array('type' => 'int', 'unsigned' => TRUE,  'not null' => FALSE),
       );
       return $columns;

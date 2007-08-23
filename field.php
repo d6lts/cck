@@ -114,14 +114,18 @@ function hook_field_settings($op, $field) {
       return array('text_processing', 'max_length', 'allowed_values');
 
     case 'database columns':
+      $columns = array(
+        'value' => array('type' => 'varchar', 'not null' => TRUE, 'default' => "''", 'sortable' => TRUE),
+        'format' => array('type' => 'int', 'length' => 10, 'unsigned' => TRUE, 'not null' => TRUE, 'default' => 0),
+      );
       if (empty($field['max_length']) || $field['max_length'] > 255) {
-        $columns['value'] = array('type' => 'text', 'size' => 'big', 'not null' => TRUE, 'default' => '', 'sortable' => TRUE);
+        $columns['value']['type'] = 'longtext';
       }
       else {
-        $columns['value'] = array('type' => 'varchar', 'length' => $field['max_length'], 'not null' => TRUE, 'default' => '', 'sortable' => TRUE);
+        $columns['value']['length'] = $field['max_length'];
       }
-      if (!empty($field['text_processing'])) {
-        $columns['format'] = array('type' => 'int', 'unsigned' => TRUE, 'not null' => TRUE, 'default' => 0);
+      if (empty($field['text_processing'])) {
+        unset($columns['format']);
       }
       return $columns;
 

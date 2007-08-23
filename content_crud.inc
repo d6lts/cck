@@ -238,8 +238,7 @@ function content_field_instance_delete($properties) {
   $field = $type['fields'][$properties['field_name']];
   $field_types = _content_field_types();
   $field_type = $field_types[$field['type']];
-//$columns = module_invoke($field_type['module'], 'field_settings', 'database columns', $field);
-  $columns = module_invoke($field_type['module'], 'field_settings', 'database columns schema', $field);
+  $columns = module_invoke($field_type['module'], 'field_settings', 'database columns', $field);
 
   $instances = db_result(db_query("SELECT COUNT(*) FROM {node_field_instance} WHERE field_name = '%s'", $properties['field_name']));
 

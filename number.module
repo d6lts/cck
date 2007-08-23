@@ -85,19 +85,6 @@ function number_field_settings($op, $field) {
     case 'database columns':
       if ($field['type'] == 'number_integer') {
         return array(
-          'value' => array('type' => 'int', 'not null' => FALSE, 'default' => NULL, 'sortable' => TRUE),
-        );
-      }
-      if ($field['type'] == 'number_decimal') {
-        return array(
-          'value' => array('type' => 'float', 'not null' => FALSE, 'default' => NULL, 'sortable' => TRUE),
-        );
-      }
-
-    // TODO : temporary, while old-style CRUD and new schema-api code coexist.
-    case 'database columns schema':
-      if ($field['type'] == 'number_integer') {
-        return array(
           'value' => array('type' => 'int', 'not null' => FALSE, 'sortable' => TRUE),
         );
       }

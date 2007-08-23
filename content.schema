@@ -35,9 +35,6 @@ function content_schema() {
 
   // Dynamic (data) tables.
 
-  // TODO : we build from the existing content_database_info().
-  // Maybe this should be refactored the other way around : remove content_database_info
-  // and use content_schema as reference ?
   foreach (content_types() as $type) {
     // We always add a 'per content type' table.
     // TODO : is that really still needed ?
@@ -54,9 +51,7 @@ function content_schema() {
       }
 
       // Add the data columns.
-      // TODO : we use 'columns schema' instead of 'columns' while old-style CRUD
-      // and new schema-api code coexist.
-      foreach ($db_info['columns schema'] as $column => $attributes) {
+      foreach ($db_info['columns'] as $column => $attributes) {
         $column_name = $attributes['column'];
         unset($attributes['column']);
         unset($attributes['sortable']);
