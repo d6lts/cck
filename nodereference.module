@@ -353,7 +353,7 @@ function nodereference_widget(&$form, &$form_state, $field, $items, $delta = 0) 
         '#default_value' => isset($items[$delta]) ? $items[$delta] : NULL,
         '#value_callback' => 'nodereference_autocomplete_value',
         '#autocomplete_path' => 'nodereference/autocomplete/'. $field['field_name'],
-        '#validate' => array('nodereference_autocomplete_validate'),
+        '#element_validate' => array('nodereference_autocomplete_validate'),
       );
       break;
   }

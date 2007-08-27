@@ -283,7 +283,7 @@ function text_elements() {
       '#input' => TRUE, '#field' => array(),
       '#columns' => array('value'), '#delta' => 0,
       '#process' => array('text_textfield_process'),
-      '#autocomplete_path' => '',
+      '#autocomplete_path' => FALSE,
       ),
     'text_textarea' => array(
       '#input' => TRUE, '#field' => array(),

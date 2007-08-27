@@ -7,20 +7,6 @@
  */
 
 /**
- * Implementation of hook_menu().
- */
-function userreference_menu() {
-  $items = array();
-  $items['user/autocomplete'] = array(
-    'title' => t('User reference autocomplete'),
-    'page callback' => 'userreference_autocomplete',
-    'access arguments' => array('access content'),
-    'type' => MENU_CALLBACK
-  );
-  return $items;
-}
-
-/**
  * Implementation of hook_field_info().
  *
  * Here we indicate that the content module will use its default
@@ -249,7 +235,8 @@ function userreference_widget(&$form, &$form_state, $field, $items, $delta = 0) 
         '#weight' => t($field['widget']['weight']),
         '#default_value' => isset($items[$delta]) ? $items[$delta] : NULL,
         '#value_callback' => 'userreference_autocomplete_value',
-        '#autocomplete_path' => 'user/autocomplete/'. $field['field_name'],
+        '#autocomplete_path' => 'user/autocomplete/',
+        '#element_validate' => array('userreference_autocomplete_validate'),
       );
       break;
   }
@@ -263,11 +250,27 @@ function userreference_widget(&$form, &$form_state, $field, $items, $delta = 0) 
  */
 function userreference_autocomplete_value($element, $edit = FALSE) {
   if (func_num_args() == 1) {
+    $field_key  = $element['#columns'][0];
     if (!empty($element['#default_value'][$field_key])) {
-      $field_key  = $element['#columns'][0];
       $value = db_result(db_query("SELECT name FROM {users} WHERE uid = '%d'", $element['#default_value'][$field_key]));
       return array($field_key => $value);
     }
+  }
+}
+
+function userreference_autocomplete_validate($element, &$form_state) {
+  $field = $element['#field'];
+  $field_key  = $element['#columns'][0];
+  $value = $element['#value'][$field_key];
+  if (!empty($value)) {
+    $value = db_result(db_query("SELECT uid FROM {users} WHERE name = '%s'", $value));
+  }
+  if (!empty($value)) {
+    form_set_value($element[$field_key], $value, $form_state);
+  }
+  elseif ($delta > 0) {
+    // Don't save empty fields when they're not the first value (keep '0' otherwise)
+    form_set_value($element[$field_key], 0, $form_state);
   }
 }
 
