@@ -137,6 +137,9 @@ function content_theme() {
     'content_view_multiple_field' => array(
       'arguments' => array('items' => NULL, 'field' => NULL, 'data' => NULL),
     ),
+    'content_multiple_values' => array(
+      'arguments' => array('element' => NULL),
+    ),
   );
 }
 
@@ -173,11 +176,14 @@ function content_load($node) {
 /**
  * Create fields' form for a content type.
  *
+ * Widget_invoke() is gone, this is the only place the widget function
+ * is called.
+ *
  * Each field defines its own component of the content entry form, via its
  * chosen widget.
  */
-function content_form(&$node) {
-  $form = array();
+function content_form(&$form, &$form_state) {
+  $node = $form['#node'];
   $type = content_types($node->type);
 
   // Set form parameters so we can accept file uploads.
@@ -185,35 +191,118 @@ function content_form(&$node) {
     $form['#attributes'] = array("enctype" => "multipart/form-data");
   }
 
-  _content_widget_invoke('prepare form values', $node);
-  $form = array_merge($form, _content_widget_invoke('form', $node));
+  $type_name = is_string($node) ? $node : (is_array($node) ? $node['type'] : $node->type);
+  $type = content_types($type_name);
+  if (count($type['fields'])) {
+    foreach ($type['fields'] as $field) {
+      $form += content_form_field($form, $form_state, $field);
+    }
+  }
   return $form;
 }
 
 /**
- * Node form 'validate' handler.
- */
-function content_node_form_validate($form, &$form_state) {
-  // TODO : the widget ops could probably go with new widget FAPIsation ?
-  $node = (object)$form_state['values'];
-  _content_widget_invoke('validate', $node);
-  _content_widget_invoke('process form values', $node);
-  $form_state['values'] = (array)$node;
-}
-
-/**
- * Node form 'submit' handler.
+ * Create a separate form element for each field.
  *
- * At submit time, the widget does whatever data massaging is necessary so that
- * the field has the content in the expected format and can commit the changes
- * to the database.
+ * Extracted from content_form() to make it possible to get a subform
+ * for just a single field at a time.
+ *
+ * Hook_widget() picks up two new values, $count and $delta, to help
+ * widgets know what information to return since multiple values are
+ * sometimes controlled by the content module.
+ *
+ * @param $form
+ *   the form to add this field element to
+ * @param $form_state
+ *   the form_state for the above form
+ * @param $field
+ *   the field array to use to create the form element
  */
-//
-function content_node_form_submit($form, &$form_state) {
-  // TODO : the widget ops could probably go with new widget FAPIsation ?
-  $node = (object)$form_state['values'];
-  _content_widget_invoke('submit', $node);
-  $form_state['values'] = (array)$node;
+function content_form_field(&$form, &$form_state, $field) {
+  $node = (object) $form['#node'];
+  $items = array();
+  if (!empty($form_state['values']) && !empty($form_state['values'][$field['field_name']])) {
+    $items =  $form_state['values'][$field['field_name']];
+  }
+  elseif(!empty($node->$field['field_name'])) {
+    $items = $node->$field['field_name'];
+  }
+
+  $widget_types = _content_widget_types();
+  $module = $widget_types[$field['widget']['type']]['module'];
+  $function = $module .'_widget';
+  if (function_exists($function)) {
+
+    // If we're building a node creation form, pre-fill with default values
+    if (empty($node->nid)) {
+      if (content_handle('widget', 'default value', $field) != CONTENT_CALLBACK_NONE) {
+        $callbacks = array_key_exists('callback arguments', $widget_types[$field['widget']['type']]) ? $widget_types[$field['widget']['type']]['callback arguments'] : array('default_value' => '');
+        $widget_function = !empty($callbacks['default_value']) ? $callbacks['default_value'] : 'content_default_value';
+        if (!empty($widget_function) && function_exists($widget_function)) {
+          $items = array_merge($items, $widget_function($form, $form_state, $field, $items, 0));
+        }
+      }
+    }
+
+    $field_form = array(
+      $field['field_name'] => array(
+        '#tree' => TRUE,
+        '#field' => $field,
+        '#weight' => $field['widget']['weight'],
+        ),
+    );
+
+    // No hard-coding of column names so widgets can be used by any field.
+    // This is a change from earlier versions which hard-coded 'value'
+    // for most widgets.
+    $db_info = content_database_info($field);
+    $field_form[$field['field_name']]['#columns'] = array_keys($db_info['columns']);
+
+    // If content module handles multiple values for this form element,
+    // make this a content_multiple_values form type and iterate through
+    // the multiple elements to add them to the form.
+    if (content_handle('widget', 'multiple values', $field) == CONTENT_CALLBACK_DEFAULT) {
+
+      $field_form[$field['field_name']]['#type'] = 'content_multiple_values';
+
+      // @TODO
+      // Here's where we can intervene to control the number of items
+      // or add javascript to dynamically add more items,
+      // or take control over the delta values in some way.
+      $delta = 0;
+      $max = !empty($field['multiple']) ? sizeof($items) + 2 : 0;
+      foreach (range($delta, $max) as $delta) {
+        $element = $function($form, $form_state, $field, $items, $delta);
+        $field_form[$field['field_name']][$delta] = $element;
+
+        // Be sure sub-elements stay in delta order. Without this
+        // if widget doesn't set #weight on this element level they can
+        // end up with empty elements at the top of the array.
+        $field_form[$field['field_name']][$delta]['#weight'] = $delta;
+      }
+    }
+    else {
+      // If the widget is handling multiple values, just get the field's
+      // form element and make it the zero value of the field.
+      // Used by optionwidgets where multiple values are combined into
+      // a single form element.
+      $element = $function($form, $form_state, $field, $items, 0);
+      if (!empty($element)) {
+        $field_form[$field['field_name']][0] = $element;
+      }
+      else {
+        // If nothing is returned from hook_widget(), do nothing.
+        // Widget could have added something non-standard directly
+        // to the form, or may not use a form element at all.
+        $field_form = array();
+      }
+    }
+  }
+  else {
+    // If there is no hook_widget() for this field, do nothing to the form.
+    $field_form = array();
+  }
+  return $field_form;
 }
 
 /**
@@ -347,11 +436,8 @@ function content_nodeapi(&$node, $op, $teaser, $page) {
  */
 function content_form_alter(&$form, $form_state, $form_id) {
   if (isset($form['type'])) {
-    $node = $form['#node'];
     if ($form['type']['#value'] .'_node_form' == $form_id) {
-      $form = array_merge($form, content_form($node));
-      $form['#validate'][] = 'content_node_form_validate';
-      $form['#submit'][] = 'content_node_form_submit';
+      $form = array_merge($form, content_form($form, $form_state));
     }
   }
 }
@@ -568,47 +654,6 @@ function _content_field_view(&$node, $teaser = NULL, $page = NULL) {
       );
       // test for values in $node_field in case modules added items
       if (isset($node->$field['field_name']) || count($node_field)) {
-        $node->$field['field_name'] = $node_field;
-      }
-    }
-  }
-  return $return;
-}
-
-/**
- * Invoke a widget hook.
- */
-function _content_widget_invoke($op, &$node) {
-  $type_name = is_string($node) ? $node : (is_array($node) ? $node['type'] : $node->type);
-  $type = content_types($type_name);
-  $widget_types = _content_widget_types();
-
-  $return = array();
-  if (count($type['fields'])) {
-    foreach ($type['fields'] as $field) {
-      $node_field = isset($node->$field['field_name']) ? $node->$field['field_name'] : array();
-
-      $module = $widget_types[$field['widget']['type']]['module'];
-      $function = $module .'_widget';
-      if (function_exists($function)) {
-        // If we're building a node creation form, pre-fill with default values
-        if ($op == 'prepare form values' && empty($node->nid)) {
-          $node_field = array_merge($node_field, content_default_value($node, $field, $node_field));
-        }
-
-        $result = $function($op, $node, $field, $node_field);
-        if (is_array($result) && $op == 'form') {
-          $result[$field['field_name']]['#weight'] = $field['widget']['weight'];
-        }
-        if (is_array($result)) {
-          $return = array_merge($return, $result);
-        }
-        else if (isset($result)) {
-          $return[] = $result;
-        }
-      }
-      // test for values in $node_field in case modules added items
-      if (is_object($node) && (isset($node->$field['field_name']) || count($node_field))) {
         $node->$field['field_name'] = $node_field;
       }
     }
@@ -891,6 +936,49 @@ function content_transpose_array_rows_cols($array) {
 }
 
 /**
+ *  Create an array of the allowed values for this field.
+ *
+ *  Used by number and text fields, expects to find either
+ *  php code that will return the correct value, or a string
+ *  with keys and labels separated with '|' and with each
+ *  new value on its own line.
+ */
+function content_allowed_values($field) {
+  static $allowed_values;
+
+  if (isset($allowed_values[$field['field_name']])) {
+    return $allowed_values[$field['field_name']];
+  }
+
+  $allowed_values[$field['field_name']] = array();
+
+  if (isset($field['allowed_values_php'])) {
+    ob_start();
+    $result = eval($field['allowed_values_php']);
+    if (is_array($result)) {
+      $allowed_values[$field['field_name']] = $result;
+    }
+    ob_end_clean();
+  }
+
+  if (empty($allowed_values[$field['field_name']]) && isset($field['allowed_values'])) {
+    $list = explode("\n", $field['allowed_values']);
+    $list = array_map('trim', $list);
+    $list = array_filter($list, 'strlen');
+    foreach ($list as $opt) {
+      if (strpos($opt, '|') !== FALSE) {
+        list($key, $value) = explode('|', $opt);
+        $allowed_values[$field['field_name']][$key] = $value ? $value : $key;
+      }
+      else {
+        $allowed_values[$field['field_name']][$opt] = $opt;
+      }
+    }
+  }
+  return $allowed_values[$field['field_name']];
+}
+
+/**
  * Format a field item for display.
  *
  * @param $field
@@ -1021,14 +1109,14 @@ function _content_table_schema($field = NULL) {
 
 /**
  *  Helper function for determining the behaviour of a field or a widget
- *  with respect to a given operation
- *  (currently only used for 'view' field op and 'default value' widegt op)
+ *  with respect to a given operation. (currently used for field 'view',
+ *  and widget 'default values' and 'multiple values')
  *
  *  @param $entity
  *    'field' or 'widget'
  *
  *  @param $op
- *    the name of the operation ('view', 'validate'...)
+ *    the name of the operation ('view', 'default value'...)
  *
  *  @param $field
  *    The field array, including widget info.
@@ -1040,19 +1128,21 @@ function _content_table_schema($field = NULL) {
  *
  */
 function content_handle($entity, $op, $field) {
-  $entity_types = ($entity == 'field') ? _content_field_types() : _content_widget_types();
-  $entity_type = ($entity == 'field') ? $field['type'] : $field['widget']['type'];
-  $module = $entity_types[$entity_type]['module'];
+  switch ($entity) {
+    case 'field':
+      $entity_types = _content_field_types();
+      $entity_type = $field['type'];
+      $module = $entity_types[$entity_type]['module'];
+      $info = module_invoke($module, "field_info");
+      return $info[$field['type']]['callbacks'][$op];
 
-  if ($op == 'default value' && $module == 'computed_field') {
-    $callback_value =   CONTENT_CALLBACK_NONE;
+    case 'widget':
+      $entity_types = _content_widget_types();
+      $entity_type = $field['widget']['type'];
+      $module = $entity_types[$entity_type]['module'];
+      $info = module_invoke($module, "widget_info");
+      return $info[$field['widget']['type']]['callbacks'][$op];
   }
-  else {
-    $callbacks = module_invoke($module, "{$entity}_settings", 'callbacks', $field);
-    $callback_value = (isset($callbacks[$op])) ? $callbacks[$op] : CONTENT_CALLBACK_DEFAULT;
-  }
-
-  return $callback_value;
 }
 
 /**
@@ -1070,16 +1160,12 @@ function content_handle($entity, $op, $field) {
  *  @return
  *    The default value for that field.
  */
-function content_default_value($node, $field, $items) {
+function content_default_value(&$form, &$form_state, $field, &$items, $delta) {
   $widget_types = _content_widget_types();
   $module = $widget_types[$field['widget']['type']]['module'];
 
   $default_value = array();
-  if (content_handle('widget', 'default value', $field) == CONTENT_CALLBACK_CUSTOM) {
-    $function = $module .'_widget';
-    $default_value = $function('default value', $node, $field, $items);
-  }
-  elseif (!empty($field['widget']['default_value_php'])) {
+  if (!empty($field['widget']['default_value_php'])) {
     ob_start();
     $result = eval($field['widget']['default_value_php']);
     ob_end_clean();
@@ -1092,4 +1178,55 @@ function content_default_value($node, $field, $items) {
   }
 
   return (array) $default_value;
+}
+
+/**
+ * Hook elements().
+ *
+ * Used to add multiple value processing, validation, and themes.
+ *
+ * FAPI callbacks can be declared here, and the element will be
+ * passed to those callbacks.
+ *
+ * Drupal will automatically theme the element using a theme with
+ * the same name as the hook_elements key.
+ *
+ * @TODO any more generic multiple value processing we could add here??
+ */
+function content_elements() {
+  return array(
+    'content_multiple_values' => array(
+      '#input' => TRUE, '#columns' => array('value'),
+    ));
+}
+
+/**
+ * Theme an individual form element.
+ *
+ * Combine multiple values into a fieldset.
+ * Override the theme to eliminate the fieldset or make other changes.
+ *
+ * We work with $element['#children'] here instead of using drupal_render()
+ * because the individual items in the element have already been rendered.
+ * Alter children in the theme set on the individual element.
+ */
+function theme_content_multiple_values($element) {
+  if (isset($element['#children'])) {
+    $field = $element['#field'];
+    if (!empty($field['multiple'])) {
+      $fieldset = array();
+      $fieldset['#type'] = 'fieldset';
+      $fieldset['#title'] = t($field['widget']['label']);
+      $fieldset['#description'] = t($field['widget']['description']);
+      $fieldset['#weight'] = $field['widget']['weight'];
+      $fieldset['#collapsible'] = FALSE;
+      $fieldset['#collapsed'] = FALSE;
+      $fieldset['#attributes'] = '';
+      $fieldset['#value'] = $element['#children'];
+      return theme('fieldset', $fieldset);
+    }
+    else {
+      return $element['#children'];
+    }
+  }
 }

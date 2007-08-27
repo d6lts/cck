@@ -85,3 +85,15 @@ function optionwidgets_update_1() {
 
   return $ret;
 }
+
+/**
+ * Rename widgets from 'options_xxx' to 'optionwidgets_xxx' so hook_elements
+ * and hook_themes items are prefixed with module name as they should be.
+ */
+function optionwidgets_update_6000() {
+  $ret = array();
+  $result = db_query("UPDATE {node_field_instance} SET widget_type = 'optionwidgets_select' where widget_type = 'options_select'");
+  $result = db_query("UPDATE {node_field_instance} SET widget_type = 'optionwidgets_onoff' where widget_type = 'options_onoff'");
+  $result = db_query("UPDATE {node_field_instance} SET widget_type = 'optionwidgets_buttons' where widget_type = 'options_buttons'");
+  return $ret;
+}

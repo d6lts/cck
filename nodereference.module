@@ -6,7 +6,6 @@
  * Defines a field type for referencing one node from another.
  */
 
-
 /**
  * Implementation of hook_menu().
  */
@@ -37,10 +36,25 @@ function nodereference_theme() {
 
 /**
  * Implementation of hook_field_info().
+ *
+ * Here we indicate that the content module will use its default
+ * handling for the view of this field.
+ *
+ * Callbacks can be omitted if default handing is used.
+ * They're included here just so this module can be used
+ * as an example for custom modules that might do things
+ * differently.
  */
 function nodereference_field_info() {
   return array(
-    'nodereference' => array('label' => 'Node Reference'),
+    'nodereference' => array(
+      'label' => 'Node Reference',
+      'callbacks' => array(
+        'view' => CONTENT_CALLBACK_DEFAULT,
+        'tables' => CONTENT_CALLBACK_DEFAULT,
+        'arguments' => CONTENT_CALLBACK_DEFAULT,
+        ),
+      ),
   );
 }
 
@@ -140,6 +154,18 @@ function nodereference_field($op, &$node, $field, &$items, $teaser, $page) {
         }
       }
       return;
+
+    // Don't save empty items.
+    case 'presave':
+      if (is_array($items)) {
+        foreach ($items as $delta => $item) {
+          if ($delta > 0 && empty($item)) {
+            unset($items[$delta]);
+            unset($node->{$field['field_name'][$delta]});
+          }
+        }
+      }
+      break;
   }
 }
 
@@ -223,184 +249,181 @@ function nodereference_field_formatter($field, $item, $formatter, $node) {
 
 /**
  * Implementation of hook_widget_info().
+ *
+ * We need custom handling of multiple values for the nodereference_select
+ * widget because we need to combine them into a options list rather
+ * than display multiple elements.
+ *
+ * We will use the content module's default handling for default value.
+ *
+ * Callbacks can be omitted if default handing is used.
+ * They're included here just so this module can be used
+ * as an example for custom modules that might do things
+ * differently.
  */
 function nodereference_widget_info() {
   return array(
     'nodereference_select' => array(
       'label' => 'Select List',
       'field types' => array('nodereference'),
+      'callbacks' => array(
+        'default value' => CONTENT_CALLBACK_DEFAULT,
+        'multiple values' => CONTENT_CALLBACK_CUSTOM,
+        ),
+      'callback arguments' => array(
+        'default value' => 'content_default_value',
+        ),
     ),
     'nodereference_autocomplete' => array(
       'label' => 'Autocomplete Text Field',
       'field types' => array('nodereference'),
+      'callbacks' => array(
+        'default value' => CONTENT_CALLBACK_DEFAULT,
+        'multiple values' => CONTENT_CALLBACK_DEFAULT,
+        ),
+      'callback arguments' => array(
+        'default value' => 'content_default_value',
+        ),
     ),
   );
 }
 
 /**
  * Implementation of hook_widget().
+ *
+ * Attach a single form element to the form. It will be built out and
+ * validated in the callback(s) listed in hook_elements. We build it
+ * out in the callbacks rather than here in hook_widget so it can be
+ * plugged into any module that can provide it with valid
+ * $field information.
+ *
+ * Content module will set the weight, field name and delta values
+ * for each form element. This is a change from earlier CCK versions
+ * where the widget managed its own multiple values.
+ *
+ * If there are multiple values for this field, the content module will
+ * call this function as many times as needed.
+ *
+ * @param $form
+ *   the entire form array, $form['#node'] holds node information
+ * @param $form_state
+ *   the form_state, $form_state['values'][$field['field_name']]
+ *   holds the field's form values.
+ * @param $field
+ *   the field array
+ * @param $items
+ *   array of default values for this field
+ * @param $delta
+ *   the order of this item in the array of subelements (0, 1, 2, etc)
+ *
+ * @return
+ *   the form item for a single element for this field
  */
-function nodereference_widget($op, &$node, $field, &$items) {
-  if ($field['widget']['type'] == 'nodereference_select') {
-    switch ($op) {
-      case 'prepare form values':
-        $items_transposed = content_transpose_array_rows_cols($items);
-        $items['default nids'] = isset($items_transposed['nid']) ? $items_transposed['nid'] : array();
-        break;
+function nodereference_widget(&$form, &$form_state, $field, $items, $delta = 0) {
 
-      case 'form':
-        $form = array();
+  // No hard-coding of column names so this can be used by any field.
+  // This is a change from earlier versions which hard-coded 'nid'.
+  $db_info = content_database_info($field);
+  $columns = array_keys($db_info['columns']);
 
-        $options = _nodereference_potential_references($field, TRUE);
-        foreach ($options as $key => $value) {
-          $options[$key] = _nodereference_item($field, $value);
-        }
-        if (!$field['required']) {
-          $options = array(0 => t('<none>')) + $options;
-        }
+  switch ($field['widget']['type']) {
+    case 'nodereference_select':
+      // The nodereference_select widget doesn't need to create its own
+      // element, it can use the optionwidgets_select element.
+      $element = array(
+        '#type' => 'optionwidgets_select',
+        '#field' => $field,
+        '#columns' => $columns,
+        '#delta' => $delta,
+        '#weight' => t($field['widget']['weight']),
+        '#default_value' => $items,
+      );
+      break;
 
-        $form[$field['field_name']] = array('#tree' => TRUE);
-        $form[$field['field_name']]['nids'] = array(
-          '#type' => 'select',
-          '#title' => t($field['widget']['label']),
-          '#default_value' => $items['default nids'],
-          '#multiple' => $field['multiple'],
-          '#size' =>  $field['multiple'] ? min(count($options), 6) : 0,
-          '#options' => $options,
-          '#required' => $field['required'],
-          '#description' => t($field['widget']['description']),
-        );
+    case 'nodereference_autocomplete':
+      // The nodereference autocomplete widget doesn't need to create its own
+      // element, it can use the text_textfield element and add an autocomplete
+      // path and some extra processing to it.
+      $element = array(
+        '#type' => 'text_textfield',
+        '#field' => $field,
+        '#columns' => $columns,
+        '#delta' => $delta,
+        '#weight' => t($field['widget']['weight']),
+        '#default_value' => isset($items[$delta]) ? $items[$delta] : NULL,
+        '#value_callback' => 'nodereference_autocomplete_value',
+        '#autocomplete_path' => 'nodereference/autocomplete/'. $field['field_name'],
+        '#validate' => array('nodereference_autocomplete_validate'),
+      );
+      break;
+  }
+  return $element;
+}
 
-        return $form;
-
-      case 'process form values':
-        if ($field['multiple']) {
-          // if nothing selected, make it 'none'
-          if (empty($items['nids'])) {
-            $items['nids'] = array(0 => '0');
-          }
-          // drop the 'none' options if other items were also selected
-          elseif (count($items['nids']) > 1) {
-            unset($items['nids'][0]);
-          }
-
-          $items = array_values(content_transpose_array_rows_cols(array('nid' => $items['nids'])));
-        }
-        else {
-          $items[0]['nid'] = $items['nids'];
-        }
-        // Remove the widget's data representation so it isn't saved.
-        unset($items['nids']);
-        foreach ($items as $delta => $item) {
-          $items[$delta]['error_field'] =  $field['field_name'] .'][nids';
-        }
-        break;
+/**
+ * Value for a nodereference autocomplete element.
+ *
+ * Substitute in the node title for the node nid.
+ */
+function nodereference_autocomplete_value($element, $edit = FALSE) {
+  if (func_num_args() == 1) {
+    $field_key  = $element['#columns'][0];
+    if (!empty($element['#default_value'][$field_key])) {
+      $value = db_result(db_query(db_rewrite_sql('SELECT n.title FROM {node} n WHERE n.nid = %d'), $element['#default_value'][$field_key]));
+      $value .= ' [nid:'. $element['#default_value'][$field_key] .']';
+      return array($field_key => $value);
     }
   }
-  else {
-    switch ($op) {
-      case 'prepare form values':
-        foreach ($items as $delta => $item) {
-          if (!empty($items[$delta]['nid'])) {
-            $items[$delta]['default node_name'] = db_result(db_query(db_rewrite_sql('SELECT n.title FROM {node} n WHERE n.nid = %d'), $items[$delta]['nid']));
-            $items[$delta]['default node_name'] .= ' [nid:'. $items[$delta]['nid'] .']';
-          }
-        }
-        break;
+}
 
-      case 'form':
-        $form = array();
-        $form[$field['field_name']] = array('#tree' => TRUE);
+function nodereference_autocomplete_validate($element, &$form_state) {
+  $field = $element['#field'];
+  $field_key  = $element['#columns'][0];
+  $value = $element['#value'][$field_key];
 
-        if ($field['multiple']) {
-          $form[$field['field_name']]['#type'] = 'fieldset';
-          $form[$field['field_name']]['#description'] = t($field['widget']['description']);
-          $delta = 0;
-          foreach ($items as $item) {
-            if ($item['nid']) {
-              $form[$field['field_name']][$delta]['node_name'] = array(
-                '#type' => 'textfield',
-                '#title' => ($delta == 0) ? t($field['widget']['label']) : '',
-                '#autocomplete_path' => 'nodereference/autocomplete/'. $field['field_name'],
-                '#default_value' => isset($item['default node_name']) ? $item['default node_name'] : '',
-                '#required' => ($delta == 0) ? $field['required'] : FALSE,
-              );
-              $delta++;
-            }
-          }
-          foreach (range($delta, $delta + 2) as $delta) {
-            $form[$field['field_name']][$delta]['node_name'] = array(
-              '#type' => 'textfield',
-              '#title' => ($delta == 0) ? t($field['widget']['label']) : '',
-              '#autocomplete_path' => 'nodereference/autocomplete/'. $field['field_name'],
-              '#default_value' => '',
-              '#required' => ($delta == 0) ? $field['required'] : FALSE,
-            );
-          }
-        }
-        else {
-          $form[$field['field_name']][0]['node_name'] = array(
-            '#type' => 'textfield',
-            '#title' => t($field['widget']['label']),
-            '#autocomplete_path' => 'nodereference/autocomplete/'. $field['field_name'],
-            '#default_value' => isset($items[0]['default node_name']) ? $items[0]['default node_name'] : '',
-            '#required' => $field['required'],
-            '#description' => t($field['widget']['description']),
-          );
-        }
-        return $form;
+  if (!empty($value)) {
+    preg_match('/^(?:\s*|(.*) )?\[\s*nid\s*:\s*(\d+)\s*\]$/', $value, $matches);
+    if (!empty($matches)) {
+      // explicit nid
+      list(, $title, $nid) = $matches;
+      if (!empty($title) && ($n = node_load($nid)) && $title != $n->title) {
+        form_set_error($element[$field_key], t('%name : Title mismatch. Please check your selection.'), array('%name' => t($field['widget']['label'])));
+      }
+    }
+    else {
+      // no explicit nid
+      // TODO :
+      // the best thing would be to present the user with an additional form,
+      // allowing the user to choose between valid candidates with the same title
+      // ATM, we pick the first matching candidate...
+      $nids = _nodereference_potential_references($field, FALSE, $value, TRUE);
+      $nid = (!empty($nids)) ? array_shift(array_keys($nids)) : 0;
+    }
 
-      case 'validate':
-        foreach ($items as $delta => $item) {
-          $error_field = $field['field_name'] .']['. $delta .'][node_name';
-          if (!empty($item['node_name'])) {
-            preg_match('/^(?:\s*|(.*) )?\[\s*nid\s*:\s*(\d+)\s*\]$/', $item['node_name'], $matches);
-            if (!empty($matches)) {
-              // explicit nid
-              list(, $title, $nid) = $matches;
-              if (!empty($title) && ($n = node_load($nid)) && $title != $n->title) {
-                form_set_error($error_field, t('%name : Title mismatch. Please check your selection.'), array('%name' => t($field['widget']['label'])));
-              }
-            }
-          }
-        }
-        return;
-
-      case 'process form values':
-        foreach ($items as $delta => $item) {
-          $nid = 0;
-          if (!empty($item['node_name'])) {
-            preg_match('/^(?:\s*|(.*) )?\[\s*nid\s*:\s*(\d+)\s*\]$/', $item['node_name'], $matches);
-            if (!empty($matches)) {
-              // explicit nid
-              $nid = $matches[2];
-            }
-            else {
-              // no explicit nid
-              // TODO :
-              // the best thing would be to present the user with an additional form,
-              // allowing the user to choose between valid candidates with the same title
-              // ATM, we pick the first matching candidate...
-              $nids = _nodereference_potential_references($field, FALSE, $item['node_name'], TRUE);
-              $nid = (!empty($nids)) ? array_shift(array_keys($nids)) : 0;
-            }
-          }
-          // Remove the widget's data representation so it isn't saved.
-          // TODO : problem when saving an empty noderef field :
-          // conflicts with line $data[] = $item[$column]; in content.module
-          unset($items[$delta]['node_name']);
-          if (!empty($nid)) {
-            $items[$delta]['nid'] = $nid;
-            $items[$delta]['error_field'] = $field['field_name'] .']['. $delta .'][node_name';
-          }
-          elseif ($delta > 0) {
-            // Don't save empty fields when they're not the first value (keep '0' otherwise)
-            unset($items[$delta]);
-          }
-        }
-        break;
+    if (!empty($nid)) {
+      form_set_value($element[$field_key], $nid, $form_state);
+    }
+    elseif ($delta > 0) {
+      // Don't save empty fields when they're not the first value (keep '0' otherwise)
+      form_set_value($element[$field_key], 0, $form_state);
     }
   }
+
+  return $element;
+}
+
+/**
+ * Implementation of hook_allowed_values().
+ */
+function nodereference_allowed_values($field) {
+  $options = _nodereference_potential_references($field, TRUE);
+  foreach ($options as $key => $value) {
+    $options[$key] = _nodereference_item($field, $value);
+  }
+  if (!$field['required']) {
+    $options = array(0 => t('<none>')) + $options;
+  }
+  return $options;
 }
 
 /**

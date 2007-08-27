@@ -56,10 +56,10 @@ function fieldgroup_menu() {
 function fieldgroup_theme() {
   return array(
     'fieldgroup_simple' => array(
-      'arguments' => array('element'),
+      'arguments' => array('element' => NULL),
       ),
     'fieldgroup_display_overview_form' => array(
-      'arguments' => array('form'),
+      'arguments' => array('form' => NULL),
       ),
   );
 }

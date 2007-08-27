@@ -100,7 +100,6 @@ function content_admin_field_overview_form(&$form_state, $type_name) {
     // Limiting weight to < 10 will keep workflow and submit elements from being added to the overview table.
     // They're outside the weight range allowed for CCK fields, so won't interfere with field placement.
     // Currently the 'menu' fieldset is at weight -2, so add a special check for that one.
-
     if (is_array($value) && (isset($value['#weight']) || $key == 'body_filter') && $key != 'menu' && $value['#weight'] <= 10) {
 
       // if this item is a group, insert group info into table, then add all the group fields below it
@@ -806,8 +805,11 @@ function _content_admin_field(&$form_state, $type_name, $field_name) {
       // Make sure the default value is not a required field.
       $widget_field = $field;
       $widget_field['required'] = FALSE;
-      $function('prepare form values', $node, $widget_field, $default_value);
-      $form_element = $function('form', $node, $widget_field, $default_value);
+      $widget_form = array('#node' => $node);
+      $widget_items = array($field['field_name'] => $default_value);
+      $widget_form_state = array('values' => $widget_items);
+      $parents = array($field['field_name'], 0);
+      $form_element = $function($widget_form, $widget_form_state, $widget_field, $widget_items, 0, $parents);
     }
     else {
       // TODO : generate a series of textfields ?
@@ -900,7 +902,6 @@ function _content_admin_field_validate($form, &$form_state) {
   $widget_types = _content_widget_types();
   $widget_type = $widget_types[$field['widget']['type']];
 
-  module_invoke($widget_type['module'], 'widget_settings', 'validate', array_merge($field, $form_values));
   module_invoke($field_type['module'], 'field_settings', 'validate', array_merge($field, $form_values));
 
   // If content.module is handling the default value,
@@ -955,17 +956,10 @@ function _content_admin_field_validate($form, &$form_state) {
       $node[$form_values['field_name']] = $default_value;
       $field['required'] = FALSE;
       $field_function = $field_type['module'] .'_field';
-      $widget_function = $widget_type['module'] .'_widget';
 
-      // If default_value is created from php code, don't run it through widget processing.
-      // This way the default value code can directly create the correct array without being
-      // mangled by widget processing which sometimes requires an input array in a completely different format.
-      if (function_exists($widget_function) && !$is_code) {
-        $widget_function('validate', $node, $field, $default_value);
-        $widget_function('process form values', $node, $field, $default_value);
-        // The widget processing may have altered the value, save it to be sure.
-        form_set_value(array('#parents' => array('default_value')), $default_value, $form_state);
-      }
+      // Widget now does its own validation, should be no need
+      // to add anything for widget validation here.
+
       if (function_exists($field_function)) {
         $field_function('validate', $node, $field, $default_value, NULL, NULL);
       }
@@ -1032,6 +1026,7 @@ function _content_admin_field_submit($form, &$form_state) {
       $field['db_storage'] = CONTENT_DB_STORAGE_PER_CONTENT_TYPE;
     }
   }
+
   db_query("UPDATE {node_field} SET required = %d, multiple = %d, global_settings = '%s', db_storage = %d WHERE field_name = '%s'", $form_values['required'], $form_values['multiple'], serialize($field_settings), $field['db_storage'], $form_values['field_name']);
 
   drupal_set_message(t('Saved field %field.', array('%field' => $form_values['label'])));

@@ -6,13 +6,41 @@
  * Defines numeric field types.
  */
 
+function number_theme() {
+  return array(
+    'number' => array('arguments' => array('element' => NULL)),
+  );
+}
+
 /**
  * Implementation of hook_field_info().
+ *
+ * Here we indicate that the content module will use its default
+ * handling for the view of these fields.
+ *
+ * Callbacks can be omitted if default handing is used.
+ * They're included here just so this module can be used
+ * as an example for custom modules that might do things
+ * differently.
  */
 function number_field_info() {
   return array(
-    'number_integer' => array('label' => 'Integer'),
-    'number_decimal' => array('label' => 'Decimal'),
+    'number_integer' => array(
+      'label' => 'Integer',
+      'callbacks' => array(
+        'view' => CONTENT_CALLBACK_DEFAULT,
+        'tables' => CONTENT_CALLBACK_DEFAULT,
+        'arguments' => CONTENT_CALLBACK_DEFAULT,
+        ),
+      ),
+    'number_decimal' => array(
+      'label' => 'Decimal',
+      'callbacks' => array(
+        'view' => CONTENT_CALLBACK_DEFAULT,
+        'tables' => CONTENT_CALLBACK_DEFAULT,
+        'arguments' => CONTENT_CALLBACK_DEFAULT,
+        ),
+      ),
   );
 }
 
@@ -80,7 +108,7 @@ function number_field_settings($op, $field) {
       break;
 
     case 'save':
-      return array('prefix', 'suffix', 'append_position', 'min', 'max', 'allowed_values', 'allowed_values_php');
+      return array('prefix', 'suffix', 'min', 'max', 'allowed_values', 'allowed_values_php');
 
     case 'database columns':
       if ($field['type'] == 'number_integer') {
@@ -95,7 +123,7 @@ function number_field_settings($op, $field) {
       }
 
     case 'filters':
-      $allowed_values = number_allowed_values($field);
+      $allowed_values = content_allowed_values($field);
       if (count($allowed_values)) {
         return array(
           'default' => array(
@@ -123,8 +151,7 @@ function number_field_settings($op, $field) {
 function number_field($op, &$node, $field, &$items, $teaser, $page) {
   switch ($op) {
     case 'validate':
-      $allowed_values = number_allowed_values($field);
-
+      $allowed_values = content_allowed_values($field);
       if (is_array($items)) {
         foreach ($items as $delta => $item) {
           $error_field = $field['field_name'] .']['. $delta .'][value';
@@ -138,6 +165,18 @@ function number_field($op, &$node, $field, &$items, $teaser, $page) {
             if (count($allowed_values) && !array_key_exists($item['value'], $allowed_values)) {
               form_set_error($error_field, t('Illegal value for %name.', array('%name' => t($field['widget']['label']))));
             }
+          }
+        }
+      }
+      break;
+
+    // Don't save empty items.
+    case 'presave':
+      if (is_array($items)) {
+        foreach ($items as $delta => $item) {
+          if ($delta > 0 && empty($item)) {
+            unset($items[$delta]);
+            unset($node->{$field['field_name'][$delta]});
           }
         }
       }
@@ -179,7 +218,7 @@ function number_field_formatter($field, $item, $formatter, $node) {
   if ($formatter == 'unformatted') {
     return $item['value'];
   }
-  $allowed_values = number_allowed_values($field);
+  $allowed_values = content_allowed_values($field);
   if (!empty($allowed_values) && isset($allowed_values[$item['value']])) {
     if ($allowed_values[$item['value']] != $item['value']) {
       return $allowed_values[$item['value']];
@@ -242,137 +281,170 @@ function number_field_formatter($field, $item, $formatter, $node) {
 
 /**
  * Implementation of hook_widget_info().
+ *
+ * Here we indicate that the content module will handle
+ * the default value and multiple values for these widgets.
+ *
+ * Callbacks can be omitted if default handing is used.
+ * They're included here just so this module can be used
+ * as an example for custom modules that might do things
+ * differently.
  */
 function number_widget_info() {
   return array(
     'number' => array(
       'label' => 'Text Field',
       'field types' => array('number_integer', 'number_decimal'),
+      'callbacks' => array(
+        'default value' => CONTENT_CALLBACK_DEFAULT,
+        'multiple values' => CONTENT_CALLBACK_DEFAULT,
+        ),
+      'callback arguments' => array(
+        'default value' => 'content_default_value',
+        ),
+    ),
+  );
+}
+
+/**
+ * Implementation of FAPI hook_elements().
+ *
+ * Any FAPI callbacks needed for individual widgets can be declared here,
+ * and the element will be passed to those callbacks for processing.
+ *
+ * Drupal will automatically theme the element using a theme with
+ * the same name as the hook_elements key.
+ *
+ * Includes a regex to check for valid values as an additional parameter
+ * the validator can use. The regex can be overridden if necessary.
+ */
+function number_elements() {
+  return array(
+    'number' => array(
+      '#input' => TRUE,
+      '#columns' => array('value'), '#delta' => 0,
+      '#process' => array('number_process'),
+      '#element_validate' => array('number_validate'),
     ),
   );
 }
 
 /**
  * Implementation of hook_widget().
+ *
+ * Attach a single form element to the form. It will be built out and
+ * validated in the callback(s) listed in hook_elements. We build it
+ * out in the callbacks rather than here in hook_widget so it can be
+ * plugged into any module that can provide it with valid
+ * $field information.
+ *
+ * Content module will set the weight, field name and delta values
+ * for each form element. This is a change from earlier CCK versions
+ * where the widget managed its own multiple values.
+ *
+ * If there are multiple values for this field, the content module will
+ * call this function as many times as needed.
+ *
+ * @param $form
+ *   the entire form array, $form['#node'] holds node information
+ * @param $form_state
+ *   the form_state, $form_state['values'] holds the form values.
+ * @param $field
+ *   the field array
+ * @param $delta
+ *   the order of this item in the array of subelements (0, 1, 2, etc)
+ *
+ * @return
+ *   the form item for a single element for this field
  */
-function number_widget($op, &$node, $field, &$items) {
-  switch ($op) {
-    case 'form':
-      $form = array();
-      $prefixes = array();
-      $suffixes = array();
-      if (!empty($field['prefix'])) {
-        $prefixes = explode('|', $field['prefix']);
-      }
-      if (!empty($field['suffix'])) {
-        $suffixes = explode('|', $field['suffix']);
-      }
-      // We take the plural form (if any) for forms.
-      $prefix = array_pop($prefixes);
-      $suffix = array_pop($suffixes);
+function number_widget(&$form, &$form_state, $field, $items, $delta = 0) {
 
-      $form[$field['field_name']] = array('#tree' => TRUE);
+  // No hard-coding of column names so this can be used by any field.
+  // This is a change from earlier versions which hard-coded 'value'.
+  $db_info = content_database_info($field);
+  $columns = array_keys($db_info['columns']);
 
-      if ($field['multiple']) {
-        $form[$field['field_name']]['#type'] = 'fieldset';
-        $form[$field['field_name']]['#description'] = t($field['widget']['description']);
-        $delta = 0;
-        foreach ($items as $data) {
-          if (isset($data['value'])) {
-            $form[$field['field_name']][$delta]['value'] = array(
-              '#type' => 'textfield',
-              '#title' => ($delta == 0) ? t($field['widget']['label']) : '',
-              '#default_value' => $data['value'],
-              '#required' => ($delta == 0) ? $field['required'] : FALSE,
-              '#size' => 20,
-              '#maxlength' => 11,
-              '#attributes' => array('class' => 'number'),
-              '#field_prefix' => $prefix,
-              '#field_suffix' => $suffix,
-            );
-            $delta++;
-          }
-        }
-        foreach (range($delta, $delta + 2) as $delta) {
-          $form[$field['field_name']][$delta]['value'] = array(
-            '#type' => 'textfield',
-            '#title' => ($delta == 0) ? t($field['widget']['label']) : '',
-            '#default_value' => '',
-            '#required' => ($delta == 0) ? $field['required'] : FALSE,
-            '#size' => 20,
-            '#maxlength' => 11,
-            '#attributes' => array('class' => 'number'),
-            '#field_prefix' => $prefix,
-            '#field_suffix' => $suffix,
-          );
-        }
-      }
-      else {
-        $form[$field['field_name']][0]['value'] = array(
-          '#type' => 'textfield',
-          '#title' => t($field['widget']['label']),
-          '#default_value' => isset($items[0]['value']) ? $items[0]['value'] : '',
-          '#required' => $field['required'],
-          '#description' => t($field['widget']['description']),
-          '#size' => 20,
-          '#maxlength' => 11,
-          '#attributes' => array('class' => 'number'),
-          '#field_prefix' => $prefix,
-          '#field_suffix' => $suffix,
-        );
-      }
-      return $form;
+  $element = array(
+    '#type' => $field['widget']['type'],
+    '#field' => $field,
+    '#columns' => $columns,
+    '#delta' => $delta,
+    '#weight' => t($field['widget']['weight']),
+    '#default_value' => isset($items[$delta]) ? $items[$delta] : NULL,
+  );
+  return $element;
+}
 
-    case 'process form values':
-      // Don't save empty fields.
-      foreach ($items as $delta => $item) {
-        $items[$delta]['value'] = preg_replace('@[^-0-9\.]@', '', $items[$delta]['value']);
-      }
-      if ($field['multiple']) {
-        foreach ($items as $delta => $item) {
-          if ($item['value'] == '' && $delta > 0) {
-            unset($items[$delta]);
-          }
-        }
-      }
-      break;
+/**
+ * Process an individual element.
+ *
+ * Build the form element. When creating a form using FAPI #process,
+ * note that $element['#value'] is already set.
+ *
+ */
+function number_process($element, &$form_state) {
+  $field = $element['#field'];
+  $field_key  = $element['#columns'][0];
+
+  $default = $field['required'] || empty($delta) ? 0 : NULL;
+
+  $element[$field_key] = array(
+    '#type' => 'textfield',
+    '#title' => t($field['widget']['label']),
+    '#description' => t($field['widget']['description']),
+    '#required' => empty($delta) ? $field['required'] : FALSE,
+    '#default_value' => isset($element['#value'][$field_key]) ? $element['#value'][$field_key] : $default,
+    '#size' => 20,
+    '#maxlength' => 11,
+    '#attributes' => array('class' => 'number'),
+  );
+
+  $prefixes = array();
+  $suffixes = array();
+  if (!empty($field['prefix'])) {
+    $prefixes = explode('|', $field['prefix']);
+    $element[$field_key]['#field_prefix'] = array_pop($prefixes);
+  }
+  if (!empty($field['suffix'])) {
+    $suffixes = explode('|', $field['suffix']);
+    $element[$field_key]['#field_suffix'] = array_pop($suffixes);
+  }
+
+  return $element;
+}
+
+/**
+ * FAPI validation of an individual number element.
+ *
+ * @TODO come back here once things are working and find a way
+ *   to validate differently for integers, decimals, decimal
+ *   separators other than the period, etc.
+ */
+function number_validate($element, &$form_state) {
+  $field_key = $element['#columns'][0];
+  $value = $element['#value'][$field_key];
+  if (($element[$field_key]['#required'] || !empty($value))) {
+    $start = $value;
+    $value = preg_replace('@[^-0-9\.]@', '', $value);
+    if ($start != $value) {
+      // No reason to make this an error, just need to inform user what has changed.
+      form_set_message(t('Only 0-9 and decimals are allowed in %field. %start was changed to %value.', array(
+        '%field' => t($element[$field_key]['#title']), '%start' => $start, '%value' => $value)));
+    }
+    form_set_value($element[$field_key], $value, $form_state);
   }
 }
 
 /**
- *  Create an array of the allowed values for this field
+ * FAPI theme for an individual number element.
+ *
+ * The textfield is already rendered by the textfield
+ * theme and the html output lives in $element['#children'].
+ * Override this theme to make custom changes to the output.
+ *
+ * $element['#field'] contains field information
+ * $element['#delta]  is the position of this element in the group
  */
-function number_allowed_values($field) {
-  static $allowed_values;
-
-  if (isset($allowed_values[$field['field_name']])) {
-    return $allowed_values[$field['field_name']];
-  }
-
-  $allowed_values[$field['field_name']] = array();
-
-  if (isset($field['allowed_values_php'])) {
-    ob_start();
-    $result = eval($field['allowed_values_php']);
-    if (is_array($result)) {
-      $allowed_values[$field['field_name']] = $result;
-    }
-    ob_end_clean();
-  }
-
-  if (empty($allowed_values[$field['field_name']]) && isset($field['allowed_values'])) {
-    $list = explode("\n", $field['allowed_values']);
-    $list = array_map('trim', $list);
-    $list = array_filter($list, 'strlen');
-    foreach ($list as $opt) {
-      if (strpos($opt, '|') !== FALSE) {
-        list($key, $value) = explode('|', $opt);
-        $allowed_values[$field['field_name']][$key] = $value ? $value : $key;
-      }
-      else {
-        $allowed_values[$field['field_name']][$opt] = $opt;
-      }
-    }
-  }
-  return $allowed_values[$field['field_name']];
+function theme_number($element) {
+  return $element['#children'];
 }

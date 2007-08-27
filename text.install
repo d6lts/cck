@@ -188,3 +188,20 @@ function text_update_5() {
 
   return $ret;
 }
+
+/**
+ * Rename widgets to match hook_elements values.
+ */
+function text_update_6000() {
+  $ret = array();
+  $fields = content_fields();
+  foreach ($fields as $field) {
+    if ($field['widget']['type'] == 'text' && $field['widget']['rows'] > 1) {
+      $result = db_query("UPDATE {node_field_instance} SET widget_type = 'text_textarea' where field_name = '". $field_name ."'");
+    }
+    elseif ($field['widget']['type'] == 'text') {
+      $result = db_query("UPDATE {node_field_instance} SET widget_type = 'text_textfield' where field_name = '". $field_name ."'");
+    }
+  }
+  return $ret;
+}

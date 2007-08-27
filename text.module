@@ -7,12 +7,41 @@
  */
 
 /**
+ * Implementation of hook_theme().
+ */
+function text_theme() {
+  return array(
+    'text_textarea' => array(
+      'arguments' => array('element' => NULL),
+    ),
+    'text_textfield' => array(
+      'arguments' => array('element' => NULL),
+    ),
+  );
+}
+
+/**
  * Implementation of hook_field_info().
+ *
+ * Here we indicate that the content module will use its default
+ * handling for the view of this field.
+ *
+ * Callbacks can be omitted if default handing is used.
+ * They're included here just so this module can be used
+ * as an example for custom modules that might do things
+ * differently.
  */
 function text_field_info() {
   return array(
-    'text' => array('label' => 'Text'),
-  );
+    'text' => array(
+      'label' => 'Text',
+      'callbacks' => array(
+        'view' => CONTENT_CALLBACK_DEFAULT,
+        'tables' => CONTENT_CALLBACK_DEFAULT,
+        'arguments' => CONTENT_CALLBACK_DEFAULT,
+        ),
+      ),
+    );
 }
 
 /**
@@ -75,7 +104,7 @@ function text_field_settings($op, $field) {
       return $columns;
 
     case 'filters':
-      $allowed_values = text_allowed_values($field);
+      $allowed_values = content_allowed_values($field);
        if (count($allowed_values)) {
          return array(
            'default' => array(
@@ -104,8 +133,7 @@ function text_field_settings($op, $field) {
 function text_field($op, &$node, $field, &$items, $teaser, $page) {
   switch ($op) {
     case 'validate':
-      $allowed_values = text_allowed_values($field);
-
+      $allowed_values = content_allowed_values($field);
       if (is_array($items)) {
         foreach ($items as $delta => $item) {
           $error_field = $field['field_name'] .']['. $delta .'][value';
@@ -121,6 +149,18 @@ function text_field($op, &$node, $field, &$items, $teaser, $page) {
           $error_field = $field['field_name'] .']['. $delta .'][value';
           if (strlen($data['value']) > $field['max_length']) {
             form_set_error($error_field, t('%label is longer than %max characters.', array('%label' => $field['widget']['label'], '%max' => $field['max_length'])));
+          }
+        }
+      }
+      break;
+
+    // Don't save empty items.
+    case 'presave':
+      if (is_array($items)) {
+        foreach ($items as $delta => $item) {
+          if ($delta > 0 && empty($item)) {
+            unset($items[$delta]);
+            unset($node->{$field['field_name'][$delta]});
           }
         }
       }
@@ -159,7 +199,7 @@ function text_field_formatter($field, $item, $formatter, $node) {
     return '';
   }
 
-  $allowed_values = number_allowed_values($field);
+  $allowed_values = content_allowed_values($field);
   if (!empty($allowed_values) && isset($allowed_values[$item['value']])) {
     return $allowed_values[$item['value']];
   }
@@ -189,14 +229,69 @@ function text_field_formatter($field, $item, $formatter, $node) {
 
 /**
  * Implementation of hook_widget_info().
+ *
+ * Here we indicate that the content module will handle
+ * the default value and multiple values for these widgets.
+ *
+ * Callbacks can be omitted if default handing is used.
+ * They're included here just so this module can be used
+ * as an example for custom modules that might do things
+ * differently.
  */
 function text_widget_info() {
   return array(
-    'text' => array(
+    'text_textfield' => array(
       'label' => 'Text Field',
       'field types' => array('text'),
+      'callbacks' => array(
+        'default value' => CONTENT_CALLBACK_DEFAULT,
+        'multiple values' => CONTENT_CALLBACK_DEFAULT,
+        ),
+      'callback arguments' => array(
+        'default value' => 'content_default_value',
+        ),
+    ),
+    'text_textarea' => array(
+      'label' => 'Text Area',
+      'field types' => array('text'),
+      'callbacks' => array(
+        'default value' => CONTENT_CALLBACK_DEFAULT,
+        'multiple values' => CONTENT_CALLBACK_DEFAULT,
+        ),
+      'callback arguments' => array(
+        'default value' => 'content_default_value',
+        ),
     ),
   );
+}
+
+/**
+ * Implementation of FAPI hook_elements().
+ *
+ * Any FAPI callbacks needed for individual widgets can be declared here,
+ * and the element will be passed to those callbacks for processing.
+ *
+ * Drupal will automatically theme the element using a theme with
+ * the same name as the hook_elements key.
+ *
+ * Autocomplete_path is not used by text_widget but other widgets can use it
+ * (see nodereference and userreference).
+ */
+function text_elements() {
+  return array(
+    'text_textfield' => array(
+      '#input' => TRUE, '#field' => array(),
+      '#columns' => array('value'), '#delta' => 0,
+      '#process' => array('text_textfield_process'),
+      '#autocomplete_path' => '',
+      ),
+    'text_textarea' => array(
+      '#input' => TRUE, '#field' => array(),
+      '#columns' => array('value', 'format'), '#delta' => 0,
+      '#process' => array('text_textarea_process'),
+      '#filter_value' => FILTER_FORMAT_DEFAULT,
+      ),
+    );
 }
 
 /**
@@ -206,12 +301,17 @@ function text_widget_settings($op, $widget) {
   switch ($op) {
     case 'form':
       $form = array();
-      $form['rows'] = array(
-        '#type' => 'textfield',
-        '#title' => t('Rows'),
-        '#default_value' => isset($widget['rows']) ? $widget['rows'] : 1,
-        '#required' => TRUE,
-      );
+      if ($widget['type'] == 'text_textfield') {
+        $form['rows'] = array('#type' => 'hidden', '#value' => 1);
+      }
+      else {
+        $form['rows'] = array(
+          '#type' => 'textfield',
+          '#title' => t('Rows'),
+          '#default_value' => isset($widget['rows']) ? $widget['rows'] : 5,
+          '#required' => TRUE,
+          );
+      }
       return $form;
 
     case 'validate':
@@ -227,150 +327,119 @@ function text_widget_settings($op, $widget) {
 
 /**
  * Implementation of hook_widget().
+ *
+ * Attach a single form element to the form. It will be built out and
+ * validated in the callback(s) listed in hook_elements. We build it
+ * out in the callbacks rather than here in hook_widget so it can be
+ * plugged into any module that can provide it with valid
+ * $field information.
+ *
+ * Content module will set the weight, field name and delta values
+ * for each form element. This is a change from earlier CCK versions
+ * where the widget managed its own multiple values.
+ *
+ * If there are multiple values for this field, the content module will
+ * call this function as many times as needed.
+ *
+ * @param $form
+ *   the entire form array, $form['#node'] holds node information
+ * @param $form_state
+ *   the form_state, $form_state['values'][$field['field_name']]
+ *   holds the field's form values.
+ * @param $field
+ *   the field array
+ * @param $items
+ *   array of default values for this field
+ * @param $delta
+ *   the order of this item in the array of subelements (0, 1, 2, etc)
+ *
+ * @return
+ *   the form item for a single element for this field
  */
-function text_widget($op, &$node, $field, &$items) {
-  switch ($op) {
-    case 'form':
-      $form = array();
+function text_widget(&$form, &$form_state, $field, $items, $delta = 0) {
 
-      $form[$field['field_name']] = array('#tree' => TRUE);
+  // No hard-coding of column names so this can be used by any field.
+  // This is a change from earlier versions which hard-coded 'value'.
+  $db_info = content_database_info($field);
+  $columns = array_keys($db_info['columns']);
 
-      $rows = isset($field['widget']['rows']) ? $field['widget']['rows'] : 1;
-      if ($field['multiple']) {
-        $form[$field['field_name']]['#type'] = 'fieldset';
-        $form[$field['field_name']]['#description'] = t($field['widget']['description']);
-        $delta = 0;
-        foreach ($items as $data) {
-          if ($data['value']) {
-            if ($rows == 1) {
-              $form[$field['field_name']][$delta]['value'] = array(
-                '#type' => 'textfield',
-                '#title' => ($delta == 0) ? t($field['widget']['label']) : '',
-                '#default_value' => $data['value'],
-                '#required' => ($delta == 0) ? $field['required'] : FALSE,
-                '#maxlength' => !empty($field['max_length']) ? $field['max_length'] : NULL,
-                '#weight' => $field['widget']['weight'],
-              );
-            }
-            else {
-              $form[$field['field_name']][$delta]['value'] = array(
-                '#type' => 'textarea',
-                '#title' => ($delta == 0) ? t($field['widget']['label']) : '',
-                '#default_value' => $data['value'],
-                '#required' => ($delta == 0) ? $field['required'] : FALSE,
-                '#rows' => $rows,
-                '#weight' => $field['widget']['weight'],
-              );
-            }
-            if (!empty($field['text_processing'])) {
-              $format = $data['format'];
-              $form[$field['field_name']][$delta]['format'] = filter_form($data['format'], $form[$field['field_name']][$delta]['value']['#weight'] + 1, array($field['field_name'], $delta, 'format'));
-            }
-            $delta++;
-          }
-        }
-        foreach (range($delta, $delta + 2) as $delta) {
-          if ($rows == 1) {
-            $form[$field['field_name']][$delta]['value'] = array(
-              '#type' => 'textfield',
-              '#title' => ($delta == 0) ? t($field['widget']['label']) : '',
-              '#default_value' => '',
-              '#required' => ($delta == 0) ? $field['required'] : FALSE,
-              '#maxlength' => !empty($field['max_length']) ? $field['max_length'] : NULL,
-              '#weight' => $field['widget']['weight'],
-            );
-          }
-          else {
-            $form[$field['field_name']][$delta]['value'] = array(
-              '#type' => 'textarea',
-              '#title' => ($delta == 0) ? t($field['widget']['label']) : '',
-              '#default_value' => '',
-              '#required' => ($delta == 0) ? $field['required'] : FALSE,
-              '#rows' => $rows,
-              '#weight' => $field['widget']['weight'],
-            );
-          }
-          if (!empty($field['text_processing'])) {
-            $format = FILTER_FORMAT_DEFAULT;
-            $form[$field['field_name']][$delta]['format'] = filter_form($format, $form[$field['field_name']][$delta]['value']['#weight'] + 1, array($field['field_name'], $delta, 'format'));
-          }
-        }
-      }
-      else {
-        if ($rows == 1) {
-          $form[$field['field_name']][0]['value'] = array(
-            '#type' => 'textfield',
-            '#title' => t($field['widget']['label']),
-            '#default_value' => isset($items[0]['value']) ? $items[0]['value'] : '',
-            '#required' => $field['required'],
-            '#description' => t($field['widget']['description']),
-            '#maxlength' => !empty($field['max_length']) ? $field['max_length'] : NULL,
-            '#weight' => $field['widget']['weight'],
-          );
-        }
-        else {
-          $form[$field['field_name']][0]['value'] = array(
-            '#type' => 'textarea',
-            '#title' => t($field['widget']['label']),
-            '#default_value' => isset($items[0]['value']) ? $items[0]['value'] : '',
-            '#required' => $field['required'],
-            '#rows' => $rows,
-            '#description' => t($field['widget']['description']),
-            '#weight' => $field['widget']['weight'],
-          );
-        }
-        if (!empty($field['text_processing'])) {
-          $format = isset($items[0]['format']) ? $items[0]['format'] : FILTER_FORMAT_DEFAULT;
-          $form[$field['field_name']][0]['format'] = filter_form($format , $form[$field['field_name']][0]['value']['#weight'] + 1, array($field['field_name'], 0, 'format'));
-        }
-      }
-      return $form;
-
-    case 'process form values':
-      // Don't save empty fields except the first value
-      foreach ($items as $delta => $item) {
-        if ($item['value'] == '' && $delta > 0) {
-          unset($items[$delta]);
-        }
-      }
-      break;
-  }
+  $element = array(
+    '#type' => $field['widget']['type'],
+    '#field' => $field,
+    '#columns' => $columns,
+    '#delta' => $delta,
+    '#weight' => t($field['widget']['weight']),
+    '#default_value' => isset($items[$delta]) ? $items[$delta] : '',
+  );
+  return $element;
 }
 
 /**
- *  Create an array of the allowed values for this field
+ * Process an individual element.
+ *
+ * Build the form element. When creating a form using FAPI #process,
+ * note that $element['#value'] is already set.
+ *
  */
-function text_allowed_values($field) {
-  static $allowed_values;
+function text_textfield_process($element, &$form_state) {
+  $field = $element['#field'];
+  $field_key  = $element['#columns'][0];
 
-  if (isset($allowed_values[$field['field_name']])) {
-    return $allowed_values[$field['field_name']];
-  }
+  $element[$field_key] = array(
+    '#type' => 'textfield',
+    '#title' => t($field['widget']['label']),
+    '#description' => t($field['widget']['description']),
+    '#required' => empty($delta) ? $field['required'] : FALSE,
+    '#default_value' => isset($element['#value'][$field_key]) ? $element['#value'][$field_key] : NULL,
+    '#autocomplete_path' => $element['#autocomplete_path'],
+  );
+  return $element;
+}
 
-  $allowed_values[$field['field_name']] = array();
+/**
+ * Process an individual element.
+ *
+ * Build the form element. When creating a form using FAPI #process,
+ * note that $element['#value'] is already set.
+ *
+ */
+function text_textarea_process($element, &$form_state) {
+  $field = $element['#field'];
+  $field_key   = $element['#columns'][0];
+  $filter_key  = $element['#columns'][1];
 
-  if (isset($field['allowed_values_php'])) {
-    ob_start();
-    $result = eval($field['allowed_values_php']);
-    if (is_array($result)) {
-      $allowed_values[$field['field_name']] = $result;
-    }
-    ob_end_clean();
-  }
+  $element[$field_key] = array(
+    '#type' => 'textarea',
+    '#title' => t($field['widget']['label']),
+    '#description' => t($field['widget']['description']),
+    '#required' => empty($delta) ? $field['required'] : FALSE,
+    '#default_value' => isset($element['#value'][$field_key]) ? $element['#value'][$field_key] : NULL,
+    '#rows' => !empty($field['widget']['rows']) ? $field['widget']['rows'] : 10,
+    '#weight' => 0,
+  );
 
-  if (empty($allowed_values[$field['field_name']]) && isset($field['allowed_values'])) {
-    $list = explode("\n", $field['allowed_values']);
-    $list = array_map('trim', $list);
-    $list = array_filter($list, 'strlen');
-    foreach ($list as $opt) {
-      if (strpos($opt, '|') !== FALSE) {
-        list($key, $value) = explode('|', $opt);
-        $allowed_values[$field['field_name']][$key] = $value ? $value : $key;
-      }
-      else {
-        $allowed_values[$field['field_name']][$opt] = $opt;
-      }
-    }
-  }
-  return $allowed_values[$field['field_name']];
+  $format = $element['#value'][$filter_key];
+  $parents = array_merge($element['#parents'] , array($filter_key));
+  $element[$filter_key] = filter_form($format, $element[$field_key]['#weight'] + 1, $parents);
+
+  return $element;
+}
+
+/**
+ * FAPI theme for an individual text elements.
+ *
+ * The textfield or textarea is already rendered by the
+ * textfield or textarea themes and the html output
+ * lives in $element['#children']. Override this theme to
+ * make custom changes to the output.
+ *
+ * $element['#field'] contains field information
+ * $element['#delta]  is the position of this element in the group
+ */
+function theme_text_textfield($element) {
+  return $element['#children'];
+}
+
+function theme_text_textarea($element) {
+  return $element['#children'];
 }

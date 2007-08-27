@@ -7,11 +7,35 @@
  */
 
 /**
+ * Implementation of hook_menu().
+ */
+function userreference_menu() {
+  $items = array();
+  $items['user/autocomplete'] = array(
+    'title' => t('User reference autocomplete'),
+    'page callback' => 'userreference_autocomplete',
+    'access arguments' => array('access content'),
+    'type' => MENU_CALLBACK
+  );
+  return $items;
+}
+
+/**
  * Implementation of hook_field_info().
+ *
+ * Here we indicate that the content module will use its default
+ * handling for the view of this field.
  */
 function userreference_field_info() {
   return array(
-    'userreference' => array('label' => 'User Reference'),
+    'userreference' => array(
+      'label' => 'User Reference',
+      'callbacks' => array(
+        'view' => CONTENT_CALLBACK_DEFAULT,
+        'tables' => CONTENT_CALLBACK_DEFAULT,
+        'arguments' => CONTENT_CALLBACK_DEFAULT,
+        ),
+      ),
   );
 }
 
@@ -68,6 +92,18 @@ function userreference_field($op, &$node, $field, &$items, $teaser, $page) {
         }
       }
       return;
+
+    // Don't save empty items.
+    case 'presave':
+      if (is_array($items)) {
+        foreach ($items as $delta => $item) {
+          if ($delta > 0 && empty($item)) {
+            unset($items[$delta]);
+            unset($node->{$field['field_name'][$delta]});
+          }
+        }
+      }
+      break;
   }
 }
 
@@ -110,146 +146,140 @@ function userreference_field_formatter($field, $item, $formatter, $node) {
 
 /**
  * Implementation of hook_widget_info().
+ *
+ * We need custom handling of multiple values for userreference_select
+ * because we need to combine them into a options list rather than
+ * display multiple elements.
+ *
+ * We will use the content module's default handling for default value.
+ *
+ * Callbacks can be omitted if default handing is used.
+ * They're included here just so this module can be used
+ * as an example for custom modules that might do things
+ * differently.
  */
 function userreference_widget_info() {
   return array(
     'userreference_select' => array(
       'label' => 'Select List',
       'field types' => array('userreference'),
+      'callbacks' => array(
+        'default value' => CONTENT_CALLBACK_DEFAULT,
+        'multiple values' => CONTENT_CALLBACK_CUSTOM,
+        ),
+      'callback arguments' => array(
+        'default value' => 'content_default_value',
+        ),
     ),
     'userreference_autocomplete' => array(
       'label' => 'Autocomplete Text Field',
       'field types' => array('userreference'),
+      'callbacks' => array(
+        'default value' => CONTENT_CALLBACK_DEFAULT,
+        'multiple values' => CONTENT_CALLBACK_DEFAULT,
+        ),
+      'callback arguments' => array(
+        'default value' => 'content_default_value',
+        ),
     ),
   );
 }
 
 /**
  * Implementation of hook_widget().
+ *
+ * Attach a single form element to the form. It will be built out and
+ * validated in the callback(s) listed in hook_elements. We build it
+ * out in the callbacks rather than here in hook_widget so it can be
+ * plugged into any module that can provide it with valid
+ * $field information.
+ *
+ * Content module will set the weight, field name and delta values
+ * for each form element. This is a change from earlier CCK versions
+ * where the widget managed its own multiple values.
+ *
+ * If there are multiple values for this field, the content module will
+ * call this function as many times as needed.
+ *
+ * @param $form
+ *   the entire form array, $form['#node'] holds node information
+ * @param $form_state
+ *   the form_state, $form_state['values'][$field['field_name']]
+ *   holds the field's form values.
+ * @param $field
+ *   the field array
+ * @param $items
+ *   array of default values for this field
+ * @param $delta
+ *   the order of this item in the array of subelements (0, 1, 2, etc)
+ *
+ * @return
+ *   the form item for a single element for this field
  */
-function userreference_widget($op, &$node, $field, &$items) {
-  if ($field['widget']['type'] == 'userreference_select') {
-    switch ($op) {
-      case 'prepare form values':
-        $items_transposed = content_transpose_array_rows_cols($items);
-        // get rid of null values
-        $items['default uids'] = isset($items_transposed['uid']) ? array_filter($items_transposed['uid']) : array();
-        break;
+function userreference_widget(&$form, &$form_state, $field, $items, $delta = 0) {
 
-      case 'form':
-        $form = array();
+  // No hard-coding of column names so this can be used by any field.
+  // This is a change from earlier versions which hard-coded 'uid'.
+  $db_info = content_database_info($field);
+  $columns = array_keys($db_info['columns']);
 
-        $options = _userreference_potential_references($field);
-        if (!$field['required']) {
-          $options = array('none' => t('<none>')) + $options;
-        }
-        if (empty($items['default uids'])) {
-          $items['default uids'][] = 'none';
-        }
-        $form[$field['field_name']] = array('#tree' => TRUE);
-        $form[$field['field_name']]['uids'] = array(
-          '#type' => 'select',
-          '#title' => t($field['widget']['label']),
-          '#default_value' => $items['default uids'],
-          '#multiple' => $field['multiple'],
-          '#size' => $field['multiple'] ? min(count($options), 6) : 0,
-          '#options' => $options,
-          '#required' => $field['required'],
-          '#description' => t($field['widget']['description']),
-        );
+  switch ($field['widget']['type']) {
+    case 'userreference_select':
+      // The userreference_select widget doesn't need to create its own
+      // element, it can use the optionwidgets_select element.
+      $element = array(
+        '#type' => 'optionwidgets_select',
+        '#field' => $field,
+        '#columns' => $columns,
+        '#delta' => $delta,
+        '#weight' => t($field['widget']['weight']),
+        '#default_value' => $items,
+      );
+      break;
 
-        return $form;
+    case 'userreference_autocomplete':
+      // The userreference autocomplete widget doesn't need to create its own
+      // element, it can use the text_textfield element and add an autocomplete
+      // path and some extra processing to it.
+      $element = array(
+        '#type' => 'text_textfield',
+        '#field' => $field,
+        '#columns' => $columns,
+        '#delta' => $delta,
+        '#weight' => t($field['widget']['weight']),
+        '#default_value' => isset($items[$delta]) ? $items[$delta] : NULL,
+        '#value_callback' => 'userreference_autocomplete_value',
+        '#autocomplete_path' => 'user/autocomplete/'. $field['field_name'],
+      );
+      break;
+  }
+  return $element;
+}
 
-      case 'process form values':
-        if ($field['multiple']) {
-          // drop the 'none' option
-          unset($items['uids']['none']);
-          if (!empty($items['uids'])) {
-            $items = array_values(content_transpose_array_rows_cols(array('uid' => $items['uids'])));
-          }
-          else {
-            $items[0]['uid'] = '';
-          }
-        }
-        else {
-          $items[0]['uid'] = ($items['uids'] != 'none') ? $items['uids'] : '';
-        }
-        // Remove the widget's data representation so it isn't saved.
-        unset($items['uids']);
-        foreach ($items as $delta => $item) {
-          $items[$delta]['error_field'] =  $field['field_name'] .'][uids';
-        }
+/**
+ * Value for a userreference autocomplete element.
+ *
+ * Substitute in the user name for the user uid.
+ */
+function userreference_autocomplete_value($element, $edit = FALSE) {
+  if (func_num_args() == 1) {
+    if (!empty($element['#default_value'][$field_key])) {
+      $field_key  = $element['#columns'][0];
+      $value = db_result(db_query("SELECT name FROM {users} WHERE uid = '%d'", $element['#default_value'][$field_key]));
+      return array($field_key => $value);
     }
   }
-  else {
-    switch ($op) {
-      case 'prepare form values':
-        foreach ($items as $delta => $item) {
-          if (!empty($items[$delta]['uid'])) {
-            $items[$delta]['default user_name'] = db_result(db_query("SELECT name FROM {users} WHERE uid = '%d'", $items[$delta]['uid']));
-          }
-        }
-        break;
+}
 
-      case 'form':
-        $form = array();
-        $form[$field['field_name']] = array('#tree' => TRUE);
-
-        if ($field['multiple']) {
-          $form[$field['field_name']]['#type'] = 'fieldset';
-          $form[$field['field_name']]['#description'] = t($field['widget']['description']);
-          $delta = 0;
-          foreach ($items as $item) {
-            if ($item['uid']) {
-              $form[$field['field_name']][$delta]['user_name'] = array(
-                '#type' => 'textfield',
-                '#title' => ($delta == 0) ? t($field['widget']['label']) : '',
-                '#autocomplete_path' => 'user/autocomplete',
-                '#default_value' => isset($item['default user_name']) ? $item['default user_name'] : '',
-                '#required' => ($delta == 0) ? $field['required'] : FALSE,
-              );
-              $delta++;
-            }
-          }
-          foreach (range($delta, $delta + 2) as $delta) {
-            $form[$field['field_name']][$delta]['user_name'] = array(
-              '#type' => 'textfield',
-              '#title' => ($delta == 0) ? t($field['widget']['label']) : '',
-              '#autocomplete_path' => 'user/autocomplete',
-              '#default_value' => '',
-              '#required' => ($delta == 0) ? $field['required'] : FALSE,
-            );
-          }
-        }
-        else {
-          $form[$field['field_name']][0]['user_name'] = array(
-            '#type' => 'textfield',
-            '#title' => t($field['widget']['label']),
-            '#autocomplete_path' => 'user/autocomplete',
-            '#default_value' => isset($items[0]['default user_name']) ? $items[0]['default user_name'] : '',
-            '#required' => $field['required'],
-            '#description' => t($field['widget']['description']),
-          );
-        }
-        return $form;
-
-      case 'process form values':
-        foreach ($items as $delta => $item) {
-          $uid = '';
-          if (!empty($items[$delta]['user_name'])) {
-            $uid = db_result(db_query("SELECT uid FROM {users} WHERE name = '%s'", $items[$delta]['user_name']));
-          }
-          // Remove the widget's data representation so it isn't saved.
-          unset($items[$delta]['user_name']);
-          $items[$delta]['uid'] = $uid;
-          $items[$delta]['error_field'] = $field['field_name'] .']['. $delta .'][user_name';
-          // Don't save empty fields except the first value
-          if (empty($uid) && $delta > 0) {
-            unset($items[$delta]);
-          }
-        }
-    }
+/**
+ * Implementation of hook_allowed_values().
+ */
+function userreference_allowed_values($field) {
+  $options = _userreference_potential_references($field);
+  if (!$field['required']) {
+    $options = array('none' => t('<none>')) + $options;
   }
+  return $options;
 }
 
 /**
