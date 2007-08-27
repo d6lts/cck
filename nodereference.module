@@ -518,8 +518,7 @@ function nodereference_autocomplete($field_name, $string = '') {
   foreach (_nodereference_potential_references($field, TRUE, $string) as $row) {
     $matches[$row->node_title .' [nid:'. $row->nid .']'] = _nodereference_item($field, $row, TRUE);
   }
-  print drupal_to_js($matches);
-  exit();
+  drupal_json($matches);
 }
 
 function _nodereference_item($field, $item, $html = false) {
