@@ -13,6 +13,9 @@ define('CONTENT_CALLBACK_NONE', 0x0001);
 define('CONTENT_CALLBACK_DEFAULT', 0x0002);
 define('CONTENT_CALLBACK_CUSTOM', 0x0004);
 
+define('CONTENT_HANDLE_CORE', 0x0001);
+define('CONTENT_HANDLE_MODULE', 0x0002);
+
 function content_help($path, $arg) {
   if (preg_match('!^admin/content/types/.*/display$!', $path)) {
     return t("Configure how this content type's fields and field labels should be displayed when it's viewed in teaser and full-page mode.");
@@ -235,9 +238,8 @@ function content_form_field(&$form, &$form_state, $field) {
 
     // If we're building a node creation form, pre-fill with default values
     if (empty($node->nid)) {
-      if (content_handle('widget', 'default value', $field) != CONTENT_CALLBACK_NONE) {
-        $callbacks = array_key_exists('callback arguments', $widget_types[$field['widget']['type']]) ? $widget_types[$field['widget']['type']]['callback arguments'] : array('default_value' => '');
-        $widget_function = !empty($callbacks['default_value']) ? $callbacks['default_value'] : 'content_default_value';
+      if (content_callback('widget', 'default value', $field) != CONTENT_CALLBACK_NONE) {
+        $widget_function = content_callback('widget', 'default value', $field) == CONTENT_CALLBACK_CUSTOM ? $module .'_default_value' : 'content_default_value';
         if (!empty($widget_function) && function_exists($widget_function)) {
           $items = array_merge($items, $widget_function($form, $form_state, $field, $items, 0));
         }
@@ -261,7 +263,7 @@ function content_form_field(&$form, &$form_state, $field) {
     // If content module handles multiple values for this form element,
     // make this a content_multiple_values form type and iterate through
     // the multiple elements to add them to the form.
-    if (content_handle('widget', 'multiple values', $field) == CONTENT_CALLBACK_DEFAULT) {
+    if (content_handle('widget', 'multiple values', $field)) {
 
       $field_form[$field['field_name']]['#type'] = 'content_multiple_values';
 
@@ -633,7 +635,7 @@ function _content_field_view(&$node, $teaser = NULL, $page = NULL) {
       $value = '';
 
       if ($formatter != 'hidden') {
-        if (content_handle('field', 'view', $field) == CONTENT_CALLBACK_CUSTOM) {
+        if (content_callback('field', 'view', $field) == CONTENT_CALLBACK_CUSTOM) {
           $module = $field_types[$field['type']]['module'];
           $function = $module .'_field';
           if (function_exists($function)) {
@@ -1127,7 +1129,7 @@ function _content_table_schema($field = NULL) {
  *    CONTENT_CALLBACK_DEFAULT - use content module default behaviour
  *
  */
-function content_handle($entity, $op, $field) {
+function content_callback($entity, $op, $field) {
   switch ($entity) {
     case 'field':
       $entity_types = _content_field_types();
@@ -1142,6 +1144,41 @@ function content_handle($entity, $op, $field) {
       $module = $entity_types[$entity_type]['module'];
       $info = module_invoke($module, "widget_info");
       return $info[$field['widget']['type']]['callbacks'][$op];
+  }
+}
+
+/**
+ *  Helper function for determining the handling of a field or a widget
+ *  with respect to a given operation. (currently used for widget 'multiple values')
+ *
+ *  @param $entity
+ *    'field' or 'widget'
+ *
+ *  @param $op
+ *    the name of the operation ('default values'...)
+ *
+ *  @param $field
+ *    The field array, including widget info.
+
+ * @return
+ *    CONTENT_HANDLE_CORE    - the content module handles this operation.
+ *    CONTENT_HANDLE_MODULE  - the module handles this operation.
+ */
+function content_handle($entity, $op, $field) {
+  switch ($entity) {
+    case 'field':
+      $entity_types = _content_field_types();
+      $entity_type = $field['type'];
+      $module = $entity_types[$entity_type]['module'];
+      $info = module_invoke($module, "field_info");
+      return $info[$field['type']][$op];
+
+    case 'widget':
+      $entity_types = _content_widget_types();
+      $entity_type = $field['widget']['type'];
+      $module = $entity_types[$entity_type]['module'];
+      $info = module_invoke($module, "widget_info");
+      return $info[$field['widget']['type']][$op];
   }
 }
 
@@ -1196,7 +1233,7 @@ function content_default_value(&$form, &$form_state, $field, &$items, $delta) {
 function content_elements() {
   return array(
     'content_multiple_values' => array(
-      '#input' => TRUE, '#columns' => array('value'),
+      '#input' => TRUE,
     ));
 }
 

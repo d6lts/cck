@@ -789,7 +789,7 @@ function _content_admin_field(&$form_state, $type_name, $field_name) {
   );
 
   // Add handling for default value if not provided by field.
-  if (content_handle('widget', 'default value', $field) == CONTENT_CALLBACK_DEFAULT) {
+  if (content_callback('widget', 'default value', $field) == CONTENT_CALLBACK_DEFAULT) {
     $form['#attributes'] = array("enctype" => "multipart/form-data");
     $form['widget']['default_value_fieldset'] = array(
       '#type' => 'fieldset',
@@ -906,7 +906,7 @@ function _content_admin_field_validate($form, &$form_state) {
 
   // If content.module is handling the default value,
   // validate the result using the field validation.
-  if (content_handle('widget', 'default value', $field) == CONTENT_CALLBACK_DEFAULT) {
+  if (content_callback('widget', 'default value', $field) == CONTENT_CALLBACK_DEFAULT) {
     if (isset($form_values['default_value_php']) && ($php = trim($form_values['default_value_php']))) {
       ob_start();
       $return = eval($php);
@@ -991,7 +991,7 @@ function _content_admin_field_submit($form, &$form_state) {
 
   // If content.module is handling the default value,
   // initialize $widget_settings with default values,
-  if (content_handle('widget', 'default value', $field) == CONTENT_CALLBACK_DEFAULT) {
+  if (content_callback('widget', 'default value', $field) == CONTENT_CALLBACK_DEFAULT) {
     $widget_settings = array(
       'default_value' => $form_values['default_value'],
       'default_value_php' => $form_values['default_value_php'],

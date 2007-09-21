@@ -149,23 +149,17 @@ function userreference_widget_info() {
     'userreference_select' => array(
       'label' => 'Select List',
       'field types' => array('userreference'),
+      'multiple values' => CONTENT_HANDLE_MODULE,
       'callbacks' => array(
         'default value' => CONTENT_CALLBACK_DEFAULT,
-        'multiple values' => CONTENT_CALLBACK_CUSTOM,
-        ),
-      'callback arguments' => array(
-        'default value' => 'content_default_value',
         ),
     ),
     'userreference_autocomplete' => array(
       'label' => 'Autocomplete Text Field',
       'field types' => array('userreference'),
+      'multiple values' => CONTENT_HANDLE_CORE,
       'callbacks' => array(
         'default value' => CONTENT_CALLBACK_DEFAULT,
-        'multiple values' => CONTENT_CALLBACK_DEFAULT,
-        ),
-      'callback arguments' => array(
-        'default value' => 'content_default_value',
         ),
     ),
   );
@@ -235,7 +229,7 @@ function userreference_widget(&$form, &$form_state, $field, $items, $delta = 0) 
         '#weight' => t($field['widget']['weight']),
         '#default_value' => isset($items[$delta]) ? $items[$delta] : NULL,
         '#value_callback' => 'userreference_autocomplete_value',
-        '#autocomplete_path' => 'user/autocomplete/',
+        '#autocomplete_path' => 'user/autocomplete',
         '#element_validate' => array('userreference_autocomplete_validate'),
       );
       break;
@@ -268,7 +262,7 @@ function userreference_autocomplete_validate($element, &$form_state) {
   if (!empty($value)) {
     form_set_value($element[$field_key], $value, $form_state);
   }
-  elseif ($delta > 0) {
+  elseif ($element['#delta'] > 0) {
     // Don't save empty fields when they're not the first value (keep '0' otherwise)
     form_set_value($element[$field_key], 0, $form_state);
   }

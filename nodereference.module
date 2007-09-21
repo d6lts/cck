@@ -266,23 +266,17 @@ function nodereference_widget_info() {
     'nodereference_select' => array(
       'label' => 'Select List',
       'field types' => array('nodereference'),
+      'multiple values' => CONTENT_HANDLE_MODULE,
       'callbacks' => array(
         'default value' => CONTENT_CALLBACK_DEFAULT,
-        'multiple values' => CONTENT_CALLBACK_CUSTOM,
-        ),
-      'callback arguments' => array(
-        'default value' => 'content_default_value',
         ),
     ),
     'nodereference_autocomplete' => array(
       'label' => 'Autocomplete Text Field',
       'field types' => array('nodereference'),
+      'multiple values' => CONTENT_HANDLE_CORE,
       'callbacks' => array(
         'default value' => CONTENT_CALLBACK_DEFAULT,
-        'multiple values' => CONTENT_CALLBACK_DEFAULT,
-        ),
-      'callback arguments' => array(
-        'default value' => 'content_default_value',
         ),
     ),
   );

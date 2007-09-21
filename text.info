@@ -2,6 +2,5 @@
 name = Text
 description = Defines simple text field types.
 dependencies[] = content
-dependencies[] = text
 package = CCK
 core = 6.x

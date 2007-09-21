@@ -243,23 +243,17 @@ function text_widget_info() {
     'text_textfield' => array(
       'label' => 'Text Field',
       'field types' => array('text'),
+      'multiple values' => CONTENT_HANDLE_CORE,
       'callbacks' => array(
         'default value' => CONTENT_CALLBACK_DEFAULT,
-        'multiple values' => CONTENT_CALLBACK_DEFAULT,
-        ),
-      'callback arguments' => array(
-        'default value' => 'content_default_value',
         ),
     ),
     'text_textarea' => array(
       'label' => 'Text Area',
       'field types' => array('text'),
+      'multiple values' => CONTENT_HANDLE_CORE,
       'callbacks' => array(
         'default value' => CONTENT_CALLBACK_DEFAULT,
-        'multiple values' => CONTENT_CALLBACK_DEFAULT,
-        ),
-      'callback arguments' => array(
-        'default value' => 'content_default_value',
         ),
     ),
   );

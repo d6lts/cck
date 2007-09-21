@@ -295,12 +295,9 @@ function number_widget_info() {
     'number' => array(
       'label' => 'Text Field',
       'field types' => array('number_integer', 'number_decimal'),
+      'multiple values' => CONTENT_HANDLE_CORE,
       'callbacks' => array(
         'default value' => CONTENT_CALLBACK_DEFAULT,
-        'multiple values' => CONTENT_CALLBACK_DEFAULT,
-        ),
-      'callback arguments' => array(
-        'default value' => 'content_default_value',
         ),
     ),
   );
