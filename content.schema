@@ -34,6 +34,7 @@ function content_schema() {
   $schema['cache_content'] = drupal_get_schema_unprocessed('system', 'cache');
 
   // Dynamic (data) tables.
+  include_once('./'. drupal_get_path('module', 'content') .'/content.module');
 
   foreach (content_types() as $type) {
     // We always add a 'per content type' table.

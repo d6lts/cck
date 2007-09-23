@@ -197,22 +197,12 @@ function userreference_widget_info() {
  *   the form item for a single element for this field
  */
 function userreference_widget(&$form, &$form_state, $field, $items, $delta = 0) {
-
-  // No hard-coding of column names so this can be used by any field.
-  // This is a change from earlier versions which hard-coded 'uid'.
-  $db_info = content_database_info($field);
-  $columns = array_keys($db_info['columns']);
-
   switch ($field['widget']['type']) {
     case 'userreference_select':
       // The userreference_select widget doesn't need to create its own
       // element, it can use the optionwidgets_select element.
       $element = array(
         '#type' => 'optionwidgets_select',
-        '#field' => $field,
-        '#columns' => $columns,
-        '#delta' => $delta,
-        '#weight' => t($field['widget']['weight']),
         '#default_value' => $items,
       );
       break;
@@ -223,10 +213,6 @@ function userreference_widget(&$form, &$form_state, $field, $items, $delta = 0) 
       // path and some extra processing to it.
       $element = array(
         '#type' => 'text_textfield',
-        '#field' => $field,
-        '#columns' => $columns,
-        '#delta' => $delta,
-        '#weight' => t($field['widget']['weight']),
         '#default_value' => isset($items[$delta]) ? $items[$delta] : NULL,
         '#value_callback' => 'userreference_autocomplete_value',
         '#autocomplete_path' => 'user/autocomplete',

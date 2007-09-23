@@ -43,6 +43,7 @@ function _content_admin_type_fields() {
  * easier to place CCK fields in the form and see where they will appear.
  */
 function content_admin_field_overview_form(&$form_state, $type_name) {
+  module_load_include('inc', 'node', 'node.pages');
   $form = array();
 
   $type = content_types($type_name);

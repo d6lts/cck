@@ -265,7 +265,12 @@ function content_form_field(&$form, &$form_state, $field) {
     // the multiple elements to add them to the form.
     if (content_handle('widget', 'multiple values', $field)) {
 
-      $field_form[$field['field_name']]['#type'] = 'content_multiple_values';
+      // No hard-coding of column names so this can be used by any field.
+      // This is a change from earlier versions which hard-coded 'value'.
+      $db_info = content_database_info($field);
+      $columns = array_keys($db_info['columns']);
+      $field_form[$field['field_name']]['#type']   = 'content_multiple_values';
+      $field_form[$field['field_name']]['#weight'] = $field['widget']['weight'];
 
       // @TODO
       // Here's where we can intervene to control the number of items
@@ -280,8 +285,12 @@ function content_form_field(&$form, &$form_state, $field) {
         // Be sure sub-elements stay in delta order. Without this
         // if widget doesn't set #weight on this element level they can
         // end up with empty elements at the top of the array.
-        $field_form[$field['field_name']][$delta]['#weight'] = $delta;
-      }
+        $field_form[$field['field_name']][$delta]['#weight']  = $delta;
+        $field_form[$field['field_name']][$delta]['#columns'] = $columns;
+        $field_form[$field['field_name']][$delta]['#field']   = $field;
+        $field_form[$field['field_name']][$delta]['#delta']   = $delta;
+        $field_form[$field['field_name']][$delta]['#weight']  = $delta;
+     }
     }
     else {
       // If the widget is handling multiple values, just get the field's

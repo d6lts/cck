@@ -355,18 +355,8 @@ function number_elements() {
  *   the form item for a single element for this field
  */
 function number_widget(&$form, &$form_state, $field, $items, $delta = 0) {
-
-  // No hard-coding of column names so this can be used by any field.
-  // This is a change from earlier versions which hard-coded 'value'.
-  $db_info = content_database_info($field);
-  $columns = array_keys($db_info['columns']);
-
   $element = array(
     '#type' => $field['widget']['type'],
-    '#field' => $field,
-    '#columns' => $columns,
-    '#delta' => $delta,
-    '#weight' => t($field['widget']['weight']),
     '#default_value' => isset($items[$delta]) ? $items[$delta] : NULL,
   );
   return $element;

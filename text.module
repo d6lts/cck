@@ -351,18 +351,8 @@ function text_widget_settings($op, $widget) {
  *   the form item for a single element for this field
  */
 function text_widget(&$form, &$form_state, $field, $items, $delta = 0) {
-
-  // No hard-coding of column names so this can be used by any field.
-  // This is a change from earlier versions which hard-coded 'value'.
-  $db_info = content_database_info($field);
-  $columns = array_keys($db_info['columns']);
-
   $element = array(
     '#type' => $field['widget']['type'],
-    '#field' => $field,
-    '#columns' => $columns,
-    '#delta' => $delta,
-    '#weight' => t($field['widget']['weight']),
     '#default_value' => isset($items[$delta]) ? $items[$delta] : '',
   );
   return $element;
@@ -377,7 +367,7 @@ function text_widget(&$form, &$form_state, $field, $items, $delta = 0) {
  */
 function text_textfield_process($element, &$form_state) {
   $field = $element['#field'];
-  $field_key  = $element['#columns'][0];
+  $field_key = $element['#columns'][0];
 
   $element[$field_key] = array(
     '#type' => 'textfield',
