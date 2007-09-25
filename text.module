@@ -304,7 +304,7 @@ function text_widget_settings($op, $widget) {
           '#title' => t('Rows'),
           '#default_value' => isset($widget['rows']) ? $widget['rows'] : 5,
           '#required' => TRUE,
-          );
+        );
       }
       return $form;
 
@@ -368,15 +368,24 @@ function text_widget(&$form, &$form_state, $field, $items, $delta = 0) {
 function text_textfield_process($element, &$form_state) {
   $field = $element['#field'];
   $field_key = $element['#columns'][0];
+  $delta = $element['#delta'];
 
   $element[$field_key] = array(
     '#type' => 'textfield',
     '#title' => t($field['widget']['label']),
     '#description' => t($field['widget']['description']),
-    '#required' => empty($delta) ? $field['required'] : FALSE,
+    '#required' => $element['#required'],
     '#default_value' => isset($element['#value'][$field_key]) ? $element['#value'][$field_key] : NULL,
     '#autocomplete_path' => $element['#autocomplete_path'],
   );
+
+  if (!empty($field['text_processing'])) {
+    $filter_key = $element['#columns'][1];
+    $format = isset($element['#value'][$filter_key]) ? $element['#value'][$filter_key] : FILTER_FORMAT_DEFAULT;
+    $parents = array_merge($element['#parents'] , array($filter_key));
+    $element[$filter_key] = filter_form($format, 1, $parents);
+  }
+
   return $element;
 }
 
@@ -390,21 +399,24 @@ function text_textfield_process($element, &$form_state) {
 function text_textarea_process($element, &$form_state) {
   $field = $element['#field'];
   $field_key   = $element['#columns'][0];
-  $filter_key  = $element['#columns'][1];
+
 
   $element[$field_key] = array(
     '#type' => 'textarea',
     '#title' => t($field['widget']['label']),
     '#description' => t($field['widget']['description']),
-    '#required' => empty($delta) ? $field['required'] : FALSE,
+    '#required' => $element['#required'],
     '#default_value' => isset($element['#value'][$field_key]) ? $element['#value'][$field_key] : NULL,
     '#rows' => !empty($field['widget']['rows']) ? $field['widget']['rows'] : 10,
     '#weight' => 0,
   );
 
-  $format = $element['#value'][$filter_key];
-  $parents = array_merge($element['#parents'] , array($filter_key));
-  $element[$filter_key] = filter_form($format, $element[$field_key]['#weight'] + 1, $parents);
+  if (!empty($field['text_processing'])) {
+    $filter_key  = $element['#columns'][1];
+    $format = isset($element['#value'][$filter_key]) ? $element['#value'][$filter_key] : FILTER_FORMAT_DEFAULT;
+    $parents = array_merge($element['#parents'] , array($filter_key));
+    $element[$filter_key] = filter_form($format, 1, $parents);
+  }
 
   return $element;
 }

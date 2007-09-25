@@ -194,14 +194,13 @@ function text_update_5() {
  */
 function text_update_6000() {
   $ret = array();
-  $fields = content_fields();
-  foreach ($fields as $field) {
-    if ($field['widget']['type'] == 'text' && $field['widget']['rows'] > 1) {
-      $result = db_query("UPDATE {node_field_instance} SET widget_type = 'text_textarea' where field_name = '". $field_name ."'");
-    }
-    elseif ($field['widget']['type'] == 'text') {
-      $result = db_query("UPDATE {node_field_instance} SET widget_type = 'text_textfield' where field_name = '". $field_name ."'");
-    }
+  $result = db_query("SELECT * FROM {node_field_instance} WHERE widget_type = 'text'");
+  while ($field_instance = db_fetch_array($result)) {
+    $widget_settings = unserialize($field_instance['widget_settings']);
+    $new_widget_type = ($widget_settings['rows'] > 1) ? 'text_textarea' : 'text_textfield';
+    $ret[] = update_sql("UPDATE {node_field_instance} SET widget_type = '$new_widget_type' WHERE field_name = '{$field_instance['field_name']}' AND type_name = '{$field_instance['type_name']}'");
   }
+  // TODO : not cleared ?
+  content_clear_type_cache();
   return $ret;
 }

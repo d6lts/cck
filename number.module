@@ -373,14 +373,12 @@ function number_process($element, &$form_state) {
   $field = $element['#field'];
   $field_key  = $element['#columns'][0];
 
-  $default = $field['required'] || empty($delta) ? 0 : NULL;
-
   $element[$field_key] = array(
     '#type' => 'textfield',
     '#title' => t($field['widget']['label']),
     '#description' => t($field['widget']['description']),
-    '#required' => empty($delta) ? $field['required'] : FALSE,
-    '#default_value' => isset($element['#value'][$field_key]) ? $element['#value'][$field_key] : $default,
+    '#required' => $element['#required'],
+    '#default_value' => isset($element['#value'][$field_key]) ? $element['#value'][$field_key] : '',
     '#size' => 20,
     '#maxlength' => 11,
     '#attributes' => array('class' => 'number'),

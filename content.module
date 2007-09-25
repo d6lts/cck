@@ -187,17 +187,12 @@ function content_load($node) {
  */
 function content_form(&$form, &$form_state) {
   $node = $form['#node'];
-  $type = content_types($node->type);
-
-  // Set form parameters so we can accept file uploads.
-  if (count($type['fields'])) {
-    $form['#attributes'] = array("enctype" => "multipart/form-data");
-  }
-
   $type_name = is_string($node) ? $node : (is_array($node) ? $node['type'] : $node->type);
   $type = content_types($type_name);
+
   if (count($type['fields'])) {
     foreach ($type['fields'] as $field) {
+
       $form += content_form_field($form, $form_state, $field);
     }
   }
@@ -223,20 +218,14 @@ function content_form(&$form, &$form_state) {
  */
 function content_form_field(&$form, &$form_state, $field) {
   $node = (object) $form['#node'];
+  $addition = array();
   $items = array();
-  if (!empty($form_state['values']) && !empty($form_state['values'][$field['field_name']])) {
-    $items =  $form_state['values'][$field['field_name']];
-  }
-  elseif(!empty($node->$field['field_name'])) {
-    $items = $node->$field['field_name'];
-  }
 
   $widget_types = _content_widget_types();
   $module = $widget_types[$field['widget']['type']]['module'];
   $function = $module .'_widget';
   if (function_exists($function)) {
-
-    // If we're building a node creation form, pre-fill with default values
+    // If we're building a node creation form, pre-fill with default values.
     if (empty($node->nid)) {
       if (content_callback('widget', 'default value', $field) != CONTENT_CALLBACK_NONE) {
         $widget_function = content_callback('widget', 'default value', $field) == CONTENT_CALLBACK_CUSTOM ? $module .'_default_value' : 'content_default_value';
@@ -245,75 +234,70 @@ function content_form_field(&$form, &$form_state, $field) {
         }
       }
     }
+    elseif (!empty($form_state['values'][$field['field_name']])) {
+      $items = $form_state['values'][$field['field_name']];
+    }
+    elseif (!empty($node->$field['field_name'])) {
+      $items = $node->$field['field_name'];
+    }
 
-    $field_form = array(
-      $field['field_name'] => array(
-        '#tree' => TRUE,
-        '#field' => $field,
-        '#weight' => $field['widget']['weight'],
-        ),
-    );
-
-    // No hard-coding of column names so widgets can be used by any field.
-    // This is a change from earlier versions which hard-coded 'value'
-    // for most widgets.
     $db_info = content_database_info($field);
-    $field_form[$field['field_name']]['#columns'] = array_keys($db_info['columns']);
+    $columns = array_keys($db_info['columns']);
+
+    $form_element = array();
 
     // If content module handles multiple values for this form element,
-    // make this a content_multiple_values form type and iterate through
+    // make this a content_multiple_values element type and iterate through
     // the multiple elements to add them to the form.
-    if (content_handle('widget', 'multiple values', $field)) {
-
-      // No hard-coding of column names so this can be used by any field.
-      // This is a change from earlier versions which hard-coded 'value'.
-      $db_info = content_database_info($field);
-      $columns = array_keys($db_info['columns']);
-      $field_form[$field['field_name']]['#type']   = 'content_multiple_values';
-      $field_form[$field['field_name']]['#weight'] = $field['widget']['weight'];
+    if (content_handle('widget', 'multiple values', $field) == CONTENT_HANDLE_CORE) {
+      $form_element['#type'] = 'content_multiple_values';
 
       // @TODO
       // Here's where we can intervene to control the number of items
       // or add javascript to dynamically add more items,
       // or take control over the delta values in some way.
-      $delta = 0;
-      $max = !empty($field['multiple']) ? sizeof($items) + 2 : 0;
-      foreach (range($delta, $max) as $delta) {
-        $element = $function($form, $form_state, $field, $items, $delta);
-        $field_form[$field['field_name']][$delta] = $element;
-
-        // Be sure sub-elements stay in delta order. Without this
-        // if widget doesn't set #weight on this element level they can
-        // end up with empty elements at the top of the array.
-        $field_form[$field['field_name']][$delta]['#weight']  = $delta;
-        $field_form[$field['field_name']][$delta]['#columns'] = $columns;
-        $field_form[$field['field_name']][$delta]['#field']   = $field;
-        $field_form[$field['field_name']][$delta]['#delta']   = $delta;
-        $field_form[$field['field_name']][$delta]['#weight']  = $delta;
-     }
+      $max = !empty($field['multiple']) ? count($items) + 2 : 0;
+      for ($delta = 0; $delta <= $max; $delta++) {
+        if ($element = $function($form, $form_state, $field, $items, $delta)) {
+          $defaults = array(
+            '#weight'   => $delta,
+            '#required' => $delta == 0 && $field['required'],
+            // TODO : should we add some logic for title and description too ?
+            '#delta'    => $delta,
+            '#columns'  => $columns,
+            '#field'    => $field,
+          );
+          $form_element[$delta] = array_merge($element, $defaults);
+        }
+      }
     }
     else {
-      // If the widget is handling multiple values, just get the field's
-      // form element and make it the zero value of the field.
-      // Used by optionwidgets where multiple values are combined into
-      // a single form element.
-      $element = $function($form, $form_state, $field, $items, 0);
-      if (!empty($element)) {
-        $field_form[$field['field_name']][0] = $element;
-      }
-      else {
-        // If nothing is returned from hook_widget(), do nothing.
-        // Widget could have added something non-standard directly
-        // to the form, or may not use a form element at all.
-        $field_form = array();
+      // If the widget is handling multiple values (e.g optionwidgets),
+      // just get the field's form element and make it the zero value.
+      if ($element = $function($form, $form_state, $field, $items)) {
+        $defaults = array(
+          '#required' => $field['required'],
+          // TODO : should we add some logic for title and description too ?
+          '#columns'  => $columns,
+          '#field'    => $field,
+        );
+        $form_element[0] = array_merge($element, $defaults);
       }
     }
   }
-  else {
-    // If there is no hook_widget() for this field, do nothing to the form.
-    $field_form = array();
+
+  if ($form_element) {
+    $defaults = array(
+      '#tree' => TRUE,
+      '#weight' => $field['widget']['weight'],
+      '#field' => $field,
+      // TODO : those could probably go ?
+      //        '#columns' => array_keys($db_info['columns']),
+    );
+    $addition[$field['field_name']] = array_merge($form_element, $defaults);
   }
-  return $field_form;
+
+  return $addition;
 }
 
 /**
