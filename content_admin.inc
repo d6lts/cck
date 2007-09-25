@@ -807,23 +807,15 @@ function _content_admin_field(&$form_state, $type_name, $field_name) {
       '#collapsed' => TRUE,
     );
     $default_value = isset($field['widget']['default_value']) ? $field['widget']['default_value'] : array();
-    $module = $widget_types[$field['widget']['type']]['module'];
-    $function = $module .'_widget';
-    if (function_exists($function)) {
-      $node = array(); // TODO are there things we need to add in here ?
-      // Make sure the default value is not a required field.
-      $widget_field = $field;
-      $widget_field['required'] = FALSE;
-      $widget_form = array('#node' => $node);
-      $widget_items = array($field['field_name'] => $default_value);
-      $widget_form_state = array('values' => $widget_items);
-      $parents = array($field['field_name'], 0);
-      $form_element = $function($widget_form, $widget_form_state, $widget_field, $widget_items, 0, $parents);
-    }
-    else {
-      // TODO : generate a series of textfields ?
-      // why would a widget not have a hook_widget implementation ?
-    }
+    $node = array();
+    // Make sure the default value is not a required field.
+    $widget_field = $field;
+    $widget_field['required'] = FALSE;
+    $widget_form = array('#node' => $node);
+    $widget_items = array($field['field_name'] => $default_value);
+    $widget_form_state = array('values' => $widget_items);
+    $form_element = content_form_field($widget_form, $widget_form_state, $widget_field, $widget_items, 0);
+
     $form['widget']['default_value_fieldset']['default_value_widget'] = $form_element;
     $form['widget']['default_value_fieldset']['default_value_widget']['#tree'] = TRUE;
     $form['widget']['default_value_fieldset']['advanced_options'] = array(
