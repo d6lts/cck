@@ -38,24 +38,8 @@ function content_type_create($info) {
   $type = content_types($info->type);
   $table = _content_tablename($type['type'], CONTENT_DB_STORAGE_PER_CONTENT_TYPE);
   if (!db_table_exists($table)) {
-    switch ($GLOBALS['db_type']) {
-      case 'mysql':
-      case 'mysqli':
-        db_query("CREATE TABLE {". $table ."} (
-          vid int unsigned NOT NULL default '0',
-          nid int unsigned NOT NULL default '0',
-          PRIMARY KEY (vid)
-        ) /*!40100 DEFAULT CHARACTER SET utf8 */");
-      break;
-
-      case 'pgsql':
-        db_query("CREATE TABLE {". $table ."} (
-          vid int_unsigned NOT NULL default '0',
-          nid int_unsigned NOT NULL default '0',
-          PRIMARY KEY (vid)
-        )");
-      break;
-    }
+    $ret = array();
+    db_create_table($ret, $table, _content_table_schema());
     drupal_set_message(t('The content fields table %name has been created.', array('%name' => $table)));
   }
 }
@@ -76,16 +60,8 @@ function content_type_update($info) {
     $old_name = _content_tablename($old_type['type'], CONTENT_DB_STORAGE_PER_CONTENT_TYPE);
     $new_name = _content_tablename($info->type, CONTENT_DB_STORAGE_PER_CONTENT_TYPE);
     if (db_table_exists($old_name)) {
-      switch ($GLOBALS['db_type']) {
-        case 'mysql':
-        case 'mysqli':
-          db_query("RENAME TABLE {". $old_name ."} TO {". $new_name ."}");
-          break;
-
-        case 'pgsql':
-          db_query("ALTER TABLE {". $old_name ."} RENAME TO {". $new_name ."}");
-          break;
-      }
+      $ret = array();
+      db_rename_table($ret, $old_name, $new_name);
       drupal_set_message(t('Content fields table %old_name has been renamed to %new_name and field instances have been updated.', array('%old_name' => $old_name, '%new_name' => $new_name)));
     }
   }
@@ -107,7 +83,8 @@ function content_type_delete($info) {
   }
   $table = _content_tablename($type['type'], CONTENT_DB_STORAGE_PER_CONTENT_TYPE);
   if (db_table_exists($table)) {
-    db_query('DROP TABLE {'. $table .'}');
+    $ret = array();
+    db_drop_table($ret, $table);
     drupal_set_message(t('The content fields table %name has been deleted.', array('%name' => $table)));
   }
 
