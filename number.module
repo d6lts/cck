@@ -28,7 +28,6 @@ function number_field_info() {
     'number_integer' => array(
       'label' => 'Integer',
       'callbacks' => array(
-        'view' => CONTENT_CALLBACK_DEFAULT,
         'tables' => CONTENT_CALLBACK_DEFAULT,
         'arguments' => CONTENT_CALLBACK_DEFAULT,
         ),
@@ -36,7 +35,6 @@ function number_field_info() {
     'number_decimal' => array(
       'label' => 'Decimal',
       'callbacks' => array(
-        'view' => CONTENT_CALLBACK_DEFAULT,
         'tables' => CONTENT_CALLBACK_DEFAULT,
         'arguments' => CONTENT_CALLBACK_DEFAULT,
         ),

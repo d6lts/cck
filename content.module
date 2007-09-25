@@ -163,6 +163,7 @@ function content_load($node) {
     $additions = _content_field_invoke('load', $node);
     if ($additions) {
       foreach ($additions as $key => $value) {
+        $node->$key = $value;
         $default_additions[$key] = $value;
       }
     }
@@ -376,12 +377,10 @@ function content_delete_revision(&$node) {
  * Generate field render arrays.
  */
 function content_view(&$node, $teaser = FALSE, $page = FALSE) {
-  if ($node->build_mode == NODE_BUILD_PREVIEW) {
-    _content_widget_invoke('process form values', $node);
-  }
-  $content = _content_field_view($node, $teaser, $page);
-  $node->content = array_merge((array) $node->content, $content);
+  $additions = _content_field_invoke_default('view', $node);
+  $node->content = array_merge((array) $node->content, $additions);
 }
+
 
 /**
  * Implementation of hook_nodeapi().
@@ -456,6 +455,32 @@ function content_field($op, &$node, $field, &$node_field, $teaser, $page) {
     case 'validate':
       // TODO : here we could validate that the number of multiple data is correct ?
       break;
+
+    case 'view':
+      if ($node->build_mode == NODE_BUILD_NORMAL) {
+        $context = $teaser ? 'teaser' : 'full';
+      }
+      else {
+        $context = $node->build_mode;
+      }
+
+      $formatter = isset($field['display_settings'][$context]['format']) ? $field['display_settings'][$context]['format'] : 'default';
+      $value = '';
+
+      if ($formatter != 'hidden') {
+        foreach ($node_field as $delta => $item) {
+          $node_field[$delta]['view'] = content_format($field, $item, $formatter, $node);
+        }
+        $value = theme('field', $node, $field, $node_field, $teaser, $page);
+      }
+      $addition[$field['field_name']] = array(
+        '#weight' => $field['widget']['weight'],
+        '#value' => $value,
+        '#access' => $formatter != 'hidden',
+
+      );
+      return $addition;
+
   }
 }
 /**
@@ -738,50 +763,6 @@ function _content_field_invoke_default($op, &$node, $teaser = NULL, $page = NULL
   return $return;
 }
 
-/**
- * Format field output based on display settings.
- */
-function _content_field_view(&$node, $teaser = NULL, $page = NULL) {
-  $type_name = is_string($node) ? $node : (is_array($node) ? $node['type'] : $node->type);
-  $type = content_types($type_name);
-  $field_types = _content_field_types();
-  $context = $teaser ? 'teaser' : 'full';
-
-  $return = array();
-  if (count($type['fields'])) {
-    foreach ($type['fields'] as $field) {
-      $node_field = isset($node->$field['field_name']) ? $node->$field['field_name'] : array();
-      $formatter = isset($field['display_settings'][$context]['format']) ? $field['display_settings'][$context]['format'] : 'default';
-      $value = '';
-
-      if ($formatter != 'hidden') {
-        if (content_callback('field', 'view', $field) == CONTENT_CALLBACK_CUSTOM) {
-          $module = $field_types[$field['type']]['module'];
-          $function = $module .'_field';
-          if (function_exists($function)) {
-            $value = $function('view', $node, $field, $node_field, $teaser, $page);
-          }
-        }
-        else {
-          foreach ($node_field as $delta => $item) {
-            $node_field[$delta]['view'] = content_format($field, $item, $formatter, $node);
-          }
-          $value = theme('field', $node, $field, $node_field, $teaser, $page);
-        }
-      }
-      $return[$field['field_name']] = array(
-        '#weight' => $field['widget']['weight'],
-        '#value' => $value,
-        '#access' => $formatter != 'hidden',
-      );
-      // test for values in $node_field in case modules added items
-      if (isset($node->$field['field_name']) || count($node_field)) {
-        $node->$field['field_name'] = $node_field;
-      }
-    }
-  }
-  return $return;
-}
 
 /**
  * Return a list of all content types.

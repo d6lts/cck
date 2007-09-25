@@ -36,7 +36,6 @@ function text_field_info() {
     'text' => array(
       'label' => 'Text',
       'callbacks' => array(
-        'view' => CONTENT_CALLBACK_DEFAULT,
         'tables' => CONTENT_CALLBACK_DEFAULT,
         'arguments' => CONTENT_CALLBACK_DEFAULT,
         ),

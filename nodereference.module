@@ -50,7 +50,6 @@ function nodereference_field_info() {
     'nodereference' => array(
       'label' => 'Node Reference',
       'callbacks' => array(
-        'view' => CONTENT_CALLBACK_DEFAULT,
         'tables' => CONTENT_CALLBACK_DEFAULT,
         'arguments' => CONTENT_CALLBACK_DEFAULT,
         ),

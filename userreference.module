@@ -17,7 +17,6 @@ function userreference_field_info() {
     'userreference' => array(
       'label' => 'User Reference',
       'callbacks' => array(
-        'view' => CONTENT_CALLBACK_DEFAULT,
         'tables' => CONTENT_CALLBACK_DEFAULT,
         'arguments' => CONTENT_CALLBACK_DEFAULT,
         ),
