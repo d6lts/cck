@@ -448,10 +448,18 @@ function _content_admin_display_overview_row($field, $field_type) {
 }
 
 function _content_admin_display_contexts() {
-  return array(
+  $contexts = array(
     'teaser' => t('Teaser'),
     'full' => t('Full'),
+    NODE_BUILD_RSS => t('RSS Item'),
+    NODE_BUILD_PRINT => t('Print'),
   );
+  if (module_exists('search')) {
+    $contexts['NODE_BUILD_SEARCH_INDEX'] = t('Search Index');
+    $contexts['NODE_BUILD_SEARCH_RESULT'] = t('Search Result');
+  }
+
+  return $contexts;
 }
 
 /**

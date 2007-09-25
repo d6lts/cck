@@ -381,6 +381,15 @@ function content_view(&$node, $teaser = FALSE, $page = FALSE) {
   $node->content = array_merge((array) $node->content, $additions);
 }
 
+/**
+ * Nodeapi 'prepare translation' op.
+ *
+ * Generate field render arrays.
+ */
+function content_prepare_translations(&$node) {
+//  $default_additions = _content_field_invoke_default('prepare translations', $node);
+//  $node = (object) array_merge((array) $node,
+}
 
 /**
  * Implementation of hook_nodeapi().
@@ -417,6 +426,11 @@ function content_nodeapi(&$node, $op, $teaser, $page) {
     case 'view':
       content_view($node, $teaser, $page);
       break;
+
+    case 'prepare translations':
+      content_prepare_translations($node);
+      break;
+
   }
 }
 
@@ -481,8 +495,12 @@ function content_field($op, &$node, $field, &$node_field, $teaser, $page) {
       );
       return $addition;
 
+    case 'prepare translations':
+      $addition[$field['field_name']] = $node->translation_source->$field['field_name'];
+      return $addition;
   }
 }
+
 /**
  * TODO : PHPdoc
  */
