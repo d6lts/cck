@@ -447,96 +447,223 @@ function content_enable() {
  *
  * This implementation is special, as content.module does not define any field
  * types. Instead, this function gets called after the type-specific hook, and
- * takes care of the database interface for field types that do not choose to
- * do their own storage.
+ * takes care of default stuff common to all field types.
  */
 function content_field($op, &$node, $field, &$node_field, $teaser, $page) {
   $db_info = content_database_info($field);
+
+  switch ($op) {
+    case 'validate':
+      // TODO : here we could validate that the number of multiple data is correct ?
+      break;
+  }
+}
+/**
+ * TODO : PHPdoc
+ */
+function content_storage($op, $node) {
+  $type_name = $node->type;
+  $type = content_types($type_name);
+
   switch ($op) {
     case 'load':
-      $column_names = array();
-      foreach ($db_info['columns'] as $column => $attributes) {
-        $column_names[] = $attributes['column'] .' AS '. $column;
-      }
-      $query = 'SELECT '. implode(', ', $column_names) .' FROM {'. $db_info['table'] .'} WHERE vid = %d';
-      if ($field['multiple']) {
-        $result = db_query($query .' ORDER BY delta', $node->vid);
-      }
-      else {
-        $result = db_query_range($query, $node->vid, 0, 1);
-      }
+      // OPTIMIZE : load all non multiple fields in a single JOIN query ?
+      // warning : 61-join limit in MySQL ?
       $additions = array();
-      while ($value = db_fetch_array($result)) {
-        $additions[$field['field_name']][] = $value;
+      // For each table used by this content type,
+      foreach ($type['tables'] as $table) {
+        $schema = drupal_get_schema($table);
+        $query = 'SELECT * FROM {'. $table .'} WHERE vid = %d';
+
+        // If we're loading a table for a multiple field,
+        // we fetch all rows (values) ordered by delta,
+        // else we only fetch one row.
+        $result = isset($schema['fields']['delta']) ? db_query($query .' ORDER BY delta', $node->vid) : db_query_range($query, $node->vid, 0, 1);
+
+        // For each table row, populate the fields.
+        while ($row = db_fetch_array($result)) {
+          // For each field stored in the table, add the field item.
+          foreach ($schema['content fields'] as $field_name) {
+            $item = array();
+            $field = content_fields($field_name, $type_name);
+            $db_info = content_database_info($field);
+
+            // For each column declared by the field, populate the item.
+            foreach ($db_info['columns'] as $column => $attributes) {
+              $item[$column] = $row[$attributes['column']];
+            }
+
+            // Add the item to the field values for the node.
+            if (!isset($additions[$field_name])) {
+              $additions[$field_name] = array();
+            }
+            $additions[$field_name][] = $item;
+          }
+        }
       }
       return $additions;
 
     case 'update':
-      if ($field['multiple']) {
-        // Delete and insert, rather than update, in case a value was added.
-        db_query('DELETE FROM {'. $db_info['table'] .'} WHERE vid = %d', $node->vid);
-      }
-      // Follow through to 'insert' op
     case 'insert':
-      foreach ($node_field as $delta => $item) {
-        $data = array();
-        $column_names = array();
-        $column_placeholders = array();
-        $column_assignments = array();
-        foreach ($db_info['columns'] as $column => $attributes) {
-          $column_names[] = $attributes['column'];
-          if (empty($item[$column]) && !$attributes['not null'] && !$field['required']) {
-            $column_placeholders[] = '%s';
-            $column_assignments[] = $attributes['column'] .' = %s';
-            $item[$column] = 'NULL';
+      foreach ($type['tables'] as $table) {
+        $schema = drupal_get_schema($table);
+        $record = new stdClass();
+        foreach ($schema['content fields'] as $field_name) {
+          $field = content_fields($field_name, $type_name);
+
+          // Multiple fields need specific handling, we'll deal with them later on.
+          if ($field['multiple']) {
+            continue;
           }
-          else {
-            switch ($attributes['type']) {
-            case 'int':
-              $column_placeholders[] = '%d';
-              $column_assignments[] = $attributes['column'] .' = %d';
-              break;
-            case 'float':
-              $column_placeholders[] = '%f';
-              $column_assignments[] = $attributes['column'] .' = %f';
-              break;
-            default:
-              $column_placeholders[] = "'%s'";
-              $column_assignments[] = $attributes['column'] ." = '%s'";
-            }
+
+          $db_info = content_database_info($field);
+          foreach ($db_info['columns'] as $column => $attributes) {
+            $record->{$attributes['column']} = $node->{$field_name}[0][$column];
           }
-          // TODO : is that right ? (isset / NULL...)
-          $data[] = isset($item[$column]) ? $item[$column] : NULL;
-        }
-        $data[] = $node->vid;
-        $data[] = $node->nid;
-        if ($field['multiple']) {
-          $data[] = $delta;
         }
 
-        if ($field['multiple']) {
-          db_query('INSERT INTO {'. $db_info['table'] .'} ('. implode(', ', $column_names) .', vid, nid, delta) VALUES ('. implode(', ', $column_placeholders) .', %d, %d, %d)', $data);
+        if (count((array)$record)) {
+          $record->nid = $node->nid;
+          $record->vid = $node->vid;
+          content_write_schema_record($table, $record, $op == 'update' ? 'vid' : FALSE);
         }
-        else {
-          if (db_result(db_query('SELECT COUNT(*) FROM {'. $db_info['table'] .'} WHERE vid = %d AND nid = %d', $node->vid, $node->nid))) {
-            db_query('UPDATE {'. $db_info['table'] .'} SET '. implode(', ', $column_assignments) .' WHERE vid = %d AND nid = %d', $data);
+      }
+
+      // Handle multiple fields.
+      foreach ($type['fields'] as $field) {
+        if ($field['multiple']) {
+          $db_info = content_database_info($field);
+
+          // Delete and insert, rather than update, in case a value was added.
+          if ($op == 'update') {
+            db_query('DELETE FROM {'. $db_info['table'] .'} WHERE vid = %d', $node->vid);
           }
-          else {
-            db_query('INSERT INTO {'. $db_info['table'] .'} ('. implode(', ', $column_names) .', vid, nid) VALUES ('. implode(', ', $column_placeholders) .', %d, %d)', $data);
+          foreach ($node->$field['field_name'] as $delta => $item) {
+            $record = new stdClass();
+            foreach ($db_info['columns'] as $column => $attributes) {
+              $record->{$attributes['column']} = $item[$column];
+            }
+            $record->nid = $node->nid;
+            $record->vid = $node->vid;
+            $record->delta = $delta;
+            content_write_schema_record($db_info['table'], $record);
           }
         }
       }
-      return;
+      break;
 
     case 'delete':
-      // Delete using nid rather than vid to purge all revisions.
-      db_query('DELETE FROM {'. $db_info['table'] .'} WHERE nid = %d', $node->nid);
-      return;
+      foreach ($type['tables'] as $table) {
+        db_query('DELETE FROM {'. $table .'} WHERE nid = %d', $node->nid);
+      }
+      break;
 
     case 'delete revision':
-      db_query('DELETE FROM {'. $db_info['table'] .'} WHERE vid = %d', $node->vid);
-      return;
+      foreach ($type['tables'] as $table) {
+        db_query('DELETE FROM {'. $table .'} WHERE vid = %d', $node->vid);
+      }
+      break;
   }
+}
+
+/**
+ * Save a record to the database based upon the schema. Default values are
+ * filled in for missing items, and 'serial' (auto increment) types are
+ * filled in with IDs.
+ *
+ * Stolen from http://drupal.org/node/169982#comment-303480
+ *
+ * @param $table
+ *   The name of the table; this must exist in schema API.
+ * @param $object
+ *   The object to write. This is a reference, as defaults according to
+ *   the schema may be filled in on the object, as well as ID on the serial
+ *   type(s).
+ * @param update
+ *   If this is an update, specify the primary keys' field names. It is the
+ *   caller's responsibility to know if a record for this object already
+ *   exists in the database. If there is only 1 key, you may pass a simple string.
+ * @return (boolean) Failure to write a record will return FALSE. Otherwise,
+ *   TRUE is returned. The $object parameter contains values for any serial
+ *   fields defined by the $table. For example, $object->nid will be populated
+ *   after inserting a new node.
+ */
+function content_write_schema_record($table, &$object, $update = array()) {
+  // Standardize $update to an array.
+  if (is_string($update)) {
+    $update = array($update);
+  }
+
+  $schema = drupal_get_schema($table);
+  if (empty($schema)) {
+    return FALSE;
+  }
+
+  $fields = $defs = $values = $serials = array();
+
+  // Go through our schema, build correlations, and when inserting, fill in defaults for
+  // fields that are not set.
+  foreach ($schema['fields'] as $field => $info) {
+    // Special case -- skip serial types if we are updating.
+    if ($info['type'] == 'serial' && count($update)) {
+      continue;
+    }
+
+    // For inserts, populate defaults from Schema if not already provided
+    if (!isset($object->$field)  && !count($update) && isset($info['default'])) {
+      $object->$field = $info['default'];
+    }
+
+    // Track serial fields so we can helpfully populate them in the after the query.
+    if ($info['type'] == 'serial') {
+      $object->$field = 'NULL';
+      $serials[] = $field;
+    }
+
+    // Build arrays for the fields, placeholders, and values in our query.
+    if (isset($object->$field)) {
+      $fields[] = $field;
+      $placeholders[] = _db_type_placeholder($info['type']);
+
+      if (empty($info['serialize'])) {
+        $values[] = $object->$field;
+      }
+      else {
+        $values[] = serialize($object->$field);
+      }
+    }
+  }
+
+  // Build the SQL.
+  $query = '';
+  if (!count($update)) {
+    $query = "INSERT INTO {$table} (" . implode(', ', $fields) . ') VALUES (' . implode(', ', $placeholders) . ')';
+  }
+  else {
+    $query = '';
+    foreach ($fields as $id => $field) {
+      if ($query) {
+        $query .= ', ';
+      }
+      $query .= $field . ' = ' . $placeholders[$id];
+    }
+
+    foreach ($update as $key){
+      $cond[] = "$key = ". _db_type_placeholder($schema['fields'][$key]['type']);
+      $values[] = $object->$key;
+    }
+
+    $query = "UPDATE {$table} SET $query WHERE ". implode(' AND ', $cond);
+  }
+  db_query($query, $values);
+
+  if ($serials) {
+    // Get last insert ids and fill them in.
+    foreach ($serials as $field) {
+      $object->$field = db_last_insert_id($table, $field);
+    }
+  }
+  return TRUE;
 }
 
 /**
@@ -583,7 +710,12 @@ function _content_field_invoke_default($op, &$node, $teaser = NULL, $page = NULL
   $type = content_types($type_name);
 
   $return = array();
-  if (count($type['fields'])) {
+  // The operations involving database queries are better off handled by table
+  // rather than by field.
+  if (in_array($op, array('load', 'insert', 'update', 'delete','delete revision'))) {
+    return content_storage($op, $node);
+  }
+  elseif (count($type['fields'])) {
     foreach ($type['fields'] as $field) {
       $node_field = isset($node->$field['field_name']) ? $node->$field['field_name'] : array();
 
@@ -809,6 +941,9 @@ function _content_type_info($reset = FALSE) {
           $field['type_name'] = $type['type'];
           $field['display_settings'] = $field['display_settings'] ? unserialize($field['display_settings']) : array();
           $type['fields'][$field['field_name']] = $field;
+
+          $db_info = content_database_info($field);
+          $type['tables'][$db_info['table']] = $db_info['table'];
         }
         $info['content types'][$type['type']] = $type;
       }
@@ -856,6 +991,8 @@ function content_clear_type_cache() {
 
 /**
  * Retrieve the database storage location(s) for a field.
+ *
+ * TODO : add a word about why it's not included in the global _content_type_info array.
  *
  * @param $field
  *   The field whose database information is requested.
@@ -1094,6 +1231,8 @@ function _content_table_schema($field = NULL) {
     $base_schema['fields']['delta'] = array('type' => 'int', 'unsigned' => TRUE, 'not null' => TRUE, 'default' => 0);
     $base_schema['primary key'][] = 'delta';
   }
+  // TODO : add the $field right now ?
+  $base_schema['content fields'] = array();
   return $base_schema;
 }
 

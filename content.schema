@@ -58,6 +58,9 @@ function content_schema() {
         unset($attributes['sortable']);
         $schema[$table]['fields'][$column_name] = $attributes;
       }
+
+      // Meta-data : content fields stored in that table.
+      $schema[$table]['content fields'][] = $field['field_name'];
     }
   }
 
