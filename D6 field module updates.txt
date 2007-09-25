@@ -1,0 +1,4 @@
+- widgets that include a file upload element need to add
+$form['#attributes'] = array("enctype" => "multipart/form-data");
+to the $form array they receive as a parameter.
+- hook_field($op = 'view') is finally deprecated
