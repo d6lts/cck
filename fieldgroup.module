@@ -39,7 +39,7 @@ function fieldgroup_menu() {
       'access arguments' => array('administer content types'),
       'type' => MENU_CALLBACK,
     );
-    $items['admin/content/types/'. $type_url_str .'/%/remove_group'] = array(
+    $items['admin/content/types/'. $type_url_str .'/groups/%/remove'] = array(
       'title' => 'Edit group',
       'page callback' => 'drupal_get_form',
       'page arguments' => array('fieldgroup_remove_group', $content_type, 4),

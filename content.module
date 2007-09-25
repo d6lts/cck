@@ -101,12 +101,7 @@ function content_menu() {
         'file path' => drupal_get_path('module', 'content'),
         'type' => MENU_CALLBACK,
       );
-      // menu.inc deals with up to 6 parts in menu paths (MENU_MAX_PARTS),
-      // so we have to remove one part for the 'remove' callback.
-      // Maybe we could remove it for the 'edit' callback above as well for consistency ?
-      // (it's ok since they're both pure MENU_CALLBACK, no hierarchy involved)
-      // Fieldgroup paths will be affected as well...
-      $items['admin/content/types/'. $type_url_str .'/'. $field_name .'/remove_field'] = array(
+      $items['admin/content/types/'. $type_url_str .'/fields/'. $field_name .'/remove'] = array(
         'title' => 'Remove field',
         'page callback' => 'drupal_get_form',
         'page arguments' => array('_content_admin_field_remove', $type_name, $field_name),

@@ -112,7 +112,7 @@ function content_admin_field_overview_form(&$form_state, $type_name) {
         $row['weights']   = 'form-group-weights';
         $row['groups']    = '';
         $row['configure'] = l(t('configure'), 'admin/content/types/'. $type['url_str'] .'/groups/'. $form['#groups'][$key]['group_name'] .'/edit');
-        $row['remove']    = l(t('remove'), 'admin/content/types/'. $type['url_str'] .'/'. $form['#groups'][$key]['group_name'] .'/remove_group');
+        $row['remove']    = l(t('remove'), 'admin/content/types/'. $type['url_str'] .'/groups/'. $form['#groups'][$key]['group_name'] .'/remove');
         $data = $row;
 
         $form['group-weights'][$key] = array('#type' => 'weight', '#default_value' => $value['#weight']);
@@ -125,7 +125,7 @@ function content_admin_field_overview_form(&$form_state, $type_name) {
           $row['weights']   = 'form-field-weights';
           $row['groups']    = 'form-field-groups';
           $row['configure'] = l(t('configure'), 'admin/content/types/'. $type['url_str'] .'/fields/'. $field_name);
-          $row['remove']    = l(t('remove'), 'admin/content/types/'. $type['url_str'] .'/'. $field_name .'/remove_field');
+          $row['remove']    = l(t('remove'), 'admin/content/types/'. $type['url_str'] .'/fields/'. $field_name .'/remove');
           $group_form[$field['widget']['weight']][] = array($field_name => $row);
 
           $form['field-weights'][$field_name] = array('#type' => 'weight', '#default_value' => $field['widget']['weight']);
@@ -150,7 +150,7 @@ function content_admin_field_overview_form(&$form_state, $type_name) {
           $row['groups']  = 'form-field-groups';
         }
         $row['configure'] = l(t('configure'), 'admin/content/types/'. $type['url_str'] .'/fields/'. $key);
-        $row['remove']    = l(t('remove'), 'admin/content/types/'. $type['url_str'] .'/'. $key .'/remove_field');
+        $row['remove']    = l(t('remove'), 'admin/content/types/'. $type['url_str'] .'/fields/'. $key .'/remove');
         $form['#table'][$field['widget']['weight']][] = array($key => $row);
 
         $form['field-weights'][$key] = array('#type' => 'weight', '#default_value' => $field['widget']['weight']);
@@ -1102,7 +1102,7 @@ function content_alter_db_field($previous_field, $previous_columns, $new_field, 
     }
   }
 
-  // Add new columns and change modified columns.
+  // Add new columns and change modified columns. TODO : check that part.
   foreach ($new_columns as $column => $attributes) {
     $column_name = $new_field['field_name'] .'_'. $column;
     if (!isset($previous_columns[$column]) || $previous_field['db_storage'] != $new_field['db_storage']) {
@@ -1112,6 +1112,8 @@ function content_alter_db_field($previous_field, $previous_columns, $new_field, 
           db_create_table($ret, $new_db_info['table'], $base_table);
         }
       }
+      // TODO : do we still need to add each column separately ?
+      // could we simply create the table using the full schema ?
       db_add_field($ret, $new_db_info['table'], $column_name, $attributes);
     }
     else {
@@ -1152,6 +1154,7 @@ function content_alter_db_field($previous_field, $previous_columns, $new_field, 
       }
 
       // Migrate data from per-field storage.
+      // TODO : we probably could simplify that part using our content_write_schema_record.
       if ($previous_field['db_storage'] == CONTENT_DB_STORAGE_PER_FIELD && $new_field['db_storage'] == CONTENT_DB_STORAGE_PER_CONTENT_TYPE) {
         $column_names = array();
         $column_placeholders_default = array();
@@ -1159,14 +1162,9 @@ function content_alter_db_field($previous_field, $previous_columns, $new_field, 
         $migrate_columns = array_intersect_assoc($new_db_info['columns'], $previous_db_info['columns']);
         foreach ($migrate_columns as $column => $attributes) {
           $column_names[] = $attributes['column'];
-          if (in_array($attributes['type'], array('int', 'float'))) {
-            $column_placeholders_default[] = '%d';
-            $column_assignments_default[] = $attributes['column'] .' = %d';
-          }
-          else {
-            $column_placeholders_default[] = "'%s'";
-            $column_assignments_default[] = $attributes['column'] ." = '%s'";
-          }
+          $placeholder = _db_type_placeholder($attributes['type']);
+          $column_placeholders_default[] = $placeholder;
+          $column_assignments_default[] = $attributes['column'] .' = '. $placeholder;
         }
         if ($previous_field['multiple']) {
           $result = db_query('SELECT '. implode(', ', $column_names) .', vid, nid FROM {'. $previous_db_info['table'] .'} WHERE delta = 0');
@@ -1197,7 +1195,13 @@ function content_alter_db_field($previous_field, $previous_columns, $new_field, 
       }
     }
   }
+
+  // Rebuild the whole database schema.
+  // TODO : this could be optimized. We don't need to rebuild in *every case*...
+  drupal_get_schema(NULL, TRUE);
+
+  // TODO : debugging stuff - should be removed
   if (module_exists('devel')) {
-    dsm($ret);
+    //dsm($ret);
   }
 }
