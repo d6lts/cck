@@ -1,4 +1,4 @@
-# $Id: ru.po,v 1.1.2.1 2007/01/05 23:33:23 maynich Exp $
+# $Id$
 #
 # Russian translation of Drupal (content_admin.inc)
 # Copyright 2007 vadbars <vadbars@mail.ru>
