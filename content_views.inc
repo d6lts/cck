@@ -144,7 +144,7 @@ function content_views_field_handler_group($field_info, $field_data, $value, $da
     foreach ($field_info['content_db_info']['columns'] as $column => $attributes) {
       $query_columns[] = "node_data_$field[field_name].$attributes[column] AS $column";
     }
-    $query = "SELECT ". implode(', ', $query_columns) .
+    $query = "SELECT node.nid, ". implode(', ', $query_columns) .
              " FROM {node} node".
              " LEFT JOIN {". $field_info['content_db_info']['table'] ."} node_data_$field[field_name] ON node.vid = node_data_$field[field_name].vid".
              " WHERE node.nid = ". $data->nid .
