@@ -188,7 +188,6 @@ function content_form(&$form, &$form_state) {
 
   if (count($type['fields'])) {
     foreach ($type['fields'] as $field) {
-
       $form += content_form_field($form, $form_state, $field);
     }
   }
@@ -215,26 +214,32 @@ function content_form(&$form, &$form_state) {
 function content_form_field(&$form, &$form_state, $field) {
   $node = (object) $form['#node'];
   $addition = array();
-  $items = array();
 
   $widget_types = _content_widget_types();
   $module = $widget_types[$field['widget']['type']]['module'];
   $function = $module .'_widget';
   if (function_exists($function)) {
-    // If we're building a node creation form, pre-fill with default values.
-    if (empty($node->nid)) {
-      if (content_callback('widget', 'default value', $field) != CONTENT_CALLBACK_NONE) {
-        $widget_function = content_callback('widget', 'default value', $field) == CONTENT_CALLBACK_CUSTOM ? $module .'_default_value' : 'content_default_value';
-        if (!empty($widget_function) && function_exists($widget_function)) {
-          $items = array_merge($items, $widget_function($form, $form_state, $field, $items, 0));
-        }
-      }
-    }
-    elseif (!empty($form_state['values'][$field['field_name']])) {
+    // Prepare the values to be filled in the widget.
+    // We look in the following places :
+    // - Form submitted values
+    // - Node values (when editing an existing node), or pre-filled values (when
+    //   creating a new node translation)
+    // - Default values set for the field (when creating a new node).
+    $items = array();
+    if (!empty($form_state['values'][$field['field_name']])) {
       $items = $form_state['values'][$field['field_name']];
     }
     elseif (!empty($node->$field['field_name'])) {
       $items = $node->$field['field_name'];
+    }
+    elseif (empty($node->nid)) {
+      if (content_callback('widget', 'default value', $field) != CONTENT_CALLBACK_NONE) {
+        $function = content_callback('widget', 'default value', $field) == CONTENT_CALLBACK_CUSTOM ? $module .'_default_value' : 'content_default_value';
+        if (function_exists($function)) {
+// TODO : what's the need to pass $items as an argument ?
+          $items = $function($form, $form_state, $field, $items, 0);
+        }
+      }
     }
 
     $db_info = content_database_info($field);
@@ -386,9 +391,9 @@ function content_view(&$node, $teaser = FALSE, $page = FALSE) {
  *
  * Generate field render arrays.
  */
-function content_prepare_translations(&$node) {
-//  $default_additions = _content_field_invoke_default('prepare translations', $node);
-//  $node = (object) array_merge((array) $node,
+function content_prepare_translation(&$node) {
+  $default_additions = _content_field_invoke_default('prepare translation', $node);
+  $node = (object) array_merge((array) $node, $default_additions);
 }
 
 /**
@@ -427,8 +432,8 @@ function content_nodeapi(&$node, $op, $teaser, $page) {
       content_view($node, $teaser, $page);
       break;
 
-    case 'prepare translations':
-      content_prepare_translations($node);
+    case 'prepare translation':
+      content_prepare_translation($node);
       break;
 
   }
@@ -491,12 +496,14 @@ function content_field($op, &$node, $field, &$node_field, $teaser, $page) {
         '#weight' => $field['widget']['weight'],
         '#value' => $value,
         '#access' => $formatter != 'hidden',
-
       );
       return $addition;
 
-    case 'prepare translations':
-      $addition[$field['field_name']] = $node->translation_source->$field['field_name'];
+    case 'prepare translation':
+      $addition = array();
+      if (isset($node->translation_source->$field['field_name'])) {
+        $addition[$field['field_name']] = $node->translation_source->$field['field_name'];
+      }
       return $addition;
   }
 }
@@ -550,7 +557,7 @@ function content_storage($op, $node) {
     case 'insert':
       foreach ($type['tables'] as $table) {
         $schema = drupal_get_schema($table);
-        $record = new stdClass();
+        $record = array();
         foreach ($schema['content fields'] as $field_name) {
           $field = content_fields($field_name, $type_name);
 
@@ -561,14 +568,14 @@ function content_storage($op, $node) {
 
           $db_info = content_database_info($field);
           foreach ($db_info['columns'] as $column => $attributes) {
-            $record->{$attributes['column']} = $node->{$field_name}[0][$column];
+            $record[$attributes['column']] = $node->{$field_name}[0][$column];
           }
         }
 
-        if (count((array)$record)) {
-          $record->nid = $node->nid;
-          $record->vid = $node->vid;
-          content_write_schema_record($table, $record, $op == 'update' ? 'vid' : FALSE);
+        if (count($record)) {
+          $record['nid'] = $node->nid;
+          $record['vid'] = $node->vid;
+          content_write_record($table, $record, $op == 'update' ? 'vid' : FALSE);
         }
       }
 
@@ -582,14 +589,14 @@ function content_storage($op, $node) {
             db_query('DELETE FROM {'. $db_info['table'] .'} WHERE vid = %d', $node->vid);
           }
           foreach ($node->$field['field_name'] as $delta => $item) {
-            $record = new stdClass();
+            $record = array();
             foreach ($db_info['columns'] as $column => $attributes) {
-              $record->{$attributes['column']} = $item[$column];
+              $record[$attributes['column']] = $item[$column];
             }
-            $record->nid = $node->nid;
-            $record->vid = $node->vid;
-            $record->delta = $delta;
-            content_write_schema_record($db_info['table'], $record);
+            $record['nid'] = $node->nid;
+            $record['vid'] = $node->vid;
+            $record['delta'] = $delta;
+            content_write_record($db_info['table'], $record);
           }
         }
       }
@@ -631,10 +638,19 @@ function content_storage($op, $node) {
  *   fields defined by the $table. For example, $object->nid will be populated
  *   after inserting a new node.
  */
-function content_write_schema_record($table, &$object, $update = array()) {
+function content_write_record($table, &$object, $update = array()) {
   // Standardize $update to an array.
   if (is_string($update)) {
     $update = array($update);
+  }
+
+  // Convert to an object if needed.
+  if (is_array($object)) {
+    $object = (object) $object;
+    $array = TRUE;
+  }
+  else {
+    $array = FALSE;
   }
 
   $schema = drupal_get_schema($table);
@@ -644,7 +660,7 @@ function content_write_schema_record($table, &$object, $update = array()) {
 
   $fields = $defs = $values = $serials = array();
 
-  // Go through our schema, build correlations, and when inserting, fill in defaults for
+  // Go through our schema, build SQL, and when inserting, fill in defaults for
   // fields that are not set.
   foreach ($schema['fields'] as $field => $info) {
     // Special case -- skip serial types if we are updating.
@@ -657,10 +673,11 @@ function content_write_schema_record($table, &$object, $update = array()) {
       $object->$field = $info['default'];
     }
 
-    // Track serial fields so we can helpfully populate them in the after the query.
+    // Track serial fields so we can helpfully populate them after the query.
     if ($info['type'] == 'serial') {
-      $object->$field = 'NULL';
       $serials[] = $field;
+      // Ignore values for serials when inserting data. Unsupported.
+      $object->$field = 'NULL';
     }
 
     // Build arrays for the fields, placeholders, and values in our query.
@@ -681,6 +698,7 @@ function content_write_schema_record($table, &$object, $update = array()) {
   $query = '';
   if (!count($update)) {
     $query = "INSERT INTO {$table} (" . implode(', ', $fields) . ') VALUES (' . implode(', ', $placeholders) . ')';
+    $return = SAVED_NEW;
   }
   else {
     $query = '';
@@ -692,11 +710,12 @@ function content_write_schema_record($table, &$object, $update = array()) {
     }
 
     foreach ($update as $key){
-      $cond[] = "$key = ". _db_type_placeholder($schema['fields'][$key]['type']);
+      $conditions[] = "$key = ". _db_type_placeholder($schema['fields'][$key]['type']);
       $values[] = $object->$key;
     }
 
-    $query = "UPDATE {$table} SET $query WHERE ". implode(' AND ', $cond);
+    $query = "UPDATE {$table} SET $query WHERE ". implode(' AND ', $conditions);
+    $return = SAVED_UPDATED;
   }
   db_query($query, $values);
 
@@ -706,7 +725,13 @@ function content_write_schema_record($table, &$object, $update = array()) {
       $object->$field = db_last_insert_id($table, $field);
     }
   }
-  return TRUE;
+
+  // If we began with an array, convert back so we don't surprise the caller.
+  if ($array) {
+    $object = (array)$object;
+  }
+
+  return $return;
 }
 
 /**
