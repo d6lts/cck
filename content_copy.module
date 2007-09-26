@@ -213,7 +213,7 @@ function content_copy_import_form(&$form_state, $type_name = '') {
     '#options' => array('<create>' => t('<Create>')) + node_get_types('names'),
     '#default_value' => $type_name,
     '#title' => t('Content type'),
-    '#description' => t('Select the content type to import these fields into.<br/>Select <Create> to create a new content type to contain the fields.'),
+    '#description' => t('Select the content type to import these fields into.<br/>Select &lt;Create&gt; to create a new content type to contain the fields.'),
     );
   $form['macro'] = array(
     '#type' => 'textarea',
