@@ -455,8 +455,8 @@ function _content_admin_display_contexts() {
     NODE_BUILD_PRINT => t('Print'),
   );
   if (module_exists('search')) {
-    $contexts['NODE_BUILD_SEARCH_INDEX'] = t('Search Index');
-    $contexts['NODE_BUILD_SEARCH_RESULT'] = t('Search Result');
+    $contexts[NODE_BUILD_SEARCH_INDEX] = t('Search Index');
+    $contexts[NODE_BUILD_SEARCH_RESULT] = t('Search Result');
   }
 
   return $contexts;
