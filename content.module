@@ -792,13 +792,23 @@ function _content_field_invoke_default($op, &$node, $teaser = NULL, $page = NULL
       $items = isset($node->$field['field_name']) ? $node->$field['field_name'] : array();
 
       // Don't save empty items.
+      // If the first item is empty, keep a NULL value for each of its columns
+      // so there is a marker in the database, otherwise unset the item.
       if ($op == 'presave') {
+        $db_info = content_database_info($field);
+        $widget_types = _content_widget_types();
+        $module = $widget_types[$field['widget']['type']]['module'];
+        $is_empty = $module .'_content_is_empty';
         foreach ((array) $items as $delta => $item) {
-          $widget_types = _content_widget_types();
-          $module = $widget_types[$field['widget']['type']]['module'];
-          $is_empty = $module .'_content_is_empty';
-          if ($delta > 0 && $is_empty($item, $field)) {
-            unset($items[$delta]);
+          if ($is_empty($item, $field)) {
+            if ($field['required'] && $delta == 0) {
+              foreach (array_keys($db_info['columns']) as $column) {
+                $items[$delta][$column] = NULL;
+              }
+            }
+            else {
+              unset($items[$delta]);
+            }
           }
         }
       }
