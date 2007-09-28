@@ -121,6 +121,7 @@ function content_menu() {
 function content_theme() {
   return array(
     'field' => array(
+      'template' => 'field',
       'arguments' => array('node' => NULL, 'field' => NULL, 'items' => NULL, 'teaser' => FALSE, 'page' => FALSE),
     ),
     'content_admin_field_overview_form' => array(
@@ -1186,54 +1187,6 @@ function content_format($field, $item, $formatter = 'default', $node = NULL) {
 }
 
 /**
- * Format an individual field for display.
- *
- * @param $node
- *   The node being displayed (provided for context).
- * @param $field
- *   The field that is to be displayed (for information about the label, field
- *   type, and so forth).
- * @param $items
- *   The actual items to theme. This will be a linear array, each element of
- *   which has a "view" property which contains the filtered, formatted contents
- *   of the item.
- * @param $teaser
- *   Whether the node is being displayed as a teaser or full version.
- * @param $page
- *   Whether the node is being displayed as a full web page.
- *
- * @return
- *   An HTML string containing the fully themed field.
- */
-function theme_field(&$node, &$field, &$items, $teaser, $page) {
-  $label_display = isset($field['display_settings']['label']['format']) ? $field['display_settings']['label']['format'] : 'above';
-  $label = t($field['widget']['label']);
-  $items_output = '';
-
-  foreach ($items as $delta => $item) {
-    if (!empty($item['view']) || $item['view'] === "0") {
-      $items_output .= '<div class="field-item">';
-      if ($label_display == 'inline') {
-        $items_output .= '<div class="field-label-inline'. ($delta ? '' : '-first') .'">';
-        $items_output .= $label .':&nbsp;</div>' ;
-      }
-      $items_output .= $item['view'] .'</div>';
-    }
-  }
-
-  $output = '';
-  if (!empty($items_output)) {
-    $output .= '<div class="field field-type-'. strtr($field['type'], '_', '-') .' field-'. strtr($field['field_name'], '_', '-') .'">';
-    if ($label_display == 'above') {
-      $output .= '<div class="field-label">'. $label .':&nbsp;</div>';
-    }
-    $output .= '<div class="field-items">'. $items_output .'</div>';
-    $output .= '</div>';
-  }
-  return $output;
-}
-
-/**
  * Generate a table name for a field or a content type.
  *
  * @param $name
@@ -1443,4 +1396,36 @@ function theme_content_multiple_values($element) {
       return $element['#children'];
     }
   }
+}
+
+/**
+ * Process variables for field.tpl.php.
+ *
+ * The $variables array contains the following arguments:
+ * - $node
+ * - $field
+ * - $items
+ * - $teaser
+ * - $page
+ *
+ * @see field.tpl.php
+ */
+function template_preprocess_field(&$variables) {
+  $field = $variables['field'];
+  $field_empty = FALSE;
+  foreach ($variables['items'] as $item) {
+    if (empty($item['view']) && $item['view'] !== 0) {
+      $field_empty = TRUE;
+    }
+  }
+  $additions = array(
+    'field_type' => $field['type'],
+    'field_name' => $field['field_name'],
+    'field_type_css' => strtr($field['type'], '_', '-'),
+    'field_name_css' => strtr($field['field_name'], '_', '-'),
+    'label' => $field['widget']['label'],
+    'label_display' => isset($field['display_settings']['label']['format']) ? $field['display_settings']['label']['format'] : 'above',
+    'field_empty' => $field_empty,
+  );
+  $variables = array_merge($variables, $additions);
 }
