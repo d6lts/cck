@@ -780,6 +780,7 @@ function _content_field_invoke($op, &$node, $teaser = NULL, $page = NULL) {
 function _content_field_invoke_default($op, &$node, $teaser = NULL, $page = NULL) {
   $type_name = is_string($node) ? $node : (is_array($node) ? $node['type'] : $node->type);
   $type = content_types($type_name);
+  $field_types = _content_field_types();
 
   $return = array();
   // The operations involving database queries are better off handled by table
@@ -796,8 +797,7 @@ function _content_field_invoke_default($op, &$node, $teaser = NULL, $page = NULL
       // so there is a marker in the database, otherwise unset the item.
       if ($op == 'presave') {
         $db_info = content_database_info($field);
-        $widget_types = _content_widget_types();
-        $module = $widget_types[$field['widget']['type']]['module'];
+        $module = $field_types[$field['type']]['module'];
         $is_empty = $module .'_content_is_empty';
         foreach ((array) $items as $delta => $item) {
           if ($is_empty($item, $field)) {
