@@ -801,7 +801,7 @@ function _content_field_invoke_default($op, &$node, $teaser = NULL, $page = NULL
         $is_empty = $module .'_content_is_empty';
         foreach ((array) $items as $delta => $item) {
           if ($is_empty($item, $field)) {
-            if ($field['required'] && $delta == 0) {
+            if ($delta == 0) {
               foreach (array_keys($db_info['columns']) as $column) {
                 $items[$delta][$column] = NULL;
               }
