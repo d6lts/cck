@@ -234,10 +234,10 @@ function content_form_field(&$form, &$form_state, $field) {
     }
     elseif (empty($node->nid)) {
       if (content_callback('widget', 'default value', $field) != CONTENT_CALLBACK_NONE) {
-        $function = content_callback('widget', 'default value', $field) == CONTENT_CALLBACK_CUSTOM ? $module .'_default_value' : 'content_default_value';
-        if (function_exists($function)) {
+        $callback = content_callback('widget', 'default value', $field) == CONTENT_CALLBACK_CUSTOM ? $module .'_default_value' : 'content_default_value';
+        if (function_exists($callback)) {
 // TODO : what's the need to pass $items as an argument ?
-          $items = $function($form, $form_state, $field, $items, 0);
+          $items = $callback($form, $form_state, $field, $items, 0);
         }
       }
     }
