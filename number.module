@@ -6,6 +6,27 @@
  * Defines numeric field types.
  */
 
+/**
+ * Implementation of hook_enable().
+ *
+ * Notify content module when this module is enabled.
+ */
+function number_enable() {
+  content_notify('enable', 'number');
+}
+
+/**
+ * Implementation of hook_disable().
+ *
+ * Notify content module when this module is disabled.
+ */
+function number_disable() {
+  content_notify('disable', 'number');
+}
+
+/**
+ * Implementation of hook_theme().
+ */
 function number_theme() {
   return array(
     'number' => array('arguments' => array('element' => NULL)),

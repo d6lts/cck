@@ -452,6 +452,31 @@ function content_form_alter(&$form, $form_state, $form_id) {
 }
 
 /**
+ * Modules notify Content module when uninstalled, disabled, etc.
+ *
+ * @param string $op
+ *   the module operation: uninstall, install, enable, disable
+ * @param string $module
+ *   the name of the affected module.
+ * @TODO
+ *   figure out exactly what needs to be done by content module when
+ *   field modules are installed, uninstalled, enabled or disabled.
+ */
+function content_notify($op, $module) {
+  // PLACEHOLDER
+  switch ($op) {
+    case 'install':
+      break;
+    case 'uninstall':
+      break;
+    case 'enable':
+      break;
+    case 'disable':
+      break;
+  }
+}
+
+/**
  *  Make sure that CCK content type info is synched with node type data
  *  any time the content module is enabled.
  */

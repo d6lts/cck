@@ -6,6 +6,7 @@
  */
 function fieldgroup_install() {
   drupal_install_schema('fieldgroup');
+  content_notify('install', 'fieldgroup');
 }
 
 
@@ -14,6 +15,7 @@ function fieldgroup_install() {
  */
 function fieldgroup_uninstall() {
   drupal_uninstall_schema('fieldgroup');
+  content_notify('uninstall', 'fieldgroup');
 }
 
 

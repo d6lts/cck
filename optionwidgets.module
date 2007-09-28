@@ -7,6 +7,24 @@
  */
 
 /**
+ * Implementation of hook_enable().
+ *
+ * Notify content module when this module is enabled.
+ */
+function optionwidgets_enable() {
+  content_notify('enable', 'optionwidgets');
+}
+
+/**
+ * Implementation of hook_disable().
+ *
+ * Notify content module when this module is disabled.
+ */
+function optionwidgets_disable() {
+  content_notify('disable', 'optionwidgets');
+}
+
+/**
  * Implementation of hook_help().
  */
 function optionwidgets_help($path, $arg) {

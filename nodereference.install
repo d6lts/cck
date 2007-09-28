@@ -5,6 +5,14 @@
  * Implementation of hook_install().
  */
 function nodereference_install() {
+  content_notify('install', 'nodereference');
+}
+
+/**
+ * Implementation of hook_uninstall().
+ */
+function nodereference_uninstall() {
+  content_notify('uninstall', 'nodereference');
 }
 
 /**
@@ -88,5 +96,31 @@ function nodereference_update_3() {
   $ret[] = update_sql('DROP TABLE {node_field_nodereference_data}');
 
   db_query('DELETE FROM {cache}');
+  return $ret;
+}
+
+/**
+ * All fields must allow NULL values to indicate empty fields.
+ */
+function nodereference_update_6000() {
+  $ret = array();
+
+  include_once('./'. drupal_get_path('module', 'content') .'/content.module');
+  include_once('./'. drupal_get_path('module', 'content') .'/content_admin.inc');
+
+  content_clear_type_cache();
+  $fields = content_fields();
+
+  foreach ($fields as $field) {
+    switch ($field['type']) {
+      case 'nodereference':
+        $columns = array(
+          'nid' => array('type' => 'int', 'not null' => FALSE, 'default' => '0'),
+        );
+        @content_alter_db_field(array(), array(), $field, $columns);
+    }
+  }
+  // TODO : not cleared ?
+  content_clear_type_cache();
   return $ret;
 }

@@ -5,6 +5,14 @@
  * Implementation of hook_install().
  */
 function text_install() {
+  content_notify('install', 'text');
+}
+
+/**
+ * Implementation of hook_uninstall().
+ */
+function text_uninstall() {
+  content_notify('uninstall', 'text');
 }
 
 /**
@@ -199,6 +207,36 @@ function text_update_6000() {
     $widget_settings = unserialize($field_instance['widget_settings']);
     $new_widget_type = ($widget_settings['rows'] > 1) ? 'text_textarea' : 'text_textfield';
     $ret[] = update_sql("UPDATE {node_field_instance} SET widget_type = '$new_widget_type' WHERE field_name = '{$field_instance['field_name']}' AND type_name = '{$field_instance['type_name']}'");
+  }
+  // TODO : not cleared ?
+  content_clear_type_cache();
+  return $ret;
+}
+
+/**
+ * All fields must allow NULL values to indicate empty fields.
+ */
+function text_update_6001() {
+  $ret = array();
+
+  include_once('./'. drupal_get_path('module', 'content') .'/content.module');
+  include_once('./'. drupal_get_path('module', 'content') .'/content_admin.inc');
+
+  content_clear_type_cache();
+  $fields = content_fields();
+
+  foreach ($fields as $field) {
+    $columns = array();
+    if (empty($field['max_length']) || $field['max_length'] > 255) {
+      $columns['value'] = array('type' => 'text', 'size' => 'big', 'not null' => FALSE, 'default' => '', 'sortable' => TRUE);
+    }
+    else {
+      $columns['value'] = array('type' => 'varchar', 'length' => $field['max_length'], 'not null' => FALSE, 'default' => '', 'sortable' => TRUE);
+    }
+    if (!empty($field['text_processing'])) {
+      $columns['format'] = array('type' => 'int', 'unsigned' => TRUE, 'not null' => FALSE, 'default' => 0);
+    }
+    @content_alter_db_field(array(), array(), $field, $columns);
   }
   // TODO : not cleared ?
   content_clear_type_cache();

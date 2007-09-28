@@ -5,6 +5,14 @@
  * Implementation of hook_install().
  */
 function userreference_install() {
+  content_notify('install', 'userreference');
+}
+
+/**
+ * Implementation of hook_uninstall().
+ */
+function userreference_uninstall() {
+  content_notify('uninstall', 'userreference');
 }
 
 /**

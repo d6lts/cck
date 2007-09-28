@@ -7,6 +7,24 @@
  */
 
 /**
+ * Implementation of hook_enable().
+ *
+ * Notify content module when this module is enabled.
+ */
+function userreference_enable() {
+  content_notify('enable', 'userreference');
+}
+
+/**
+ * Implementation of hook_disable().
+ *
+ * Notify content module when this module is disabled.
+ */
+function userreference_disable() {
+  content_notify('disable', 'userreference');
+}
+
+/**
  * Implementation of hook_field_info().
  *
  * Here we indicate that the content module will use its default
