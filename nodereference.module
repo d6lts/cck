@@ -153,19 +153,17 @@ function nodereference_field($op, &$node, $field, &$items, $teaser, $page) {
         }
       }
       return;
-
-    // Don't save empty items.
-    case 'presave':
-      if (is_array($items)) {
-        foreach ($items as $delta => $item) {
-          if ($delta > 0 && empty($item)) {
-            unset($items[$delta]);
-            unset($node->{$field['field_name'][$delta]});
-          }
-        }
-      }
-      break;
   }
+}
+
+/**
+ * Implementation of hook_content_is_empty().
+ */
+function nodeference_content_is_empty($item, $field) {
+  if (empty($item['nid'])) {
+    return TRUE;
+  }
+  return FALSE;
 }
 
 /**

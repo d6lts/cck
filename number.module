@@ -167,19 +167,17 @@ function number_field($op, &$node, $field, &$items, $teaser, $page) {
         }
       }
       break;
-
-    // Don't save empty items.
-    case 'presave':
-      if (is_array($items)) {
-        foreach ($items as $delta => $item) {
-          if ($delta > 0 && empty($item)) {
-            unset($items[$delta]);
-            unset($node->{$field['field_name'][$delta]});
-          }
-        }
-      }
-      break;
   }
+}
+
+/**
+ * Implementation of hook_content_is_empty().
+ */
+function number_content_is_empty($item, $field) {
+  if (empty($item['value'])) {
+    return TRUE;
+  }
+  return FALSE;
 }
 
 /**

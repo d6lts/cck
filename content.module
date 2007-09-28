@@ -789,11 +789,23 @@ function _content_field_invoke_default($op, &$node, $teaser = NULL, $page = NULL
   }
   elseif (count($type['fields'])) {
     foreach ($type['fields'] as $field) {
-      $node_field = isset($node->$field['field_name']) ? $node->$field['field_name'] : array();
+      $items = isset($node->$field['field_name']) ? $node->$field['field_name'] : array();
+
+      // Don't save empty items.
+      if ($op == 'presave') {
+        foreach ((array) $items as $delta => $item) {
+          $widget_types = _content_widget_types();
+          $module = $widget_types[$field['widget']['type']]['module'];
+          $is_empty = $module .'_content_is_empty';
+          if ($delta > 0 && $is_empty($item, $field)) {
+            unset($items[$delta]);
+          }
+        }
+      }
 
       $db_info = content_database_info($field);
       if (count($db_info['columns'])) {
-        $result = content_field($op, $node, $field, $node_field, $teaser, $page);
+        $result = content_field($op, $node, $field, $items, $teaser, $page);
         if (is_array($result)) {
           $return = array_merge($return, $result);
         }
@@ -802,7 +814,7 @@ function _content_field_invoke_default($op, &$node, $teaser = NULL, $page = NULL
         }
       }
       if (isset($node->$field['field_name'])) {
-        $node->$field['field_name'] = $node_field;
+        $node->$field['field_name'] = $items;
       }
     }
   }
