@@ -588,8 +588,6 @@ function _content_admin_field_add_existing_submit($form, &$form_state) {
   $form_values = $form_state['values'];
   $type  = content_types($form_values['type_name']);
   $field = content_fields($form_values['field_name']);
-  $field_types = _content_field_types();
-  $field_type = $field_types[$field['type']];
   $columns = content_invoke_columns($field);
 
   if (is_array($columns) && count($columns)) {
@@ -675,10 +673,7 @@ function _content_admin_field_add_new_submit($form, &$form_state) {
   menu_rebuild();
 
   // Create new database columns as necessary.
-  $field_types = _content_field_types();
-  $field_type = $field_types[$field_widget_type[0]];
   $field = content_fields($field_name);
-
   $columns = content_invoke_columns($field);
   if (is_array($columns) && count($columns)) {
     content_alter_db_field(array(), array(), $field, $columns);
@@ -1014,7 +1009,7 @@ function _content_admin_field_submit($form, &$form_state) {
   }
 
   $prev_field = $field;
-  $prev_columns = module_invoke($field_type['module'], 'field_settings', 'database columns', $field);
+  $prev_columns = content_invoke_columns($field);
 
   db_query("UPDATE {node_field_instance} SET weight = %d, label = '%s', widget_type = '%s', widget_settings = '%s', description = '%s' WHERE type_name = '%s' AND field_name = '%s'", $form_values['weight'], $form_values['label'], $form_values['widget_type'], serialize($widget_settings), $form_values['description'], $form_values['type_name'], $form_values['field_name']);
 
@@ -1034,7 +1029,7 @@ function _content_admin_field_submit($form, &$form_state) {
   content_clear_type_cache();
 
   $new_field = content_fields($form_values['field_name']);
-  $new_columns = module_invoke($field_type['module'], 'field_settings', 'database columns', $new_field);
+  $new_columns = content_invoke_columns($new_field);
 
   if (!isset($prev_columns)) {
     $prev_columns = array();

@@ -1080,8 +1080,6 @@ function content_clear_type_cache() {
  *       database column that stores the data.
  */
 function content_database_info($field) {
-  $field_types = _content_field_types();
-  $module = $field_types[$field['type']]['module'];
   $columns = content_invoke_columns($field);
 
   $db_info = array();
@@ -1116,7 +1114,7 @@ function content_invoke_columns($field) {
   $columns = module_invoke($module, 'field_settings', 'database columns', $field);
   if (is_array($columns)) {
     // Ensure columns always default to NULL values.
-    foreach ((array) $columns as $column_name => $column) {
+    foreach ($columns as $column_name => $column) {
       $columns[$column_name]['not null'] = FALSE;
       unset($columns[$column_name]['default']);
     }
