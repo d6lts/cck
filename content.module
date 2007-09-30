@@ -1084,12 +1084,6 @@ function content_database_info($field) {
   $module = $field_types[$field['type']]['module'];
   $columns = module_invoke($module, 'field_settings', 'database columns', $field);
 
-  // Ensure columns always default to NULL values.
-  foreach ($columns as $key => $column) {
-    $columns[$key]['not null'] = FALSE;
-    unset($columns[$key]['default']);
-  }
-
   $db_info = array();
 
   if ($field['db_storage'] == CONTENT_DB_STORAGE_PER_FIELD) {
@@ -1103,6 +1097,9 @@ function content_database_info($field) {
     $db_info['columns'] = $columns;
     foreach ($columns as $column_name => $attributes) {
       $db_info['columns'][$column_name]['column'] = $field['field_name'] .'_'. $column_name;
+      // Ensure columns always default to NULL values.
+      $db_info['columns'][$column_name]['not null'] = FALSE;
+      unset($db_info['columns'][$column_name]['default']);
     }
   }
   else {
