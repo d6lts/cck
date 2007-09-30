@@ -135,7 +135,7 @@ function nodereference_field_settings($op, $field) {
 
     case 'database columns':
       $columns = array(
-        'nid' => array('type' => 'int', 'unsigned' => TRUE, 'not null' => FALSE, 'default' => 0),
+        'nid' => array('type' => 'int', 'unsigned' => TRUE, 'not null' => FALSE),
       );
       return $columns;
 
