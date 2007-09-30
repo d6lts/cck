@@ -493,12 +493,33 @@ function content_enable() {
  * types. Instead, this function gets called after the type-specific hook, and
  * takes care of default stuff common to all field types.
  */
-function content_field($op, &$node, $field, &$node_field, $teaser, $page) {
+function content_field($op, &$node, $field, &$items, $teaser, $page) {
   $db_info = content_database_info($field);
 
   switch ($op) {
     case 'validate':
       // TODO : here we could validate that the number of multiple data is correct ?
+      break;
+
+    case 'presave':
+      // Don't save empty items.
+      // If the first item is empty, keep a NULL value for each of its columns
+      // so there is a marker in the database, otherwise unset the item.
+      $db_info = content_database_info($field);
+      $module = $field_types[$field['type']]['module'];
+      $is_empty = $module .'_content_is_empty';
+      foreach ((array) $items as $delta => $item) {
+        if ($is_empty($item, $field)) {
+          if ($delta == 0) {
+            foreach (array_keys($db_info['columns']) as $column) {
+              $items[$delta][$column] = NULL;
+            }
+          }
+          else {
+            unset($items[$delta]);
+          }
+        }
+      }
       break;
 
     case 'view':
@@ -513,14 +534,14 @@ function content_field($op, &$node, $field, &$node_field, $teaser, $page) {
       $value = '';
 
       if ($formatter != 'hidden') {
-        foreach ($node_field as $delta => $item) {
-          $node_field[$delta]['view'] = content_format($field, $item, $formatter, $node);
+        foreach ($items as $delta => $item) {
+          $items[$delta]['view'] = content_format($field, $item, $formatter, $node);
         }
         // Do not include field labels when indexing content.
         if ($context == NODE_BUILD_SEARCH_INDEX) {
           $field['display_settings']['label']['format'] = 'hidden';
         }
-        $value = theme('field', $node, $field, $node_field, $teaser, $page);
+        $value = theme('field', $node, $field, $items, $teaser, $page);
       }
       $addition[$field['field_name']] = array(
         '#weight' => $field['widget']['weight'],
@@ -778,12 +799,12 @@ function _content_field_invoke($op, &$node, $teaser = NULL, $page = NULL) {
   $return = array();
   if (count($type['fields'])) {
     foreach ($type['fields'] as $field) {
-      $node_field = isset($node->$field['field_name']) ? $node->$field['field_name'] : array();
+      $items = isset($node->$field['field_name']) ? $node->$field['field_name'] : array();
 
       $module = $field_types[$field['type']]['module'];
       $function = $module .'_field';
       if (function_exists($function)) {
-        $result = $function($op, $node, $field, $node_field, $teaser, $page);
+        $result = $function($op, $node, $field, $items, $teaser, $page);
         if (is_array($result)) {
           $return = array_merge($return, $result);
         }
@@ -791,9 +812,9 @@ function _content_field_invoke($op, &$node, $teaser = NULL, $page = NULL) {
           $return[] = $result;
         }
       }
-      // test for values in $node_field in case modules added items on insert
-      if (isset($node->$field['field_name']) || count($node_field)) {
-        $node->$field['field_name'] = $node_field;
+      // test for values in $items in case modules added items on insert
+      if (isset($node->$field['field_name']) || count($items)) {
+        $node->$field['field_name'] = $items;
       }
     }
   }
@@ -817,28 +838,6 @@ function _content_field_invoke_default($op, &$node, $teaser = NULL, $page = NULL
   elseif (count($type['fields'])) {
     foreach ($type['fields'] as $field) {
       $items = isset($node->$field['field_name']) ? $node->$field['field_name'] : array();
-
-      // Don't save empty items.
-      // If the first item is empty, keep a NULL value for each of its columns
-      // so there is a marker in the database, otherwise unset the item.
-      if ($op == 'presave') {
-        $db_info = content_database_info($field);
-        $module = $field_types[$field['type']]['module'];
-        $is_empty = $module .'_content_is_empty';
-        foreach ((array) $items as $delta => $item) {
-          if ($is_empty($item, $field)) {
-            if ($delta == 0) {
-              foreach (array_keys($db_info['columns']) as $column) {
-                $items[$delta][$column] = NULL;
-              }
-            }
-            else {
-              unset($items[$delta]);
-            }
-          }
-        }
-      }
-
       $db_info = content_database_info($field);
       if (count($db_info['columns'])) {
         $result = content_field($op, $node, $field, $items, $teaser, $page);
