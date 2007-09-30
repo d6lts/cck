@@ -590,7 +590,7 @@ function _content_admin_field_add_existing_submit($form, &$form_state) {
   $field = content_fields($form_values['field_name']);
   $field_types = _content_field_types();
   $field_type = $field_types[$field['type']];
-  $columns = module_invoke($field_type['module'], 'field_settings', 'database columns', $field);
+  $columns = content_invoke_columns($field);
 
   if (is_array($columns) && count($columns)) {
     if ($field['db_storage'] == CONTENT_DB_STORAGE_PER_CONTENT_TYPE) {
@@ -679,7 +679,7 @@ function _content_admin_field_add_new_submit($form, &$form_state) {
   $field_type = $field_types[$field_widget_type[0]];
   $field = content_fields($field_name);
 
-  $columns = module_invoke($field_type['module'], 'field_settings', 'database columns', $field);
+  $columns = content_invoke_columns($field);
   if (is_array($columns) && count($columns)) {
     content_alter_db_field(array(), array(), $field, $columns);
   }

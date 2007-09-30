@@ -1082,7 +1082,7 @@ function content_clear_type_cache() {
 function content_database_info($field) {
   $field_types = _content_field_types();
   $module = $field_types[$field['type']]['module'];
-  $columns = module_invoke($module, 'field_settings', 'database columns', $field);
+  $columns = content_invoke_columns($field);
 
   $db_info = array();
 
@@ -1097,9 +1097,6 @@ function content_database_info($field) {
     $db_info['columns'] = $columns;
     foreach ($columns as $column_name => $attributes) {
       $db_info['columns'][$column_name]['column'] = $field['field_name'] .'_'. $column_name;
-      // Ensure columns always default to NULL values.
-      $db_info['columns'][$column_name]['not null'] = FALSE;
-      unset($db_info['columns'][$column_name]['default']);
     }
   }
   else {
@@ -1107,6 +1104,24 @@ function content_database_info($field) {
   }
 
   return $db_info;
+}
+
+/**
+ * Helper function to retrieve column information for a field
+ * Allows content module to control column settings.
+ */
+function content_invoke_columns($field) {
+  $field_types = _content_field_types();
+  $module = $field_types[$field['type']]['module'];
+  $columns = module_invoke($module, 'field_settings', 'database columns', $field);
+  if (is_array($columns)) {
+    // Ensure columns always default to NULL values.
+    foreach ((array) $columns as $column_name => $column) {
+      $columns[$column_name]['not null'] = FALSE;
+      unset($columns[$column_name]['default']);
+    }
+  }
+  return $columns;
 }
 
 /**
