@@ -263,10 +263,6 @@ function userreference_autocomplete_validate($element, &$form_state) {
   if (!empty($value)) {
     form_set_value($element[$field_key], $value, $form_state);
   }
-  elseif ($element['#delta'] > 0) {
-    // Don't save empty fields when they're not the first value (keep '0' otherwise)
-    form_set_value($element[$field_key], 0, $form_state);
-  }
 }
 
 /**
