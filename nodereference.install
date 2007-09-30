@@ -115,7 +115,7 @@ function nodereference_update_6000() {
     switch ($field['type']) {
       case 'nodereference':
         $columns = array(
-          'nid' => array('type' => 'int', 'not null' => FALSE, 'default' => '0'),
+          'nid' => array('type' => 'int', 'not null' => FALSE),
         );
         @content_alter_db_field(array(), array(), $field, $columns);
     }
