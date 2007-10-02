@@ -177,6 +177,8 @@ function number_update_5() {
 
 /**
  * All fields must allow NULL values to indicate empty fields.
+ * The previous update set not null to FALSE, need to remove default value, too,
+ * then update existing values in the database.
  */
 function number_update_6000() {
   $ret = array();
@@ -189,21 +191,25 @@ function number_update_6000() {
 
   foreach ($fields as $field) {
     switch ($field['type']) {
-      case 'number':
+      case 'number_integer':
+      case 'number_decimal':
         if ($field['type'] == 'number_integer') {
           $columns = array(
-            'value' => array('type' => 'int', 'not null' => FALSE, 'sortable' => TRUE),
+            'value' => array('type' => 'int', 'not null' => FALSE),
           );
         }
         if ($field['type'] == 'number_decimal') {
           $columns = array(
-            'value' => array('type' => 'float', 'not null' => FALSE, 'sortable' => TRUE),
+            'value' => array('type' => 'float', 'not null' => FALSE),
           );
         }
         @content_alter_db_field(array(), array(), $field, $columns);
+
     }
   }
   // TODO : not cleared ?
   content_clear_type_cache();
+
+
   return $ret;
 }
