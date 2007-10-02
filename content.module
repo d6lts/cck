@@ -505,7 +505,7 @@ function content_field($op, &$node, $field, &$items, $teaser, $page) {
       // Don't save empty items.
       // If the first item is empty, keep a NULL value for each of its columns
       // so there is a marker in the database, otherwise unset the item.
-      $db_info = content_database_info($field);
+      $field_types = _content_field_types();
       $module = $field_types[$field['type']]['module'];
       $is_empty = $module .'_content_is_empty';
       foreach ((array) $items as $delta => $item) {
