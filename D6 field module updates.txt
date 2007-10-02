@@ -1,4 +1,12 @@
+- content_notify() on install/uninstall/enable/disable
 - widgets that include a file upload element need to add
-$form['#attributes'] = array("enctype" => "multipart/form-data");
-to the $form array they receive as a parameter.
+$form['#attributes']['enctype'] = "multipart/form-data";
+to the $form array they receive as a parameter in hook_widget.
 - hook_field($op = 'view') is finally deprecated
+- hook_field('columns') now use Schema API syntax (link ?)
+- field db columns are now forced with 'not null' => FALSE, 'default' => NULL
+- field modules have to write an update function to update their columns 
+  (TBD : and the data ?)
+  (TODO : can we provide a helper function to make this easier ?)
+- hook_content_is_empty
+
