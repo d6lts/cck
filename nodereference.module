@@ -177,7 +177,7 @@ function nodereference_field($op, &$node, $field, &$items, $teaser, $page) {
 /**
  * Implementation of hook_content_is_empty().
  */
-function nodeference_content_is_empty($item, $field) {
+function nodereference_content_is_empty($item, $field) {
   if (empty($item['nid'])) {
     return TRUE;
   }
