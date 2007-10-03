@@ -879,6 +879,7 @@ function _content_type_info($reset = FALSE) {
       while ($type = db_fetch_array($type_result)) {
         $type['url_str'] = str_replace('_', '-', $type['type']);
         $type['fields'] = array();
+        $type['tables'] = array();
         $field_result = db_query("SELECT * FROM {node_field_instance} nfi WHERE nfi.type_name = '%s' ORDER BY nfi.weight ASC, nfi.label ASC", $type['type']);
         while ($field = db_fetch_array($field_result)) {
           // Overwrite global field information with specific information
@@ -904,7 +905,6 @@ function _content_type_info($reset = FALSE) {
         }
         $info['content types'][$type['type']] = $type;
       }
-
       cache_set('content_type_info', $info, 'cache_content');
     }
   }
@@ -963,7 +963,6 @@ function content_clear_type_cache() {
  */
 function content_database_info($field) {
   $columns = content_invoke_columns($field);
-
   $db_info = array();
 
   if ($field['db_storage'] == CONTENT_DB_STORAGE_PER_FIELD) {
