@@ -1,5 +1,14 @@
 // $Id$
 
+5--1.x
+======
+
+Bugfix
+------
+
+Field / widget modules
+- #140687  OptionWidgets : fix 'single checkbox' stick on checked when used with text values.
+
 5--1.6-1
 ========
 
