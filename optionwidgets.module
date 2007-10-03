@@ -251,6 +251,9 @@ function optionwidgets_onoff_process($element, &$form_state) {
     '#required' => $element['required'],
     '#multiple' => $field['multiple'],
     '#options' => optionwidgets_options($field),
+    // TODO : check fix for http://drupal.org/node/140687 - http://drupal.org/cvs?commit=83011
+    // been committed to 4.7 and 5, not sure of the right way to fix in D6
+    // (optionwidgets seem sort of broken right now)
     '#default_value' => isset($element['#value']) ? $element['#value'] : NULL,
   );
   return $element;
