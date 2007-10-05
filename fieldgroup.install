@@ -18,6 +18,32 @@ function fieldgroup_uninstall() {
   content_notify('uninstall', 'fieldgroup');
 }
 
+/**
+ * Implementation of hook_schema.
+ */
+function fieldgroup_schema() {
+  $schema['node_group'] = array(
+    'fields' => array(
+      'type_name'  => array('type' => 'varchar', 'length' => 32, 'not null' => TRUE, 'default' => ''),
+      'group_name' => array('type' => 'varchar', 'length' => 32, 'not null' => TRUE, 'default' => ''),
+      'label'      => array('type' => 'varchar', 'length' => 255, 'not null' => TRUE, 'default' => ''),
+      'settings'   => array('type' => 'text', 'size' => 'medium', 'not null' => TRUE, 'default' => ''),
+      'weight'     => array('type' => 'int', 'size' => 'tiny', 'not null' => TRUE, 'default' => 0),
+    ),
+    'primary key' => array('type_name', 'group_name'),
+  );
+
+  $schema['node_group_fields'] = array(
+    'fields' => array(
+      'type_name'  => array('type' => 'varchar', 'length' => 32, 'not null' => TRUE, 'default' => ''),
+      'group_name' => array('type' => 'varchar', 'length' => 32, 'not null' => TRUE, 'default' => ''),
+      'field_name' => array('type' => 'varchar', 'length' => 32, 'not null' => TRUE, 'default' => ''),
+    ),
+    'primary key' => array('type_name', 'group_name', 'field_name'),
+  );
+
+  return $schema;
+}
 
 /**
  *  rename groups form "group-*" to "group_*"
