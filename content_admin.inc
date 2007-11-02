@@ -526,11 +526,11 @@ function _content_admin_field_add_new(&$form_state, $type_name, $new_field_name 
       '#type' => 'fieldset',
       '#title' => t('Create new field'),
     );
-    $form['new']['widget']['label'] = array(
-      '#title' => t('Name'),
+    $form['new']['field']['field_name'] = array(
+      '#title' => t('Field name'),
       '#type' => 'textfield',
       '#default_value' => '',
-      '#description' => t('The machine-readable name of the field.<br/>Allowed characters : unaccentuated a-z, numbers and _. All other characters will be discarded.<br/>You\'ll be able to choose a human-readable label for the field on next page'),
+      '#description' => t('The machine-readable name of the field. This name cannot be changed later!<br/>Allowed characters : unaccentuated a-z, numbers and _.<br/>You\'ll be able to choose a human-readable label for the field on next page'),
       '#required' => TRUE,
     );
     $form['new']['field_widget_type'] = array(
@@ -618,7 +618,7 @@ function _content_admin_field_add_existing_submit($form, &$form_state) {
 }
 
 /**
- *  Field name validation for programmatic field addition that supply the field name.
+ *  Field name validation.
  */
 function _content_admin_field_add_new_validate($form, &$form_state) {
   $form_values = $form_state['values'];
@@ -640,30 +640,9 @@ function _content_admin_field_add_new_validate($form, &$form_state) {
  */
 function _content_admin_field_add_new_submit($form, &$form_state) {
   $form_values = $form_state['values'];
-  // Find a valid, computer-friendly field name.
 
   $fields = content_fields();
   $type   = content_types($form_values['type_name']);
-
-  // Accept field name from programmed submissions if valid and it doesn't already exist.
-  if ($form_values['field_name']) {
-    $field_name = $form_values['field_name'];
-  }
-  else {
-    $field_name = trim($form_values['label']);
-    $field_name = drupal_strtolower($field_name);
-    $field_name = str_replace(array(' ', '-'), '_', $field_name);
-    $field_name = preg_replace('/[^a-z0-9_]/', '', $field_name);
-    $field_name = 'field_'. $field_name;
-    $field_name = substr($field_name, 0, 31);
-    if (isset($fields[$field_name])) {
-      $counter = 0;
-      do {
-        $new_name = substr($field_name, 0, 29) .'_'. $counter++;
-      }   while (isset($fields[$new_name]));
-      $field_name = $new_name;
-    }
-  }
 
   $field_widget_type = explode('-', $form_values['field_widget_type']);
   db_query("INSERT INTO {node_field} (field_name, type, global_settings, required, multiple, db_storage) VALUES ('%s', '%s', '%s', %d, %d, %d)", $field_name, $field_widget_type[0], serialize(array()), 0, 0, CONTENT_DB_STORAGE_PER_CONTENT_TYPE);
@@ -679,7 +658,7 @@ function _content_admin_field_add_new_submit($form, &$form_state) {
     content_alter_db_field(array(), array(), $field, $columns);
   }
 
-  drupal_set_message(t('Created field %label.', array('%label' => $form_values['label'])));
+  drupal_set_message(t('Created field %label.', array('%label' => $form_values['field_name'])));
 
   $form_state['redirect'] = 'admin/content/types/'. $type['url_str'] .'/fields/'. $field_name;
 }
@@ -744,7 +723,7 @@ function _content_admin_field(&$form_state, $type_name, $field_name) {
   $widget_types = _content_widget_types();
   $widget_type = $widget_types[$field['widget']['type']];
 
-  drupal_set_title($field['widget']['label']);
+  drupal_set_title(isset($field['widget']['label']) ? $field['widget']['label'] : $field['field_name']);
 
   $form = array();
   $form['widget'] = array(
