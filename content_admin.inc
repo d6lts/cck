@@ -725,7 +725,8 @@ function _content_admin_field(&$form_state, $type_name, $field_name) {
 
   drupal_set_title(isset($field['widget']['label']) ? $field['widget']['label'] : $field['field_name']);
 
-  $form = array();
+  // Set up form info that the default value widget will need to find in the form.
+  $form = array('#field_info' => array($field['field_name'] => $field));
   $form['widget'] = array(
     '#type' => 'fieldset',
     '#title' => t('Widget settings'),
@@ -789,7 +790,6 @@ function _content_admin_field(&$form_state, $type_name, $field_name) {
     $widget_items = array($field['field_name'] => $default_value);
     $widget_form_state = array('values' => $widget_items);
     $form_element = content_form_field($widget_form, $widget_form_state, $widget_field, $widget_items, 0);
-
     $form['widget']['default_value_fieldset']['default_value_widget'] = $form_element;
     $form['widget']['default_value_fieldset']['default_value_widget']['#tree'] = TRUE;
     $form['widget']['default_value_fieldset']['advanced_options'] = array(

@@ -179,7 +179,7 @@ function optionwidgets_value(&$element, $edit = FALSE) {
  * note that $element['#value'] is already set from $element['#default_value'].
  */
 function optionwidgets_buttons_process($element, $edit, $form_state, $form) {
-  $field_name = $element['#parents'][0];
+  $field_name = $element['#field_name'];
   $field = $form['#field_info'][$field_name];
   $field_key  = $element['#columns'][0];
 
@@ -202,7 +202,7 @@ function optionwidgets_buttons_process($element, $edit, $form_state, $form) {
  * note that $element['#value'] is already set from $element['#default_value'].
  */
 function optionwidgets_select_process($element, $edit, $form_state, $form) {
-  $field_name = $element['#parents'][0];
+  $field_name = $element['#field_name'];
   $field = $form['#field_info'][$field_name];
   $field_key  = $element['#columns'][0];
 

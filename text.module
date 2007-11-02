@@ -364,7 +364,7 @@ function text_widget(&$form, &$form_state, $field, $items, $delta = 0) {
  *
  */
 function text_textfield_process($element, $edit, $form_state, $form) {
-  $field = $form['#field_info'][$element['#parents'][0]];
+  $field = $form['#field_info'][$element['#field_name']];
   $field_key = $element['#columns'][0];
   $delta = $element['#delta'];
 
@@ -395,7 +395,7 @@ function text_textfield_process($element, $edit, $form_state, $form) {
  *
  */
 function text_textarea_process($element, $edit, $form_state, $form) {
-  $field = $form['#field_info'][$element['#parents'][0]];
+  $field = $form['#field_info'][$element['#field_name']];
   $field_key   = $element['#columns'][0];
   $element[$field_key] = array(
     '#type' => 'textarea',

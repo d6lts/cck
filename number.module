@@ -369,7 +369,7 @@ function number_widget(&$form, &$form_state, $field, $items, $delta = 0) {
  *
  */
 function number_process($element, $edit, $form_state, $form) {
-  $field_name = $element['#parents'][0];
+  $field_name = $element['#field_name'];
   $field = $form['#field_info'][$field_name];
   $field_key  = $element['#columns'][0];
 

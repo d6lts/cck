@@ -257,6 +257,7 @@ function content_form_field(&$form, &$form_state, $field) {
       for ($delta = 0; $delta <= $max; $delta++) {
         if ($element = $function($form, $form_state, $field, $items, $delta)) {
           $defaults = array(
+            '#field_name' => $field['field_name'],
             '#weight'   => $delta,
             '#required' => $delta == 0 && $field['required'],
             // TODO : should we add some logic for title and description too ?
@@ -272,6 +273,7 @@ function content_form_field(&$form, &$form_state, $field) {
       // just get the field's form element and make it the zero value.
       if ($element = $function($form, $form_state, $field, $items)) {
         $defaults = array(
+          '#field_name' => $field['field_name'],
           '#required' => $field['required'],
           // TODO : should we add some logic for title and description too ?
           '#columns'  => $field['columns'],
@@ -282,7 +284,10 @@ function content_form_field(&$form, &$form_state, $field) {
   }
 
   if ($form_element) {
+    // Field name is needed at this level as well as the individual elements
+    // so the multiple values theme can find it.
     $defaults = array(
+      '#field_name' => $field['field_name'],
       '#tree' => TRUE,
       '#weight' => $field['widget']['weight'],
     );
@@ -1288,7 +1293,7 @@ function content_elements() {
  */
 function theme_content_multiple_values($element) {
   if (isset($element['#children'])) {
-    $field_name = $element['#parents'][0];
+    $field_name = $element['#field_name'];
     $field = content_fields($field_name);
     $type = content_types($field['type_name']);
     $widget = $type['fields'][$field_name]['widget'];
