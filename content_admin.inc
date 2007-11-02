@@ -1193,7 +1193,7 @@ function content_alter_db_field($previous_field, $previous_columns, $new_field, 
 
   // Rebuild the whole database schema.
   // TODO : this could be optimized. We don't need to rebuild in *every case*...
-  drupal_get_schema(NULL, TRUE);
+  content_clear_type_cache(TRUE);
 
   // TODO : debugging stuff - should be removed
   if (module_exists('devel')) {

@@ -920,18 +920,15 @@ function content_node_type($op, $info) {
  * Clear the cache of content_types; called in several places when content
  * information is changed.
  */
-function content_clear_type_cache() {
+function content_clear_type_cache($with_schema = FALSE) {
 
   cache_clear_all('content_type_info', 'cache_content');
 
   _content_type_info(TRUE);
 
   // Refresh the schema to pick up new information.
-  $types = content_types();
-  foreach($types as $type) {
-    foreach ($type['tables'] as $table) {
-      $schema = drupal_get_schema($table, TRUE);
-    }
+  if ($with_schema) {
+    $schema = drupal_get_schema(NULL, TRUE);
   }
 
   if (module_exists('views')) {
