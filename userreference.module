@@ -253,8 +253,9 @@ function userreference_autocomplete_value($element, $edit = FALSE) {
   }
 }
 
-function userreference_autocomplete_validate($element, &$form_state) {
-  $field = $element['#field'];
+function userreference_autocomplete_validate($element, &$form_state, $form) {
+  $field_name = $element['#parents'][0];
+  $field = $form['#field_info'][$field_name];
   $field_key  = $element['#columns'][0];
   $value = $element['#value'][$field_key];
   if (!empty($value)) {

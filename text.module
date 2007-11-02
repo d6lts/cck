@@ -412,8 +412,9 @@ function text_textfield_process($element, &$form_state) {
  * note that $element['#value'] is already set.
  *
  */
-function text_textarea_process($element, &$form_state) {
-  $field = $element['#field'];
+function text_textarea_process($element, &$form_state, $form) {
+  $field_name = $element['#field_name'];
+  $field = $form['#field_info'][$field_name];
   $field_key   = $element['#columns'][0];
 
 

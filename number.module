@@ -386,8 +386,9 @@ function number_widget(&$form, &$form_state, $field, $items, $delta = 0) {
  * note that $element['#value'] is already set.
  *
  */
-function number_process($element, &$form_state) {
-  $field = $element['#field'];
+function number_process($element, &$form_state, $form) {
+  $field_name = $element['#parents'][0];
+  $field = $form['#field_info'][$field_name];
   $field_key  = $element['#columns'][0];
 
   $element[$field_key] = array(
@@ -422,7 +423,7 @@ function number_process($element, &$form_state) {
  *   to validate differently for integers, decimals, decimal
  *   separators other than the period, etc.
  */
-function number_validate($element, &$form_state) {
+function number_validate($element, &$form_state, $form) {
   $field_key = $element['#columns'][0];
   $value = $element['#value'][$field_key];
   if (($element[$field_key]['#required'] || !empty($value))) {

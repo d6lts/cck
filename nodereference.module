@@ -371,8 +371,9 @@ function nodereference_autocomplete_value($element, $edit = FALSE) {
   }
 }
 
-function nodereference_autocomplete_validate($element, &$form_state) {
-  $field = $element['#field'];
+function nodereference_autocomplete_validate($element, &$form_state, $form) {
+  $field_name = $element['#parents'][0];
+  $field = $form['#field_info'][$field_name];
   $field_key  = $element['#columns'][0];
   $value = $element['#value'][$field_key];
 

@@ -117,21 +117,21 @@ function optionwidgets_widget_info() {
 function optionwidgets_elements() {
   return array(
     'optionwidgets_select' => array(
-      '#input' => TRUE, '#field' => array(),
+      '#input' => TRUE,
       '#columns' => array('value'), '#delta' => 0,
       '#value_callback' => 'optionwidgets_value',
       '#process' => array('optionwidgets_select_process'),
       '#element_validate' => array('optionwidgets_validate'),
       ),
     'optionwidgets_buttons' => array(
-      '#input' => TRUE, '#field' => array(),
+      '#input' => TRUE,
       '#columns' => array('value'), '#delta' => 0,
       '#value_callback' => 'optionwidgets_value',
       '#process' => array('optionwidgets_buttons_process'),
       '#element_validate' => array('optionwidgets_validate'),
       ),
     'optionwidgets_onoff' => array(
-      '#input' => TRUE, '#field' => array(),
+      '#input' => TRUE,
       '#columns' => array('value'), '#delta' => 0,
       '#value_callback' => 'optionwidgets_value',
       '#process' => array('optionwidgets_onoff_process'),
@@ -196,8 +196,9 @@ function optionwidgets_value(&$element, $edit = FALSE) {
  * Build the form element. When creating a form using FAPI #process,
  * note that $element['#value'] is already set from $element['#default_value'].
  */
-function optionwidgets_buttons_process($element, &$form_state) {
-  $field = $element['#field'];
+function optionwidgets_buttons_process($element, &$form_state, $form) {
+  $field_name = $element['#parents'][0];
+  $field = $form['#field_info'][$field_name];
   $field_key  = $element['#columns'][0];
 
   $element[$field_key] = array(
