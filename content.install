@@ -59,7 +59,6 @@ function content_schema() {
     // TODO : is that really still needed ?
     $table = _content_tablename($type['type'], CONTENT_DB_STORAGE_PER_CONTENT_TYPE);
     $schema[$table] = _content_table_schema();
-
     foreach ($type['fields'] as $field) {
       $db_info = content_database_info($field);
       $table = $db_info['table'];
@@ -81,7 +80,6 @@ function content_schema() {
       $schema[$table]['content fields'][] = $field['field_name'];
     }
   }
-
   return $schema;
 }
 

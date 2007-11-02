@@ -7,24 +7,6 @@
  */
 
 /**
- * Implementation of hook_enable().
- *
- * Notify content module when this module is enabled.
- */
-function text_enable() {
-  content_notify('enable', 'text');
-}
-
-/**
- * Implementation of hook_disable().
- *
- * Notify content module when this module is disabled.
- */
-function text_disable() {
-  content_notify('disable', 'text');
-}
-
-/**
  * Implementation of hook_theme().
  */
 function text_theme() {
@@ -290,13 +272,13 @@ function text_widget_info() {
 function text_elements() {
   return array(
     'text_textfield' => array(
-      '#input' => TRUE, '#field' => array(),
+      '#input' => TRUE,
       '#columns' => array('value'), '#delta' => 0,
       '#process' => array('text_textfield_process'),
       '#autocomplete_path' => FALSE,
       ),
     'text_textarea' => array(
-      '#input' => TRUE, '#field' => array(),
+      '#input' => TRUE,
       '#columns' => array('value', 'format'), '#delta' => 0,
       '#process' => array('text_textarea_process'),
       '#filter_value' => FILTER_FORMAT_DEFAULT,
@@ -381,8 +363,8 @@ function text_widget(&$form, &$form_state, $field, $items, $delta = 0) {
  * note that $element['#value'] is already set.
  *
  */
-function text_textfield_process($element, &$form_state) {
-  $field = $element['#field'];
+function text_textfield_process($element, $edit, $form_state, $form) {
+  $field = $form['#field_info'][$element['#parents'][0]];
   $field_key = $element['#columns'][0];
   $delta = $element['#delta'];
 
@@ -412,12 +394,9 @@ function text_textfield_process($element, &$form_state) {
  * note that $element['#value'] is already set.
  *
  */
-function text_textarea_process($element, &$form_state, $form) {
-  $field_name = $element['#field_name'];
-  $field = $form['#field_info'][$field_name];
+function text_textarea_process($element, $edit, $form_state, $form) {
+  $field = $form['#field_info'][$element['#parents'][0]];
   $field_key   = $element['#columns'][0];
-
-
   $element[$field_key] = array(
     '#type' => 'textarea',
     '#title' => t($field['widget']['label']),

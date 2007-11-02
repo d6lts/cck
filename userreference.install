@@ -16,6 +16,24 @@ function userreference_uninstall() {
 }
 
 /**
+ * Implementation of hook_enable().
+ *
+ * Notify content module when this module is enabled.
+ */
+function userreference_enable() {
+  content_notify('enable', 'userreference');
+}
+
+/**
+ * Implementation of hook_disable().
+ *
+ * Notify content module when this module is disabled.
+ */
+function userreference_disable() {
+  content_notify('disable', 'userreference');
+}
+
+/**
  * Add node ID column so we can delete old revisions at node delete time.
  */
 function userreference_update_1() {

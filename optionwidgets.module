@@ -7,24 +7,6 @@
  */
 
 /**
- * Implementation of hook_enable().
- *
- * Notify content module when this module is enabled.
- */
-function optionwidgets_enable() {
-  content_notify('enable', 'optionwidgets');
-}
-
-/**
- * Implementation of hook_disable().
- *
- * Notify content module when this module is disabled.
- */
-function optionwidgets_disable() {
-  content_notify('disable', 'optionwidgets');
-}
-
-/**
  * Implementation of hook_help().
  */
 function optionwidgets_help($path, $arg) {
@@ -196,7 +178,7 @@ function optionwidgets_value(&$element, $edit = FALSE) {
  * Build the form element. When creating a form using FAPI #process,
  * note that $element['#value'] is already set from $element['#default_value'].
  */
-function optionwidgets_buttons_process($element, &$form_state, $form) {
+function optionwidgets_buttons_process($element, $edit, $form_state, $form) {
   $field_name = $element['#parents'][0];
   $field = $form['#field_info'][$field_name];
   $field_key  = $element['#columns'][0];
@@ -219,8 +201,9 @@ function optionwidgets_buttons_process($element, &$form_state, $form) {
  * Build the form element. When creating a form using FAPI #process,
  * note that $element['#value'] is already set from $element['#default_value'].
  */
-function optionwidgets_select_process($element, &$form_state) {
-  $field = $element['#field'];
+function optionwidgets_select_process($element, $edit, $form_state, $form) {
+  $field_name = $element['#parents'][0];
+  $field = $form['#field_info'][$field_name];
   $field_key  = $element['#columns'][0];
 
   $element[$field_key] = array(
@@ -241,7 +224,7 @@ function optionwidgets_select_process($element, &$form_state) {
  * Build the form element. When creating a form using FAPI #process,
  * note that $element['#value'] is already set from $element['#default_value'].
  */
-function optionwidgets_onoff_process($element, &$form_state) {
+function optionwidgets_onoff_process($element, $edit, $form_state, $form) {
   $field = $element['#field'];
   $field_key  = $element['#columns'][0];
 

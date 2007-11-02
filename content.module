@@ -186,7 +186,6 @@ function content_form(&$form, &$form_state) {
   $node = $form['#node'];
   $type_name = is_string($node) ? $node : (is_array($node) ? $node['type'] : $node->type);
   $type = content_types($type_name);
-
   if (count($type['fields'])) {
     foreach ($type['fields'] as $field) {
       $form['#field_info'][$field['field_name']] = $field;
@@ -237,12 +236,10 @@ function content_form_field(&$form, &$form_state, $field) {
       if (content_callback('widget', 'default value', $field) != CONTENT_CALLBACK_NONE) {
         $callback = content_callback('widget', 'default value', $field) == CONTENT_CALLBACK_CUSTOM ? $module .'_default_value' : 'content_default_value';
         if (function_exists($callback)) {
-// TODO : what's the need to pass $items as an argument ?
-          $items = $callback($form, $form_state, $field, $items, 0);
+          $items = $callback($form, $form_state, $field, 0);
         }
       }
     }
-
     $db_info = content_database_info($field);
     $columns = array_keys($db_info['columns']);
 
@@ -258,7 +255,7 @@ function content_form_field(&$form, &$form_state, $field) {
       // Here's where we can intervene to control the number of items
       // or add javascript to dynamically add more items,
       // or take control over the delta values in some way.
-      $max = !empty($field['multiple']) ? count($items) + 2 : 0;
+      $max = !empty($field['multiple']) ? count($items) + 1 : 0;
       for ($delta = 0; $delta <= $max; $delta++) {
         if ($element = $function($form, $form_state, $field, $items, $delta)) {
           $defaults = array(
@@ -290,8 +287,6 @@ function content_form_field(&$form, &$form_state, $field) {
     $defaults = array(
       '#tree' => TRUE,
       '#weight' => $field['widget']['weight'],
-      // TODO : those could probably go ?
-      //        '#columns' => array_keys($db_info['columns']),
     );
     $addition[$field['field_name']] = array_merge($form_element, $defaults);
   }
@@ -631,7 +626,6 @@ function content_storage($op, $node) {
       foreach ($type['fields'] as $field) {
         if ($field['multiple']) {
           $db_info = content_database_info($field);
-
           // Delete and insert, rather than update, in case a value was added.
           if ($op == 'update') {
             db_query('DELETE FROM {'. $db_info['table'] .'} WHERE vid = %d', $node->vid);
@@ -867,6 +861,8 @@ function _content_type_info($reset = FALSE) {
         $instance_info = db_fetch_array(db_query("SELECT type_name, label FROM {node_field_instance} WHERE field_name = '%s'", $field['field_name']));
         $field['widget']['label'] = $instance_info['label'];
         $field['type_name'] = $instance_info['type_name'];
+        $field['module'] = $info['field types'][$field['type']]['module'];
+        $field['columns'] = array_keys(content_invoke_columns($field));
         $info['fields'][$field['field_name']] = $field;
       }
       $type_result = db_query('SELECT * FROM {node_type} ORDER BY type ASC');
@@ -892,9 +888,11 @@ function _content_type_info($reset = FALSE) {
           $field['type_name'] = $type['type'];
           $field['display_settings'] = $field['display_settings'] ? unserialize($field['display_settings']) : array();
           $type['fields'][$field['field_name']] = $field;
+          $type['fields'][$field['field_name']]['module'] = $info['field types'][$field['type']]['module'];
 
           $db_info = content_database_info($field);
           $type['tables'][$db_info['table']] = $db_info['table'];
+
         }
         $info['content types'][$type['type']] = $type;
       }
@@ -930,9 +928,18 @@ function content_node_type($op, $info) {
  * information is changed.
  */
 function content_clear_type_cache() {
+
   cache_clear_all('content_type_info', 'cache_content');
 
   _content_type_info(TRUE);
+
+  // Refresh the schema to pick up new information.
+  $types = content_types();
+  foreach($types as $type) {
+    foreach ($type['tables'] as $table) {
+      $schema = drupal_get_schema($table, TRUE);
+    }
+  }
 
   if (module_exists('views')) {
     views_invalidate_cache();
@@ -974,7 +981,6 @@ function content_database_info($field) {
   else {
     $db_info['columns'] = array();
   }
-
   return $db_info;
 }
 
@@ -983,7 +989,8 @@ function content_database_info($field) {
  * Allows content module to control column settings.
  */
 function content_invoke_columns($field) {
-  $columns = module_invoke_all('field_settings', 'database columns', $field);
+  $module = $field['module'];
+  $columns = module_invoke($module, 'field_settings', 'database columns', $field);
   if (is_array($columns)) {
     // Ensure columns always default to NULL values.
     foreach ($columns as $column_name => $column) {
@@ -1239,7 +1246,7 @@ function content_handle($entity, $op, $field) {
  *  @return
  *    The default value for that field.
  */
-function content_default_value(&$form, &$form_state, $field, &$items, $delta) {
+function content_default_value(&$form, &$form_state, $field, $delta) {
   $widget_types = _content_widget_types();
   $module = $widget_types[$field['widget']['type']]['module'];
 
@@ -1291,13 +1298,16 @@ function content_elements() {
  */
 function theme_content_multiple_values($element) {
   if (isset($element['#children'])) {
-    $field = $element['#field'];
+    $field_name = $element['#parents'][0];
+    $field = content_fields($field_name);
+    $type = content_types($field['type_name']);
+    $widget = $type['fields'][$field_name]['widget'];
     if (!empty($field['multiple'])) {
       $fieldset = array();
       $fieldset['#type'] = 'fieldset';
-      $fieldset['#title'] = t($field['widget']['label']);
-      $fieldset['#description'] = t($field['widget']['description']);
-      $fieldset['#weight'] = $field['widget']['weight'];
+      $fieldset['#title'] = t($widget['label']);
+      $fieldset['#description'] = t($widget['description']);
+      $fieldset['#weight'] = $widget['weight'];
       $fieldset['#collapsible'] = FALSE;
       $fieldset['#collapsed'] = FALSE;
       $fieldset['#attributes'] = '';

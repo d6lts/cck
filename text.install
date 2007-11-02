@@ -16,6 +16,24 @@ function text_uninstall() {
 }
 
 /**
+ * Implementation of hook_enable().
+ *
+ * Notify content module when this module is enabled.
+ */
+function text_enable() {
+  content_notify('enable', 'text');
+}
+
+/**
+ * Implementation of hook_disable().
+ *
+ * Notify content module when this module is disabled.
+ */
+function text_disable() {
+  content_notify('disable', 'text');
+}
+
+/**
  * Add node ID column so we can delete old revisions at node delete time.
  */
 function text_update_1() {

@@ -7,24 +7,6 @@
  */
 
 /**
- * Implementation of hook_enable().
- *
- * Notify content module when this module is enabled.
- */
-function nodereference_enable() {
-  content_notify('enable', 'nodereference');
-}
-
-/**
- * Implementation of hook_disable().
- *
- * Notify content module when this module is disabled.
- */
-function nodereference_disable() {
-  content_notify('disable', 'nodereference');
-}
-
-/**
  * Implementation of hook_menu().
  */
 function nodereference_menu() {

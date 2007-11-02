@@ -16,6 +16,24 @@ function optionwidgets_uninstall() {
 }
 
 /**
+ * Implementation of hook_enable().
+ *
+ * Notify content module when this module is enabled.
+ */
+function optionwidgets_enable() {
+  content_notify('enable', 'optionwidgets');
+}
+
+/**
+ * Implementation of hook_disable().
+ *
+ * Notify content module when this module is disabled.
+ */
+function optionwidgets_disable() {
+  content_notify('disable', 'optionwidgets');
+}
+
+/**
  * Reformat allowed values settings into new key|label format
  */
 function optionwidgets_update_1() {
