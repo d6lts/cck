@@ -189,6 +189,7 @@ function content_form(&$form, &$form_state) {
 
   if (count($type['fields'])) {
     foreach ($type['fields'] as $field) {
+      $form['#field_info'][$field['field_name']] = $field;
       $form += content_form_field($form, $form_state, $field);
     }
   }
@@ -215,7 +216,6 @@ function content_form(&$form, &$form_state) {
 function content_form_field(&$form, &$form_state, $field) {
   $node = (object) $form['#node'];
   $addition = array();
-
   $widget_types = _content_widget_types();
   $module = $widget_types[$field['widget']['type']]['module'];
   $function = $module .'_widget';
@@ -267,7 +267,6 @@ function content_form_field(&$form, &$form_state, $field) {
             // TODO : should we add some logic for title and description too ?
             '#delta'    => $delta,
             '#columns'  => $columns,
-            '#field'    => $field,
           );
           $form_element[$delta] = array_merge($element, $defaults);
         }
@@ -281,7 +280,6 @@ function content_form_field(&$form, &$form_state, $field) {
           '#required' => $field['required'],
           // TODO : should we add some logic for title and description too ?
           '#columns'  => $columns,
-          '#field'    => $field,
         );
         $form_element[0] = array_merge($element, $defaults);
       }
@@ -292,7 +290,6 @@ function content_form_field(&$form, &$form_state, $field) {
     $defaults = array(
       '#tree' => TRUE,
       '#weight' => $field['widget']['weight'],
-      '#field' => $field,
       // TODO : those could probably go ?
       //        '#columns' => array_keys($db_info['columns']),
     );
@@ -818,7 +815,6 @@ function _content_widget_types() {
  */
 function _content_type_info($reset = FALSE) {
   static $info;
-
   if ($reset || !isset($info)) {
     if ($cached = cache_get('content_type_info', 'cache_content')) {
       $info = $cached->data;
@@ -860,7 +856,6 @@ function _content_type_info($reset = FALSE) {
           }
         }
       }
-
       $field_result = db_query('SELECT * FROM {node_field}');
       while ($field = db_fetch_array($field_result)) {
         $global_settings = $field['global_settings'] ? unserialize($field['global_settings']) : array();
@@ -874,7 +869,6 @@ function _content_type_info($reset = FALSE) {
         $field['type_name'] = $instance_info['type_name'];
         $info['fields'][$field['field_name']] = $field;
       }
-
       $type_result = db_query('SELECT * FROM {node_type} ORDER BY type ASC');
       while ($type = db_fetch_array($type_result)) {
         $type['url_str'] = str_replace('_', '-', $type['type']);
@@ -884,7 +878,6 @@ function _content_type_info($reset = FALSE) {
         while ($field = db_fetch_array($field_result)) {
           // Overwrite global field information with specific information
           $field = array_merge($info['fields'][$field['field_name']], $field);
-
           $widget_settings = $field['widget_settings'] ? unserialize($field['widget_settings']) : array();
           unset($field['widget_settings']);
           $field['widget'] = $widget_settings;
@@ -990,9 +983,7 @@ function content_database_info($field) {
  * Allows content module to control column settings.
  */
 function content_invoke_columns($field) {
-  $field_types = _content_field_types();
-  $module = $field_types[$field['type']]['module'];
-  $columns = module_invoke($module, 'field_settings', 'database columns', $field);
+  $columns = module_invoke_all('field_settings', 'database columns', $field);
   if (is_array($columns)) {
     // Ensure columns always default to NULL values.
     foreach ($columns as $column_name => $column) {
