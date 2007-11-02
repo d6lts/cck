@@ -240,8 +240,6 @@ function content_form_field(&$form, &$form_state, $field) {
         }
       }
     }
-    $db_info = content_database_info($field);
-    $columns = array_keys($db_info['columns']);
 
     $form_element = array();
 
@@ -263,7 +261,7 @@ function content_form_field(&$form, &$form_state, $field) {
             '#required' => $delta == 0 && $field['required'],
             // TODO : should we add some logic for title and description too ?
             '#delta'    => $delta,
-            '#columns'  => $columns,
+            '#columns'  => $field['columns'],
           );
           $form_element[$delta] = array_merge($element, $defaults);
         }
@@ -276,7 +274,7 @@ function content_form_field(&$form, &$form_state, $field) {
         $defaults = array(
           '#required' => $field['required'],
           // TODO : should we add some logic for title and description too ?
-          '#columns'  => $columns,
+          '#columns'  => $field['columns'],
         );
         $form_element[0] = array_merge($element, $defaults);
       }
@@ -486,8 +484,6 @@ function content_enable() {
  * takes care of default stuff common to all field types.
  */
 function content_field($op, &$node, $field, &$items, $teaser, $page) {
-  $db_info = content_database_info($field);
-
   switch ($op) {
     case 'validate':
       // TODO : here we could validate that the number of multiple data is correct ?
@@ -503,7 +499,7 @@ function content_field($op, &$node, $field, &$items, $teaser, $page) {
       foreach ((array) $items as $delta => $item) {
         if ($is_empty($item, $field)) {
           if ($delta == 0) {
-            foreach (array_keys($db_info['columns']) as $column) {
+            foreach (array_keys($field['columns']) as $column) {
               $items[$delta][$column] = NULL;
             }
           }
@@ -579,10 +575,9 @@ function content_storage($op, $node) {
           foreach ($schema['content fields'] as $field_name) {
             $item = array();
             $field = content_fields($field_name, $type_name);
-            $db_info = content_database_info($field);
 
             // For each column declared by the field, populate the item.
-            foreach ($db_info['columns'] as $column => $attributes) {
+            foreach ($field['columns'] as $column => $attributes) {
               $item[$column] = $row[$attributes['column']];
             }
 
@@ -609,8 +604,7 @@ function content_storage($op, $node) {
             continue;
           }
 
-          $db_info = content_database_info($field);
-          foreach ($db_info['columns'] as $column => $attributes) {
+          foreach ($field['columns'] as $column => $attributes) {
             $record[$attributes['column']] = $node->{$field_name}[0][$column];
           }
         }
@@ -632,7 +626,7 @@ function content_storage($op, $node) {
           }
           foreach ($node->$field['field_name'] as $delta => $item) {
             $record = array();
-            foreach ($db_info['columns'] as $column => $attributes) {
+            foreach ($field['columns'] as $column => $attributes) {
               $record[$attributes['column']] = $item[$column];
             }
             $record['nid'] = $node->nid;
@@ -711,8 +705,7 @@ function _content_field_invoke_default($op, &$node, $teaser = NULL, $page = NULL
   elseif (count($type['fields'])) {
     foreach ($type['fields'] as $field) {
       $items = isset($node->$field['field_name']) ? $node->$field['field_name'] : array();
-      $db_info = content_database_info($field);
-      if (count($db_info['columns'])) {
+      if (count($field['columns'])) {
         $result = content_field($op, $node, $field, $items, $teaser, $page);
         if (is_array($result)) {
           $return = array_merge($return, $result);
