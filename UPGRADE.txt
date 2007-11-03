@@ -214,6 +214,12 @@ to use optionwidgets select and checkboxes.
 The content module adds the #column values to the element, so they are
 available in all #process and #element_validate functions.
 
+The content module also adds #delta to each element, so you can tell
+which is which in processes and themes.
+
+The field name is available in $element['#field_name'] and the complete field
+array is available in $form['#field_info'][$element['#field_name']].
+
 /**
  * Process an individual element.
  *
