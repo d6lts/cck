@@ -1,3 +1,6 @@
+DEVELOPER DOCUMENTATION
+UPDATING FROM 5.x TO 6.x
+
 TODO:
 - field modules have to write an update function to update their columns
   (can we provide a helper function to make this easier ?)
@@ -16,7 +19,7 @@ that search for empty/not empty, and to make it possible for the
 content module to handle empty multiple values in a consistant manner.
 Fields should be defined that way in hook_field($op = 'columns'), but
 even if they are not the content module will override their schema
-to enforce this. When using 'not nul' => FALSE, there is no need to
+to enforce this. When using 'not null' => FALSE, there is no need to
 provide a default value, so leave it out completely.
 
 Update or add install(), uninstall(), enable() and disable() hooks for your
