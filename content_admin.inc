@@ -96,6 +96,7 @@ function content_admin_field_overview_form(&$form_state, $type_name) {
   // Construct the table values in an array '#table' that FAPI will ignore, keyed on the item's weight.
   // Create separate form elements for each weight and group value and put a placeholder for each in #table.
 
+  $field_names = array_keys(content_fields());
   foreach ($dummy_form as $key => $value) {
 
     // Limiting weight to < 10 will keep workflow and submit elements from being added to the overview table.
@@ -139,7 +140,7 @@ function content_admin_field_overview_form(&$form_state, $type_name) {
       }
 
       // else if this item is a top-level field, insert field row into the table
-      elseif (substr($key, 0, 6) == 'field_') {
+      elseif (in_array($key, $field_names)) {
         $row = array();
         $field = $type['fields'][$key];
         $row['label']     = $field['widget']['label'];
@@ -529,8 +530,8 @@ function _content_admin_field_add_new(&$form_state, $type_name, $new_field_name 
     $form['new']['field']['field_name'] = array(
       '#title' => t('Field name'),
       '#type' => 'textfield',
-      '#default_value' => '',
-      '#description' => t('The machine-readable name of the field. This name cannot be changed later!<br/>Allowed characters : unaccentuated a-z, numbers and _.<br/>You\'ll be able to choose a human-readable label for the field on next page'),
+      '#default_value' => $new_field_name,
+      '#description' => t('The machine-readable name of the field. This name cannot be changed later! Allowed characters : unaccentuated a-z, numbers and _. You\'ll be able to choose a human-readable label for the field on next page'),
       '#required' => TRUE,
     );
     $form['new']['field_widget_type'] = array(
@@ -549,10 +550,6 @@ function _content_admin_field_add_new(&$form_state, $type_name, $new_field_name 
     $form['new']['type_name'] = array(
       '#type' => 'value',
       '#value' => $type_name,
-    );
-    $form['new']['field_name'] = array(
-      '#type' => 'value',
-      '#value' => $new_field_name,
     );
   }
   else {
@@ -622,16 +619,18 @@ function _content_admin_field_add_existing_submit($form, &$form_state) {
  */
 function _content_admin_field_add_new_validate($form, &$form_state) {
   $form_values = $form_state['values'];
-  if ($form_values['field_name']) {
-    $fields = content_fields();
-    if (!empty($fields[$form_values['field_name']])) {
-      form_set_error('field_name', t('The field name %field_name already exists.', array(
-        '%field_name' => $form_values['field_name'])));
-    }
-    if (!preg_match('!^[a-z0-9_]+$!', $form_values['field_name'])) {
-      form_set_error('field_name', t('The field name %field_name is invalid.', array(
-        '%field_name' => $form_values['field_name'])));
-    }
+  $fields = content_fields();
+  $field_name = $form_values['field_name'];
+  if (empty($form_values['field_name'])) {
+    form_set_error('field_name', t('The field name is required!'));
+  }
+  elseif (array_key_exists($field_name, $fields)) {
+    form_set_error('field_name', t('The field name %field_name already exists.', array(
+      '%field_name' => $form_values['field_name'])));
+  }
+  elseif (!preg_match('!^[a-z0-9_]+$!', $form_values['field_name'])) {
+    form_set_error('field_name', t('The field name %field_name is invalid.', array(
+      '%field_name' => $form_values['field_name'])));
   }
 }
 
@@ -640,13 +639,14 @@ function _content_admin_field_add_new_validate($form, &$form_state) {
  */
 function _content_admin_field_add_new_submit($form, &$form_state) {
   $form_values = $form_state['values'];
+  $field_name = $form_values['field_name'];
 
   $fields = content_fields();
   $type   = content_types($form_values['type_name']);
 
   $field_widget_type = explode('-', $form_values['field_widget_type']);
   db_query("INSERT INTO {node_field} (field_name, type, global_settings, required, multiple, db_storage) VALUES ('%s', '%s', '%s', %d, %d, %d)", $field_name, $field_widget_type[0], serialize(array()), 0, 0, CONTENT_DB_STORAGE_PER_CONTENT_TYPE);
-  db_query("INSERT INTO {node_field_instance} (field_name, type_name, weight, label, widget_type, widget_settings, display_settings, description) VALUES ('%s', '%s', %d, '%s', '%s', '%s', '%s', '%s')", $field_name, $form_values['type_name'], 0, $form_values['label'], $field_widget_type[1], serialize(array()), serialize(array()), '');
+  db_query("INSERT INTO {node_field_instance} (field_name, type_name, weight, label, widget_type, widget_settings, display_settings, description) VALUES ('%s', '%s', %d, '%s', '%s', '%s', '%s', '%s')", $field_name, $form_values['type_name'], 0, $field_name, $field_widget_type[1], serialize(array()), serialize(array()), '');
 
   content_clear_type_cache();
   menu_rebuild();
