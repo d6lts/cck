@@ -224,7 +224,7 @@ taken from #columns. This is what makes it possible for both nodereference,
 which has a column named 'nid', and text, which uses a column named 'value',
 to use optionwidgets select and checkboxes.
 
-The content module adds the #column values to the element, so they are
+The content module adds the #columns value to the element, so they are
 available in all #process and #element_validate functions.
 
 The content module also adds #delta to each element, so you can tell

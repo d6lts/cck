@@ -367,7 +367,6 @@ function text_textfield_process($element, $edit, $form_state, $form) {
   $field = $form['#field_info'][$element['#field_name']];
   $field_key = $element['#columns'][0];
   $delta = $element['#delta'];
-
   $element[$field_key] = array(
     '#type' => 'textfield',
     '#title' => t($field['widget']['label']),
@@ -383,7 +382,6 @@ function text_textfield_process($element, $edit, $form_state, $form) {
     $parents = array_merge($element['#parents'] , array($filter_key));
     $element[$filter_key] = filter_form($format, 1, $parents);
   }
-
   return $element;
 }
 
@@ -425,7 +423,7 @@ function text_textarea_process($element, $edit, $form_state, $form) {
  * lives in $element['#children']. Override this theme to
  * make custom changes to the output.
  *
- * $element['#field'] contains field information
+ * $element['#field_name'] contains the field name
  * $element['#delta]  is the position of this element in the group
  */
 function theme_text_textfield($element) {

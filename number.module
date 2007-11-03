@@ -427,7 +427,7 @@ function number_validate($element, &$form_state) {
  * theme and the html output lives in $element['#children'].
  * Override this theme to make custom changes to the output.
  *
- * $element['#field'] contains field information
+ * $element['#field_name'] contains the field name
  * $element['#delta]  is the position of this element in the group
  */
 function theme_number($element) {

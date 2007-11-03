@@ -343,7 +343,7 @@ function theme_optionwidgets_none($widget_type, $field_name, $node) {
  * lives in $element['#children']. Override this theme to
  * make custom changes to the output.
  *
- * $element['#field'] contains field information
+ * $element['#field_name'] contains the field name
  * $element['#delta]  is the position of this element in the group
  */
 function theme_optionwidgets_select($element) {

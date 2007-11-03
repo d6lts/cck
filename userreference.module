@@ -7,6 +7,20 @@
  */
 
 /**
+ * Implementation of hook_theme().
+ */
+function userreference_theme() {
+  return array(
+    'userreference_select' => array(
+      'arguments' => array('element' => NULL),
+    ),
+    'userreference_autocomplete' => array(
+      'arguments' => array('element' => NULL),
+    ),
+  );
+}
+
+/**
  * Implementation of hook_field_info().
  *
  * Here we indicate that the content module will use its default
@@ -163,6 +177,34 @@ function userreference_widget_info() {
 }
 
 /**
+ * Implementation of FAPI hook_elements().
+ *
+ * Any FAPI callbacks needed for individual widgets can be declared here,
+ * and the element will be passed to those callbacks for processing.
+ *
+ * Drupal will automatically theme the element using a theme with
+ * the same name as the hook_elements key.
+ *
+ * Autocomplete_path is not used by text_widget but other widgets can use it
+ * (see nodereference and userreference).
+ */
+function userreference_elements() {
+  return array(
+    'userreference_select' => array(
+      '#input' => TRUE,
+      '#columns' => array('uid'), '#delta' => 0,
+      '#process' => array('userreference_select_process'),
+      ),
+    'userreference_autocomplete' => array(
+      '#input' => TRUE,
+      '#columns' => array('name'), '#delta' => 0,
+      '#process' => array('userreference_autocomplete_process'),
+      '#autocomplete_path' => FALSE,
+      ),
+    );
+}
+
+/**
  * Implementation of hook_widget().
  *
  * Attach a single form element to the form. It will be built out and
@@ -196,24 +238,17 @@ function userreference_widget_info() {
 function userreference_widget(&$form, &$form_state, $field, $items, $delta = 0) {
   switch ($field['widget']['type']) {
     case 'userreference_select':
-      // The userreference_select widget doesn't need to create its own
-      // element, it can use the optionwidgets_select element.
       $element = array(
-        '#type' => 'optionwidgets_select',
+        '#type' => 'userreference_select',
         '#default_value' => $items,
       );
       break;
 
     case 'userreference_autocomplete':
-      // The userreference autocomplete widget doesn't need to create its own
-      // element, it can use the text_textfield element and add an autocomplete
-      // path and some extra processing to it.
       $element = array(
-        '#type' => 'text_textfield',
+        '#type' => 'userreference_autocomplete',
         '#default_value' => isset($items[$delta]) ? $items[$delta] : NULL,
         '#value_callback' => 'userreference_autocomplete_value',
-        '#autocomplete_path' => 'user/autocomplete',
-        '#element_validate' => array('userreference_autocomplete_validate'),
       );
       break;
   }
@@ -221,30 +256,84 @@ function userreference_widget(&$form, &$form_state, $field, $items, $delta = 0) 
 }
 
 /**
- * Value for a userreference autocomplete element.
+ * Process an individual element.
  *
- * Substitute in the user name for the user uid.
+ * Build the form element. When creating a form using FAPI #process,
+ * note that $element['#value'] is already set.
+ *
  */
-function userreference_autocomplete_value($element, $edit = FALSE) {
-  if (func_num_args() == 1) {
-    $field_key  = $element['#columns'][0];
-    if (!empty($element['#default_value'][$field_key])) {
-      $value = db_result(db_query("SELECT name FROM {users} WHERE uid = '%d'", $element['#default_value'][$field_key]));
-      return array($field_key => $value);
-    }
-  }
+function userreference_select_process($element, $edit, $form_state, $form) {
+  // The userreference_select widget doesn't need to create its own
+  // element, it can wrap around the optionwidgets_select element.
+  // Add a validation step where the value can be unwrapped.
+  $field_key  = $element['#columns'][0];
+  $element[$field_key] = array(
+    '#type' => 'optionwidgets_select',
+    '#default_value' => isset($element['#value'][$field_key]) ? $element['#value'][$field_key] : '',
+    '#element_validate' => array('userreference_select_validate'),
+    '#field_name' => $element['#field_name'],
+    '#delta' => $element['#delta'],
+    '#columns' => $element['#columns'],
+  );
+  return $element;
 }
 
-function userreference_autocomplete_validate($element, &$form_state, $form) {
-  $field_name = $element['#field_name'];
-  $field = $form['#field_info'][$field_name];
+/**
+ * Process an individual element.
+ *
+ * Build the form element. When creating a form using FAPI #process,
+ * note that $element['#value'] is already set.
+ *
+ */
+function userreference_autocomplete_process($element, $edit, $form_state, $form) {
+  // The userreference autocomplete widget doesn't need to create its own
+  // element, it can wrap around the text_textfield element and add an autocomplete
+  // path and some extra processing to it.
+  // Add a validation step where the value can be unwrapped.
+  $field_key  = $element['#columns'][0];
+  $value = '';
+  if (!empty($element['#default_value'][$field_key])) {
+    $value = db_result(db_query("SELECT name FROM {users} WHERE uid = '%d'", $element['#default_value'][$field_key]));
+  }
+  $element[$field_key] = array(
+    '#type' => 'text_textfield',
+    '#default_value' => array($field_key => $value),
+    '#autocomplete_path' => 'user/autocomplete',
+    '#element_validate' => array('userreference_autocomplete_validate'),
+    '#field_name' => $element['#field_name'],
+    '#delta' => $element['#delta'],
+    '#columns' => $element['#columns'],
+  );
+  return $element;
+}
+
+/**
+ * Validate a select element.
+ *
+ * Remove the wrapper layer and set the right element's value.
+ * Since we nested two elements, we ended up with a value like
+ * $element['#value']['uid']['uid'] and we need to make it back
+ * into $element['#value']['uid'].
+ */
+function userreference_select_validate($element, &$form_state) {
+  $field_key  = $element['#columns'][0];
+  $value = $element['#value'][$field_key];
+  form_set_value($element, $value, $form_state);
+}
+
+/**
+ * Validate an autocomplete element.
+ *
+ * Remove the wrapper layer and set the right element's value.
+ */
+function userreference_autocomplete_validate($element, &$form_state) {
   $field_key  = $element['#columns'][0];
   $value = $element['#value'][$field_key];
   if (!empty($value)) {
     $value = db_result(db_query("SELECT uid FROM {users} WHERE name = '%s'", $value));
   }
   if (!empty($value)) {
-    form_set_value($element[$field_key], $value, $form_state);
+    form_set_value($element, $value, $form_state);
   }
 }
 
@@ -291,4 +380,23 @@ function _userreference_filter_handler($op, $filterinfo) {
   $options = views_handler_filter_usercurrent();
   $options = $options + _userreference_potential_references($filterinfo['extra']['field']);
   return $options;
+}
+
+/**
+ * FAPI theme for an individual elements.
+ *
+ * The textfield or select is already rendered by the
+ * textfield or select themes and the html output
+ * lives in $element['#children']. Override this theme to
+ * make custom changes to the output.
+ *
+ * $element['#field_name'] contains the field name
+ * $element['#delta]  is the position of this element in the group
+ */
+function theme_userreference_select($element) {
+  return $element['#children'];
+}
+
+function theme_userreference_autocomplete($element) {
+  return $element['#children'];
 }

@@ -592,9 +592,9 @@ function content_storage($op, $node) {
           foreach ($schema['content fields'] as $field_name) {
             $item = array();
             $field = content_fields($field_name, $type_name);
-
+            $db_info = content_database_info($field);
             // For each column declared by the field, populate the item.
-            foreach ($field['columns'] as $column => $attributes) {
+            foreach ($db_info['columns'] as $column => $attributes) {
               $item[$column] = $row[$attributes['column']];
             }
 
@@ -615,13 +615,14 @@ function content_storage($op, $node) {
         $record = array();
         foreach ($schema['content fields'] as $field_name) {
           $field = content_fields($field_name, $type_name);
+          $db_info = content_database_info($field);
 
           // Multiple fields need specific handling, we'll deal with them later on.
           if ($field['multiple']) {
             continue;
           }
 
-          foreach ($field['columns'] as $column => $attributes) {
+          foreach ($db_info['columns'] as $column => $attributes) {
             $record[$attributes['column']] = $node->{$field_name}[0][$column];
           }
         }
@@ -643,7 +644,7 @@ function content_storage($op, $node) {
           }
           foreach ($node->$field['field_name'] as $delta => $item) {
             $record = array();
-            foreach ($field['columns'] as $column => $attributes) {
+            foreach ($db_info['columns'] as $column => $attributes) {
               $record[$attributes['column']] = $item[$column];
             }
             $record['nid'] = $node->nid;

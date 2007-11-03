@@ -31,6 +31,12 @@ function nodereference_theme() {
     'nodereference_item_advanced' => array(
       'arguments' => array('item' => NULL, 'view' => NULL),
     ),
+    'nodereference_select' => array(
+      'arguments' => array('element' => NULL),
+    ),
+    'nodereference_autocomplete' => array(
+      'arguments' => array('element' => NULL),
+    ),
   );
 }
 
@@ -280,6 +286,34 @@ function nodereference_widget_info() {
 }
 
 /**
+ * Implementation of FAPI hook_elements().
+ *
+ * Any FAPI callbacks needed for individual widgets can be declared here,
+ * and the element will be passed to those callbacks for processing.
+ *
+ * Drupal will automatically theme the element using a theme with
+ * the same name as the hook_elements key.
+ *
+ * Autocomplete_path is not used by text_widget but other widgets can use it
+ * (see nodereference and userreference).
+ */
+function nodereference_elements() {
+  return array(
+    'nodereference_select' => array(
+      '#input' => TRUE,
+      '#columns' => array('uid'), '#delta' => 0,
+      '#process' => array('nodereference_select_process'),
+      ),
+    'nodereference_autocomplete' => array(
+      '#input' => TRUE,
+      '#columns' => array('name'), '#delta' => 0,
+      '#process' => array('nodereference_autocomplete_process'),
+      '#autocomplete_path' => FALSE,
+      ),
+    );
+}
+
+/**
  * Implementation of hook_widget().
  *
  * Attach a single form element to the form. It will be built out and
@@ -313,24 +347,17 @@ function nodereference_widget_info() {
 function nodereference_widget(&$form, &$form_state, $field, $items, $delta = 0) {
   switch ($field['widget']['type']) {
     case 'nodereference_select':
-      // The nodereference_select widget doesn't need to create its own
-      // element, it can use the optionwidgets_select element.
       $element = array(
-        '#type' => 'optionwidgets_select',
+        '#type' => 'nodereference_select',
         '#default_value' => $items,
       );
       break;
 
     case 'nodereference_autocomplete':
-      // The nodereference autocomplete widget doesn't need to create its own
-      // element, it can use the text_textfield element and add an autocomplete
-      // path and some extra processing to it.
       $element = array(
-        '#type' => 'text_textfield',
+        '#type' => 'nodereference_autocomplete',
         '#default_value' => isset($items[$delta]) ? $items[$delta] : NULL,
         '#value_callback' => 'nodereference_autocomplete_value',
-        '#autocomplete_path' => 'nodereference/autocomplete/'. $field['field_name'],
-        '#element_validate' => array('nodereference_autocomplete_validate'),
       );
       break;
   }
@@ -343,6 +370,9 @@ function nodereference_widget(&$form, &$form_state, $field, $items, $delta = 0) 
  * Substitute in the node title for the node nid.
  */
 function nodereference_autocomplete_value($element, $edit = FALSE) {
+return;
+dsm($element);
+dsm($edit);
   if (func_num_args() == 1) {
     $field_key  = $element['#columns'][0];
     if (!empty($element['#default_value'][$field_key])) {
@@ -350,12 +380,86 @@ function nodereference_autocomplete_value($element, $edit = FALSE) {
       $value .= ' [nid:'. $element['#default_value'][$field_key] .']';
       return array($field_key => $value);
     }
+    return array($field_key => NULL);
   }
 }
 
-function nodereference_autocomplete_validate($element, &$form_state, $form) {
+/**
+ * Process an individual element.
+ *
+ * Build the form element. When creating a form using FAPI #process,
+ * note that $element['#value'] is already set.
+ *
+ */
+function nodereference_select_process($element, $edit, $form_state, $form) {
+  // The nodereference_select widget doesn't need to create its own
+  // element, it can wrap around the optionwidgets_select element.
+  // Add a validation step where the value can be unwrapped.
+  $field_key  = $element['#columns'][0];
+  $element[$field_key] = array(
+    '#type' => 'optionwidgets_select',
+    '#default_value' => isset($element['#value'][$field_key]) ? $element['#value'][$field_key] : '',
+    '#element_validate' => array('nodereference_select_validate'),
+    '#field_name' => $element['#field_name'],
+    '#delta' => $element['#delta'],
+    '#columns' => $element['#columns'],
+  );
+  return $element;
+}
+
+/**
+ * Process an individual element.
+ *
+ * Build the form element. When creating a form using FAPI #process,
+ * note that $element['#value'] is already set.
+ *
+ */
+function nodereference_autocomplete_process($element, $edit, $form_state, $form) {
+  // The nodereference autocomplete widget doesn't need to create its own
+  // element, it can wrap around the text_textfield element and add an autocomplete
+  // path and some extra processing to it.
+  // Add a validation step where the value can be unwrapped.
+  $field_key  = $element['#columns'][0];
+  $field = $form['#field_info'][$element['#field_name']];
+
+  $value = '';
+  if (!empty($element['#value'][$field_key])) {
+    $value = db_result(db_query(db_rewrite_sql('SELECT n.title FROM {node} n WHERE n.nid = %d'), $element['#value'][$field_key]));
+    $value .= ' [nid:'. $element['#value'][$field_key] .']';
+  }
+  $element[$field_key] = array(
+    '#type' => 'text_textfield',
+    '#default_value' => array($field_key => $value),
+    '#autocomplete_path' => 'nodereference/autocomplete/'. $field['field_name'],
+    '#element_validate' => array('nodereference_autocomplete_validate'),
+    '#field_name' => $element['#field_name'],
+    '#delta' => $element['#delta'],
+    '#columns' => $element['#columns'],
+  );
+  return $element;
+}
+
+/**
+ * Validate a select element.
+ *
+ * Remove the wrapper layer and set the right element's value.
+ * Since we nested two elements, we ended up with a value like
+ * $element['#value']['nid']['nid'] and we need to make it back
+ * into $element['#value']['nid'].
+ */
+function nodereference_select_validate($element, &$form_state) {
+  $field_key  = $element['#columns'][0];
+  $value = $element['#value'][$field_key];
+  form_set_value($element, $value, $form_state);
+}
+
+/**
+ * Validate an autocomplete element.
+ *
+ * Remove the wrapper layer and set the right element's value.
+ */
+function nodereference_autocomplete_validate($element, &$form_state) {
   $field_name = $element['#field_name'];
-  $field = $form['#field_info'][$field_name];
   $field_key  = $element['#columns'][0];
   $value = $element['#value'][$field_key];
 
@@ -365,7 +469,7 @@ function nodereference_autocomplete_validate($element, &$form_state, $form) {
       // explicit nid
       list(, $title, $nid) = $matches;
       if (!empty($title) && ($n = node_load($nid)) && $title != $n->title) {
-        form_set_error($element[$field_key], t('%name : Title mismatch. Please check your selection.'), array('%name' => t($field['widget']['label'])));
+        form_set_error($element[$field_key], t('%name : Title mismatch. Please check your selection.'), array('%name' => t($element[$field_key]['#title'])));
       }
     }
     else {
@@ -379,11 +483,11 @@ function nodereference_autocomplete_validate($element, &$form_state, $form) {
     }
 
     if (!empty($nid)) {
-      form_set_value($element[$field_key], $nid, $form_state);
+      form_set_value($element, $nid, $form_state);
     }
     elseif ($delta > 0) {
       // Don't save empty fields when they're not the first value (keep '0' otherwise)
-      form_set_value($element[$field_key], 0, $form_state);
+      form_set_value($element, 0, $form_state);
     }
   }
 
@@ -541,4 +645,23 @@ function _nodereference_filter_handler($op, $filterinfo) {
   $options = array(0 => t('<empty>'));
   $options = $options + _nodereference_potential_references($filterinfo['extra']['field']);
   return $options;
+}
+
+/**
+ * FAPI theme for an individual elements.
+ *
+ * The textfield or select is already rendered by the
+ * textfield or select themes and the html output
+ * lives in $element['#children']. Override this theme to
+ * make custom changes to the output.
+ *
+ * $element['#field_name'] contains the field name
+ * $element['#delta]  is the position of this element in the group
+ */
+function theme_nodereference_select($element) {
+  return $element['#children'];
+}
+
+function theme_nodereference_autocomplete($element) {
+  return $element['#children'];
 }
