@@ -1139,7 +1139,7 @@ function content_alter_db_field($previous_field, $previous_columns, $new_field, 
         $migrate_columns = array_intersect_assoc($new_db_info['columns'], $previous_db_info['columns']);
         foreach ($migrate_columns as $column => $attributes) {
           $column_names[] = $attributes['column'];
-          $placeholder = _db_type_placeholder($attributes['type']);
+          $placeholder = db_type_placeholder($attributes['type']);
           $column_placeholders_default[] = $placeholder;
           $column_assignments_default[] = $attributes['column'] .' = '. $placeholder;
         }
