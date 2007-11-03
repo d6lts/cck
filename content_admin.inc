@@ -616,6 +616,9 @@ function _content_admin_field_add_existing_submit($form, &$form_state) {
 
 /**
  *  Field name validation.
+ *
+ * TODO Should we enforce a prefix of 'field_' on field names to prevent
+ * node namespace clashes, or automatically add a prefix, or leave it up to the end user?
  */
 function _content_admin_field_add_new_validate($form, &$form_state) {
   $form_values = $form_state['values'];
