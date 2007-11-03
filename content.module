@@ -217,8 +217,11 @@ function content_form(&$form, &$form_state) {
  *   the form_state for the above form
  * @param $field
  *   the field array to use to create the form element
+ * @param $get_delta
+ *   use to get only a specific delta value of a multiple value field, otherwise
+ *   function will return the entire $field form element.
  */
-function content_form_field(&$form, &$form_state, $field) {
+function content_form_field(&$form, &$form_state, $field, $get_delta = NULL) {
   $node = (object) $form['#node'];
   $addition = array();
   $widget_types = _content_widget_types();
@@ -260,7 +263,11 @@ function content_form_field(&$form, &$form_state, $field) {
       // or add javascript to dynamically add more items,
       // or take control over the delta values in some way.
       $max = !empty($field['multiple']) ? count($items) + 1 : 0;
-      for ($delta = 0; $delta <= $max; $delta++) {
+      $min = 0;
+      if (isset($get_delta)) {
+        $max = $min = $get_delta;
+      }
+      for ($delta = $min; $delta <= $max; $delta++) {
         if ($element = $function($form, $form_state, $field, $items, $delta)) {
           $defaults = array(
             '#field_name' => $field['field_name'],
@@ -299,7 +306,6 @@ function content_form_field(&$form, &$form_state, $field) {
     );
     $addition[$field['field_name']] = array_merge($form_element, $defaults);
   }
-
   return $addition;
 }
 
