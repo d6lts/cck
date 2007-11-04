@@ -235,6 +235,7 @@ function content_form(&$form, &$form_state) {
  *   function will return the entire $field form element.
  */
 function content_form_field(&$form, &$form_state, $field, $get_delta = NULL) {
+  $node = $form['#node'];
   $addition = array();
   $function = $field['module'] .'_widget';
   if (function_exists($function)) {
@@ -620,10 +621,12 @@ function content_field($op, &$node, $field, &$items, $teaser, $page) {
       break;
 
     case 'presave':
+      // If there was an AHAH add more button in this field, don't save it.
+      unset($items[$field['field_name']. '_add_more']);
+
       // Don't save empty items.
       // If the first item is empty, keep a NULL value for each of its columns
       // so there is a marker in the database, otherwise unset the item.
-
       $field_types = _content_field_types();
       $module = $field_types[$field['type']]['module'];
       $is_empty = $module .'_content_is_empty';
