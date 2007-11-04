@@ -747,7 +747,12 @@ function content_storage($op, $node) {
         if (count($record)) {
           $record['nid'] = $node->nid;
           $record['vid'] = $node->vid;
-          drupal_write_record($table, $record, $op == 'update' ? 'vid' : FALSE);
+          if ($op == 'update') {
+            drupal_write_record($table, $record, 'vid');
+          }
+          else {
+            drupal_write_record($table, $record);
+          }
         }
       }
 
