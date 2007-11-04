@@ -56,6 +56,7 @@ function content_menu() {
     'file path' => drupal_get_path('module', 'content'),
     'type' => MENU_LOCAL_TASK,
   );
+
   foreach (node_get_types() as $type) {
     $type_name = $type->type;
     $content_type = content_types($type_name);
@@ -93,6 +94,18 @@ function content_menu() {
     );
     foreach ($content_type['fields'] as $field) {
       $field_name = $field['field_name'];
+
+      // Callbacks for AHAH add more buttons.
+      if ($field['multiple']) {
+        $items['content/js/'. $field_name] = array(
+          'title' => 'Javascript Add More Form',
+          'page callback' => 'content_add_more_js',
+          'page arguments' => array($field_name),
+          'access arguments' => array('access content'),
+          'type' => MENU_CALLBACK,
+        );
+      }
+
       // TODO how should this be handled? If type is MENU_CALLBACK, the
       // breadcrumbs and tabs disappear on this page. If type is MENU_LOCAL_TASK,
       // the breadcrumbs and main tabs are right, but we also get secondary
@@ -222,11 +235,8 @@ function content_form(&$form, &$form_state) {
  *   function will return the entire $field form element.
  */
 function content_form_field(&$form, &$form_state, $field, $get_delta = NULL) {
-  $node = (object) $form['#node'];
   $addition = array();
-  $widget_types = _content_widget_types();
-  $module = $widget_types[$field['widget']['type']]['module'];
-  $function = $module .'_widget';
+  $function = $field['module'] .'_widget';
   if (function_exists($function)) {
     // Prepare the values to be filled in the widget.
     // We look in the following places :
@@ -250,40 +260,14 @@ function content_form_field(&$form, &$form_state, $field, $get_delta = NULL) {
       }
     }
 
-    $form_element = array();
-
     // If content module handles multiple values for this form element,
-    // make this a content_multiple_values element type and iterate through
-    // the multiple elements to add them to the form.
+    // process the multiple value form.
     if (content_handle('widget', 'multiple values', $field) == CONTENT_HANDLE_CORE) {
-      $form_element['#type'] = 'content_multiple_values';
-
-      // @TODO
-      // Here's where we can intervene to control the number of items
-      // or add javascript to dynamically add more items,
-      // or take control over the delta values in some way.
-      $max = !empty($field['multiple']) ? count($items) + 1 : 0;
-      $min = 0;
-      if (isset($get_delta)) {
-        $max = $min = $get_delta;
-      }
-      for ($delta = $min; $delta <= $max; $delta++) {
-        if ($element = $function($form, $form_state, $field, $items, $delta)) {
-          $defaults = array(
-            '#field_name' => $field['field_name'],
-            '#weight'   => $delta,
-            '#required' => $delta == 0 && $field['required'],
-            // TODO : should we add some logic for title and description too ?
-            '#delta'    => $delta,
-            '#columns'  => $field['columns'],
-          );
-          $form_element[$delta] = array_merge($element, $defaults);
-        }
-      }
+       $form_element = content_multiple_value_form($form, $form_state, $field, $items, $get_delta);
     }
+    // If the widget is handling multiple values (e.g optionwidgets),
+    // just get the field's form element and make it the zero value.
     else {
-      // If the widget is handling multiple values (e.g optionwidgets),
-      // just get the field's form element and make it the zero value.
       if ($element = $function($form, $form_state, $field, $items)) {
         $defaults = array(
           '#field_name' => $field['field_name'],
@@ -294,19 +278,148 @@ function content_form_field(&$form, &$form_state, $field, $get_delta = NULL) {
         $form_element[0] = array_merge($element, $defaults);
       }
     }
-  }
 
-  if ($form_element) {
-    // Field name is needed at this level as well as the individual elements
-    // so the multiple values theme can find it.
-    $defaults = array(
-      '#field_name' => $field['field_name'],
-      '#tree' => TRUE,
-      '#weight' => $field['widget']['weight'],
-    );
-    $addition[$field['field_name']] = array_merge($form_element, $defaults);
+    // Field name is needed at top level as well as the individual elements
+    // so the multiple values or other field level theme or processing can find it.
+    if ($form_element) {
+      $defaults = array(
+        '#field_name' => $field['field_name'],
+        '#tree' => TRUE,
+        '#weight' => $field['widget']['weight'],
+        '#count' => sizeof($form_element),
+      );
+      $addition[$field['field_name']] = array_merge($form_element, $defaults);
+
+    }
   }
   return $addition;
+}
+
+
+function content_multiple_value_form(&$form, &$form_state, $field, $items, $get_delta = NULL) {
+
+  $function = $field['module'] .'_widget';
+  $field_name = $field['field_name'];
+  $field_name_css = str_replace('_', '-', $field_name);
+
+  $form_element = array();
+  $count =  isset($form_state['item_count'][$field_name]) ? $form_state['item_count'][$field_name] : sizeof($items);
+
+  $max = !empty($field['multiple']) ? $count + 2 : 0;
+  $min = 0;
+  if (isset($get_delta)) {
+    $max = $min = $get_delta;
+  }
+  for ($delta = $min; $delta <= $max; $delta++) {
+    if ($element = $function($form, $form_state, $field, $items, $delta)) {
+      $defaults = array(
+        '#field_name' => $field_name,
+        '#weight'   => $delta,
+        '#required' => $delta == 0 && $field['required'],
+        '#delta'    => $delta,
+        '#columns'  => $field['columns'],
+      );
+      $form_element[$delta] = array_merge($element, $defaults);
+    }
+  }
+
+  // Add AHAH add more button to all multiple values for now.
+  // Don't do this when working with a programmed form or if only a
+  // single delta value has been requested.
+
+  // TODO once this is working, come back and add options on the settings
+  // page to either add an infinite number of items using ahah or
+  // set a specific number of multiples, then check that before
+  // adding the AHAH wrapper so there is a non-AHAH alternative.
+  if ($field['multiple'] && empty($form['#programmed']) && !$get_delta) {
+    // Make sure the form is cached so ahah can work.
+    $form['#cache'] = TRUE;
+
+    // Add a wrapper for the fields and more button.
+    $form_element['#prefix'] = '<div class="clear-block" id="'. $field_name_css .'-add-more-wrapper">';
+    // Container for just the field items.
+    $form_element['#prefix'] .= '<div id="'. $field_name_css .'-items">';
+    $form_element['#suffix'] = '</div></div>';
+
+    // We name our button $field_name .'_add_more' to avoid conflicts with
+    // other fields and other modules using AHAH-enabled buttons with the id 'more'.
+    // Use a prefix to close out the container for field items and start the button container.
+    $form_element[$field_name .'_add_more'] = array(
+      '#prefix' => '</div><div>',
+      '#suffix' => '</div>',
+      '#type' => 'submit',
+      '#value' => t('Add another !field field', array('!field' => t($field['widget']['label']))),
+      '#description' => t("If the amount of boxes above isn't enough, click here to add more items."),
+      '#weight' => $field['widget']['weight'] + 2,
+      '#submit' => array('content_add_more_submit'), // If no javascript action.
+      '#ahah' => array(
+        'path' => 'content/js/'. $field_name,
+        'wrapper' => $field_name_css .'-items',
+        'method' => 'replace',
+        'effect' => 'fade',
+      ),
+    );
+  }
+  else {
+    $form_element['#type'] = 'content_multiple_values';
+  }
+  return $form_element;
+}
+
+/**
+ * Submit handler to add more choices to a content form. This handler is used when
+ * javascript is not available. It makes changes to the form state and the
+ * entire form is rebuilt during the page reload.
+ */
+function content_add_more_submit($form, &$form_state) {
+  // Set the form to rebuild and run submit handlers.
+  node_form_submit_build_node($form, $form_state);
+
+  foreach ($form['#field_info'] as $field_name => $field) {
+    // Make the changes we want to the form state.
+    if ($form_state['values'][$field_name][$field_name .'_add_more']) {
+      $form_state['item_count'][$field_name] = count($form[$field_name]['#count']) + 1;
+    }
+  }
+}
+
+/**
+ * Menu callback for AHAH additions.
+ */
+function content_add_more_js($field_name) {
+  // Add the new element to the stored form state. Without adding the element
+  // to the form, Drupal is not aware of this new elements existence and will
+  // not process it. We retreive the cached form, add the element, and resave.
+  $delta = max(array_keys($_POST[$field_name])) + 1;
+  $cache = cache_get('form_'. $_POST['form_build_id'], 'cache_form');
+  $form = $cache->data;
+
+  // Build our new form element.
+  $field = $form['#field_info'][$field_name];
+  $form_state = array('values' => $_POST);
+  $form_element = content_form_field($form, $form_state, $field, $delta);
+
+  drupal_alter('form', $form_element, array(), 'content_add_more_js');
+  $form[$field_name][$delta] = $form_element;
+  cache_set('form_'. $_POST['form_build_id'], $form, 'cache_form', $cache->expire);
+
+  // Build the new form.
+  $form_state = array('submitted' => FALSE);
+  $form_state['item_count'][$field_name] = $delta;
+  $form += array(
+    '#post' => $_POST,
+    '#programmed' => FALSE,
+  );
+  $form = form_builder($_POST['form_id'], $form, $form_state);
+
+  // Render the new output.
+  $output = '';
+  $choice_form = $form[$field_name];
+  unset($choice_form['#prefix'], $choice_form['#suffix'], $choice_form[$field_name .'_add_more']); // Prevent duplicate wrappers.
+  $choice_form[$form[$field_name]['#count']]['#attributes']['class'] = empty($choice_form[$delta]['#attributes']['class']) ? 'ahah-new-content' : $choice_form[$delta]['#attributes']['class'] .' ahah-new-content';
+  $output = theme('status_messages') . drupal_render($choice_form);
+
+  drupal_json(array('status' => TRUE, 'data' => $output));
 }
 
 /**
@@ -510,6 +623,7 @@ function content_field($op, &$node, $field, &$items, $teaser, $page) {
       // Don't save empty items.
       // If the first item is empty, keep a NULL value for each of its columns
       // so there is a marker in the database, otherwise unset the item.
+
       $field_types = _content_field_types();
       $module = $field_types[$field['type']]['module'];
       $is_empty = $module .'_content_is_empty';
@@ -1311,20 +1425,10 @@ function theme_content_multiple_values($element) {
     $type = content_types($field['type_name']);
     $widget = $type['fields'][$field_name]['widget'];
     if (!empty($field['multiple'])) {
-      $fieldset = array();
-      $fieldset['#type'] = 'fieldset';
-      $fieldset['#title'] = t($widget['label']);
-      $fieldset['#description'] = t($widget['description']);
-      $fieldset['#weight'] = $widget['weight'];
-      $fieldset['#collapsible'] = FALSE;
-      $fieldset['#collapsed'] = FALSE;
-      $fieldset['#attributes'] = '';
-      $fieldset['#value'] = $element['#children'];
-      return theme('fieldset', $fieldset);
+      // Change the button title to reflect the behavior when using JavaScript.
+      drupal_add_js('if (Drupal.jsEnabled) { $(document).ready(function() { $("#edit-'. str_replace('_', '-', $field_name) .'-add-more").val("'. t('Add another item') .'"); }); }', 'inline');
     }
-    else {
-      return $element['#children'];
-    }
+    return $element['#children'];
   }
 }
 
