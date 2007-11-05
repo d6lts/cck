@@ -516,7 +516,7 @@ function fieldgroup_get_group($content_type, $field_name) {
  *  React to change in node types
  */
 function fieldgroup_node_type($op, $info) {
-  if ($op == 'update' && $info->type != $info->old_type) {
+  if ($op == 'update' && !empty($info->old_type) && $info->type != $info->old_type) {
     // update the tables
     db_query("UPDATE {node_group} SET type_name='%s' WHERE type_name='%s'", array($info->type, $info->old_type));
     db_query("UPDATE {node_group_fields} SET type_name='%s' WHERE type_name='%s'", array($info->type, $info->old_type));
