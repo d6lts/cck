@@ -266,7 +266,7 @@ function content_form_field(&$form, &$form_state, $field, $get_delta = NULL) {
     // If content module handles multiple values for this form element,
     // and not selecting an individual $delta, process the multiple value form.
     if (!$get_delta && content_handle('widget', 'multiple values', $field) == CONTENT_HANDLE_CORE) {
-       $form_element = content_multiple_value_form($form, $form_state, $field, $items, $get_delta);
+       $form_element = content_multiple_value_form($form, $form_state, $field, $items);
     }
     // If the widget is handling multiple values (e.g optionwidgets),
     // or selecting an individual element, just get a single form
@@ -331,7 +331,7 @@ function content_multiple_value_form(&$form, &$form_state, $field, $items) {
     }
   }
 
-  // Add AHAH add more button, but not when working with a programmed form.
+  // Add AHAH add more button, if not working with a programmed form.
   if ($field['multiple'] == 1 && empty($form['#programmed'])) {
     // Make sure the form is cached so ahah can work.
     $form['#cache'] = TRUE;
@@ -619,24 +619,30 @@ function content_field($op, &$node, $field, &$items, $teaser, $page) {
       break;
 
     case 'presave':
+
       // If there was an AHAH add more button in this field, don't save it.
       unset($items[$field['field_name']. '_add_more']);
 
-      // Don't save empty items.
-      // If the first item is empty, keep a NULL value for each of its columns
-      // so there is a marker in the database, otherwise unset the item.
-      $field_types = _content_field_types();
-      $module = $field_types[$field['type']]['module'];
-      $is_empty = $module .'_content_is_empty';
-      foreach ((array) $items as $delta => $item) {
-        if ($is_empty($item, $field)) {
-          if ($delta == 0) {
-            foreach (array_keys($field['columns']) as $column) {
-              $items[$delta][$column] = NULL;
+      // If content module is handling multiple values, don't save empty items.
+      // If a specified number of multiple values was requested or this is
+      // the zero delta, save even if empty and keep a NULL value for each
+      // of its columns so there is a marker row in the database, otherwise
+      // unset the item.
+      if (content_handle('widget', 'multiple values', $field) == CONTENT_HANDLE_CORE) {
+        $field_types = _content_field_types();
+        $module = $field_types[$field['type']]['module'];
+        $is_empty = $module .'_content_is_empty';
+        $max_delta = $field['multiple'] > 1 ? $field['multiple'] : 0;
+        foreach ((array) $items as $delta => $item) {
+          if ($is_empty($item, $field)) {
+            if ($delta <= $max_delta) {
+              foreach (array_keys($field['columns']) as $column) {
+                $items[$delta][$column] = NULL;
+              }
             }
-          }
-          else {
-            unset($items[$delta]);
+            else {
+              unset($items[$delta]);
+            }
           }
         }
       }
@@ -1429,7 +1435,7 @@ function theme_content_multiple_values($element) {
     $field = content_fields($field_name);
     $type = content_types($field['type_name']);
     $widget = $type['fields'][$field_name]['widget'];
-    if (!empty($field['multiple'])) {
+    if ($field['multiple'] == 1) {
       // Change the button title to reflect the behavior when using JavaScript.
       drupal_add_js('if (Drupal.jsEnabled) { $(document).ready(function() { $("#edit-'. str_replace('_', '-', $field_name) .'-add-more").val("'. t('Add another item') .'"); }); }', 'inline');
     }
