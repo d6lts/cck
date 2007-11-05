@@ -644,8 +644,14 @@ function _content_admin_field_add_new_submit($form, &$form_state) {
   $type   = content_types($form_values['type_name']);
 
   $field_widget_type = explode('-', $form_values['field_widget_type']);
-  db_query("INSERT INTO {node_field} (field_name, type, global_settings, required, multiple, db_storage) VALUES ('%s', '%s', '%s', %d, %d, %d)", $field_name, $field_widget_type[0], serialize(array()), 0, 0, CONTENT_DB_STORAGE_PER_CONTENT_TYPE);
-  db_query("INSERT INTO {node_field_instance} (field_name, type_name, weight, label, widget_type, widget_settings, display_settings, description) VALUES ('%s', '%s', %d, '%s', '%s', '%s', '%s', '%s')", $field_name, $form_values['type_name'], 0, $field_name, $field_widget_type[1], serialize(array()), serialize(array()), '');
+
+  $info = _content_type_info();
+  $field_module = $info['field types'][$field_widget_type[0]]['module'];
+  $widget_module = $info['widget types'][$field_widget_type[1]]['module'];
+
+
+  db_query("INSERT INTO {node_field} (field_name, type, global_settings, required, multiple, db_storage, module) VALUES ('%s', '%s', '%s', %d, %d, %d, '%s')", $field_name, $field_widget_type[0], serialize(array()), 0, 0, CONTENT_DB_STORAGE_PER_CONTENT_TYPE, $field_module);
+  db_query("INSERT INTO {node_field_instance} (field_name, type_name, weight, label, widget_type, widget_settings, display_settings, description, module) VALUES ('%s', '%s', %d, '%s', '%s', '%s', '%s', '%s', '%s')", $field_name, $form_values['type_name'], 0, $field_name, $field_widget_type[1], serialize(array()), serialize(array()), '', $widget_module);
 
   content_clear_type_cache();
   menu_rebuild();

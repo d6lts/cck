@@ -33,6 +33,7 @@ function content_schema() {
       'required'        => array('type' => 'int', 'size' => 'tiny', 'not null' => TRUE, 'default' => 0),
       'multiple'        => array('type' => 'int', 'size' => 'tiny', 'not null' => TRUE, 'default' => 0),
       'db_storage'      => array('type' => 'int', 'size' => 'tiny', 'not null' => TRUE, 'default' => 0),
+      'module'          => array('type' => 'varchar', 'length' => 127, 'not null' => TRUE, 'default' => ''),
     ),
     'primary key' => array('field_name'),
   );
@@ -46,6 +47,7 @@ function content_schema() {
       'widget_settings'  => array('type' => 'text', 'size' => 'medium', 'not null' => TRUE, 'default' => ''),
       'display_settings' => array('type' => 'text', 'size' => 'medium', 'not null' => TRUE, 'default' => ''),
       'description'      => array('type' => 'text', 'size' => 'medium', 'not null' => TRUE, 'default' => ''),
+      'module'           => array('type' => 'varchar', 'length' => 127, 'not null' => TRUE, 'default' => ''),
     ),
     'primary key' => array('field_name', 'type_name'),
   );
@@ -568,4 +570,40 @@ function content_update_1007() {
  */
 function content_update_1008() {
   return array();
+}
+
+/**
+ * Add module name to fields table to make it easier to identify the fields to delete when a module
+ * is uninstalled.
+ *
+ * Needed because the value drops out of content_info() when module is disabled, so there
+ * is no other way to find the associated fields.
+ */
+function content_update_6000() {
+  $ret = array();
+  include_once('./'. drupal_get_path('module', 'content') .'/content.module');
+  include_once('./'. drupal_get_path('module', 'content') .'/content_admin.inc');
+  switch ($GLOBALS['db_type']) {
+    case 'pgsql':
+      db_add_column($ret, 'node_field', 'module', 'varchar(127)', array('not null' => TRUE, 'default' => "''"));
+      db_add_column($ret, 'node_field_instance', 'module', 'varchar(127)', array('not null' => TRUE, 'default' => "''"));
+      break;
+
+    case 'mysql':
+    case 'mysqli':
+      $ret[] = update_sql("ALTER TABLE {node_field} ADD COLUMN module varchar(127) NOT NULL");
+      $ret[] = update_sql("ALTER TABLE {node_field_instance} ADD COLUMN module varchar(127) NOT NULL");
+      break;
+  }
+  foreach (_content_field_types() as $type => $field) {
+    if (!empty($type)) {
+      $ret[] = update_sql("UPDATE {node_field} SET module = '". $field['module'] ."' WHERE type = '". $type ."'");
+    }
+  }
+  foreach (_content_widget_types() as $type => $field) {
+    if (!empty($type)) {
+      $ret[] = update_sql("UPDATE {node_field_instance} SET module = '". $field['module'] ."' WHERE widget_type = '". $type ."'");
+    }
+  }
+  return $ret;
 }

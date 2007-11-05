@@ -582,12 +582,15 @@ function content_form_alter(&$form, $form_state, $form_id) {
  *   field modules are installed, uninstalled, enabled or disabled.
  */
 function content_notify($op, $module) {
-  // PLACEHOLDER
   switch ($op) {
     case 'install':
       content_clear_type_cache();
       break;
     case 'uninstall':
+      $results = db_query("SELECT * FROM {node_field} WHERE module = '%s'", $module);
+      while ($row = $results) {
+        content_field_delete(array('field_name' => $row['field_name']));
+      }
       content_clear_type_cache(TRUE);
       break;
     case 'enable':
@@ -620,6 +623,11 @@ function content_field($op, &$node, $field, &$items, $teaser, $page) {
   switch ($op) {
     case 'validate':
       // TODO : here we could validate that the number of multiple data is correct ?
+      // We're controlling the number of fields to fill out and saving empty
+      // ones if a specified number is requested, so no reason to do any validation
+      // here right now, but if later create a method to indicate whether
+      // 'required' means all values must be filled out, we can come back
+      // here and check that they're not empty.
       break;
 
     case 'presave':
