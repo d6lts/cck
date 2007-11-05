@@ -531,7 +531,7 @@ function _content_admin_field_add_new(&$form_state, $type_name, $new_field_name 
       '#title' => t('Field name'),
       '#type' => 'textfield',
       '#default_value' => $new_field_name,
-      '#description' => t('The machine-readable name of the field. This name cannot be changed later! Allowed characters : unaccentuated a-z, numbers and _. You\'ll be able to choose a human-readable label for the field on next page'),
+      '#description' => t('The machine-readable name of the field. This name cannot be changed later! Allowed characters are lowercase, unaccentuated a-z, numbers and underscores, and the name must be prefixed with \'field_\'. You\'ll be able to choose a human-readable label for the field on next page'),
       '#required' => TRUE,
     );
     $form['new']['field_widget_type'] = array(
@@ -631,8 +631,8 @@ function _content_admin_field_add_new_validate($form, &$form_state) {
     form_set_error('field_name', t('The field name %field_name already exists.', array(
       '%field_name' => $form_values['field_name'])));
   }
-  elseif (!preg_match('!^[a-z0-9_]+$!', $form_values['field_name'])) {
-    form_set_error('field_name', t('The field name %field_name is invalid.', array(
+  elseif (!preg_match('!^field_[a-z0-9_]+$!', $form_values['field_name'])) {
+    form_set_error('field_name', t('The field name %field_name is invalid. Allowed characters are lowercase, unaccentuated a-z, numbers and underscores, and the name must be prefixed with \'field_\',', array(
       '%field_name' => $form_values['field_name'])));
   }
 }
@@ -833,10 +833,13 @@ function _content_admin_field(&$form_state, $type_name, $field_name) {
     '#title' => t('Required'),
     '#default_value' => $field['required'],
   );
+  $options = drupal_map_assoc(range(2, 10));
   $form['field']['multiple'] = array(
-    '#type' => 'checkbox',
+    '#type' => 'select',
     '#title' => t('Multiple values'),
+    '#options' => array_merge(array(0 => t('None'), 1 => t('Unlimited')), $options),
     '#default_value' => $field['multiple'],
+    '#description' => t('Select \'None\' if this field should not allow multiple values, \'Unlimited\' to provide an \'Add more\' button so the user can add as many values as they like, or select a number to provide a specific number of multiple values for this field.')
   );
 
   $additions = module_invoke($field_type['module'], 'field_settings', 'form', $field);
