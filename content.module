@@ -585,12 +585,16 @@ function content_notify($op, $module) {
   // PLACEHOLDER
   switch ($op) {
     case 'install':
+      content_clear_type_cache();
       break;
     case 'uninstall':
+      content_clear_type_cache(TRUE);
       break;
     case 'enable':
+      content_clear_type_cache();
       break;
     case 'disable':
+      content_clear_type_cache(TRUE);
       break;
   }
 }
