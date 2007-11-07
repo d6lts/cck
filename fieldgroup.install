@@ -22,7 +22,7 @@ function fieldgroup_uninstall() {
  * Implementation of hook_schema.
  */
 function fieldgroup_schema() {
-  $schema['node_group'] = array(
+  $schema['content_group'] = array(
     'fields' => array(
       'type_name'  => array('type' => 'varchar', 'length' => 32, 'not null' => TRUE, 'default' => ''),
       'group_name' => array('type' => 'varchar', 'length' => 32, 'not null' => TRUE, 'default' => ''),
@@ -33,7 +33,7 @@ function fieldgroup_schema() {
     'primary key' => array('type_name', 'group_name'),
   );
 
-  $schema['node_group_fields'] = array(
+  $schema['content_group_fields'] = array(
     'fields' => array(
       'type_name'  => array('type' => 'varchar', 'length' => 32, 'not null' => TRUE, 'default' => ''),
       'group_name' => array('type' => 'varchar', 'length' => 32, 'not null' => TRUE, 'default' => ''),
@@ -146,5 +146,12 @@ function fieldgroup_update_3() {
 function fieldgroup_update_4() {
   $ret = array();
   $ret[] = update_sql("UPDATE {system} SET weight = 9 WHERE name = 'fieldgroup'");
+  return $ret;
+}
+
+function fieldgroup_update_6000() {
+  $ret = array();
+  db_rename_table($ret, 'node_group', 'content_group');
+  db_rename_table($ret, 'node_group_fields', 'content_group_fields');
   return $ret;
 }

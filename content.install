@@ -25,7 +25,7 @@ function content_schema() {
 
   // Static (meta) tables.
 
-  $schema['node_field'] = array(
+  $schema['content_field'] = array(
     'fields' => array(
       'field_name'      => array('type' => 'varchar', 'length' => 32, 'not null' => TRUE, 'default' => ''),
       'type'            => array('type' => 'varchar', 'length' => 127, 'not null' => TRUE, 'default' => ''),
@@ -37,7 +37,7 @@ function content_schema() {
     ),
     'primary key' => array('field_name'),
   );
-  $schema['node_field_instance'] = array(
+  $schema['content_field_instance'] = array(
     'fields' => array(
       'field_name'       => array('type' => 'varchar', 'length' => 32, 'not null' => TRUE, 'default' => ''),
       'type_name'        => array('type' => 'varchar', 'length' => 32, 'not null' => TRUE, 'default' => ''),
@@ -392,7 +392,7 @@ function content_update_1003() {
     $old_name = _content_tablename($type['type'], CONTENT_DB_STORAGE_PER_CONTENT_TYPE);
     $new_name = _content_tablename($type['type'], CONTENT_DB_STORAGE_PER_CONTENT_TYPE, 1003);
     if (db_table_exists($old_name)) {
-      if (!in_array($old_name, array('node_access',  'node_comments_statistics', 'node_counter', 'node_field', 'node_field_instance', 'node_group', 'node_group_fields', 'node_revisions', 'node_type'))) {
+      if (!in_array($old_name, array('node_access',  'node_comments_statistics', 'node_counter', 'node_field', 'node_field_instance', 'content_group', 'content_group_fields', 'node_revisions', 'node_type'))) {
         $rename[$old_name] = $new_name;
       }
       else {
@@ -605,5 +605,12 @@ function content_update_6000() {
       $ret[] = update_sql("UPDATE {node_field_instance} SET module = '". $field['module'] ."' WHERE widget_type = '". $type ."'");
     }
   }
+  return $ret;
+}
+
+function content_update_6001() {
+  $ret = array();
+  db_rename_table($ret, 'node_field', 'content_field');
+  db_rename_table($ret, 'node_field_instance', 'content_field_instance');
   return $ret;
 }

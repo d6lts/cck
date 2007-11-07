@@ -20,7 +20,7 @@ function _content_admin_type_fields() {
     $row[] = $field['type'];
 
     $types = array();
-    $result = db_query("SELECT nt.name, nt.type FROM {node_field_instance} nfi LEFT JOIN {node_type} nt ON nt.type = nfi.type_name WHERE nfi.field_name = '%s' ORDER BY nt.name ASC", $field['field_name']);
+    $result = db_query("SELECT nt.name, nt.type FROM {content_field_instance} nfi LEFT JOIN {node_type} nt ON nt.type = nfi.type_name WHERE nfi.field_name = '%s' ORDER BY nt.name ASC", $field['field_name']);
     while ($type = db_fetch_array($result)) {
       $content_type = content_types($type['type']);
       $types[] = l($type['name'], 'admin/content/types/'. $content_type['url_str'] .'/fields');
@@ -315,7 +315,7 @@ function content_admin_field_overview_form_submit($form, &$form_state) {
   // Update field weights.
   foreach ((array) $form_values['field-weights'] as $key => $value) {
     if ($key && !in_array($key, unserialize($form_values['disabled']))) {
-      db_query("UPDATE {node_field_instance} SET weight = %d WHERE type_name = '%s' AND field_name = '%s'",
+      db_query("UPDATE {content_field_instance} SET weight = %d WHERE type_name = '%s' AND field_name = '%s'",
         $value, $form_values['type_name'], $key);
     }
   }
@@ -335,7 +335,7 @@ function content_admin_field_overview_form_submit($form, &$form_state) {
   // Update group weights.
   foreach ((array) $form_values['group-weights'] as $key => $value) {
     if ($key && !in_array($key, unserialize($form_values['disabled']))) {
-      db_query("UPDATE {node_group} SET weight = %d WHERE type_name = '%s' AND group_name = '%s'",
+      db_query("UPDATE {content_group} SET weight = %d WHERE type_name = '%s' AND group_name = '%s'",
         $value, $form_values['type_name'], $key);
     }
   }
@@ -404,7 +404,7 @@ function content_admin_display_overview_form_submit($form, &$form_state) {
         $display_settings[$key] = $value;
       }
 
-      db_query("UPDATE {node_field_instance} SET display_settings = '%s' WHERE type_name = '%s' AND field_name = '%s'",
+      db_query("UPDATE {content_field_instance} SET display_settings = '%s' WHERE type_name = '%s' AND field_name = '%s'",
         serialize($display_settings), $type, $fieldname);
     }
     content_clear_type_cache();
@@ -590,12 +590,12 @@ function _content_admin_field_add_existing_submit($form, &$form_state) {
     if ($field['db_storage'] == CONTENT_DB_STORAGE_PER_CONTENT_TYPE) {
       $new_field = $field;
       $new_field['db_storage'] = CONTENT_DB_STORAGE_PER_FIELD;
-      db_query("UPDATE {node_field} SET db_storage = %d WHERE field_name = '%s'", CONTENT_DB_STORAGE_PER_FIELD, $form_values['field_name']);
+      db_query("UPDATE {content_field} SET db_storage = %d WHERE field_name = '%s'", CONTENT_DB_STORAGE_PER_FIELD, $form_values['field_name']);
       content_alter_db_field($field, $columns, $new_field, $columns);
     }
   }
 
-  $prior_instance = db_fetch_array(db_query("SELECT * FROM {node_field_instance} WHERE field_name = '%s'", $form_values['field_name']));
+  $prior_instance = db_fetch_array(db_query("SELECT * FROM {content_field_instance} WHERE field_name = '%s'", $form_values['field_name']));
   if (!$prior_instance) {
     $prior_instance = array();
     $prior_instance['weight'] = 0;
@@ -605,7 +605,7 @@ function _content_admin_field_add_existing_submit($form, &$form_state) {
     $prior_instance['display_settings'] = '';
     $prior_instance['description'] = '';
   }
-  db_query("INSERT INTO {node_field_instance} (field_name, type_name, weight, label, widget_type, widget_settings, display_settings, description) VALUES ('%s', '%s', %d, '%s', '%s', '%s', '%s', '%s')", $form_values['field_name'], $form_values['type_name'], $prior_instance['weight'], $prior_instance['label'], $prior_instance['widget_type'], $prior_instance['widget_settings'], $prior_instance['display_settings'], $prior_instance['description']);
+  db_query("INSERT INTO {content_field_instance} (field_name, type_name, weight, label, widget_type, widget_settings, display_settings, description) VALUES ('%s', '%s', %d, '%s', '%s', '%s', '%s', '%s')", $form_values['field_name'], $form_values['type_name'], $prior_instance['weight'], $prior_instance['label'], $prior_instance['widget_type'], $prior_instance['widget_settings'], $prior_instance['display_settings'], $prior_instance['description']);
 
   drupal_set_message(t('Added field %label.', array('%label' => $prior_instance['label'])));
   content_clear_type_cache();
@@ -650,8 +650,8 @@ function _content_admin_field_add_new_submit($form, &$form_state) {
   $widget_module = $info['widget types'][$field_widget_type[1]]['module'];
 
 
-  db_query("INSERT INTO {node_field} (field_name, type, global_settings, required, multiple, db_storage, module) VALUES ('%s', '%s', '%s', %d, %d, %d, '%s')", $field_name, $field_widget_type[0], serialize(array()), 0, 0, CONTENT_DB_STORAGE_PER_CONTENT_TYPE, $field_module);
-  db_query("INSERT INTO {node_field_instance} (field_name, type_name, weight, label, widget_type, widget_settings, display_settings, description, module) VALUES ('%s', '%s', %d, '%s', '%s', '%s', '%s', '%s', '%s')", $field_name, $form_values['type_name'], 0, $field_name, $field_widget_type[1], serialize(array()), serialize(array()), '', $widget_module);
+  db_query("INSERT INTO {content_field} (field_name, type, global_settings, required, multiple, db_storage, module) VALUES ('%s', '%s', '%s', %d, %d, %d, '%s')", $field_name, $field_widget_type[0], serialize(array()), 0, 0, CONTENT_DB_STORAGE_PER_CONTENT_TYPE, $field_module);
+  db_query("INSERT INTO {content_field_instance} (field_name, type_name, weight, label, widget_type, widget_settings, display_settings, description, module) VALUES ('%s', '%s', %d, '%s', '%s', '%s', '%s', '%s', '%s')", $field_name, $form_values['type_name'], 0, $field_name, $field_widget_type[1], serialize(array()), serialize(array()), '', $widget_module);
 
   content_clear_type_cache();
   menu_rebuild();
@@ -998,19 +998,19 @@ function _content_admin_field_submit($form, &$form_state) {
   $prev_field = $field;
   $prev_columns = content_invoke_columns($field);
 
-  db_query("UPDATE {node_field_instance} SET weight = %d, label = '%s', widget_type = '%s', widget_settings = '%s', description = '%s' WHERE type_name = '%s' AND field_name = '%s'", $form_values['weight'], $form_values['label'], $form_values['widget_type'], serialize($widget_settings), $form_values['description'], $form_values['type_name'], $form_values['field_name']);
+  db_query("UPDATE {content_field_instance} SET weight = %d, label = '%s', widget_type = '%s', widget_settings = '%s', description = '%s' WHERE type_name = '%s' AND field_name = '%s'", $form_values['weight'], $form_values['label'], $form_values['widget_type'], serialize($widget_settings), $form_values['description'], $form_values['type_name'], $form_values['field_name']);
 
   if ($form_values['multiple']) {
     $field['db_storage'] = CONTENT_DB_STORAGE_PER_FIELD;
   }
   else {
-    $instances = db_result(db_query("SELECT COUNT(*) FROM {node_field_instance} WHERE field_name = '%s'", $form_values['field_name']));
+    $instances = db_result(db_query("SELECT COUNT(*) FROM {content_field_instance} WHERE field_name = '%s'", $form_values['field_name']));
     if ($instances == 1) {
       $field['db_storage'] = CONTENT_DB_STORAGE_PER_CONTENT_TYPE;
     }
   }
 
-  db_query("UPDATE {node_field} SET required = %d, multiple = %d, global_settings = '%s', db_storage = %d WHERE field_name = '%s'", $form_values['required'], $form_values['multiple'], serialize($field_settings), $field['db_storage'], $form_values['field_name']);
+  db_query("UPDATE {content_field} SET required = %d, multiple = %d, global_settings = '%s', db_storage = %d WHERE field_name = '%s'", $form_values['required'], $form_values['multiple'], serialize($field_settings), $field['db_storage'], $form_values['field_name']);
 
   drupal_set_message(t('Saved field %field.', array('%field' => $form_values['label'])));
   content_clear_type_cache();
@@ -1038,12 +1038,12 @@ function content_alter_db_field($previous_field, $previous_columns, $new_field, 
   // When adding and removing columns, we need to know what content type has an instance of the field.
   if (count($previous_columns)) {
     if (!isset($previous_field['type_name'])) {
-      $previous_field['type_name'] = db_result(db_query("SELECT type_name FROM {node_field_instance} WHERE field_name = '%s'", $previous_field['field_name']));
+      $previous_field['type_name'] = db_result(db_query("SELECT type_name FROM {content_field_instance} WHERE field_name = '%s'", $previous_field['field_name']));
     }
     $previous_db_info = content_database_info($previous_field);
   }
   if (count($new_columns)) {
-    $new_field['type_name'] = db_result(db_query("SELECT type_name FROM {node_field_instance} WHERE field_name = '%s'", $new_field['field_name']));
+    $new_field['type_name'] = db_result(db_query("SELECT type_name FROM {content_field_instance} WHERE field_name = '%s'", $new_field['field_name']));
     $new_db_info = content_database_info($new_field);
   }
 
