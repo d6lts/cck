@@ -619,6 +619,9 @@ function _content_admin_field_add_new_validate($form, &$form_state) {
     form_set_error('field_name', t('The field name %field_name is invalid. Allowed characters are lowercase, unaccentuated a-z, numbers, and underscores, and the name must be prefixed with \'field_\',', array(
       '%field_name' => $form_values['field_name'])));
   }
+  elseif ($form_values['field_name'] == 'field_instance') {
+    form_set_error('field_name', t('The name \'field_instance\' is a reserved name.'));
+  }
 }
 
 /**
