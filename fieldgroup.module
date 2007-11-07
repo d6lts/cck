@@ -385,7 +385,6 @@ function fieldgroup_form_alter(&$form, $form_state, $form_id) {
     );
     $form['widget']['weight']['#weight'] = 5;
     $form['widget']['description']['#weight'] = 7;
-    $form['#default'] = $form['widget']['group']['#default_value'];
     $form['#submit'][] = 'fieldgroup_content_admin_form_submit';
   }
   elseif ($form_id == 'content_admin_display_overview_form') {
@@ -399,11 +398,28 @@ function fieldgroup_form_alter(&$form, $form_state, $form_id) {
   elseif ($form_id == '_content_admin_field_remove') {
     $form['#submit'][] = 'fieldgroup_content_admin_field_remove_submit';
   }
+  elseif ($form_id == 'content_admin_field_overview_form') {
+    $form['#submit'][] = 'fieldgroup_content_overview_form_submit';
+  }
 }
 
 function fieldgroup_content_admin_form_submit($form, &$form_state) {
   $form_values = $form_state['values'];
-  $default = $form['#default'];
+  fieldgroup_update_group($form_values);
+}
+
+function fieldgroup_content_overview_form_submit($form, &$form_state) {
+  // Update groups.
+  $form_values = $form_state['values'];
+  foreach ((array) $form_values['field-groups'] as $key => $value) {
+    if ($key && !in_array($key, unserialize($form_values['disabled']))) {
+      fieldgroup_update_group(array('field_name' => $key, 'group' => $value, 'type_name' => $form_values['type_name']));
+    }
+  }
+}
+
+function fieldgroup_update_group($form_values) {
+  $default = _fieldgroup_field_get_group($form_values['type_name'], $form_values['field_name']);
 
   if ($default != $form_values['group']) {
     if ($form_values['group'] && !$default) {

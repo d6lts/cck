@@ -320,18 +320,6 @@ function content_admin_field_overview_form_submit($form, &$form_state) {
     }
   }
 
-  // TODO : the following ops should be moved to fieldgroup.module...
-  // Update groups.
-  foreach ((array) $form_values['field-groups'] as $key => $value) {
-    if ($key && !in_array($key, unserialize($form_values['disabled']))) {
-      // TODO : really hackish now...
-      // This should be refactored, and not be based on the field settings form anymore
-      $fake_form = array('#default' => isset($form_values['field-groups-defaults'][$key]) ? $form_values['field-groups-defaults'][$key] : NULL);
-      $fake_values = array('values' => array('field_name' => $key, 'group' => $value, 'type_name' => $form_values['type_name']));
-      fieldgroup_content_admin_form_submit($fake_form, $fake_values);
-    }
-  }
-
   // Update group weights.
   foreach ((array) $form_values['group-weights'] as $key => $value) {
     if ($key && !in_array($key, unserialize($form_values['disabled']))) {
