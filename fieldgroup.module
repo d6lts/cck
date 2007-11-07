@@ -91,6 +91,18 @@ function fieldgroup_elements() {
   );
 }
 
+/**
+ * Implementation of hook_fieldapi().
+ */
+function fieldgroup_content_fieldapi($op, $field) {
+  switch ($op) {
+    case 'delete':
+      db_query("DELETE FROM {content_group_fields) WHERE field_name = '%s'", $field['field_name']);
+      break;
+  }
+  cache_clear_all('fieldgroup_data', 'content_cache');
+}
+
 function fieldgroup_edit_group_form(&$form_state, $content_type, $group_name, $action) {
   $groups = fieldgroup_groups($content_type['type']);
 

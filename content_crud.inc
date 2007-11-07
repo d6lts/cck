@@ -146,13 +146,19 @@ function content_field_update($properties) {
  *   The number of fields deleted.
  */
 function content_field_delete($properties) {
-  $result = db_query("SELECT type_name FROM {content_field_instance} WHERE field_name = '%s'", $properties['field_name']);
+  $field_name = $properties['field_name'];
+  $result = db_query("SELECT type_name FROM {content_field_instance} WHERE field_name = '%s'", $field_name);
   $type_names = array();
   while ($type = db_fetch_array($result)) {
     $type_names[] = $type['type_name'];
   }
   foreach ($type_names as $type_name) {
-    content_field_instance_delete(array('type_name' => $type_name, 'field_name' => $properties['field_name']));
+    content_field_instance_delete(array('type_name' => $type_name, 'field_name' => $field_name));
+  }
+  $fields = content_fields();
+  $field = $fields[$field_name];
+  foreach (module_list() as $module) {
+    module_invoke('content_fieldapi', 'delete', $field);
   }
   return (count($type_names) ? 1 : 0);
 }
@@ -209,13 +215,15 @@ function content_field_instance_update($properties) {
  *   The number of field instances deleted.
  */
 function content_field_instance_delete($properties) {
-  $number_deleted = db_query("DELETE FROM {content_field_instance} WHERE type_name = '%s' AND field_name = '%s'", $properties['type_name'], $properties['field_name']);
+  $field_name = $properties['field_name'];
+  $type_name = $properties['type_name'];
+  $number_deleted = db_query("DELETE FROM {content_field_instance} WHERE type_name = '%s' AND field_name = '%s'", $type_name, $field_name);
 
-  $type = content_types($properties['type_name']);
-  $field = $type['fields'][$properties['field_name']];
+  $type = content_types($type_name);
+  $field = $type['fields'][$field_name];
   $columns = content_invoke_columns($field);
 
-  $instances = db_result(db_query("SELECT COUNT(*) FROM {content_field_instance} WHERE field_name = '%s'", $properties['field_name']));
+  $instances = db_result(db_query("SELECT COUNT(*) FROM {content_field_instance} WHERE field_name = '%s'", $field_name));
 
   // If only one instance remains, we may need to change the database
   // representation for this field.
@@ -225,7 +233,7 @@ function content_field_instance_delete($properties) {
       if (is_array($columns) && count($columns)) {
         $new_field = $field;
         $new_field['db_storage'] = CONTENT_DB_STORAGE_PER_CONTENT_TYPE;
-        db_query("UPDATE {content_field} SET db_storage = %d WHERE field_name = '%s'", CONTENT_DB_STORAGE_PER_CONTENT_TYPE, $properties['field_name']);
+        db_query("UPDATE {content_field} SET db_storage = %d WHERE field_name = '%s'", CONTENT_DB_STORAGE_PER_CONTENT_TYPE, $field_name);
         content_alter_db_field($field, $columns, $new_field, $columns);
       }
     }
@@ -236,9 +244,12 @@ function content_field_instance_delete($properties) {
     if (is_array($columns) && count($columns)) {
       content_alter_db_field($field, $columns, array(), array());
     }
-    db_query("DELETE FROM {content_field} WHERE field_name = '%s'", $properties['field_name']);
+    db_query("DELETE FROM {content_field} WHERE field_name = '%s'", $field_name);
   }
 
+  foreach (module_list() as $module) {
+    module_invoke('content_fieldapi', 'delete instance', $field);
+  }
   content_clear_type_cache();
 
   return $number_deleted;
