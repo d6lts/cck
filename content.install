@@ -610,6 +610,23 @@ function content_update_6000() {
 
 function content_update_6001() {
   $ret = array();
+  // If a field named 'field_instance' already exists, change it so we
+  // won't have a table name clash with new content_field_instance table.
+  $fields = content_fields();
+  if (in_array('field_instance', array_keys($fields))) {
+    if (db_table_exists('content_field_instance')) {
+      db_rename_table($ret, 'content_field_instance', 'content_field_instance2');
+    }
+    $ret = sql_query("UPDATE {node_field} SET field_name = 'content_field_instance2' WHERE field_name = 'field_instance'");
+    $ret = sql_query("UPDATE {node_field_instance} SET field_name = 'field_instance2' WHERE field_name = 'field_instance'");
+    // Content module should be getting updated before fieldgroup, but just in case...
+    if (db_table_exists('node_group_fields')) {
+      $ret = sql_query("UPDATE {node_group_fields} SET field_name = 'field_instance2' WHERE field_name = 'field_instance'");
+    }
+    elseif (db_table_exists('content_group_fields')) {
+      $ret = sql_query("UPDATE {content_group_fields} SET field_name = 'field_instance2' WHERE field_name = 'field_instance'");
+    }
+  }
   db_rename_table($ret, 'node_field', 'content_field');
   db_rename_table($ret, 'node_field_instance', 'content_field_instance');
   return $ret;
