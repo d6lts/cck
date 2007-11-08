@@ -5,7 +5,7 @@
  * Implementation of hook_install().
  */
 function content_install() {
-  variable_set('content_schema_version', 1003);
+  variable_set('content_schema_version', 6001);
   drupal_install_schema('content');
 }
 
@@ -98,7 +98,7 @@ function content_update_2() {
 
     case 'mysql':
     case 'mysqli':
-      $ret[] = update_sql("ALTER TABLE {node_field_instance} ADD COLUMN description mediumtext NOT NULL");
+      $ret[] = update_sql("ALTER TABLE {". _content_field_instance_tablename() ."} ADD COLUMN description mediumtext NOT NULL");
       break;
   }
 
@@ -118,7 +118,7 @@ function content_update_3() {
 
     case 'mysql':
     case 'mysqli':
-      $ret[] = update_sql("ALTER TABLE {node_field} ADD COLUMN db_storage int NOT NULL default 0");
+      $ret[] = update_sql("ALTER TABLE {". _content_field_tablename() ."} ADD COLUMN db_storage int NOT NULL default 0");
       break;
   }
 
@@ -175,7 +175,7 @@ function content_update_5() {
 
   content_clear_type_cache();
 
-  $result = db_query('SELECT nf.field_name FROM {node_field} nf LEFT JOIN {node_field_instance} nfi ON nfi.field_name = nf.field_name WHERE nf.multiple = 0 AND nf.db_storage = 0 GROUP BY nfi.field_name HAVING COUNT(*) = 1');
+  $result = db_query('SELECT nf.field_name FROM {". _content_field_tablename() ."} nf LEFT JOIN {". _content_field_instance_tablename() ."} nfi ON nfi.field_name = nf.field_name WHERE nf.multiple = 0 AND nf.db_storage = 0 GROUP BY nfi.field_name HAVING COUNT(*) = 1');
 
   if (db_num_rows($result)) {
     // Multi-part update
@@ -189,7 +189,7 @@ function content_update_5() {
     $field = $fields[$field['field_name']];
     $columns = content_invoke_columns($field);
 
-    $ret[] = update_sql("UPDATE {node_field} SET db_storage = ". CONTENT_DB_STORAGE_PER_CONTENT_TYPE ." WHERE field_name = '". $field['field_name'] ."'");
+    $ret[] = update_sql("UPDATE {". _content_field_tablename() ."} SET db_storage = ". CONTENT_DB_STORAGE_PER_CONTENT_TYPE ." WHERE field_name = '". $field['field_name'] ."'");
     if (is_array($columns) && count($columns)) {
       $new_field = $field;
       $new_field['db_storage'] = CONTENT_DB_STORAGE_PER_CONTENT_TYPE;
@@ -238,7 +238,7 @@ function content_update_7() {
     $new_type_name = str_replace('content-', 'content_', $old_type_name);
     $ret[] = update_sql("UPDATE {node} SET type = '". $new_type_name ."' WHERE type = '". $old_type_name ."'");
     $ret[] = update_sql("UPDATE {". $table_name ."} SET type_name = '". $new_type_name ."' WHERE type_name = '". $old_type_name ."'");
-    $ret[] = update_sql("UPDATE {node_field_instance} SET type_name = '". $new_type_name ."' WHERE type_name = '". $old_type_name ."'");
+    $ret[] = update_sql("UPDATE {". _content_field_instance_tablename() ."} SET type_name = '". $new_type_name ."' WHERE type_name = '". $old_type_name ."'");
     $ret[] = update_sql("UPDATE {vocabulary_node_types} SET type = '". $new_type_name ."' WHERE type = '". $old_type_name ."'");
 
     $variable_result = db_query("SELECT name, value FROM {variable} WHERE name LIKE '%%%s%%' OR value LIKE '%%%s%%'", $old_type_name, $old_type_name);
@@ -287,16 +287,16 @@ function content_update_10() {
 
   // drop fields with no field instances
   $fields = array();
-  $result = db_query("SELECT DISTINCT(field_name)  FROM {node_field_instance}");
+  $result = db_query("SELECT DISTINCT(field_name)  FROM {". _content_field_instance_tablename() ."}");
   while ($row = db_fetch_array($result)) {
     $fields[] = "'". $row['field_name'] ."'";
   }
-  $ret[] = update_sql("DELETE FROM {node_field} WHERE field_name NOT IN (". implode(', ', $fields) .")");
+  $ret[] = update_sql("DELETE FROM {". _content_field_tablename() ."} WHERE field_name NOT IN (". implode(', ', $fields) .")");
 
   // set invalid 'per field storage' back to 'per content type'
-  $result = db_query("SELECT field_name FROM {node_field} WHERE multiple = 0 AND db_storage = %d", CONTENT_DB_STORAGE_PER_FIELD);
+  $result = db_query("SELECT field_name FROM {". _content_field_tablename() ."} WHERE multiple = 0 AND db_storage = %d", CONTENT_DB_STORAGE_PER_FIELD);
   while ($row = db_fetch_array($result)) {
-    $count = db_num_rows(db_query("SELECT field_name FROM {node_field_instance} WHERE field_name = '%s'", $row['field_name']));
+    $count = db_num_rows(db_query("SELECT field_name FROM {". _content_field_instance_tablename() ."} WHERE field_name = '%s'", $row['field_name']));
     if ($count == 1) {
       $field = content_fields($row['field_name']);
       $db_info = content_database_info($field);
@@ -354,7 +354,7 @@ function content_update_1002() {
   $ret = array();
 
   // See if this column was already added in 4.7.
-  $result = db_fetch_array(db_query_range("SELECT * FROM {node_field_instance}", array(), 0, 1));
+  $result = db_fetch_array(db_query_range("SELECT * FROM {". _content_field_instance_tablename() ."}", array(), 0, 1));
   if (isset($result['display_settings'])) {
     return $ret;
   }
@@ -366,7 +366,7 @@ function content_update_1002() {
 
     case 'mysql':
     case 'mysqli':
-      $ret[] = update_sql("ALTER TABLE {node_field_instance} ADD COLUMN display_settings mediumtext NOT NULL");
+      $ret[] = update_sql("ALTER TABLE {". _content_field_instance_tablename() ."} ADD COLUMN display_settings mediumtext NOT NULL");
       break;
   }
 
@@ -444,12 +444,12 @@ function content_update_1004() {
 
   // drop fields with no field instances
   $fields = array();
-  $result = db_query("SELECT DISTINCT(field_name) FROM {node_field_instance}");
+  $result = db_query("SELECT DISTINCT(field_name) FROM {". _content_field_instance_tablename() ."}");
   while($row = db_fetch_array($result)) {
     $fields[] = "'". $row['field_name'] ."'";
   }
   if ($fields) {
-    $ret[] = update_sql("DELETE FROM {node_field} WHERE field_name NOT IN (". implode(', ', $fields) .")");
+    $ret[] = update_sql("DELETE FROM {". _content_field_tablename() ."} WHERE field_name NOT IN (". implode(', ', $fields) .")");
   }
 
   // drop 'content_type_' table
@@ -459,9 +459,9 @@ function content_update_1004() {
   }
 
   // set invalid 'per field storage' back to 'per content type'
-  $result = db_query("SELECT field_name FROM {node_field} WHERE multiple = 0 AND db_storage = %d", CONTENT_DB_STORAGE_PER_FIELD);
+  $result = db_query("SELECT field_name FROM {". _content_field_tablename() ."} WHERE multiple = 0 AND db_storage = %d", CONTENT_DB_STORAGE_PER_FIELD);
   while ($row = db_fetch_array($result)) {
-    $count = db_num_rows(db_query("SELECT field_name FROM {node_field_instance} WHERE field_name = '%s'", $row['field_name']));
+    $count = db_num_rows(db_query("SELECT field_name FROM {". _content_field_instance_tablename() ."} WHERE field_name = '%s'", $row['field_name']));
     if ($count == 1) {
       $field = content_fields($row['field_name']);
       $db_info = content_database_info($field);
@@ -591,18 +591,18 @@ function content_update_6000() {
 
     case 'mysql':
     case 'mysqli':
-      $ret[] = update_sql("ALTER TABLE {node_field} ADD COLUMN module varchar(127) NOT NULL");
-      $ret[] = update_sql("ALTER TABLE {node_field_instance} ADD COLUMN module varchar(127) NOT NULL");
+      $ret[] = update_sql("ALTER TABLE {". _content_field_tablename() ."} ADD COLUMN module varchar(127) NOT NULL");
+      $ret[] = update_sql("ALTER TABLE {". _content_field_instance_tablename() ."} ADD COLUMN module varchar(127) NOT NULL");
       break;
   }
   foreach (_content_field_types() as $type => $field) {
     if (!empty($type)) {
-      $ret[] = update_sql("UPDATE {node_field} SET module = '". $field['module'] ."' WHERE type = '". $type ."'");
+      $ret[] = update_sql("UPDATE {". _content_field_tablename() ."} SET module = '". $field['module'] ."' WHERE type = '". $type ."'");
     }
   }
   foreach (_content_widget_types() as $type => $field) {
     if (!empty($type)) {
-      $ret[] = update_sql("UPDATE {node_field_instance} SET module = '". $field['module'] ."' WHERE widget_type = '". $type ."'");
+      $ret[] = update_sql("UPDATE {". _content_field_instance_tablename() ."} SET module = '". $field['module'] ."' WHERE widget_type = '". $type ."'");
     }
   }
   return $ret;
@@ -629,5 +629,6 @@ function content_update_6001() {
   }
   db_rename_table($ret, 'node_field', 'content_field');
   db_rename_table($ret, 'node_field_instance', 'content_field_instance');
+  variable_set('content_schema_version', 6001);
   return $ret;
 }

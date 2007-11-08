@@ -251,12 +251,12 @@ function fieldgroup_save_group($type_name, $group) {
         }
       }
     }
-    db_query("INSERT INTO {content_group} (type_name, group_name, label, settings, weight)
+    db_query("INSERT INTO {". _content_group_tablename() ."} (type_name, group_name, label, settings, weight)
              VALUES ('%s', '%s', '%s', '%s', %d)", $type_name, $group_name, $group['label'], serialize($group['settings']), $group['weight']);
     return SAVED_NEW;
   }
   else {
-    db_query("UPDATE {content_group} SET label = '%s', settings = '%s', weight = %d ".
+    db_query("UPDATE {". _content_group_tablename() ."} SET label = '%s', settings = '%s', weight = %d ".
              "WHERE type_name = '%s' AND group_name = '%s'",
              $group['label'], serialize($group['settings']), $group['weight'], $type_name, $group['group_name']);
     return SAVED_UPDATED;
@@ -288,8 +288,8 @@ function fieldgroup_remove_group_submit($form, &$form_state) {
   $content_type = $form['#content_type'];
   $group_name = $form['#group_name'];
 
-  db_query("DELETE FROM {content_group} WHERE  type_name = '%s' AND group_name = '%s'", $content_type['type'], $group_name);
-  db_query("DELETE FROM {content_group_fields} WHERE  type_name = '%s' AND group_name = '%s'", $content_type['type'], $group_name);
+  db_query("DELETE FROM {". _content_group_tablename() ."} WHERE  type_name = '%s' AND group_name = '%s'", $content_type['type'], $group_name);
+  db_query("DELETE FROM {". _content_group_fields_tablename() ."} WHERE  type_name = '%s' AND group_name = '%s'", $content_type['type'], $group_name);
   cache_clear_all('fieldgroup_data', 'cache_content');
 
   drupal_set_message('The group has been removed.');
@@ -312,7 +312,7 @@ function fieldgroup_groups($content_type = '', $sorted = FALSE, $reset = FALSE) 
       $groups_sorted = $data['groups_sorted'];
     }
     else {
-      $result = db_query("SELECT * FROM {content_group} ORDER BY weight, group_name");
+      $result = db_query("SELECT * FROM {". _content_group_tablename() ."} ORDER BY weight, group_name");
       $groups = array();
       $groups_sorted = array();
       while ($group = db_fetch_array($result)) {
@@ -322,9 +322,9 @@ function fieldgroup_groups($content_type = '', $sorted = FALSE, $reset = FALSE) 
         $groups_sorted[$group['type_name']][] = &$groups[$group['type_name']][$group['group_name']];
       }
       //load fields
-      $result = db_query("SELECT nfi.*, ng.group_name FROM {content_group} ng ".
-                         "INNER JOIN {content_group_fields} ngf ON ngf.type_name = ng.type_name AND ngf.group_name = ng.group_name ".
-                         "INNER JOIN {content_field_instance} nfi ON nfi.field_name = ngf.field_name AND nfi.type_name = ngf.type_name ".
+      $result = db_query("SELECT nfi.*, ng.group_name FROM {". _content_group_tablename() ."} ng ".
+                         "INNER JOIN {". _content_group_fields_tablename() ."} ngf ON ngf.type_name = ng.type_name AND ngf.group_name = ng.group_name ".
+                         "INNER JOIN {". _content_field_instance_tablename() ."} nfi ON nfi.field_name = ngf.field_name AND nfi.type_name = ngf.type_name ".
                          "ORDER BY nfi.weight");
       while ($field = db_fetch_array($result)) {
         $groups[$field['type_name']][$field['group_name']]['fields'][$field['field_name']] = $field;
@@ -354,7 +354,7 @@ function _fieldgroup_groups_label($content_type) {
 }
 
 function _fieldgroup_field_get_group($content_type, $field_name) {
-  return db_result(db_query("SELECT group_name FROM {content_group_fields} WHERE type_name = '%s' AND field_name = '%s'", $content_type, $field_name));
+  return db_result(db_query("SELECT group_name FROM {". _content_group_fields_tablename() ."} WHERE type_name = '%s' AND field_name = '%s'", $content_type, $field_name));
 }
 
 /*
@@ -435,15 +435,15 @@ function fieldgroup_update_group($form_values) {
 
   if ($default != $form_values['group']) {
     if ($form_values['group'] && !$default) {
-      db_query("INSERT INTO {content_group_fields} (type_name, group_name, field_name) VALUES ('%s', '%s', '%s')",
+      db_query("INSERT INTO {". _content_group_fields_tablename() ."} (type_name, group_name, field_name) VALUES ('%s', '%s', '%s')",
                 $form_values['type_name'], $form_values['group'], $form_values['field_name']);
     }
     elseif ($form_values['group']) {
-      db_query("UPDATE {content_group_fields} SET group_name = '%s' WHERE type_name = '%s' AND field_name = '%s'",
+      db_query("UPDATE {". _content_group_fields_tablename() ."} SET group_name = '%s' WHERE type_name = '%s' AND field_name = '%s'",
                 $form_values['group'], $form_values['type_name'], $form_values['field_name']);
     }
     else {
-      db_query("DELETE FROM {content_group_fields} WHERE type_name = '%s' AND field_name = '%s'", $form_values['type_name'], $form_values['field_name']);
+      db_query("DELETE FROM {". _content_group_fields_tablename() ."} WHERE type_name = '%s' AND field_name = '%s'", $form_values['type_name'], $form_values['field_name']);
     }
     cache_clear_all('fieldgroup_data', 'cache_content');
   }
@@ -455,7 +455,7 @@ function fieldgroup_content_admin_field_remove_submit($form, &$form_state) {
   // - when a (non last) field is removed from a group, a 'ghost row' remains in the fields overview
   // - when the last field is removed, the group disappears
   // seems to be fixed when emptying the cache.
-  db_query("DELETE FROM {content_group_fields} WHERE type_name = '%s' AND field_name = '%s'", $form_values['type_name'], $form_values['field_name']);
+  db_query("DELETE FROM {". _content_group_fields_tablename() ."} WHERE type_name = '%s' AND field_name = '%s'", $form_values['type_name'], $form_values['field_name']);
 }
 
 /**
@@ -546,13 +546,13 @@ function fieldgroup_get_group($content_type, $field_name) {
 function fieldgroup_node_type($op, $info) {
   if ($op == 'update' && !empty($info->old_type) && $info->type != $info->old_type) {
     // update the tables
-    db_query("UPDATE {content_group} SET type_name='%s' WHERE type_name='%s'", array($info->type, $info->old_type));
-    db_query("UPDATE {content_group_fields} SET type_name='%s' WHERE type_name='%s'", array($info->type, $info->old_type));
+    db_query("UPDATE {". _content_group_tablename() ."} SET type_name='%s' WHERE type_name='%s'", array($info->type, $info->old_type));
+    db_query("UPDATE {". _content_group_fields_tablename() ."} SET type_name='%s' WHERE type_name='%s'", array($info->type, $info->old_type));
     cache_clear_all('fieldgroup_data', 'cache_content');
   }
   elseif ($op == 'delete') {
-    db_query("DELETE FROM {content_group_fields} WHERE type_name = '%s'", $info->type);
-    db_query("DELETE FROM {content_group} WHERE type_name = '%s'", $info->type);
+    db_query("DELETE FROM {". _content_group_fields_tablename() ."} WHERE type_name = '%s'", $info->type);
+    db_query("DELETE FROM {". _content_group_tablename() ."} WHERE type_name = '%s'", $info->type);
   }
 }
 
@@ -646,4 +646,18 @@ function fieldgroup_display_overview_form_submit($form, &$form_state) {
     }
     cache_clear_all('fieldgroup_data', 'cache_content');
   }
+}
+
+function _fieldgroup_group_tablename($version = NULL) {
+  if (is_null($version)) {
+    $version = variable_get('fieldgroup_schema_version', 0);
+  }
+  return $version < 6000 ? 'node_group' : 'content_group';
+}
+
+function _fieldgroup_group_fields_tablename($version = NULL) {
+  if (is_null($version)) {
+    $version = variable_get('fieldgroup_schema_version', 0);
+  }
+  return $version < 6000 ? 'node_group_fields' : 'content_group_fields';
 }

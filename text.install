@@ -195,7 +195,7 @@ function text_update_4() {
 function text_update_5() {
   $ret = array();
 
-  $result = db_query("SELECT field_name, type, global_settings FROM {content_field} WHERE type IN ('text_shorttext', 'text_longtext')");
+  $result = db_query("SELECT field_name, type, global_settings FROM {". _content_field_tablename() ."} WHERE type IN ('text_shorttext', 'text_longtext')");
   while ($field = db_fetch_object($result)) {
     $global_settings = array();
     if ($field->global_settings) {
@@ -207,7 +207,7 @@ function text_update_5() {
     else {
       $global_settings['max_length'] = '';
     }
-    db_query("UPDATE {content_field} SET type = 'text', global_settings = '%s' WHERE field_name = '%s'", serialize($global_settings), $field->field_name);
+    db_query("UPDATE {". _content_field_tablename() ."} SET type = 'text', global_settings = '%s' WHERE field_name = '%s'", serialize($global_settings), $field->field_name);
   }
 
   db_query('DELETE FROM {cache}');
@@ -220,11 +220,11 @@ function text_update_5() {
  */
 function text_update_6000() {
   $ret = array();
-  $result = db_query("SELECT * FROM {content_field_instance} WHERE widget_type = 'text'");
+  $result = db_query("SELECT * FROM {". _content_field_instance_tablename() ."} WHERE widget_type = 'text'");
   while ($field_instance = db_fetch_array($result)) {
     $widget_settings = unserialize($field_instance['widget_settings']);
     $new_widget_type = ($widget_settings['rows'] > 1) ? 'text_textarea' : 'text_textfield';
-    $ret[] = update_sql("UPDATE {content_field_instance} SET widget_type = '$new_widget_type' WHERE field_name = '{$field_instance['field_name']}' AND type_name = '{$field_instance['type_name']}'");
+    $ret[] = update_sql("UPDATE {". _content_field_instance_tablename() ."} SET widget_type = '$new_widget_type' WHERE field_name = '{$field_instance['field_name']}' AND type_name = '{$field_instance['type_name']}'");
   }
   // TODO : not cleared ?
   content_clear_type_cache();

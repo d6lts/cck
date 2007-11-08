@@ -587,7 +587,7 @@ function content_notify($op, $module) {
       content_clear_type_cache();
       break;
     case 'uninstall':
-      $results = db_query("SELECT * FROM {content_field} WHERE module = '%s'", $module);
+      $results = db_query("SELECT * FROM {". _content_field_tablename() ."} WHERE module = '%s'", $module);
       while ($row = $results) {
         content_field_delete(array('field_name' => $row['field_name']));
       }
@@ -999,7 +999,7 @@ function _content_type_info($reset = FALSE) {
           }
         }
       }
-      $field_result = db_query('SELECT * FROM {content_field}');
+      $field_result = db_query('SELECT * FROM {'. _content_field_tablename() .'}');
       while ($field = db_fetch_array($field_result)) {
         $global_settings = $field['global_settings'] ? unserialize($field['global_settings']) : array();
         unset($field['global_settings']);
@@ -1007,7 +1007,7 @@ function _content_type_info($reset = FALSE) {
         if (is_array($global_settings)) {
           $field = array_merge($field, $global_settings);
         }
-        $instance_info = db_fetch_array(db_query("SELECT type_name, label FROM {content_field_instance} WHERE field_name = '%s'", $field['field_name']));
+        $instance_info = db_fetch_array(db_query("SELECT type_name, label FROM {". _content_field_instance_tablename() ."} WHERE field_name = '%s'", $field['field_name']));
         $field['widget']['label'] = $instance_info['label'];
         $field['type_name'] = $instance_info['type_name'];
         $field['module'] = $info['field types'][$field['type']]['module'];
@@ -1019,7 +1019,7 @@ function _content_type_info($reset = FALSE) {
         $type['url_str'] = str_replace('_', '-', $type['type']);
         $type['fields'] = array();
         $type['tables'] = array();
-        $field_result = db_query("SELECT * FROM {content_field_instance} nfi WHERE nfi.type_name = '%s' ORDER BY nfi.weight ASC, nfi.label ASC", $type['type']);
+        $field_result = db_query("SELECT * FROM {". _content_field_instance_tablename() ."} nfi WHERE nfi.type_name = '%s' ORDER BY nfi.weight ASC, nfi.label ASC", $type['type']);
         while ($field = db_fetch_array($field_result)) {
           // Overwrite global field information with specific information
           $field = array_merge($info['fields'][$field['field_name']], $field);
@@ -1285,6 +1285,20 @@ function _content_tablename($name, $storage, $version = NULL) {
     case '1003-'. CONTENT_DB_STORAGE_PER_FIELD :
       return "content_$name";
   }
+}
+
+function _content_field_tablename($version = NULL) {
+  if (is_null($version)) {
+    $version = variable_get('content_schema_version', 0);
+  }
+  return $version < 6001 ? 'node_field' : 'content_field';
+}
+
+function _content_field_instance_tablename($version = NULL) {
+  if (is_null($version)) {
+    $version = variable_get('content_schema_version', 0);
+  }
+  return $version < 6001 ? 'node_field_instance' : 'content_field_instance';
 }
 
 function _content_table_schema($field = NULL) {

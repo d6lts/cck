@@ -7,6 +7,7 @@
 function fieldgroup_install() {
   drupal_install_schema('fieldgroup');
   content_notify('install', 'fieldgroup');
+  variable_set('fieldgroup_schema_version', 6000);
 }
 
 
@@ -52,14 +53,14 @@ function fieldgroup_update_1() {
   $ret = array();
   switch ($GLOBALS['db_type']) {
     case 'pgsql':
-      $ret[] = update_sql("UPDATE {node_group} SET group_name = 'group_'||SUBSTRING(group_name FROM 7)");
-      $ret[] = update_sql("UPDATE {node_group_fields} SET group_name = 'group_'||SUBSTRING(group_name FROM 7)");
+      $ret[] = update_sql("UPDATE {". _content_group_tablename() ."} SET group_name = 'group_'||SUBSTRING(group_name FROM 7)");
+      $ret[] = update_sql("UPDATE {". _content_group_fields_tablename() ."} SET group_name = 'group_'||SUBSTRING(group_name FROM 7)");
       break;
 
     case 'mysql':
     case 'mysqli':
-      $ret[] = update_sql("UPDATE {node_group} SET group_name = CONCAT('group_', SUBSTRING(group_name FROM 7))");
-      $ret[] = update_sql("UPDATE {node_group_fields} SET group_name = CONCAT('group_', SUBSTRING(group_name FROM 7))");
+      $ret[] = update_sql("UPDATE {". _content_group_tablename() ."} SET group_name = CONCAT('group_', SUBSTRING(group_name FROM 7))");
+      $ret[] = update_sql("UPDATE {". _content_group_fields_tablename() ."} SET group_name = CONCAT('group_', SUBSTRING(group_name FROM 7))");
       break;
   }
   return $ret;
@@ -75,7 +76,7 @@ function fieldgroup_update_2() {
   switch ($GLOBALS['db_type']) {
     case 'mysql':
     case 'mysqli':
-      $ret[] = update_sql('ALTER TABLE {node_group} CHANGE settings settings mediumtext NOT NULL');
+      $ret[] = update_sql('ALTER TABLE {". _content_group_tablename() ."} CHANGE settings settings mediumtext NOT NULL');
       break;
 
     case 'pgsql':
@@ -84,20 +85,20 @@ function fieldgroup_update_2() {
   }
 
   // move description into the settings array, and add new settings
-  $result = db_query("SELECT * FROM {node_group}");
+  $result = db_query("SELECT * FROM {". _content_group_tablename() ."}");
   while ($group = db_fetch_array($result)) {
     $settings = array();
     $settings['form'] = unserialize($group['settings']);
     $settings['form']['description'] = $group['description'];
     $settings['display'] = array('collapsible' => 0, 'collapsed' => 0, 'description' => '');
-    $ret[] = update_sql("UPDATE {node_group} SET settings = '". db_escape_string(serialize($settings)) ."', description = '' WHERE group_name = '". $group['group_name'] ."'");
+    $ret[] = update_sql("UPDATE {". _content_group_tablename() ."} SET settings = '". db_escape_string(serialize($settings)) ."', description = '' WHERE group_name = '". $group['group_name'] ."'");
   }
 
   // drop description column
   switch ($GLOBALS['db_type']) {
     case 'mysql':
     case 'mysqli':
-      $ret[] = update_sql('ALTER TABLE {node_group} DROP description');
+      $ret[] = update_sql('ALTER TABLE {". _content_group_tablename() ."} DROP description');
       break;
 
     case 'pgsql':
@@ -114,7 +115,7 @@ function fieldgroup_update_2() {
  */
 function fieldgroup_update_3() {
   $ret = array();
-  $result = db_query("SELECT * FROM {node_group}");
+  $result = db_query("SELECT * FROM {". _content_group_tablename() ."}");
   while ($group = db_fetch_array($result)) {
     $group['settings'] = unserialize($group['settings']);
 
@@ -133,7 +134,7 @@ function fieldgroup_update_3() {
         }
       }
 
-      $ret[] = update_sql("UPDATE {node_group} SET settings = '". db_escape_string(serialize($group['settings'])) ."' WHERE group_name = '". $group['group_name'] ."'");
+      $ret[] = update_sql("UPDATE {". _content_group_tablename() ."} SET settings = '". db_escape_string(serialize($group['settings'])) ."' WHERE group_name = '". $group['group_name'] ."'");
     }
   }
 
@@ -153,5 +154,6 @@ function fieldgroup_update_6000() {
   $ret = array();
   db_rename_table($ret, 'node_group', 'content_group');
   db_rename_table($ret, 'node_group_fields', 'content_group_fields');
+  variable_set('fieldgroup_schema_version', 6000);
   return $ret;
 }
