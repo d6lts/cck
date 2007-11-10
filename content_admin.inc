@@ -319,16 +319,7 @@ function content_admin_field_overview_form_submit($form, &$form_state) {
     }
   }
 
-  // Update group weights.
-  foreach ((array) $form_values['group-weights'] as $key => $value) {
-    if ($key && !in_array($key, unserialize($form_values['disabled']))) {
-      db_query("UPDATE {". _content_group_tablename() ."} SET weight = %d WHERE type_name = '%s' AND group_name = '%s'",
-        $value, $form_values['type_name'], $key);
-    }
-  }
-
   content_clear_type_cache();
-  cache_clear_all('fieldgroup_data', _content_cache_tablename());
 }
 
 /**
