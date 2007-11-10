@@ -41,7 +41,7 @@ function optionwidgets_update_1() {
 
   // find distinct values already stored in the database
 
-  $result = db_query("SELECT * FROM {". _content_field_instance_tablename() ."} fi LEFT JOIN {". _content_field_tablename() ."} f ON fi.field_name=f.field_name WHERE widget_type IN ('options_select', 'options_buttons')");
+  $result = db_query("SELECT * FROM {". content_instance_tablename() ."} fi LEFT JOIN {". content_field_tablename() ."} f ON fi.field_name=f.field_name WHERE widget_type IN ('options_select', 'options_buttons')");
   while ($field_instance = db_fetch_array($result)) {
     $db_info = content_database_info($field_instance);
     $result2 = db_query("SELECT DISTINCT ". $db_info['columns']['value']['column'] ." FROM {". $db_info['table'] ."}");
@@ -52,7 +52,7 @@ function optionwidgets_update_1() {
 
   // find all field instances that use the optionwidgets widget
 
-  $result = db_query("SELECT DISTINCT f.field_name, f.type, global_settings FROM {". _content_field_tablename() ."} f LEFT JOIN {". _content_field_instance_tablename() ."} fi ON fi.field_name=f.field_name WHERE widget_type IN ('options_select', 'options_buttons') AND type IN ('text', 'number_integer', 'number_decimal')");
+  $result = db_query("SELECT DISTINCT f.field_name, f.type, global_settings FROM {". content_field_tablename() ."} f LEFT JOIN {". content_instance_tablename() ."} fi ON fi.field_name=f.field_name WHERE widget_type IN ('options_select', 'options_buttons') AND type IN ('text', 'number_integer', 'number_decimal')");
   while ($field = db_fetch_object($result)) {
 
     $updated = FALSE;
@@ -98,7 +98,7 @@ function optionwidgets_update_1() {
       }
       // update the allowed values setting to use the correct key|label combination
       $global_settings['allowed_values'] = implode("\n", $allowed_values);
-      db_query("UPDATE {". _content_field_tablename() ."} SET type = '%s', global_settings = '%s' WHERE field_name = '%s'", $field->type, serialize($global_settings), $field->field_name);
+      db_query("UPDATE {". content_field_tablename() ."} SET type = '%s', global_settings = '%s' WHERE field_name = '%s'", $field->type, serialize($global_settings), $field->field_name);
       drupal_set_message(t('<div>The allowed values list for %field was updated from </div><pre>%start</pre><div> to </div><pre>%end</pre><div>You can go to the field settings page to give each option a more user-friendly label.', array('%field' => $field->field_name, '%start' => $start_values, '%end' => $global_settings['allowed_values'])));
     }
     else {
@@ -117,8 +117,8 @@ function optionwidgets_update_1() {
  */
 function optionwidgets_update_6000() {
   $ret = array();
-  $result = db_query("UPDATE {". _content_field_instance_tablename() ."} SET widget_type = 'optionwidgets_select' where widget_type = 'options_select'");
-  $result = db_query("UPDATE {". _content_field_instance_tablename() ."} SET widget_type = 'optionwidgets_onoff' where widget_type = 'options_onoff'");
-  $result = db_query("UPDATE {". _content_field_instance_tablename() ."} SET widget_type = 'optionwidgets_buttons' where widget_type = 'options_buttons'");
+  $result = db_query("UPDATE {". content_instance_tablename() ."} SET widget_type = 'optionwidgets_select' where widget_type = 'options_select'");
+  $result = db_query("UPDATE {". content_instance_tablename() ."} SET widget_type = 'optionwidgets_onoff' where widget_type = 'options_onoff'");
+  $result = db_query("UPDATE {". content_instance_tablename() ."} SET widget_type = 'optionwidgets_buttons' where widget_type = 'options_buttons'");
   return $ret;
 }

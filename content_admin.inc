@@ -20,7 +20,7 @@ function _content_admin_type_fields() {
     $row[] = $field['type'];
 
     $types = array();
-    $result = db_query("SELECT nt.name, nt.type FROM {". _content_field_instance_tablename() ."} nfi LEFT JOIN {node_type} nt ON nt.type = nfi.type_name WHERE nfi.field_name = '%s' ORDER BY nt.name ASC", $field['field_name']);
+    $result = db_query("SELECT nt.name, nt.type FROM {". content_instance_tablename() ."} nfi LEFT JOIN {node_type} nt ON nt.type = nfi.type_name WHERE nfi.field_name = '%s' ORDER BY nt.name ASC", $field['field_name']);
     while ($type = db_fetch_array($result)) {
       $content_type = content_types($type['type']);
       $types[] = l($type['name'], 'admin/content/types/'. $content_type['url_str'] .'/fields');
@@ -314,7 +314,7 @@ function content_admin_field_overview_form_submit($form, &$form_state) {
   // Update field weights.
   foreach ((array) $form_values['field-weights'] as $key => $value) {
     if ($key && !in_array($key, unserialize($form_values['disabled']))) {
-      db_query("UPDATE {". _content_field_instance_tablename() ."} SET weight = %d WHERE type_name = '%s' AND field_name = '%s'",
+      db_query("UPDATE {". content_instance_tablename() ."} SET weight = %d WHERE type_name = '%s' AND field_name = '%s'",
         $value, $form_values['type_name'], $key);
     }
   }
@@ -328,7 +328,7 @@ function content_admin_field_overview_form_submit($form, &$form_state) {
   }
 
   content_clear_type_cache();
-  cache_clear_all('fieldgroup_data', 'cache_content');
+  cache_clear_all('fieldgroup_data', _content_cache_tablename());
 }
 
 /**
@@ -391,7 +391,7 @@ function content_admin_display_overview_form_submit($form, &$form_state) {
         $display_settings[$key] = $value;
       }
 
-      db_query("UPDATE {". _content_field_instance_tablename() ."} SET display_settings = '%s' WHERE type_name = '%s' AND field_name = '%s'",
+      db_query("UPDATE {". content_instance_tablename() ."} SET display_settings = '%s' WHERE type_name = '%s' AND field_name = '%s'",
         serialize($display_settings), $type, $fieldname);
     }
     content_clear_type_cache();
@@ -919,12 +919,12 @@ function content_alter_db_field($previous_field, $previous_columns, $new_field, 
   // When adding and removing columns, we need to know what content type has an instance of the field.
   if (count($previous_columns)) {
     if (!isset($previous_field['type_name'])) {
-      $previous_field['type_name'] = db_result(db_query("SELECT type_name FROM {". _content_field_instance_tablename() ."} WHERE field_name = '%s'", $previous_field['field_name']));
+      $previous_field['type_name'] = db_result(db_query("SELECT type_name FROM {". content_instance_tablename() ."} WHERE field_name = '%s'", $previous_field['field_name']));
     }
     $previous_db_info = content_database_info($previous_field);
   }
   if (count($new_columns)) {
-    $new_field['type_name'] = db_result(db_query("SELECT type_name FROM {". _content_field_instance_tablename() ."} WHERE field_name = '%s'", $new_field['field_name']));
+    $new_field['type_name'] = db_result(db_query("SELECT type_name FROM {". content_instance_tablename() ."} WHERE field_name = '%s'", $new_field['field_name']));
     $new_db_info = content_database_info($new_field);
   }
 

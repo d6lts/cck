@@ -27,7 +27,7 @@ function content_help($path, $arg) {
  * Include {cache_content} in the list of tables cleared by devel's 'empty cache'
  */
 function content_devel_caches() {
-  return array('cache_content');
+  return array(content_cache_tablename());
 }
 
 /**
@@ -172,7 +172,7 @@ function content_theme() {
  */
 function content_load($node) {
   $cid = 'content:'. $node->nid .':'. $node->vid;
-  if ($cached = cache_get($cid, 'cache_content')) {
+  if ($cached = cache_get($cid, content_cache_tablename())) {
     return $cached->data;
   }
   else {
@@ -189,7 +189,7 @@ function content_load($node) {
         $default_additions[$key] = $value;
       }
     }
-    cache_set($cid, $default_additions, 'cache_content');
+    cache_set($cid, $default_additions, content_cache_tablename());
     return $default_additions;
   }
 }
@@ -459,7 +459,7 @@ function content_insert(&$node) {
 function content_update(&$node) {
   _content_field_invoke('update', $node);
   _content_field_invoke_default('update', $node);
-  cache_clear_all('content:'. $node->nid .':'. $node->vid, 'cache_content');
+  cache_clear_all('content:'. $node->nid .':'. $node->vid, content_cache_tablename());
 }
 
 /**
@@ -477,7 +477,7 @@ function content_delete(&$node) {
   if (db_table_exists($table)) {
     db_query('DELETE FROM {'. $table .'} WHERE nid = %d', $node->nid);
   }
-  cache_clear_all('content:'. $node->nid, 'cache_content', TRUE);
+  cache_clear_all('content:'. $node->nid, content_cache_tablename(), TRUE);
 }
 
 /**
@@ -495,7 +495,7 @@ function content_delete_revision(&$node) {
   if (db_table_exists($table)) {
     db_query('DELETE FROM {'. $table .'} WHERE vid = %d', $node->vid);
   }
-  cache_clear_all('content:'. $node->nid .':'. $node->vid, 'cache_content');
+  cache_clear_all('content:'. $node->nid .':'. $node->vid, content_cache_tablename());
 }
 
 /**
@@ -589,10 +589,7 @@ function content_notify($op, $module) {
       content_clear_type_cache();
       break;
     case 'uninstall':
-      $results = db_query("SELECT * FROM {". _content_field_tablename() ."} WHERE module = '%s'", $module);
-      while ($row = $results) {
-        content_field_delete(array('field_name' => $row['field_name']));
-      }
+      content_module_delete($module);
       content_clear_type_cache(TRUE);
       break;
     case 'enable':
@@ -958,13 +955,11 @@ function _content_type_info($reset = FALSE) {
 
   // Make sure this function doesn't run until the tables have been created,
   // for instance, when first enabled and called from content_menu().
-  if (!db_table_exists(_content_field_tablename()) || !db_table_exists(_content_field_instance_tablename())) {
+  if (!db_table_exists(content_field_tablename()) || !db_table_exists(content_instance_tablename())) {
       return array();
   }
   if ($reset || !isset($info)) {
-    // When run from update functions, the cache_content table may not exist yet.
-    $cache_name = db_table_exists('cache_content') ? 'cache_content' : 'cache';
-    if ($cached = cache_get('content_type_info', $cache_name)) {
+    if ($cached = cache_get('content_type_info', content_cache_tablename())) {
       $info = $cached->data;
     }
     else {
@@ -1016,7 +1011,7 @@ function _content_type_info($reset = FALSE) {
         }
         $info['content types'][$type_name] = $type;
       }
-      cache_set('content_type_info', $info, $cache_name);
+      cache_set('content_type_info', $info, content_cache_tablename());
     }
   }
   return $info;
@@ -1049,13 +1044,14 @@ function content_node_type($op, $info) {
  */
 function content_clear_type_cache($with_schema = FALSE) {
 
-  cache_clear_all('content_type_info', 'cache_content');
+  cache_clear_all('content_type_info', content_cache_tablename());
 
   _content_type_info(TRUE);
 
   // Refresh the schema to pick up new information.
   if ($with_schema) {
     $schema = drupal_get_schema(NULL, TRUE);
+    menu_rebuild();
   }
 
   if (module_exists('views')) {
@@ -1246,7 +1242,7 @@ function _content_tablename($name, $storage, $version = NULL) {
  *
  * Needed because the table name changes depending on version.
  */
-function _content_field_tablename($version = NULL) {
+function content_field_tablename($version = NULL) {
   if (is_null($version)) {
     $version = variable_get('content_schema_version', 0);
   }
@@ -1258,11 +1254,24 @@ function _content_field_tablename($version = NULL) {
  *
  * Needed because the table name changes depending on version.
  */
-function _content_field_instance_tablename($version = NULL) {
+function content_instance_tablename($version = NULL) {
   if (is_null($version)) {
     $version = variable_get('content_schema_version', 0);
   }
   return $version < 6001 ? 'node_field_instance' : 'content_field_instance';
+}
+
+/**
+ * Generate table name for the content cache table.
+ *
+ * Needed because the table name changes depending on version.
+ */function content_cache_tablename() {
+  if (!db_table_exists('cache_content')) {
+    return 'cache';
+  }
+  else {
+    return 'cache_content';
+  }
 }
 
 /**

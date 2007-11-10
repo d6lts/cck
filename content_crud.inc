@@ -61,7 +61,7 @@ function content_field_update($field) {
  */
 function content_field_sanitize($field) {
   // Use schema to be sure all field values are set.
-  $schema = drupal_get_schema(_content_field_tablename());
+  $schema = drupal_get_schema(content_field_tablename());
   foreach ($schema['fields'] as $name => $info) {
     $field[$name] = !empty($field[$name]) ? $field[$name] : $info['default'];
   }
@@ -107,10 +107,10 @@ function _content_field_write($field, $op = 'update') {
   $field['columns'] = serialize($field['columns']);
   switch ($op) {
     case 'create':
-      drupal_write_record(_content_field_tablename(), $field);
+      drupal_write_record(content_field_tablename(), $field);
       break;
     case 'update':
-      drupal_write_record(_content_field_tablename(), $field, 'field_name');
+      drupal_write_record(content_field_tablename(), $field, 'field_name');
       break;
   }
 }
@@ -125,7 +125,7 @@ function _content_field_write($field, $op = 'update') {
  *   The field array.
  */
 function content_field_read($param) {
-  $field = db_fetch_array(db_query("SELECT * FROM {". _content_field_tablename() ."} nf WHERE field_name = '%s'", $param['field_name']));
+  $field = db_fetch_array(db_query("SELECT * FROM {". content_field_tablename() ."} nf WHERE field_name = '%s'", $param['field_name']));
   $field = content_field_sanitize($field);
 
   // Invoke hook_content_fieldapi().
@@ -175,7 +175,7 @@ function content_field_instance_create($field) {
     if ($field['db_storage'] == CONTENT_DB_STORAGE_PER_CONTENT_TYPE) {
       $new_field = $field;
       $new_field['db_storage'] = CONTENT_DB_STORAGE_PER_FIELD;
-      drupal_write_record(_content_field_tablename(), $new_field, 'field_name');
+      drupal_write_record(content_field_tablename(), $new_field, 'field_name');
       content_alter_db_field($field, $field['columns'], $new_field, $field['columns']);
     }
   }
@@ -241,7 +241,7 @@ function content_field_instance_update($field) {
  */
 function content_field_instance_sanitize($field) {
   // Use schema to be sure all field values are set.
-  $schema = drupal_get_schema(_content_field_instance_tablename());
+  $schema = drupal_get_schema(content_instance_tablename());
   foreach ($schema['fields'] as $name => $info) {
     $field[$name] = !empty($field[$name]) ? $field[$name] : $info['default'];
   }
@@ -278,10 +278,10 @@ function _content_field_instance_write($field, $op = 'update') {
   $field['display_settings'] = serialize($field['display_settings']);
   switch ($op) {
     case 'create':
-      drupal_write_record(_content_field_instance_tablename(), $field);
+      drupal_write_record(content_instance_tablename(), $field);
       break;
     case 'update':
-      drupal_write_record(_content_field_instance_tablename(), $field, 'field_name');
+      drupal_write_record(content_instance_tablename(), $field, 'field_name');
       break;
   }
 }
@@ -308,7 +308,7 @@ function content_field_instance_read($param = NULL) {
   if (count($cond)) {
     $cond = " WHERE ". implode(' AND ', $cond);
   }
-  $db_result = db_query("SELECT * FROM {". _content_field_instance_tablename() ."} nfi ". $cond ." ORDER BY nfi.weight ASC, nfi.label ASC", $args);
+  $db_result = db_query("SELECT * FROM {". content_instance_tablename() ."} nfi ". $cond ." ORDER BY nfi.weight ASC, nfi.label ASC", $args);
   $fields = array();
   while ($field = db_fetch_array($db_result)) {
     $field = content_field_instance_sanitize($field);
@@ -354,7 +354,7 @@ function content_field_instance_delete($field) {
   // Invoke hook_content_fieldapi().
   module_invoke_all('content_fieldapi', 'delete instance', $field);
 
-  db_query("DELETE FROM {". _content_field_instance_tablename() ."} WHERE field_name = '%s' AND type_name = '%s'", $field['field_name'], $field['type_name']);
+  db_query("DELETE FROM {". content_instance_tablename() ."} WHERE field_name = '%s' AND type_name = '%s'", $field['field_name'], $field['type_name']);
 
   $instances = content_field_instance_read(array('field_name' => $field['field_name']));
 
@@ -377,7 +377,7 @@ function content_field_instance_delete($field) {
     if (is_array($columns) && count($columns)) {
       content_alter_db_field($field, $columns, array(), array());
     }
-    db_query("DELETE FROM {". _content_field_tablename() ."} WHERE field_name = '%s'", $field_name);
+    db_query("DELETE FROM {". content_field_tablename() ."} WHERE field_name = '%s'", $field_name);
   }
 }
 
@@ -388,14 +388,14 @@ function content_field_instance_delete($field) {
  */
 function content_module_delete($module) {
   // Delete the field data.
-  $results = db_query("SELECT * FROM {". _content_field_tablename() ."} WHERE module = '%s'", $module);
+  $results = db_query("SELECT * FROM {". content_field_tablename() ."} WHERE module = '%s'", $module);
   while ($field = db_fetch_array($results)) {
     $field['columns'] = unserialize($field['columns']);
     content_field_delete($field);
   }
   // Delete the field settings.
-  db_query("DELETE FROM {". _content_field_tablename() ."} WHERE module = '%s'", $module);
-  db_query("DELETE FROM {". _content_field_instance_tablename() ."} WHERE widget_module = '%s'", $module);
+  db_query("DELETE FROM {". content_field_tablename() ."} WHERE module = '%s'", $module);
+  db_query("DELETE FROM {". content_instance_tablename() ."} WHERE widget_module = '%s'", $module);
   // Force the caches and static arrays to update to the new info.
   _content_type_info(TRUE, TRUE);
 
@@ -410,7 +410,7 @@ function content_module_delete($module) {
 function content_types_rebuild() {
   $db_types = content_types();
 
-  $result = db_query("SELECT type_name FROM {". _content_field_instance_tablename() ."}");
+  $result = db_query("SELECT type_name FROM {". content_instance_tablename() ."}");
   while ($type = db_fetch_array($result)) {
     $field_types[] = $type['type_name'];
   }
@@ -448,7 +448,7 @@ function content_type_create($info) {
 function content_type_update($info) {
   if (!empty($info->old_type) && $info->old_type != $info->type) {
     // rename the content type in all fields that use changed content type.
-    db_query("UPDATE {". _content_field_instance_tablename() ."} SET type_name='%s' WHERE type_name='%s'", array($info->type, $info->old_type));
+    db_query("UPDATE {". content_instance_tablename() ."} SET type_name='%s' WHERE type_name='%s'", array($info->type, $info->old_type));
 
     // Rename the content fields table to match new content type name.
     $old_type = content_types($info->old_type);

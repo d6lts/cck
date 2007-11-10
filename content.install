@@ -81,8 +81,8 @@ function content_schema() {
   // _content_table_schema() and content_database_info() have no
   // circular logic and are safe to use here.
 
-  $db_result = db_query("SELECT * FROM {". _content_field_instance_tablename() ."} nfi ".
-    " LEFT JOIN {". _content_field_tablename() ."} nf ON nf.field_name = nfi.field_name");
+  $db_result = db_query("SELECT * FROM {". content_instance_tablename() ."} nfi ".
+    " LEFT JOIN {". content_field_tablename() ."} nf ON nf.field_name = nfi.field_name");
   while ($field = db_fetch_array($db_result)) {
     $field['columns'] = unserialize($field['columns']);
 
@@ -129,7 +129,7 @@ function content_update_2() {
 
     case 'mysql':
     case 'mysqli':
-      $ret[] = update_sql("ALTER TABLE {". _content_field_instance_tablename() ."} ADD COLUMN description mediumtext NOT NULL");
+      $ret[] = update_sql("ALTER TABLE {". content_instance_tablename() ."} ADD COLUMN description mediumtext NOT NULL");
       break;
   }
 
@@ -149,7 +149,7 @@ function content_update_3() {
 
     case 'mysql':
     case 'mysqli':
-      $ret[] = update_sql("ALTER TABLE {". _content_field_tablename() ."} ADD COLUMN db_storage int NOT NULL default 0");
+      $ret[] = update_sql("ALTER TABLE {". content_field_tablename() ."} ADD COLUMN db_storage int NOT NULL default 0");
       break;
   }
 
@@ -206,7 +206,7 @@ function content_update_5() {
 
   content_clear_type_cache();
 
-  $result = db_query('SELECT nf.field_name FROM {". _content_field_tablename() ."} nf LEFT JOIN {". _content_field_instance_tablename() ."} nfi ON nfi.field_name = nf.field_name WHERE nf.multiple = 0 AND nf.db_storage = 0 GROUP BY nfi.field_name HAVING COUNT(*) = 1');
+  $result = db_query('SELECT nf.field_name FROM {". content_field_tablename() ."} nf LEFT JOIN {". content_instance_tablename() ."} nfi ON nfi.field_name = nf.field_name WHERE nf.multiple = 0 AND nf.db_storage = 0 GROUP BY nfi.field_name HAVING COUNT(*) = 1');
 
   if (db_num_rows($result)) {
     // Multi-part update
@@ -220,7 +220,7 @@ function content_update_5() {
     $field = $fields[$field['field_name']];
     $columns = module_invoke($field['module'], 'field_settings', 'database columns', $field);
 
-    $ret[] = update_sql("UPDATE {". _content_field_tablename() ."} SET db_storage = ". CONTENT_DB_STORAGE_PER_CONTENT_TYPE ." WHERE field_name = '". $field['field_name'] ."'");
+    $ret[] = update_sql("UPDATE {". content_field_tablename() ."} SET db_storage = ". CONTENT_DB_STORAGE_PER_CONTENT_TYPE ." WHERE field_name = '". $field['field_name'] ."'");
     if (is_array($columns) && count($columns)) {
       $new_field = $field;
       $new_field['db_storage'] = CONTENT_DB_STORAGE_PER_CONTENT_TYPE;
@@ -269,7 +269,7 @@ function content_update_7() {
     $new_type_name = str_replace('content-', 'content_', $old_type_name);
     $ret[] = update_sql("UPDATE {node} SET type = '". $new_type_name ."' WHERE type = '". $old_type_name ."'");
     $ret[] = update_sql("UPDATE {". $table_name ."} SET type_name = '". $new_type_name ."' WHERE type_name = '". $old_type_name ."'");
-    $ret[] = update_sql("UPDATE {". _content_field_instance_tablename() ."} SET type_name = '". $new_type_name ."' WHERE type_name = '". $old_type_name ."'");
+    $ret[] = update_sql("UPDATE {". content_instance_tablename() ."} SET type_name = '". $new_type_name ."' WHERE type_name = '". $old_type_name ."'");
     $ret[] = update_sql("UPDATE {vocabulary_node_types} SET type = '". $new_type_name ."' WHERE type = '". $old_type_name ."'");
 
     $variable_result = db_query("SELECT name, value FROM {variable} WHERE name LIKE '%%%s%%' OR value LIKE '%%%s%%'", $old_type_name, $old_type_name);
@@ -318,16 +318,16 @@ function content_update_10() {
 
   // drop fields with no field instances
   $fields = array();
-  $result = db_query("SELECT DISTINCT(field_name)  FROM {". _content_field_instance_tablename() ."}");
+  $result = db_query("SELECT DISTINCT(field_name)  FROM {". content_instance_tablename() ."}");
   while ($row = db_fetch_array($result)) {
     $fields[] = "'". $row['field_name'] ."'";
   }
-  $ret[] = update_sql("DELETE FROM {". _content_field_tablename() ."} WHERE field_name NOT IN (". implode(', ', $fields) .")");
+  $ret[] = update_sql("DELETE FROM {". content_field_tablename() ."} WHERE field_name NOT IN (". implode(', ', $fields) .")");
 
   // set invalid 'per field storage' back to 'per content type'
-  $result = db_query("SELECT field_name FROM {". _content_field_tablename() ."} WHERE multiple = 0 AND db_storage = %d", CONTENT_DB_STORAGE_PER_FIELD);
+  $result = db_query("SELECT field_name FROM {". content_field_tablename() ."} WHERE multiple = 0 AND db_storage = %d", CONTENT_DB_STORAGE_PER_FIELD);
   while ($row = db_fetch_array($result)) {
-    $count = db_num_rows(db_query("SELECT field_name FROM {". _content_field_instance_tablename() ."} WHERE field_name = '%s'", $row['field_name']));
+    $count = db_num_rows(db_query("SELECT field_name FROM {". content_instance_tablename() ."} WHERE field_name = '%s'", $row['field_name']));
     if ($count == 1) {
       $field = content_fields($row['field_name']);
       $db_info = content_database_info($field);
@@ -385,7 +385,7 @@ function content_update_1002() {
   $ret = array();
 
   // See if this column was already added in 4.7.
-  $result = db_fetch_array(db_query_range("SELECT * FROM {". _content_field_instance_tablename() ."}", array(), 0, 1));
+  $result = db_fetch_array(db_query_range("SELECT * FROM {". content_instance_tablename() ."}", array(), 0, 1));
   if (isset($result['display_settings'])) {
     return $ret;
   }
@@ -397,7 +397,7 @@ function content_update_1002() {
 
     case 'mysql':
     case 'mysqli':
-      $ret[] = update_sql("ALTER TABLE {". _content_field_instance_tablename() ."} ADD COLUMN display_settings mediumtext NOT NULL");
+      $ret[] = update_sql("ALTER TABLE {". content_instance_tablename() ."} ADD COLUMN display_settings mediumtext NOT NULL");
       break;
   }
 
@@ -475,12 +475,12 @@ function content_update_1004() {
 
   // drop fields with no field instances
   $fields = array();
-  $result = db_query("SELECT DISTINCT(field_name) FROM {". _content_field_instance_tablename() ."}");
+  $result = db_query("SELECT DISTINCT(field_name) FROM {". content_instance_tablename() ."}");
   while($row = db_fetch_array($result)) {
     $fields[] = "'". $row['field_name'] ."'";
   }
   if ($fields) {
-    $ret[] = update_sql("DELETE FROM {". _content_field_tablename() ."} WHERE field_name NOT IN (". implode(', ', $fields) .")");
+    $ret[] = update_sql("DELETE FROM {". content_field_tablename() ."} WHERE field_name NOT IN (". implode(', ', $fields) .")");
   }
 
   // drop 'content_type_' table
@@ -490,9 +490,9 @@ function content_update_1004() {
   }
 
   // set invalid 'per field storage' back to 'per content type'
-  $result = db_query("SELECT field_name FROM {". _content_field_tablename() ."} WHERE multiple = 0 AND db_storage = %d", CONTENT_DB_STORAGE_PER_FIELD);
+  $result = db_query("SELECT field_name FROM {". content_field_tablename() ."} WHERE multiple = 0 AND db_storage = %d", CONTENT_DB_STORAGE_PER_FIELD);
   while ($row = db_fetch_array($result)) {
-    $count = db_num_rows(db_query("SELECT field_name FROM {". _content_field_instance_tablename() ."} WHERE field_name = '%s'", $row['field_name']));
+    $count = db_num_rows(db_query("SELECT field_name FROM {". content_instance_tablename() ."} WHERE field_name = '%s'", $row['field_name']));
     if ($count == 1) {
       $field = content_fields($row['field_name']);
       $db_info = content_database_info($field);
@@ -616,28 +616,30 @@ function content_update_6000() {
   include_once('./'. drupal_get_path('module', 'content') .'/content_admin.inc');
   switch ($GLOBALS['db_type']) {
     case 'pgsql':
-      db_add_column($ret, _content_field_tablename(), 'module', 'varchar(127)', array('not null' => TRUE, 'default' => "''"));
-      db_add_column($ret, _content_field_tablename(), 'columns', 'text', array('not null' => TRUE, 'default' => "''"));
-      db_add_column($ret, _content_field_instance_tablename(), 'widget_module', 'varchar(127)', array('not null' => TRUE, 'default' => "''"));
+      db_add_column($ret, content_field_tablename(), 'module', 'varchar(127)', array('not null' => TRUE, 'default' => "''"));
+      db_add_column($ret, content_field_tablename(), 'columns', 'text', array('not null' => TRUE, 'default' => "''"));
+      db_add_column($ret, content_instance_tablename(), 'widget_module', 'varchar(127)', array('not null' => TRUE, 'default' => "''"));
       break;
 
     case 'mysql':
     case 'mysqli':
-      $ret[] = update_sql("ALTER TABLE {". _content_field_tablename() ."} ADD COLUMN module varchar(127) NOT NULL");
-      $ret[] = update_sql("ALTER TABLE {". _content_field_tablename() ."} ADD COLUMN columns text NOT NULL");
-      $ret[] = update_sql("ALTER TABLE {". _content_field_instance_tablename() ."} ADD COLUMN widget_module varchar(127) NOT NULL");
+      $ret[] = update_sql("ALTER TABLE {". content_field_tablename() ."} ADD COLUMN module varchar(127) NOT NULL");
+      $ret[] = update_sql("ALTER TABLE {". content_field_tablename() ."} ADD COLUMN columns text NOT NULL");
+      $ret[] = update_sql("ALTER TABLE {". content_instance_tablename() ."} ADD COLUMN widget_module varchar(127) NOT NULL");
       break;
   }
   foreach (module_list() as $module) {
     $module_field_types = module_invoke($module, 'field_info');
     if ($module_field_types) {
       foreach ($module_field_types as $name => $field_info) {
-        $ret[] = update_sql("UPDATE {". _content_field_tablename() ."} SET module = '". $module ."' WHERE type = '". $name ."'");
+        $ret[] = update_sql("UPDATE {". content_field_tablename() ."} SET module = '". $module ."' WHERE type = '". $name ."'");
         foreach (content_fields() as $field) {
           if ($field['type'] == $name) {
             $columns = module_invoke($module, 'field_settings', 'database columns', $field);
             if ($columns) {
-              db_query("UPDATE {". _content_field_tablename() ."} SET columns = '%s' WHERE field_name = '%s'", serialize($columns), $field['field_name']);
+              // Using db_query() instead of update_sql() here because serialized arrays
+              // lose data in the escaping done by update_sql().
+              db_query("UPDATE {". content_field_tablename() ."} SET columns = '%s' WHERE field_name = '%s'", serialize($columns), $field['field_name']);
             }
           }
         }
@@ -646,7 +648,7 @@ function content_update_6000() {
     $module_widgets = module_invoke($module, 'widget_info');
     if ($module_widgets) {
       foreach ($module_widgets as $name => $widget_info) {
-        $ret[] = update_sql("UPDATE {". _content_field_instance_tablename() ."} SET widget_module = '". $module ."' WHERE widget_type = '". $name ."'");
+        $ret[] = update_sql("UPDATE {". content_instance_tablename() ."} SET widget_module = '". $module ."' WHERE widget_type = '". $name ."'");
       }
     }
 
@@ -662,6 +664,7 @@ function content_update_6000() {
  * until a major version change.
  */
 function content_update_6001() {
+  include_once('./'. drupal_get_path('module', 'content') .'/content.module');
   $ret = array();
   // If a field named 'field_instance' already exists, change it so we
   // won't have a table name clash with new content_field_instance table.
