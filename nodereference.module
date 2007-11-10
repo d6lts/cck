@@ -370,9 +370,6 @@ function nodereference_widget(&$form, &$form_state, $field, $items, $delta = 0) 
  * Substitute in the node title for the node nid.
  */
 function nodereference_autocomplete_value($element, $edit = FALSE) {
-return;
-dsm($element);
-dsm($edit);
   if (func_num_args() == 1) {
     $field_key  = $element['#columns'][0];
     if (!empty($element['#default_value'][$field_key])) {

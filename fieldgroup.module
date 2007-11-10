@@ -100,7 +100,7 @@ function fieldgroup_content_fieldapi($op, $field) {
       db_query("DELETE FROM {". _fieldgroup_group_fields_tablename() ." WHERE field_name = '%s'", $field['field_name']);
       break;
   }
-  cache_clear_all('fieldgroup_data', 'content_cache');
+  cache_clear_all('fieldgroup_data', 'cache_content');
 }
 
 function fieldgroup_edit_group_form(&$form_state, $content_type, $group_name, $action) {

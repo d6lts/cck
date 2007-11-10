@@ -95,7 +95,6 @@ function content_admin_field_overview_form(&$form_state, $type_name) {
   // Iterate through the dummy form and add top-level fields and weights to a table.
   // Construct the table values in an array '#table' that FAPI will ignore, keyed on the item's weight.
   // Create separate form elements for each weight and group value and put a placeholder for each in #table.
-
   $field_names = array_keys(content_fields());
   foreach ($dummy_form as $key => $value) {
     // Limiting weight to < 10 will keep workflow and submit elements from being added to the overview table.
@@ -570,34 +569,10 @@ function theme_content_admin_field_add_new_field_widget_type($form) {
  */
 function _content_admin_field_add_existing_submit($form, &$form_state) {
   $form_values = $form_state['values'];
-  $type  = content_types($form_values['type_name']);
-  $field = content_fields($form_values['field_name']);
-  $columns = content_invoke_columns($field);
-
-  if (is_array($columns) && count($columns)) {
-    if ($field['db_storage'] == CONTENT_DB_STORAGE_PER_CONTENT_TYPE) {
-      $new_field = $field;
-      $new_field['db_storage'] = CONTENT_DB_STORAGE_PER_FIELD;
-      db_query("UPDATE {". _content_field_tablename() ."} SET db_storage = %d WHERE field_name = '%s'", CONTENT_DB_STORAGE_PER_FIELD, $form_values['field_name']);
-      content_alter_db_field($field, $columns, $new_field, $columns);
-    }
-  }
-
-  $prior_instance = db_fetch_array(db_query("SELECT * FROM {". _content_field_instance_tablename() ."} WHERE field_name = '%s'", $form_values['field_name']));
-  if (!$prior_instance) {
-    $prior_instance = array();
-    $prior_instance['weight'] = 0;
-    $prior_instance['label'] = $form_values['field_name'];
-    $prior_instance['widget_type'] = '';
-    $prior_instance['widget_settings'] = '';
-    $prior_instance['display_settings'] = '';
-    $prior_instance['description'] = '';
-  }
-  db_query("INSERT INTO {". _content_field_instance_tablename() ."} (field_name, type_name, weight, label, widget_type, widget_settings, display_settings, description) VALUES ('%s', '%s', %d, '%s', '%s', '%s', '%s', '%s')", $form_values['field_name'], $form_values['type_name'], $prior_instance['weight'], $prior_instance['label'], $prior_instance['widget_type'], $prior_instance['widget_settings'], $prior_instance['display_settings'], $prior_instance['description']);
-
-  drupal_set_message(t('Added field %label.', array('%label' => $prior_instance['label'])));
-  content_clear_type_cache();
-
+  module_load_include('inc', 'content', 'content_crud');
+  content_field_instance_create($form_values);
+  drupal_set_message(t('Added field %label.', array('%label' => $form_values['field_name'])));
+  $type   = content_types($form_values['type_name']);
   $form_state['redirect'] = 'admin/content/types/'. $type['url_str'] .'/fields';
 }
 
@@ -629,34 +604,14 @@ function _content_admin_field_add_new_validate($form, &$form_state) {
  */
 function _content_admin_field_add_new_submit($form, &$form_state) {
   $form_values = $form_state['values'];
-  $field_name = $form_values['field_name'];
-
-  $fields = content_fields();
-  $type   = content_types($form_values['type_name']);
-
   $field_widget_type = explode('-', $form_values['field_widget_type']);
-
-  $info = _content_type_info();
-  $field_module = $info['field types'][$field_widget_type[0]]['module'];
-  $widget_module = $info['widget types'][$field_widget_type[1]]['module'];
-
-
-  db_query("INSERT INTO {". _content_field_tablename() ."} (field_name, type, global_settings, required, multiple, db_storage, module) VALUES ('%s', '%s', '%s', %d, %d, %d, '%s')", $field_name, $field_widget_type[0], serialize(array()), 0, 0, CONTENT_DB_STORAGE_PER_CONTENT_TYPE, $field_module);
-  db_query("INSERT INTO {". _content_field_instance_tablename() ."} (field_name, type_name, weight, label, widget_type, widget_settings, display_settings, description, module) VALUES ('%s', '%s', %d, '%s', '%s', '%s', '%s', '%s', '%s')", $field_name, $form_values['type_name'], 0, $field_name, $field_widget_type[1], serialize(array()), serialize(array()), '', $widget_module);
-
-  content_clear_type_cache();
-  menu_rebuild();
-
-  // Create new database columns as necessary.
-  $field = content_fields($field_name);
-  $columns = content_invoke_columns($field);
-  if (is_array($columns) && count($columns)) {
-    content_alter_db_field(array(), array(), $field, $columns);
-  }
-
+  $form_values['type'] = $field_widget_type[0];
+  $form_values['widget_type'] = $field_widget_type[1];
+  module_load_include('inc', 'content', 'content_crud');
+  content_field_create($form_values);
   drupal_set_message(t('Created field %label.', array('%label' => $form_values['field_name'])));
-
-  $form_state['redirect'] = 'admin/content/types/'. $type['url_str'] .'/fields/'. $field_name;
+  $type   = content_types($form_values['type_name']);
+  $form_state['redirect'] = 'admin/content/types/'. $type['url_str'] .'/fields/'. $form_values['field_name'];
 }
 
 /**
@@ -694,13 +649,10 @@ function _content_admin_field_remove_submit($form, &$form_state) {
   $form_values = $form_state['values'];
   $type = content_types($form_values['type_name']);
   $field = $type['fields'][$form_values['field_name']];
-
   if ($type && $field && $form_values['confirm']) {
     module_load_include('inc', 'content', 'content_crud');
     content_field_instance_delete($form_values);
-
     drupal_set_message(t('Removed field %field from %type.', array('%field' => $field['widget']['label'], '%type' => $type['name'])));
-
     $form_state['redirect'] = 'admin/content/types/'. $type['url_str'] .'/fields';
   }
 }
@@ -856,10 +808,6 @@ function _content_admin_field(&$form_state, $type_name, $field_name) {
     '#type' => 'value',
     '#value' => $field['type'],
   );
-  $form['module'] = array(
-    '#type' => 'value',
-    '#value' => implode(', ', array_unique(array($field_type['module'], $widget_type['module']))),
-    );
   return $form;
 }
 
@@ -955,68 +903,10 @@ function _content_admin_field_validate($form, &$form_state) {
  */
 function _content_admin_field_submit($form, &$form_state) {
   $form_values = $form_state['values'];
-
-  $type = content_types($form_values['type_name']);
-  $field = $type['fields'][$form_values['field_name']];
-  $field_types = _content_field_types();
-  $field_type = $field_types[$field['type']];
-  $widget_types = _content_widget_types();
-  $widget_type = $widget_types[$form_values['widget_type']];
-
-  // If content.module is handling the default value,
-  // initialize $widget_settings with default values,
-  if (content_callback('widget', 'default value', $field) == CONTENT_CALLBACK_DEFAULT) {
-    $widget_settings = array(
-      'default_value' => $form_values['default_value'],
-      'default_value_php' => $form_values['default_value_php'],
-    );
-  }
-
-  $setting_names = module_invoke($widget_type['module'], 'widget_settings', 'save', $field);
-  if (is_array($setting_names)) {
-    foreach ($setting_names as $setting) {
-      $widget_settings[$setting] = isset($form_values[$setting]) ? $form_values[$setting] : '';
-    }
-  }
-  $field_settings = array();
-  $setting_names = module_invoke($field_type['module'], 'field_settings', 'save', $field);
-  if (is_array($setting_names)) {
-    foreach ($setting_names as $setting) {
-      $field_settings[$setting] = isset($form_values[$setting]) ? $form_values[$setting] : '';
-    }
-  }
-
-  $prev_field = $field;
-  $prev_columns = content_invoke_columns($field);
-
-  db_query("UPDATE {". _content_field_instance_tablename() ."} SET weight = %d, label = '%s', widget_type = '%s', widget_settings = '%s', description = '%s' WHERE type_name = '%s' AND field_name = '%s'", $form_values['weight'], $form_values['label'], $form_values['widget_type'], serialize($widget_settings), $form_values['description'], $form_values['type_name'], $form_values['field_name']);
-
-  if ($form_values['multiple']) {
-    $field['db_storage'] = CONTENT_DB_STORAGE_PER_FIELD;
-  }
-  else {
-    $instances = db_result(db_query("SELECT COUNT(*) FROM {". _content_field_instance_tablename() ."} WHERE field_name = '%s'", $form_values['field_name']));
-    if ($instances == 1) {
-      $field['db_storage'] = CONTENT_DB_STORAGE_PER_CONTENT_TYPE;
-    }
-  }
-
-  db_query("UPDATE {". _content_field_tablename() ."} SET required = %d, multiple = %d, global_settings = '%s', db_storage = %d WHERE field_name = '%s'", $form_values['required'], $form_values['multiple'], serialize($field_settings), $field['db_storage'], $form_values['field_name']);
-
-  drupal_set_message(t('Saved field %field.', array('%field' => $form_values['label'])));
-  content_clear_type_cache();
-
-  $new_field = content_fields($form_values['field_name']);
-  $new_columns = content_invoke_columns($new_field);
-
-  if (!isset($prev_columns)) {
-    $prev_columns = array();
-  }
-  if (!isset($new_columns)) {
-    $new_columns = array();
-  }
-  content_alter_db_field($prev_field, $prev_columns, $new_field, $new_columns);
-
+  module_load_include('inc', 'content', 'content_crud');
+  content_field_instance_update($form_values);
+  drupal_set_message(t('Saved field %label.', array('%label' => $form_values['label'])));
+  $type   = content_types($form_values['type_name']);
   $form_state['redirect'] = 'admin/content/types/'. $type['url_str'] .'/fields';
 }
 

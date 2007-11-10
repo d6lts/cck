@@ -60,75 +60,77 @@ function content_menu() {
   foreach (node_get_types() as $type) {
     $type_name = $type->type;
     $content_type = content_types($type_name);
-    $type_url_str = $content_type['url_str'];
-
-    $items['admin/content/types/'. $type_url_str .'/fields'] = array(
-      'title' => 'Manage fields',
-      'page callback' => 'drupal_get_form',
-      'page arguments' => array('content_admin_field_overview_form', $type_name),
-      'access arguments' => array('administer content types'),
-      'file' => 'content_admin.inc',
-      'file path' => drupal_get_path('module', 'content'),
-      'type' => MENU_LOCAL_TASK,
-      'weight' => 0,
-    );
-    $items['admin/content/types/'. $type_url_str .'/display'] = array(
-      'title' => 'Display fields',
-      'page callback' => 'drupal_get_form',
-      'page arguments' => array('content_admin_display_overview_form', $type_name),
-      'access arguments' => array('administer content types'),
-      'file' => 'content_admin.inc',
-      'file path' => drupal_get_path('module', 'content'),
-      'type' => MENU_LOCAL_TASK,
-      'weight' => 1,
-    );
-    $items['admin/content/types/'. $type_url_str .'/add_field'] = array(
-      'title' => 'Add field',
-      'page callback' => '_content_admin_field_add',
-      'page arguments' => array($type_name),
-      'access arguments' => array('administer content types'),
-      'file' => 'content_admin.inc',
-      'file path' => drupal_get_path('module', 'content'),
-      'type' => MENU_LOCAL_TASK,
-      'weight' => 2,
-    );
-    foreach ($content_type['fields'] as $field) {
-      $field_name = $field['field_name'];
-
-      // Callbacks for AHAH add more buttons.
-      if ($field['multiple']) {
-        $items['content/js/'. $field_name] = array(
-          'title' => 'Javascript Add More Form',
-          'page callback' => 'content_add_more_js',
-          'page arguments' => array($field_name),
-          'access arguments' => array('access content'),
-          'type' => MENU_CALLBACK,
-        );
-      }
-
-      // TODO how should this be handled? If type is MENU_CALLBACK, the
-      // breadcrumbs and tabs disappear on this page. If type is MENU_LOCAL_TASK,
-      // the breadcrumbs and main tabs are right, but we also get secondary
-      // row of tabs for each field. Not losing the top tabs is probably the
-      // best option, even with the extra tabs.
-      $items['admin/content/types/'. $type_url_str .'/fields/'. $field_name] = array(
-        'title' => t($field['widget']['label']),
+    if (!empty($content_type)) {
+      $type_url_str = $content_type['url_str'];
+      $items['admin/content/types/'. $type_url_str .'/fields'] = array(
+        'title' => 'Manage fields',
         'page callback' => 'drupal_get_form',
-        'page arguments' => array('_content_admin_field', $type_name, $field_name),
+        'page arguments' => array('content_admin_field_overview_form', $type_name),
         'access arguments' => array('administer content types'),
         'file' => 'content_admin.inc',
         'file path' => drupal_get_path('module', 'content'),
         'type' => MENU_LOCAL_TASK,
+        'weight' => 0,
       );
-      $items['admin/content/types/'. $type_url_str .'/fields/'. $field_name .'/remove'] = array(
-        'title' => 'Remove field',
+      $items['admin/content/types/'. $type_url_str .'/display'] = array(
+        'title' => 'Display fields',
         'page callback' => 'drupal_get_form',
-        'page arguments' => array('_content_admin_field_remove', $type_name, $field_name),
+        'page arguments' => array('content_admin_display_overview_form', $type_name),
         'access arguments' => array('administer content types'),
         'file' => 'content_admin.inc',
         'file path' => drupal_get_path('module', 'content'),
-        'type' => MENU_CALLBACK,
+        'type' => MENU_LOCAL_TASK,
+        'weight' => 1,
       );
+      $items['admin/content/types/'. $type_url_str .'/add_field'] = array(
+        'title' => 'Add field',
+        'page callback' => '_content_admin_field_add',
+        'page arguments' => array($type_name),
+        'access arguments' => array('administer content types'),
+        'file' => 'content_admin.inc',
+        'file path' => drupal_get_path('module', 'content'),
+        'type' => MENU_LOCAL_TASK,
+        'weight' => 2,
+      );
+      if (!empty($content_type['fields'])) {
+        foreach ($content_type['fields'] as $field) {
+          $field_name = $field['field_name'];
+          // Callbacks for AHAH add more buttons.
+          if ($field['multiple']) {
+            $items['content/js/'. $field_name] = array(
+              'title' => 'Javascript Add More Form',
+              'page callback' => 'content_add_more_js',
+              'page arguments' => array($field_name),
+              'access arguments' => array('access content'),
+              'type' => MENU_CALLBACK,
+            );
+          }
+        }
+
+        // TODO how should this be handled? If type is MENU_CALLBACK, the
+        // breadcrumbs and tabs disappear on this page. If type is MENU_LOCAL_TASK,
+        // the breadcrumbs and main tabs are right, but we also get secondary
+        // row of tabs for each field. Not losing the top tabs is probably the
+        // best option, even with the extra tabs.
+        $items['admin/content/types/'. $type_url_str .'/fields/'. $field_name] = array(
+          'title' => t($field['widget']['label']),
+          'page callback' => 'drupal_get_form',
+          'page arguments' => array('_content_admin_field', $type_name, $field_name),
+          'access arguments' => array('administer content types'),
+          'file' => 'content_admin.inc',
+          'file path' => drupal_get_path('module', 'content'),
+          'type' => MENU_LOCAL_TASK,
+        );
+        $items['admin/content/types/'. $type_url_str .'/fields/'. $field_name .'/remove'] = array(
+          'title' => 'Remove field',
+          'page callback' => 'drupal_get_form',
+          'page arguments' => array('_content_admin_field_remove', $type_name, $field_name),
+          'access arguments' => array('administer content types'),
+          'file' => 'content_admin.inc',
+          'file path' => drupal_get_path('module', 'content'),
+          'type' => MENU_CALLBACK,
+        );
+      }
     }
   }
   return $items;
@@ -266,7 +268,7 @@ function content_form_field(&$form, &$form_state, $field, $get_delta = NULL) {
     // If content module handles multiple values for this form element,
     // and not selecting an individual $delta, process the multiple value form.
     if (!$get_delta && content_handle('widget', 'multiple values', $field) == CONTENT_HANDLE_CORE) {
-       $form_element = content_multiple_value_form($form, $form_state, $field, $items);
+      $form_element = content_multiple_value_form($form, $form_state, $field, $items);
     }
     // If the widget is handling multiple values (e.g optionwidgets),
     // or selecting an individual element, just get a single form
@@ -278,7 +280,7 @@ function content_form_field(&$form, &$form_state, $field, $get_delta = NULL) {
           '#field_name' => $field['field_name'],
           '#required' => $get_delta > 0 ? FALSE : $field['required'],
           // TODO : should we add some logic for title and description too ?
-          '#columns'  => $field['columns'],
+          '#columns'  => array_keys($field['columns']),
           '#delta' => $delta,
         );
         $form_element[0] = array_merge($element, $defaults);
@@ -325,7 +327,7 @@ function content_multiple_value_form(&$form, &$form_state, $field, $items) {
         '#weight'   => $delta,
         '#required' => $delta == 0 && $field['required'],
         '#delta'    => $delta,
-        '#columns'  => $field['columns'],
+        '#columns'  => array_keys($field['columns']),
       );
       $form_element[$delta] = array_merge($element, $defaults);
     }
@@ -603,16 +605,6 @@ function content_notify($op, $module) {
 }
 
 /**
- *  Make sure that CCK content type info is synched with node type data
- *  any time the content module is enabled.
- */
-function content_enable() {
-  module_load_include('inc', 'content', 'content_admin');
-  module_load_include('inc', 'content', 'content_crud');
-  content_types_rebuild();
-}
-
-/**
  * Implementation of hook_field(). Handles common field housekeeping.
  *
  * This implementation is special, as content.module does not define any field
@@ -879,7 +871,6 @@ function _content_field_invoke_default($op, &$node, $teaser = NULL, $page = NULL
   return $return;
 }
 
-
 /**
  * Return a list of all content types.
  *
@@ -891,6 +882,9 @@ function content_types($type_name = NULL) {
   $type_name = !empty($type_name) ? str_replace('-', '_', $type_name) : NULL;
 
   $info = _content_type_info();
+  if (!isset($info['content types'])) {
+    return array();
+  }
   if (isset($type_name)) {
     if (isset($info['content types'][$type_name])) {
       return $info['content types'][$type_name];
@@ -913,6 +907,9 @@ function content_types($type_name = NULL) {
  */
 function content_fields($field_name = NULL, $content_type_name = NULL) {
   $info = _content_type_info();
+  if (!isset($info['fields'])) {
+    return array();
+  }
   if (isset($field_name)) {
     if (isset($info['fields'][$field_name])) {
       if (isset($content_type_name)) {
@@ -939,7 +936,7 @@ function content_fields($field_name = NULL, $content_type_name = NULL) {
  */
 function _content_field_types() {
   $info = _content_type_info();
-  return $info['field types'];
+  return isset($info['field types']) ? $info['field types'] : array();
 }
 
 /**
@@ -947,7 +944,7 @@ function _content_field_types() {
  */
 function _content_widget_types() {
   $info = _content_type_info();
-  return $info['widget types'];
+  return isset($info['widget types']) ? $info['widget types'] : array();
 }
 
 /**
@@ -958,8 +955,16 @@ function _content_widget_types() {
  */
 function _content_type_info($reset = FALSE) {
   static $info;
+
+  // Make sure this function doesn't run until the tables have been created,
+  // for instance, when first enabled and called from content_menu().
+  if (!db_table_exists(_content_field_tablename()) || !db_table_exists(_content_field_instance_tablename())) {
+      return array();
+  }
   if ($reset || !isset($info)) {
-    if ($cached = cache_get('content_type_info', 'cache_content')) {
+    // When run from update functions, the cache_content table may not exist yet.
+    $cache_name = db_table_exists('cache_content') ? 'cache_content' : 'cache';
+    if ($cached = cache_get('content_type_info', $cache_name)) {
       $info = $cached->data;
     }
     else {
@@ -979,7 +984,6 @@ function _content_type_info($reset = FALSE) {
             $info['field types'][$name]['formatters'] = array();
           }
         }
-
         $module_widgets = module_invoke($module, 'widget_info');
         if ($module_widgets) {
           foreach ($module_widgets as $name => $widget_info) {
@@ -987,8 +991,6 @@ function _content_type_info($reset = FALSE) {
             $info['widget types'][$name]['module'] = $module;
           }
         }
-      }
-      foreach (module_list() as $module) {
         $module_formatters = module_invoke($module, 'field_formatter_info');
         if ($module_formatters) {
           foreach ($module_formatters as $name => $formatter_info) {
@@ -999,53 +1001,22 @@ function _content_type_info($reset = FALSE) {
           }
         }
       }
-      $field_result = db_query('SELECT * FROM {'. _content_field_tablename() .'}');
-      while ($field = db_fetch_array($field_result)) {
-        $global_settings = $field['global_settings'] ? unserialize($field['global_settings']) : array();
-        unset($field['global_settings']);
-        // Preventative error handling for PHP5 if field nodule hasn't created an arrray.
-        if (is_array($global_settings)) {
-          $field = array_merge($field, $global_settings);
-        }
-        $instance_info = db_fetch_array(db_query("SELECT type_name, label FROM {". _content_field_instance_tablename() ."} WHERE field_name = '%s'", $field['field_name']));
-        $field['widget']['label'] = $instance_info['label'];
-        $field['type_name'] = $instance_info['type_name'];
-        $field['module'] = $info['field types'][$field['type']]['module'];
-        $field['columns'] = array_keys(content_invoke_columns($field));
-        $info['fields'][$field['field_name']] = $field;
-      }
-      $type_result = db_query('SELECT * FROM {node_type} ORDER BY type ASC');
-      while ($type = db_fetch_array($type_result)) {
+      module_load_include('inc', 'content', 'content_crud');
+      foreach (node_get_types() as $type_name => $data) {
+        $type = (array) $data;
         $type['url_str'] = str_replace('_', '-', $type['type']);
         $type['fields'] = array();
         $type['tables'] = array();
-        $field_result = db_query("SELECT * FROM {". _content_field_instance_tablename() ."} nfi WHERE nfi.type_name = '%s' ORDER BY nfi.weight ASC, nfi.label ASC", $type['type']);
-        while ($field = db_fetch_array($field_result)) {
-          // Overwrite global field information with specific information
-          $field = array_merge($info['fields'][$field['field_name']], $field);
-          $widget_settings = $field['widget_settings'] ? unserialize($field['widget_settings']) : array();
-          unset($field['widget_settings']);
-          $field['widget'] = $widget_settings;
-          $field['widget']['type'] = $field['widget_type'];
-          unset($field['widget_type']);
-          $field['widget']['weight'] = $field['weight'];
-          unset($field['weight']);
-          $field['widget']['label'] = $field['label'];
-          unset($field['label']);
-          $field['widget']['description'] = $field['description'];
-          unset($field['description']);
-          $field['type_name'] = $type['type'];
-          $field['display_settings'] = $field['display_settings'] ? unserialize($field['display_settings']) : array();
+        $fields = content_field_instance_read(array('type_name' => $type_name));
+        foreach ($fields as $field) {
           $type['fields'][$field['field_name']] = $field;
-          $type['fields'][$field['field_name']]['module'] = $info['field types'][$field['type']]['module'];
-
           $db_info = content_database_info($field);
           $type['tables'][$db_info['table']] = $db_info['table'];
-
+          $info['fields'][$field['field_name']] = $field;
         }
-        $info['content types'][$type['type']] = $type;
+        $info['content types'][$type_name] = $type;
       }
-      cache_set('content_type_info', $info, 'cache_content');
+      cache_set('content_type_info', $info, $cache_name);
     }
   }
   return $info;
@@ -1108,7 +1079,7 @@ function content_clear_type_cache($with_schema = FALSE) {
  *       database column that stores the data.
  */
 function content_database_info($field) {
-  $columns = content_invoke_columns($field);
+  $columns = $field['columns'];
   $db_info = array();
 
   if ($field['db_storage'] == CONTENT_DB_STORAGE_PER_FIELD) {
@@ -1128,23 +1099,6 @@ function content_database_info($field) {
     $db_info['columns'] = array();
   }
   return $db_info;
-}
-
-/**
- * Helper function to retrieve column information for a field
- * Allows content module to control column settings.
- */
-function content_invoke_columns($field) {
-  $module = $field['module'];
-  $columns = module_invoke($module, 'field_settings', 'database columns', $field);
-  if (is_array($columns)) {
-    // Ensure columns always default to NULL values.
-    foreach ($columns as $column_name => $column) {
-      $columns[$column_name]['not null'] = FALSE;
-      unset($columns[$column_name]['default']);
-    }
-  }
-  return $columns;
 }
 
 /**
@@ -1287,6 +1241,11 @@ function _content_tablename($name, $storage, $version = NULL) {
   }
 }
 
+/**
+ * Generate table name for the content field table.
+ *
+ * Needed because the table name changes depending on version.
+ */
 function _content_field_tablename($version = NULL) {
   if (is_null($version)) {
     $version = variable_get('content_schema_version', 0);
@@ -1294,6 +1253,11 @@ function _content_field_tablename($version = NULL) {
   return $version < 6001 ? 'node_field' : 'content_field';
 }
 
+/**
+ * Generate table name for the content field instance table.
+ *
+ * Needed because the table name changes depending on version.
+ */
 function _content_field_instance_tablename($version = NULL) {
   if (is_null($version)) {
     $version = variable_get('content_schema_version', 0);
@@ -1301,6 +1265,13 @@ function _content_field_instance_tablename($version = NULL) {
   return $version < 6001 ? 'node_field_instance' : 'content_field_instance';
 }
 
+/**
+ * A basic schema used by all field and type tables.
+ *
+ * Do not add the fields here because we need this function
+ * to work when called directly from hook_schema, where functions
+ * like content_fields() and content_types() are not safe to use.
+ */
 function _content_table_schema($field = NULL) {
   $base_schema = array(
     'fields' => array(
@@ -1313,7 +1284,6 @@ function _content_table_schema($field = NULL) {
     $base_schema['fields']['delta'] = array('type' => 'int', 'unsigned' => TRUE, 'not null' => TRUE, 'default' => 0);
     $base_schema['primary key'][] = 'delta';
   }
-  // TODO : add the $field right now ?
   $base_schema['content fields'] = array();
   return $base_schema;
 }

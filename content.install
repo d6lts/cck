@@ -19,6 +19,22 @@ function content_uninstall() {
 }
 
 /**
+ *  Make sure that CCK content type info is synched with node type data
+ *  any time the content module is enabled.
+ */
+function content_enable() {
+  module_load_include('inc', 'content', 'content_admin');
+  module_load_include('inc', 'content', 'content_crud');
+  content_types_rebuild();
+}
+
+/**
+ * Implementation of hook_disable().
+ */
+function content_disable() {
+}
+
+/**
  * Implementation of hook_schema.
  */
 function content_schema() {
@@ -32,8 +48,9 @@ function content_schema() {
       'global_settings' => array('type' => 'text', 'size' => 'medium', 'not null' => TRUE, 'default' => ''),
       'required'        => array('type' => 'int', 'size' => 'tiny', 'not null' => TRUE, 'default' => 0),
       'multiple'        => array('type' => 'int', 'size' => 'tiny', 'not null' => TRUE, 'default' => 0),
-      'db_storage'      => array('type' => 'int', 'size' => 'tiny', 'not null' => TRUE, 'default' => 0),
+      'db_storage'      => array('type' => 'int', 'size' => 'tiny', 'not null' => TRUE, 'default' => 1),
       'module'          => array('type' => 'varchar', 'length' => 127, 'not null' => TRUE, 'default' => ''),
+      'columns'         => array('type' => 'text', 'size' => 'medium', 'not null' => TRUE, 'default' => ''),
     ),
     'primary key' => array('field_name'),
   );
@@ -47,7 +64,7 @@ function content_schema() {
       'widget_settings'  => array('type' => 'text', 'size' => 'medium', 'not null' => TRUE, 'default' => ''),
       'display_settings' => array('type' => 'text', 'size' => 'medium', 'not null' => TRUE, 'default' => ''),
       'description'      => array('type' => 'text', 'size' => 'medium', 'not null' => TRUE, 'default' => ''),
-      'module'           => array('type' => 'varchar', 'length' => 127, 'not null' => TRUE, 'default' => ''),
+      'widget_module'    => array('type' => 'varchar', 'length' => 127, 'not null' => TRUE, 'default' => ''),
     ),
     'primary key' => array('field_name', 'type_name'),
   );
@@ -56,31 +73,45 @@ function content_schema() {
   // Dynamic (data) tables.
   include_once('./'. drupal_get_path('module', 'content') .'/content.module');
 
-  foreach (content_types() as $type) {
+  // Can't use many helper functions here, like content_fields() or
+  // content_types() or we risk creating a fatal loop from circular
+  // logic when they call other functions that use this schema, so create
+  // the schema directly from a fresh query of the database.
+
+  // _content_table_schema() and content_database_info() have no
+  // circular logic and are safe to use here.
+
+  $db_result = db_query("SELECT * FROM {". _content_field_instance_tablename() ."} nfi ".
+    " LEFT JOIN {". _content_field_tablename() ."} nf ON nf.field_name = nfi.field_name");
+  while ($field = db_fetch_array($db_result)) {
+    $field['columns'] = unserialize($field['columns']);
+
+    $content_table = _content_tablename($field['type_name'], CONTENT_DB_STORAGE_PER_CONTENT_TYPE);
+    $field_table = _content_tablename($field['field_name'], CONTENT_DB_STORAGE_PER_FIELD);
+
     // We always add a 'per content type' table.
     // TODO : is that really still needed ?
-    $table = _content_tablename($type['type'], CONTENT_DB_STORAGE_PER_CONTENT_TYPE);
-    $schema[$table] = _content_table_schema();
-    foreach ($type['fields'] as $field) {
-      $db_info = content_database_info($field);
-      $table = $db_info['table'];
-
-      // Add the 'per field' table if needed.
-      if ($field['db_storage'] == CONTENT_DB_STORAGE_PER_FIELD && !isset($schema[$table])) {
-        $schema[$table] = _content_table_schema($field['multiple']);
-      }
-
-      // Add the data columns.
-      foreach ($db_info['columns'] as $column => $attributes) {
-        $column_name = $attributes['column'];
-        unset($attributes['column']);
-        unset($attributes['sortable']);
-        $schema[$table]['fields'][$column_name] = $attributes;
-      }
-
-      // Meta-data : content fields stored in that table.
-      $schema[$table]['content fields'][] = $field['field_name'];
+    if (!isset($schema[$content_table])) {
+      $schema[$content_table] = _content_table_schema();
     }
+    // Add the 'per field' table if needed.
+    if (!isset($schema[$field_table]) && $field['db_storage'] == CONTENT_DB_STORAGE_PER_FIELD) {
+      $schema[$field_table] = _content_table_schema($field['multiple']);
+    }
+
+    // Add the data columns.
+    $db_info = content_database_info($field);
+    $table   = $db_info['table'];
+    $columns = $db_info['columns'];
+    foreach ($columns as $column => $attributes) {
+      $column_name = $attributes['column'];
+      unset($attributes['column']);
+      unset($attributes['sortable']);
+      $schema[$table]['fields'][$column_name] = $attributes;
+    }
+
+    // Meta-data : content fields stored in that table.
+    $schema[$table]['content fields'][] = $field['field_name'];
   }
   return $schema;
 }
@@ -187,7 +218,7 @@ function content_update_5() {
     $field = db_fetch_array($result);
     $fields = content_fields();
     $field = $fields[$field['field_name']];
-    $columns = content_invoke_columns($field);
+    $columns = module_invoke($field['module'], 'field_settings', 'database columns', $field);
 
     $ret[] = update_sql("UPDATE {". _content_field_tablename() ."} SET db_storage = ". CONTENT_DB_STORAGE_PER_CONTENT_TYPE ." WHERE field_name = '". $field['field_name'] ."'");
     if (is_array($columns) && count($columns)) {
@@ -585,29 +616,51 @@ function content_update_6000() {
   include_once('./'. drupal_get_path('module', 'content') .'/content_admin.inc');
   switch ($GLOBALS['db_type']) {
     case 'pgsql':
-      db_add_column($ret, 'node_field', 'module', 'varchar(127)', array('not null' => TRUE, 'default' => "''"));
-      db_add_column($ret, 'node_field_instance', 'module', 'varchar(127)', array('not null' => TRUE, 'default' => "''"));
+      db_add_column($ret, _content_field_tablename(), 'module', 'varchar(127)', array('not null' => TRUE, 'default' => "''"));
+      db_add_column($ret, _content_field_tablename(), 'columns', 'text', array('not null' => TRUE, 'default' => "''"));
+      db_add_column($ret, _content_field_instance_tablename(), 'widget_module', 'varchar(127)', array('not null' => TRUE, 'default' => "''"));
       break;
 
     case 'mysql':
     case 'mysqli':
       $ret[] = update_sql("ALTER TABLE {". _content_field_tablename() ."} ADD COLUMN module varchar(127) NOT NULL");
-      $ret[] = update_sql("ALTER TABLE {". _content_field_instance_tablename() ."} ADD COLUMN module varchar(127) NOT NULL");
+      $ret[] = update_sql("ALTER TABLE {". _content_field_tablename() ."} ADD COLUMN columns text NOT NULL");
+      $ret[] = update_sql("ALTER TABLE {". _content_field_instance_tablename() ."} ADD COLUMN widget_module varchar(127) NOT NULL");
       break;
   }
-  foreach (_content_field_types() as $type => $field) {
-    if (!empty($type)) {
-      $ret[] = update_sql("UPDATE {". _content_field_tablename() ."} SET module = '". $field['module'] ."' WHERE type = '". $type ."'");
+  foreach (module_list() as $module) {
+    $module_field_types = module_invoke($module, 'field_info');
+    if ($module_field_types) {
+      foreach ($module_field_types as $name => $field_info) {
+        $ret[] = update_sql("UPDATE {". _content_field_tablename() ."} SET module = '". $module ."' WHERE type = '". $name ."'");
+        foreach (content_fields() as $field) {
+          if ($field['type'] == $name) {
+            $columns = module_invoke($module, 'field_settings', 'database columns', $field);
+            if ($columns) {
+              db_query("UPDATE {". _content_field_tablename() ."} SET columns = '%s' WHERE field_name = '%s'", serialize($columns), $field['field_name']);
+            }
+          }
+        }
+      }
     }
-  }
-  foreach (_content_widget_types() as $type => $field) {
-    if (!empty($type)) {
-      $ret[] = update_sql("UPDATE {". _content_field_instance_tablename() ."} SET module = '". $field['module'] ."' WHERE widget_type = '". $type ."'");
+    $module_widgets = module_invoke($module, 'widget_info');
+    if ($module_widgets) {
+      foreach ($module_widgets as $name => $widget_info) {
+        $ret[] = update_sql("UPDATE {". _content_field_instance_tablename() ."} SET widget_module = '". $module ."' WHERE widget_type = '". $name ."'");
+      }
     }
+
   }
   return $ret;
 }
 
+/**
+ * Rename node_field and node_field_instance tables.
+ *
+ * This is a carryover from when the data tables were renamed,
+ * postponed so we wouldn't create any more havoc than necessary
+ * until a major version change.
+ */
 function content_update_6001() {
   $ret = array();
   // If a field named 'field_instance' already exists, change it so we
@@ -630,5 +683,6 @@ function content_update_6001() {
   db_rename_table($ret, 'node_field', 'content_field');
   db_rename_table($ret, 'node_field_instance', 'content_field_instance');
   variable_set('content_schema_version', 6001);
+  content_clear_type_cache(TRUE);
   return $ret;
 }
