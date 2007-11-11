@@ -85,7 +85,8 @@ function content_field_update($field) {
   // Invoke hook_content_fieldapi().
   module_invoke_all('content_fieldapi', 'update', $field);
 
-  _content_field_write($field, 'update');
+  $field = _content_field_write($field, 'update');
+
   content_clear_type_cache();
 
   return $field;
@@ -156,6 +157,8 @@ function _content_field_write($field, $op = 'update') {
       drupal_write_record(content_field_tablename(), $field, 'field_name');
       break;
   }
+
+  return $field;
 }
 
 /**
@@ -170,9 +173,6 @@ function content_field_read($param) {
   $field = db_fetch_array(db_query("SELECT * FROM {". content_field_tablename() ."} nf WHERE field_name = '%s'", $param['field_name']));
   $field['columns'] = (array) (!empty($field['columns']) ? unserialize($field['columns']) : array());
   $field['global_settings'] = (array) (!empty($field['global_settings']) ? unserialize($field['global_settings']) : array());
-
-  // Build out the field array.
-  $field = content_field_sanitize($field);
 
   // Invoke hook_content_fieldapi().
   module_invoke_all('content_fieldapi', 'read', $field);
@@ -253,40 +253,20 @@ function content_field_instance_create($field) {
  *   array of form values.
  */
 function content_field_instance_update($field) {
-  // If content.module is handling the default value,
-  // initialize $widget_settings with default values,
-  if (content_callback('widget', 'default value', $field) == CONTENT_CALLBACK_DEFAULT) {
-    $widget_settings = array(
-      'default_value' => $field['default_value'],
-      'default_value_php' => $field['default_value_php'],
-    );
-  }
+  // Get the value before this update from the cached value.
+  $prev_field = content_fields($field['field_name']);
 
   // Build out the field array.
-  $prev_field = content_field_instance_sanitize(content_field_sanitize($field));
-  $prev_columns = $field['columns'];
+  $field = content_field_instance_sanitize(content_field_sanitize($field));
 
   // Invoke hook_content_fieldapi().
   module_invoke_all('content_fieldapi', 'update instance', $field);
+  $new_field = $field;
 
-  _content_field_instance_write($field, 'update');
+  $field = _content_field_instance_write($field, 'update');
 
-  if ($field['multiple']) {
-    $field['db_storage'] = CONTENT_DB_STORAGE_PER_FIELD;
-  }
-  else {
-    $instances = content_field_instance_read(array('field_name' => $field['field_name']));
-    if (sizeof($instances) == 1) {
-      $field['db_storage'] = CONTENT_DB_STORAGE_PER_CONTENT_TYPE;
-    }
-  }
-  content_field_update($field);
-
-  content_clear_type_cache();
-
-  $new_field = content_fields($field['field_name']);
   $new_columns = $new_field['columns'];
-
+  $prev_columns = $prev_field['columns'];
   if (!isset($prev_columns)) {
     $prev_columns = array();
   }
@@ -295,6 +275,7 @@ function content_field_instance_update($field) {
   }
   content_alter_db_field($prev_field, $prev_columns, $new_field, $new_columns);
 
+  content_clear_type_cache();
   return $field;
 }
 
@@ -310,6 +291,12 @@ function content_field_instance_update($field) {
  *   The field array to process.
  */
 function content_field_instance_sanitize($field) {
+
+  // Make sure all $field formats start out collapsed.
+  if (isset($field['widget'])) {
+    $field = _content_field_instance_collapse($field);
+  }
+
   // Use schema to be sure all field values are set.
   $schema = drupal_get_schema(content_instance_tablename());
   foreach ($schema['fields'] as $name => $info) {
@@ -320,12 +307,10 @@ function content_field_instance_sanitize($field) {
   $setting_names = module_invoke($field['widget_module'], 'widget_settings', 'save', $field);
   if (is_array($setting_names)) {
     foreach ($setting_names as $setting) {
-      $field['widget'][$setting] = isset($field['widget'][$setting]) ? $field['widget'][$setting] : (isset($field[$setting]) ? $field[$setting] : '');
+      $field['widget_settings'][$setting] = isset($field['widget_settings'][$setting]) ? $field['widget_settings'][$setting] : (isset($field[$setting]) ? $field[$setting] : '');
       unset($field[$setting]);
     }
   }
-
-  $field['widget']['label'] = !empty($field['widget']['label']) ? $field['widget']['label'] : $field['field_name'];
 
   // Make sure display settings have valid values.
   $setting_names = array_merge(array('label' => 'above'), _content_admin_display_contexts());
@@ -333,10 +318,14 @@ function content_field_instance_sanitize($field) {
     $field['display_settings'][$setting]['format'] = isset($field[$setting]) ? $field[$setting] : (isset($field['display_settings'][$setting]) ? $field['display_settings'][$setting] : ($setting == 'label' ? 'above' : 'default'));
   }
 
-  if (empty($field['widget_module']) && isset($field['widget_type'])) {
+  // Expand the collapsed to the nested array.
+  $field = _content_field_instance_expand($field);
+  $field['widget']['label'] = !empty($field['widget']['label']) ? $field['widget']['label'] : $field['field_name'];
+
+  if (empty($field['widget']['module']) && isset($field['widget']['type'])) {
     $field_types = _content_widget_types();
-    if (isset($field_types[$field['widget_type']])) {
-      $field['widget_module'] = $field_types[$field['widget_type']]['module'];
+    if (isset($field_types[$field['widget']['type']])) {
+      $field['widget']['module'] = $field_types[$field['widget']['type']]['module'];
     }
   }
   return $field;
@@ -373,6 +362,7 @@ function _content_field_instance_write($field, $op = 'update') {
       drupal_write_record(content_instance_tablename(), $field, 'field_name');
       break;
   }
+  return $field;
 }
 
 /**
@@ -403,7 +393,6 @@ function content_field_instance_read($param = NULL) {
     $field['widget_settings'] = (array) (!empty($field['widget_settings']) ? unserialize($field['widget_settings']) : array());
     $field['display_settings'] = (array) (!empty($field['display_settings']) ? unserialize($field['display_settings']) : array());
 
-    $field = content_field_instance_sanitize($field);
     $field = _content_field_instance_expand(array_merge(content_field_read($field), $field));
 
     // Invoke hook_content_fieldapi().
@@ -426,7 +415,18 @@ function _content_field_instance_expand($field) {
   unset($field['label']);
   $field['widget']['description'] = $field['description'];
   unset($field['description']);
+  $field['widget']['module'] = $field['widget_module'];
+  unset($field['widget_module']);
   unset($field['widget_settings']);
+
+  // If content.module is handling the default value,
+  // initialize $widget_settings with default values,
+  if (content_callback('widget', 'default value', $field) == CONTENT_CALLBACK_DEFAULT) {
+    $field['widget']['default_value'] = $field['default_value'];
+    $field['widget']['default_value_php'] = $field['default_value_php'];
+    unset($field['default_value']);
+    unset($field['default_value_php']);
+  }
   return $field;
 }
 
@@ -443,6 +443,8 @@ function _content_field_instance_collapse($field) {
   unset($field['widget_settings']['label']);
   $field['description'] = $field['widget']['description'];
   unset($field['widget_settings']['description']);
+  $field['widget_module'] = $field['widget']['module'];
+  unset($field['widget_settings']['module']);
   unset($field['widget']);
   return $field;
 }

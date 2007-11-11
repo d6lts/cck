@@ -643,7 +643,6 @@ function _content_admin_field_remove_submit($form, &$form_state) {
  */
 function _content_admin_field(&$form_state, $type_name, $field_name) {
   $output = '';
-
   $type = content_types($type_name);
   $field = $type['fields'][$field_name];
   $field_types = _content_field_types();
@@ -783,7 +782,7 @@ function _content_admin_field(&$form_state, $type_name, $field_name) {
     '#type' => 'value',
     '#value' => $field_name,
   );
-  $form['field_type'] = array(
+  $form['type'] = array(
     '#type' => 'value',
     '#value' => $field['type'],
   );
@@ -793,7 +792,7 @@ function _content_admin_field(&$form_state, $type_name, $field_name) {
   );
   $form['widget_module'] = array(
     '#type' => 'value',
-    '#value' => $field['widget_module'],
+    '#value' => $field['widget']['module'],
   );
   $form['columns'] = array(
     '#type' => 'value',
@@ -895,6 +894,7 @@ function _content_admin_field_validate($form, &$form_state) {
 function _content_admin_field_submit($form, &$form_state) {
   module_load_include('inc', 'content', 'content_crud');
   $form_values = $form_state['values'];
+  unset($form_values['default_value_widget']);
   content_field_instance_update($form_values);
   drupal_set_message(t('Saved field %label.', array('%label' => $form_values['label'])));
   $type   = content_types($form_values['type_name']);

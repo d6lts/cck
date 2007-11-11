@@ -1336,17 +1336,11 @@ function _content_table_schema($field = NULL) {
 function content_callback($entity, $op, $field) {
   switch ($entity) {
     case 'field':
-      $entity_types = _content_field_types();
-      $entity_type = $field['type'];
-      $module = $entity_types[$entity_type]['module'];
-      $info = module_invoke($module, "field_info");
+      $info = module_invoke($field['module'], "field_info");
       return $info[$field['type']]['callbacks'][$op];
 
     case 'widget':
-      $entity_types = _content_widget_types();
-      $entity_type = $field['widget']['type'];
-      $module = $entity_types[$entity_type]['module'];
-      $info = module_invoke($module, "widget_info");
+      $info = module_invoke($field['widget']['module'], "widget_info");
       return $info[$field['widget']['type']]['callbacks'][$op];
   }
 }
@@ -1371,17 +1365,11 @@ function content_callback($entity, $op, $field) {
 function content_handle($entity, $op, $field) {
   switch ($entity) {
     case 'field':
-      $entity_types = _content_field_types();
-      $entity_type = $field['type'];
-      $module = $entity_types[$entity_type]['module'];
-      $info = module_invoke($module, "field_info");
+      $info = module_invoke($field['module'], "field_info");
       return $info[$field['type']][$op];
 
     case 'widget':
-      $entity_types = _content_widget_types();
-      $entity_type = $field['widget']['type'];
-      $module = $entity_types[$entity_type]['module'];
-      $info = module_invoke($module, "widget_info");
+      $info = module_invoke($field['widget']['_module'], "widget_info");
       return $info[$field['widget']['type']][$op];
   }
 }
