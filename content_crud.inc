@@ -4,17 +4,43 @@
 /**
  * @file
  * Create/Read/Update/Delete functions for CCK-defined object types.
+ *
+ * The goal is to create an API that will allow $field arguments to
+ * be input either in the field => widget nested array that is used
+ * by the content module, or in flattened $form_values arrays, by
+ * converting flattened arrays to the nested format.
+ *
+ * A hook_fieldapi() is available for each field and field
+ * instance action, and each hook receives the nested field => widget
+ * array as an argument. The $ops include:
+ *
+ *   - create
+ *   - create instance
+ *   - read
+ *   - read instance
+ *   - delete
+ *   - delete instance
+ *   - update
+ *   - update instance
+ *
+ * Another function, content_module_delete($module) will clean up
+ * after a module that has been deleted by removing all data and
+ * settings information that was created by that module.
  */
 
 /**
  * Create a new field.
  *
  * @param $field
- *   An array of properties to create the field with.
+ *   An array of properties to create the field with, input either in
+ *   the field => widget format used by the content module or as an
+ *   array of form values.
  */
 function content_field_create($field) {
+  // Build out the field array.
   $field = content_field_sanitize($field);
 
+  // Get a fresh copy of the column information whenever a field is created.
   $field['columns'] = (array) module_invoke($field['module'], 'field_settings', 'database columns', $field);
 
   // Invoke hook_content_fieldapi().
@@ -22,29 +48,38 @@ function content_field_create($field) {
 
   // Write record and immediately create at least one field instance.
   _content_field_write($field, 'create');
-  content_field_instance_create($field);
+  $field = content_field_instance_create($field);
 
   content_clear_type_cache();
-
-  // New fields require a menu rebuild to create all the field paths.
-  menu_rebuild();
 
   // Create new database columns.
   if (is_array($field['columns']) && count($field['columns'])) {
     content_alter_db_field(array(), array(), $field, $field['columns']);
   }
+
+  // TODO menu_rebuild() is REALLY REALLY slow, is there an ajaxy way to run this
+  // in the background while we proceed to the next step?
+
+  // New fields require a menu rebuild to create all the field paths.
+  menu_rebuild();
+
+  return $field;
 }
 
 /**
  * Update an existing field.
  *
  * @param $field
- *   The field array to process.
+ *   An array of properties to create the field with, input either in
+ *   the field => widget format used by the content module or as an
+ *   array of form values.
  */
 function content_field_update($field) {
+  // Build out the field array.
   $field = content_field_sanitize($field);
 
-  // Changes in field values may affect columns.
+  // Changes in field values may affect columns, or column
+  // information may have changed, get a fresh copy.
   $field['columns'] = (array) module_invoke($field['module'], 'field_settings', 'database columns', $field);
 
   // Invoke hook_content_fieldapi().
@@ -52,6 +87,8 @@ function content_field_update($field) {
 
   _content_field_write($field, 'update');
   content_clear_type_cache();
+
+  return $field;
 }
 
 /**
@@ -66,22 +103,17 @@ function content_field_sanitize($field) {
   foreach ($schema['fields'] as $name => $info) {
     $field[$name] = !empty($field[$name]) ? $field[$name] : $info['default'];
   }
-  // Make sure columns are formatted into an array.
-  if (!is_array($field['columns'])) {
-    $field['columns'] = (array) (!empty($field['columns']) ? unserialize($field['columns']) : array());
-    if (is_array($field['columns'])) {
-      // Ensure columns always default to NULL values.
-      foreach ($field['columns'] as $column_name => $column) {
-        $field['columns'][$column_name]['not null'] = FALSE;
-      }
-    }
+
+  // Ensure columns always default to NULL values.
+  foreach ((array) $field['columns'] as $column_name => $column) {
+    $field['columns'][$column_name]['not null'] = FALSE;
   }
+
   // Make sure some value has been created for all global settings.
-  $field_settings = (array) (!empty($field['global_settings']) ? unserialize($field['global_settings']) : array());
   $setting_names = module_invoke($field['module'], 'field_settings', 'save', $field);
   if (is_array($setting_names)) {
     foreach ($setting_names as $setting) {
-      $field[$setting] = isset($field[$setting]) ? $field[$setting] : (isset($field_settings[$setting]) ? $field_settings[$setting] : '');
+      $field[$setting] = isset($field[$setting]) ? $field[$setting] : (isset($field['global_settings'][$setting]) ? $field['global_settings'][$setting] : '');
     }
   }
   unset($field['global_settings']);
@@ -92,6 +124,7 @@ function content_field_sanitize($field) {
       $field['module'] = $field_types[$field['type']]['module'];
     }
   }
+
   return $field;
 }
 
@@ -112,7 +145,9 @@ function _content_field_write($field, $op = 'update') {
     }
   }
   $field['global_settings'] = serialize($field_settings);
+
   $field['columns'] = serialize($field['columns']);
+
   switch ($op) {
     case 'create':
       drupal_write_record(content_field_tablename(), $field);
@@ -127,17 +162,21 @@ function _content_field_write($field, $op = 'update') {
  * Load a field.
  *
  * @param $param
- *   An array of properties to use in selecting a field. Valid keys:
- *   field_name
+ *   An array of properties to use in selecting a field. Valid keys: field_name
  * @return
  *   The field array.
  */
 function content_field_read($param) {
   $field = db_fetch_array(db_query("SELECT * FROM {". content_field_tablename() ."} nf WHERE field_name = '%s'", $param['field_name']));
+  $field['columns'] = (array) (!empty($field['columns']) ? unserialize($field['columns']) : array());
+  $field['global_settings'] = (array) (!empty($field['global_settings']) ? unserialize($field['global_settings']) : array());
+
+  // Build out the field array.
   $field = content_field_sanitize($field);
 
   // Invoke hook_content_fieldapi().
   module_invoke_all('content_fieldapi', 'read', $field);
+
   return $field;
 }
 
@@ -145,9 +184,14 @@ function content_field_read($param) {
  * Delete an existing field.
  *
  * @param $field
- *   The field array to process.
+ *   An array of properties to create the field with, input either in
+ *   the field => widget format used by the content module or as an
+ *   array of form values.
  */
 function content_field_delete($field) {
+  // Build out the field array.
+  $field = content_field_sanitize($field);
+
   // Invoke hook_content_fieldapi().
   module_invoke_all('content_fieldapi', 'delete', $field);
 
@@ -155,8 +199,13 @@ function content_field_delete($field) {
   foreach ($fields as $field) {
     content_field_instance_delete($field);
   }
+
+  // TODO menu_rebuild() is REALLY REALLY slow, is there an ajaxy way to run this
+  // in the background while we proceed to the next step?
+
   // Deleted fields require a menu rebuild to remove all the field paths.
   menu_rebuild();
+
 }
 
 
@@ -164,17 +213,18 @@ function content_field_delete($field) {
  * Create a new field instance.
  *
  * @param $field
- *   The field array to process.
+ *   An array of properties to create the field with, input either in
+ *   the field => widget format used by the content module or as an
+ *   array of form values.
  */
 function content_field_instance_create($field) {
   $prior_instances = content_field_instance_read(array('field_name' => $field['field_name']));
   if ($prior_instances) {
     $field = array_merge(array_pop($prior_instances), $field);
   }
-  $field = content_field_instance_sanitize($field);
 
-  $field['widget_settings']  = !empty($field['widget_settings']) && !is_array($field['widget_settings']) ? unserialize($field['widget_settings']) : (array) $field['widget_settings'];
-  $field['display_settings'] = !empty($field['display_settings']) && !is_array($field['display_settings']) ? unserialize($field['display_settings']) : (array) $field['display_settings'];
+  // Build out the field array.
+  $field = content_field_instance_sanitize($field);
 
   // Invoke hook_content_fieldapi().
   module_invoke_all('content_fieldapi', 'create instance', $field);
@@ -190,13 +240,17 @@ function content_field_instance_create($field) {
 
   _content_field_instance_write($field, 'create');
   content_clear_type_cache();
+
+  return $field;
 }
 
 /**
  * Update an existing field instance.
  *
  * @param $field
- *   The field array to process.
+ *   An array of properties to create the field with, input either in
+ *   the field => widget format used by the content module or as an
+ *   array of form values.
  */
 function content_field_instance_update($field) {
   // If content.module is handling the default value,
@@ -208,6 +262,7 @@ function content_field_instance_update($field) {
     );
   }
 
+  // Build out the field array.
   $prev_field = content_field_instance_sanitize(content_field_sanitize($field));
   $prev_columns = $field['columns'];
 
@@ -239,10 +294,17 @@ function content_field_instance_update($field) {
     $new_columns = array();
   }
   content_alter_db_field($prev_field, $prev_columns, $new_field, $new_columns);
+
+  return $field;
 }
 
 /**
- * Make sure all field values are set.
+ * Normalize format and make sure all field values are set.
+ *
+ * Designed to take field values input either in the nested field => widget
+ * format used by the content module or as a flattened array of form values
+ * and convert both to the field => widget array for consistency and so
+ * hook_fieldapi field values are what other modules will expect.
  *
  * @param $field
  *   The field array to process.
@@ -253,22 +315,23 @@ function content_field_instance_sanitize($field) {
   foreach ($schema['fields'] as $name => $info) {
     $field[$name] = isset($field[$name]) ? $field[$name] : $info['default'];
   }
+
   // Make sure widget settings all have a value set in the array.
-  $field['widget_settings'] = !is_array($field['widget_settings']) ? (array) unserialize($field['widget_settings']) : $field['widget_settings'];
   $setting_names = module_invoke($field['widget_module'], 'widget_settings', 'save', $field);
   if (is_array($setting_names)) {
     foreach ($setting_names as $setting) {
-      $field['widget_settings'][$setting] = isset($field[$setting]) ? $field[$setting] : (isset($field['widget_settings'][$setting]) ? $field['widget_settings'][$setting] : '');
+      $field['widget'][$setting] = isset($field['widget'][$setting]) ? $field['widget'][$setting] : (isset($field[$setting]) ? $field[$setting] : '');
+      unset($field[$setting]);
     }
   }
+
+  $field['widget']['label'] = !empty($field['widget']['label']) ? $field['widget']['label'] : $field['field_name'];
+
   // Make sure display settings have valid values.
-  module_load_include('inc', 'content', 'content_admin');
-  $field['display_settings'] = !is_array($field['display_settings']) ? (array) unserialize($field['display_settings']) : $field['display_settings'];
   $setting_names = array_merge(array('label' => 'above'), _content_admin_display_contexts());
   foreach ($setting_names as $setting => $label) {
     $field['display_settings'][$setting]['format'] = isset($field[$setting]) ? $field[$setting] : (isset($field['display_settings'][$setting]) ? $field['display_settings'][$setting] : ($setting == 'label' ? 'above' : 'default'));
   }
-  $field['label'] = !empty($field['label']) ? $field['label'] : $field['field_name'];
 
   if (empty($field['widget_module']) && isset($field['widget_type'])) {
     $field_types = _content_widget_types();
@@ -286,8 +349,11 @@ function content_field_instance_sanitize($field) {
  *   The field array to process.
  */
 function _content_field_instance_write($field, $op = 'update') {
+  // Collapse the field => widget format.
+  $field = _content_field_instance_collapse($field);
+
   // Rearrange the data to create the widget_settings array.
-  $field_settings = array();
+  $field_settings = $field['widget_settings'];
   $setting_names = module_invoke($field['widget_module'], 'widget_settings', 'save', $field);
   if (is_array($setting_names)) {
     foreach ($setting_names as $name => $setting) {
@@ -296,7 +362,9 @@ function _content_field_instance_write($field, $op = 'update') {
     }
   }
   $field['widget_settings'] = serialize($field_settings);
+
   $field['display_settings'] = serialize($field['display_settings']);
+
   switch ($op) {
     case 'create':
       drupal_write_record(content_instance_tablename(), $field);
@@ -332,8 +400,12 @@ function content_field_instance_read($param = NULL) {
   $db_result = db_query("SELECT * FROM {". content_instance_tablename() ."} nfi ". $cond ." ORDER BY nfi.weight ASC, nfi.label ASC", $args);
   $fields = array();
   while ($field = db_fetch_array($db_result)) {
+    $field['widget_settings'] = (array) (!empty($field['widget_settings']) ? unserialize($field['widget_settings']) : array());
+    $field['display_settings'] = (array) (!empty($field['display_settings']) ? unserialize($field['display_settings']) : array());
+
     $field = content_field_instance_sanitize($field);
     $field = _content_field_instance_expand(array_merge(content_field_read($field), $field));
+
     // Invoke hook_content_fieldapi().
     module_invoke_all('content_fieldapi', 'read instance', $field);
     $fields[] = $field;
@@ -342,14 +414,10 @@ function content_field_instance_read($param = NULL) {
 }
 
 /**
- * Expand field info to create $field['widget'] info.
- *
- * Private function to expand a field.
+ * Expand field info to create field => widget info.
  */
 function _content_field_instance_expand($field) {
-  $widget_settings = $field['widget_settings'] ? $field['widget_settings'] : array();
-  unset($field['widget_settings']);
-  $field['widget'] = $widget_settings;
+  $field['widget'] = (array) $field['widget_settings'];
   $field['widget']['type'] = $field['widget_type'];
   unset($field['widget_type']);
   $field['widget']['weight'] = $field['weight'];
@@ -358,6 +426,24 @@ function _content_field_instance_expand($field) {
   unset($field['label']);
   $field['widget']['description'] = $field['description'];
   unset($field['description']);
+  unset($field['widget_settings']);
+  return $field;
+}
+
+/**
+ * Collapse field info from field => widget to flattened form values.
+ */
+function _content_field_instance_collapse($field) {
+  $field['widget_settings'] = (array) $field['widget'];
+  $field['widget_type'] = $field['widget']['type'];
+  unset($field['widget_settings']['type']);
+  $field['weight'] = $field['widget']['weight'];
+  unset($field['widget_settings']['weight']);
+  $field['label'] = $field['widget']['label'];
+  unset($field['widget_settings']['label']);
+  $field['description'] = $field['widget']['description'];
+  unset($field['widget_settings']['description']);
+  unset($field['widget']);
   return $field;
 }
 
@@ -365,9 +451,12 @@ function _content_field_instance_expand($field) {
  * Delete an existing field instance.
  *
  * @param $field
- *   The field array to process.
+ *   An array of properties to create the field with, input either in
+ *   the field => widget format used by the content module or as an
+ *   array of form values.
  */
 function content_field_instance_delete($field) {
+  // Build out the field array.
   $field = content_field_instance_sanitize(content_field_sanitize($field));
 
   // Invoke hook_content_fieldapi().

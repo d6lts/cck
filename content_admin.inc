@@ -372,18 +372,18 @@ function theme_content_admin_display_overview_form($form) {
 }
 
 function content_admin_display_overview_form_submit($form, &$form_state) {
+  module_load_include('inc', 'content', 'content_crud');
   $form_values = $form_state['values'];
   $type = $form_values['type_name'];
 
   if (isset($form_values['fields'])) {
     foreach ($form_values['fields'] as $fieldname => $fieldvalues) {
-      $display_settings = array();
+      $form_values['fields'][$fieldname]['display_settings'] = array();
       foreach ($fieldvalues as $key => $value) {
-        $display_settings[$key] = $value;
+        $form_values['fields'][$fieldname]['display_settings'][$key] = $value;
+        unset($form_values['fields'][$fieldname][$key]);
       }
-
-      db_query("UPDATE {". content_instance_tablename() ."} SET display_settings = '%s' WHERE type_name = '%s' AND field_name = '%s'",
-        serialize($display_settings), $type, $fieldname);
+      content_field_update($form_values['fields'][$fieldname]);
     }
     content_clear_type_cache();
   }
@@ -423,21 +423,6 @@ function _content_admin_display_overview_row($field, $field_type) {
     );
   }
   return $row;
-}
-
-function _content_admin_display_contexts() {
-  $contexts = array(
-    'teaser' => t('Teaser'),
-    'full' => t('Full'),
-    NODE_BUILD_RSS => t('RSS Item'),
-    NODE_BUILD_PRINT => t('Print'),
-  );
-  if (module_exists('search')) {
-    $contexts[NODE_BUILD_SEARCH_INDEX] = t('Search Index');
-    $contexts[NODE_BUILD_SEARCH_RESULT] = t('Search Result');
-  }
-
-  return $contexts;
 }
 
 /**
@@ -559,8 +544,8 @@ function theme_content_admin_field_add_new_field_widget_type($form) {
  * Add an existing field to a content type.
  */
 function _content_admin_field_add_existing_submit($form, &$form_state) {
-  $form_values = $form_state['values'];
   module_load_include('inc', 'content', 'content_crud');
+  $form_values = $form_state['values'];
   content_field_instance_create($form_values);
   drupal_set_message(t('Added field %label.', array('%label' => $form_values['field_name'])));
   $type   = content_types($form_values['type_name']);
@@ -594,11 +579,11 @@ function _content_admin_field_add_new_validate($form, &$form_state) {
  * Create a new field for a content type.
  */
 function _content_admin_field_add_new_submit($form, &$form_state) {
+  module_load_include('inc', 'content', 'content_crud');
   $form_values = $form_state['values'];
   $field_widget_type = explode('-', $form_values['field_widget_type']);
   $form_values['type'] = $field_widget_type[0];
   $form_values['widget_type'] = $field_widget_type[1];
-  module_load_include('inc', 'content', 'content_crud');
   content_field_create($form_values);
   drupal_set_message(t('Created field %label.', array('%label' => $form_values['field_name'])));
   $type   = content_types($form_values['type_name']);
@@ -637,11 +622,11 @@ function _content_admin_field_remove(&$form_state, $type_name, $field_name) {
  * Remove a field from a content type.
  */
 function _content_admin_field_remove_submit($form, &$form_state) {
+  module_load_include('inc', 'content', 'content_crud');
   $form_values = $form_state['values'];
   $type = content_types($form_values['type_name']);
   $field = $type['fields'][$form_values['field_name']];
   if ($type && $field && $form_values['confirm']) {
-    module_load_include('inc', 'content', 'content_crud');
     content_field_instance_delete($form_values);
     drupal_set_message(t('Removed field %field from %type.', array('%field' => $field['widget']['label'], '%type' => $type['name'])));
     $form_state['redirect'] = 'admin/content/types/'. $type['url_str'] .'/fields';
@@ -666,7 +651,6 @@ function _content_admin_field(&$form_state, $type_name, $field_name) {
   $widget_types = _content_widget_types();
   $widget_type = $widget_types[$field['widget']['type']];
   drupal_set_title(isset($field['widget']['label']) ? $field['widget']['label'] : $field['field_name']);
-  dsm(_content_field_types());
 
   // Set up form info that the default value widget will need to find in the form.
   $form = array('#field_info' => array($field['field_name'] => $field));
@@ -909,8 +893,8 @@ function _content_admin_field_validate($form, &$form_state) {
  * Save a field's settings after editing.
  */
 function _content_admin_field_submit($form, &$form_state) {
-  $form_values = $form_state['values'];
   module_load_include('inc', 'content', 'content_crud');
+  $form_values = $form_state['values'];
   content_field_instance_update($form_values);
   drupal_set_message(t('Saved field %label.', array('%label' => $form_values['label'])));
   $type   = content_types($form_values['type_name']);
