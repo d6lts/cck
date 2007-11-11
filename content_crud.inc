@@ -14,6 +14,7 @@
  */
 function content_field_create($field) {
   $field = content_field_sanitize($field);
+
   $field['columns'] = (array) module_invoke($field['module'], 'field_settings', 'database columns', $field);
 
   // Invoke hook_content_fieldapi().
@@ -84,6 +85,13 @@ function content_field_sanitize($field) {
     }
   }
   unset($field['global_settings']);
+
+  if (empty($field['module']) && isset($field['type'])) {
+    $field_types = _content_field_types();
+    if (isset($field_types[$field['type']])) {
+      $field['module'] = $field_types[$field['type']]['module'];
+    }
+  }
   return $field;
 }
 
@@ -165,14 +173,14 @@ function content_field_instance_create($field) {
   }
   $field = content_field_instance_sanitize($field);
 
-  $field['widget_settings']  = !empty($field['widget_settings']) ? unserialize($field['widget_settings']) : array();
-  $field['display_settings'] = !empty($field['display_settings']) ? unserialize($field['display_settings']) : array();
+  $field['widget_settings']  = !empty($field['widget_settings']) && !is_array($field['widget_settings']) ? unserialize($field['widget_settings']) : (array) $field['widget_settings'];
+  $field['display_settings'] = !empty($field['display_settings']) && !is_array($field['display_settings']) ? unserialize($field['display_settings']) : (array) $field['display_settings'];
 
   // Invoke hook_content_fieldapi().
   module_invoke_all('content_fieldapi', 'create instance', $field);
 
   if (is_array($field['columns']) && count($field['columns'])) {
-    if ($field['db_storage'] == CONTENT_DB_STORAGE_PER_CONTENT_TYPE) {
+    if ($field['db_storage'] == CONTENT_DB_STORAGE_PER_CONTENT_TYPE && $prior_instances) {
       $new_field = $field;
       $new_field['db_storage'] = CONTENT_DB_STORAGE_PER_FIELD;
       drupal_write_record(content_field_tablename(), $new_field, 'field_name');
@@ -243,18 +251,31 @@ function content_field_instance_sanitize($field) {
   // Use schema to be sure all field values are set.
   $schema = drupal_get_schema(content_instance_tablename());
   foreach ($schema['fields'] as $name => $info) {
-    $field[$name] = !empty($field[$name]) ? $field[$name] : $info['default'];
+    $field[$name] = isset($field[$name]) ? $field[$name] : $info['default'];
   }
   // Make sure widget settings all have a value set in the array.
-  $field_settings = (array) unserialize($field['widget_settings']);
+  $field['widget_settings'] = !is_array($field['widget_settings']) ? (array) unserialize($field['widget_settings']) : $field['widget_settings'];
   $setting_names = module_invoke($field['widget_module'], 'widget_settings', 'save', $field);
   if (is_array($setting_names)) {
     foreach ($setting_names as $setting) {
-      $field[$setting] = isset($field[$setting]) ? $field[$setting] : (isset($field_settings[$setting]) ? $field_settings[$setting] : '');
+      $field['widget_settings'][$setting] = isset($field[$setting]) ? $field[$setting] : (isset($field['widget_settings'][$setting]) ? $field['widget_settings'][$setting] : '');
     }
   }
-  unset($field['widget_settings']);
+  // Make sure display settings have valid values.
+  module_load_include('inc', 'content', 'content_admin');
+  $field['display_settings'] = !is_array($field['display_settings']) ? (array) unserialize($field['display_settings']) : $field['display_settings'];
+  $setting_names = array_merge(array('label' => 'above'), _content_admin_display_contexts());
+  foreach ($setting_names as $setting => $label) {
+    $field['display_settings'][$setting]['format'] = isset($field[$setting]) ? $field[$setting] : (isset($field['display_settings'][$setting]) ? $field['display_settings'][$setting] : ($setting == 'label' ? 'above' : 'default'));
+  }
   $field['label'] = !empty($field['label']) ? $field['label'] : $field['field_name'];
+
+  if (empty($field['widget_module']) && isset($field['widget_type'])) {
+    $field_types = _content_widget_types();
+    if (isset($field_types[$field['widget_type']])) {
+      $field['widget_module'] = $field_types[$field['widget_type']]['module'];
+    }
+  }
   return $field;
 }
 
@@ -326,8 +347,7 @@ function content_field_instance_read($param = NULL) {
  * Private function to expand a field.
  */
 function _content_field_instance_expand($field) {
-  // Overwrite global field information with specific information
-  $widget_settings = $field['widget_settings'] ? unserialize($field['widget_settings']) : array();
+  $widget_settings = $field['widget_settings'] ? $field['widget_settings'] : array();
   unset($field['widget_settings']);
   $field['widget'] = $widget_settings;
   $field['widget']['type'] = $field['widget_type'];
@@ -338,7 +358,6 @@ function _content_field_instance_expand($field) {
   unset($field['label']);
   $field['widget']['description'] = $field['description'];
   unset($field['description']);
-  $field['display_settings'] = $field['display_settings'] ? unserialize($field['display_settings']) : array();
   return $field;
 }
 

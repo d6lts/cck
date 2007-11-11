@@ -51,10 +51,10 @@ function content_copy_menu() {
  *  A form to export field definitions.
  */
 function content_copy_export_form(&$form_state) {
-  $form_values = $form_state['values'];
-  $form_state['storage']['step'] = isset($form_state['storage']['step']) ? $form_state['storage']['step'] + 1 : 1;
+  $form_values = isset($form_state['values']) ? $form_state['values'] : array();
+  $step = isset($form_state['storage']['step']) ? $form_state['storage']['step'] + 1 : 1;
 
-  $type_name = $form_values['type_name'];
+  $type_name = isset($form_values['type_name']) ? $form_values['type_name'] : '';
   $types  = content_copy_types();
   $fields = content_copy_fields($type_name);
 
@@ -73,7 +73,6 @@ function content_copy_export_form(&$form_state) {
   switch ($step) {
 
     case 1: // Select a content type.
-
       $form['type_name'] = array(
         '#title' => t('Types'),
         '#type' => 'radios',
@@ -131,7 +130,7 @@ function content_copy_export_form(&$form_state) {
         '#title' => t('Export data'),
         '#type' => 'textarea',
         '#cols' => 60,
-        '#value' => content_copy_export($form_id, $form_values),
+        '#value' => content_copy_export($form_values),
         '#rows' => max(40, $GLOBALS['content_copy']['count']),
         '#description' => t('Copy the export text and paste it into another content type using the import function.'),
         );
@@ -146,12 +145,16 @@ function content_copy_export_form(&$form_state) {
       '#value' => t('Submit'),
     );
   }
-
+  $form['step'] = array(
+    '#type' => 'value',
+    '#value' => $step,
+    );
   return $form;
 }
 
 function content_copy_export_form_submit($form, &$form_state) {
   $form_state['rebuild'] = TRUE;
+  $form_state['storage']['step'] = $form_state['values']['step'];
 }
 
 
@@ -159,23 +162,26 @@ function content_copy_export_form_submit($form, &$form_state) {
  *  Process the export, get field admin forms for all requested fields
  *   and save the form values as formatted text.
  */
-function content_copy_export($form, &$form_values) {
-
+function content_copy_export($form_values) {
   // Set a global variable to tell when to intervene with form_alter().
   $GLOBALS['content_copy']['status'] = 'export';
 
   // Get the content type info by submitting the content type form.
-  $node_form = array();
-  drupal_execute('node_type_form', $node_form, node_get_types('type', $form_values['type_name']));
+  $node_state = array('values' => array('type_name' => $form_values['type_name']));
+  module_load_include('inc', 'node', 'content_types');
+  drupal_execute('node_type_form', $node_state, node_get_types('type', $form_values['type_name']));
+
+  module_load_include('inc', 'content', 'content_admin');
+  module_load_include('inc', 'content', 'content_crud');
 
   // Get an array of groups to export.
   // Record a macro for each group by submitting the group edit form.
-  if (is_array($form_values['groups']) && module_exists('fieldgroup')) {
+  if (!empty($form_values['groups']) && module_exists('fieldgroup')) {
 
     $content_type = content_types($form_values['type_name']);
     foreach ($form_values['groups'] as $group) {
-      $field_form = array();
-      drupal_execute('fieldgroup_edit_group_form', $field_form, $content_type, $group, 'edit');
+      $group_state = array('values' => array('group_name' => $group));
+      drupal_execute('fieldgroup_edit_group_form', $group_state, $content_type, $group, 'edit');
     }
   }
 
@@ -193,8 +199,8 @@ function content_copy_export($form, &$form_values) {
     $widget_module = $widget_types[$field['widget']['type']]['module'];
 
     if (!empty($field_module) && module_exists($field_module) && !empty($widget_module) && module_exists($widget_module)) {
-      $field_form = array();
-      drupal_execute('_content_admin_field', $field_form, $form_values['type_name'], $field_name);
+      $field_state = array('values' => array('field_name' => $field_name));
+      drupal_execute('_content_admin_field', $field_state, $form_values['type_name'], $field_name);
     }
   }
 
@@ -438,7 +444,7 @@ function content_copy_import_form_submit($form, &$form_state) {
  * Implementation of hook_form_alter().
  * Intervene to run form through macro when doing export
  */
-function content_copy_form_alter(&$form, $form_id) {
+function content_copy_form_alter(&$form, &$form_state, $form_id) {
   $alter_forms = array('node_type_form', '_content_admin_field', 'fieldgroup_edit_group_form');
   if (isset($GLOBALS['content_copy']) && $GLOBALS['content_copy']['status'] == 'export' && in_array($form_id, $alter_forms)) {
     $form['#submit'][] = 'content_copy_record_macro';
@@ -449,7 +455,6 @@ function content_copy_form_alter(&$form, $form_id) {
  *  Get all the fields for a content type.
  */
 function content_copy_fields($type_name) {
-
   $fields = array();
   if (!$type_name) {
     return $fields;
@@ -501,7 +506,8 @@ function content_copy_types() {
 /**
  * A handler that stores the form submissions into a $GLOBALS array
  */
-function content_copy_record_macro($form_id, $edit, $form) {
+function content_copy_record_macro($form, &$form_state) {
+  $edit = $form_state['values'];
   $subs = $GLOBALS['content_copy']['submissions'];
 
   // Get the form values and store them in a $GLOBALS['content_copy']['submissions'] array.
@@ -510,24 +516,24 @@ function content_copy_record_macro($form_id, $edit, $form) {
 
   unset($edit['type_name'], $edit['submit'], $edit['delete'], $edit['form_id']);
   switch ($form_id) {
-  case 'node_type_form':
-    $subs['type'] = $edit;
-    $GLOBALS['content_copy']['count'] += sizeof($edit) + 5;
-    break;
-  case 'fieldgroup_edit_group_form':
-    $subs['groups'][] = $edit;
-    $GLOBALS['content_copy']['count'] += sizeof($edit) + 5;
-    break;
-  default:
-    if ($edit['field_widget_type']) {
-      $tmp = explode('-', $edit['field_widget_type']);
-      $field_name = $tmp[0];
-    }
-    else {
-      $field_name = $edit['field_name'];
-    }
-    $subs['fields'][] = $edit;
-    $GLOBALS['content_copy']['count'] += sizeof($edit) + 5;
+    case 'node_type_form':
+      $subs['type'] = $edit;
+      $GLOBALS['content_copy']['count'] += sizeof($edit) + 5;
+      break;
+    case 'fieldgroup_edit_group_form':
+      $subs['groups'][] = $edit;
+      $GLOBALS['content_copy']['count'] += sizeof($edit) + 5;
+      break;
+    default:
+      if ($edit['field_widget_type']) {
+        $tmp = explode('-', $edit['field_widget_type']);
+        $field_name = $tmp[0];
+      }
+      else {
+        $field_name = $edit['field_name'];
+      }
+      $subs['fields'][] = $edit;
+      $GLOBALS['content_copy']['count'] += sizeof($edit) + 5;
   }
 
   $GLOBALS['content_copy']['submissions'] = $subs;
@@ -538,8 +544,10 @@ function content_copy_record_macro($form_id, $edit, $form) {
  * @return a code representation of the recorded macro.
  */
 function content_copy_get_macro() {
-  foreach ($GLOBALS['content_copy']['submissions'] as $form_type => $form) {
-    $string .= "\$content[$form_type]  = ". var_export((array) $form, TRUE) .";\n";
+  if (array_key_exists('submissions', $GLOBALS['content_copy'])) {
+    foreach ($GLOBALS['content_copy']['submissions'] as $form_type => $form) {
+      $string .= "\$content[$form_type]  = ". var_export((array) $form, TRUE) .";\n";
+    }
+    return $string;
   }
-  return $string;
 }

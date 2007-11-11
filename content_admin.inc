@@ -651,6 +651,10 @@ function _content_admin_field_remove_submit($form, &$form_state) {
 
 /**
  * Menu callback; presents the field editing page.
+ *
+ * @TODO figure out which changes might result in data loss and add a
+ *   confirmation screen or warning to those options, like changing
+ *   from multiple value to not multiple.
  */
 function _content_admin_field(&$form_state, $type_name, $field_name) {
   $output = '';
@@ -661,8 +665,8 @@ function _content_admin_field(&$form_state, $type_name, $field_name) {
   $field_type = $field_types[$field['type']];
   $widget_types = _content_widget_types();
   $widget_type = $widget_types[$field['widget']['type']];
-
   drupal_set_title(isset($field['widget']['label']) ? $field['widget']['label'] : $field['field_name']);
+  dsm(_content_field_types());
 
   // Set up form info that the default value widget will need to find in the form.
   $form = array('#field_info' => array($field['field_name'] => $field));
@@ -798,6 +802,18 @@ function _content_admin_field(&$form_state, $type_name, $field_name) {
   $form['field_type'] = array(
     '#type' => 'value',
     '#value' => $field['type'],
+  );
+  $form['module'] = array(
+    '#type' => 'value',
+    '#value' => $field['module'],
+  );
+  $form['widget_module'] = array(
+    '#type' => 'value',
+    '#value' => $field['widget_module'],
+  );
+  $form['columns'] = array(
+    '#type' => 'value',
+    '#value' => $field['columns'],
   );
   return $form;
 }
