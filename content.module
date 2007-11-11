@@ -92,19 +92,17 @@ function content_menu() {
         'type' => MENU_LOCAL_TASK,
         'weight' => 2,
       );
-      if (!empty($content_type['fields'])) {
-        foreach ($content_type['fields'] as $field) {
-          $field_name = $field['field_name'];
-          // Callbacks for AHAH add more buttons.
-          if ($field['multiple']) {
-            $items['content/js/'. $field_name] = array(
-              'title' => 'Javascript Add More Form',
-              'page callback' => 'content_add_more_js',
-              'page arguments' => array($field_name),
-              'access arguments' => array('access content'),
-              'type' => MENU_CALLBACK,
-            );
-          }
+      foreach ($content_type['fields'] as $field) {
+        $field_name = $field['field_name'];
+        // Callbacks for AHAH add more buttons.
+        if ($field['multiple']) {
+          $items['content/js/'. $field_name] = array(
+            'title' => 'Javascript Add More Form',
+            'page callback' => 'content_add_more_js',
+            'page arguments' => array($field_name),
+            'access arguments' => array('access content'),
+            'type' => MENU_CALLBACK,
+          );
         }
 
         // TODO how should this be handled? If type is MENU_CALLBACK, the
