@@ -428,6 +428,14 @@ function fieldgroup_content_overview_form_submit($form, &$form_state) {
       fieldgroup_update_group(array('field_name' => $key, 'group' => $value, 'type_name' => $form_values['type_name']));
     }
   }
+  // Update group weights.
+  foreach ((array) $form_values['group-weights'] as $key => $value) {
+    if ($key && !in_array($key, unserialize($form_values['disabled']))) {
+      db_query("UPDATE {". _content_group_tablename() ."} SET weight = %d WHERE type_name = '%s' AND group_name = '%s'",
+      $value, $form_values['type_name'], $key);
+    }
+  }
+  cache_clear_all('fieldgroup_data', content_cache_tablename());
 }
 
 function fieldgroup_update_group($form_values) {
@@ -643,13 +651,6 @@ function fieldgroup_display_overview_form_submit($form, &$form_state) {
         $group['settings']['display'][$key] = $value;
       }
       fieldgroup_save_group($type, $group);
-    }
-    // Update group weights.
-    foreach ((array) $form_values['group-weights'] as $key => $value) {
-      if ($key && !in_array($key, unserialize($form_values['disabled']))) {
-        db_query("UPDATE {". _content_group_tablename() ."} SET weight = %d WHERE type_name = '%s' AND group_name = '%s'",
-        $value, $form_values['type_name'], $key);
-      }
     }
     cache_clear_all('fieldgroup_data', content_cache_tablename());
   }
