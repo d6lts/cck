@@ -251,7 +251,8 @@ function content_copy_import_form_submit($form, &$form_state) {
   $content = NULL;
   // Convert the import formatted text back into a $content array.
   // Return if errors generated or not an array.
-  eval($form_values['macro']);
+  // Use '@' to surpress errors about undefined constants in the macro.
+  @eval($form_values['macro']);
 
   // Preliminary error trapping, must have valid arrays to work with.
   if (!isset($content) || !isset($content['type']) || !is_array($content) || !is_array($content['type'])) {
@@ -279,21 +280,21 @@ function content_copy_import_form_submit($form, &$form_state) {
   if (isset($content['groups']) && module_exists('fieldgroup')) {
     $imported_groups = (array) $content['groups'];
   }
-  elseif (is_array($content['groups'])) {
+  elseif (isset($content['groups']) && is_array($content['groups'])) {
     $not_enabled[] = 'fieldgroup';
   }
 
   // Make sure that all the field and widget modules in the import are enabled in this database.
   foreach ($imported_fields as $field) {
-    if (empty($field['module'])) {
+    if (empty($field['module']) || empty($field['widget_module'])) {
       $not_enabled[] = $field['field_name'];
     }
     else {
-      $modules = explode(', ', $field['module']);
-      foreach ($modules as $module) {
-        if (!module_exists($module)) {
-          $not_enabled[] = $module;
-        }
+      if (!module_exists($field['module'])) {
+        $not_enabled[] = $field['module'];
+      }
+      if (!module_exists($field['widget_module'])) {
+        $not_enabled[] = $field['widget_module'];
       }
     }
   }
@@ -314,7 +315,7 @@ function content_copy_import_form_submit($form, &$form_state) {
     }
   }
 
-  if (form_set_error()) {
+  if (form_get_errors()) {
     drupal_set_message(t('Exiting. No import performed.'), 'error');
     return;
   }
@@ -333,6 +334,7 @@ function content_copy_import_form_submit($form, &$form_state) {
     // Reset type and database values once new type has been added.
     $type_name  = $imported_type_name;
     $type_label = node_get_types('name', $type_name);
+    content_clear_type_cache();
     $content_info = _content_type_info();
 
     if (form_get_errors() || !isset($content_info['content types']) || !is_array($content_info['content types'][$type_name])) {
@@ -344,14 +346,13 @@ function content_copy_import_form_submit($form, &$form_state) {
   }
 
   // Create the groups for this type, if they don't already exist.
-  if (module_exists('fieldgroup')) {
+  if (module_exists('fieldgroup') && isset($imported_groups)) {
     $groups = fieldgroup_groups($type_name);
     $content_type = content_types($type_name);
 
     foreach ($imported_groups as $group) {
       $group_name = $group['group_name'];
       if (!is_array($groups[$group_name])) {
-        $values = (array) $group;
         fieldgroup_save_group($content_type, $group);
       }
     }
@@ -360,19 +361,22 @@ function content_copy_import_form_submit($form, &$form_state) {
   }
 
   // Iterate through the field forms in the import and execute each.
+  module_load_include('inc', 'content', 'content_crud');
   foreach ($imported_fields as $field) {
 
     // Make sure the field doesn't already exist in the type.
     // If so, do nothing, fields can't be duplicated within a content type.
     $field_name   = $field['field_name'];
 
-    if (!empty($field['field_name']) && is_array($content_info['content types'][$type_name]['fields'][$field_name])) {
+    if (!empty($field['field_name']) && isset($content_info['content types'][$type_name]['fields'][$field_name])) {
       drupal_set_message(t("The imported field %field_label (%field_name) was not added to %type because that field already exists in %type.", array(
         '%field_label' => $field_label, '%field_name' => $field_name, '%type' => $type_name)));
     }
     else {
 
-      $field = _content_field_expand($field);
+      // Might need to overwrite the content type name if a new type was created.
+      $field['type_name'] = $type_name;
+
       if (!array_key_exists($field_name, $content_info['fields'])) {
         $field = content_field_create($field);
       }
@@ -380,7 +384,7 @@ function content_copy_import_form_submit($form, &$form_state) {
         $field = content_field_instance_create($field);
       }
       drupal_set_message(t("The field %field_label (%field_name) was added to the content type %type.", array(
-        '%field_label' => $field_label, '%field_name' => $field_name, '%type' => $type_label)));
+        '%field_label' => $field['widget']['label'], '%field_name' => $field_name, '%type' => $type_label)));
     }
   }
 }
@@ -492,7 +496,8 @@ function content_copy_record_macro($form, &$form_state) {
  * @return a code representation of the recorded macro.
  */
 function content_copy_get_macro() {
-  $string = '';
+  // Define the indexes for the evaluated code.
+  $string = "";
   if (array_key_exists('submissions', $GLOBALS['content_copy'])) {
     foreach ($GLOBALS['content_copy']['submissions'] as $form_type => $form) {
       $string .= "\$content[$form_type]  = ". var_export((array) $form, TRUE) .";\n";
