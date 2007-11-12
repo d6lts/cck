@@ -345,9 +345,9 @@ function _content_field_instance_write($field, $op = 'update') {
   $field_settings = $field['widget_settings'];
   $setting_names = module_invoke($field['widget_module'], 'widget_settings', 'save', $field);
   if (is_array($setting_names)) {
-    foreach ($setting_names as $name => $setting) {
+    foreach ($setting_names as $setting) {
       $field_settings[$setting] = isset($field[$setting]) ? $field[$setting] : '';
-      unset($field[$name]);
+      unset($field[$setting]);
     }
   }
   $field['widget_settings'] = serialize($field_settings);
