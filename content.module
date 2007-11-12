@@ -95,6 +95,13 @@ function content_menu() {
       foreach ($content_type['fields'] as $field) {
         $field_name = $field['field_name'];
         // Callbacks for AHAH add more buttons.
+
+        // @TODO
+        // Find if there is a way to tweak the code so it is not
+        // necessary to create a path for every field and still know what
+        // field to manipulate, needed if there are more than one AHAH field
+        // button on the same form.
+
         if ($field['multiple']) {
           $items['content/js/'. $field_name] = array(
             'title' => 'Javascript Add More Form',
@@ -265,7 +272,7 @@ function content_form_field(&$form, &$form_state, $field, $get_delta = NULL) {
     }
     // If content module handles multiple values for this form element,
     // and not selecting an individual $delta, process the multiple value form.
-    if (!$get_delta && content_handle('widget', 'multiple values', $field) == CONTENT_HANDLE_CORE) {
+    if (!isset($get_delta) && content_handle('widget', 'multiple values', $field) == CONTENT_HANDLE_CORE) {
       $form_element = content_multiple_value_form($form, $form_state, $field, $items);
     }
     // If the widget is handling multiple values (e.g optionwidgets),
@@ -312,7 +319,7 @@ function content_multiple_value_form(&$form, &$form_state, $field, $items) {
       $max = 0;
       break;
     case 1:
-      $max = (isset($form_state['item_count'][$field_name]) ? $form_state['item_count'][$field_name] : sizeof($items)) + 1;
+      $max = (isset($form_state['item_count'][$field_name]) ? $form_state['item_count'][$field_name] : sizeof($items)) - 1;
       break;
     default:
       $max = $field['multiple'] - 1;
@@ -384,6 +391,11 @@ function content_add_more_submit($form, &$form_state) {
 
 /**
  * Menu callback for AHAH additions.
+ *
+ * @todo
+ *   The new element is not going to the bottom of the form but is getting
+ *   inserted right after the first item. Need to figure out what to tweak
+ *   to get it in the right place.
  */
 function content_add_more_js($field_name) {
   // Add the new element to the stored form state. Without adding the element
@@ -399,7 +411,7 @@ function content_add_more_js($field_name) {
   $form_element = content_form_field($form, $form_state, $field, $delta);
 
   drupal_alter('form', $form_element, array(), 'content_add_more_js');
-  $form[$field_name][$delta] = $form_element;
+  $form[$field_name][$delta] = $form_element[$field_name][0];
   cache_set('form_'. $_POST['form_build_id'], $form, 'cache_form', $cache->expire);
 
   // Build the new form.
@@ -1049,7 +1061,6 @@ function content_clear_type_cache($with_schema = FALSE) {
   // Refresh the schema to pick up new information.
   if ($with_schema) {
     $schema = drupal_get_schema(NULL, TRUE);
-    menu_rebuild();
   }
 
   if (module_exists('views')) {

@@ -85,7 +85,7 @@ function content_field_update($field) {
   // Invoke hook_content_fieldapi().
   module_invoke_all('content_fieldapi', 'update', $field);
 
-  $field = _content_field_write($field, 'update');
+  _content_field_write($field, 'update');
 
   content_clear_type_cache();
 
@@ -261,19 +261,21 @@ function content_field_instance_update($field) {
 
   // Invoke hook_content_fieldapi().
   module_invoke_all('content_fieldapi', 'update instance', $field);
-  $new_field = $field;
 
-  $field = _content_field_instance_write($field, 'update');
+  _content_field_instance_write($field, 'update');
 
-  $new_columns = $new_field['columns'];
-  $prev_columns = $prev_field['columns'];
-  if (!isset($prev_columns)) {
-    $prev_columns = array();
+  $prior_instances = content_field_instance_read(array('field_name' => $field['field_name']));
+  if ($field['multiple'] > 0 || sizeof($prior_instances) > 0) {
+    $field['db_storage'] = CONTENT_DB_STORAGE_PER_FIELD;
   }
-  if (!isset($new_columns)) {
-    $new_columns = array();
+  else {
+    $field['db_storage'] = CONTENT_DB_STORAGE_PER_CONTENT_TYPE;
   }
-  content_alter_db_field($prev_field, $prev_columns, $new_field, $new_columns);
+  $field = content_field_update($field);
+
+  $columns = (array) $field['columns'];
+  $prev_columns = (array) $prev_field['columns'];
+  content_alter_db_field($prev_field, $prev_columns, $field, $columns);
 
   content_clear_type_cache();
   return $field;
@@ -421,7 +423,7 @@ function _content_field_instance_expand($field) {
 
   // If content.module is handling the default value,
   // initialize $widget_settings with default values,
-  if (content_callback('widget', 'default value', $field) == CONTENT_CALLBACK_DEFAULT) {
+  if (isset($field['default_value']) && isset($field['default_value_php']) && content_callback('widget', 'default value', $field) == CONTENT_CALLBACK_DEFAULT) {
     $field['widget']['default_value'] = $field['default_value'];
     $field['widget']['default_value_php'] = $field['default_value_php'];
     unset($field['default_value']);
