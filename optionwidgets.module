@@ -62,7 +62,7 @@ function optionwidgets_widget_info() {
   return array(
     'optionwidgets_select' => array(
       'label' => 'Select list',
-      'field types' => array('text', 'number_integer', 'number_decimal'),
+      'field types' => array('text', 'number_integer', 'number_decimal', 'number_float'),
       'multiple values' => CONTENT_HANDLE_MODULE,
       'callbacks' => array(
         'default value' => CONTENT_CALLBACK_DEFAULT,
@@ -70,7 +70,7 @@ function optionwidgets_widget_info() {
     ),
     'optionwidgets_buttons' => array(
       'label' => 'Check boxes/radio buttons',
-      'field types' => array('text', 'number_integer', 'number_decimal'),
+      'field types' => array('text', 'number_integer', 'number_decimal', 'number_float'),
       'multiple values' => CONTENT_HANDLE_MODULE,
       'callbacks' => array(
         'default value' => CONTENT_CALLBACK_DEFAULT,
@@ -78,7 +78,7 @@ function optionwidgets_widget_info() {
     ),
     'optionwidgets_onoff' => array(
       'label' => 'Single on/off checkbox',
-      'field types' => array('text', 'number_integer', 'number_decimal'),
+      'field types' => array('text', 'number_integer', 'number_decimal', 'number_float'),
       'multiple values' => CONTENT_HANDLE_MODULE,
       'callbacks' => array(
         'default value' => CONTENT_CALLBACK_DEFAULT,

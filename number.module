@@ -42,6 +42,13 @@ function number_field_info() {
         'arguments' => CONTENT_CALLBACK_DEFAULT,
         ),
       ),
+    'number_float' => array(
+      'label' => 'Float',
+      'callbacks' => array(
+        'tables' => CONTENT_CALLBACK_DEFAULT,
+        'arguments' => CONTENT_CALLBACK_DEFAULT,
+        ),
+      ),
   );
 }
 
@@ -62,6 +69,29 @@ function number_field_settings($op, $field) {
         '#title' => t('Maximum'),
         '#default_value' => isset($field['max']) ? $field['max'] : '',
       );
+      if ($field['type'] == 'number_decimal') {
+        $form['scale'] = array(
+          '#type' => 'select',
+          '#options' => drupal_map_assoc(range(10, 32)),
+          '#title' => t('Scale'),
+          '#description' => t('The total number of digits to store in the database, including those to the right of the decimal.'),
+          '#default_value' => isset($field['scale']) ? $field['scale'] : '',
+        );
+        $form['precision'] = array(
+          '#type' => 'select',
+          '#options' => drupal_map_assoc(range(0, 2)),
+          '#title' => t('Precision'),
+          '#description' => t('The number of digits to the right of the decimal.'),
+          '#default_value' => isset($field['precision']) ? $field['precision'] : '',
+        );
+        $form['decimal'] = array(
+          '#type' => 'select',
+          '#options' => array('.' => 'decimal point', ',' => 'comma', ' ', 'space'),
+          '#title' => t('Decimal marker'),
+          '#description' => t('The character users will input to mark the decimal point in forms.'),
+          '#default_value' => isset($field['scale']) ? $field['scale'] : '',
+        );
+      }
       $form['append']['prefix'] = array(
         '#type' => 'textfield',
         '#title' => t('Prefix'),
@@ -109,7 +139,11 @@ function number_field_settings($op, $field) {
       break;
 
     case 'save':
-      return array('prefix', 'suffix', 'min', 'max', 'allowed_values', 'allowed_values_php');
+      $values = array('prefix', 'suffix', 'min', 'max', 'allowed_values', 'allowed_values_php');
+      if ($field['type'] == 'number_decimal') {
+        $values = array_merge($values, array('scale', 'precision', 'decimal'));
+      }
+      return $values;
 
     case 'database columns':
       if ($field['type'] == 'number_integer') {
@@ -117,9 +151,16 @@ function number_field_settings($op, $field) {
           'value' => array('type' => 'int', 'not null' => FALSE, 'sortable' => TRUE),
         );
       }
-      if ($field['type'] == 'number_decimal') {
+      if ($field['type'] == 'number_float') {
         return array(
           'value' => array('type' => 'float', 'not null' => FALSE, 'sortable' => TRUE),
+        );
+      }
+      if ($field['type'] == 'number_decimal') {
+        $scale = isset($field['scale']) ? $field['scale'] : 10;
+        $precision = isset($field['precision']) ? $field['precision'] : 2;
+        return array(
+          'value' => array('type' => 'numeric', 'precision' => $precision, 'scale' => $scale, 'not null' => FALSE, 'sortable' => TRUE),
         );
       }
 
@@ -293,7 +334,7 @@ function number_widget_info() {
   return array(
     'number' => array(
       'label' => 'Text Field',
-      'field types' => array('number_integer', 'number_decimal'),
+      'field types' => array('number_integer', 'number_decimal', 'number_float'),
       'multiple values' => CONTENT_HANDLE_CORE,
       'callbacks' => array(
         'default value' => CONTENT_CALLBACK_DEFAULT,
@@ -320,7 +361,6 @@ function number_elements() {
       '#input' => TRUE,
       '#columns' => array('value'), '#delta' => 0,
       '#process' => array('number_process'),
-      '#element_validate' => array('number_validate'),
     ),
   );
 }
@@ -394,18 +434,27 @@ function number_process($element, $edit, $form_state, $form) {
     $suffixes = explode('|', $field['suffix']);
     $element[$field_key]['#field_suffix'] = array_pop($suffixes);
   }
-
+  switch ($field['type']) {
+    case 'number_float':
+      $element['#element_validate'] = array('number_float_validate');
+      break;
+    case 'number_integer':
+      $element['#element_validate'] = array('number_integer_validate');
+      break;
+    case 'number_decimal':
+      $element['#element_validate'] = array('number_decimal_validate');
+      $element['#decimal'] = isset($field['decimal']) ? $field['decimal'] : '.';
+      $element['#scale'] = isset($field['scale']) ? $field['scale'] : 10;
+      $element['#precision'] = isset($field['precision']) ? $field['precision'] : 2;
+      break;
+  }
   return $element;
 }
 
 /**
- * FAPI validation of an individual number element.
- *
- * @TODO come back here once things are working and find a way
- *   to validate differently for integers, decimals, decimal
- *   separators other than the period, etc.
+ * FAPI validation of an individual float element.
  */
-function number_validate($element, &$form_state) {
+function number_float_validate($element, &$form_state) {
   $field_key = $element['#columns'][0];
   $value = $element['#value'][$field_key];
   if (($element[$field_key]['#required'] || !empty($value))) {
@@ -413,9 +462,47 @@ function number_validate($element, &$form_state) {
     $value = preg_replace('@[^-0-9\.]@', '', $value);
     if ($start != $value) {
       // No reason to make this an error, just need to inform user what has changed.
-      form_set_message(t('Only 0-9 and decimals are allowed in %field. %start was changed to %value.', array(
-        '%field' => t($element[$field_key]['#title']), '%start' => $start, '%value' => $value)));
+      drupal_set_message(t('Only numbers and decimals are allowed in %field. %start was changed to %value.', array(
+      '%field' => t($element[$field_key]['#title']), '%start' => $start, '%value' => $value)));
     }
+    form_set_value($element[$field_key], $value, $form_state);
+  }
+}
+
+/**
+ * FAPI validation of an individual integer element.
+ */
+function number_integer_validate($element, &$form_state) {
+  $field_key = $element['#columns'][0];
+  $value = $element['#value'][$field_key];
+  if (($element[$field_key]['#required'] || !empty($value))) {
+    $start = $value;
+    $value = preg_replace('@[^-0-9]@', '', $value);
+    if ($start != $value) {
+      // No reason to make this an error, just need to inform user what has changed.
+      drupal_set_message(t('Only numbers are allowed in %field. %start was changed to %value.', array(
+      '%field' => t($element[$field_key]['#title']), '%start' => $start, '%value' => $value)));
+    }
+    form_set_value($element[$field_key], $value, $form_state);
+  }
+}
+
+/**
+ * FAPI validation of an individual decimal element.
+ */
+function number_decimal_validate($element, &$form_state) {
+  $field_key = $element['#columns'][0];
+  $value = $element['#value'][$field_key];
+  if (($element[$field_key]['#required'] || !empty($value))) {
+    $start = $value;
+    $value = str_replace($element['#decimal'], '.', $value);
+    $value = preg_replace('@[^-0-9\.]@', '', $value);
+    if ($start != $value) {
+      // No reason to make this an error, just need to inform user what has changed.
+      drupal_set_message( t('Only numbers and the decimal character (%decimal) are allowed in %field. %start was changed to %value.', array(
+      '%decimal' => $element['#decimal'], '%field' => t($element[$field_key]['#title']), '%start' => $start, '%value' => $value)));
+    }
+    $value = round($value, $element['#precision']);
     form_set_value($element[$field_key], $value, $form_state);
   }
 }

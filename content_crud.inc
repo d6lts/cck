@@ -125,7 +125,6 @@ function content_field_sanitize($field) {
       $field['module'] = $field_types[$field['type']]['module'];
     }
   }
-
   return $field;
 }
 
@@ -173,6 +172,8 @@ function content_field_read($param) {
   $field = db_fetch_array(db_query("SELECT * FROM {". content_field_tablename() ."} nf WHERE field_name = '%s'", $param['field_name']));
   $field['columns'] = (array) (!empty($field['columns']) ? unserialize($field['columns']) : array());
   $field['global_settings'] = (array) (!empty($field['global_settings']) ? unserialize($field['global_settings']) : array());
+
+  $field = content_field_sanitize($field);
 
   // Invoke hook_content_fieldapi().
   module_invoke_all('content_fieldapi', 'read', $field);

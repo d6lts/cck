@@ -231,3 +231,11 @@ function number_update_6000() {
 
   return $ret;
 }
+
+function number_update_6001() {
+  $ret = array();
+  $ret = update_sql("UPDATE {". content_field_tablename() ."} SET type='number_float' WHERE type = 'number_decimal'");
+  include_once('./'. drupal_get_path('module', 'content') .'/content.module');
+  content_clear_type_cache();
+  return $ret;
+}
