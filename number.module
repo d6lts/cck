@@ -30,6 +30,7 @@ function number_field_info() {
   return array(
     'number_integer' => array(
       'label' => 'Integer',
+      'description' => t('Store a number in the database as an integer.'),
       'callbacks' => array(
         'tables' => CONTENT_CALLBACK_DEFAULT,
         'arguments' => CONTENT_CALLBACK_DEFAULT,
@@ -37,6 +38,7 @@ function number_field_info() {
       ),
     'number_decimal' => array(
       'label' => 'Decimal',
+      'description' => t('Store a number in the database in a fixed decimal format.'),
       'callbacks' => array(
         'tables' => CONTENT_CALLBACK_DEFAULT,
         'arguments' => CONTENT_CALLBACK_DEFAULT,
@@ -44,6 +46,7 @@ function number_field_info() {
       ),
     'number_float' => array(
       'label' => 'Float',
+      'description' => t('Store a number in the database in a floating point format.'),
       'callbacks' => array(
         'tables' => CONTENT_CALLBACK_DEFAULT,
         'arguments' => CONTENT_CALLBACK_DEFAULT,

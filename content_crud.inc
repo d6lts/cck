@@ -544,12 +544,14 @@ function content_types_rebuild() {
 function content_type_create($info) {
   content_clear_type_cache();
   $type = content_types($info->type);
-  $table = _content_tablename($type['type'], CONTENT_DB_STORAGE_PER_CONTENT_TYPE);
+  $table = _content_tablename($info->type, CONTENT_DB_STORAGE_PER_CONTENT_TYPE);
   if (!db_table_exists($table)) {
     $ret = array();
     db_create_table($ret, $table, _content_table_schema());
     drupal_set_message(t('The content fields table %name has been created.', array('%name' => $table)));
   }
+  // Must rebuild the menu here so our field paths get created.
+  menu_rebuild();
 }
 
 /**
@@ -584,11 +586,13 @@ function content_type_update($info) {
  *   value supplied by hook_node_type()
  */
 function content_type_delete($info) {
-  $type = content_types($info->type);
-  foreach ($type['fields'] as $field) {
+  //$type = content_types($info->type);
+  //foreach ($type['fields'] as $field) {
+  $fields = content_field_instance_read(array('type_name' => $info->type));
+  foreach ($fields as $field) {
     content_field_instance_delete($field);
   }
-  $table = _content_tablename($type['type'], CONTENT_DB_STORAGE_PER_CONTENT_TYPE);
+  $table = _content_tablename($info->type, CONTENT_DB_STORAGE_PER_CONTENT_TYPE);
   if (db_table_exists($table)) {
     $ret = array();
     db_drop_table($ret, $table);

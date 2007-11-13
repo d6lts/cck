@@ -55,6 +55,7 @@ function nodereference_field_info() {
   return array(
     'nodereference' => array(
       'label' => 'Node Reference',
+      'description' => t('Store the id of a related node as an integer value.'),
       'callbacks' => array(
         'tables' => CONTENT_CALLBACK_DEFAULT,
         'arguments' => CONTENT_CALLBACK_DEFAULT,

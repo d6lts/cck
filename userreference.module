@@ -30,6 +30,7 @@ function userreference_field_info() {
   return array(
     'userreference' => array(
       'label' => 'User Reference',
+      'description' => t('Store the id of a related user as an integer value.'),
       'callbacks' => array(
         'tables' => CONTENT_CALLBACK_DEFAULT,
         'arguments' => CONTENT_CALLBACK_DEFAULT,

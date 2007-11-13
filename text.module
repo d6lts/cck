@@ -35,6 +35,7 @@ function text_field_info() {
   return array(
     'text' => array(
       'label' => 'Text',
+      'description' => t('Store text in the database.'),
       'callbacks' => array(
         'tables' => CONTENT_CALLBACK_DEFAULT,
         'arguments' => CONTENT_CALLBACK_DEFAULT,

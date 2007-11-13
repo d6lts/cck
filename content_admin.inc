@@ -493,7 +493,7 @@ function _content_admin_field_add_new(&$form_state, $type_name, $new_field_name 
       '#title' => t('Field name'),
       '#type' => 'textfield',
       '#default_value' => $new_field_name,
-      '#description' => t('The machine-readable name of the field. This name cannot be changed later! Allowed characters are lowercase, unaccentuated a-z, numbers, and underscores, and the name must be prefixed with \'field_\'. You\'ll be able to choose a human-readable label for the field on next page'),
+      '#description' => t('The machine-readable name of the field. This name cannot be changed later! the name must be prefixed with \'field_\' and can include lowercase unaccentuated letters, numbers, and underscores. You\'ll be able to choose a human-readable label for the field on next page'),
       '#required' => TRUE,
     );
     $form['new']['field_widget_type'] = array(
@@ -525,10 +525,11 @@ function theme_content_admin_field_add_new_field_widget_type($form) {
   $field_types = _content_field_types();
   $widget_types = _content_widget_types();
   $output = '';
-
+  $output .= t('<p>Choose the type of value to store and an input method from the list below.</p>');
   $output .= '<dl>';
   foreach ($field_types as $field_name => $field_type) {
     $output .= '<dt>'. $field_type['label'] .'</dt>';
+    $output .= '<dd><em>'. $field_type['description'] .'</em></dd>';
     foreach ($widget_types as $widget_name => $widget_type) {
       if (in_array($field_name, $widget_type['field types'])) {
         $output .= '<dd>'. drupal_render($form[$field_name .'-'. $widget_name]) .'</dd>';
@@ -567,7 +568,7 @@ function _content_admin_field_add_new_validate($form, &$form_state) {
       '%field_name' => $form_values['field_name'])));
   }
   elseif (!preg_match('!^field_[a-z0-9_]+$!', $form_values['field_name'])) {
-    form_set_error('field_name', t('The field name %field_name is invalid. Allowed characters are lowercase, unaccentuated a-z, numbers, and underscores, and the name must be prefixed with \'field_\',', array(
+    form_set_error('field_name', t('The field name %field_name is invalid. The name must be prefixed with \'field_\' and include only lowercase unaccentuated letters, numbers, and underscores.', array(
       '%field_name' => $form_values['field_name'])));
   }
   elseif ($form_values['field_name'] == 'field_instance') {
