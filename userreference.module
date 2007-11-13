@@ -261,6 +261,7 @@ function userreference_widget(&$form, &$form_state, $field, $items, $delta = 0) 
  * Build the form element. When creating a form using FAPI #process,
  * note that $element['#value'] is already set.
  *
+ * The $fields array is in $form['#field_info'][$element['#field_name']].
  */
 function userreference_select_process($element, $edit, $form_state, $form) {
   // The userreference_select widget doesn't need to create its own
@@ -284,6 +285,7 @@ function userreference_select_process($element, $edit, $form_state, $form) {
  * Build the form element. When creating a form using FAPI #process,
  * note that $element['#value'] is already set.
  *
+ * The $fields array is in $form['#field_info'][$element['#field_name']].
  */
 function userreference_autocomplete_process($element, $edit, $form_state, $form) {
   // The userreference autocomplete widget doesn't need to create its own

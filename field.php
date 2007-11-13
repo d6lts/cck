@@ -11,32 +11,109 @@
  * Widget module hooks are also defined here; the two go hand-in-hand, often in
  * the same module (though they are independent).
  *
- * Widget hooks are typically called by content.module using _content_widget_invoke().
+ * Widget hooks are typically called by content.module when it creates the field
+ * form elements in the node form using hook_form_alter().
+ */
+
+/**
+ * @addtogroup install
+ * @{
+ */
+/**
+ * Implementation of hook_content_notify().
+ *
+ * This hook should be implemented inside hook_install(), hook_uninstall(),
+ * hook_enable() and hook_disable(), and is used to notify the content
+ * module when a field module is added or removed so it can respond
+ * appropriately. One use of this hook is to allow the content module
+ * to remove fields and field data created by this module when the
+ * module is uninstalled.
+ *
+ * The recommended location for these hooks is in the module's .install file.
+ */
+/**
+ * Implementation of hook_install().
+ */
+function text_install() {
+  content_notify('install', 'text');
+}
+
+/**
+ * Implementation of hook_uninstall().
+ */
+function text_uninstall() {
+  content_notify('uninstall', 'text');
+}
+
+/**
+ * Implementation of hook_enable().
+ *
+ * Notify content module when this module is enabled.
+ */
+function text_enable() {
+  content_notify('enable', 'text');
+}
+
+/**
+ * Implementation of hook_disable().
+ *
+ * Notify content module when this module is disabled.
+ */
+function text_disable() {
+  content_notify('disable', 'text');
+}
+/**
+ * @} End of "addtogroup install".
  */
 
 /**
  * @addtogroup hooks
  * @{
  */
-
-
 /**
- * Declare information about a field type.
- *
- * @return
- *   An array keyed by field type name. Each element of the array is an associative
- *   array with these keys and values:
- *   - "label": The human-readable label for the field type.
+ * Implementation of hook_theme().
  */
-function hook_field_info() {
+function text_theme() {
   return array(
-    'number_integer' => array('label' => 'Integer'),
-    'number_decimal' => array('label' => 'Decimal'),
+    'text_textarea' => array(
+      'arguments' => array('element' => NULL),
+    ),
+    'text_textfield' => array(
+      'arguments' => array('element' => NULL),
+    ),
   );
 }
 
 /**
- * Handle the parameters for a field.
+ * Implementation of hook_field_info().
+ *
+ * Here we indicate that the content module will use its default
+ * handling for the view of this field.
+ *
+ * Callbacks can be omitted if default handing is used.
+ * They're included here just so this module can be used
+ * as an example for custom modules that might do things
+ * differently.
+ *
+ * If your module will provide its own Views tables or arguments,
+ * change CONTENT_CALLBACK_DEFAULT to CONTENT_CALLBACK_CUSTOM.
+ */
+function text_field_info() {
+  return array(
+    'text' => array(
+      'label' => 'Text',
+      'callbacks' => array(
+        'tables' => CONTENT_CALLBACK_DEFAULT,
+        'arguments' => CONTENT_CALLBACK_DEFAULT,
+        ),
+      ),
+    );
+}
+
+/**
+ * Implementation of hook_field_settings().
+ *
+ * Handle the settings for a field.
  *
  * @param $op
  *   The operation to be performed. Possible values:
@@ -46,19 +123,6 @@ function hook_field_info() {
  *   - "database columns": Declare the columns that content.module should create
  *     and manage on behalf of the field. If the field module wishes to handle
  *     its own database storage, this should be omitted.
- *   - "callbacks": Describe the field's behaviour regarding hook_field operations.
- *   - "tables" : Declare the Views tables informations for the field.
- *     Use this operator only if you need to override CCK's default general-purpose
- *     implementation.
- *     In this case, it is probably a good idea to use the default definitions
- *     returned by content_views_field_tables($field) as a start point for your own
- *     definitions.
- *   - "arguments" : Declare the Views arguments informations for the field.
- *     Use this operator only if you need to override CCK's default general-purpose
- *     implementation.
- *     In this case, it is probably a good idea to use the default definitions
- *     returned by content_views_field_arguments($field) as a start point for your own
- *     definitions.
  *   - "filters": Declare the Views filters available for the field.
  *     (this is used in CCK's default Views tables definition)
  *     They always apply to the first column listed in the "database columns"
@@ -77,103 +141,106 @@ function hook_field_info() {
  *     MySQL data type of the column, and may also include a "sortable" parameter
  *     to indicate to views.module that the column contains ordered information.
  *     TODO : Details of other information that can be passed to the database layer can
- *     be found at content_db_add_column().
- *   - "callbacks": an array describing the field's behaviour regarding hook_field
- *     operations. The array is keyed by hook_field operations ('view', 'validate'...)
- *     and has the following possible values :
- *       CONTENT_CALLBACK_NONE     : do nothing for this operation
- *       CONTENT_CALLBACK_CUSTOM   : use the behaviour in hook_field(operation)
- *       CONTENT_CALLBACK_DEFAULT  : use content.module's default bahaviour
- *     Note : currently only the 'view' operation implements this feature.
- *     All other field operation implemented by the module _will_ be executed
- *     no matter what.
- *   - "tables": an array of 'tables' definitions as expected by views.module
- *     (see Views Documentation).
- *   - "arguments": an array of 'arguments' definitions as expected by views.module
- *     (see Views Documentation).
+ *     be found in the API for the Schema API.
  *   - "filters": an array of 'filters' definitions as expected by views.module
  *     (see Views Documentation).
  *     When providing several filters, it is recommended to use the 'name'
  *     attribute in order to let the user distinguish between them. If no 'name'
  *     is specified for a filter, the key of the filter will be used instead.
  */
-function hook_field_settings($op, $field) {
+function text_field_settings($op, $field) {
   switch ($op) {
     case 'form':
       $form = array();
+      $options = array(0 => t('Plain text'), 1 => t('Filtered text (user selects input format)'));
+      $form['text_processing'] = array(
+        '#type' => 'radios',
+        '#title' => t('Text processing'),
+        '#default_value' => isset($field['text_processing']) ? $field['text_processing'] : 0,
+        '#options' => $options,
+      );
       $form['max_length'] = array(
         '#type' => 'textfield',
         '#title' => t('Maximum length'),
-        '#default_value' => $field['max_length'] ? $field['max_length'] : '',
+        '#default_value' => isset($field['max_length']) ? $field['max_length'] : '',
         '#required' => FALSE,
         '#description' => t('The maximum length of the field in characters. Leave blank for an unlimited size.'),
+      );
+      $form['allowed_values'] = array(
+        '#type' => 'textarea',
+        '#title' => t('Allowed values list'),
+        '#default_value' => isset($field['allowed_values']) ? $field['allowed_values'] : '',
+        '#required' => FALSE,
+        '#rows' => 10,
+        '#description' => t('The possible values this field can contain. Enter one value per line, in the format key|label. The key is the value that will be stored in the database and it must match the field storage type, %type. The label is optional and the key will be used as the label if no label is specified.', array('%type' => $field['type'])),
+      );
+      $form['advanced_options'] = array(
+        '#type' => 'fieldset',
+        '#title' => t('Php code'),
+        '#collapsible' => TRUE,
+        '#collapsed' => TRUE,
+      );
+      $form['advanced_options']['allowed_values_php'] = array(
+        '#type' => 'textarea',
+        '#title' => t('Code'),
+        '#default_value' => isset($field['allowed_values_php']) ? $field['allowed_values_php'] : '',
+        '#rows' => 6,
+        '#description' => t('Advanced Usage Only: PHP code that returns a keyed array of allowed values. Should not include &lt;?php ?&gt; delimiters. If this field is filled out, the array returned by this code will override the allowed values list above.'),
       );
       return $form;
 
     case 'save':
-      return array('text_processing', 'max_length', 'allowed_values');
+      return array('text_processing', 'max_length', 'allowed_values', 'allowed_values_php');
 
     case 'database columns':
-      $columns = array(
-        'value' => array('type' => 'varchar', 'not null' => TRUE, 'default' => "''", 'sortable' => TRUE),
-        'format' => array('type' => 'int', 'length' => 10, 'unsigned' => TRUE, 'not null' => TRUE, 'default' => 0),
-      );
       if (empty($field['max_length']) || $field['max_length'] > 255) {
-        $columns['value']['type'] = 'longtext';
+        $columns['value'] = array('type' => 'text', 'size' => 'big', 'not null' => FALSE, 'sortable' => TRUE);
       }
       else {
-        $columns['value']['length'] = $field['max_length'];
+        $columns['value'] = array('type' => 'varchar', 'length' => $field['max_length'], 'not null' => FALSE, 'sortable' => TRUE);
       }
-      if (empty($field['text_processing'])) {
-        unset($columns['format']);
+      if (!empty($field['text_processing'])) {
+        $columns['format'] = array('type' => 'int', 'unsigned' => TRUE, 'not null' => FALSE);
       }
       return $columns;
 
-    case 'callbacks':
-      return array(
-        'view' => CONTENT_CALLBACK_CUSTOM,
-      );
-
-    case 'tables':
-      $tables = content_views_field_tables($field);
-      // whatever additions / modifications needed on the default definitions
-      return $tables;
-
-    case 'arguments':
-      $arguments = content_views_field_arguments($field);
-      // whatever additions / modifications needed on the default definitions
-      return $arguments;
-
     case 'filters':
-      return array(
-        'substring' => array(
-          'operator' => 'views_handler_operator_like',
-          'handler' => 'views_handler_filter_like',
-        ),
-        'alpha_order' => array(
-          'name' => 'alphabetical order',
-          'operator' => 'views_handler_operator_gtlt',
-        ),
-      );
-
+      $allowed_values = content_allowed_values($field);
+       if (count($allowed_values)) {
+         return array(
+           'default' => array(
+            'list' => $allowed_values,
+             'list-type' => 'list',
+             'operator' => 'views_handler_operator_or',
+             'value-type' => 'array',
+            ),
+          );
+        }
+      else {
+        return array(
+          'like' => array(
+            'operator' => 'views_handler_operator_like',
+            'handler' => 'views_handler_filter_like',
+          ),
+        );
+      }
+      break;
   }
 }
 
 /**
+ * Implementation of hook_field().
+ *
  * Define the behavior of a field type.
  *
  * @param $op
  *   What kind of action is being performed. Possible values:
  *   - "load": The node is about to be loaded from the database. This hook
  *     should be used to load the field.
- *   - "view": The node is about to be presented to the user. The module
- *     should prepare and return an HTML string containing a default
- *     representation of the field.
- *     It will be called only if 'view' was set to TRUE in hook_field_settings('callbacks')
  *   - "validate": The user has just finished editing the node and is
  *     trying to preview or submit it. This hook can be used to check or
  *     even modify the node. Errors should be set with form_set_error().
- *   - "submit": The user has just finished editing the node and the node has
+ *   - "presave": The user has just finished editing the node and the node has
  *     passed validation. This hook can be used to modify the node.
  *   - "insert": The node is being created (inserted in the database).
  *   - "update": The node is being updated.
@@ -190,35 +257,31 @@ function hook_field_settings($op, $field) {
  *   This varies depending on the operation.
  *   - The "load" operation should return an object containing extra values
  *     to be merged into the node object.
- *   - The "view" operation should return a string containing an HTML
- *     representation of the field data.
- *   - The "insert", "update", "delete", "validate", and "submit" operations
+ *   - The "insert", "update", "delete", "validate", and "presave" operations
  *     have no return value.
  *
  * In most cases, only "validate" operations is relevant ; the rest
  * have default implementations in content_field() that usually suffice.
  */
-function hook_field($op, &$node, $field, &$node_field, $teaser, $page) {
+function text_field($op, &$node, $field, &$items, $teaser, $page) {
   switch ($op) {
-    case 'view':
-      $context = $teaser ? 'teaser' : 'full';
-      $formatter = isset($field['display_settings'][$context]['format']) ? $field['display_settings'][$context]['format'] : 'default';
-      $items = array();
-      foreach ($node_field as $delta => $item) {
-        $items[$delta]['view'] = content_format($field, $item, $formatter, $node);
-      }
-      return theme('field', $node, $field, $items, $teaser, $page);
-
     case 'validate':
-      $allowed_values = text_allowed_values($field);
-
+      $allowed_values = content_allowed_values($field);
       if (is_array($items)) {
         foreach ($items as $delta => $item) {
-          $error_field = $field['field_name']. ']['. $delta.'][value';
+          $error_field = $field['field_name'] .']['. $delta .'][value';
           if ($item['value'] != '') {
             if (count($allowed_values) && !array_key_exists($item['value'], $allowed_values)) {
               form_set_error($error_field, t('Illegal value for %name.', array('%name' => t($field['widget']['label']))));
             }
+          }
+        }
+      }
+      if (!empty($field['max_length'])) {
+        foreach ($items as $delta => $data) {
+          $error_field = $field['field_name'] .']['. $delta .'][value';
+          if (strlen($data['value']) > $field['max_length']) {
+            form_set_error($error_field, t('%label is longer than %max characters.', array('%label' => $field['widget']['label'], '%max' => $field['max_length'])));
           }
         }
       }
@@ -227,16 +290,25 @@ function hook_field($op, &$node, $field, &$node_field, $teaser, $page) {
 }
 
 /**
- * Declare information about a formatter.
+ * Implementation of hook_content_is_empty().
  *
- * @return
- *   An array keyed by formatter name. Each element of the array is an associative
- *   array with these keys and values:
- *   - "label": The human-readable label for the formatter.
- *   - "field types": An array of field type names that can be displayed using
- *     this formatter.
+ * NEW REQUIRED HOOK!
+ *
+ * This function tells the content module whether or not to consider
+ * the $item to be empty. This is used by the content module
+ * to remove empty, non-required values before saving them.
  */
-function hook_field_formatter_info() {
+function text_content_is_empty($item, $field) {
+  if (empty($item['value'])) {
+    return TRUE;
+  }
+  return FALSE;
+}
+
+/**
+ * Implementation of hook_field_formatter_info().
+ */
+function text_field_formatter_info() {
   return array(
     'default' => array(
       'label' => 'Default',
@@ -254,6 +326,8 @@ function hook_field_formatter_info() {
 }
 
 /**
+ * Implementation of hook_field_formatter().
+ *
  * Prepare an individual item for viewing in a browser.
  *
  * @param $field
@@ -277,50 +351,103 @@ function hook_field_formatter_info() {
  * It is important that this function at the minimum perform security
  * transformations such as running check_plain() or check_markup().
  */
-function hook_field_formatter($field, $item, $formatter, $node) {
+function text_field_formatter($field, $item, $formatter, $node) {
   if (!isset($item['value'])) {
     return '';
   }
-  if ($field['text_processing']) {
-    $text = check_markup($item['value'], $item['format'], is_null($node) || $node->build_mode == NODE_BUILD_PREVIEW);
-  }
-  else {
-    $text = check_plain($item['value']);
+
+  $allowed_values = content_allowed_values($field);
+  if (!empty($allowed_values) && isset($allowed_values[$item['value']])) {
+    return $allowed_values[$item['value']];
   }
 
   switch ($formatter) {
     case 'plain':
-      return strip_tags($text);
+      $text = strip_tags($item['value']);
+      break;
 
     case 'trimmed':
-      return node_teaser($text, $field['text_processing'] ? $item['format'] : NULL);
+      $text = node_teaser($item['value'], $field['text_processing'] ? $item['format'] : NULL);
+      break;
 
-    default:
-      return $text;
+    case 'default':
+      $text = $item['value'];
+  }
+
+  // TODO : undefined index text_processing / format on node preview
+  if ($field['text_processing']) {
+    return check_markup($text, $item['format'], is_null($node) || $node->build_mode == NODE_BUILD_PREVIEW);
+  }
+  else {
+    return check_plain($text);
   }
 }
 
 
 /**
- * Declare information about a widget.
+ * Implementation of hook_widget_info().
  *
- * @return
- *   An array keyed by widget name. Each element of the array is an associative
- *   array with these keys and values:
- *   - "label": The human-readable label for the widget.
- *   - "field types": An array of field type names that can be edited using
- *     this widget.
+ * Here we indicate that the content module will handle
+ * the default value and multiple values for these widgets.
+ *
+ * Callbacks can be omitted if default handing is used.
+ * They're included here just so this module can be used
+ * as an example for custom modules that might do things
+ * differently.
  */
-function hook_widget_info() {
+function text_widget_info() {
   return array(
-    'text' => array(
+    'text_textfield' => array(
       'label' => 'Text Field',
       'field types' => array('text'),
+      'multiple values' => CONTENT_HANDLE_CORE,
+      'callbacks' => array(
+        'default value' => CONTENT_CALLBACK_DEFAULT,
+        ),
+    ),
+    'text_textarea' => array(
+      'label' => 'Text Area',
+      'field types' => array('text'),
+      'multiple values' => CONTENT_HANDLE_CORE,
+      'callbacks' => array(
+        'default value' => CONTENT_CALLBACK_DEFAULT,
+        ),
     ),
   );
 }
 
 /**
+ * Implementation of FAPI hook_elements().
+ *
+ * Any FAPI callbacks needed for individual widgets can be declared here,
+ * and the element will be passed to those callbacks for processing.
+ *
+ * Drupal will automatically theme the element using a theme with
+ * the same name as the hook_elements key.
+ *
+ * Autocomplete_path is not used by text_widget but other widgets can use it
+ * (see nodereference and userreference).
+ */
+function text_elements() {
+  return array(
+    'text_textfield' => array(
+      '#input' => TRUE,
+      '#columns' => array('value'), '#delta' => 0,
+      '#process' => array('text_textfield_process'),
+      '#autocomplete_path' => FALSE,
+      ),
+    'text_textarea' => array(
+      '#input' => TRUE,
+      '#columns' => array('value', 'format'), '#delta' => 0,
+      '#process' => array('text_textarea_process'),
+      '#filter_value' => FILTER_FORMAT_DEFAULT,
+      ),
+    );
+}
+
+/**
+ * Implementation of hook_widget_settings().
+ *
  * Handle the parameters for a widget.
  *
  * @param $op
@@ -328,7 +455,6 @@ function hook_widget_info() {
  *   - "form": Display the widget settings form.
  *   - "validate": Check the widget settings form for errors.
  *   - "save": Declare which pieces of information to save back to the database.
- *   - "callbacks": Describe the widget's behaviour regarding hook_widget operations.
  * @param $widget
  *   The widget on which the operation is to be performed.
  * @return
@@ -336,26 +462,22 @@ function hook_widget_info() {
  *   - "form": an array of form elements to add to the settings page.
  *   - "validate": no return value. Use form_set_error().
  *   - "save": an array of names of form elements to be saved in the database.
- *   - "callbacks": an array describing the widget's behaviour regarding hook_widget
- *     operations. The array is keyed by hook_widget operations ('form', 'validate'...)
- *     and has the following possible values :
- *       CONTENT_CALLBACK_NONE     : do nothing for this operation
- *       CONTENT_CALLBACK_CUSTOM   : use the behaviour in hook_widget(operation)
- *       CONTENT_CALLBACK_DEFAULT  : use content.module's default bahaviour
- *     Note : currently only the 'default value' operation implements this feature.
- *     All other widget operation implemented by the module _will_ be executed
- *     no matter what.
  */
-function hook_widget_settings($op, $widget) {
+function text_widget_settings($op, $widget) {
   switch ($op) {
     case 'form':
       $form = array();
-      $form['rows'] = array(
-        '#type' => 'textfield',
-        '#title' => t('Rows'),
-        '#default_value' => $widget['rows'] ? $widget['rows'] : 1,
-        '#required' => TRUE,
-      );
+      if ($widget['type'] == 'text_textfield') {
+        $form['rows'] = array('#type' => 'hidden', '#value' => 1);
+      }
+      else {
+        $form['rows'] = array(
+          '#type' => 'textfield',
+          '#title' => t('Rows'),
+          '#default_value' => isset($widget['rows']) ? $widget['rows'] : 5,
+          '#required' => TRUE,
+        );
+      }
       return $form;
 
     case 'validate':
@@ -366,84 +488,127 @@ function hook_widget_settings($op, $widget) {
 
     case 'save':
       return array('rows');
-
-    case 'callbacks':
-      return array(
-        'default value' => CONTENT_CALLBACK_NONE,
-      );
   }
 }
 
 /**
- * Define the behavior of a widget.
+ * Implementation of hook_widget().
  *
- * @param $op
- *   What kind of action is being performed. Possible values:
- *   - "prepare form values": The editing form will be displayed. The widget
- *     should perform any conversion necessary from the field's native storage
- *     format into the storage used for the form. Convention dictates that the
- *     widget's version of the data should be stored beginning with "default".
- *   - "form": The node is being edited, and a form should be prepared for
- *     display to the user.
- *   - "validate": The user has just finished editing the node and is
- *     trying to preview or submit it. This hook can be used to check or
- *     even modify the node. Errors should be set with form_set_error().
- *   - "process form values": The inverse of the prepare operation. The widget
- *     should convert the data back to the field's native format.
- *   - "submit": The user has just finished editing the node and the node has
- *     passed validation. This hook can be used to modify the node.
- * @param &$node
- *   The node the action is being performed on. This argument is passed by
- *   reference for performance only; do not modify it.
+ * Attach a single form element to the form. It will be built out and
+ * validated in the callback(s) listed in hook_elements. We build it
+ * out in the callbacks rather than here in hook_widget so it can be
+ * plugged into any module that can provide it with valid
+ * $field information.
+ *
+ * Content module will set the weight, field name and delta values
+ * for each form element. This is a change from earlier CCK versions
+ * where the widget managed its own multiple values.
+ *
+ * If there are multiple values for this field, the content module will
+ * call this function as many times as needed.
+ *
+ * @param $form
+ *   the entire form array, $form['#node'] holds node information
+ * @param $form_state
+ *   the form_state, $form_state['values'][$field['field_name']]
+ *   holds the field's form values.
  * @param $field
- *   The field the action is being performed on.
- * @param &$node_field
- *   The contents of the field in this node. Changes to this variable will
- *   be saved back to the node object.
+ *   the field array
+ * @param $items
+ *   array of default values for this field
+ * @param $delta
+ *   the order of this item in the array of subelements (0, 1, 2, etc)
+ *
  * @return
- *   This varies depending on the operation.
- *   - The "form" operation should return an array of form elements to display.
- *   - Other operations have no return value.
+ *   the form item for a single element for this field
  */
-function hook_widget($op, &$node, $field, &$node_field) {
-  switch ($op) {
-    case 'prepare form values':
-      if ($field['multiple']) {
-        $node_field_transposed = content_transpose_array_rows_cols($node_field);
-        $node_field['default nids'] = $node_field_transposed['nid'];
-      }
-      else {
-        $node_field['default nids'] = array($node_field['nid']);
-      }
-      break;
-
-    case 'form':
-      $form = array();
-
-      $form[$field['field_name']] = array('#tree' => TRUE);
-      $form[$field['field_name']]['nids'] = array(
-        '#type' => 'select',
-        '#title' => t($field['widget']['label']),
-        '#default_value' => $node_field['default nids'],
-        '#multiple' => $field['multiple'],
-        '#options' => _nodereference_potential_references($field),
-        '#required' => $field['required'],
-        '#description' => $field['widget']['description'],
-      );
-      return $form;
-
-    case 'process form values':
-      if ($field['multiple']) {
-        $node_field = content_transpose_array_rows_cols(array('nid' => $node_field['nids']));
-      }
-      else {
-        $node_field['nid'] = is_array($node_field['nids']) ? reset($node_field['nids']) : $node_field['nids'];
-      }
-      break;
-  }
+function text_widget(&$form, &$form_state, $field, $items, $delta = 0) {
+  $element = array(
+    '#type' => $field['widget']['type'],
+    '#default_value' => isset($items[$delta]) ? $items[$delta] : '',
+  );
+  return $element;
 }
 
+/**
+ * Process an individual element.
+ *
+ * Build the form element. When creating a form using FAPI #process,
+ * note that $element['#value'] is already set.
+ *
+ * The $fields array is in $form['#field_info'][$element['#field_name']].
+ */
+function text_textfield_process($element, $edit, $form_state, $form) {
+  $field = $form['#field_info'][$element['#field_name']];
+  $field_key = $element['#columns'][0];
+  $delta = $element['#delta'];
+  $element[$field_key] = array(
+    '#type' => 'textfield',
+    '#title' => t($field['widget']['label']),
+    '#description' => t($field['widget']['description']),
+    '#required' => $element['#required'],
+    '#default_value' => isset($element['#value'][$field_key]) ? $element['#value'][$field_key] : NULL,
+    '#autocomplete_path' => $element['#autocomplete_path'],
+  );
 
+  if (!empty($field['text_processing'])) {
+    $filter_key = $element['#columns'][1];
+    $format = isset($element['#value'][$filter_key]) ? $element['#value'][$filter_key] : FILTER_FORMAT_DEFAULT;
+    $parents = array_merge($element['#parents'] , array($filter_key));
+    $element[$filter_key] = filter_form($format, 1, $parents);
+  }
+  return $element;
+}
+
+/**
+ * Process an individual element.
+ *
+ * Build the form element. When creating a form using FAPI #process,
+ * note that $element['#value'] is already set.
+ *
+ * The $fields array is in $form['#field_info'][$element['#field_name']].
+ */
+function text_textarea_process($element, $edit, $form_state, $form) {
+  $field = $form['#field_info'][$element['#field_name']];
+  $field_key   = $element['#columns'][0];
+  $element[$field_key] = array(
+    '#type' => 'textarea',
+    '#title' => t($field['widget']['label']),
+    '#description' => t($field['widget']['description']),
+    '#required' => $element['#required'],
+    '#default_value' => isset($element['#value'][$field_key]) ? $element['#value'][$field_key] : NULL,
+    '#rows' => !empty($field['widget']['rows']) ? $field['widget']['rows'] : 10,
+    '#weight' => 0,
+  );
+
+  if (!empty($field['text_processing'])) {
+    $filter_key  = $element['#columns'][1];
+    $format = isset($element['#value'][$filter_key]) ? $element['#value'][$filter_key] : FILTER_FORMAT_DEFAULT;
+    $parents = array_merge($element['#parents'] , array($filter_key));
+    $element[$filter_key] = filter_form($format, 1, $parents);
+  }
+
+  return $element;
+}
+
+/**
+ * FAPI theme for an individual text elements.
+ *
+ * The textfield or textarea is already rendered by the
+ * textfield or textarea themes and the html output
+ * lives in $element['#children']. Override this theme to
+ * make custom changes to the output.
+ *
+ * $element['#field_name'] contains the field name
+ * $element['#delta]  is the position of this element in the group
+ */
+function theme_text_textfield($element) {
+  return $element['#children'];
+}
+
+function theme_text_textarea($element) {
+  return $element['#children'];
+}
 
 /**
  * @} End of "addtogroup hooks".

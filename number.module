@@ -407,6 +407,7 @@ function number_widget(&$form, &$form_state, $field, $items, $delta = 0) {
  * Build the form element. When creating a form using FAPI #process,
  * note that $element['#value'] is already set.
  *
+ * The $fields array is in $form['#field_info'][$element['#field_name']].
  */
 function number_process($element, $edit, $form_state, $form) {
   $field_name = $element['#field_name'];

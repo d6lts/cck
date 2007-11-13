@@ -387,6 +387,7 @@ function nodereference_autocomplete_value($element, $edit = FALSE) {
  * Build the form element. When creating a form using FAPI #process,
  * note that $element['#value'] is already set.
  *
+ * The $fields array is in $form['#field_info'][$element['#field_name']].
  */
 function nodereference_select_process($element, $edit, $form_state, $form) {
   // The nodereference_select widget doesn't need to create its own

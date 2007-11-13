@@ -161,7 +161,9 @@ function optionwidgets_widget(&$form, &$form_state, $field, $items, $delta = 0) 
  * Process an individual element.
  *
  * Build the form element. When creating a form using FAPI #process,
- * note that $element['#value'] is already set from $element['#default_value'].
+ * note that $element['#value'] is already set.
+ *
+ * The $fields array is in $form['#field_info'][$element['#field_name']].
  */
 function optionwidgets_buttons_process($element, $edit, $form_state, $form) {
   $field_name = $element['#field_name'];
@@ -186,7 +188,9 @@ function optionwidgets_buttons_process($element, $edit, $form_state, $form) {
  * Process an individual element.
  *
  * Build the form element. When creating a form using FAPI #process,
- * note that $element['#value'] is already set from $element['#default_value'].
+ * note that $element['#value'] is already set.
+ *
+ * The $fields array is in $form['#field_info'][$element['#field_name']].
  */
 function optionwidgets_select_process($element, $edit, $form_state, $form) {
   $field_name = $element['#field_name'];
@@ -213,7 +217,9 @@ function optionwidgets_select_process($element, $edit, $form_state, $form) {
  * Process an individual element.
  *
  * Build the form element. When creating a form using FAPI #process,
- * note that $element['#value'] is already set from $element['#default_value'].
+ * note that $element['#value'] is already set.
+ *
+ * The $fields array is in $form['#field_info'][$element['#field_name']].
  */
 function optionwidgets_onoff_process($element, $edit, $form_state, $form) {
   $field = $element['#field'];
