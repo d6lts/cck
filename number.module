@@ -75,21 +75,21 @@ function number_field_settings($op, $field) {
           '#options' => drupal_map_assoc(range(10, 32)),
           '#title' => t('Scale'),
           '#description' => t('The total number of digits to store in the database, including those to the right of the decimal.'),
-          '#default_value' => isset($field['scale']) ? $field['scale'] : '',
+          '#default_value' => isset($field['scale']) ? $field['scale'] : 10,
         );
         $form['precision'] = array(
           '#type' => 'select',
           '#options' => drupal_map_assoc(range(0, 2)),
           '#title' => t('Precision'),
           '#description' => t('The number of digits to the right of the decimal.'),
-          '#default_value' => isset($field['precision']) ? $field['precision'] : '',
+          '#default_value' => isset($field['precision']) ? $field['precision'] : 2,
         );
         $form['decimal'] = array(
           '#type' => 'select',
           '#options' => array('.' => 'decimal point', ',' => 'comma', ' ', 'space'),
           '#title' => t('Decimal marker'),
           '#description' => t('The character users will input to mark the decimal point in forms.'),
-          '#default_value' => isset($field['scale']) ? $field['scale'] : '',
+          '#default_value' => isset($field['scale']) ? $field['scale'] : '.',
         );
       }
       $form['append']['prefix'] = array(
@@ -230,17 +230,17 @@ function number_content_is_empty($item, $field) {
 function number_field_formatter_info() {
 
   return array(
-    'default' => array('label' => '9999',             'field types' => array('number_integer', 'number_decimal')),
-    'us_0'    => array('label' => '9,999',            'field types' => array('number_integer', 'number_decimal')),
-    'us_1'    => array('label' => '9,999.9',          'field types' => array('number_decimal')),
-    'us_2'    => array('label' => '9,999.99',         'field types' => array('number_decimal')),
-    'be_0'    => array('label' => '9.999',            'field types' => array('number_integer', 'number_decimal')),
-    'be_1'    => array('label' => '9.999,9',          'field types' => array('number_decimal')),
-    'be_2'    => array('label' => '9.999,99',         'field types' => array('number_decimal')),
-    'fr_0'    => array('label' => '9 999',            'field types' => array('number_integer', 'number_decimal')),
-    'fr_1'    => array('label' => '9 999, 9',         'field types' => array('number_decimal')),
-    'fr_2'    => array('label' => '9 999, 99',        'field types' => array('number_decimal')),
-    'unformatted' => array('label' => 'unformatted',  'field types' => array('number_integer', 'number_decimal')),
+    'default' => array('label' => '9999',             'field types' => array('number_integer', 'number_decimal', 'number_float')),
+    'us_0'    => array('label' => '9,999',            'field types' => array('number_integer', 'number_decimal', 'number_float')),
+    'us_1'    => array('label' => '9,999.9',          'field types' => array('number_decimal', 'number_float')),
+    'us_2'    => array('label' => '9,999.99',         'field types' => array('number_decimal', 'number_float')),
+    'be_0'    => array('label' => '9.999',            'field types' => array('number_integer', 'number_decimal', 'number_float')),
+    'be_1'    => array('label' => '9.999,9',          'field types' => array('number_decimal', 'number_float')),
+    'be_2'    => array('label' => '9.999,99',         'field types' => array('number_decimal', 'number_float')),
+    'fr_0'    => array('label' => '9 999',            'field types' => array('number_integer', 'number_decimal', 'number_float')),
+    'fr_1'    => array('label' => '9 999, 9',         'field types' => array('number_decimal', 'number_float')),
+    'fr_2'    => array('label' => '9 999, 99',        'field types' => array('number_decimal', 'number_float')),
+    'unformatted' => array('label' => 'unformatted',  'field types' => array('number_integer', 'number_decimal', 'number_float')),
   );
 }
 
@@ -413,14 +413,18 @@ function number_process($element, $edit, $form_state, $form) {
   $field = $form['#field_info'][$field_name];
   $field_key  = $element['#columns'][0];
 
+  $value = isset($element['#value'][$field_key]) ? $element['#value'][$field_key] : '';
+  $value = isset($field['decimal']) ? str_replace('.', $field['decimal'], $value) : $value;
   $element[$field_key] = array(
     '#type' => 'textfield',
     '#title' => t($field['widget']['label']),
     '#description' => t($field['widget']['description']),
     '#required' => $element['#required'],
-    '#default_value' => isset($element['#value'][$field_key]) ? $element['#value'][$field_key] : '',
-    '#size' => 20,
-    '#maxlength' => 11,
+    '#default_value' => $value,
+    // Need to allow a slighltly larger size that the field length to allow
+    // for some configurations where all characters won't fit in input field.
+    '#size' => isset($field['scale']) ? $field['scale'] + 2 : 12,
+    '#maxlength' => isset($field['scale']) ? $field['scale'] : 10,
     '#attributes' => array('class' => 'number'),
   );
 
