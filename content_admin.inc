@@ -493,7 +493,7 @@ function _content_admin_field_add_new(&$form_state, $type_name, $new_field_name 
       '#title' => t('Field name'),
       '#type' => 'textfield',
       '#default_value' => $new_field_name,
-      '#description' => t('The machine-readable name of the field. This name cannot be changed later! the name must be prefixed with \'field_\' and can include lowercase unaccentuated letters, numbers, and underscores. You\'ll be able to choose a human-readable label for the field on next page'),
+      '#description' => t('The machine-readable name of the field. This name cannot be changed later! The name must be prefixed with \'field_\' and can include lowercase unaccentuated letters, numbers, and underscores. You\'ll be able to choose a human-readable label for the field on next page'),
       '#required' => TRUE,
     );
     $form['new']['field_widget_type'] = array(
