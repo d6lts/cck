@@ -73,6 +73,17 @@ function content_schema() {
   // Dynamic (data) tables.
   include_once('./'. drupal_get_path('module', 'content') .'/content.module');
 
+
+  // When the module is first installed, the remaining code in the schema
+  // will create errors, since these tables have not yet been created.
+  // We don't need to create those tables on initial installation anyway
+  // since no fields have been created yet, so just return with this much
+  // of the schema.
+
+  if (!db_table_exists('content_field') || !db_table_exists('content_field_instance')) {
+    return $schema;
+  }
+
   // Can't use many helper functions here, like content_fields() or
   // content_types() or we risk creating a fatal loop from circular
   // logic when they call other functions that use this schema, so create
