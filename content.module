@@ -41,6 +41,15 @@ function content_init() {
   if (module_exists('pathauto')) {
     module_load_include('inc', 'content', 'content_pathauto');
   }
+  // When adding new content types and fields, a menu rebuild is needed,
+  // but sometimes it won't work right until other processes complete.
+  // This session variable provides a way to delay the rebuild until
+  // the next page load.
+  if (isset($_SESSION['content_menu_needs_rebuild'])) {
+    content_clear_type_cache(TRUE);
+    menu_rebuild();
+    unset($_SESSION['content_menu_needs_rebuild']);
+  }
 }
 
 /**
@@ -599,6 +608,7 @@ function content_notify($op, $module) {
       content_clear_type_cache();
       break;
     case 'uninstall':
+      module_load_include('inc', 'content', 'content_crud');
       content_module_delete($module);
       content_clear_type_cache(TRUE);
       break;

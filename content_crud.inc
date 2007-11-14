@@ -201,6 +201,8 @@ function content_field_delete($field) {
     content_field_instance_delete($field);
   }
 
+  db_query("DELETE FROM {". content_field_tablename() ."} WHERE field_name = '%s'", $field['field_name']);
+
   // TODO menu_rebuild() is REALLY REALLY slow, is there an ajaxy way to run this
   // in the background while we proceed to the next step?
 
@@ -503,12 +505,8 @@ function content_module_delete($module) {
   // Delete the field data.
   $results = db_query("SELECT * FROM {". content_field_tablename() ."} WHERE module = '%s'", $module);
   while ($field = db_fetch_array($results)) {
-    $field['columns'] = unserialize($field['columns']);
     content_field_delete($field);
   }
-  // Delete the field settings.
-  db_query("DELETE FROM {". content_field_tablename() ."} WHERE module = '%s'", $module);
-  db_query("DELETE FROM {". content_instance_tablename() ."} WHERE widget_module = '%s'", $module);
   // Force the caches and static arrays to update to the new info.
   _content_type_info(TRUE, TRUE);
 
@@ -540,9 +538,13 @@ function content_types_rebuild() {
  *
  * @param $info
  *   value supplied by hook_node_type()
+ *
+ * node_get_types() is still missing the new type at this point, so no
+ * use to call content_clear_type_cache() or menu_rebuild() here. Instead
+ * we set a flag to make sure it gets rebuilt on next page load.
  */
 function content_type_create($info) {
-  content_clear_type_cache();
+  $_SESSION['content_menu_needs_rebuild'] = TRUE;
   $type = content_types($info->type);
   $table = _content_tablename($info->type, CONTENT_DB_STORAGE_PER_CONTENT_TYPE);
   if (!db_table_exists($table)) {
@@ -550,8 +552,6 @@ function content_type_create($info) {
     db_create_table($ret, $table, _content_table_schema());
     drupal_set_message(t('The content fields table %name has been created.', array('%name' => $table)));
   }
-  // Must rebuild the menu here so our field paths get created.
-  menu_rebuild();
 }
 
 /**
