@@ -10,6 +10,7 @@ General
 - Include views module in content_clear_type_cache() to prevent errors when this is called from .install files.
 
 Field / widget modules
+- #183816  Fix missing decimal in number formatter.
 - #140687  OptionWidgets : fix 'single checkbox' stick on checked when used with text values.
 
 5--1.6-1
