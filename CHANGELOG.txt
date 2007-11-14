@@ -6,6 +6,9 @@
 Bugfix
 ------
 
+General
+- Include views module in content_clear_type_cache() to prevent errors when this is called from .install files.
+
 Field / widget modules
 - #140687  OptionWidgets : fix 'single checkbox' stick on checked when used with text values.
 
@@ -27,16 +30,16 @@ Field / widget modules
 5--1.6
 ======
 
-IMPORTANT : this release fixes two cross-site scripting (XSS) vulnerabilities 
+IMPORTANT : this release fixes two cross-site scripting (XSS) vulnerabilities
 in nodereference.module :
 - when a nodereference field is displayed using the 'plain' formatter
-- when a nodereference field is edited using the 'autocomplete text field' widget 
-  (only when _not_ using the 'advanced options - Views.module' for the field) 
-  
+- when a nodereference field is edited using the 'autocomplete text field' widget
+  (only when _not_ using the 'advanced options - Views.module' for the field)
+
 All sites using CCK / nodereference.module should consider upgrading to this release
 as soon as possible.
 
-Features 
+Features
 --------
 
 General
@@ -47,7 +50,7 @@ General
 - #136697  Make field form_alter easier, if fieldgroups are used.
 
 Field / widget modules
-- #152892  Optionwidgets : Better help text for 'single on/off checkbox' widget label.   
+- #152892  Optionwidgets : Better help text for 'single on/off checkbox' widget label.
 - #65133 / #152016  Nodereference : Added 'full node' and 'teaser' formatters.
 - #126926  Nodereference : Skip node_load in 'title'-based formatters.
 
@@ -67,23 +70,23 @@ Field / widget modules
 -          Nodereference : Fixed XSS vulnerabilities (missing check_plain's around node titles).
 - #147205  Nodereference : Fixed 'advanced settings - view arguments' not working.
 - #155327  Nodereference : Added missing "n." table aliases in 'referenceable nodes' query.
-- #153284  Nodereference : Fix unneeded and repeating {view_view} queries when 
+- #153284  Nodereference : Fix unneeded and repeating {view_view} queries when
            'advanced (Views) node selection' is *not* used.
-- #150297  Nodereference : Fix encoded raw htmlentities appearing in select widgets when using 
+- #150297  Nodereference : Fix encoded raw htmlentities appearing in select widgets when using
            'advanced (Views) node selection' is used.
 - #129016  Nodereference : Prevent possible errors if formatter is called with non numeric 'nid'.
-   
+
 5--1.5
 ======
 
-Features 
+Features
 --------
-- #126333  Update to Views 1.6 API 
+- #126333  Update to Views 1.6 API
            (no need to update cached queries on field setup changes anymore)
 - #115848  Optimization : use dedicated cache table
 - #126776  Enhance 'default value php code' help text and error message.
 -          minor - collapse 'default value php code' if empty
-           
+
 Bugfix
 ------
 
@@ -92,9 +95,9 @@ General
 - #130545  Core translation destroyed by German translation
 -          Fieldgroup_data cache was fetched every time from the database -> fixed static caching
 - #128994  Fix for 'ungroup multiple values' views handler populating every 'column'
-           of the values with the first column (revert http://drupal.org/cvs?commit=58000) 
+           of the values with the first column (revert http://drupal.org/cvs?commit=58000)
 - #116775  Stupid conflict on field form when field_name == 'name'
-- #122991  Fixes further display page issues with no fields / groups           
+- #122991  Fixes further display page issues with no fields / groups
 - #127010  (followup to #125661) - proper escaping in update_sql
 -          Forgot some t() labels in fieldgroups
 - #125661  escape group description in update_sql (fieldgroup update)
@@ -156,7 +159,7 @@ Field / widget modules
 - #108302  Number : Added formatters for numbers (+ be sure non-numeric data is not stored)
 - #110570  Number : Added prefix and suffix option
 - #111129  Optionwidgets : Added widget to handle single on/off checkbox
-- #112464  Standardize validation in field rather than widget, 
+- #112464  Standardize validation in field rather than widget,
            Standardize use of $items rather than $node_field
 
 Bugfix
