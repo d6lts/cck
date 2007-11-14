@@ -1064,6 +1064,8 @@ function content_clear_type_cache($with_schema = FALSE) {
   }
 
   if (module_exists('views')) {
+    // Needed because this can be called from .install files
+    include_once('./'. drupal_get_path('module', 'views') .'/views.module');
     views_invalidate_cache();
   }
 }
