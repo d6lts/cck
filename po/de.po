@@ -17,7 +17,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: CCK\n"
 "POT-Creation-Date: 2006-07-27 08:09-0400\n"
-"PO-Revision-Date: 2007-10-13 23:10+0100\n"
+"PO-Revision-Date: 2007-11-15 14:16+0100\n"
 "Last-Translator: Alexander Hass\n"
 "Language-Team: German <lukas.gangoly@univie.ac.at>\n"
 "MIME-Version: 1.0\n"
@@ -130,15 +130,15 @@ msgstr "!label (!name)"
 
 #: content_admin.inc:320
 msgid "Updated field groups."
-msgstr "Feldgruppen wurden aktualisiert."
+msgstr "Die Feldgruppen wurden aktualisiert."
 
 #: content_admin.inc:331
 msgid "Updated group weights."
-msgstr "Gruppengewichte wurden aktualisiert."
+msgstr "Die Reihenfolge der Gruppen wurde aktualisiert."
 
 #: content_admin.inc:342
 msgid "Updated field weights."
-msgstr "Feldgewichte wurden aktualisiert."
+msgstr "Die Reihenfolge der Felder wurde aktualisiert."
 
 #: content_admin.inc:371
 #: content_copy.module:158;231
@@ -174,11 +174,11 @@ msgstr "Anrisstext"
 
 #: content_admin.inc:452
 msgid "Full"
-msgstr "Voll"
+msgstr "Vollständig"
 
 #: content_admin.inc:483
 msgid "Add existing field"
-msgstr "Existierendes Feld hinzufügen"
+msgstr "Vorhandenes Feld hinzufügen"
 
 #: content_admin.inc:492
 #: content.module:108
@@ -191,7 +191,7 @@ msgstr "Neues Feld anlegen"
 
 #: content_admin.inc:524
 msgid "The machine-readable name of the field.<br/>Allowed characters : unaccentuated a-z, numbers and _. All other characters will be discarded.<br/>You'll be able to choose a human-readable label for the field on next page"
-msgstr ""
+msgstr "Der maschinenlesbare Name des Feldes.<br />Gültige Zeichen: nicht-akzentuierte a-z, Zahlen und _. Alle weiteren Zeichen werden entfernt.<br />Eine visuell lesbare Bezeichnung für das Feld kann auf der nächsten Seite ausgewählt werden"
 
 #: content_admin.inc:537
 msgid "Create field"
@@ -199,7 +199,7 @@ msgstr "Feld anlegen"
 
 #: content_admin.inc:549
 msgid "No field modules are enabled. You need to <a href=\"!modules_url\">enable one</a>, such as text.module, before you can add new fields."
-msgstr "Keine Feldmodule aktiviert. Zumindest eines, z.B. text.module, muss <a href=\"!modules_url\">aktiviert sein</a>, bevor neue Felder hinzugefügt werden können."
+msgstr "Es sind keine Feldmodule aktiviert. Zumindest eines, z.B. text.module, muss <a href=\"!modules_url\">aktiviert sein</a>, bevor neue Felder hinzugefügt werden können."
 
 #: content_admin.inc:605
 msgid "Added field %label."
@@ -207,7 +207,7 @@ msgstr "Feld %label hinzugefügt."
 
 #: content_admin.inc:617
 msgid "The field name %field_name already exists."
-msgstr "Der Feldname %field_name existiert bereits."
+msgstr "Der Feldname %field_name ist bereits vorhanden."
 
 #: content_admin.inc:621
 msgid "The field name %field_name is invalid."
@@ -302,7 +302,7 @@ msgstr "Feldeinstellungen speichern"
 
 #: content_admin.inc:924
 msgid "The default value php code returned an incorrect value<br/>Expected format : <pre>!sample</pre>Returned value : @value"
-msgstr ""
+msgstr "Der Standardwert den PHP Code bei ungültigen Werten zurückliefert<br/>Erwartetes Format : <pre>!sample</pre>zurückgegebener Wert : @value"
 
 #: content_admin.inc:962
 msgid "The default value php code created @value which is invalid."
@@ -383,7 +383,7 @@ msgstr "Importieren"
 
 #: content_copy.module:81
 msgid "This form will process a content type and one or more fields from that type and export the settings. The export created by this process can be copied and pasted as an import into the current or any other database. The import will add the fields to into an existing content type or create a new content type that includes the selected fields."
-msgstr ""
+msgstr "Dieses Formular verarbeitet einen Inhaltstyp, ein oder mehrere Felder von diesem Typ und exportiert die Einstellungen. Der von diesem Prozess erstellte Export kann kopiert und als Import in die Aktuelle oder jede andere Datenbank eingefügt werden. Der Import wird die Felder zu einem vorhandenen Inhaltstyp hinzufügen oder einen neuen Inhaltstyp mit den ausgewählten Feldern erstellen."
 
 #: content_copy.module:90
 msgid "Types"
@@ -415,7 +415,7 @@ msgstr "Kopieren Sie den exportierten Text und fügen Sie ihn mit der Importfunk
 
 #: content_copy.module:214
 msgid "This form will import field definitions exported from another content type or another database.<br/>Note that fields cannot be duplicated within the same content type, so imported fields will be added only if they do not already exist in the selected type."
-msgstr ""
+msgstr "Dieses Formular wird Felddefinitionen importieren, die von einem anderen Inhaltstyp oder anderen Datenbank exportiert wurden.<br />Dabei ist zu beachten, dass die Felder nicht innerhalb des gleichen Inhalttyps dupliziert werden können, deshalb werden importierte Felder nur hinzugefügt, wenn diese im ausgewählten Typ noch nicht vorhanden sind."
 
 #: content_copy.module:217
 msgid "<Create>"
@@ -559,7 +559,7 @@ msgstr "Wählen Sie eine Gruppe aus, in der das Feld im Bearbeitungsformular ang
 
 #: fieldgroup.module:481
 msgid "no styling"
-msgstr ""
+msgstr "kein Design"
 
 #: fieldgroup.module:482
 msgid "simple"
@@ -607,7 +607,7 @@ msgstr "Anzeigen"
 
 #: nodereference.module:70
 msgid "Choose the \"Views module\" view that selects the nodes that can be referenced.<br>Note :<ul><li>This will discard the \"Content types\" settings above. Use the view's \"filters\" section instead.</li><li>Use the view's \"fields\" section to display additional informations about candidate nodes on node creation/edition form.</li><li>Use the view's \"sort criteria\" section to determine the order in which candidate nodes will be displayed.</li></ul>"
-msgstr ""
+msgstr "Wähle die „Views-Modul“-Ansicht das die Beiträge auswählt, die Referenziert werden können.<br />Hinweis:<ul><li>Dies wird die Einstellungen der obigen „Inhaltsttypen“ verwerfen. Stattdessen sollte hierfür der „Filter“-Bereich der Ansicht verwendet werden.</li><li>Um weitere Informationen über Beitragskandidaten für das Erstellungs-/Bearbeitungsformular anzuzeigen, kann das Ansichten Feld verwendet werden.</li><li>Um die Reihenfolge der Beitragskandidaten anzuzeigen sollte „Sortierkriterium“ von Ansichten verwendet werden.</li></ul>"
 
 #: nodereference.module:74
 msgid "View arguments"
@@ -615,7 +615,7 @@ msgstr "Argumente anzeigen"
 
 #: nodereference.module:77
 msgid "Provide a comma separated list of arguments to pass to the view."
-msgstr ""
+msgstr "Eine kommagetrennte Liste von Argumenten angeben, welche an die Ansicht übergeben werden."
 
 #: nodereference.module:122
 msgid "%name : This post can't be referenced."
@@ -670,7 +670,7 @@ msgstr "Gültige Werteliste"
 #: number.module:61
 #: text.module:45
 msgid "The possible values this field can contain. Enter one value per line, in the format key|label. The key is the value that will be stored in the database and it must match the field storage type, %type. The label is optional and the key will be used as the label if no label is specified."
-msgstr ""
+msgstr "Die möglichen Werte, welche dieses Feld enthalten kann. Es sollte ein Wert pro Zeile im Format „Schlüssel|Beschriftung“ angegeben werden. Der Schlüssel ist der Wert, welcher in der Datenbank gespeichert wird und dem Feldspeichertyp %type entsprechen muss. Sollte die optionale Beschriftung nicht angegeben werden, wird der Schlüssel als Beschriftung verwendet."
 
 #: number.module:74
 #: text.module:58
@@ -699,15 +699,15 @@ msgstr "Nummer"
 
 #: optionwidgets.module:15
 msgid "Create a list of options as a list in <strong>Allowed values</strong> or as an array in Php code at the bottom of this page. These values will be the same for the %field in all content types. "
-msgstr ""
+msgstr "Eine Liste von Optionen als eine Liste in <strong>gültigen Werten</strong> oder als ein Array in PHP Code am Ende dieser Seite erstellen. Diese Werte werden mit dem %field in allen Inhaltsstypen übereinstimmen."
 
 #: optionwidgets.module:17
 msgid "For a 'Single on/off checkbox' widget, define the 'off' value first, then the 'on' value in the <strong>Allowed values</strong> section. Note that the checkbox will be labeled with the label of the 'on' value."
-msgstr ""
+msgstr "Für ein einzelnes „an/aus“ Checkbox-Steuerelement sollte zuerst der ‚aus‘ Wert und dann der ‚an‘ Wert im Bereich der <strong>gültigen Werte</strong> angegeben werden. Die Checkbox wird mit der Beschriftung des ‚an‘ Wertes beschriftet."
 
 #: optionwidgets.module:20
 msgid "The 'Checkboxes / radio buttons' widget will display checkboxes if the multiple values option is selected for this field, otherwise radios will be displayed."
-msgstr ""
+msgstr "Das ‚Checkboxes / Auswahl-Knöpfe‘ Steuerelement wird Checkboxen anzeigen, wenn die Option für mehrere Werte bei diesem Feld ausgewählt wurde, ansonsten werden Auswahl-Knöpfe anzeigt."
 
 #: optionwidgets.module:204
 msgid "N/A"
@@ -751,7 +751,7 @@ msgstr "Verweis auf Benutzer"
 
 #: optionwidgets.install:77
 msgid "<div>The allowed values list for %field was updated from </div><pre>%start</pre><div> to </div><pre>%end</pre><div>You can go to the field settings page to give each option a more user-friendly label."
-msgstr "<div>Die zulässige Werteliste für %field wurde aktualisiert von </div><pre>%start</pre><div> zu </div><pre>%end</pre>.<div>Auf der Feld-Einstellungsseite können nun benutzerfreundlichere Bezeichnungen vergeben werden."
+msgstr "<div>Die gültige Werteliste für %field wurde von </div><pre>%start</pre><div> zu </div><pre>%end</pre> aktualisiert.<div>Auf der Feld-Einstellungsseite können nun benutzerfreundlichere Bezeichnungen vergeben werden."
 
 #: optionwidgets.install:80
 msgid "<div>The allowed values list for %field was not changed from </div><pre>%start</pre>"
