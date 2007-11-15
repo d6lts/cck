@@ -475,7 +475,6 @@ function _content_admin_field_add_new(&$form_state, $type_name, $new_field_name 
   $field_types = _content_field_types();
   $widget_types = _content_widget_types();
   $form = array();
-
   $field_type_options = array();
   foreach ($field_types as $field_name => $field_type) {
     foreach ($widget_types as $widget_name => $widget_type) {
@@ -547,8 +546,13 @@ function theme_content_admin_field_add_new_field_widget_type($form) {
 function _content_admin_field_add_existing_submit($form, &$form_state) {
   module_load_include('inc', 'content', 'content_crud');
   $form_values = $form_state['values'];
-  content_field_instance_create($form_values);
-  drupal_set_message(t('Added field %label.', array('%label' => $form_values['field_name'])));
+
+  if (!content_field_instance_create($form_values)) {
+    drupal_set_message(t('There was a problem adding field %label.', array('%label' => $form_values['field_name'])));
+  }
+  else {
+    drupal_set_message(t('Added field %label.', array('%label' => $form_values['field_name'])));
+  }
   $type   = content_types($form_values['type_name']);
   $form_state['redirect'] = 'admin/content/types/'. $type['url_str'] .'/fields';
 }
@@ -585,8 +589,14 @@ function _content_admin_field_add_new_submit($form, &$form_state) {
   $field_widget_type = explode('-', $form_values['field_widget_type']);
   $form_values['type'] = $field_widget_type[0];
   $form_values['widget_type'] = $field_widget_type[1];
-  content_field_create($form_values);
-  drupal_set_message(t('Created field %label.', array('%label' => $form_values['field_name'])));
+
+  if (!$field = content_field_create($form_values)) {
+    drupal_set_message(t('There was a problem creating field %label.', array('%label' => $form_values['field_name'])));
+  }
+  else {
+    drupal_set_message(t('Created field %label.', array('%label' => $form_values['field_name'])));
+  }
+
   $type   = content_types($form_values['type_name']);
   $form_state['redirect'] = 'admin/content/types/'. $type['url_str'] .'/fields/'. $form_values['field_name'];
 }
@@ -628,8 +638,12 @@ function _content_admin_field_remove_submit($form, &$form_state) {
   $type = content_types($form_values['type_name']);
   $field = $type['fields'][$form_values['field_name']];
   if ($type && $field && $form_values['confirm']) {
-    content_field_instance_delete($form_values);
-    drupal_set_message(t('Removed field %field from %type.', array('%field' => $field['widget']['label'], '%type' => $type['name'])));
+    if (content_field_instance_delete($form_values['field_name'], $form_values['type_name'])) {
+      drupal_set_message(t('Removed field %field from %type.', array('%field' => $field['widget']['label'], '%type' => $type['name'])));
+    }
+    else {
+      drupal_set_message(t('There was a problem deleting %field from %type', array('%field' => $field['widget']['label'], '%type' => $type['name'])));
+    }
     $form_state['redirect'] = 'admin/content/types/'. $type['url_str'] .'/fields';
   }
 }
@@ -650,6 +664,7 @@ function _content_admin_field(&$form_state, $type_name, $field_name) {
   $field_type = $field_types[$field['type']];
   $widget_types = _content_widget_types();
   $widget_type = $widget_types[$field['widget']['type']];
+
   drupal_set_title(isset($field['widget']['label']) ? $field['widget']['label'] : $field['field_name']);
 
   // Set up form info that the default value widget will need to find in the form.

@@ -75,7 +75,7 @@ function nodereference_field_settings($op, $field) {
         '#type' => 'checkboxes',
         '#title' => t('Content types that can be referenced'),
         '#multiple' => TRUE,
-        '#default_value' => isset($field['referenceable_types']) ? $field['referenceable_types'] : array(),
+        '#default_value' => is_array($field['referenceable_types']) ? $field['referenceable_types'] : array(),
         '#options' => node_get_types('names'),
       );
       if (module_exists('views')) {
@@ -550,7 +550,7 @@ function _nodereference_potential_references($field, $return_full_nodes = FALSE,
     $related_types = array();
     $args = array();
 
-    if (isset($field['referenceable_types'])) {
+    if (is_array($field['referenceable_types'])) {
       foreach ($field['referenceable_types'] as $related_type) {
         if ($related_type) {
           $related_types[] = " n.type = '%s'";

@@ -65,12 +65,12 @@ function number_field_settings($op, $field) {
       $form['min'] = array(
         '#type' => 'textfield',
         '#title' => t('Minimum'),
-        '#default_value' => isset($field['min']) ? $field['min'] : '',
+        '#default_value' => is_numeric($field['min']) ? $field['min'] : '',
       );
       $form['max'] = array(
         '#type' => 'textfield',
         '#title' => t('Maximum'),
-        '#default_value' => isset($field['max']) ? $field['max'] : '',
+        '#default_value' => is_numeric($field['max']) ? $field['max'] : '',
       );
       if ($field['type'] == 'number_decimal') {
         $form['scale'] = array(
@@ -78,41 +78,41 @@ function number_field_settings($op, $field) {
           '#options' => drupal_map_assoc(range(10, 32)),
           '#title' => t('Scale'),
           '#description' => t('The total number of digits to store in the database, including those to the right of the decimal.'),
-          '#default_value' => isset($field['scale']) ? $field['scale'] : 10,
+          '#default_value' => is_numeric($field['scale']) ? $field['scale'] : 10,
         );
         $form['precision'] = array(
           '#type' => 'select',
           '#options' => drupal_map_assoc(range(0, 2)),
           '#title' => t('Precision'),
           '#description' => t('The number of digits to the right of the decimal.'),
-          '#default_value' => isset($field['precision']) ? $field['precision'] : 2,
+          '#default_value' => is_numeric($field['precision']) ? $field['precision'] : 2,
         );
         $form['decimal'] = array(
           '#type' => 'select',
           '#options' => array('.' => 'decimal point', ',' => 'comma', ' ', 'space'),
           '#title' => t('Decimal marker'),
           '#description' => t('The character users will input to mark the decimal point in forms.'),
-          '#default_value' => isset($field['scale']) ? $field['scale'] : '.',
+          '#default_value' => !empty($field['scale']) ? $field['scale'] : '.',
         );
       }
       $form['append']['prefix'] = array(
         '#type' => 'textfield',
         '#title' => t('Prefix'),
         '#size' => 60,
-        '#default_value' => isset($field['prefix']) ? $field['prefix'] : '',
+        '#default_value' => !empty($field['prefix']) ? $field['prefix'] : '',
         '#description' => t('Define a string that should be prefixed to the value, like $ or €. Leave blank for none. Separate singular and plural values with a pipe (pound|pounds).'),
       );
       $form['append']['suffix'] = array(
         '#type' => 'textfield',
         '#title' => t('Suffix'),
         '#size' => 60,
-        '#default_value' => isset($field['suffix']) ? $field['suffix'] : '',
+        '#default_value' => !empty($field['suffix']) ? $field['suffix'] : '',
         '#description' => t('Define a string that should suffixed to the value, like m², m/s², kb/s. Leave blank for none. Separate singular and plural values with a pipe (pound|pounds). '),
       );
       $form['allowed_values'] = array(
         '#type' => 'textarea',
         '#title' => t('Allowed values list'),
-        '#default_value' => isset($field['allowed_values']) ? $field['allowed_values'] : '',
+        '#default_value' => !empty($field['allowed_values']) ? $field['allowed_values'] : '',
         '#required' => FALSE,
         '#rows' => 10,
         '#description' => t('The possible values this field can contain. Enter one value per line, in the format key|label. The key is the value that will be stored in the database and it must match the field storage type, %type. The label is optional and the key will be used as the label if no label is specified.', array('%type' => $field['type'])),
@@ -126,7 +126,7 @@ function number_field_settings($op, $field) {
       $form['advanced_options']['allowed_values_php'] = array(
         '#type' => 'textarea',
         '#title' => t('Code'),
-        '#default_value' => isset($field['allowed_values_php']) ? $field['allowed_values_php'] : '',
+        '#default_value' => !empty($field['allowed_values_php']) ? $field['allowed_values_php'] : '',
         '#rows' => 6,
         '#description' => t('Advanced Usage Only: PHP code that returns a keyed array of allowed values. Should not include &lt;?php ?&gt; delimiters. If this field is filled out, the array returned by this code will override the allowed values list above.'),
       );

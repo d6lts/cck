@@ -55,20 +55,20 @@ function text_field_settings($op, $field) {
       $form['text_processing'] = array(
         '#type' => 'radios',
         '#title' => t('Text processing'),
-        '#default_value' => isset($field['text_processing']) ? $field['text_processing'] : 0,
+        '#default_value' => is_numeric($field['text_processing']) ? $field['text_processing'] : 0,
         '#options' => $options,
       );
       $form['max_length'] = array(
         '#type' => 'textfield',
         '#title' => t('Maximum length'),
-        '#default_value' => isset($field['max_length']) ? $field['max_length'] : '',
+        '#default_value' => is_numeric($field['max_length']) ? $field['max_length'] : '',
         '#required' => FALSE,
         '#description' => t('The maximum length of the field in characters. Leave blank for an unlimited size.'),
       );
       $form['allowed_values'] = array(
         '#type' => 'textarea',
         '#title' => t('Allowed values list'),
-        '#default_value' => isset($field['allowed_values']) ? $field['allowed_values'] : '',
+        '#default_value' => !empty($field['allowed_values']) ? $field['allowed_values'] : '',
         '#required' => FALSE,
         '#rows' => 10,
         '#description' => t('The possible values this field can contain. Enter one value per line, in the format key|label. The key is the value that will be stored in the database and it must match the field storage type, %type. The label is optional and the key will be used as the label if no label is specified.', array('%type' => $field['type'])),
@@ -82,7 +82,7 @@ function text_field_settings($op, $field) {
       $form['advanced_options']['allowed_values_php'] = array(
         '#type' => 'textarea',
         '#title' => t('Code'),
-        '#default_value' => isset($field['allowed_values_php']) ? $field['allowed_values_php'] : '',
+        '#default_value' => !empty($field['allowed_values_php']) ? $field['allowed_values_php'] : '',
         '#rows' => 6,
         '#description' => t('Advanced Usage Only: PHP code that returns a keyed array of allowed values. Should not include &lt;?php ?&gt; delimiters. If this field is filled out, the array returned by this code will override the allowed values list above.'),
       );
@@ -301,7 +301,7 @@ function text_widget_settings($op, $widget) {
         $form['rows'] = array(
           '#type' => 'textfield',
           '#title' => t('Rows'),
-          '#default_value' => isset($widget['rows']) ? $widget['rows'] : 5,
+          '#default_value' => is_numeric($widget['rows']) ? $widget['rows'] : 5,
           '#required' => TRUE,
         );
       }

@@ -49,7 +49,7 @@ function userreference_field_settings($op, $field) {
       $form['referenceable_roles'] = array(
         '#type' => 'checkboxes',
         '#title' => t('User roles that can be referenced'),
-        '#default_value' => isset($field['referenceable_roles']) ? $field['referenceable_roles'] : array(),
+        '#default_value' => is_array($field['referenceable_roles']) ? $field['referenceable_roles'] : array(),
         '#options' => user_roles(1),
       );
       return $form;
