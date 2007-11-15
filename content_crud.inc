@@ -316,7 +316,7 @@ function content_field_instance_create($field) {
 
   $default_values = content_instance_default_values($field['field_name'], $field['type_name'], $field['widget_type']);
   $field = array_merge($default_values, $prior_values, $field);
-  dsm($field);
+
   // Invoke hook_content_fieldapi().
   module_invoke_all('content_fieldapi', 'create instance', $field);
 
