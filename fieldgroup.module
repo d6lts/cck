@@ -204,7 +204,7 @@ function fieldgroup_edit_group_submit($form, &$form_state) {
 }
 
 function fieldgroup_remove_group(&$form_state, $content_type, $group_name) {
-  $groups = fieldgroup_groups($content_type['type']);
+  $groups = fieldgroup_groups($content_type);
   $group = $groups[$group_name];
 
   if (!$group) {
