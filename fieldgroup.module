@@ -75,7 +75,7 @@ function fieldgroup_elements() {
 /**
  * Implementation of hook_fieldapi().
  */
-function fieldgroup_contentapi($op, $field) {
+function fieldgroup_content_fieldapi($op, $field) {
   switch ($op) {
     case 'delete':
       db_query("DELETE FROM {". fieldgroup_fields_tablename() ." WHERE field_name = '%s'", $field['field_name']);

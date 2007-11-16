@@ -10,7 +10,7 @@
  * by the content module, or in flattened $form_values arrays, by
  * converting flattened arrays to the nested format.
  *
- * A hook_contentapi() is available for each field and field
+ * A hook_content_fieldapi() is available for each field and field
  * instance action, and each hook receives the nested field => widget
  * array as an argument. The $ops include:
  *
@@ -161,8 +161,8 @@ function content_field_create($field) {
   // Get a fresh copy of the column information whenever a field is created.
   $field['columns'] = (array) module_invoke($field['module'], 'field_settings', 'database columns', $field);
 
-  // Invoke hook_contentapi().
-  module_invoke_all('contentapi', 'create', $field);
+  // Invoke hook_content_fieldapi().
+  module_invoke_all('content_fieldapi', 'create', $field);
 
   // Write record and immediately create at least one field instance.
   _content_field_write($field, 'create');
@@ -206,8 +206,8 @@ function content_field_update($field) {
   // information may have changed, get a fresh copy.
   $field['columns'] = (array) module_invoke($field['module'], 'field_settings', 'database columns', $field);
 
-  // Invoke hook_contentapi().
-  module_invoke_all('contentapi', 'update', $field);
+  // Invoke hook_content_fieldapi().
+  module_invoke_all('content_fieldapi', 'update', $field);
 
   _content_field_write($field, 'update');
 
@@ -271,8 +271,8 @@ function content_field_read($param) {
   }
   unset($field['global_settings']);
 
-  // Invoke hook_contentapi().
-  module_invoke_all('contentapi', 'read', $field);
+  // Invoke hook_content_fieldapi().
+  module_invoke_all('content_fieldapi', 'read', $field);
 
   return $field;
 }
@@ -285,8 +285,8 @@ function content_field_delete($field_name) {
   // Get the current value to pass to the hook.
   $field = content_field_read(array('field_name' => $field_name));
 
-  // Invoke hook_contentapi().
-  module_invoke_all('contentapi', 'delete', $field);
+  // Invoke hook_content_fieldapi().
+  module_invoke_all('content_fieldapi', 'delete', $field);
 
   $instances = content_field_instance_read(array('field_name' => $field_name));
   foreach ($instances as $instance) {
@@ -327,8 +327,8 @@ function content_field_instance_create($field) {
   $default_values = content_instance_default_values($field['field_name'], $field['type_name'], $field['widget_type']);
   $field = array_merge($default_values, $prior_values, $field);
 
-  // Invoke hook_contentapi().
-  module_invoke_all('contentapi', 'create instance', $field);
+  // Invoke hook_content_fieldapi().
+  module_invoke_all('content_fieldapi', 'create instance', $field);
 
   if (is_array($field['columns']) && count($field['columns'])) {
     if ($field['db_storage'] == CONTENT_DB_STORAGE_PER_CONTENT_TYPE && $prior_instances) {
@@ -361,8 +361,8 @@ function content_field_instance_update($field) {
   $default_values = content_instance_default_values($field['field_name'], $field['type_name'], $field['widget_type']);
   $field = array_merge($default_values, $prev_field, $field);
 
-  // Invoke hook_contentapi().
-  module_invoke_all('contentapi', 'update instance', $field);
+  // Invoke hook_content_fieldapi().
+  module_invoke_all('content_fieldapi', 'update instance', $field);
 
   _content_field_instance_write($field, 'update');
 
@@ -463,8 +463,8 @@ function content_field_instance_read($param = NULL) {
 
     $field = content_field_instance_expand(array_merge($base_field, $instance));
 
-    // Invoke hook_contentapi().
-    module_invoke_all('contentapi', 'read instance', $field);
+    // Invoke hook_content_fieldapi().
+    module_invoke_all('content_fieldapi', 'read instance', $field);
     $fields[] = $field;
   }
   return $fields;
@@ -478,8 +478,8 @@ function content_field_instance_delete($field_name, $type_name) {
   $fields = content_field_instance_read(array('field_name' => $field_name, 'type_name' => $type_name));
   $field = $fields[0];
 
-  // Invoke hook_contentapi().
-  module_invoke_all('contentapi', 'delete instance', $field);
+  // Invoke hook_content_fieldapi().
+  module_invoke_all('content_fieldapi', 'delete instance', $field);
 
   db_query("DELETE FROM {". content_instance_tablename() .
     "} WHERE field_name = '%s' AND type_name = '%s'", $field['field_name'], $field['type_name']);
