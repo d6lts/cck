@@ -224,7 +224,7 @@ function content_form(&$form, &$form_state) {
   if (count($type['fields'])) {
     foreach ($type['fields'] as $field_name => $field) {
       $form['#field_info'][$field['field_name']] = $field;
-      $form += (array) content_form_field($form, $form_state, $field);
+      $form += (array) content_field_form($form, $form_state, $field);
     }
   }
   return $form;
@@ -250,7 +250,7 @@ function content_form(&$form, &$form_state) {
  *   use to get only a specific delta value of a multiple value field, otherwise
  *   function will return the entire $field form element.
  */
-function content_form_field(&$form, &$form_state, $field, $get_delta = NULL) {
+function content_field_form(&$form, &$form_state, $field, $get_delta = NULL) {
   $form['#cache'] = FALSE;
   $node = $form['#node'];
   $addition = array();
@@ -421,7 +421,8 @@ function content_add_more_js($field_name) {
   // Build our new form element.
   $field = $form['#field_info'][$field_name];
   $form_state = array('values' => $_POST);
-  $form_element = content_form_field($form, $form_state, $field, $delta);
+  $form_element = content_field_form($form, $form_state, $field, $delta);
+  $form_element[$field_name][0]['#weight'] = $delta;
 
   drupal_alter('form', $form_element, array(), 'content_add_more_js');
   $form[$field_name][$delta] = $form_element[$field_name][0];
@@ -1514,4 +1515,19 @@ function template_preprocess_field(&$variables) {
     'field_empty' => $field_empty,
   );
   $variables = array_merge($variables, $additions);
+}
+
+/**
+ * Debugging for content_fieldapi.
+ *
+ * @TODO remove later
+ *
+ * @param unknown_type $op
+ * @param unknown_type $field
+ */
+function content_content_fieldapi($op, $field) {
+  if (module_exists('devel')) {
+    //dsm($op);
+    //dsm($field);
+  }
 }
