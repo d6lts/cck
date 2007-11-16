@@ -351,7 +351,6 @@ function content_multiple_value_form(&$form, &$form_state, $field, $items) {
   if ($field['multiple'] == 1 && empty($form['#programmed'])) {
     // Make sure the form is cached so ahah can work.
     $form['#cache'] = TRUE;
-
     // Add a wrapper for the fields and more button.
     $field_name_css = str_replace('_', '-', $field_name);
     $form_element['#prefix'] = '<div class="clear-block" id="'. $field_name_css .'-add-more-wrapper">';
