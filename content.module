@@ -317,7 +317,13 @@ function content_form_field(&$form, &$form_state, $field, $get_delta = NULL) {
   return $addition;
 }
 
-
+/**
+ * Special handling to create form elements for multiple values.
+ *
+ * Checks value stored in $field['multiple'] and uses it to either
+ * provide the right number of field elements or add the AHAH add more
+ * processing to the form.
+ */
 function content_multiple_value_form(&$form, &$form_state, $field, $items) {
   $function = $field['module'] .'_widget';
   $field_name = $field['field_name'];
