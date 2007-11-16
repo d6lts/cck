@@ -731,7 +731,7 @@ function _content_admin_field(&$form_state, $type_name, $field_name) {
     $widget_form = array('#node' => $node);
     $widget_items = array($field['field_name'] => $default_value);
     $widget_form_state = array('values' => $widget_items);
-    $form_element = content_form_field($widget_form, $widget_form_state, $widget_field, 0);
+    $form_element = content_field_form($widget_form, $widget_form_state, $widget_field, 0);
     $form['widget']['default_value_fieldset']['default_value_widget'] = $form_element;
     $form['widget']['default_value_fieldset']['default_value_widget']['#tree'] = TRUE;
     $form['widget']['default_value_fieldset']['advanced_options'] = array(
