@@ -32,7 +32,7 @@
   <?php endif;?>
   <div class="field-items">
     <?php foreach ($items as $delta => $item) :
-            if (!empty($item['view']) || $item['view'] === "0") : ?>
+            if (!$item['empty']) : ?>
               <div class="field-item">
                 <?php if ($label_display == 'inline') { ?>
                   <div class="field-label-inline<?php print($delta ? '' : '-first')?>">

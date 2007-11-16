@@ -1489,10 +1489,14 @@ function theme_content_multiple_values($element) {
  */
 function template_preprocess_field(&$variables) {
   $field = $variables['field'];
-  $field_empty = FALSE;
-  foreach ($variables['items'] as $item) {
+  $field_empty = TRUE;
+  foreach ($variables['items'] as $delta => $item) {
     if (empty($item['view']) && $item['view'] !== 0) {
-      $field_empty = TRUE;
+      $variables['items'][$delta]['empty'] = TRUE;
+    }
+    else {
+      $field_empty = FALSE;
+      $variables['items'][$delta]['empty'] = FALSE;
     }
   }
   $additions = array(
