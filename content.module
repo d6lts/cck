@@ -297,7 +297,7 @@ function content_form_field(&$form, &$form_state, $field, $get_delta = NULL) {
           '#columns'  => array_keys($field['columns']),
           '#delta' => $delta,
         );
-        $form_element[0] = array_merge($element, $defaults);
+        $form_element[$delta] = array_merge($element, $defaults);
       }
     }
 
@@ -346,7 +346,6 @@ function content_multiple_value_form(&$form, &$form_state, $field, $items) {
       $form_element[$delta] = array_merge($element, $defaults);
     }
   }
-
   // Add AHAH add more button, if not working with a programmed form.
   if ($field['multiple'] == 1 && empty($form['#programmed'])) {
     // Make sure the form is cached so ahah can work.
@@ -392,7 +391,7 @@ function content_add_more_submit($form, &$form_state) {
   foreach ($form['#field_info'] as $field_name => $field) {
     // Make the changes we want to the form state.
     if ($form_state['values'][$field_name][$field_name .'_add_more']) {
-      $form_state['item_count'][$field_name] = count($form[$field_name]['#count']) + 1;
+      $form_state['item_count'][$field_name] = count($form_state['node'][$field_name]) + 1;
     }
   }
 }
@@ -424,7 +423,6 @@ function content_add_more_js($field_name) {
 
   // Build the new form.
   $form_state = array('submitted' => FALSE);
-  $form_state['item_count'][$field_name] = $delta;
   $form += array(
     '#post' => $_POST,
     '#programmed' => FALSE,
@@ -433,11 +431,13 @@ function content_add_more_js($field_name) {
 
   // Render the new output.
   $output = '';
-  $choice_form = $form[$field_name];
-  unset($choice_form['#prefix'], $choice_form['#suffix'], $choice_form[$field_name .'_add_more']); // Prevent duplicate wrappers.
-  $choice_form[$form[$field_name]['#count']]['#attributes']['class'] = empty($choice_form[$delta]['#attributes']['class']) ? 'ahah-new-content' : $choice_form[$delta]['#attributes']['class'] .' ahah-new-content';
-  $output = theme('status_messages') . drupal_render($choice_form);
-
+  $field_form = $form[$field_name];
+  // Prevent duplicate wrappers.
+  unset($field_form['#prefix'], $field_form['#suffix'], $field_form[$field_name .'_add_more']);
+  // Add div around new content to receive ahah effect.
+  $field_form[$delta]['#prefix'] = '<div class="ahah-new-content">'. (isset($field_form[$delta]['#prefix']) ? $field_form[$delta]['#prefix'] : '');
+  $field_form[$delta]['#suffix'] = (isset($field_form[$delta]['#suffix']) ? $field_form[$delta]['#suffix'] : '') .'</div>';
+  $output = theme('status_messages') . drupal_render($field_form);
   drupal_json(array('status' => TRUE, 'data' => $output));
 }
 
