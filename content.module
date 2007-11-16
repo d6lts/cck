@@ -328,7 +328,7 @@ function content_multiple_value_form(&$form, &$form_state, $field, $items) {
       $max = 0;
       break;
     case 1:
-      $max = (isset($form_state['item_count'][$field_name]) ? $form_state['item_count'][$field_name] : sizeof($items)) - 1;
+      $max = (isset($form_state['item_count'][$field_name]) ? $form_state['item_count'][$field_name] : sizeof($items));
       break;
     default:
       $max = $field['multiple'] - 1;

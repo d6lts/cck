@@ -912,6 +912,7 @@ function _content_admin_field_submit($form, &$form_state) {
   $form_values = $form_state['values'];
   unset($form_values['default_value_widget']);
   content_field_instance_update($form_values);
+  content_field_update($form_values);
   drupal_set_message(t('Saved field %label.', array('%label' => $form_values['label'])));
   $type   = content_types($form_values['type_name']);
   $form_state['redirect'] = 'admin/content/types/'. $type['url_str'] .'/fields';
