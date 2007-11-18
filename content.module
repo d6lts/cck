@@ -1,6 +1,5 @@
 <?php
 // $Id$
-
 /**
  * @file
  * Allows administrators to associate custom fields to content types.
@@ -69,6 +68,9 @@ function content_menu() {
   foreach (node_get_types() as $type) {
     $type_name = $type->type;
     $content_type = content_types($type_name);
+
+    // Make sure this doesn't fire until content_types is working,
+    // needed to avoid errors on initial installation.
     if (!empty($content_type)) {
       $type_url_str = $content_type['url_str'];
       $items['admin/content/types/'. $type_url_str .'/fields'] = array(
@@ -1286,12 +1288,15 @@ function _content_tablename($name, $storage, $version = NULL) {
  * Generate table name for the content field table.
  *
  * Needed because the table name changes depending on version.
+ * Using 'content_node_field' instead of 'content_field'
+ * to avoid conflicts with field tables that will be prefixed
+ * with 'content_field'.
  */
 function content_field_tablename($version = NULL) {
   if (is_null($version)) {
     $version = variable_get('content_schema_version', 0);
   }
-  return $version < 6001 ? 'node_field' : 'content_field';
+  return $version < 6001 ? 'node_field' : 'content_node_field';
 }
 
 /**
@@ -1303,7 +1308,7 @@ function content_instance_tablename($version = NULL) {
   if (is_null($version)) {
     $version = variable_get('content_schema_version', 0);
   }
-  return $version < 6001 ? 'node_field_instance' : 'content_field_instance';
+  return $version < 6001 ? 'node_field_instance' : 'content_node_field_instance';
 }
 
 /**
@@ -1322,24 +1327,36 @@ function content_instance_tablename($version = NULL) {
 /**
  * A basic schema used by all field and type tables.
  *
- * Do not add the fields here because we need this function
- * to work when called directly from hook_schema, where functions
- * like content_fields() and content_types() are not safe to use.
+ * Leave $field['columns'] empty to get only the base schema,
+ * otherwise the function will return the whole thing.
  */
 function _content_table_schema($field = NULL) {
-  $base_schema = array(
+  $schema = array(
     'fields' => array(
       'vid' => array('type' => 'int', 'unsigned' => TRUE, 'not null' => TRUE, 'default' => 0),
       'nid' => array('type' => 'int', 'unsigned' => TRUE, 'not null' => TRUE, 'default' => 0)
     ),
     'primary key' => array('vid'),
   );
-  if (isset($field['multiple'])) {
-    $base_schema['fields']['delta'] = array('type' => 'int', 'unsigned' => TRUE, 'not null' => TRUE, 'default' => 0);
-    $base_schema['primary key'][] = 'delta';
+  if (!empty($field['multiple'])) {
+    $schema['fields']['delta'] = array('type' => 'int', 'unsigned' => TRUE, 'not null' => TRUE, 'default' => 0);
+    $schema['primary key'][] = 'delta';
   }
-  $base_schema['content fields'] = array();
-  return $base_schema;
+  $schema['content fields'] = array();
+
+  // This function is called from install files where it is not safe
+  // to use content_fields() or content_database_info(), so we
+  // just used the column values stored in the $field.
+  if (!empty($field['columns']) && array_key_exists('column', $field['columns'])) {
+    foreach ($field['columns'] as $column => $attributes) {
+      $column_name = $attributes['column'];
+      unset($attributes['column']);
+      unset($attributes['sortable']);
+      $schema[$table]['fields'][$column_name] = $attributes;
+    }
+    $schema['content fields'] = array_keys($field['columns']);
+  }
+  return $schema;
 }
 
 /**
