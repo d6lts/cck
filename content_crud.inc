@@ -171,7 +171,7 @@ function content_field_create($field) {
 
   // Create new database columns.
   if (is_array($field['columns']) && count($field['columns'])) {
-    content_alter_db_field(array(), array(), $field, $field['columns']);
+    content_alter_schema(array(), $field);
   }
 
   // TODO menu_rebuild() is REALLY REALLY slow, is there an ajaxy way to run this
@@ -294,7 +294,7 @@ function content_field_delete($field_name) {
   }
 
   if (is_array($field['columns']) && count($field['columns'])) {
-    content_alter_db_field($field, $field['columns'], array(), array());
+    content_alter_schema($field, array());
   }
   db_query("DELETE FROM {". content_field_tablename() ."} WHERE field_name = '%s'", $field['field_name']);
 
@@ -335,7 +335,7 @@ function content_field_instance_create($field) {
       $new_field = $field;
       $new_field['db_storage'] = CONTENT_DB_STORAGE_PER_FIELD;
       drupal_write_record(content_field_tablename(), $new_field, 'field_name');
-      content_alter_db_field($field, $field['columns'], $new_field, $field['columns']);
+      content_alter_schema($field, $new_field);
     }
   }
 
@@ -376,9 +376,7 @@ function content_field_instance_update($field) {
   }
   if ($field['db_storage'] != $prev_field['db_storage']) {
     content_field_update($field);
-    $columns = (array) $field['columns'];
-    $prev_columns = (array) $prev_field['columns'];
-    content_alter_db_field($prev_field, $prev_columns, $field, $columns);
+    content_alter_schema($prev_field, $field);
   }
 
   content_clear_type_cache();
@@ -496,7 +494,7 @@ function content_field_instance_delete($field_name, $type_name) {
         $new_field['db_storage'] = CONTENT_DB_STORAGE_PER_CONTENT_TYPE;
 
         content_field_update($new_field);
-        content_alter_db_field($field, $field['columns'], $new_field, $field['columns']);
+        content_alter_schema($field, $new_field);
       }
     }
   }
@@ -527,27 +525,6 @@ function content_module_delete($module) {
 }
 
 /**
- * Rebuild content type information from node tables.
- *
- *  Used to update CCK tables that might have missed changes made when CCK was disabled.
- *  Called by hook_form_alter() on system modules page whenever CCK is enabled.
- */
-function content_types_rebuild() {
-  $db_types = content_types();
-
-  $result = db_query("SELECT type_name FROM {". content_instance_tablename() ."}");
-  while ($type = db_fetch_array($result)) {
-    $field_types[] = $type['type_name'];
-  }
-
-  foreach ($db_types as $content_type) {
-    // Find content types that are missing the content table and add it
-    content_type_create((object)array('type' => $content_type['type']));
-  }
-  content_clear_type_cache();
-}
-
-/**
  * Make changes needed when a content type is created.
  *
  * @param $info
@@ -559,13 +536,6 @@ function content_types_rebuild() {
  */
 function content_type_create($info) {
   $_SESSION['content_menu_needs_rebuild'] = TRUE;
-  $type = content_types($info->type);
-  $table = _content_tablename($info->type, CONTENT_DB_STORAGE_PER_CONTENT_TYPE);
-  if (!db_table_exists($table)) {
-    $ret = array();
-    db_create_table($ret, $table, _content_table_schema());
-    drupal_set_message(t('The content fields table %name has been created.', array('%name' => $table)));
-  }
 }
 
 /**
