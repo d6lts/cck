@@ -38,18 +38,10 @@ function userreference_disable() {
  */
 function userreference_update_1() {
   $ret = array();
-
-  switch ($GLOBALS['db_type']) {
-    case 'pgsql':
-      db_add_column($ret, 'node_field_userreference_data', 'nid', 'integer', array('not null' => TRUE, 'default' => 0));
-      break;
-
-    case 'mysql':
-    case 'mysqli':
-      $ret[] = update_sql("ALTER TABLE {node_field_userreference_data} ADD COLUMN nid int(10) NOT NULL DEFAULT 0");
-      break;
+  if (!db_table_exists('node_field_userreference_data')) {
+   return $ret;
   }
-
+  db_add_field($ret, 'node_field_userreference_data', 'nid', array(array('type' => 'int', 'not null' => TRUE, 'default' => 0)));
   return $ret;
 }
 
@@ -57,6 +49,10 @@ function userreference_update_1() {
  * Populate nid column in existing user reference fields.
  */
 function userreference_update_2() {
+  $ret = array();
+  if (!db_table_exists('node_field_userreference_data')) {
+   return $ret;
+  }
   // Multi-part update
   if (!isset($_SESSION['userreference_update_2'])) {
     $_SESSION['userreference_update_2'] = 0;
@@ -82,25 +78,20 @@ function userreference_update_2() {
  * Data is now stored in per-field tables.
  */
 function userreference_update_3() {
-  $ret = array();
-
   include_once('./'. drupal_get_path('module', 'content') .'/content.module');
-  include_once('./'. drupal_get_path('module', 'content') .'/content_admin.inc');
+  $ret = array();
+  if (!db_table_exists('node_field_userreference_data')) {
+   return $ret;
+  }
 
   content_clear_type_cache();
   $fields = content_fields();
-
   foreach ($fields as $field) {
     switch ($field['type']) {
       case 'userreference':
-        $columns = array(
-          'uid' => array('type' => 'int', 'not null' => TRUE, 'default' => '0'),
-        );
-        // the following line will trigger (negligible) warnings if content_update_5 was run before
-        // (column already exists)
-        @content_alter_db_field(array(), array(), $field, $columns);
         $db_info = content_database_info($field);
         $table = $db_info['table'];
+        db_create_table($ret, $table, _content_table_schema($field));
         if ($field['multiple']) {
           $ret[] = update_sql('INSERT INTO {'. $table .'} (vid, delta, nid, '. $field['field_name'] ."_uid) SELECT vid, delta, nid, field_uid FROM {node_field_userreference_data} WHERE field_name = '". $field['field_name'] ."'");
         }
@@ -110,9 +101,7 @@ function userreference_update_3() {
         break;
     }
   }
-
-  $ret[] = update_sql('DROP TABLE {node_field_userreference_data}');
-
+  db_drop_table($ret, 'node_field_userreference_data');
   db_query('DELETE FROM {cache}');
   return $ret;
 }
@@ -122,28 +111,16 @@ function userreference_update_3() {
  * and replace 0 with NULL in the field data tables
  */
 function userreference_update_4() {
+  include_once('./'. drupal_get_path('module', 'content') .'/content.module');
   $ret = array();
 
-  include_once('./'. drupal_get_path('module', 'content') .'/content.module');
-  include_once('./'. drupal_get_path('module', 'content') .'/content_admin.inc');
-
   $fields = content_fields();
-
-
   foreach ($fields as $field) {
     switch ($field['type']) {
       case 'userreference':
         $db_info = content_database_info($field);
-        $columns_old = $db_info['columns'];
-        $columns = $columns_old;
-        $columns['uid']['not null'] = FALSE;
-        $columns['uid']['default'] = NULL;
-        // force the old values : if the db info was rebuilt before the update is run,
-        // it will already contain the new values, and nothing gets changed in content_alter_db_field
-        $columns_old['uid']['not null'] = TRUE;
-        $columns_old['uid']['default'] = 0;
-
-        content_alter_db_field($field, $columns_old, $field, $columns);
+        $table = $db_info['table'];
+        db_change_field($ret, $table, 'uid', 'uid', array('type' => 'int', 'not null' => FALSE, 'default' => NULL));
         $ret[] = array(
           'query' => strtr('The field %field_name has been updated to accept NULL values.', array('%field_name' => $field['field_name'])),
           'success' => TRUE
@@ -155,31 +132,5 @@ function userreference_update_4() {
   }
 
   db_query('DELETE FROM {cache}');
-  return $ret;
-}
-
-/**
- * All fields must allow NULL values to indicate empty fields.
- */
-function userreference_update_6000() {
-  $ret = array();
-
-  include_once('./'. drupal_get_path('module', 'content') .'/content.module');
-  include_once('./'. drupal_get_path('module', 'content') .'/content_admin.inc');
-
-  content_clear_type_cache();
-  $fields = content_fields();
-
-  foreach ($fields as $field) {
-    switch ($field['type']) {
-      case 'userreference':
-        $columns = array(
-          'uid' => array('type' => 'int', 'not null' => FALSE),
-        );
-        @content_alter_db_field(array(), array(), $field, $columns);
-    }
-  }
-  // TODO : not cleared ?
-  content_clear_type_cache();
   return $ret;
 }

@@ -90,40 +90,24 @@ function fieldgroup_update_1() {
 function fieldgroup_update_2() {
   $ret = array();
 
-  // set settings column to accept larger values
-  switch ($GLOBALS['db_type']) {
-    case 'mysql':
-    case 'mysqli':
-      $ret[] = update_sql('ALTER TABLE {". fieldgroup_tablename() ."} CHANGE settings settings mediumtext NOT NULL');
-      break;
-
-    case 'pgsql':
-      db_change_column($ret, 'node_group', 'settings', 'settings', 'text', array('not null' => TRUE));
-      break;
+  if (!db_table_exists(fieldgroup_tablename(1))) {
+    return $ret;
   }
+  // set settings column to accept larger values
+  db_change_field($ret, fieldgroup_tablename(1), 'settings', 'settings', array('type' => 'text', 'not null' => TRUE));
 
   // move description into the settings array, and add new settings
-  $result = db_query("SELECT * FROM {". fieldgroup_tablename() ."}");
+  $result = db_query("SELECT * FROM {". fieldgroup_tablename(1) ."}");
   while ($group = db_fetch_array($result)) {
     $settings = array();
     $settings['form'] = unserialize($group['settings']);
     $settings['form']['description'] = $group['description'];
     $settings['display'] = array('collapsible' => 0, 'collapsed' => 0, 'description' => '');
-    $ret[] = update_sql("UPDATE {". fieldgroup_tablename() ."} SET settings = '". db_escape_string(serialize($settings)) ."', description = '' WHERE group_name = '". $group['group_name'] ."'");
+    $ret[] = update_sql("UPDATE {". fieldgroup_tablename(1) ."} SET settings = '". db_escape_string(serialize($settings)) ."', description = '' WHERE group_name = '". $group['group_name'] ."'");
   }
 
   // drop description column
-  switch ($GLOBALS['db_type']) {
-    case 'mysql':
-    case 'mysqli':
-      $ret[] = update_sql('ALTER TABLE {". fieldgroup_tablename() ."} DROP description');
-      break;
-
-    case 'pgsql':
-      // Postgres only supports dropping of columns since 7.4
-      break;
-  }
-
+  db_drop_field($ret, fieldgroup_tablename(1), 'description');
   return $ret;
 }
 
@@ -133,7 +117,11 @@ function fieldgroup_update_2() {
  */
 function fieldgroup_update_3() {
   $ret = array();
-  $result = db_query("SELECT * FROM {". fieldgroup_tablename() ."}");
+  if (!db_table_exists(fieldgroup_tablename(1))) {
+    return $ret;
+  }
+
+  $result = db_query("SELECT * FROM {". fieldgroup_tablename(1) ."}");
   while ($group = db_fetch_array($result)) {
     $group['settings'] = unserialize($group['settings']);
 
@@ -152,7 +140,7 @@ function fieldgroup_update_3() {
         }
       }
 
-      $ret[] = update_sql("UPDATE {". fieldgroup_tablename() ."} SET settings = '". db_escape_string(serialize($group['settings'])) ."' WHERE group_name = '". $group['group_name'] ."'");
+      $ret[] = update_sql("UPDATE {". fieldgroup_tablename(1) ."} SET settings = '". db_escape_string(serialize($group['settings'])) ."' WHERE group_name = '". $group['group_name'] ."'");
     }
   }
 

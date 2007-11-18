@@ -38,18 +38,10 @@ function nodereference_disable() {
  */
 function nodereference_update_1() {
   $ret = array();
-
-  switch ($GLOBALS['db_type']) {
-    case 'pgsql':
-      db_add_column($ret, 'node_field_nodereference_data', 'nid', 'integer', array('not null' => TRUE, 'default' => 0));
-      break;
-
-    case 'mysql':
-    case 'mysqli':
-      $ret[] = update_sql("ALTER TABLE {node_field_nodereference_data} ADD COLUMN nid int(10) NOT NULL DEFAULT 0");
-      break;
+  if (!db_table_exists('node_field_nodereference_data')) {
+   return $ret;
   }
-
+  db_add_field($ret, 'node_field_nodereference_data', 'nid', array('type' => 'int', 'not null' => TRUE, 'default' => 0));
   return $ret;
 }
 
@@ -57,6 +49,10 @@ function nodereference_update_1() {
  * Populate nid column in existing node reference fields.
  */
 function nodereference_update_2() {
+  $ret = array();
+  if (!db_table_exists('node_field_nodereference_data')) {
+   return $ret;
+  }
   // Multi-part update
   if (!isset($_SESSION['nodereference_update_2'])) {
     $_SESSION['nodereference_update_2'] = 0;
@@ -82,25 +78,20 @@ function nodereference_update_2() {
  * Data is now stored in per-field tables.
  */
 function nodereference_update_3() {
-  $ret = array();
-
   include_once('./'. drupal_get_path('module', 'content') .'/content.module');
-  include_once('./'. drupal_get_path('module', 'content') .'/content_admin.inc');
+  $ret = array();
+  if (!db_table_exists('node_field_nodereference_data')) {
+   return $ret;
+  }
 
   content_clear_type_cache();
   $fields = content_fields();
-
   foreach ($fields as $field) {
     switch ($field['type']) {
       case 'nodereference':
-        $columns = array(
-          'nid' => array('type' => 'int', 'not null' => TRUE, 'default' => '0'),
-        );
-        // the following line will trigger (negligible) warnings if content_update_5 was run before
-        // (column already exists)
-        @content_alter_db_field(array(), array(), $field, $columns);
         $db_info = content_database_info($field);
         $table = $db_info['table'];
+        db_create_table($ret, $table, _content_table_schema($field));
         if ($field['multiple']) {
           $ret[] = update_sql('INSERT INTO {'. $table .'} (vid, delta, nid, '. $field['field_name'] ."_nid) SELECT vid, delta, nid, field_nid FROM {node_field_nodereference_data} WHERE field_name = '". $field['field_name'] ."'");
         }
@@ -110,9 +101,7 @@ function nodereference_update_3() {
         break;
     }
   }
-
-  $ret[] = update_sql('DROP TABLE {node_field_nodereference_data}');
-
+  db_drop_table($ret, 'node_field_nodereference_data');
   db_query('DELETE FROM {cache}');
   return $ret;
 }
@@ -121,24 +110,19 @@ function nodereference_update_3() {
  * All fields must allow NULL values to indicate empty fields.
  */
 function nodereference_update_6000() {
-  $ret = array();
-
   include_once('./'. drupal_get_path('module', 'content') .'/content.module');
-  include_once('./'. drupal_get_path('module', 'content') .'/content_admin.inc');
+  $ret = array();
 
   content_clear_type_cache();
   $fields = content_fields();
-
   foreach ($fields as $field) {
     switch ($field['type']) {
       case 'nodereference':
-        $columns = array(
-          'nid' => array('type' => 'int', 'not null' => FALSE),
-        );
-        @content_alter_db_field(array(), array(), $field, $columns);
+        $db_info = content_database_info($field);
+        $table = $db_info['table'];
+        db_change_field($ret, $table, 'nid', 'nid', array('type' => 'int', 'not null' => FALSE));
+        $ret[] = update_sql("UPDATE {". $db_info['table'] ."} SET ". $db_info['columns']['nid']['column'] ." = NULL WHERE ". $db_info['columns']['nid']['column'] ." = 0");
     }
   }
-  // TODO : not cleared ?
-  content_clear_type_cache();
   return $ret;
 }

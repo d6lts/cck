@@ -38,20 +38,11 @@ function text_disable() {
  */
 function text_update_1() {
   $ret = array();
-
-  switch ($GLOBALS['db_type']) {
-    case 'pgsql':
-      db_add_column($ret, 'node_field_shorttext_data', 'nid', 'integer', array('not null' => TRUE, 'default' => 0));
-      db_add_column($ret, 'node_field_longtext_data', 'nid', 'integer', array('not null' => TRUE, 'default' => 0));
-      break;
-
-    case 'mysql':
-    case 'mysqli':
-      $ret[] = update_sql("ALTER TABLE {node_field_shorttext_data} ADD COLUMN nid int(10) NOT NULL DEFAULT 0");
-      $ret[] = update_sql("ALTER TABLE {node_field_longtext_data} ADD COLUMN nid int(10) NOT NULL DEFAULT 0");
-      break;
+  if (!db_table_exists('node_field_shorttext_data') || !db_table_exists('node_field_longtext_data')) {
+   return $ret;
   }
-
+  db_add_field($ret, 'node_field_shorttext_data', 'nid', array('type' => 'int', 'not null' => TRUE, 'default' => 0));
+  db_add_column($ret, 'node_field_longtext_data', 'nid', array('type' => 'int', 'not null' => TRUE, 'default' => 0));
   return $ret;
 }
 
@@ -59,6 +50,10 @@ function text_update_1() {
  * Populate nid column in existing short-text fields.
  */
 function text_update_2() {
+  $ret = array();
+  if (!db_table_exists('node_field_shorttext_data') || !db_table_exists('node_field_longtext_data')) {
+   return $ret;
+  }
   // Multi-part update
   if (!isset($_SESSION['text_update_2'])) {
     $_SESSION['text_update_2'] = 0;
@@ -84,6 +79,10 @@ function text_update_2() {
  * Populate nid column in existing long-text fields.
  */
 function text_update_3() {
+  $ret = array();
+  if (!db_table_exists('node_field_shorttext_data') || !db_table_exists('node_field_longtext_data')) {
+   return $ret;
+  }
   // Multi-part update
   if (!isset($_SESSION['text_update_3'])) {
     $_SESSION['text_update_3'] = 0;
@@ -109,29 +108,28 @@ function text_update_3() {
  * Data is now stored in per-field tables.
  */
 function text_update_4() {
-  $ret = array();
-
   include_once('./'. drupal_get_path('module', 'content') .'/content.module');
-  include_once('./'. drupal_get_path('module', 'content') .'/content_admin.inc');
+  $ret = array();
+  if (!db_table_exists('node_field_shorttext_data') || !db_table_exists('node_field_longtext_data')) {
+   return $ret;
+  }
 
   content_clear_type_cache();
-  $fields = content_fields();
 
+  $fields = content_fields();
   foreach ($fields as $field) {
     switch ($field['type']) {
       case 'text_shorttext':
-        $columns = array(
-          'value' => array('type' => 'varchar', 'length' => 255, 'not null' => TRUE, 'default' => "''"),
-          'format' => array('type' => 'int', 'length' => 10, 'unsigned' => TRUE, 'not null' => TRUE, 'default' => 0),
-        );
-        if ($field['text_processing'] == 0) {
-          unset($columns['format']);
-        }
-        // the following line will trigger (negligible) warnings if content_update_5 was run before
-        // (column already exists)
-        @content_alter_db_field(array(), array(), $field, $columns);
         $db_info = content_database_info($field);
         $table = $db_info['table'];
+        if ($field['text_processing'] == 0) {
+          db_change_field($ret, $table, 'value', 'value', array('type' => 'varchar', 'length' => 255, 'not null' => TRUE, 'default' => ''));
+          unset($columns['format']);
+        }
+        else {
+          db_change_field($ret, $table, 'value', 'value', array('type' => 'varchar', 'length' => 255, 'not null' => TRUE, 'default' => ''));
+          db_change_field($ret, $table, 'format', 'format', array('type' => 'int', 'length' => 10, 'unsigned' => TRUE, 'not null' => TRUE, 'default' => 0));
+        }
         if ($field['multiple']) {
           if ($field['text_processing']) {
             $ret[] = update_sql('INSERT INTO {'. $table .'} (vid, delta, nid, '. $field['field_name'] .'_value, '. $field['field_name'] ."_format) SELECT vid, delta, nid, field_shorttext, format FROM {node_field_shorttext_data} WHERE field_name = '". $field['field_name'] ."'");
@@ -150,18 +148,16 @@ function text_update_4() {
         }
         break;
       case 'text_longtext':
-        $columns = array(
-          'value' => array('type' => 'mediumtext', 'not null' => TRUE, 'default' => "''"),
-          'format' => array('type' => 'int', 'length' => 10, 'unsigned' => TRUE, 'not null' => TRUE, 'default' => 0),
-        );
-        if ($field['text_processing'] == 0) {
-          unset($columns['format']);
-        }
-        // the following line will trigger (negligible) warnings if content_update_5 was run before
-        // (column already exists)
-        @content_alter_db_field(array(), array(), $field, $columns);
         $db_info = content_database_info($field);
         $table = $db_info['table'];
+        if ($field['text_processing'] == 0) {
+          db_change_field($ret,$table, 'value', 'value', array('type' => 'mediumtext', 'not null' => TRUE, 'default' => ''));
+          unset($columns['format']);
+        }
+        else {
+          db_change_field($ret, $table, 'value', 'value', array('type' => 'mediumtext', 'not null' => TRUE, 'default' => ''));
+          db_change_field($ret, $table, 'format', 'format', array('type' => 'int', 'length' => 10, 'unsigned' => TRUE, 'not null' => TRUE, 'default' => 0));
+        }
         if ($field['multiple']) {
           if ($field['text_processing']) {
             $ret[] = update_sql('INSERT INTO {'. $table .'} (vid, delta, nid, '. $field['field_name'] .'_value, '. $field['field_name'] ."_format) SELECT vid, delta, nid, field_longtext, format FROM {node_field_longtext_data} WHERE field_name = '". $field['field_name'] ."'");
@@ -181,10 +177,8 @@ function text_update_4() {
         break;
     }
   }
-
-  $ret[] = update_sql('DROP TABLE {node_field_shorttext_data}');
-  $ret[] = update_sql('DROP TABLE {node_field_longtext_data}');
-
+  db_drop_table($ret, 'node_field_shorttext_data');
+  db_drop_table($ret, 'node_field_longtext_data');
   db_query('DELETE FROM {cache}');
   return $ret;
 }
@@ -219,6 +213,7 @@ function text_update_5() {
  * Rename widgets to match hook_elements values.
  */
 function text_update_6000() {
+  include_once('./'. drupal_get_path('module', 'content') .'/content.module');
   $ret = array();
   $result = db_query("SELECT * FROM {". content_instance_tablename() ."} WHERE widget_type = 'text'");
   while ($field_instance = db_fetch_array($result)) {
@@ -226,8 +221,6 @@ function text_update_6000() {
     $new_widget_type = ($widget_settings['rows'] > 1) ? 'text_textarea' : 'text_textfield';
     $ret[] = update_sql("UPDATE {". content_instance_tablename() ."} SET widget_type = '$new_widget_type' WHERE field_name = '{$field_instance['field_name']}' AND type_name = '{$field_instance['type_name']}'");
   }
-  // TODO : not cleared ?
-  content_clear_type_cache();
   return $ret;
 }
 
@@ -235,10 +228,8 @@ function text_update_6000() {
  * All fields must allow NULL values to indicate empty fields.
  */
 function text_update_6001() {
-  $ret = array();
-
   include_once('./'. drupal_get_path('module', 'content') .'/content.module');
-  include_once('./'. drupal_get_path('module', 'content') .'/content_admin.inc');
+  $ret = array();
 
   content_clear_type_cache();
   $fields = content_fields();
@@ -246,20 +237,21 @@ function text_update_6001() {
   foreach ($fields as $field) {
     switch ($field['type']) {
       case 'text':
-        $columns = array();
+        $db_info = content_database_info($field);
+        $table = $db_info['table'];
         if (empty($field['max_length']) || $field['max_length'] > 255) {
-          $columns['value'] = array('type' => 'text', 'size' => 'big', 'not null' => FALSE, 'sortable' => TRUE);
+          db_change_field($ret, $table, 'value', 'value', array('type' => 'text', 'size' => 'big', 'not null' => FALSE, 'sortable' => TRUE));
+          $ret[] = update_sql("UPDATE {". $db_info['table'] ."} SET ". $db_info['columns']['value']['column'] ." = NULL WHERE ". $db_info['columns']['value']['column'] ." = ''");
         }
         else {
-          $columns['value'] = array('type' => 'varchar', 'length' => $field['max_length'], 'not null' => FALSE, 'sortable' => TRUE);
+          db_change_field($ret, $table, 'value', 'value', array('type' => 'varchar', 'length' => $field['max_length'], 'not null' => FALSE, 'sortable' => TRUE));
+          $ret[] = update_sql("UPDATE {". $db_info['table'] ."} SET ". $db_info['columns']['value']['column'] ." = NULL WHERE ". $db_info['columns']['value']['column'] ." = ''");
         }
         if (!empty($field['text_processing'])) {
-          $columns['format'] = array('type' => 'int', 'unsigned' => TRUE, 'not null' => FALSE);
+          db_change_field($ret, $table, 'format', 'format', array('type' => 'int', 'unsigned' => TRUE, 'not null' => FALSE));
+          $ret[] = update_sql("UPDATE {". $db_info['table'] ."} SET ". $db_info['columns']['format']['column'] ." = NULL WHERE ". $db_info['columns']['format']['column'] ." = 0");
         }
-        @content_alter_db_field(array(), array(), $field, $columns);
     }
   }
-  // TODO : not cleared ?
-  content_clear_type_cache();
   return $ret;
 }
