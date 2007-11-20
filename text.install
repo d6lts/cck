@@ -225,31 +225,38 @@ function text_update_6000() {
 }
 
 /**
- * All fields must allow NULL values to indicate empty fields.
+ * Set all columns to accept NULL values and set empty string values in the
+ * database to NULL.
+ *
+ * Leaving it up to module developers to handle conversion of numbers to
+ * NULL values, since there are times when zeros are valid data and times
+ * when they should be NULL.
+ *
  */
 function text_update_6001() {
   include_once('./'. drupal_get_path('module', 'content') .'/content.module');
   $ret = array();
 
-  content_clear_type_cache();
-  $fields = content_fields();
+  // Get the latest cache values and schema.
+  content_clear_type_cache(TRUE, TRUE);
 
+  $types = content_types();
+  $fields = content_fields();
   foreach ($fields as $field) {
     switch ($field['type']) {
       case 'text':
         $db_info = content_database_info($field);
-        $table = $db_info['table'];
-        if (empty($field['max_length']) || $field['max_length'] > 255) {
-          db_change_field($ret, $table, 'value', 'value', array('type' => 'text', 'size' => 'big', 'not null' => FALSE, 'sortable' => TRUE));
-          $ret[] = update_sql("UPDATE {". $db_info['table'] ."} SET ". $db_info['columns']['value']['column'] ." = NULL WHERE ". $db_info['columns']['value']['column'] ." = ''");
-        }
-        else {
-          db_change_field($ret, $table, 'value', 'value', array('type' => 'varchar', 'length' => $field['max_length'], 'not null' => FALSE, 'sortable' => TRUE));
-          $ret[] = update_sql("UPDATE {". $db_info['table'] ."} SET ". $db_info['columns']['value']['column'] ." = NULL WHERE ". $db_info['columns']['value']['column'] ." = ''");
-        }
-        if (!empty($field['text_processing'])) {
-          db_change_field($ret, $table, 'format', 'format', array('type' => 'int', 'unsigned' => TRUE, 'not null' => FALSE));
-          $ret[] = update_sql("UPDATE {". $db_info['table'] ."} SET ". $db_info['columns']['format']['column'] ." = NULL WHERE ". $db_info['columns']['format']['column'] ." = 0");
+        foreach ($db_info['columns'] as $column => $attributes) {
+          $attributes['not null'] = FALSE;
+          $column = $attributes['column'];
+          db_change_field($ret, $db_info['table'], $column,$column, $attributes);
+          db_field_set_no_default($ret, $db_info['table'], $column);
+          if ($attributes['type'] == 'varchar' || $attributes['type'] == 'text') {
+            $ret = update_sql("UPDATE {". $table ."} SET ". $column ." = NULL WHERE ". $column ." = ''");
+          }
+          else {
+            $ret = update_sql("UPDATE {". $table ."} SET ". $column ." = NULL WHERE ". $column ." = 0");
+          }
         }
     }
   }
