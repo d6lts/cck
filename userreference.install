@@ -91,7 +91,7 @@ function userreference_update_3() {
       case 'userreference':
         $db_info = content_database_info($field);
         $table = $db_info['table'];
-        db_create_table($ret, $table, _content_table_schema($field));
+        db_create_table($ret, $table, content_table_schema($field));
         if ($field['multiple']) {
           $ret[] = update_sql('INSERT INTO {'. $table .'} (vid, delta, nid, '. $field['field_name'] ."_uid) SELECT vid, delta, nid, field_uid FROM {node_field_userreference_data} WHERE field_name = '". $field['field_name'] ."'");
         }
