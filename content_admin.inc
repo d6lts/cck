@@ -1322,6 +1322,13 @@ function content_mask_batch_update($field, $mask, &$context) {
 
   if (!isset($context['sandbox']['progress'])) {
     $db_info = content_database_info($field);
+
+    // Might run into non-existant tables when cleaning up a corrupted
+    // database, like some of the old content storage changes in the
+    // .install files.
+    if (!db_table_exists($db_info['table'])) {
+      return $context['finished'] = 1;
+    }
     $nodes = array();
     $result = db_query("SELECT nid FROM {". $db_info['table'] ."}");
     while ($node = db_fetch_array($result)) {
