@@ -44,7 +44,7 @@ function fieldgroup_menu() {
       $items['admin/content/types/'. $type_url_str .'/groups/%/remove'] = array(
         'title' => 'Edit group',
         'page callback' => 'drupal_get_form',
-        'page arguments' => array('fieldgroup_remove_group', $content_type, 4),
+        'page arguments' => array('fieldgroup_remove_group', $content_type, 5),
         'access arguments' => array('administer content types'),
         'type' => MENU_CALLBACK,
       );
@@ -208,10 +208,10 @@ function fieldgroup_edit_group_submit($form, &$form_state) {
 }
 
 function fieldgroup_remove_group(&$form_state, $content_type, $group_name) {
-  $groups = fieldgroup_groups($content_type);
-  $group = $groups[$group_name];
+  $groups = fieldgroup_groups($content_type['type']);
+  $group = isset($groups[$group_name]) ? $groups[$group_name] : '';
 
-  if (!$group) {
+  if (empty($group)) {
     drupal_not_found();
     exit;
   }
@@ -231,7 +231,7 @@ function fieldgroup_remove_group_submit($form, &$form_state) {
   $form_values = $form_state['values'];
   $content_type = $form['#content_type'];
   $group_name = $form['#group_name'];
-  fieldgroup_delete($content_type, $group_name);
+  fieldgroup_delete($content_type['type'], $group_name);
   drupal_set_message('The group has been removed.');
   $form_state['redirect'] = 'admin/content/types/'. $content_type['url_str'] .'/fields';
 }
@@ -241,7 +241,6 @@ function fieldgroup_remove_group_submit($form, &$form_state) {
  */
 function fieldgroup_groups($content_type = '', $sorted = FALSE, $reset = FALSE) {
   static $groups, $groups_sorted;
-
   if (!isset($groups) || $reset) {
     if ($cached = cache_get('fieldgroup_data', content_cache_tablename())) {
       $data = $cached->data;
@@ -269,11 +268,10 @@ function fieldgroup_groups($content_type = '', $sorted = FALSE, $reset = FALSE) 
       cache_set('fieldgroup_data', array('groups' => $groups, 'groups_sorted' => $groups_sorted), content_cache_tablename());
     }
   }
-
   if (empty($content_type)) {
     return $groups;
   }
-  elseif (empty($groups[$content_type])) {
+  elseif (empty($groups) || empty($groups[$content_type])) {
     return array();
   }
   return $sorted ? $groups_sorted[$content_type] : $groups[$content_type];
@@ -360,16 +358,20 @@ function fieldgroup_content_admin_form_submit($form, &$form_state) {
 function fieldgroup_content_overview_form_submit($form, &$form_state) {
   // Update groups.
   $form_values = $form_state['values'];
-  foreach ((array) $form_values['field-groups'] as $key => $value) {
-    if ($key && !in_array($key, unserialize($form_values['disabled']))) {
-      fieldgroup_update_fields(array('field_name' => $key, 'group' => $value, 'type_name' => $form_values['type_name']));
+  if (isset($form_values['field-groups'])) {
+    foreach ((array) $form_values['field-groups'] as $key => $value) {
+      if ($key && !in_array($key, unserialize($form_values['disabled']))) {
+        fieldgroup_update_fields(array('field_name' => $key, 'group' => $value, 'type_name' => $form_values['type_name']));
+      }
     }
   }
   // Update group weights.
-  foreach ((array) $form_values['group-weights'] as $key => $value) {
-    if ($key && !in_array($key, unserialize($form_values['disabled']))) {
-      db_query("UPDATE {". fieldgroup_tablename() ."} SET weight = %d WHERE type_name = '%s' AND group_name = '%s'",
-      $value, $form_values['type_name'], $key);
+  if (isset($form_values['group-weights'])) {
+    foreach ((array) $form_values['group-weights'] as $key => $value) {
+      if ($key && !in_array($key, unserialize($form_values['disabled']))) {
+        db_query("UPDATE {". fieldgroup_tablename() ."} SET weight = %d WHERE type_name = '%s' AND group_name = '%s'",
+        $value, $form_values['type_name'], $key);
+      }
     }
   }
   cache_clear_all('fieldgroup_data', content_cache_tablename());
@@ -560,7 +562,7 @@ function fieldgroup_display_overview_form_submit($form, &$form_state) {
   $form_values = $form_state['values'];
 
   $type = $form_values['type_name'];
-  $groups = fieldgroup_groups($type);
+  $groups = fieldgroup_groups($form_values['type_name']);
 
   if (isset($form_values['groups'])) {
     foreach ($form_values['groups'] as $group_name => $groupvalues) {
@@ -651,7 +653,7 @@ function fieldgroup_update_fields($form_values) {
 }
 
 function fieldgroup_delete($content_type, $group_name) {
-  db_query("DELETE FROM {". fieldgroup_tablename() ."} WHERE  type_name = '%s' AND group_name = '%s'", $content_type['type'], $group_name);
-  db_query("DELETE FROM {". fieldgroup_fields_tablename() ."} WHERE  type_name = '%s' AND group_name = '%s'", $content_type['type'], $group_name);
+  db_query("DELETE FROM {". fieldgroup_tablename() ."} WHERE  type_name = '%s' AND group_name = '%s'", $content_type, $group_name);
+  db_query("DELETE FROM {". fieldgroup_fields_tablename() ."} WHERE  type_name = '%s' AND group_name = '%s'", $content_type, $group_name);
   cache_clear_all('fieldgroup_data', content_cache_tablename());
 }
