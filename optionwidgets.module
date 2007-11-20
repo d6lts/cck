@@ -176,7 +176,7 @@ function optionwidgets_buttons_process($element, $edit, $form_state, $form) {
     '#type' => $field['multiple'] ? 'checkboxes' : 'radios',
     '#title' => t($field['widget']['label']),
     '#description' => t($field['widget']['description']),
-    '#required' => $element['required'],
+    '#required' => $field['required'],
     '#multiple' => $field['multiple'],
     '#options' => optionwidgets_options($field),
     '#default_value' => isset($element['#value']) ? $element['#value'] : NULL,
@@ -222,7 +222,8 @@ function optionwidgets_select_process($element, $edit, $form_state, $form) {
  * The $fields array is in $form['#field_info'][$element['#field_name']].
  */
 function optionwidgets_onoff_process($element, $edit, $form_state, $form) {
-  $field = $element['#field'];
+  $field_name = $element['#field_name'];
+  $field = $form['#field_info'][$field_name];
   $field_key  = $element['#columns'][0];
 
   if (empty($edit)) {
@@ -232,7 +233,7 @@ function optionwidgets_onoff_process($element, $edit, $form_state, $form) {
     '#type' => 'checkbox',
     '#title' => t($field['widget']['label']),
     '#description' => t($field['widget']['description']),
-    '#required' => $element['required'],
+    '#required' => $field['required'],
     '#multiple' => $field['multiple'],
     '#options' => optionwidgets_options($field),
     // TODO : check fix for http://drupal.org/node/140687 - http://drupal.org/cvs?commit=83011
