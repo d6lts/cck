@@ -159,43 +159,18 @@ function number_update_5() {
     }
   }
 
-  db_query('DELETE FROM {cache}');
+  content_clear_type_cache();
   return $ret;
 }
 
 /**
- * All fields must allow NULL values to indicate empty fields.
- * The previous update set not null to FALSE, need to remove default value, too,
- * then update existing values in the database.
+ * Rename old decimal fields, which were really floats, to float
  */
 function number_update_6000() {
   include_once('./'. drupal_get_path('module', 'content') .'/content.module');
   $ret = array();
-
-  content_clear_type_cache();
-  $fields = content_fields();
-  foreach ($fields as $field) {
-    switch ($field['type']) {
-      case 'number_integer':
-        $db_info = content_database_info($field);
-        db_change_field($ret, $db_info['table'], 'value', 'value', array('type' => 'int', 'not null' => FALSE));
-        $ret[] = update_sql("UPDATE {". $db_info['table'] ."} SET ". $db_info['columns']['value']['column'] ." = NULL WHERE ". $db_info['columns']['value']['column'] ." = 0");
-        break;
-      case 'number_decimal':
-        $db_info = content_database_info($field);
-        db_change_field($ret, $db_info['table'], 'value', 'value', array('type' => 'float', 'not null' => FALSE));
-        $ret[] = update_sql("UPDATE {". $db_info['table'] ."} SET ". $db_info['columns']['value']['column'] ." = NULL WHERE ". $db_info['columns']['value']['column'] ." = 0");
-        break;
-    }
-  }
-  content_clear_type_cache();
-  return $ret;
-}
-
-function number_update_6001() {
-  include_once('./'. drupal_get_path('module', 'content') .'/content.module');
-  $ret = array();
   $ret[] = update_sql("UPDATE {". content_field_tablename() ."} SET type='number_float' WHERE type = 'number_decimal'");
+
   content_clear_type_cache();
   return $ret;
 }
