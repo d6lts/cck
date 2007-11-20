@@ -170,6 +170,11 @@ function fieldgroup_edit_group_form(&$form_state, $content_type, $group_name, $a
 
 /**
  *  Group name validation for programmatic group addition.
+ *
+ * @todo
+ * Come back here and do the same thing for groups as we've done for fields,
+ * present a machine-readable name field as well as a label instead of
+ * trying to create a machine-readable name from the label.
  */
 function fieldgroup_edit_group_validate($form, &$form_state) {
   $form_values = $form_state['values'];
@@ -259,9 +264,9 @@ function fieldgroup_groups($content_type = '', $sorted = FALSE, $reset = FALSE) 
       }
       //load fields
       $result = db_query("SELECT nfi.*, ng.group_name FROM {". fieldgroup_tablename() ."} ng ".
-                         "INNER JOIN {". fieldgroup_fields_tablename() ."} ngf ON ngf.type_name = ng.type_name AND ngf.group_name = ng.group_name ".
-                         "INNER JOIN {". content_instance_tablename() ."} nfi ON nfi.field_name = ngf.field_name AND nfi.type_name = ngf.type_name ".
-                         "ORDER BY nfi.weight");
+ "INNER JOIN {". fieldgroup_fields_tablename() ."} ngf ON ngf.type_name = ng.type_name AND ngf.group_name = ng.group_name ".
+ "INNER JOIN {". content_instance_tablename() ."} nfi ON nfi.field_name = ngf.field_name AND nfi.type_name = ngf.type_name ".
+ "ORDER BY nfi.weight");
       while ($field = db_fetch_array($result)) {
         $groups[$field['type_name']][$field['group_name']]['fields'][$field['field_name']] = $field;
       }
@@ -591,6 +596,9 @@ function fieldgroup_fields_tablename($version = NULL) {
 
 /**
  * CRUD API for fieldgroup module.
+ *
+ * @todo
+ * Make this into more of a real API for groups.
  */
 /*
  * Saves the given group for this content-type
