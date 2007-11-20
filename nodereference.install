@@ -91,7 +91,7 @@ function nodereference_update_3() {
       case 'nodereference':
         $db_info = content_database_info($field);
         $table = $db_info['table'];
-        db_create_table($ret, $table, _content_table_schema($field));
+        db_create_table($ret, $table, content_table_schema($field));
         if ($field['multiple']) {
           $ret[] = update_sql('INSERT INTO {'. $table .'} (vid, delta, nid, '. $field['field_name'] ."_nid) SELECT vid, delta, nid, field_nid FROM {node_field_nodereference_data} WHERE field_name = '". $field['field_name'] ."'");
         }
@@ -120,8 +120,10 @@ function nodereference_update_6000() {
       case 'nodereference':
         $db_info = content_database_info($field);
         $table = $db_info['table'];
-        db_change_field($ret, $table, 'nid', 'nid', array('type' => 'int', 'not null' => FALSE));
-        $ret[] = update_sql("UPDATE {". $db_info['table'] ."} SET ". $db_info['columns']['nid']['column'] ." = NULL WHERE ". $db_info['columns']['nid']['column'] ." = 0");
+        $column = $db_info['columns']['nid']['column'] ;
+        db_change_field($ret, $table, $column, $column, array('type' => 'int', 'not null' => FALSE));
+        db_field_set_no_default($ret, $db_info['table'], $column);
+        $ret[] = update_sql("UPDATE {". $db_info['table'] ."} SET ". $column ." = NULL WHERE ". $column ." = 0");
     }
   }
   return $ret;
