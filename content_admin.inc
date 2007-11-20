@@ -377,16 +377,17 @@ function theme_content_admin_display_overview_form($form) {
 function content_admin_display_overview_form_submit($form, &$form_state) {
   module_load_include('inc', 'content', 'content_crud');
   $form_values = $form_state['values'];
-  $type = $form_values['type_name'];
-
+  $type_name = $form_values['type_name'];
+  $fields = content_fields();
   if (isset($form_values['fields'])) {
-    foreach ($form_values['fields'] as $fieldname => $fieldvalues) {
-      $form_values['fields'][$fieldname]['display_settings'] = array();
-      foreach ($fieldvalues as $key => $value) {
-        $form_values['fields'][$fieldname]['display_settings'][$key] = $value;
-        unset($form_values['fields'][$fieldname][$key]);
+    foreach ($form_values['fields'] as $field_name => $field_values) {
+      $field = content_fields($field_name, $type_name);
+      $field['display_settings'] = array();
+      foreach ($field_values as $key => $value) {
+        $field['display_settings'][$key] = $value;
       }
-      content_field_update($form_values['fields'][$fieldname]);
+      $field = content_field_instance_collapse($field);
+      content_field_instance_update($field);
     }
     content_clear_type_cache();
   }
