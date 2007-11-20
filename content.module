@@ -653,27 +653,8 @@ function content_field($op, &$node, $field, &$items, $teaser, $page) {
       unset($items[$field['field_name']. '_add_more']);
 
       // If content module is handling multiple values, don't save empty items.
-      // If a specified number of multiple values was requested or this is
-      // the zero delta, save even if empty and keep a NULL value for each
-      // of its columns so there is a marker row in the database, otherwise
-      // unset the item.
       if (content_handle('widget', 'multiple values', $field) == CONTENT_HANDLE_CORE) {
-        $field_types = _content_field_types();
-        $module = $field_types[$field['type']]['module'];
-        $is_empty = $module .'_content_is_empty';
-        $max_delta = $field['multiple'] > 1 ? $field['multiple'] : 0;
-        foreach ((array) $items as $delta => $item) {
-          if ($is_empty($item, $field)) {
-            if ($delta <= $max_delta) {
-              foreach (array_keys($field['columns']) as $column) {
-                $items[$delta][$column] = NULL;
-              }
-            }
-            else {
-              unset($items[$delta]);
-            }
-          }
-        }
+        $items = content_set_empty($field, $items);
       }
       break;
 
@@ -712,6 +693,37 @@ function content_field($op, &$node, $field, &$items, $teaser, $page) {
       }
       return $addition;
   }
+}
+
+/**
+ * Helper function to set NULL values and unset items where needed.
+ *
+ * If a specified number of multiple values was requested or this is
+ * the zero delta, save even if empty and keep a NULL value for each
+ * of its columns so there is a marker row in the database, otherwise
+ * unset the item.
+ *
+ * @param array $field
+ * @param array $items
+ * @return array
+ *   returns emptied and adjusted item array
+ */
+function content_set_empty($field, $items) {
+  $is_empty = $field['module'] .'_content_is_empty';
+  $max_delta = $field['multiple'] > 1 ? $field['multiple'] : 0;
+  foreach ((array) $items as $delta => $item) {
+    if ($is_empty($item, $field)) {
+      if ($delta <= $max_delta) {
+        foreach (array_keys($field['columns']) as $column) {
+          $items[$delta][$column] = NULL;
+        }
+      }
+      else {
+        unset($items[$delta]);
+      }
+    }
+  }
+  return $items;
 }
 
 /**
@@ -1127,6 +1139,24 @@ function content_database_info($field) {
 }
 
 /**
+ * Helper function for identifying the storage type for a field.
+ */
+function content_storage_type($field) {
+  if ($field['multiple'] > 0) {
+    return CONTENT_DB_STORAGE_PER_FIELD;
+  }
+  else {
+    $instances = content_field_instance_read(array('field_name' => $field['field_name']));
+    if (sizeof($instances) > 1) {
+      return CONTENT_DB_STORAGE_PER_FIELD;
+    }
+    else {
+      return CONTENT_DB_STORAGE_PER_CONTENT_TYPE;
+    }
+  }
+}
+
+/**
  * Manipulate a 2D array to reverse rows and columns.
  *
  * The default data storage for fields is delta first, column names second.
@@ -1330,7 +1360,7 @@ function content_instance_tablename($version = NULL) {
  * Leave $field['columns'] empty to get only the base schema,
  * otherwise the function will return the whole thing.
  */
-function _content_table_schema($field = NULL) {
+function content_table_schema($field = NULL) {
   $schema = array(
     'fields' => array(
       'vid' => array('type' => 'int', 'unsigned' => TRUE, 'not null' => TRUE, 'default' => 0),
@@ -1347,12 +1377,12 @@ function _content_table_schema($field = NULL) {
   // This function is called from install files where it is not safe
   // to use content_fields() or content_database_info(), so we
   // just used the column values stored in the $field.
-  if (!empty($field['columns']) && array_key_exists('column', $field['columns'])) {
+  if (!empty($field['columns'])) {
     foreach ($field['columns'] as $column => $attributes) {
-      $column_name = $attributes['column'];
+      $column_name =  $field['field_name'] .'_'. $column;
       unset($attributes['column']);
       unset($attributes['sortable']);
-      $schema[$table]['fields'][$column_name] = $attributes;
+      $schema['fields'][$column_name] = $attributes;
     }
     $schema['content fields'] = array_keys($field['columns']);
   }

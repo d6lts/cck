@@ -47,7 +47,7 @@ function content_field_default_values($field_type) {
 
   $field['required'] = 0;
   $field['multiple'] = 0;
-  $field['db_storage'] = 1;
+  $field['db_storage'] = CONTENT_DB_STORAGE_PER_CONTENT_TYPE;
 
   // Make sure field settings all have an index in the array.
   $setting_names = module_invoke($field['module'], 'field_settings', 'save', $field);
@@ -366,14 +366,8 @@ function content_field_instance_update($field) {
 
   _content_field_instance_write($field, 'update');
 
-  $prior_instances = content_field_instance_read(array('field_name' => $field['field_name']));
+  $field['db_storage'] = content_storage_type($field);
 
-  if ($field['multiple'] > 0 || sizeof($prior_instances) > 1) {
-    $field['db_storage'] = CONTENT_DB_STORAGE_PER_FIELD;
-  }
-  else {
-    $field['db_storage'] = CONTENT_DB_STORAGE_PER_CONTENT_TYPE;
-  }
   if ($field['db_storage'] != $prev_field['db_storage']) {
     content_field_update($field);
     content_alter_schema($prev_field, $field);
