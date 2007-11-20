@@ -76,7 +76,7 @@ function content_schema() {
   // since no fields have been created yet, so just return with this much
   // of the schema.
 
-  if (!db_table_exists('content_field') || !db_table_exists('content_field_instance')) {
+  if (!db_table_exists('content_node_field') || !db_table_exists('content_node_field_instance')) {
     return $schema;
   }
 
@@ -85,28 +85,28 @@ function content_schema() {
   // logic when they call other functions that use this schema, so create
   // the schema directly from a fresh query of the database.
 
-  // _content_table_schema() and content_database_info() have no
+  // content_table_schema() and content_database_info() have no
   // circular logic and are safe to use here.
 
   $db_result = db_query("SELECT * FROM {". content_instance_tablename() ."} nfi ".
     " LEFT JOIN {". content_field_tablename() ."} nf ON nf.field_name = nfi.field_name");
   while ($field = db_fetch_array($db_result)) {
     $field['columns'] = unserialize($field['columns']);
-
     $content_table = _content_tablename($field['type_name'], CONTENT_DB_STORAGE_PER_CONTENT_TYPE);
     $field_table = _content_tablename($field['field_name'], CONTENT_DB_STORAGE_PER_FIELD);
 
+    // We always add a 'per content type' table.
+    // TODO : is that really still needed ?
+    if (!isset($schema[$content_table])) {
+      $schema[$content_table] = content_table_schema();
+    }
+
     // Add the 'per field' table if needed.
     if (!isset($schema[$field_table]) && $field['db_storage'] == CONTENT_DB_STORAGE_PER_FIELD) {
-      // We always add a 'per content type' table.
-      // TODO : is that really still needed ?
-      if (!isset($schema[$content_table])) {
-        $schema[$content_table] = _content_table_schema();
-      }
-      $schema[$field_table] = _content_table_schema($field);
+      $schema[$field_table] = content_table_schema($field);
     }
     else {
-      $schema[$content_table] = array_merge($schema[$content_table], _content_table_schema($field));
+      $schema[$content_table] = array_merge($schema[$content_table], content_table_schema($field));
     }
   }
   return $schema;
@@ -159,7 +159,7 @@ function content_update_4() {
   else {
     $result = db_query("SELECT type_name FROM {node_type_content}");
   }
-  $base_schema = _content_table_schema();
+  $base_schema = content_table_schema();
 
   while ($type = db_fetch_object($result)) {
     $base_tablename = _content_tablename($type->type_name, CONTENT_DB_STORAGE_PER_CONTENT_TYPE, 1);
@@ -174,45 +174,10 @@ function content_update_4() {
  * Move data from per-field storage to per-content-type storage where possible.
  */
 function content_update_5() {
-  include_once('./'. drupal_get_path('module', 'content') .'/content.module');
-  include_once('./'. drupal_get_path('module', 'content') .'/content_admin.inc');
   $ret = array();
-
-  content_clear_type_cache();
-
-  // Multi-part update
-  if (empty($_SESSION['content_update_5'])) {
-    $results = array();
-    $result = db_query("SELECT DISTINCT nf.field_name FROM {". content_field_tablename() ."} nf LEFT JOIN {". content_instance_tablename() ."} nfi ON nfi.field_name = nf.field_name WHERE nf.multiple = 0 AND nf.db_storage = 0");
-    while($row = db_fetch_array($result)) {
-      $results[] = $row['field_name'];
-    }
-    $_SESSION['content_update_5']['current'] = 0;
-    $_SESSION['content_update_5']['max'] = count($results);
-    $_SESSION['content_update_5']['values'] = $results;
-  }
-
-  $value = is_array($_SESSION['content_update_5']['values']) ? array_pop($_SESSION['content_update_5']['values']) : '';
-  if (empty($value)) {
-    return $ret;
-  }
-  $fields = content_fields();
-  $field = $fields[$value];
-  $field['columns'] = module_invoke($field['module'], 'field_settings', 'database columns', $field);
-
-  $ret[] = update_sql("UPDATE {". content_field_tablename() ."} SET db_storage = ". CONTENT_DB_STORAGE_PER_CONTENT_TYPE ." WHERE field_name = '". $field['field_name'] ."'");
-  if (is_array($field['columns']) && count($field['columns'])) {
-    $new_field = $field;
-    $new_field['db_storage'] = CONTENT_DB_STORAGE_PER_CONTENT_TYPE;
-    content_alter_schema($field, $new_field);
-  }
-
-  $_SESSION['content_update_5']['current']++;
-  $ret['#finished'] = $_SESSION['content_update_5']['current'] / $_SESSION['content_update_5']['max'];
-  if ($ret['#finished'] >= 1) {
-    unset($_SESSION['content_update_5']);
-    content_clear_type_cache();
-  }
+  // update_5() had a mistake that was later corrected in update_10() for 4.7
+  // and update_1004() in 5.x. Instead of repeating variations of the same
+  // update several times, the fix is done entirely in update_6003().
   return $ret;
 }
 
@@ -293,31 +258,9 @@ function content_update_8() {
  */
 function content_update_10() {
   $ret = array();
-  include_once('./'. drupal_get_path('module', 'content') .'/content.module');
-  include_once('./'. drupal_get_path('module', 'content') .'/content_admin.inc');
-
-  // drop fields with no field instances
-  $fields = array();
-  $result = db_query("SELECT DISTINCT(field_name)  FROM {". content_instance_tablename() ."}");
-  while ($row = db_fetch_array($result)) {
-    $fields[] = "'". $row['field_name'] ."'";
-  }
-  $ret[] = update_sql("DELETE FROM {". content_field_tablename() ."} WHERE field_name NOT IN (". implode(', ', $fields) .")");
-
-  // set invalid 'per field storage' back to 'per content type'
-  $result = db_query("SELECT field_name FROM {". content_field_tablename() ."} WHERE multiple = 0 AND db_storage = %d", CONTENT_DB_STORAGE_PER_FIELD);
-  while ($row = db_fetch_array($result)) {
-    $count = db_result(db_fetch_array(db_query("SELECT COUNT(*) FROM {". content_instance_tablename() ."} WHERE field_name = '%s'", $row['field_name'])));
-    if ($count == 1) {
-      $field = content_fields($row['field_name']);
-      $db_info = content_database_info($field);
-      $field['columns'] = $db_info['columns'];
-      $new_field = $field;
-      $new_field['db_storage'] = CONTENT_DB_STORAGE_PER_CONTENT_TYPE;
-      content_alter_schema($field, $new_field);
-    }
-  }
-
+  // update_5() had a mistake that was later corrected in update_10() for 4.7
+  // and update_1004() in 5.x. Instead of repeating variations of the same
+  // update several times, the fix is done entirely in update_6003().
   return $ret;
 }
 
@@ -420,42 +363,13 @@ function content_update_1003() {
 }
 
 /**
- *  Fix corrupted db due to a bug in 1.3 release (http://drupal.org/node/115332)
+ * Fix corrupted db due to a bug in 1.3 release (http://drupal.org/node/115332).
  */
 function content_update_1004() {
   $ret = array();
-  include_once('./'. drupal_get_path('module', 'content') .'/content.module');
-  include_once('./'. drupal_get_path('module', 'content') .'/content_admin.inc');
-
-  // drop fields with no field instances
-  $fields = array();
-  $result = db_query("SELECT DISTINCT(field_name) FROM {". content_instance_tablename() ."}");
-  while($row = db_fetch_array($result)) {
-    $fields[] = "'". $row['field_name'] ."'";
-  }
-  if ($fields) {
-    $ret[] = update_sql("DELETE FROM {". content_field_tablename() ."} WHERE field_name NOT IN (". implode(', ', $fields) .")");
-  }
-
-  // drop 'content_type_' table
-  $table = _content_tablename('', CONTENT_DB_STORAGE_PER_CONTENT_TYPE);
-  if (db_table_exists($table)) {
-    $ret[] = update_sql("DROP TABLE {".$table."}");
-  }
-
-  // set invalid 'per field storage' back to 'per content type'
-  $result = db_query("SELECT field_name FROM {". content_field_tablename() ."} WHERE multiple = 0 AND db_storage = %d", CONTENT_DB_STORAGE_PER_FIELD);
-  while ($row = db_fetch_array($result)) {
-    $count = db_num_rows(db_query("SELECT field_name FROM {". content_instance_tablename() ."} WHERE field_name = '%s'", $row['field_name']));
-    if ($count == 1) {
-      $field = content_fields($row['field_name']);
-      $db_info = content_database_info($field);
-      $field['columns'] = $db_info['columns'];
-      $new_field = $field;
-      $new_field['db_storage'] = CONTENT_DB_STORAGE_PER_CONTENT_TYPE;
-      content_alter_schema($field, $new_field);
-    }
-  }
+  // update_5() had a mistake that was later corrected in update_10() for 4.7
+  // and update_1004() in 5.x. Instead of repeating variations of the same
+  // update several times, the fix is done entirely in update_6003().
   return $ret;
 }
 
@@ -578,7 +492,7 @@ function content_update_6001() {
 }
 
 /**
- * Get rid of per content tables for content types that have no fields.
+ * Get rid of automatic per content tables for content types that have no fields.
  * Switching to adding those tables only when needed.
  */
 function content_update_6002() {
@@ -599,3 +513,53 @@ function content_update_6002() {
   content_clear_type_cache(TRUE);
 }
 
+/**
+ * Fix corrupted db due to a bug in 1.3 release (http://drupal.org/node/115332).
+ *
+ * The original problem was that update_5() moved all data that had multiple = 0
+ * to per content tables, but shared fields should have stayed in per field tables,
+ * so this update checks for that and changes the database back.
+ *
+ * This may have been originally created in 4.7 in update_5() and fixed in 4.7
+ * in update_10() or in 5.x in update_1004() but repeated here in a way that
+ * will fix the database no matter what the state, eliminating the need for
+ * three confusingly similar updates.
+ */
+function content_update_6003() {
+  global $base_url;
+  $ret = array();
+  include_once('./'. drupal_get_path('module', 'content') .'/content.module');
+  include_once('./'. drupal_get_path('module', 'content') .'/content_admin.inc');
+
+  // drop fields with no field instances.
+  $fields = array();
+  $result = db_query("SELECT DISTINCT(field_name) FROM {". content_instance_tablename() ."}");
+  while ($row = db_fetch_array($result)) {
+    $fields[] = $row['field_name'];
+  }
+  $ret[] = update_sql("DELETE FROM {". content_field_tablename() ."} WHERE field_name NOT IN ('". implode("','", $fields) ."')");
+
+  // Check the status of all non-multiple fields to be sure storage is set correctly.
+  $result = db_query("SELECT field_name, db_storage FROM {". content_field_tablename() ."} WHERE multiple = 0");
+  while ($row = db_fetch_array($result)) {
+    $field = content_fields($row['field_name']);
+    $db_info = content_database_info($field);
+    $field['columns'] = $db_info['columns'];
+    // Insert the actual value from the database, since it may have been
+    // corrected in the cached array.
+    $field['db_storage'] = $row['db_storage'];
+    $new_field = $field;
+    $instances = db_result(db_query("SELECT COUNT(*) FROM {". content_instance_tablename() ."} WHERE field_name = '%s'", $row['field_name']));
+    if ($field['db_storage'] == CONTENT_DB_STORAGE_PER_FIELD && $instances == 1) {
+      $new_field['db_storage'] = CONTENT_DB_STORAGE_PER_CONTENT_TYPE;
+      $ret[] = update_sql("UPDATE {". content_field_tablename() ."} SET db_storage = ". $new_field['db_storage'] ." WHERE field_name ='". $new_field['field_name'] ."'");
+      content_alter_schema($field, $new_field);
+    }
+    elseif ($field['db_storage'] == CONTENT_DB_STORAGE_PER_CONTENT_TYPE && $instances > 1) {
+      $new_field['db_storage'] = CONTENT_DB_STORAGE_PER_FIELD;
+      $ret[] = update_sql("UPDATE {". content_field_tablename() ."} SET db_storage = ". $new_field['db_storage'] ." WHERE field_name ='". $new_field['field_name'] ."'");
+      content_alter_schema($field, $new_field);
+    }
+  }
+  return $ret;
+}

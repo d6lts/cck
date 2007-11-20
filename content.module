@@ -778,7 +778,6 @@ function content_storage($op, $node) {
         foreach ($schema['content fields'] as $field_name) {
           $field = content_fields($field_name, $type_name);
           $db_info = content_database_info($field);
-
           // Multiple fields need specific handling, we'll deal with them later on.
           if ($field['multiple']) {
             continue;
@@ -1383,8 +1382,8 @@ function content_table_schema($field = NULL) {
       unset($attributes['column']);
       unset($attributes['sortable']);
       $schema['fields'][$column_name] = $attributes;
+      $schema['content fields'][] = $field['field_name'];
     }
-    $schema['content fields'] = array_keys($field['columns']);
   }
   return $schema;
 }

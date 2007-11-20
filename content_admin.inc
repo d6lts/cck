@@ -20,7 +20,10 @@ function _content_admin_type_fields() {
     $row[] = $field['type'];
 
     $types = array();
-    $result = db_query("SELECT nt.name, nt.type FROM {". content_instance_tablename() ."} nfi LEFT JOIN {node_type} nt ON nt.type = nfi.type_name WHERE nfi.field_name = '%s' ORDER BY nt.name ASC", $field['field_name']);
+    $result = db_query("SELECT nt.name, nt.type FROM {".
+    content_instance_tablename() ."} nfi LEFT JOIN {node_type} nt ".
+    "ON nt.type = nfi.type_name WHERE nfi.field_name = '%s' ".
+    "ORDER BY nt.name ASC", $field['field_name']);
     while ($type = db_fetch_array($result)) {
       $content_type = content_types($type['type']);
       $types[] = l($type['name'], 'admin/content/types/'. $content_type['url_str'] .'/fields');
@@ -548,10 +551,12 @@ function _content_admin_field_add_existing_submit($form, &$form_state) {
   $form_values = $form_state['values'];
 
   if (!content_field_instance_create($form_values)) {
-    drupal_set_message(t('There was a problem adding field %label.', array('%label' => $form_values['field_name'])));
+    drupal_set_message(t('There was a problem adding field %label.', array(
+      '%label' => $form_values['field_name'])));
   }
   else {
-    drupal_set_message(t('Added field %label.', array('%label' => $form_values['field_name'])));
+    drupal_set_message(t('Added field %label.', array(
+      '%label' => $form_values['field_name'])));
   }
   $type   = content_types($form_values['type_name']);
   $form_state['redirect'] = 'admin/content/types/'. $type['url_str'] .'/fields';
@@ -591,10 +596,12 @@ function _content_admin_field_add_new_submit($form, &$form_state) {
   $form_values['widget_type'] = $field_widget_type[1];
 
   if (!$field = content_field_create($form_values)) {
-    drupal_set_message(t('There was a problem creating field %label.', array('%label' => $form_values['field_name'])));
+    drupal_set_message(t('There was a problem creating field %label.', array(
+      '%label' => $form_values['field_name'])));
   }
   else {
-    drupal_set_message(t('Created field %label.', array('%label' => $form_values['field_name'])));
+    drupal_set_message(t('Created field %label.', array(
+      '%label' => $form_values['field_name'])));
   }
 
   $type   = content_types($form_values['type_name']);
@@ -619,7 +626,8 @@ function _content_admin_field_remove(&$form_state, $type_name, $field_name) {
   );
 
   $output = confirm_form($form,
-    t('Are you sure you want to remove the field %field?', array('%field' => $field['widget']['label'])),
+    t('Are you sure you want to remove the field %field?', array(
+      '%field' => $field['widget']['label'])),
     'admin/content/types/'. $type['url_str'] .'/fields',
     t('If you have any content left in this field, it will be lost. This action cannot be undone.'),
     t('Remove'), t('Cancel'),
@@ -639,10 +647,14 @@ function _content_admin_field_remove_submit($form, &$form_state) {
   $field = $type['fields'][$form_values['field_name']];
   if ($type && $field && $form_values['confirm']) {
     if (content_field_instance_delete($form_values['field_name'], $form_values['type_name'])) {
-      drupal_set_message(t('Removed field %field from %type.', array('%field' => $field['widget']['label'], '%type' => $type['name'])));
+      drupal_set_message(t('Removed field %field from %type.', array(
+        '%field' => $field['widget']['label'],
+        '%type' => $type['name'])));
     }
     else {
-      drupal_set_message(t('There was a problem deleting %field from %type', array('%field' => $field['widget']['label'], '%type' => $type['name'])));
+      drupal_set_message(t('There was a problem deleting %field from %type', array(
+        '%field' => $field['widget']['label'],
+        '%type' => $type['name'])));
     }
     $form_state['redirect'] = 'admin/content/types/'. $type['url_str'] .'/fields';
   }
@@ -651,10 +663,6 @@ function _content_admin_field_remove_submit($form, &$form_state) {
 
 /**
  * Menu callback; presents the field editing page.
- *
- * @TODO figure out which changes might result in data loss and add a
- *   confirmation screen or warning to those options, like changing
- *   from multiple value to not multiple.
  */
 function _content_admin_field(&$form_state, $type_name, $field_name) {
   $output = '';
@@ -672,7 +680,9 @@ function _content_admin_field(&$form_state, $type_name, $field_name) {
   $form['widget'] = array(
     '#type' => 'fieldset',
     '#title' => t('Widget settings'),
-    '#description' => t('These settings apply only to the %field field as it appears in the %type content type.', array('%field' => $field['widget']['label'], '%type' => $type['name'])),
+    '#description' => t('These settings apply only to the %field field as it appears in the %type content type.', array(
+      '%field' => $field['widget']['label'],
+      '%type' => $type['name'])),
   );
   $options = array();
   foreach ($widget_types as $possible_widget_name => $possible_widget_type) {
@@ -758,7 +768,10 @@ function _content_admin_field(&$form_state, $type_name, $field_name) {
       '#default_value' => isset($field['widget']['default_value_php']) ? $field['widget']['default_value_php'] : '',
       '#rows' => 6,
       '#tree' => TRUE,
-      '#description' => t('Advanced Usage Only: PHP code that returns a default value. Should not include &lt;?php ?&gt; delimiters. If this field is filled out, the value returned by this code will override any value specified above. Expected format :<pre>!sample</pre>Using !link_devel\'s \'devel load\' tab on a %type content page might help you figure out the expected format.', array('!sample' => $sample, '!link_devel' => l('devel.module', 'http://www.drupal.org/project/devel'), '%type' => $type_name)),
+      '#description' => t('Advanced Usage Only: PHP code that returns a default value. Should not include &lt;?php ?&gt; delimiters. If this field is filled out, the value returned by this code will override any value specified above. Expected format :<pre>!sample</pre>Using !link_devel\'s \'devel load\' tab on a %type content page might help you figure out the expected format.', array(
+        '!sample' => $sample,
+        '!link_devel' => l('devel.module', 'http://www.drupal.org/project/devel'),
+        '%type' => $type_name)),
     );
   }
 
@@ -781,9 +794,9 @@ function _content_admin_field(&$form_state, $type_name, $field_name) {
     '#description' => t('<p>Select \'None\' if this field should not allow multiple values, \'Unlimited\' to provide an \'Add more\' button so the user can add as many values as they like, or select a number to set a specific number of multiple values for this field.</p><p><strong>Warning! Changing the multiple values setting after data has been created could result in the loss of data!</strong></p>')
   );
 
-  $form['field']['previous_multiple'] = array(
+  $form['field']['previous_field'] = array(
     '#type' => 'hidden',
-    '#value' => $field['multiple'],
+    '#value' => serialize($field),
     );
 
   $additions = module_invoke($field_type['module'], 'field_settings', 'form', $field);
@@ -835,8 +848,7 @@ function _content_admin_field_validate($form, &$form_state) {
   $widget_types = _content_widget_types();
   $widget_type = $widget_types[$field['widget']['type']];
 
-  $previous_field = $field;
-  $previous_field['multiple'] = $form_values['previous_multiple'];
+  $previous_field = unserialize($form_values['previous_field']);
   if ($dropped_data = content_alter_db_analyze($previous_field, $field)) {
     // @TODO
     // This is a change that might result in loss of data.
@@ -848,7 +860,8 @@ function _content_admin_field_validate($form, &$form_state) {
   // If content.module is handling the default value,
   // validate the result using the field validation.
   if (content_callback('widget', 'default value', $field) == CONTENT_CALLBACK_DEFAULT) {
-    if (isset($form_values['default_value_php']) && ($php = trim($form_values['default_value_php']))) {
+    if (isset($form_values['default_value_php']) &&
+    ($php = trim($form_values['default_value_php']))) {
       ob_start();
       $return = eval($php);
       ob_end_clean();
@@ -876,7 +889,9 @@ function _content_admin_field_validate($form, &$form_state) {
   1 => array('. implode(', ', $columns) .'),
   2 => ...
 );';
-        form_set_error('default_value_php', t('The default value php code returned an incorrect value<br/>Expected format : <pre>!sample</pre>Returned value : @value', array('!sample' => $sample, '@value' => print_r($return, true))));
+        form_set_error('default_value_php', t('The default value php code returned an incorrect value<br/>Expected format : <pre>!sample</pre> Returned value : @value', array(
+          '!sample' => $sample,
+          '@value' => print_r($return, true))));
         return;
       }
       else {
@@ -904,10 +919,12 @@ function _content_admin_field_validate($form, &$form_state) {
       if (function_exists($field_function)) {
         $field_function('validate', $node, $field, $default_value, NULL, NULL);
       }
-      // The field validation routine won't set an error on the right field, so set it here.
+      // The field validation routine won't set an error on the right field,
+      // so set it here.
       if (form_get_errors()) {
         if (trim($form_values['default_value_php'])) {
-          form_set_error('default_value_php', t('The default value php code created @value which is invalid.', array('@value' => print_r($default_value, true))));
+          form_set_error('default_value_php', t('The default value php code created @value which is invalid.', array(
+            '@value' => print_r($default_value, true))));
         }
         else {
           form_set_error('default_value', t('The default value is invalid.'));
@@ -940,32 +957,41 @@ function _content_admin_field_submit($form, &$form_state) {
  * delete the data one node at a time to allow hooks to fire,
  * then alter the schema.
  *
- * IMPORTANT NOTE: This function is intended to work when called
- * from a form submit handler. Calling it outside of the form submission
- * process may not work correctly.
+ * Set $url if calling from outside FAPI, as when calling from an update.
  *
  */
-function content_alter_schema($previous_field, $new_field) {
+function content_alter_schema($previous_field, $new_field, $url = NULL) {
+
+  // See what values need to be updated in the field data.
+  $mask = content_alter_db_mask($previous_field, $new_field);
+
   // We use batch processing to prevent timeout when updating a large number
-  // of nodes.
-  $mask = content_alter_db_delete_mask($previous_field, $new_field);
+  // of nodes. If there is no previous data to adjust, we can just go straight
+  // to altering the schema, otherwise use batch processing to update
+  // the database one node at a time, then update the schema.
+  if (empty($mask) && empty($previous_field)) {
+    return content_alter_db($previous_field, $new_field);
+  }
   $batch = array(
     'operations' => array(
-      array('content_batch_update', array($previous_field, $new_field, $mask)),
+      array('content_mask_batch_update', array($previous_field, $mask)),
       array('content_alter_db', array($previous_field, $new_field))
     ),
-    'finished' => '_content_alter_schema_batch_finished',
+    'finished' => '_content_alter_schema_finished',
     'title' => t('Processing'),
     'error_message' => t('The update has encountered an error.'),
+    'file' => './'. drupal_get_path('module', 'content') .'/content_admin.inc',
   );
   batch_set($batch);
-  return $batch;
+  if (!empty($url)) {
+    batch_process($url, $url);
+  }
 }
 
 /**
  * Content Schema Alter Batch 'finished' callback.
  */
-function _content_alter_schema_batch_finished($success, $results, $operations) {
+function _content_alter_schema_finished($success, $results, $operations) {
   if ($success) {
     drupal_set_message(t('The database has been altered and data has been migrated or deleted.'));
   }
@@ -975,6 +1001,60 @@ function _content_alter_schema_batch_finished($success, $results, $operations) {
     $message .= theme('item_list', $results);
     drupal_set_message($message);
   }
+}
+
+/**
+ * Schema Alter Analyze
+ *
+ * Analyze if changes will remove columns or delta values, thus losing data.
+ * Do this so we can delete the data and fire the necessary hooks, before
+ * we actually alter the schema.
+ */
+function content_alter_db_analyze($previous_field, $new_field) {
+  $dropped = array();
+
+  // There is no loss of data if there was no previous data.
+  if (empty($previous_field)) {
+    return $dropped;
+  }
+
+  // Analyze possible data loss from changes in storage type.
+  if (!empty($previous_field) && !empty($new_field)) {
+    // Changing from multiple to not multiple data, will cause loss of all
+    // values greater than zero.
+    if ($previous_field['db_storage'] == CONTENT_DB_STORAGE_PER_FIELD &&
+    $new_field['db_storage'] == CONTENT_DB_STORAGE_PER_CONTENT_TYPE) {
+      $dropped['delta'] = 0;
+    }
+    // Changing from one multiple value to another will cause loss of all
+    // values for deltas greater than or equal to the new multiple value.
+    elseif (isset($previous_field['multiple']) && isset($new_field['multiple'])) {
+      if ($previous_field['multiple'] != $new_field['multiple'] &&
+      $previous_field['multiple'] > 0) {
+        $dropped['delta'] = $new_field['multiple'];
+      }
+    }
+  }
+
+  $previous_schema = !empty($previous_field) ? content_table_schema($previous_field) : array();
+  $new_schema = !empty($new_field) ? content_table_schema($new_field) : array();
+
+  if (empty($new_schema['fields'])) {
+    // No new columns, will lose all columns for a field.
+    foreach ($previous_schema['fields'] as $column => $attributes) {
+      $dropped['columns'][] = $column;
+    }
+  }
+  else {
+    // Check both old and new columns to see if we are deleting some columns for a field.
+    foreach ($previous_schema['fields'] as $column => $attributes) {
+      if (!isset($new_schema['fields'][$column])) {
+        $dropped['columns'][] = $column;
+      }
+    }
+  }
+
+  return $dropped;
 }
 
 /**
@@ -988,10 +1068,16 @@ function _content_alter_schema_batch_finished($success, $results, $operations) {
  * the item 'empty', as defined by hook_content_is_empty(), even if
  * some columns still have values, so all these things need to be tested.
  */
-function content_alter_db_delete_mask($previous_field, $new_field) {
+function content_alter_db_mask($previous_field, $new_field) {
+
+  // Get an array of column values that will be dropped by this
+  // schema change and create a mask to feed to content_batch_update.
   $dropped_columns = content_alter_db_analyze($previous_field, $new_field);
+  if (empty($dropped_columns)) {
+    return array();
+  }
   $mask = array();
-  $delta_mask = array();
+  $alt_mask = array();
   foreach ($previous_field['columns'] as $column_name => $column) {
     // The basic mask will ampty the dropped columns.
     if (in_array($column_name, $dropped_columns)) {
@@ -999,38 +1085,243 @@ function content_alter_db_delete_mask($previous_field, $new_field) {
     }
     // Over the delta we'll empty all columns.
     if ($dropped_columns['delta']) {
-      $delta_mask[$column_name] = NULL;
+      $alt_mask[$column_name] = NULL;
     }
   }
   return array(
     'mask' => $mask,
+    'alt_mask' => $alt_mask,
     'delta' => $dropped_columns['delta'],
-    'delta_mask' => $delta_mask,
     );
 }
 
 /**
- * Content Data Update Batch Operation
- *
- * Used here to do the mass delete, but designed to be reusable by other
- * functions or modules. Supply a mask of field column data to be replaced into
- * field values, one mask for basic values and an optional different mask
- * for values equal to or higher than a specified delta.
- *
- * @param $previous_field
- * @param $new_field
- * @param $mask
- *   A mask is an array that contains a delta and two masks, a default mask
- *   to apply to values under the delta and an alternate mask to apply to
- *   values over the delta. The mask should contain only the values to
- *   be substituted in. It will be merged into the existing values to replace
- *   only those values in the mask.
+ * Perform adds, alters, and drops as needed to synchronize the database with
+ * new field definitions.
  */
-function content_batch_update($previous_field, $new_field, $masks, &$context) {
-  $field_name = $previous_field['field_name'];
+function content_alter_db($previous_field, $new_field) {
+  $ret = array();
+
+  $previous_schema = !empty($previous_field) ? content_table_schema($previous_field) : array();
+  $new_schema = !empty($new_field) ? content_table_schema($new_field) : array();
+
+  // One or the other of these must be valid.
+  if (empty($previous_schema) && empty($new_schema)) {
+    return $ret;
+  }
+
+  if (!empty($previous_field)) {
+    $previous_db_info = content_database_info($previous_field);
+    $previous_table = $previous_db_info['table'];
+  }
+  if (!empty($new_field)) {
+    $new_db_info = content_database_info($new_field);
+    $new_table = $new_db_info['table'];
+  }
+
+  // Deleting this field entirely is a simple case.
+  if (empty($new_schema)) {
+    if ($previous_field['db_storage'] == CONTENT_DB_STORAGE_PER_FIELD) {
+      db_drop_table($ret, $previous_table);
+    }
+    else {
+      foreach ($previous_schema['fields'] as $column => $attributes) {
+        if (!in_array($column, array('nid', 'vid', 'delta'))) {
+          db_drop_field($ret, $previous_table, $column);
+        }
+      }
+    }
+    return content_alter_db_cleanup($ret);
+  }
+
+  // Create new table and columns, if not already created.
+  if (!db_table_exists($new_table)) {
+    db_create_table($ret, $new_table, $new_schema);
+  }
+
+  // All content types need a content type table.
+  if (!empty($new_schema)) {
+    $base_tablename = _content_tablename($new_field['type_name'], CONTENT_DB_STORAGE_PER_CONTENT_TYPE);
+    if (!db_table_exists($base_tablename)) {
+      db_create_table($ret, $base_tablename, content_table_schema());
+    }
+  }
+
+  // If this is a new field, we're done.
+  if (empty($previous_schema)) {
+    return content_alter_db_cleanup($ret);
+  }
+
+  // If the previous table doesn't exist, we're done.
+  // Could happen if someone tries to run a schema update from an
+  // content.install update function more than once.
+  if (db_table_exists($previous_table)) {
+    return content_alter_db_cleanup($ret);
+  }
+
+  // If changing data from one schema to another, see if changes require that
+  // we drop multiple values or migrate data from one storage type to another.
+  $migrate_columns = array_intersect_assoc($new_schema['fields'], $previous_schema['fields']);
+  unset($migrate_columns['nid'], $migrate_columns['vid'], $migrate_columns['delta']);
+
+  // If we're going from one multiple value to another, and the new one
+  // is smaller than the old one, drop all delta values higher than the new
+  // maximum delta value. Not needed if the new multiple is unlimited.
+  if ($previous_field['multiple'] > 0 && $new_field['multiple'] > 1 &&
+  $new_field['multiple'] < $previous_field['multiple']){
+    db_query("DELETE FROM {". $new_table ."} WHERE delta >= ". $new_field['multiple']);
+  }
+
+  // If going from multiple to non-multiple, make sure the field tables have
+  // the right database structure to accept migrated data.
+  if ($new_field['db_storage'] == CONTENT_DB_STORAGE_PER_FIELD) {
+    if (count($previous_schema['fields']) &&
+    $previous_field['db_storage'] == CONTENT_DB_STORAGE_PER_FIELD) {
+      // Already using per-field storage; change multiplicity if needed.
+      if ($previous_field['multiple'] > 0 && $new_field['multiple'] == 0) {
+        db_drop_field($ret, $new_table, 'delta');
+        db_drop_primary_key($ret, $new_table);
+        db_add_primary_key($ret, $new_table, array('vid'));
+      }
+      else if ($previous_field['multiple'] == 0 && $new_field['multiple'] > 0) {
+        db_add_field($ret, $new_table, 'delta', array(
+          'type' => 'int',
+          'unsigned' => TRUE,
+          'not null' => TRUE,
+          'default' => 0));
+        db_drop_primary_key($ret, $new_table);
+        db_add_primary_key($ret, $new_table, array('vid', 'delta'));
+      }
+    }
+  }
+
+  // Migrate data from per-content-type storage.
+  if ($previous_field['db_storage'] == CONTENT_DB_STORAGE_PER_CONTENT_TYPE &&
+  $new_field['db_storage'] == CONTENT_DB_STORAGE_PER_FIELD) {
+    $columns = array_keys($migrate_columns);
+    if ($new_field['multiple']) {
+      db_query('INSERT INTO {'. $new_table .'} (vid, nid, delta, '. implode(', ', $columns) .') '.
+        ' SELECT vid, nid, 0, '. implode(', ', $columns) .' FROM {'. $previous_table .'}');
+    }
+    else {
+      db_query('INSERT INTO {'. $new_table .'} (vid, nid, '. implode(', ', $columns) .') '.
+        ' SELECT vid, nid, '. implode(', ', $columns) .' FROM {'. $previous_table .'}');
+    }
+    foreach ($columns as $column_name) {
+      db_drop_field($ret, $previous_table, $column_name);
+    }
+  }
+
+  // Migrate data from per-field storage, and drop per-field table.
+  if ($previous_field['db_storage'] == CONTENT_DB_STORAGE_PER_FIELD &&
+  $new_field['db_storage'] == CONTENT_DB_STORAGE_PER_CONTENT_TYPE) {
+    if ($previous_field['multiple']) {
+      $result = db_query('SELECT * FROM {'. $previous_table .'} WHERE delta = 0');
+    }
+    else {
+      $result = db_query('SELECT * FROM {'. $previous_table .'}');
+    }
+    $record = array();
+    while ($data = db_fetch_array($result)) {
+      $record['nid'] = $data['nid'];
+      $record['vid'] = $data['vid'];
+      if ($previous_field['multiple']) {
+        $record['delta'] = $data['delta'];
+      }
+      foreach ($migrate_columns as $column => $attributes) {
+        $record[$column] = is_null($data[$column]) ? NULL : $data[$column];
+      }
+      if (db_result(db_query('SELECT COUNT(*) FROM {'. $new_table .
+      '} WHERE vid = %d AND nid = %d', $data['vid'], $data['nid']))) {
+        drupal_write_record($new_table, $record, array('vid', 'nid'));
+      }
+      else {
+        drupal_write_record($new_table, $record);
+      }
+    }
+    db_drop_table($ret, $previous_table);
+  }
+
+  // Change modified columns that don't involve storage changes.
+  foreach ($new_schema['fields'] as $column => $attributes) {
+    if (isset($previous_schema['fields'][$column]) &&
+    $previous_field['db_storage'] == $new_field['db_storage']) {
+      if ($attributes != $previous_schema['fields'][$column]) {
+        if (!in_array($column, array('nid', 'vid', 'delta'))) {
+          db_change_field($ret, $new_table, $column, $column, $attributes);
+        }
+      }
+    }
+  }
+
+  // Remove obsolete columns.
+  foreach ($previous_schema['fields'] as $column => $attributes) {
+    if (!isset($new_schema['fields'][$column])) {
+      if (!in_array($column, array('nid', 'vid', 'delta'))) {
+        db_drop_field($ret, $previous_table, $column);
+      }
+    }
+  }
+
+  return content_alter_db_cleanup($ret);
+}
+
+/**
+ * Helper function for handling cleanup operations when schema changes are made.
+ */
+function content_alter_db_cleanup($ret) {
+  // Rebuild the whole database schema.
+  // TODO : this could be optimized. We don't need to rebuild in *every case*...
+  // Or do we? This affects the schema and menu and may have unfortunate
+  // delayed effects if we don't clear everything out at this point.
+  content_clear_type_cache(TRUE);
+
+  // TODO : debugging stuff - should be removed
+  if (module_exists('devel')) {
+    //dsm($ret);
+  }
+  return $ret;
+
+}
+
+/**
+ * Content Mask Batch Update Operation
+ *
+ * Used here to do the mass delete for content_alter_schema, but designed to
+ * be called by other batch functions. Supply a mask of field column values
+ * to be replaced into field values, one mask for basic values and an optional
+ * different mask for values in field items equal to or higher than a specified
+ * delta.
+ *
+ * @param $field
+ * @param $mask
+ *   $mask is an array that contains a delta and two masks, a default mask
+ *   to apply to values under the delta and an alternate mask to apply to
+ *   values at or over the delta. The mask should contain only the column
+ *   values to  be substituted in. It will be merged into the existing column
+ *   values to replace only the columns in the mask, leaving all other columns
+ *   unchanged.
+ *
+ *   The format of the mask is array(
+ *    'mask' => array()
+ *      // Keyed array of column names and replacement values for use
+ *      // below delta, or for all values if no delta is supplied.
+ *    'alt_mask' => array()
+ *      // Optional, keyed array of column names and replacement values for use
+ *      // at or above delta, if a delta is supplied.
+ *    'delta' => #
+ *      // Optional, the number to use as the delta value where you switch from
+ *      // one mask to the other.
+ */
+function content_mask_batch_update($field, $mask, &$context) {
+  if(empty($field)) {
+    $context['finished'] = 1;
+    return;
+  }
+  $field_name = $field['field_name'];
 
   if (!isset($context['sandbox']['progress'])) {
-    $db_info = content_database_info($previous_field);
+    $db_info = content_database_info($field);
     $nodes = array();
     $result = db_query("SELECT nid FROM {". $db_info['table'] ."}");
     while ($node = db_fetch_array($result)) {
@@ -1044,31 +1335,27 @@ function content_batch_update($previous_field, $new_field, $masks, &$context) {
   // Process nodes by groups of 5.
   $count = min(5, count($context['sandbox']['nodes']));
 
-  $mask = $masks['mask'];
-  $test_delta = $masks['delta'];
-  $delta_mask = $masks['delta_mask'];
-  $is_empty = $field['module'] .'_content_is_empty';
-
   for ($i = 1; $i <= $count; $i++) {
     // For each nid, load the node, empty the column values
     // or the whole field, and re-save it.
     $nid = array_shift($context['sandbox']['nodes']);
     $node = node_load($nid, NULL, TRUE);
-    foreach ($node->$field_name as $delta => $value) {
-      if (isset($test_delta) && isset($delta_mask) && $delta >= $test_delta) {
-        $field_mask = $delta_mask;
+
+    $items = $node->$field_name;
+    foreach ($items as $delta => $value) {
+      if (isset($mask['delta']) && isset($mask['alt_mask']) && $delta >= $mask['delta']) {
+        $field_mask = $alt_mask;
       }
       else {
-        $field_mask = $mask;
+        $field_mask = $mask['mask'];
       }
       // Merge the mask into the field values to do the replacements.
-      $node->$field_name[$delta] = array_merge($node->$field_name[$delta], $field_mask);
-
-      // Test if the new values in the transformed item will make it qualify as empty.
-      if ($is_empty($node->$field_name[$delta], $new_field) && $delta >= $new_field['multiple']) {
-        unset($node->$field_name[$delta]);
-      }
+      $items[$delta] = array_merge($node->$field_name[$delta], $field_mask);
     }
+    // Test if the new values will make items qualify as empty.
+    $items = content_set_empty($field, $items);
+
+    $node->$field_name = $items;
     node_save($node);
 
     // Store result for post-processing in the finished callback.
@@ -1083,204 +1370,5 @@ function content_batch_update($previous_field, $new_field, $masks, &$context) {
   // and provide an estimation of the completion level we reached.
   if ($context['sandbox']['progress'] != $context['sandbox']['max']) {
     $context['finished'] = $context['sandbox']['progress'] / $context['sandbox']['max'];
-  }
-}
-
-/**
- * Schema Alter Analyze
- *
- * Analyze if changes will remove columns or delta values, thus losing data.
- * Do this so we can delete the data and fire the necessary hooks, before
- * we actually alter the schema.
- */
-function content_alter_db_analyze($previous_field, $new_field) {
-  $dropped = array();
-
-  $previous_columns = $previous_field['columns'];
-  $previous_db_info = content_database_info($previous_field);
-  $new_columns = $new_field['columns'];
-  $new_db_info = content_database_info($new_field);
-
-  // There is no loss of data if there was no previous data.
-  if (!count($previous_columns) || empty($previous_field)) {
-    return $dropped;
-  }
-
-  // Changing from multiple to not multiple data, will cause
-  // some delta values will be lost. We will drop all delta
-  // values greater than or equal to the new multiple value.
-  if ($previous_field['multiple'] != $new_field['multiple'] && $previous_field['multiple'] > 0) {
-    $dropped['delta'] = $new_field['multiple'];
-  }
-
-  // Deleting all columns for a field.
-  if (!count($new_columns)) {
-    foreach ($previous_db_info['columns'] as $column => $attributes) {
-      $dropped['columns'][] = $attributes['column'];
-    }
-  }
-
-  // Deleting some columns for a field.
-  if (count($new_columns)) {
-    foreach ($previous_columns as $column => $attributes) {
-      if (!isset($new_columns[$column])) {
-        $dropped['columns'][] = $attributes['column'];
-      }
-    }
-  }
-
-  return $dropped;
-}
-
-/**
- * Perform adds, alters, and drops as needed to synchronize the database with
- * new field definitions.
- */
-function content_alter_db($previous_field, $new_field) {
-  $ret = array();
-
-  $previous_columns = $previous_field['columns'];
-  $previous_db_info = content_database_info($previous_field);
-  $new_columns = $new_field['columns'];
-  $new_db_info = content_database_info($new_field);
-
-  $base_tablename = _content_tablename($new_field['type_name'], CONTENT_DB_STORAGE_PER_CONTENT_TYPE);
-
-  // Deleting this field entirely is a simple case.
-  if (!count($new_columns)) {
-    if (count($previous_columns)) {
-      if ($previous_field['db_storage'] == CONTENT_DB_STORAGE_PER_FIELD) {
-        db_drop_table($ret, $previous_db_info['table']);
-      }
-      else {
-        foreach ($previous_db_info['columns'] as $column => $attributes) {
-          db_drop_field($ret, $previous_db_info['table'], $attributes['column']);
-        }
-      }
-      // Make sure any remaining content table gets deleted, too.
-      if (db_table_exists($base_tablename)) {
-        db_drop_table($ret, $base_tablename);
-      }
-    }
-    return;
-  }
-
-  // Create new table and columns, if not already created.
-  if (!db_table_exists($new_db_info['table'])) {
-    db_create_table($ret, $new_db_info['table'], _content_table_schema($new_field));
-  }
-
-  // All content types need a content type table.
-  if (count($new_columns) && !db_table_exists($base_tablename)) {
-    db_create_table($ret, $base_tablename, _content_table_schema());
-  }
-
-  // If we're going from one multiple value to another, and the new one
-  // is smaller than the old one, drop all delta values higher than the new
-  // maximum delta value. Not needed if the new multiple is unlimited.
-  if ($previous_field['multiple'] > 0 && $new_field['multiple'] > 1 &&
-    $new_field['multiple'] < $previous_field['multiple']){
-      db_query("DELETE FROM {". $new_db_info['table'] ."} WHERE delta >= ". $new_field['multiple']);
-  }
-
-  // If going from multiple to non-multiple, make sure the field tables have
-  // the right database structure to accept migrated data.
-  if ($new_field['db_storage'] == CONTENT_DB_STORAGE_PER_FIELD) {
-    if (count($previous_columns) && $previous_field['db_storage'] == CONTENT_DB_STORAGE_PER_FIELD) {
-      // Already using per-field storage; change multiplicity if needed.
-      if ($previous_field['multiple'] > 0 && $new_field['multiple'] == 0) {
-        db_drop_field($ret, $new_db_info['table'], 'delta');
-        db_drop_primary_key($ret, $new_db_info['table']);
-        db_add_primary_key($ret, $new_db_info['table'], array('vid'));
-      }
-      else if ($previous_field['multiple'] == 0 && $new_field['multiple'] > 0) {
-        db_add_field($ret, $new_db_info['table'], 'delta', array('type' => 'int', 'unsigned' => TRUE, 'not null' => TRUE, 'default' => 0));
-        db_drop_primary_key($ret, $new_db_info['table']);
-        db_add_primary_key($ret, $new_db_info['table'], array('vid', 'delta'));
-      }
-    }
-  }
-
-  // Migrate data from one storage type to another.
-  $migrate_columns = array();
-  if (count($previous_columns) && count($new_columns)) {
-    $migrate_columns = array_intersect_assoc($new_db_info['columns'], $previous_db_info['columns']);
-  }
-  if (count($migrate_columns) && db_table_exists($previous_db_info['table'])) {
-    // Migrate data from per-content-type storage.
-    if ($previous_field['db_storage'] == CONTENT_DB_STORAGE_PER_CONTENT_TYPE && $new_field['db_storage'] == CONTENT_DB_STORAGE_PER_FIELD) {
-      $columns = array();
-      foreach ($migrate_columns as $column => $attributes) {
-        $columns[] = $attributes['column'];
-      }
-      if ($new_field['multiple']) {
-        db_query('INSERT INTO {'. $new_db_info['table'] .'} (vid, nid, delta, '. implode(', ', $columns) .') '.
-          ' SELECT vid, nid, 0, '. implode(', ', $columns) .' FROM {'. $previous_db_info['table'] .'}');
-      }
-      else {
-        db_query('INSERT INTO {'. $new_db_info['table'] .'} (vid, nid, '. implode(', ', $columns) .') '.
-          ' SELECT vid, nid, '. implode(', ', $columns) .' FROM {'. $previous_db_info['table'] .'}');
-      }
-      foreach ($columns as $column_name) {
-        db_drop_field($ret, $previous_db_info['table'], $column_name);
-      }
-    }
-
-    // Migrate data from per-field storage.
-    if ($previous_field['db_storage'] == CONTENT_DB_STORAGE_PER_FIELD && $new_field['db_storage'] == CONTENT_DB_STORAGE_PER_CONTENT_TYPE) {
-      if ($previous_field['multiple']) {
-        $result = db_query('SELECT * FROM {'. $previous_db_info['table'] .'} WHERE delta = 0');
-      }
-      else {
-        $result = db_query('SELECT * FROM {'. $previous_db_info['table'] .'}');
-      }
-      $record = array();
-      while ($data = db_fetch_array($result)) {
-        $record['nid'] = $data['nid'];
-        $record['vid'] = $data['vid'];
-        if ($previous_field['multiple']) {
-          $record['delta'] = $data['delta'];
-        }
-        foreach ($migrate_columns as $column => $attributes) {
-          $column = $previous_field['field_name'] .'_'. $column;
-          $record[$column] = is_null($data[$column]) ? NULL : $data[$column];
-        }
-        if (db_result(db_query('SELECT COUNT(*) FROM {'. $new_db_info['table'] .'} WHERE vid = %d AND nid = %d', $data['vid'], $data['nid']))) {
-          drupal_write_record($new_db_info['table'], $record, array('vid', 'nid'));
-        }
-        else {
-          drupal_write_record($new_db_info['table'], $record);
-        }
-      }
-      db_drop_table($ret, $previous_db_info['table']);
-    }
-  }
-
-  // Change modified columns.
-  foreach ($new_columns as $column => $attributes) {
-    $column_name = $new_field['field_name'] .'_'. $column;
-    if (isset($previous_columns[$column]) || $previous_field['db_storage'] == $new_field['db_storage']) {
-      if ($attributes != $previous_columns[$column]) {
-        db_change_field($ret, $new_db_info['table'], $column_name, $column_name, $attributes);
-      }
-    }
-  }
-
-  // Remove obsolete columns.
-  foreach ($previous_columns as $column => $attributes) {
-    $column_name = $previous_field['field_name'] .'_'. $column;
-    if (!isset($new_columns[$column])) {
-      db_drop_field($ret, $previous_db_info['table'], $column_name);
-    }
-  }
-
-
-  // Rebuild the whole database schema.
-  // TODO : this could be optimized. We don't need to rebuild in *every case*...
-  content_clear_type_cache(TRUE);
-
-  // TODO : debugging stuff - should be removed
-  if (module_exists('devel')) {
-    dsm($ret);
   }
 }
