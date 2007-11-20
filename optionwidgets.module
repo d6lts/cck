@@ -227,19 +227,17 @@ function optionwidgets_onoff_process($element, $edit, $form_state, $form) {
   $field_key  = $element['#columns'][0];
 
   if (empty($edit)) {
-    $element['#value'] = optionwidgets_data2form($element, $element['#default_value'], $field);
+    $element['#value'] = optionwidgets_data2form($element, $element['#value'], $field);
   }
+  $on_value = array_shift(optionwidgets_options($field));
   $element[$field_key] = array(
     '#type' => 'checkbox',
     '#title' => t($field['widget']['label']),
     '#description' => t($field['widget']['description']),
     '#required' => $field['required'],
     '#multiple' => $field['multiple'],
-    '#options' => optionwidgets_options($field),
-    // TODO : check fix for http://drupal.org/node/140687 - http://drupal.org/cvs?commit=83011
-    // been committed to 4.7 and 5, not sure of the right way to fix in D6
-    // (optionwidgets seem sort of broken right now)
-    '#default_value' => isset($element['#value']) ? $element['#value'] : NULL,
+    '#default_value' => isset($element['#value'][0]) ? $element['#value'][0] == $on_value : FALSE,
+    '#return_value' => $on_value,
   );
   return $element;
 }
@@ -295,7 +293,7 @@ function optionwidgets_form2data($element, $items, $field) {
   $field_key = $element['#columns'][0];
 
   $options = optionwidgets_options($field);
-  $keys = !empty($items[$field_key]) ? $items[$field_key] : '';
+  $keys = !empty($items[$field_key]) ? $items[$field_key] : array();
   if (!is_array($keys)) {
     $keys = array($keys);
   }
@@ -307,7 +305,7 @@ function optionwidgets_form2data($element, $items, $field) {
   }
   if ($element['#type'] == 'optionwidgets_onoff' && empty($values)) {
     $keys = array_keys($options);
-    $values[] = $keys[0];
+    $values[] = array_key_exists(0, $keys) ? $keys[0] : '';
   }
   return content_transpose_array_rows_cols(array($field_key => $values));
 }
@@ -321,12 +319,16 @@ function optionwidgets_form2data($element, $items, $field) {
 function optionwidgets_options($field) {
   $function = $field['module'] .'_allowed_values';
   if (function_exists($function)) {
-    return $function($field);
+    $options = $function($field);
   }
   else {
     $values = content_allowed_values($field);
-    return (array) $values;
+    $options = (array) $values;
   }
+  if (!$field['required']) {
+    $options = array('' => '') + $options;
+  }
+  return $options;
 }
 
 /**
