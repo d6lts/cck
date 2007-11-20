@@ -1085,15 +1085,18 @@ function content_alter_db_mask($previous_field, $new_field) {
       $mask[$column_name] = NULL;
     }
     // Over the delta we'll empty all columns.
-    if ($dropped_columns['delta']) {
+    if (isset($dropped_columns['delta'])) {
       $alt_mask[$column_name] = NULL;
     }
   }
-  return array(
-    'mask' => $mask,
-    'alt_mask' => $alt_mask,
-    'delta' => $dropped_columns['delta'],
-    );
+  $mask = array('mask' => $mask);
+  if (isset($alt_mask)) {
+    $mask['alt_mask'] = $alt_mask;
+  }
+  if (isset($dropped_columns['delta'])) {
+    $mask['delta'] = $dropped_columns['delta'];
+  }
+  return $mask;
 }
 
 /**
