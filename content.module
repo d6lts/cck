@@ -64,6 +64,13 @@ function content_menu() {
     'file path' => drupal_get_path('module', 'content'),
     'type' => MENU_LOCAL_TASK,
   );
+  // Callback for AHAH add more buttons.
+  $items['content/js_add_more'] = array(
+    'page callback' => 'content_add_more_js',
+    // TODO : access rule ?
+    'access arguments' => array('access content'),
+    'type' => MENU_CALLBACK,
+  );
 
   foreach (node_get_types() as $type) {
     $type_name = $type->type;
@@ -109,27 +116,6 @@ function content_menu() {
       );
       foreach ($content_type['fields'] as $field) {
         $field_name = $field['field_name'];
-        // Callbacks for AHAH add more buttons.
-
-        // @TODO
-        // Find if there is a way to tweak the code so it is not
-        // necessary to create a path for every field and still know what
-        // field to manipulate, needed if there are more than one AHAH field
-        // button on the same form.
-        // YCHED : we could probably live with one single path ('content/js_add_more'), expecting the
-        // field name as an additional path component ?
-
-        if ($field['multiple']) {
-          $items['content/js/'. $field_name] = array(
-            'title' => 'Javascript Add More Form',
-            'page callback' => 'content_add_more_js',
-            'page arguments' => array($field_name),
-            // TODO : access rule ?
-            'access arguments' => array('access content'),
-            'type' => MENU_CALLBACK,
-          );
-        }
-
         $items['admin/content/types/'. $type_url_str .'/fields/'. $field_name] = array(
           'title' => t($field['widget']['label']),
           'page callback' => 'drupal_get_form',
@@ -380,6 +366,7 @@ function content_multiple_value_form(&$form, &$form_state, $field, $items) {
       '#submit' => array('content_add_more_submit'), // If no javascript action.
       '#ahah' => array(
         'path' => 'content/js/'. $field_name,
+        'path' => 'content/js_add_more/'. $field_name,
         'wrapper' => $field_name_css .'-items',
         'method' => 'replace',
         'effect' => 'fade',
@@ -424,6 +411,7 @@ function content_add_more_js($field_name) {
 
   // Build our new form element.
   $field = $form['#field_info'][$field_name];
+  // TODO : should we check that the field is multiple ?
   $form_state = array('values' => $_POST);
   $form_element = content_field_form($form, $form_state, $field, $delta);
   $form_element[$field_name][0]['#weight'] = $delta;
