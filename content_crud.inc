@@ -354,11 +354,11 @@ function content_field_instance_create($field) {
  *   array of form values.
  */
 function content_field_instance_update($field) {
-
   // If there is a prior value, fill out missing values from the prior value,
   // otherwise get missing values from default values.
-  $prev_field = content_fields($field['field_name'], $field['type_name']);
-  $default_values = content_instance_default_values($field['field_name'], $field['type_name'], $field['widget_type']);
+  $field = content_field_instance_expand($field);
+  $prev_field = content_field_instance_expand(content_fields($field['field_name'], $field['type_name']));
+  $default_values = content_instance_default_values($field['field_name'], $field['type_name'], $field['widget']['type']);
   $field = array_merge($default_values, $prev_field, $field);
 
   // Invoke hook_content_fieldapi().

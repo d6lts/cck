@@ -941,9 +941,15 @@ function _content_admin_field_validate($form, &$form_state) {
 function _content_admin_field_submit($form, &$form_state) {
   module_load_include('inc', 'content', 'content_crud');
   $form_values = $form_state['values'];
+
+  // If the widget type has changed, update the widget module, too.
+  $widget_types = _content_widget_types();
+  $form_values['widget_module'] = $widget_types[$form_values['widget_type']]['module'];
   unset($form_values['default_value_widget']);
+
   content_field_instance_update($form_values);
   content_field_update($form_values);
+
   drupal_set_message(t('Saved field %label.', array('%label' => $form_values['label'])));
   $type   = content_types($form_values['type_name']);
   $form_state['redirect'] = 'admin/content/types/'. $type['url_str'] .'/fields';
