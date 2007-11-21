@@ -1142,6 +1142,14 @@ function content_alter_db($previous_field, $new_field) {
   if (!db_table_exists($new_table)) {
     db_create_table($ret, $new_table, $new_schema);
   }
+  else {
+    // Or add fields to an existing table.
+    foreach ($new_schema['fields'] as $column => $attributes) {
+      if (!in_array($column, array('nid', 'vid', 'delta'))) {
+        db_add_field($ret, $new_table, $column, $attributes);
+      }
+    }
+  }
 
   // All content types need a content type table.
   if (!empty($new_schema)) {

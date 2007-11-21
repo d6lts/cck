@@ -1376,6 +1376,9 @@ function content_table_schema($field = NULL) {
   // This function is called from install files where it is not safe
   // to use content_fields() or content_database_info(), so we
   // just used the column values stored in the $field.
+
+  // We also need the schema to include fields from disabled modules
+  // or there will be no way to delete those fields.
   if (!empty($field['columns'])) {
     foreach ($field['columns'] as $column => $attributes) {
       $column_name =  $field['field_name'] .'_'. $column;
@@ -1564,7 +1567,7 @@ function template_preprocess_field(&$variables) {
 }
 
 /**
- * Debugging for content_fieldapi.
+ * Debugging using hook_content_fieldapi.
  *
  * @TODO remove later
  *
