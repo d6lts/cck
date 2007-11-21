@@ -650,8 +650,9 @@ function content_field($op, &$node, $field, &$items, $teaser, $page) {
       break;
 
     case 'presave':
-
       // If there was an AHAH add more button in this field, don't save it.
+      // TODO : this is too late to do this : currently $items in hook_field('validate')
+      // contain the extraneous 'add more' element.
       unset($items[$field['field_name']. '_add_more']);
 
       // If content module is handling multiple values, don't save empty items.
