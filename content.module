@@ -73,6 +73,10 @@ function content_menu() {
     // needed to avoid errors on initial installation.
     if (!empty($content_type)) {
       $type_url_str = $content_type['url_str'];
+      $items['admin/content/types/'. $type_url_str .'/edit'] = array(
+        'title' => t('Edit'),
+        'type' => MENU_DEFAULT_LOCAL_TASK,
+      );
       $items['admin/content/types/'. $type_url_str .'/fields'] = array(
         'title' => 'Manage fields',
         'page callback' => 'drupal_get_form',
@@ -81,7 +85,7 @@ function content_menu() {
         'file' => 'content_admin.inc',
         'file path' => drupal_get_path('module', 'content'),
         'type' => MENU_LOCAL_TASK,
-        'weight' => 0,
+        'weight' => 1,
       );
       $items['admin/content/types/'. $type_url_str .'/display'] = array(
         'title' => 'Display fields',
@@ -91,7 +95,7 @@ function content_menu() {
         'file' => 'content_admin.inc',
         'file path' => drupal_get_path('module', 'content'),
         'type' => MENU_LOCAL_TASK,
-        'weight' => 1,
+        'weight' => 2,
       );
       $items['admin/content/types/'. $type_url_str .'/add_field'] = array(
         'title' => 'Add field',
@@ -101,7 +105,7 @@ function content_menu() {
         'file' => 'content_admin.inc',
         'file path' => drupal_get_path('module', 'content'),
         'type' => MENU_LOCAL_TASK,
-        'weight' => 2,
+        'weight' => 3,
       );
       foreach ($content_type['fields'] as $field) {
         $field_name = $field['field_name'];
@@ -112,22 +116,20 @@ function content_menu() {
         // necessary to create a path for every field and still know what
         // field to manipulate, needed if there are more than one AHAH field
         // button on the same form.
+        // YCHED : we could probably live with one single path ('content/js_add_more'), expecting the
+        // field name as an additional path component ?
 
         if ($field['multiple']) {
           $items['content/js/'. $field_name] = array(
             'title' => 'Javascript Add More Form',
             'page callback' => 'content_add_more_js',
             'page arguments' => array($field_name),
+            // TODO : access rule ?
             'access arguments' => array('access content'),
             'type' => MENU_CALLBACK,
           );
         }
 
-        // TODO how should this be handled? If type is MENU_CALLBACK, the
-        // breadcrumbs and tabs disappear on this page. If type is MENU_LOCAL_TASK,
-        // the breadcrumbs and main tabs are right, but we also get secondary
-        // row of tabs for each field. Not losing the top tabs is probably the
-        // best option, even with the extra tabs.
         $items['admin/content/types/'. $type_url_str .'/fields/'. $field_name] = array(
           'title' => t($field['widget']['label']),
           'page callback' => 'drupal_get_form',
@@ -135,7 +137,7 @@ function content_menu() {
           'access arguments' => array('administer content types'),
           'file' => 'content_admin.inc',
           'file path' => drupal_get_path('module', 'content'),
-          'type' => MENU_LOCAL_TASK,
+          'type' => MENU_NORMAL_ITEM,
         );
         $items['admin/content/types/'. $type_url_str .'/fields/'. $field_name .'/remove'] = array(
           'title' => 'Remove field',
