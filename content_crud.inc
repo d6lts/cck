@@ -211,13 +211,6 @@ function content_field_update($field) {
 
   _content_field_write($field, 'update');
 
-  if($prev_field['multiple'] != 1 && $field['multiple'] == 1) {
-    // AHAH multiple values need to have the menu rebuilt to
-    // create the path for the js.
-    content_clear_type_cache(TRUE);
-    $_SESSION['content_menu_needs_rebuild'] = TRUE;
-  }
-
   content_clear_type_cache();
   return $field;
 }
