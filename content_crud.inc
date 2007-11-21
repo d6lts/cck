@@ -99,16 +99,16 @@ function content_field_instance_expand($field) {
   if (isset($field['widget'])) {
     return $field;
   }
-  $field['widget'] = (array) $field['widget_settings'];
+  $field['widget'] = isset($field['widget_settings']) ? $field['widget_settings'] : array();
   $field['widget']['type'] = $field['widget_type'];
-  unset($field['widget_type']);
   $field['widget']['weight'] = $field['weight'];
-  unset($field['weight']);
   $field['widget']['label'] = $field['label'];
-  unset($field['label']);
   $field['widget']['description'] = $field['description'];
-  unset($field['description']);
   $field['widget']['module'] = $field['widget_module'];
+  unset($field['widget_type']);
+  unset($field['weight']);
+  unset($field['label']);
+  unset($field['description']);
   unset($field['widget_module']);
   unset($field['widget_settings']);
 
@@ -133,14 +133,14 @@ function content_field_instance_collapse($field) {
   }
   $field['widget_settings'] = (array) $field['widget'];
   $field['widget_type'] = $field['widget']['type'];
-  unset($field['widget_settings']['type']);
   $field['weight'] = $field['widget']['weight'];
-  unset($field['widget_settings']['weight']);
   $field['label'] = $field['widget']['label'];
-  unset($field['widget_settings']['label']);
   $field['description'] = $field['widget']['description'];
-  unset($field['widget_settings']['description']);
   $field['widget_module'] = $field['widget']['module'];
+  unset($field['widget_settings']['type']);
+  unset($field['widget_settings']['weight']);
+  unset($field['widget_settings']['label']);
+  unset($field['widget_settings']['description']);
   unset($field['widget_settings']['module']);
   unset($field['widget']);
   return $field;
