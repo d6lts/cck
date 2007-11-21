@@ -459,7 +459,9 @@ function nodereference_select_validate($element, &$form_state) {
  */
 function nodereference_autocomplete_validate($element, &$form_state) {
   $field_name = $element['#field_name'];
+  $field = content_fields($field_name);
   $field_key  = $element['#columns'][0];
+  $delta = $element['#delta'];
   $value = $element['#value'][$field_key];
 
   if (!empty($value)) {
