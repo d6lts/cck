@@ -1369,7 +1369,7 @@ function content_mask_batch_update($field, $mask, &$context) {
     $items = $node->$field_name;
     foreach ($items as $delta => $value) {
       if (isset($mask['delta']) && isset($mask['alt_mask']) && $delta >= $mask['delta']) {
-        $field_mask = $alt_mask;
+        $field_mask = $mask['alt_mask'];
       }
       else {
         $field_mask = $mask['mask'];
