@@ -554,7 +554,7 @@ function content_type_update($info) {
     }
   }
   // reset all content type info
-  content_clear_type_cache();
+  $_SESSION['content_menu_needs_rebuild'] = TRUE;
 }
 
 /**
@@ -576,5 +576,5 @@ function content_type_delete($info) {
   }
 
   // reset all content type info
-  content_clear_type_cache();
+  $_SESSION['content_menu_needs_rebuild'] = TRUE;
 }
