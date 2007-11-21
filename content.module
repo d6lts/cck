@@ -371,7 +371,7 @@ function content_multiple_value_form(&$form, &$form_state, $field, $items) {
     // other fields and other modules using AHAH-enabled buttons with the id 'more'.
     // Use a prefix to close out the container for field items and start the button container.
     $form_element[$field_name .'_add_more'] = array(
-      '#prefix' => '</div><div>',
+      '#prefix' => '</div><div class="content-add-more">',
       '#suffix' => '</div>',
       '#type' => 'submit',
       '#value' => t('Add another !field field', array('!field' => t($field['widget']['label']))),
