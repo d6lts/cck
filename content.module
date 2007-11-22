@@ -353,6 +353,7 @@ function content_multiple_value_form(&$form, &$form_state, $field, $items) {
     $form_element['#prefix'] .= '<div id="'. $field_name_css .'-items">';
     $form_element['#suffix'] = '</div></div>';
 
+    $content_type = content_types($form['type']['#value']);
     // We name our button $field_name .'_add_more' to avoid conflicts with
     // other fields and other modules using AHAH-enabled buttons with the id 'more'.
     // Use a prefix to close out the container for field items and start the button container.
@@ -360,13 +361,12 @@ function content_multiple_value_form(&$form, &$form_state, $field, $items) {
       '#prefix' => '</div><div class="content-add-more">',
       '#suffix' => '</div>',
       '#type' => 'submit',
-      '#value' => t('Add another !field field', array('!field' => t($field['widget']['label']))),
+      '#value' => t('Add another !field value', array('!field' => t($field['widget']['label']))),
       '#description' => t("If the amount of boxes above isn't enough, click here to add more items."),
       '#weight' => $field['widget']['weight'] + $max + 1,
       '#submit' => array('content_add_more_submit'), // If no javascript action.
       '#ahah' => array(
-        'path' => 'content/js/'. $field_name,
-        'path' => 'content/js_add_more/'. $field_name,
+        'path' => 'content/js_add_more/'. $content_type['url_str'] .'/'. $field_name,
         'wrapper' => $field_name_css .'-items',
         'method' => 'replace',
         'effect' => 'fade',
@@ -394,31 +394,29 @@ function content_add_more_submit($form, &$form_state) {
 }
 
 /**
- * Menu callback for AHAH additions.
+ * Menu callback for AHAH addition of new empty widgets.
  *
- * @todo
- *   The new element is not going to the bottom of the form but is getting
- *   inserted right after the first item. Need to figure out what to tweak
- *   to get it in the right place.
+ * Fields inside fieldgroups are dealt with by fieldgroup_add_more_js
+ * (menu handler override in fieldgroup_menu_alter).
  */
-function content_add_more_js($field_name) {
-  // Add the new element to the stored form state. Without adding the element
-  // to the form, Drupal is not aware of this new elements existence and will
-  // not process it. We retreive the cached form, add the element, and resave.
-  $delta = max(array_keys($_POST[$field_name])) + 1;
-  $cache = cache_get('form_'. $_POST['form_build_id'], 'cache_form');
-  $form = $cache->data;
+function content_add_more_js($type_name, $field_name) {
+  // Retreive the cached form.
+  $form_state = array('values' => $_POST);
+  $form = form_get_cache($_POST['form_build_id'], $form_state);
 
   // Build our new form element.
+  $delta = max(array_keys($_POST[$field_name])) + 1;
   $field = $form['#field_info'][$field_name];
-  // TODO : should we check that the field is multiple ?
-  $form_state = array('values' => $_POST);
+  // TODO : should we check that the field is actually multiple ?
   $form_element = content_field_form($form, $form_state, $field, $delta);
-  $form_element[$field_name][0]['#weight'] = $delta;
 
+  // Let other modules alter the new form element, and append it to the form.
   drupal_alter('form', $form_element, array(), 'content_add_more_js');
   $form[$field_name][$delta] = $form_element[$field_name][0];
-  cache_set('form_'. $_POST['form_build_id'], $form, 'cache_form', $cache->expire);
+  $form[$field_name][$delta]['#weight'] = $delta;
+
+  // Save the new state of the form.
+  form_set_cache($_POST['form_build_id'], $form, $form_state);
 
   // Build the new form.
   $form_state = array('submitted' => FALSE);
@@ -428,8 +426,8 @@ function content_add_more_js($field_name) {
   );
   $form = form_builder($_POST['form_id'], $form, $form_state);
 
+  // TODO : why don't we return only the new element and append it ?
   // Render the new output.
-  $output = '';
   $field_form = $form[$field_name];
   // Prevent duplicate wrappers.
   unset($field_form['#prefix'], $field_form['#suffix'], $field_form[$field_name .'_add_more']);
