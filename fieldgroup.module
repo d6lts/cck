@@ -602,7 +602,7 @@ function fieldgroup_add_more_js($type_name_url, $field_name) {
     return content_add_more_js($type_name_url, $field_name);
   }
 
-  // Retreive the cached form.
+  // Retrieve the cached form.
   $form_state = array('values' => $_POST);
   $form = form_get_cache($_POST['form_build_id'], $form_state);
 
@@ -611,16 +611,17 @@ function fieldgroup_add_more_js($type_name_url, $field_name) {
   $field = $form['#field_info'][$field_name];
   // TODO : should we check that the field is actually multiple ?
   $form_element = content_field_form($form, $form_state, $field, $delta);
+  $form_element[$field_name][0]['#weight'] = $delta;
 
   // Let other modules alter the new form element, and append it to the form.
   drupal_alter('form', $form_element, array(), 'content_add_more_js');
+  // This is where we differ from content_add_more_js.
   $form[$group_name][$field_name][$delta] = $form_element[$field_name][0];
-  $form[$group_name][$field_name][$delta]['#weight'] = $delta;
 
   // Save the new state of the form.
   form_set_cache($_POST['form_build_id'], $form, $form_state);
 
-  // Build the new form.
+  // Build the new form so that we can render the new element.
   $form_state = array('submitted' => FALSE);
   $form += array(
     '#post' => $_POST,
@@ -628,16 +629,12 @@ function fieldgroup_add_more_js($type_name_url, $field_name) {
   );
   $form = form_builder($_POST['form_id'], $form, $form_state);
 
-  // TODO : why don't we return only the new element and append it ?
   // Render the new output.
-  $field_form = $form[$group_name][$field_name];
-  // Prevent duplicate wrappers.
-  unset($field_form['#prefix'], $field_form['#suffix'], $field_form[$field_name .'_add_more']);
-  // Add div around new content to receive ahah effect.
-  $field_form[$delta]['#prefix'] = '<div class="ahah-new-content">'. (isset($field_form[$delta]['#prefix']) ? $field_form[$delta]['#prefix'] : '');
-  $field_form[$delta]['#suffix'] = (isset($field_form[$delta]['#suffix']) ? $field_form[$delta]['#suffix'] : '') .'</div>';
-
-  $output = theme('status_messages') . drupal_render($field_form);
+  $new_element = $form[$group_name][$field_name][$delta];
+  // We add div around new content to receive the ahah effect.
+  $new_element['#prefix'] = '<div class="ahah-new-content">'. (isset($new_element['#prefix']) ? $new_element['#prefix'] : '');
+  $new_element['#suffix'] = (isset($new_element['#suffix']) ? $new_element['#suffix'] : '') .'</div>';
+  $output = theme('status_messages') . drupal_render($new_element);
   drupal_json(array('status' => TRUE, 'data' => $output));
 }
 
