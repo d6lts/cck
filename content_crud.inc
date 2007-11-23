@@ -398,7 +398,7 @@ function _content_field_instance_write($field, $op = 'update') {
       drupal_write_record(content_instance_tablename(), $field);
       break;
     case 'update':
-      drupal_write_record(content_instance_tablename(), $field, 'field_name');
+      drupal_write_record(content_instance_tablename(), $field, array('field_name', 'type_name'));
       break;
   }
   return $field;
