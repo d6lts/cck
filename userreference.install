@@ -34,103 +34,31 @@ function userreference_disable() {
 }
 
 /**
- * Add node ID column so we can delete old revisions at node delete time.
+ * Test and report Content module installation requirements.
  */
-function userreference_update_1() {
-  $ret = array();
-  if (!db_table_exists('node_field_userreference_data')) {
-   return $ret;
+function userreference_requirements($phase) {
+  $requirements = array();
+
+  // Ensure translations don't break at install time
+  $t = get_t();
+
+  $current_version = drupal_get_installed_schema_version('userreference');
+  $minimum_version = 4;
+
+  if ($current_version < $minimum_version) {
+    $requirements['userreference_version'] = array(
+      'title' => $t('Userreference Version'),
+      'value' => $t('The Userreference fields in your CCK database are not up to date and will not work correctly in this version of the Userreference module. Please upgrade your database in Drupal 5.x to at least Userreference update %number, using the latest 5.x version of the Userreference module, before upgrading to Drupal 6.x.', array('%number' => $minimum_version)),
+      'severity' => REQUIREMENT_ERROR,
+    );
   }
-  db_add_field($ret, 'node_field_userreference_data', 'nid', array(array('type' => 'int', 'not null' => TRUE, 'default' => 0)));
-  return $ret;
+  return $requirements;
 }
 
 /**
- * Populate nid column in existing user reference fields.
+ * Placeholder update to set newly installed versions to the latest update number.
  */
-function userreference_update_2() {
+function userreference_update_6000() {
   $ret = array();
-  if (!db_table_exists('node_field_userreference_data')) {
-   return $ret;
-  }
-  // Multi-part update
-  if (!isset($_SESSION['userreference_update_2'])) {
-    $_SESSION['userreference_update_2'] = 0;
-    $_SESSION['userreference_update_2_max'] = db_result(db_query("SELECT COUNT(*) FROM {node_field_userreference_data}"));;
-  }
-
-  $limit = 20;
-  $result = db_query_range("SELECT nr.nid, nfud.vid, nfud.field_name, nfud.delta FROM {node_field_userreference_data} nfud LEFT JOIN {node_revisions} nr ON nr.vid = nfud.vid", $_SESSION['userreference_update_2'], $limit);
-  if (db_num_rows($result) == 0) {
-    unset($_SESSION['userreference_update_2']);
-    unset($_SESSION['userreference_update_2_max']);
-    return array();
-  }
-  while ($data = db_fetch_object($result)) {
-    $_SESSION['userreference_update_2']++;
-    db_query("UPDATE {node_field_userreference_data} SET nid = %d WHERE vid = %d AND field_name = '%s' AND delta = %d", $data->nid, $data->vid, $data->field_name, $data->delta);
-  }
-
-  return array('#finished' => $_SESSION['userreference_update_2'] / $_SESSION['userreference_update_2_max']);
-}
-
-/**
- * Data is now stored in per-field tables.
- */
-function userreference_update_3() {
-  include_once('./'. drupal_get_path('module', 'content') .'/content.module');
-  $ret = array();
-  if (!db_table_exists('node_field_userreference_data')) {
-   return $ret;
-  }
-
-  content_clear_type_cache();
-  $fields = content_fields();
-  foreach ($fields as $field) {
-    switch ($field['type']) {
-      case 'userreference':
-        $db_info = content_database_info($field);
-        $table = $db_info['table'];
-        db_create_table($ret, $table, content_table_schema($field));
-        if ($field['multiple']) {
-          $ret[] = update_sql('INSERT INTO {'. $table .'} (vid, delta, nid, '. $field['field_name'] ."_uid) SELECT vid, delta, nid, field_uid FROM {node_field_userreference_data} WHERE field_name = '". $field['field_name'] ."'");
-        }
-        else {
-          $ret[] = update_sql('INSERT INTO {'. $table .'} (vid, nid, '. $field['field_name'] ."_uid) SELECT vid, nid, field_uid FROM {node_field_userreference_data} WHERE field_name = '". $field['field_name'] ."'");
-        }
-        break;
-    }
-  }
-  db_drop_table($ret, 'node_field_userreference_data');
-  db_query('DELETE FROM {cache}');
-  return $ret;
-}
-
-/**
- * Set the value columns to accept NULL values
- * and replace 0 with NULL in the field data tables
- */
-function userreference_update_4() {
-  include_once('./'. drupal_get_path('module', 'content') .'/content.module');
-  $ret = array();
-
-  $fields = content_fields();
-  foreach ($fields as $field) {
-    switch ($field['type']) {
-      case 'userreference':
-        $db_info = content_database_info($field);
-        $table = $db_info['table'];
-        db_change_field($ret, $table, 'uid', 'uid', array('type' => 'int', 'not null' => FALSE, 'default' => NULL));
-        $ret[] = array(
-          'query' => strtr('The field %field_name has been updated to accept NULL values.', array('%field_name' => $field['field_name'])),
-          'success' => TRUE
-        );
-
-        $ret[] = update_sql("UPDATE {". $db_info['table'] ."} SET ". $db_info['columns']['uid']['column'] ." = NULL WHERE ". $db_info['columns']['uid']['column'] ." = 0");
-        break;
-    }
-  }
-
-  db_query('DELETE FROM {cache}');
   return $ret;
 }

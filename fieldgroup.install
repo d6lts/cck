@@ -38,6 +38,28 @@ function fieldgroup_disable() {
 }
 
 /**
+ * Test and report Content module installation requirements.
+ */
+function fieldgroup_requirements($phase) {
+  $requirements = array();
+
+  // Ensure translations don't break at install time
+  $t = get_t();
+
+  $current_version = drupal_get_installed_schema_version('fieldgroup');
+  $minimum_version = 4;
+
+  if ($current_version < $minimum_version) {
+    $requirements['fieldgroup_version'] = array(
+      'title' => $t('Fieldgroup Version'),
+      'value' => $t('The Fieldgroup data in your CCK database are not up to date and will not work correctly in this version of the Fieldgroup module. Please upgrade your database in Drupal 5.x to at least Fieldgroup update %number, using the latest 5.x version of the Fieldgroup module, before upgrading to Drupal 6.x.', array('%number' => $minimum_version)),
+      'severity' => REQUIREMENT_ERROR,
+    );
+  }
+  return $requirements;
+}
+
+/**
  * Implementation of hook_schema.
  */
 function fieldgroup_schema() {
@@ -65,101 +87,9 @@ function fieldgroup_schema() {
 }
 
 /**
- *  rename groups form "group-*" to "group_*"
+ * Placeholder update to set newly installed versions to the latest update number.
  */
-function fieldgroup_update_1() {
-  $ret = array();
-  switch ($GLOBALS['db_type']) {
-    case 'pgsql':
-      $ret[] = update_sql("UPDATE {". fieldgroup_tablename() ."} SET group_name = 'group_'||SUBSTRING(group_name FROM 7)");
-      $ret[] = update_sql("UPDATE {". fieldgroup_fields_tablename() ."} SET group_name = 'group_'||SUBSTRING(group_name FROM 7)");
-      break;
-
-    case 'mysql':
-    case 'mysqli':
-      $ret[] = update_sql("UPDATE {". fieldgroup_tablename() ."} SET group_name = CONCAT('group_', SUBSTRING(group_name FROM 7))");
-      $ret[] = update_sql("UPDATE {". fieldgroup_fields_tablename() ."} SET group_name = CONCAT('group_', SUBSTRING(group_name FROM 7))");
-      break;
-  }
-  return $ret;
-}
-
-/**
- * add display settings for the group
- */
-function fieldgroup_update_2() {
-  $ret = array();
-
-  if (!db_table_exists(fieldgroup_tablename(1))) {
-    return $ret;
-  }
-  // set settings column to accept larger values
-  db_change_field($ret, fieldgroup_tablename(1), 'settings', 'settings', array('type' => 'text', 'not null' => TRUE));
-
-  // move description into the settings array, and add new settings
-  $result = db_query("SELECT * FROM {". fieldgroup_tablename(1) ."}");
-  while ($group = db_fetch_array($result)) {
-    $settings = array();
-    $settings['form'] = unserialize($group['settings']);
-    $settings['form']['description'] = $group['description'];
-    $settings['display'] = array('collapsible' => 0, 'collapsed' => 0, 'description' => '');
-    $ret[] = update_sql("UPDATE {". fieldgroup_tablename(1) ."} SET settings = '". db_escape_string(serialize($settings)) ."', description = '' WHERE group_name = '". $group['group_name'] ."'");
-  }
-
-  // drop description column
-  db_drop_field($ret, fieldgroup_tablename(1), 'description');
-  return $ret;
-}
-
-
-/**
- * converts group settings collapsible/collapsed => style
- */
-function fieldgroup_update_3() {
-  $ret = array();
-  if (!db_table_exists(fieldgroup_tablename(1))) {
-    return $ret;
-  }
-
-  $result = db_query("SELECT * FROM {". fieldgroup_tablename(1) ."}");
-  while ($group = db_fetch_array($result)) {
-    $group['settings'] = unserialize($group['settings']);
-
-    if (!isset($group['settings']['form']['style'])) {
-      foreach (array('form', 'display') as $context) {
-        if (isset($group['settings'][$context]['collapsible']) && $group['settings'][$context]['collapsible']) {
-          if (isset($group['settings'][$context]['collapsed']) && $group['settings'][$context]['collapsed']) {
-            $group['settings'][$context]['style'] = 'fieldset_collapsed';
-          }
-          else {
-            $group['settings'][$context]['style'] = 'fieldset_collapsible';
-          }
-        }
-        else {
-          $group['settings'][$context]['style'] = 'fieldset';
-        }
-      }
-
-      $ret[] = update_sql("UPDATE {". fieldgroup_tablename(1) ."} SET settings = '". db_escape_string(serialize($group['settings'])) ."' WHERE group_name = '". $group['group_name'] ."'");
-    }
-  }
-
-  return $ret;
-}
-/*
- * Increases module weight, so that other modules can form_alter() cck forms before the fields
- * are moved in groups
- */
-function fieldgroup_update_4() {
-  $ret = array();
-  $ret[] = update_sql("UPDATE {system} SET weight = 9 WHERE name = 'fieldgroup'");
-  return $ret;
-}
-
 function fieldgroup_update_6000() {
   $ret = array();
-  db_rename_table($ret, 'node_group', 'content_group');
-  db_rename_table($ret, 'node_group_fields', 'content_group_fields');
-  variable_set('fieldgroup_schema_version', 6000);
   return $ret;
 }

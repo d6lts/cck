@@ -34,81 +34,25 @@ function optionwidgets_disable() {
 }
 
 /**
- * Reformat allowed values settings into new key|label format
+ * Test and report Content module installation requirements.
  */
-function optionwidgets_update_1() {
-  $ret = array();
+function optionwidgets_requirements($phase) {
+  $requirements = array();
 
-  // find distinct values already stored in the database
+  // Ensure translations don't break at install time
+  $t = get_t();
 
-  $result = db_query("SELECT * FROM {". content_instance_tablename() ."} fi LEFT JOIN {". content_field_tablename() ."} f ON fi.field_name=f.field_name WHERE widget_type IN ('options_select', 'options_buttons')");
-  while ($field_instance = db_fetch_array($result)) {
-    $db_info = content_database_info($field_instance);
-    $result2 = db_query("SELECT DISTINCT ". $db_info['columns']['value']['column'] ." FROM {". $db_info['table'] ."}");
-    while ($value = db_fetch_array($result2)) {
-      $values[$field_instance['field_name']][$value[$db_info['columns']['value']['column']]] = $value[$db_info['columns']['value']['column']];
-    }
+  $current_version = drupal_get_installed_schema_version('optionwidgets');
+  $minimum_version = 1;
+
+  if ($current_version < $minimum_version) {
+    $requirements['optionwidgets_version'] = array(
+      'title' => $t('Optionwidgets Version'),
+      'value' => $t('The Optionwidgets fields in your CCK database are not up to date and will not work correctly in this version of the Optionwidgets module. Please upgrade your database in Drupal 5.x to at least Optionwidgets update %number, using the latest 5.x version of the Optionwidgets module, before upgrading to Drupal 6.x.', array('%number' => $minimum_version)),
+      'severity' => REQUIREMENT_ERROR,
+    );
   }
-
-  // find all field instances that use the optionwidgets widget
-
-  $result = db_query("SELECT DISTINCT f.field_name, f.type, global_settings FROM {". content_field_tablename() ."} f LEFT JOIN {". content_instance_tablename() ."} fi ON fi.field_name=f.field_name WHERE widget_type IN ('options_select', 'options_buttons') AND type IN ('text', 'number_integer', 'number_decimal')");
-  while ($field = db_fetch_object($result)) {
-
-    $updated = FALSE;
-    $used_keys = $used_deltas = $keys = $deltas = $delta_values = $key_values = $allowed_values = array();
-
-    // get the current allowed values settings
-
-    $global_settings = array();
-    if ($field->global_settings) {
-      $global_settings = unserialize($field->global_settings);
-    }
-    $start_values = $global_settings['allowed_values'];
-    $list = explode("\n", $start_values);
-    $list = array_map('trim', $list);
-    $list = array_filter($list, 'strlen');
-
-    $delta = 1;
-    foreach ($list as $opt) {
-      list ($key, $label) = explode('|', $opt);
-      $delta_values[] = $delta .'|'. $key;
-      $key_values[]   = $key   .'|'. $key;
-      if ($label) {
-        // this field has already been updated to use keys and labels, no change needed
-        $updated = TRUE;
-      }
-      else {
-        $keys[]   = $key;
-        $deltas[] = $delta;
-        $delta++;
-      }
-    }
-    if (!$updated && $global_settings['allowed_values']) {
-      // see if current data is storing the delta or the allowed values value
-      if (is_array($values[$field->field_name])) {
-        $used_keys   = array_intersect($keys, $values[$field->field_name]);
-        $used_deltas = array_intersect($deltas, $values[$field->field_name]);
-      }
-      if (!$used_keys || sizeof($used_deltas) > sizeof($used_keys)) {
-        $allowed_values = $delta_values;
-      }
-      else {
-        $allowed_values = $key_values;
-      }
-      // update the allowed values setting to use the correct key|label combination
-      $global_settings['allowed_values'] = implode("\n", $allowed_values);
-      db_query("UPDATE {". content_field_tablename() ."} SET type = '%s', global_settings = '%s' WHERE field_name = '%s'", $field->type, serialize($global_settings), $field->field_name);
-      drupal_set_message(t('<div>The allowed values list for %field was updated from </div><pre>%start</pre><div> to </div><pre>%end</pre><div>You can go to the field settings page to give each option a more user-friendly label.', array('%field' => $field->field_name, '%start' => $start_values, '%end' => $global_settings['allowed_values'])));
-    }
-    else {
-      drupal_set_message(t('<div>The allowed values list for %field was not changed from </div><pre>%start</pre>', array('%field' => $field->field_name, '%start' => $start_values)));
-    }
-  }
-
-  db_query('DELETE FROM {cache}');
-
-  return $ret;
+  return $requirements;
 }
 
 /**
