@@ -34,7 +34,7 @@ function nodereference_disable() {
 }
 
 /**
- * Test and report Content module installation requirements.
+ * Test and report installation requirements.
  */
 function nodereference_requirements($phase) {
   $requirements = array();

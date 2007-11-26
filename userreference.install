@@ -34,7 +34,7 @@ function userreference_disable() {
 }
 
 /**
- * Test and report Content module installation requirements.
+ * Test and report installation requirements.
  */
 function userreference_requirements($phase) {
   $requirements = array();

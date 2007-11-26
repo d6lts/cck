@@ -34,7 +34,7 @@ function text_disable() {
 }
 
 /**
- * Test and report Content module installation requirements.
+ * Test and report installation requirements.
  */
 function text_requirements($phase) {
   $requirements = array();

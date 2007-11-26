@@ -34,7 +34,7 @@ function number_disable() {
 }
 
 /**
- * Test and report Content module installation requirements.
+ * Test and report installation requirements.
  */
 function number_requirements($phase) {
   $requirements = array();
