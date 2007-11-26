@@ -209,18 +209,24 @@ function content_update_6001() {
  */
 function content_update_6002() {
   include_once('./'. drupal_get_path('module', 'content') .'/content.module');
+  $ret = array();
+
   $db_types = content_types();
+  $field_types = array();
 
   $result = db_query("SELECT DISTINCT type_name FROM {". content_instance_tablename() ."}");
   while ($type = db_fetch_array($result)) {
     $field_types[] = $type['type_name'];
   }
 
-  foreach ($db_types as $content_type) {
+  foreach ($db_types as $content_type => $content_info) {
     if (!in_array($content_type, $field_types)) {
       $table = _content_tablename($content_type, CONTENT_DB_STORAGE_PER_CONTENT_TYPE);
-      db_drop_table($ret, $table);
+      if (db_table_exists($table)) {
+        db_drop_table($ret, $table);
+      }
     }
   }
   content_clear_type_cache(TRUE);
+  return $ret;
 }
