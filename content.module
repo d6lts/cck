@@ -285,6 +285,7 @@ function content_field_form(&$form, &$form_state, $field, $get_delta = NULL) {
           '#required' => $get_delta > 0 ? FALSE : $field['required'],
           // TODO : should we add some logic for title and description too ?
           '#columns'  => array_keys($field['columns']),
+          '#title' => t($field['widget']['label']),
           '#delta' => $delta,
         );
         $form_element[$delta] = array_merge($element, $defaults);
