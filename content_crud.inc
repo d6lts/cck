@@ -206,6 +206,7 @@ function content_field_instance_create($field) {
   $field = array_merge($default_values, $prev_field, $field);
   $field['widget'] = $widget;
 
+  // Make sure we know what module to invoke for field into.
   if (empty($field['module']) && !empty($field['type'])) {
     $field_types = _content_field_types();
     $field['module'] = $field_types[$field['type']]['module'];
@@ -217,13 +218,13 @@ function content_field_instance_create($field) {
   // Get a fresh copy of the column information whenever a field is created.
   $field['columns'] = (array) module_invoke($field['module'], 'field_settings', 'database columns', $field);
 
-  // If this is the first instance, create the field, too.
+  // If this is the first instance, create the field.
   if (empty($prev_field['widget']) || $prior_instances < 1) {
     $field['db_storage'] = $field['multiple'] > 0 ? CONTENT_DB_STORAGE_PER_FIELD : CONTENT_DB_STORAGE_PER_CONTENT_TYPE;
     _content_field_write($field, 'create');
     $_SESSION['content_menu_needs_rebuild'] = TRUE;
 
-  // If the database storage has changed, update the field and previous instances, too.
+  // If the database storage has changed, update the field and previous instances.
   } elseif (!empty($prev_field['widget']) && $prev_field['db_storage'] == CONTENT_DB_STORAGE_PER_CONTENT_TYPE && count($prior_instances) > 0) {
     $field['db_storage'] = CONTENT_DB_STORAGE_PER_FIELD;
     foreach ($prior_instances as $instance) {
@@ -255,7 +256,7 @@ function content_field_instance_create($field) {
  * Update an existing field instance.
  *
  * @param $field
- *   An array of properties to create the field with, input either in
+ *   An array of properties to update the field with, input either in
  *   the field => widget format used by the content module or as an
  *   array of form values.
  */
@@ -285,7 +286,7 @@ function content_field_instance_update($field) {
   // information may have changed, get a fresh copy.
   $field['columns'] = (array) module_invoke($field['module'], 'field_settings', 'database columns', $field);
 
-  // If the database storage has changed, update the field and previous instances, too.
+  // If the database storage has changed, update the field and previous instances.
   $prior_instances = (array) content_field_instance_read(array('field_name' => $field['field_name']));
   if ($prev_field['db_storage'] == CONTENT_DB_STORAGE_PER_CONTENT_TYPE && count($prior_instances) > 1) {
     // Update the field's data storage.
@@ -405,7 +406,7 @@ function content_field_instance_read($param = NULL) {
     $cond = " WHERE ". implode(' AND ', $cond);
   }
   $db_result = db_query("SELECT * FROM {". content_instance_tablename() ."} nfi ".
-    " JOIN ". content_field_tablename() ."} nf ON nfi.field_name = nfi.field_name ".
+    " JOIN ". content_field_tablename() ."} nf ON nfi.field_name = nf.field_name ".
     $cond ." ORDER BY nfi.weight ASC, nfi.label ASC", $args);
 
   $fields = array();
