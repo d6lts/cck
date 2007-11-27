@@ -778,7 +778,7 @@ function content_storage($op, $node) {
           $record['nid'] = $node->nid;
           $record['vid'] = $node->vid;
           if ($op == 'update') {
-            drupal_write_record($table, $record, 'vid');
+            drupal_write_record($table, $record, array('vid'));
           }
           else {
             drupal_write_record($table, $record);
@@ -838,6 +838,11 @@ function _content_field_invoke($op, &$node, $teaser = NULL, $page = NULL) {
     foreach ($type['fields'] as $field) {
       $items = isset($node->$field['field_name']) ? $node->$field['field_name'] : array();
 
+      // Make sure AHAH 'add more' button isn't sent to the fields for processing.
+      if (isset($items[$field['field_name'] .'_add_more'])) {
+        unset($items[$field['field_name'] .'_add_more']);
+      }
+
       $module = $field_types[$field['type']]['module'];
       $function = $module .'_field';
       if (function_exists($function)) {
@@ -889,7 +894,6 @@ function _content_field_invoke_default($op, &$node, $teaser = NULL, $page = NULL
       }
     }
   }
-
   return $return;
 }
 
@@ -1132,7 +1136,7 @@ function content_storage_type($field) {
   }
   else {
     $instances = content_field_instance_read(array('field_name' => $field['field_name']));
-    if (sizeof($instances) > 1) {
+    if (count($instances) > 1) {
       return CONTENT_DB_STORAGE_PER_FIELD;
     }
     else {
