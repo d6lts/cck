@@ -165,7 +165,7 @@ function optionwidgets_widget(&$form, &$form_state, $field, $items, $delta = 0) 
  *
  * The $fields array is in $form['#field_info'][$element['#field_name']].
  */
-function optionwidgets_buttons_process($element, $edit, $form_state, $form) {
+function optionwidgets_buttons_process($element, $edit, &$form_state, $form) {
   $field_name = $element['#field_name'];
   $field = $form['#field_info'][$field_name];
   $field_key  = $element['#columns'][0];
@@ -192,7 +192,7 @@ function optionwidgets_buttons_process($element, $edit, $form_state, $form) {
  *
  * The $fields array is in $form['#field_info'][$element['#field_name']].
  */
-function optionwidgets_select_process($element, $edit, $form_state, $form) {
+function optionwidgets_select_process($element, $edit, &$form_state, $form) {
   $field_name = $element['#field_name'];
   $field = $form['#field_info'][$field_name];
   $field_key  = $element['#columns'][0];
@@ -221,7 +221,7 @@ function optionwidgets_select_process($element, $edit, $form_state, $form) {
  *
  * The $fields array is in $form['#field_info'][$element['#field_name']].
  */
-function optionwidgets_onoff_process($element, $edit, $form_state, $form) {
+function optionwidgets_onoff_process($element, $edit, &$form_state, $form) {
   $field_name = $element['#field_name'];
   $field = $form['#field_info'][$field_name];
   $field_key  = $element['#columns'][0];
@@ -291,8 +291,8 @@ function optionwidgets_data2form($element, $items, $field) {
  */
 function optionwidgets_form2data($element, $items, $field) {
   $field_key = $element['#columns'][0];
-
   $options = optionwidgets_options($field);
+
   $keys = !empty($items[$field_key]) ? $items[$field_key] : array();
   if (!is_array($keys)) {
     $keys = array($keys);
