@@ -5,7 +5,7 @@
  * @file
  * Create/Read/Update/Delete functions for CCK-defined object types.
  *
- * The goal is to create an API that will allow $field arguments to
+ * The content module field API will allow $field arguments to
  * be input either in the field => widget nested array that is used
  * by the content module, or in flattened $form_values arrays, by
  * converting flattened arrays to the nested format.
@@ -13,12 +13,12 @@
  * A hook_content_fieldapi() is available for each field instance action,
  * and each hook receives the nested field => widget array as an argument.
  *
- * The $ops include:
+ * The hook_content_fieldapi() $ops include:
  *
  *   - create instance
  *   - read instance
- *   - delete instance
  *   - update instance
+ *   - delete instance
  *
  * Another function, content_module_delete($module) will clean up
  * after a module that has been deleted by removing all data and
@@ -206,7 +206,7 @@ function content_field_instance_create($field) {
   $field = array_merge($default_values, $prev_field, $field);
   $field['widget'] = $widget;
 
-  // Make sure we know what module to invoke for field into.
+  // Make sure we know what module to invoke for field info.
   if (empty($field['module']) && !empty($field['type'])) {
     $field_types = _content_field_types();
     $field['module'] = $field_types[$field['type']]['module'];
@@ -220,13 +220,17 @@ function content_field_instance_create($field) {
 
   // If this is the first instance, create the field.
   if (empty($prev_field['widget']) || $prior_instances < 1) {
+
     $field['db_storage'] = $field['multiple'] > 0 ? CONTENT_DB_STORAGE_PER_FIELD : CONTENT_DB_STORAGE_PER_CONTENT_TYPE;
+
     _content_field_write($field, 'create');
     $_SESSION['content_menu_needs_rebuild'] = TRUE;
 
   // If the database storage has changed, update the field and previous instances.
   } elseif (!empty($prev_field['widget']) && $prev_field['db_storage'] == CONTENT_DB_STORAGE_PER_CONTENT_TYPE && count($prior_instances) > 0) {
+
     $field['db_storage'] = CONTENT_DB_STORAGE_PER_FIELD;
+
     foreach ($prior_instances as $instance) {
       $new_instance = $instance;
       $new_instance['db_storage'] = CONTENT_DB_STORAGE_PER_FIELD;
@@ -247,7 +251,7 @@ function content_field_instance_create($field) {
 
   content_alter_schema(array(), $field);
 
-  content_clear_type_cache();
+  content_clear_type_cache(TRUE);
 
   return $field;
 }
@@ -273,7 +277,7 @@ function content_field_instance_update($field) {
   $field = array_merge($prev_field, $field);
   $field['widget'] = $widget;
 
-  // Make sure we know what module to invoke for field into.
+  // Make sure we know what module to invoke for field info.
   if (empty($field['module']) && !empty($field['type'])) {
     $field_types = _content_field_types();
     $field['module'] = $field_types[$field['type']]['module'];
@@ -288,7 +292,9 @@ function content_field_instance_update($field) {
 
   // If the database storage has changed, update the field and previous instances.
   $prior_instances = (array) content_field_instance_read(array('field_name' => $field['field_name']));
+
   if ($prev_field['db_storage'] == CONTENT_DB_STORAGE_PER_CONTENT_TYPE && count($prior_instances) > 1) {
+
     // Update the field's data storage.
     $field['db_storage'] = CONTENT_DB_STORAGE_PER_FIELD;
 
@@ -315,7 +321,7 @@ function content_field_instance_update($field) {
 
   content_alter_schema($prev_field, $field);
 
-  content_clear_type_cache();
+  content_clear_type_cache(TRUE);
 
   return $field;
 }
@@ -460,7 +466,9 @@ function content_field_instance_delete($field_name, $type_name) {
   // If no instances remain, delete the field entirely.
   $instances = content_field_instance_read(array('field_name' => $field_name));
   if (sizeof($instances) < 1) {
+
     db_query("DELETE FROM {". content_field_tablename() ."} WHERE field_name = '%s'", $field['field_name']);
+
     // Deleted fields require a menu rebuild to remove all the field paths.
     $_SESSION['content_menu_needs_rebuild'] = TRUE;
   }
@@ -468,13 +476,14 @@ function content_field_instance_delete($field_name, $type_name) {
   // If only one instance remains, we may need to change the database
   // representation for this field.
   if (sizeof($instances) == 1 && !($field['multiple'])) {
+
     // Multiple-valued fields are always stored per-field-type.
     $instance = $instances[0];
     $new_instance['db_storage'] = CONTENT_DB_STORAGE_PER_CONTENT_TYPE;
     content_alter_schema($instance, $new_instance);
   }
 
-  content_clear_type_cache();
+  content_clear_type_cache(TRUE);
   return $field;
 }
 
@@ -500,9 +509,13 @@ function content_module_delete($module) {
  * @param $info
  *   value supplied by hook_node_type()
  *
- * node_get_types() is still missing the new type at this point, so no
- * use to call content_clear_type_cache() or menu_rebuild() here. Instead
+ * We need a menu rebuild to get the field tabs to display on the
+ * new content type edit page.
+ *
+ * The function node_get_types() is still missing the new type at this point,
+ * so no use to call content_clear_type_cache() or menu_rebuild() here. Instead
  * we set a flag to make sure it gets rebuilt on next page load.
+ *
  */
 function content_type_create($info) {
   $_SESSION['content_menu_needs_rebuild'] = TRUE;
@@ -516,7 +529,7 @@ function content_type_create($info) {
  */
 function content_type_update($info) {
   if (!empty($info->old_type) && $info->old_type != $info->type) {
-    // rename the content type in all fields that use changed content type.
+    // Rename the content type in all fields that use changed content type.
     db_query("UPDATE {". content_instance_tablename() ."} SET type_name='%s' WHERE type_name='%s'", array($info->type, $info->old_type));
 
     // Rename the content fields table to match new content type name.
@@ -526,10 +539,11 @@ function content_type_update($info) {
     if (db_table_exists($old_name)) {
       $ret = array();
       db_rename_table($ret, $old_name, $new_name);
-      drupal_set_message(t('Content fields table %old_name has been renamed to %new_name and field instances have been updated.', array('%old_name' => $old_name, '%new_name' => $new_name)));
+      drupal_set_message(t('Content fields table %old_name has been renamed to %new_name and field instances have been updated.', array(
+        '%old_name' => $old_name, '%new_name' => $new_name)));
     }
   }
-  // reset all content type info
+  // Reset all content type info and alter the menu paths.
   $_SESSION['content_menu_needs_rebuild'] = TRUE;
 }
 
@@ -551,6 +565,6 @@ function content_type_delete($info) {
     drupal_set_message(t('The content fields table %name has been deleted.', array('%name' => $table)));
   }
 
-  // reset all content type info
+  // Reset all content type info and remove the menu paths.
   $_SESSION['content_menu_needs_rebuild'] = TRUE;
 }
