@@ -10,17 +10,14 @@
  * by the content module, or in flattened $form_values arrays, by
  * converting flattened arrays to the nested format.
  *
- * A hook_content_fieldapi() is available for each field and field
- * instance action, and each hook receives the nested field => widget
- * array as an argument. The $ops include:
+ * A hook_content_fieldapi() is available for each field instance action,
+ * and each hook receives the nested field => widget array as an argument.
  *
- *   - create
+ * The $ops include:
+ *
  *   - create instance
- *   - read
  *   - read instance
- *   - delete
  *   - delete instance
- *   - update
  *   - update instance
  *
  * Another function, content_module_delete($module) will clean up
@@ -67,10 +64,10 @@ function content_instance_default_values($field_name, $type_name, $widget_type) 
   $module = $widget_types[$widget_type]['module'];
 
   $widget = array();
+  $widget['label'] = $field_name;
   $widget['field_name'] = $field_name;
   $widget['type_name'] = $type_name;
   $widget['weight'] = 0;
-  $widget['label'] = $field_name;
   $widget['description'] = '';
   $widget['widget_type'] = $widget_type;
   $widget['widget_module'] = $module;
@@ -99,12 +96,24 @@ function content_field_instance_expand($field) {
   if (isset($field['widget'])) {
     return $field;
   }
-  $field['widget'] = isset($field['widget_settings']) ? $field['widget_settings'] : array();
-  $field['widget']['type'] = $field['widget_type'];
-  $field['widget']['weight'] = $field['weight'];
-  $field['widget']['label'] = $field['label'];
-  $field['widget']['description'] = $field['description'];
-  $field['widget']['module'] = $field['widget_module'];
+  $field['widget'] = !empty($field['widget_settings']) ? $field['widget_settings'] : array();
+  $field['widget']['label'] = !empty($field['label']) ? $field['label'] : $field['field_name'];
+  $field['widget']['type'] = !empty($field['widget_type']) ? $field['widget_type'] : NULL;
+  $field['widget']['weight'] = !empty($field['weight']) ? $field['weight'] : 0;
+  $field['widget']['description'] = !empty($field['description']) ? $field['description'] : NULL;
+
+  if (!empty($field['widget_module'])) {
+    $widget_module = $field['widget_module'];
+  }
+  elseif (!empty($field['widget_type'])) {
+    $widget_types = _content_widget_types();
+    $widget_module = $widget_types[$field['widget_type']]['module'];
+  }
+  else {
+    $widget_module = NULL;
+  }
+  $field['widget']['module'] = $widget_module;
+
   unset($field['widget_type']);
   unset($field['weight']);
   unset($field['label']);
@@ -116,8 +125,8 @@ function content_field_instance_expand($field) {
   // initialize $widget_settings with default values,
   if (isset($field['default_value']) && isset($field['default_value_php']) &&
       content_callback('widget', 'default value', $field) == CONTENT_CALLBACK_DEFAULT) {
-    $field['widget']['default_value'] = $field['default_value'];
-    $field['widget']['default_value_php'] = $field['default_value_php'];
+    $field['widget']['default_value'] = !empty($field['default_value']) ? $field['default_value']  : NULL;
+    $field['widget']['default_value_php'] = !empty($field['default_value_php']) ? $field['default_value_php'] : NULL;
     unset($field['default_value']);
     unset($field['default_value_php']);
   }
@@ -131,12 +140,25 @@ function content_field_instance_collapse($field) {
   if (!isset($field['widget'])) {
     return $field;
   }
-  $field['widget_settings'] = (array) $field['widget'];
-  $field['widget_type'] = $field['widget']['type'];
-  $field['weight'] = $field['widget']['weight'];
-  $field['label'] = $field['widget']['label'];
-  $field['description'] = $field['widget']['description'];
-  $field['widget_module'] = $field['widget']['module'];
+  $field['widget_settings'] = !empty($field['widget']) ? $field['widget'] : array();
+  $field['widget_type'] = !empty($field['widget']['type']) ? $field['widget']['type'] : NULL;
+  $field['weight'] = !empty($field['widget']['weight']) ? $field['widget']['weight'] : 0;
+  $field['label'] = !empty($field['widget']['label']) ? $field['widget']['label'] : $field['field_name'];
+  $field['description'] = !empty($field['widget']['description']) ? $field['widget']['description'] : NULL;
+  $field['type_name'] = !empty($field['type_name']) ? $field['type_name'] : NULL;
+
+  if (!empty($field['widget']['module'])) {
+    $widget_module = $field['widget']['module'];
+  }
+  elseif (!empty($field['widget']['type'])) {
+    $widget_types = _content_widget_types();
+    $widget_module = $widget_types[$field['widget']['type']]['module'];
+  }
+  else {
+    $widget_module = NULL;
+  }
+  $field['widget_module'] = $widget_module;
+
   unset($field['widget_settings']['type']);
   unset($field['widget_settings']['weight']);
   unset($field['widget_settings']['label']);
@@ -147,71 +169,153 @@ function content_field_instance_collapse($field) {
 }
 
 /**
- * Create a new field.
+ * Create a new field instance.
  *
  * @param $field
  *   An array of properties to create the field with, input either in
  *   the field => widget format used by the content module or as an
  *   array of form values.
+ *
+ *   Required values:
+ *   - field_name, the name of the field to be created
+ *   - type_name, the content type of the instance to be created
+ *   - type, the type of field to create
+ *   - widget_type, the type of widget to use
  */
-function content_field_create($field) {
+function content_field_instance_create($field) {
+
+  $field = content_field_instance_expand($field);
+
+  // If there are prior instances, fill out missing values from the prior values,
+  // otherwise get missing values from default values.
+  $prior_instances = (array) content_field_instance_read(array('field_name' => $field['field_name']));
+  if (!empty($prior_instances) && is_array($prior_instances)) {
+    $prev_field = content_field_instance_expand($prior_instances[0]);
+  }
+  else {
+    $prev_field = array('widget' => array());
+  }
+
   $default_values = content_field_default_values($field['type']);
-  $field = array_merge($default_values, $field);
+  $default_instance_values = content_instance_default_values($field['field_name'], $field['type_name'], $field['widget']['type']);
+  $default_values = content_field_instance_expand(array_merge($default_values, $default_instance_values));
+
+  // Merge default values, previous values, and current values to create
+  // a complete field array.
+  $widget = array_merge($default_values['widget'], $prev_field['widget'], $field['widget']);
+  $field = array_merge($default_values, $prev_field, $field);
+  $field['widget'] = $widget;
+
+  if (empty($field['module']) && !empty($field['type'])) {
+    $field_types = _content_field_types();
+    $field['module'] = $field_types[$field['type']]['module'];
+  }
+
+  // The storage type may need to be updated.
+  $field['db_storage'] = content_storage_type($field);
 
   // Get a fresh copy of the column information whenever a field is created.
   $field['columns'] = (array) module_invoke($field['module'], 'field_settings', 'database columns', $field);
 
-  // Invoke hook_content_fieldapi().
-  module_invoke_all('content_fieldapi', 'create', $field);
+  // If this is the first instance, create the field, too.
+  if (empty($prev_field['widget']) || $prior_instances < 1) {
+    $field['db_storage'] = $field['multiple'] > 0 ? CONTENT_DB_STORAGE_PER_FIELD : CONTENT_DB_STORAGE_PER_CONTENT_TYPE;
+    _content_field_write($field, 'create');
+    $_SESSION['content_menu_needs_rebuild'] = TRUE;
 
-  // Write record and immediately create at least one field instance.
-  _content_field_write($field, 'create');
+  // If the database storage has changed, update the field and previous instances, too.
+  } elseif (!empty($prev_field['widget']) && $prev_field['db_storage'] == CONTENT_DB_STORAGE_PER_CONTENT_TYPE && count($prior_instances) > 0) {
+    $field['db_storage'] = CONTENT_DB_STORAGE_PER_FIELD;
+    foreach ($prior_instances as $instance) {
+      $new_instance = $instance;
+      $new_instance['db_storage'] = CONTENT_DB_STORAGE_PER_FIELD;
 
-  content_field_instance_create($field);
+      // Invoke hook_content_fieldapi().
+      module_invoke_all('content_fieldapi', 'update instance', $new_instance);
 
-  // Create new database columns.
-  if (is_array($field['columns']) && count($field['columns'])) {
-    content_alter_schema(array(), $field);
+      content_alter_schema($instance, $new_instance);
+    }
   }
 
-  // TODO menu_rebuild() is REALLY REALLY slow, is there an ajaxy way to run this
-  // in the background while we proceed to the next step?
+  // Invoke hook_content_fieldapi().
+  module_invoke_all('content_fieldapi', 'create instance', $field);
 
-  // New fields require a menu rebuild to create all the field paths.
-  // It seems doing it immediately doesn't pick up all the right values,
-  // so we'll postpone the rebuild to the next page.
-  content_clear_type_cache(TRUE);
-  $_SESSION['content_menu_needs_rebuild'] = TRUE;
+  // Update the field and the instance with the latest values.
+  _content_field_write($field, 'update');
+  _content_field_instance_write($field, 'create');
+
+  content_alter_schema(array(), $field);
+
+  content_clear_type_cache();
 
   return $field;
 }
 
 /**
- * Update an existing field.
+ * Update an existing field instance.
  *
  * @param $field
  *   An array of properties to create the field with, input either in
  *   the field => widget format used by the content module or as an
  *   array of form values.
  */
-function content_field_update($field) {
+function content_field_instance_update($field) {
+  // Get the previous value from the table.
+  $previous = content_field_instance_read(array('field_name' => $field['field_name'], 'type_name' => $field['type_name']));
+  $prev_field = array_pop($previous);
 
-  // If there is a prior value, fill out missing values from the prior value,
-  // otherwise get missing values from default values.
-  $prev_field = content_fields($field['field_name'], $field['type_name']);
-  $default_values = content_field_default_values($field['type']);
-  $field = array_merge($default_values, $prev_field, $field);
+  $field = content_field_instance_expand($field);
+
+  // Create a complete field array by merging the previous and current values,
+  // letting the current values overwrite the previous ones.
+  $widget = array_merge($prev_field['widget'], $field['widget']);
+  $field = array_merge($prev_field, $field);
+  $field['widget'] = $widget;
+
+  // Make sure we know what module to invoke for field into.
+  if (empty($field['module']) && !empty($field['type'])) {
+    $field_types = _content_field_types();
+    $field['module'] = $field_types[$field['type']]['module'];
+  }
+
+  // The storage type may need to be updated.
+  $field['db_storage'] = content_storage_type($field);
 
   // Changes in field values may affect columns, or column
   // information may have changed, get a fresh copy.
   $field['columns'] = (array) module_invoke($field['module'], 'field_settings', 'database columns', $field);
 
-  // Invoke hook_content_fieldapi().
-  module_invoke_all('content_fieldapi', 'update', $field);
+  // If the database storage has changed, update the field and previous instances, too.
+  $prior_instances = (array) content_field_instance_read(array('field_name' => $field['field_name']));
+  if ($prev_field['db_storage'] == CONTENT_DB_STORAGE_PER_CONTENT_TYPE && count($prior_instances) > 1) {
+    // Update the field's data storage.
+    $field['db_storage'] = CONTENT_DB_STORAGE_PER_FIELD;
 
+    // Update the schema for prior instances to adapt to the change in db storage.
+    foreach ($prior_instances as $instance) {
+      if ($instance['type_name'] != $field['type_name']) {
+        $new_instance = $instance;
+        $new_instance['db_storage'] = CONTENT_DB_STORAGE_PER_FIELD;
+
+        // Invoke hook_content_fieldapi().
+        module_invoke_all('content_fieldapi', 'update instance', $new_instance);
+
+        content_alter_schema($instance, $new_instance);
+      }
+    }
+  }
+
+  // Invoke hook_content_fieldapi().
+  module_invoke_all('content_fieldapi', 'update instance', $field);
+
+  // Update the field and the instance with the latest values.
   _content_field_write($field, 'update');
+  _content_field_instance_write($field, 'update');
+
+  content_alter_schema($prev_field, $field);
 
   content_clear_type_cache();
+
   return $field;
 }
 
@@ -242,132 +346,6 @@ function _content_field_write($field, $op = 'update') {
       drupal_write_record(content_field_tablename(), $field, 'field_name');
       break;
   }
-  return $field;
-}
-
-/**
- * Load a field.
- *
- * @param $param
- *   An array of properties to use in selecting a field. Valid keys: field_name
- * @return
- *   The field array.
- */
-function content_field_read($param) {
-  $field = db_fetch_array(db_query("SELECT * FROM {".
-    content_field_tablename() ."} nf WHERE field_name = '%s'", $param['field_name']));
-  $field['columns'] = (array) (!empty($field['columns']) ? unserialize($field['columns']) : array());
-  $field['global_settings'] = (array) (!empty($field['global_settings']) ? unserialize($field['global_settings']) : array());
-
-  foreach ($field['global_settings'] as $key => $value) {
-    $field[$key] = $value;
-  }
-  unset($field['global_settings']);
-
-  // Invoke hook_content_fieldapi().
-  module_invoke_all('content_fieldapi', 'read', $field);
-
-  return $field;
-}
-
-/**
- * Delete an existing field.
- */
-function content_field_delete($field_name) {
-
-  // Get the current value to pass to the hook.
-  $field = content_field_read(array('field_name' => $field_name));
-
-  // Invoke hook_content_fieldapi().
-  module_invoke_all('content_fieldapi', 'delete', $field);
-
-  $instances = content_field_instance_read(array('field_name' => $field_name));
-  foreach ($instances as $instance) {
-    content_field_instance_delete(array($instance['field_name'], $instance['type_name']));
-  }
-
-  if (is_array($field['columns']) && count($field['columns'])) {
-    content_alter_schema($field, array());
-  }
-  db_query("DELETE FROM {". content_field_tablename() ."} WHERE field_name = '%s'", $field['field_name']);
-
-  content_clear_type_cache();
-
-  // TODO menu_rebuild() is REALLY REALLY slow, is there an ajaxy way to run this
-  // in the background while we proceed to the next step?
-
-  // Deleted fields require a menu rebuild to remove all the field paths.
-  menu_rebuild();
-
-  return $field;
-}
-
-/**
- * Create a new field instance.
- *
- * @param $field
- *   An array of properties to create the field with, input either in
- *   the field => widget format used by the content module or as an
- *   array of form values.
- */
-function content_field_instance_create($field) {
-  // If there are prior instances, fill out missing values from the prior values,
-  // otherwise get missing values from default values.
-  $prior_instances = (array) content_field_instance_read(array(
-    'field_name' => $field['field_name'], 'type_name' => $field['type_name']));
-  $prior_values = (array) array_pop($prior_instances);
-
-  $default_values = content_instance_default_values($field['field_name'], $field['type_name'], $field['widget_type']);
-  $field = array_merge($default_values, $prior_values, $field);
-
-  // Invoke hook_content_fieldapi().
-  module_invoke_all('content_fieldapi', 'create instance', $field);
-
-  if (is_array($field['columns']) && count($field['columns'])) {
-    if ($field['db_storage'] == CONTENT_DB_STORAGE_PER_CONTENT_TYPE && $prior_instances) {
-      $new_field = $field;
-      $new_field['db_storage'] = CONTENT_DB_STORAGE_PER_FIELD;
-      drupal_write_record(content_field_tablename(), $new_field, 'field_name');
-      content_alter_schema($field, $new_field);
-    }
-  }
-
-  _content_field_instance_write($field, 'create');
-  content_clear_type_cache();
-
-  return $field;
-}
-
-/**
- * Update an existing field instance.
- *
- * @param $field
- *   An array of properties to create the field with, input either in
- *   the field => widget format used by the content module or as an
- *   array of form values.
- */
-function content_field_instance_update($field) {
-  // If there is a prior value, fill out missing values from the prior value,
-  // otherwise get missing values from default values.
-  $field = content_field_instance_expand($field);
-  $prev_field = content_field_instance_expand(content_fields($field['field_name'], $field['type_name']));
-  $default_values = content_instance_default_values($field['field_name'], $field['type_name'], $field['widget']['type']);
-  $field = array_merge($default_values, $prev_field, $field);
-
-  // Invoke hook_content_fieldapi().
-  module_invoke_all('content_fieldapi', 'update instance', $field);
-
-  _content_field_instance_write($field, 'update');
-
-  $field['db_storage'] = content_storage_type($field);
-
-  if ($field['db_storage'] != $prev_field['db_storage']) {
-    content_field_update($field);
-    content_alter_schema($prev_field, $field);
-  }
-
-  content_clear_type_cache();
-
   return $field;
 }
 
@@ -426,12 +404,20 @@ function content_field_instance_read($param = NULL) {
   if (count($cond)) {
     $cond = " WHERE ". implode(' AND ', $cond);
   }
-  $db_result = db_query("SELECT * FROM {". content_instance_tablename() ."} nfi ". $cond .
-    " ORDER BY nfi.weight ASC, nfi.label ASC", $args);
+  $db_result = db_query("SELECT * FROM {". content_instance_tablename() ."} nfi ".
+    " JOIN ". content_field_tablename() ."} nf ON nfi.field_name = nfi.field_name ".
+    $cond ." ORDER BY nfi.weight ASC, nfi.label ASC", $args);
 
   $fields = array();
   while ($instance = db_fetch_array($db_result)) {
-    $base_field = content_field_read(array('field_name' => $instance['field_name']));
+
+    $instance['columns'] = (array) (!empty($instance['columns']) ? unserialize($instance['columns']) : array());
+    $instance['global_settings'] = (array) (!empty($instance['global_settings']) ? unserialize($instance['global_settings']) : array());
+
+    foreach ($instance['global_settings'] as $key => $value) {
+      $instance[$key] = $value;
+    }
+    unset($instance['global_settings']);
 
     if (!empty($instance['widget_settings'])) {
       $instance['widget_settings'] = (array) unserialize($instance['widget_settings']);
@@ -446,7 +432,7 @@ function content_field_instance_read($param = NULL) {
       $instance['display_settings'] = array();
     }
 
-    $field = content_field_instance_expand(array_merge($base_field, $instance));
+    $field = content_field_instance_expand($instance);
 
     // Invoke hook_content_fieldapi().
     module_invoke_all('content_fieldapi', 'read instance', $field);
@@ -459,36 +445,32 @@ function content_field_instance_read($param = NULL) {
  * Delete an existing field instance.
  */
 function content_field_instance_delete($field_name, $type_name) {
-  // Get the current field value to pass to the hook.
-  $fields = content_field_instance_read(array('field_name' => $field_name, 'type_name' => $type_name));
-  $field = $fields[0];
+  // Get the previous field value.
+  $field = array_pop(content_field_instance_read(array('field_name' => $field_name, 'type_name' => $type_name)));
 
   // Invoke hook_content_fieldapi().
   module_invoke_all('content_fieldapi', 'delete instance', $field);
 
+  content_alter_schema($field, array());
+
   db_query("DELETE FROM {". content_instance_tablename() .
     "} WHERE field_name = '%s' AND type_name = '%s'", $field['field_name'], $field['type_name']);
 
-  $instances = content_field_instance_read(array('field_name' => $field['field_name']));
+  // If no instances remain, delete the field entirely.
+  $instances = content_field_instance_read(array('field_name' => $field_name));
+  if (sizeof($instances) < 1) {
+    db_query("DELETE FROM {". content_field_tablename() ."} WHERE field_name = '%s'", $field['field_name']);
+    // Deleted fields require a menu rebuild to remove all the field paths.
+    $_SESSION['content_menu_needs_rebuild'] = TRUE;
+  }
 
   // If only one instance remains, we may need to change the database
   // representation for this field.
-  if (sizeof($instances) == 1) {
-    if (!($field['multiple'])) {
-      // Multiple-valued fields are always stored per-field-type.
-      if (is_array($field['columns']) && count($field['columns'])) {
-        $new_field = $field;
-        $new_field['db_storage'] = CONTENT_DB_STORAGE_PER_CONTENT_TYPE;
-
-        content_field_update($new_field);
-        content_alter_schema($field, $new_field);
-      }
-    }
-  }
-
-  // If no instances remain, delete the field entirely.
-  elseif (sizeof($instances) == 0) {
-    $field = content_field_delete($field['field_name']);
+  if (sizeof($instances) == 1 && !($field['multiple'])) {
+    // Multiple-valued fields are always stored per-field-type.
+    $instance = $instances[0];
+    $new_instance['db_storage'] = CONTENT_DB_STORAGE_PER_CONTENT_TYPE;
+    content_alter_schema($instance, $new_instance);
   }
 
   content_clear_type_cache();
@@ -502,9 +484,9 @@ function content_field_instance_delete($field_name, $type_name) {
  */
 function content_module_delete($module) {
   // Delete the field data.
-  $results = db_query("SELECT * FROM {". content_field_tablename() ."} WHERE module = '%s'", $module);
+  $results = db_query("SELECT field_name, type_name FROM {". content_field_instance_tablename() ."} WHERE module = '%s'", $module);
   while ($field = db_fetch_array($results)) {
-    content_field_delete($field);
+    content_field_instance_delete($field);
   }
   // Force the caches and static arrays to update to the new info.
   _content_type_info(TRUE, TRUE);

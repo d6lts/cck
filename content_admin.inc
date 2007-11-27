@@ -592,11 +592,13 @@ function _content_admin_field_add_new_validate($form, &$form_state) {
 function _content_admin_field_add_new_submit($form, &$form_state) {
   module_load_include('inc', 'content', 'content_crud');
   $form_values = $form_state['values'];
+
   $field_widget_type = explode('-', $form_values['field_widget_type']);
   $form_values['type'] = $field_widget_type[0];
   $form_values['widget_type'] = $field_widget_type[1];
+  unset($form_values['field_widget_type']);
 
-  if (!$field = content_field_create($form_values)) {
+  if (!$field = content_field_instance_create($form_values)) {
     drupal_set_message(t('There was a problem creating field %label.', array(
       '%label' => $form_values['field_name'])));
   }
@@ -607,7 +609,7 @@ function _content_admin_field_add_new_submit($form, &$form_state) {
 
   $type   = content_types($form_values['type_name']);
   $form_state['redirect'] = 'admin/content/types/'. $type['url_str'] .'/fields/'. $form_values['field_name'];
-}
+  }
 
 /**
  * Menu callback; present a form for removing a field from a content type.
@@ -644,6 +646,7 @@ function _content_admin_field_remove(&$form_state, $type_name, $field_name) {
 function _content_admin_field_remove_submit($form, &$form_state) {
   module_load_include('inc', 'content', 'content_crud');
   $form_values = $form_state['values'];
+
   $type = content_types($form_values['type_name']);
   $field = $type['fields'][$form_values['field_name']];
   if ($type && $field && $form_values['confirm']) {
@@ -948,7 +951,6 @@ function _content_admin_field_submit($form, &$form_state) {
   unset($form_values['default_value_widget']);
 
   content_field_instance_update($form_values);
-  content_field_update($form_values);
 
   drupal_set_message(t('Saved field %label.', array('%label' => $form_values['label'])));
   $type   = content_types($form_values['type_name']);
@@ -976,7 +978,7 @@ function content_alter_schema($previous_field, $new_field, $url = NULL) {
   // of nodes. If there is no previous data to adjust, we can just go straight
   // to altering the schema, otherwise use batch processing to update
   // the database one node at a time, then update the schema.
-  if (empty($mask) && empty($previous_field)) {
+  if (empty($mask)) {
     return content_alter_db($previous_field, $new_field);
   }
   $batch = array(
@@ -1112,13 +1114,13 @@ function content_alter_db_mask($previous_field, $new_field) {
 function content_alter_db($previous_field, $new_field) {
   $ret = array();
 
-  $previous_schema = !empty($previous_field) ? content_table_schema($previous_field) : array();
-  $new_schema = !empty($new_field) ? content_table_schema($new_field) : array();
-
   // One or the other of these must be valid.
-  if (empty($previous_schema) && empty($new_schema)) {
+  if (empty($previous_field) && empty($new_field)) {
     return $ret;
   }
+
+  $previous_schema = !empty($previous_field) ? content_table_schema($previous_field) : array();
+  $new_schema = !empty($new_field) ? content_table_schema($new_field) : array();
 
   if (!empty($previous_field)) {
     $previous_db_info = content_database_info($previous_field);
@@ -1130,7 +1132,7 @@ function content_alter_db($previous_field, $new_field) {
   }
 
   // Deleting this field entirely is a simple case.
-  if (empty($new_schema)) {
+  if (empty($new_field)) {
     if ($previous_field['db_storage'] == CONTENT_DB_STORAGE_PER_FIELD) {
       db_drop_table($ret, $previous_table);
     }
@@ -1144,6 +1146,14 @@ function content_alter_db($previous_field, $new_field) {
     return content_alter_db_cleanup($ret);
   }
 
+  // All content types need a content type table.
+  if (!empty($new_field)) {
+    $base_tablename = _content_tablename($new_field['type_name'], CONTENT_DB_STORAGE_PER_CONTENT_TYPE);
+    if (!db_table_exists($base_tablename)) {
+      db_create_table($ret, $base_tablename, content_table_schema());
+    }
+  }
+
   // Create new table and columns, if not already created.
   if (!db_table_exists($new_table)) {
     db_create_table($ret, $new_table, $new_schema);
@@ -1151,29 +1161,21 @@ function content_alter_db($previous_field, $new_field) {
   else {
     // Or add fields to an existing table.
     foreach ($new_schema['fields'] as $column => $attributes) {
-      if (!in_array($column, array('nid', 'vid', 'delta'))) {
+      if (!in_array($column, array('nid', 'vid', 'delta')) && !db_column_exists($new_table, $column)) {
         db_add_field($ret, $new_table, $column, $attributes);
       }
     }
   }
 
-  // All content types need a content type table.
-  if (!empty($new_schema)) {
-    $base_tablename = _content_tablename($new_field['type_name'], CONTENT_DB_STORAGE_PER_CONTENT_TYPE);
-    if (!db_table_exists($base_tablename)) {
-      db_create_table($ret, $base_tablename, content_table_schema());
-    }
-  }
-
   // If this is a new field, we're done.
-  if (empty($previous_schema)) {
+  if (empty($previous_field)) {
     return content_alter_db_cleanup($ret);
   }
 
   // If the previous table doesn't exist, we're done.
   // Could happen if someone tries to run a schema update from an
   // content.install update function more than once.
-  if (db_table_exists($previous_table)) {
+  if (!db_table_exists($previous_table)) {
     return content_alter_db_cleanup($ret);
   }
 
@@ -1280,7 +1282,6 @@ function content_alter_db($previous_field, $new_field) {
       }
     }
   }
-
   return content_alter_db_cleanup($ret);
 }
 
