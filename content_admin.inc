@@ -1253,7 +1253,8 @@ function content_alter_db($previous_field, $new_field) {
       }
       if (db_result(db_query('SELECT COUNT(*) FROM {'. $new_table .
       '} WHERE vid = %d AND nid = %d', $data['vid'], $data['nid']))) {
-        drupal_write_record($new_table, $record, array('vid', 'nid'));
+        $keys = $field['multiple'] ? array('vid', 'delta') : array('vid');
+        drupal_write_record($new_table, $record, $keys);
       }
       else {
         drupal_write_record($new_table, $record);
