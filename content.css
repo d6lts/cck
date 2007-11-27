@@ -5,23 +5,28 @@
 .field .field-label-inline-first {
   font-weight:bold;
 }
-
 .field .field-label-inline,
 .field .field-label-inline-first {
   display:inline;
 }
-
 .field .field-label-inline {
   visibility:hidden;
 }
 
-.node-form .number {
-  display: inline;
-  width: auto;
+.node-form .content-multiple-table td.content-multiple-drag {
+  width:30px;
+  padding-right:0;
+}
+.node-form .content-multiple-table td.content-multiple-drag a.tabledrag-handle{
+  padding-right:.5em;
+}
+.node-form .content-add-more .form-submit{
+  margin:0;
 }
 
-.node-form .content-add-more .form-submit{
-  margin: 0;
+.node-form .number {
+  display:inline;
+  width:auto;
 }
 
 

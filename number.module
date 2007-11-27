@@ -421,7 +421,7 @@ function number_process($element, $edit, $form_state, $form) {
   $value = isset($field['decimal']) ? str_replace('.', $field['decimal'], $value) : $value;
   $element[$field_key] = array(
     '#type' => 'textfield',
-    '#title' => t($field['widget']['label']),
+    '#title' => $element['#title'],
     '#description' => t($field['widget']['description']),
     '#required' => $element['#required'],
     '#default_value' => $value,

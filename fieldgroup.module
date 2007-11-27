@@ -53,10 +53,6 @@ function fieldgroup_menu() {
   return $items;
 }
 
-function fieldgroup_menu_alter(&$items) {
-  $items['content/js_add_more']['page callback'] = 'fieldgroup_add_more_js';
-}
-
 /**
  * Implementation of hook_theme().
  */
@@ -582,60 +578,6 @@ function fieldgroup_display_overview_form_submit($form, &$form_state) {
       fieldgroup_save_group($type, $group);
     }
   }
-}
-
-/**
- * Menu callback for AHAH additions.
- *
- * This overrides the default content.module callback
- * (see fieldgroup_menu_alter).
- *
- * TODO : This is override keeps content.module and fieldgroup.module
- *
- */
-function fieldgroup_add_more_js($type_name_url, $field_name) {
-  // If the field is not in a group, we use content.module's
-  // content_add_more_js().
-  $type = content_types($type_name_url);
-  $group_name = _fieldgroup_field_get_group($type['type'], $field_name);
-  if (empty($group_name)) {
-    return content_add_more_js($type_name_url, $field_name);
-  }
-
-  // Retrieve the cached form.
-  $form_state = array('values' => $_POST);
-  $form = form_get_cache($_POST['form_build_id'], $form_state);
-
-  // Build our new form element.
-  $delta = max(array_keys($_POST[$field_name])) + 1;
-  $field = $form['#field_info'][$field_name];
-  // TODO : should we check that the field is actually multiple ?
-  $form_element = content_field_form($form, $form_state, $field, $delta);
-  $form_element[$field_name][0]['#weight'] = $delta;
-
-  // Let other modules alter the new form element, and append it to the form.
-  drupal_alter('form', $form_element, array(), 'content_add_more_js');
-  // This is where we differ from content_add_more_js.
-  $form[$group_name][$field_name][$delta] = $form_element[$field_name][0];
-
-  // Save the new state of the form.
-  form_set_cache($_POST['form_build_id'], $form, $form_state);
-
-  // Build the new form so that we can render the new element.
-  $form_state = array('submitted' => FALSE);
-  $form += array(
-    '#post' => $_POST,
-    '#programmed' => FALSE,
-  );
-  $form = form_builder($_POST['form_id'], $form, $form_state);
-
-  // Render the new output.
-  $new_element = $form[$group_name][$field_name][$delta];
-  // We add div around new content to receive the ahah effect.
-  $new_element['#prefix'] = '<div class="ahah-new-content">'. (isset($new_element['#prefix']) ? $new_element['#prefix'] : '');
-  $new_element['#suffix'] = (isset($new_element['#suffix']) ? $new_element['#suffix'] : '') .'</div>';
-  $output = theme('status_messages') . drupal_render($new_element);
-  drupal_json(array('status' => TRUE, 'data' => $output));
 }
 
 function fieldgroup_tablename($version = NULL) {

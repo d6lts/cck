@@ -174,7 +174,7 @@ function optionwidgets_buttons_process($element, $edit, &$form_state, $form) {
   }
   $element[$field_key] = array(
     '#type' => $field['multiple'] ? 'checkboxes' : 'radios',
-    '#title' => t($field['widget']['label']),
+    '#title' => $element['#title'],
     '#description' => t($field['widget']['description']),
     '#required' => $field['required'],
     '#multiple' => $field['multiple'],
@@ -203,7 +203,7 @@ function optionwidgets_select_process($element, $edit, &$form_state, $form) {
   }
   $element[$field_key] = array(
     '#type' => 'select',
-    '#title' => t($field['widget']['label']),
+    '#title' => $element['#title'],
     '#description' => t($field['widget']['description']),
     '#required' => $field['required'],
     '#multiple' => $field['multiple'],
@@ -232,7 +232,7 @@ function optionwidgets_onoff_process($element, $edit, &$form_state, $form) {
   $on_value = array_shift(optionwidgets_options($field));
   $element[$field_key] = array(
     '#type' => 'checkbox',
-    '#title' => t($field['widget']['label']),
+    '#title' => $element['#title'],
     '#description' => t($field['widget']['description']),
     '#required' => $field['required'],
     '#multiple' => $field['multiple'],

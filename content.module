@@ -310,56 +310,72 @@ function content_field_form(&$form, &$form_state, $field, $get_delta = NULL) {
 /**
  * Special handling to create form elements for multiple values.
  *
- * Checks value stored in $field['multiple'] and uses it to either
- * provide the right number of field elements or add the AHAH add more
- * processing to the form.
+ * Handles generic features for multiple fields :
+ * - number of widgets
+ * - AHAH-'add more' button
+ * - drag-n-drop value reordering
  */
 function content_multiple_value_form(&$form, &$form_state, $field, $items) {
-  $function = $field['module'] .'_widget';
   $field_name = $field['field_name'];
-  $form_element = array('#type' => 'content_multiple_values');
 
   switch ($field['multiple']) {
     case 0:
       $max = 0;
       break;
     case 1:
-      $max = (isset($form_state['item_count'][$field_name]) ? $form_state['item_count'][$field_name] : sizeof($items));
+      $max = (isset($form_state['item_count'][$field_name]) ? $form_state['item_count'][$field_name] : count($items));
       break;
     default:
       $max = $field['multiple'] - 1;
       break;
   }
+
+  $form_element = array(
+    // TODO : Not sure about that one - when theming through '#type',
+    // children are already rendered, and we can't do the table layout.
+    //'#type' => 'content_multiple_values',
+    '#theme' => 'content_multiple_values',
+    '#title' => t($field['widget']['label'])
+  );
+  $function = $field['module'] .'_widget';
+
   for ($delta = 0; $delta <= $max; $delta++) {
     if ($element = $function($form, $form_state, $field, $items, $delta)) {
       $defaults = array(
         '#field_name' => $field_name,
-        '#weight'   => $delta,
+        '#title' => ($field['multiple'] >= 1) ? '' : t($field['widget']['label']),
         '#required' => $delta == 0 && $field['required'],
-        '#delta'    => $delta,
-        '#columns'  => array_keys($field['columns']),
+        '#weight' => $delta,
+        '#delta' => $delta,
+        '#columns' => array_keys($field['columns']),
       );
+
+      // Add an input field for the delta (drag-n-drop reordering), which will
+      // be hidden by tabledrag js behavior.
+      if ($field['multiple'] >= 1) {
+        // We name the element '_weight' to avoid clashing with column names
+        // defined by field modules.
+        $element['_weight'] = array(
+          // When JS is disabled, a weight selector will be more convenient (?),
+          // but won't work well with more than 10 values.
+          '#type' => ($max < 10) ? 'weight' : 'textfield',
+          '#default_value' => $delta,
+          '#weight' => 100,
+        );
+      }
+
       $form_element[$delta] = array_merge($element, $defaults);
     }
   }
+
   // Add AHAH add more button, if not working with a programmed form.
   if ($field['multiple'] == 1 && empty($form['#programmed'])) {
     // Make sure the form is cached so ahah can work.
     $form['#cache'] = TRUE;
-    // Add a wrapper for the fields and more button.
-    $field_name_css = str_replace('_', '-', $field_name);
-    $form_element['#prefix'] = '<div class="clear-block" id="'. $field_name_css .'-add-more-wrapper">';
-    // Container for just the field items.
-    $form_element['#prefix'] .= '<div id="'. $field_name_css .'-items">';
-    $form_element['#suffix'] = '</div></div>';
-
     $content_type = content_types($form['type']['#value']);
-    // We name our button $field_name .'_add_more' to avoid conflicts with
-    // other fields and other modules using AHAH-enabled buttons with the id 'more'.
-    // Use a prefix to close out the container for field items and start the button container.
+    $field_name_css = str_replace('_', '-', $field_name);
+
     $form_element[$field_name .'_add_more'] = array(
-      '#prefix' => '</div><div class="content-add-more">',
-      '#suffix' => '</div>',
       '#type' => 'submit',
       '#value' => t('Add another !field value', array('!field' => t($field['widget']['label']))),
       '#description' => t("If the amount of boxes above isn't enough, click here to add more items."),
@@ -368,10 +384,16 @@ function content_multiple_value_form(&$form, &$form_state, $field, $items) {
       '#ahah' => array(
         'path' => 'content/js_add_more/'. $content_type['url_str'] .'/'. $field_name,
         'wrapper' => $field_name_css .'-items',
-        'method' => 'append',
+        'method' => 'replace',
         'effect' => 'fade',
       ),
     );
+
+    // Add wrappers for the fields and 'more' button.
+    // TODO : could be simplified ?
+    $form_element['#prefix'] = '<div class="clear-block" id="'. $field_name_css .'-add-more-wrapper"><div id="'. $field_name_css .'-items">';
+    $form_element[$field_name .'_add_more']['#prefix'] = '<div class="content-add-more">';
+    $form_element[$field_name .'_add_more']['#suffix'] =  '</div></div></div>';
   }
   return $form_element;
 }
@@ -395,30 +417,40 @@ function content_add_more_submit($form, &$form_state) {
 
 /**
  * Menu callback for AHAH addition of new empty widgets.
- *
- * Fields inside fieldgroups are dealt with by fieldgroup_add_more_js
- * (menu handler override in fieldgroup_menu_alter).
  */
-function content_add_more_js($type_name, $field_name) {
+function content_add_more_js($type_name_url, $field_name) {
+  $type = content_types($type_name_url);
+  $field = content_fields($field_name, $type['type']);
+  if ($field['multiple'] != 1) {
+    // TODO : is that correct ?
+    drupal_json(array('status' => 0));
+  }
+
+  // Reorder values to account for drag-n-drop reordering
+  $_POST[$field_name] = _content_sort_items($field, $_POST[$field_name]);
+  $delta = max(array_keys($_POST[$field_name])) + 1;
   // Retrieve the cached form.
   $form_state = array('values' => $_POST);
   $form = form_get_cache($_POST['form_build_id'], $form_state);
 
-  // Build our new form element.
-  $delta = max(array_keys($_POST[$field_name])) + 1;
-  $field = $form['#field_info'][$field_name];
-  // TODO : should we check that the field is actually multiple ?
-  $form_element = content_field_form($form, $form_state, $field, $delta);
-  $form_element[$field_name][0]['#weight'] = $delta;
-
-  // Let other modules alter the new form element, and append it to the form.
+  // Build our new form element for the whole field,
+  // and let other modules alter it.
+  $form_element = content_field_form($form, $form_state, $field);
   drupal_alter('form', $form_element, array(), 'content_add_more_js');
-  $form[$field_name][$delta] = $form_element[$field_name][0];
 
-  // Save the new state of the form.
+  // Add the new element at the right place in the form.
+  if (module_exists('fieldgroup') && ($group_name = _fieldgroup_field_get_group($type['type'], $field_name))) {
+    $form[$group_name][$field_name] = $form_element[$field_name];
+  }
+  else {
+    $form[$field_name] = $form_element[$field_name];
+  }
+
+  // Save the new definition of the form.
   form_set_cache($_POST['form_build_id'], $form, $form_state);
 
   // Build the new form so that we can render the new element.
+  $_POST[$field_name][$delta]['_weight'] = $delta;   // TODO : Hack !!
   $form_state = array('submitted' => FALSE);
   $form += array(
     '#post' => $_POST,
@@ -426,12 +458,15 @@ function content_add_more_js($type_name, $field_name) {
   );
   $form = form_builder($_POST['form_id'], $form, $form_state);
 
+  // TODO : bug - the new element gets an empty delta value
+
   // Render the new output.
-  $new_element = $form[$field_name][$delta];
-  // We add div around new content to receive the ahah effect.
-  $new_element['#prefix'] = '<div class="ahah-new-content">'. (isset($new_element['#prefix']) ? $new_element['#prefix'] : '');
-  $new_element['#suffix'] = (isset($new_element['#suffix']) ? $new_element['#suffix'] : '') .'</div>';
-  $output = theme('status_messages') . drupal_render($new_element);
+  $field_form = (!empty($group_name)) ? $form[$group_name][$field_name] : $form[$field_name];
+  // We add a div around the new content to receive the ahah effect.
+
+  $field_form[$delta]['#prefix'] = '<div class="ahah-new-content">'. (isset($field_form[$delta]['#prefix']) ? $field_form[$delta]['#prefix'] : '');
+  $field_form[$delta]['#suffix'] = (isset($field_form[$delta]['#suffix']) ? $field_form[$delta]['#suffix'] : '') .'</div>';
+  $output = theme('status_messages') . drupal_render($field_form);
   drupal_json(array('status' => TRUE, 'data' => $output));
 }
 
@@ -640,7 +675,10 @@ function content_field($op, &$node, $field, &$items, $teaser, $page) {
 
       // If content module is handling multiple values, don't save empty items.
       if (content_handle('widget', 'multiple values', $field) == CONTENT_HANDLE_CORE) {
+        // Filter out empty values.
         $items = content_set_empty($field, $items);
+        // Reorder items to account for drag-n-drop reordering.
+        $items = _content_sort_items($field, $items);
       }
       break;
 
@@ -710,6 +748,24 @@ function content_set_empty($field, $items) {
     }
   }
   return $items;
+}
+
+function _content_sort_items($field, $items) {
+  if ($field['multiple'] >= 1 && isset($items[0]['_weight'])) {
+    usort($items, '_content_sort_items_helper');
+    foreach($items as $delta => $item) {
+      unset($items[$delta]['_weight']);
+    }
+  }
+  return $items;
+}
+
+/**
+ * Helper function to sort items in a field according to
+ * user drag-n-drop reordering.
+ */
+function _content_sort_items_helper($a, $b) {
+  return $a["_weight"] - $b["_weight"];
 }
 
 /**
@@ -1486,38 +1542,72 @@ function content_default_value(&$form, &$form_state, $field, $delta) {
  *
  * Drupal will automatically theme the element using a theme with
  * the same name as the hook_elements key.
- *
- * @TODO any more generic multiple value processing we could add here??
  */
 function content_elements() {
   return array(
     'content_multiple_values' => array(
+      // TODO : right now this element is similar to a fieldset,
+      // #input could be FALSE...
+      // Do we need an 'element' at all, for that matter ?
       '#input' => TRUE,
-    ));
+    )
+  );
 }
 
 /**
  * Theme an individual form element.
  *
- * Combine multiple values into a fieldset.
- * Override the theme to eliminate the fieldset or make other changes.
- *
- * We work with $element['#children'] here instead of using drupal_render()
- * because the individual items in the element have already been rendered.
- * Alter children in the theme set on the individual element.
+ * Combine multiple values into a table with drag-n-drop reordering.
  */
 function theme_content_multiple_values($element) {
-  if (isset($element['#children'])) {
-    $field_name = $element['#field_name'];
-    $field = content_fields($field_name);
-    $type = content_types($field['type_name']);
-    $widget = $type['fields'][$field_name]['widget'];
-    if ($field['multiple'] == 1) {
-      // Change the button title to reflect the behavior when using JavaScript.
-      drupal_add_js('if (Drupal.jsEnabled) { $(document).ready(function() { $("#edit-'. str_replace('_', '-', $field_name) .'-add-more").val("'. t('Add another item') .'"); }); }', 'inline');
+  $field_name = $element['#field_name'];
+  $field = content_fields($field_name);
+  $output = '';
+
+  if ($field['multiple'] >= 1) {
+    $table_id = $element['#field_name'] .'_values';
+    $order_class = $element['#field_name'] .'-delta-order';
+    $header = array(
+      // TODO : field label should be in first header with a colspan of 2,
+      // but this breaks tabledrag.js column hiding...
+      '',
+      $element['#title'],
+      t('Order')
+    );
+    $rows = array();
+
+    foreach (element_children($element) as $key) {
+      if ($key !== $element['#field_name'] .'_add_more') {
+        $element[$key]['_weight']['#attributes']['class'] = $order_class;
+        $delta_element = drupal_render($element[$key]['_weight']);
+        $cells = array(
+          array('data' => '', 'class' => 'content-multiple-drag'),
+          drupal_render($element[$key]),
+          array('data' => $delta_element, 'class' => 'delta-order'),
+        );
+        $rows[] = array(
+          'data' => $cells,
+          'class' => 'draggable',
+        );
+      }
     }
-    return $element['#children'];
+
+    $output .= theme('table', $header, $rows, array('id' => $table_id, 'class' => 'content-multiple-table'));
+    $output .= drupal_render($element[$element['#field_name'] .'_add_more']);
+
+    drupal_add_tabledrag($table_id, 'order', 'sibling', $order_class);
+
+    // Change the button title to reflect the behavior when using JavaScript.
+    $field_name_css = str_replace('_', '-', $field_name);
+    drupal_add_js('if (Drupal.jsEnabled) { $(document).ready(function() { $("#edit-'. $field_name_css .'-'. $field_name_css .'-add-more").val("'. t('Add another item') .'"); }); }', 'inline');
   }
+  else {
+    foreach (element_children($element) as $key) {
+      $output .= drupal_render($element[$key]);
+    }
+  }
+
+  return $output;
 }
 
 /**
