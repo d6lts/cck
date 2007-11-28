@@ -353,13 +353,11 @@ function userreference_after_build($element, &$form_state) {
  */
 function userreference_autocomplete_validate($element, &$form_state) {
   $field_key  = $element['#columns'][0];
-  $value = $element['#value'][$field_key];
-  if (!empty($value)) {
-    $value = db_result(db_query("SELECT uid FROM {users} WHERE name = '%s'", $value));
+  $uid = $element['#value'][$field_key];
+  if (!empty($uid)) {
+    $uid = db_result(db_query("SELECT uid FROM {users} WHERE name = '%s'", $uid));
   }
-  if (!empty($value)) {
-    form_set_value($element, $value, $form_state);
-  }
+  form_set_value($element, $uid, $form_state);
 }
 
 /**

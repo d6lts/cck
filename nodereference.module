@@ -470,6 +470,7 @@ function nodereference_autocomplete_validate($element, &$form_state) {
   $delta = $element['#delta'];
   $value = $element['#value'][$field_key];
 
+  $nid = NULL;
   if (!empty($value)) {
     preg_match('/^(?:\s*|(.*) )?\[\s*nid\s*:\s*(\d+)\s*\]$/', $value, $matches);
     if (!empty($matches)) {
@@ -488,16 +489,8 @@ function nodereference_autocomplete_validate($element, &$form_state) {
       $nids = _nodereference_potential_references($field, FALSE, $value, TRUE);
       $nid = (!empty($nids)) ? array_shift(array_keys($nids)) : 0;
     }
-
-    if (!empty($nid)) {
-      form_set_value($element, $nid, $form_state);
-    }
-    elseif ($delta > 0) {
-      // Don't save empty fields when they're not the first value (keep '0' otherwise)
-      form_set_value($element, 0, $form_state);
-    }
   }
-
+  form_set_value($element, $nid, $form_state);
   return $element;
 }
 
