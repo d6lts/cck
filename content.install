@@ -128,7 +128,9 @@ function content_schema() {
       $schema[$field_table] = content_table_schema($field);
     }
     else {
-      $schema[$content_table] = array_merge($schema[$content_table], content_table_schema($field));
+      $content_schema = content_table_schema($field);
+      $schema[$content_table]['fields'] = array_merge($schema[$content_table]['fields'], $content_schema['fields']);
+      $schema[$content_table]['content fields'] = array_merge($schema[$content_table]['content fields'], $content_schema['content fields']);
     }
   }
   return $schema;
