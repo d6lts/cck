@@ -148,7 +148,7 @@ function nodereference_field($op, &$node, $field, &$items, $teaser, $page) {
   switch ($op) {
     case 'validate':
       $refs = _nodereference_potential_references($field, TRUE);
-      foreach ($items as $delta => $item) {
+      foreach ($items[0] as $delta => $item) {
         if (is_array($item) && !empty($item['error_field'])) {
           $error_field = $item['error_field'];
           unset($item['error_field']);
@@ -159,7 +159,7 @@ function nodereference_field($op, &$node, $field, &$items, $teaser, $page) {
           }
         }
       }
-      return;
+      return $items;
   }
 }
 
@@ -399,6 +399,7 @@ function nodereference_select_process($element, $edit, $form_state, $form) {
     '#type' => 'optionwidgets_select',
     '#default_value' => isset($element['#value'][$field_key]) ? $element['#value'][$field_key] : '',
     '#element_validate' => array('nodereference_select_validate'),
+    '#after_build' => array('nodereference_after_build'),
 
     // The following values were set by the content module and need
     // to be passed down to the nested element.
@@ -435,6 +436,7 @@ function nodereference_autocomplete_process($element, $edit, $form_state, $form)
     '#default_value' => array($field_key => $value),
     '#autocomplete_path' => 'nodereference/autocomplete/'. $field['field_name'],
     '#element_validate' => array('nodereference_autocomplete_validate'),
+    '#after_build' => array('nodereference_after_build'),
 
     // The following values were set by the content module and need
     // to be passed down to the nested element.
@@ -447,17 +449,17 @@ function nodereference_autocomplete_process($element, $edit, $form_state, $form)
 }
 
 /**
- * Validate a select element.
+ * Afterbuild adjustment of the element.
  *
  * Remove the wrapper layer and set the right element's value.
  * Since we nested two elements, we ended up with a value like
- * $element['#value']['nid']['nid'] and we need to make it back
- * into $element['#value']['nid'].
+ * $element['#parents'][...]['nid']['nid'] and we need to make it back
+ * into $element['#parents'][...]['nid'].
  */
-function nodereference_select_validate($element, &$form_state) {
-  $field_key  = $element['#columns'][0];
-  $value = $element['#value'][$field_key];
-  form_set_value($element, $value, $form_state);
+function nodereference_after_build($element, &$form_state) {
+  array_pop($element['#parents']);
+  array_pop($element['#array_parents']);
+  return $element;
 }
 
 /**

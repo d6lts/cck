@@ -273,6 +273,7 @@ function userreference_select_process($element, $edit, $form_state, $form) {
     '#type' => 'optionwidgets_select',
     '#default_value' => isset($element['#value'][$field_key]) ? $element['#value'][$field_key] : '',
     '#element_validate' => array('userreference_select_validate'),
+    '#after_build' => array('userreference_after_build'),
 
     // The following values were set by the content module and need
     // to be passed down to the nested element.
@@ -307,6 +308,7 @@ function userreference_autocomplete_process($element, $edit, $form_state, $form)
     '#default_value' => array($field_key => $value),
     '#autocomplete_path' => 'user/autocomplete',
     '#element_validate' => array('userreference_autocomplete_validate'),
+    '#after_build' => array('userreference_after_build'),
 
     // The following values were set by the content module and need
     // to be passed down to the nested element.
@@ -319,17 +321,17 @@ function userreference_autocomplete_process($element, $edit, $form_state, $form)
 }
 
 /**
- * Validate a select element.
+ * Afterbuild adjustment of the element.
  *
  * Remove the wrapper layer and set the right element's value.
  * Since we nested two elements, we ended up with a value like
- * $element['#value']['uid']['uid'] and we need to make it back
- * into $element['#value']['uid'].
+ * $element['#parents'][...]['nid']['nid'] and we need to make it back
+ * into $element['#parents'][...]['nid'].
  */
-function userreference_select_validate($element, &$form_state) {
-  $field_key  = $element['#columns'][0];
-  $value = $element['#value'][$field_key];
-  form_set_value($element, $value, $form_state);
+function userreference_after_build($element, &$form_state) {
+  array_pop($element['#parents']);
+  array_pop($element['#array_parents']);
+  return $element;
 }
 
 /**
