@@ -102,19 +102,16 @@ function optionwidgets_elements() {
       '#input' => TRUE,
       '#columns' => array('value'), '#delta' => 0,
       '#process' => array('optionwidgets_select_process'),
-      '#element_validate' => array('optionwidgets_validate'),
       ),
     'optionwidgets_buttons' => array(
       '#input' => TRUE,
       '#columns' => array('value'), '#delta' => 0,
       '#process' => array('optionwidgets_buttons_process'),
-      '#element_validate' => array('optionwidgets_validate'),
       ),
     'optionwidgets_onoff' => array(
       '#input' => TRUE,
       '#columns' => array('value'), '#delta' => 0,
       '#process' => array('optionwidgets_onoff_process'),
-      '#element_validate' => array('optionwidgets_validate'),
       ),
     );
 }
@@ -181,6 +178,8 @@ function optionwidgets_buttons_process($element, $edit, &$form_state, $form) {
     '#options' => optionwidgets_options($field),
     '#default_value' => isset($element['#value']) ? $element['#value'] : NULL,
   );
+
+  $element['#element_validate'][] = 'optionwidgets_validate';
   return $element;
 }
 
@@ -210,6 +209,8 @@ function optionwidgets_select_process($element, $edit, &$form_state, $form) {
     '#options' => optionwidgets_options($field),
     '#default_value' => isset($element['#value']) ? $element['#value'] : NULL,
   );
+
+  $element['#element_validate'][] = 'optionwidgets_validate';
   return $element;
 }
 
@@ -239,6 +240,8 @@ function optionwidgets_onoff_process($element, $edit, &$form_state, $form) {
     '#default_value' => isset($element['#value'][0]) ? $element['#value'][0] == $on_value : FALSE,
     '#return_value' => $on_value,
   );
+
+  $element['#element_validate'][] = 'optionwidgets_validate';
   return $element;
 }
 
