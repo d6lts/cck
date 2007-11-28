@@ -257,6 +257,22 @@ function userreference_widget(&$form, &$form_state, $field, $items, $delta = 0) 
 }
 
 /**
+ * Value for a userreference autocomplete element.
+ *
+ * Substitute in the user name for the uid.
+ */
+function userreference_autocomplete_value($element, $edit = FALSE) {
+  if (func_num_args() == 1) {
+    $field_key  = $element['#columns'][0];
+    if (!empty($element['#default_value'][$field_key])) {
+      $value = $value = db_result(db_query("SELECT name FROM {users} WHERE uid = '%d'", $element['#default_value'][$field_key]));
+      return array($field_key => $value);
+    }
+    return array($field_key => NULL);
+  }
+}
+
+/**
  * Process an individual element.
  *
  * Build the form element. When creating a form using FAPI #process,
@@ -299,13 +315,9 @@ function userreference_autocomplete_process($element, $edit, $form_state, $form)
   // path and some extra processing to it.
   // Add a validation step where the value can be unwrapped.
   $field_key  = $element['#columns'][0];
-  $value = '';
-  if (!empty($element['#default_value'][$field_key])) {
-    $value = db_result(db_query("SELECT name FROM {users} WHERE uid = '%d'", $element['#default_value'][$field_key]));
-  }
   $element[$field_key] = array(
     '#type' => 'text_textfield',
-    '#default_value' => array($field_key => $value),
+    '#default_value' => isset($element['#value']) ? $element['#value'] : '',
     '#autocomplete_path' => 'user/autocomplete',
     '#element_validate' => array('userreference_autocomplete_validate'),
     '#after_build' => array('userreference_after_build'),
