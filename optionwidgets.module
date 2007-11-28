@@ -166,6 +166,7 @@ function optionwidgets_buttons_process($element, $edit, &$form_state, $form) {
   $field_name = $element['#field_name'];
   $field = $form['#field_info'][$field_name];
   $field_key  = $element['#columns'][0];
+
   if (empty($edit)) {
     $element['#value'] = optionwidgets_data2form($element, $element['#default_value'], $field);
   }
@@ -179,6 +180,9 @@ function optionwidgets_buttons_process($element, $edit, &$form_state, $form) {
     '#default_value' => isset($element['#value']) ? $element['#value'] : NULL,
   );
 
+  // Make sure field info will be available to the validator which
+  // does not get the values in $form.
+  $form_state['#field_info'][$field['field_name']] = $field;
   $element['#element_validate'][] = 'optionwidgets_validate';
   return $element;
 }
@@ -195,7 +199,6 @@ function optionwidgets_select_process($element, $edit, &$form_state, $form) {
   $field_name = $element['#field_name'];
   $field = $form['#field_info'][$field_name];
   $field_key  = $element['#columns'][0];
-  $form_state['storage'][$field_name] = $field;
 
   if (empty($edit)) {
     $element['#value'] = optionwidgets_data2form($element, $element['#default_value'], $field);
@@ -210,6 +213,9 @@ function optionwidgets_select_process($element, $edit, &$form_state, $form) {
     '#default_value' => isset($element['#value']) ? $element['#value'] : NULL,
   );
 
+  // Make sure field info will be available to the validator which
+  // does not get the values in $form.
+  $form_state['#field_info'][$field['field_name']] = $field;
   $element['#element_validate'][] = 'optionwidgets_validate';
   return $element;
 }
@@ -241,6 +247,9 @@ function optionwidgets_onoff_process($element, $edit, &$form_state, $form) {
     '#return_value' => $on_value,
   );
 
+  // Make sure field info will be available to the validator which
+  // does not get the values in $form.
+  $form_state['#field_info'][$field['field_name']] = $field;
   $element['#element_validate'][] = 'optionwidgets_validate';
   return $element;
 }
@@ -254,7 +263,7 @@ function optionwidgets_onoff_process($element, $edit, &$form_state, $form) {
  * to create multiple elements.
  */
 function optionwidgets_validate($element, &$form_state) {
-  $field = $form_state['storage'][$element['#field_name']];
+  $field = $form_state['#field_info'][$element['#field_name']];
   $updated = optionwidgets_form2data($element, $element['#value'], $field);
   $parents = $element['#parents'];
   array_pop($parents);

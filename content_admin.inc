@@ -1368,7 +1368,7 @@ function content_mask_batch_update($field, $mask, &$context) {
     $nid = array_shift($context['sandbox']['nodes']);
     $node = node_load($nid, NULL, TRUE);
 
-    $items = $node->$field_name;
+    $items = isset($node->$field_name) ? $node->$field_name : array();
     foreach ($items as $delta => $value) {
       if (isset($mask['delta']) && isset($mask['alt_mask']) && $delta >= $mask['delta']) {
         $field_mask = $mask['alt_mask'];
@@ -1377,7 +1377,7 @@ function content_mask_batch_update($field, $mask, &$context) {
         $field_mask = $mask['mask'];
       }
       // Merge the mask into the field values to do the replacements.
-      $items[$delta] = array_merge($node->$field_name[$delta], $field_mask);
+      $items[$delta] = array_merge($items[$delta], $field_mask);
     }
     // Test if the new values will make items qualify as empty.
     $items = content_set_empty($field, $items);

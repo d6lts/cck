@@ -825,12 +825,10 @@ function content_storage($op, $node) {
           if ($field['multiple']) {
             continue;
           }
-
           foreach ($db_info['columns'] as $column => $attributes) {
             $record[$attributes['column']] = $node->{$field_name}[0][$column];
           }
         }
-
         if (count($record)) {
           $record['nid'] = $node->nid;
           $record['vid'] = $node->vid;
