@@ -148,7 +148,7 @@ function nodereference_field($op, &$node, $field, &$items, $teaser, $page) {
   switch ($op) {
     case 'validate':
       $refs = _nodereference_potential_references($field, TRUE);
-      foreach ($items[0] as $delta => $item) {
+      foreach ($items as $delta => $item) {
         if (is_array($item) && !empty($item['error_field'])) {
           $error_field = $item['error_field'];
           unset($item['error_field']);
