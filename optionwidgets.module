@@ -203,6 +203,7 @@ function optionwidgets_select_process($element, $edit, &$form_state, $form) {
   if (empty($edit)) {
     $element['#value'] = optionwidgets_data2form($element, $element['#default_value'], $field);
   }
+
   $element[$field_key] = array(
     '#type' => 'select',
     '#title' => $element['#title'],
@@ -295,10 +296,10 @@ function optionwidgets_data2form($element, $items, $field) {
     }
   }
   if ($field['multiple'] || $element['#type'] == 'optionwidgets_onoff') {
-    return $keys;
+    return array($field_key => $keys);
   }
   else {
-    return reset($keys);
+    return array($field_key => reset($keys));
   }
 }
 
