@@ -397,7 +397,7 @@ function nodereference_select_process($element, $edit, $form_state, $form) {
   $field_key  = $element['#columns'][0];
   $element[$field_key] = array(
     '#type' => 'optionwidgets_select',
-    '#default_value' => isset($element['#value'][$field_key]) ? $element['#value'][$field_key] : '',
+    '#default_value' => isset($element['#value']) ? $element['#value'] : '',
     '#element_validate' => array('nodereference_select_validate'),
     '#after_build' => array('nodereference_after_build'),
 
