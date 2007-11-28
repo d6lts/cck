@@ -215,6 +215,12 @@ function optionwidgets_select_process($element, $edit, &$form_state, $form) {
 
   // Make sure field info will be available to the validator which
   // does not get the values in $form.
+
+  // TODO for some reason putting the $field array into $form_state['storage']
+  // causes the node's hook_form_alter to be invoked twice, garbling the
+  // results. Need to investigate why that is happening (a core bug?), but
+  // in the meantime avoid using $form_state['storage'] to store anything.
+
   $form_state['#field_info'][$field['field_name']] = $field;
   $element['#element_validate'][] = 'optionwidgets_validate';
   return $element;
