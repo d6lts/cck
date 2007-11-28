@@ -273,9 +273,13 @@ function userreference_select_process($element, $edit, $form_state, $form) {
     '#type' => 'optionwidgets_select',
     '#default_value' => isset($element['#value'][$field_key]) ? $element['#value'][$field_key] : '',
     '#element_validate' => array('userreference_select_validate'),
+
+    // The following values were set by the content module and need
+    // to be passed down to the nested element.
     '#field_name' => $element['#field_name'],
     '#delta' => $element['#delta'],
     '#columns' => $element['#columns'],
+    '#title' => $element['#title'],
   );
   return $element;
 }
@@ -303,9 +307,13 @@ function userreference_autocomplete_process($element, $edit, $form_state, $form)
     '#default_value' => array($field_key => $value),
     '#autocomplete_path' => 'user/autocomplete',
     '#element_validate' => array('userreference_autocomplete_validate'),
+
+    // The following values were set by the content module and need
+    // to be passed down to the nested element.
     '#field_name' => $element['#field_name'],
     '#delta' => $element['#delta'],
     '#columns' => $element['#columns'],
+    '#title' => $element['#title'],
   );
   return $element;
 }

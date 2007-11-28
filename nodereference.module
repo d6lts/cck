@@ -399,9 +399,13 @@ function nodereference_select_process($element, $edit, $form_state, $form) {
     '#type' => 'optionwidgets_select',
     '#default_value' => isset($element['#value'][$field_key]) ? $element['#value'][$field_key] : '',
     '#element_validate' => array('nodereference_select_validate'),
+
+    // The following values were set by the content module and need
+    // to be passed down to the nested element.
     '#field_name' => $element['#field_name'],
     '#delta' => $element['#delta'],
     '#columns' => $element['#columns'],
+    '#title' => $element['#title'],
   );
   return $element;
 }
@@ -431,9 +435,13 @@ function nodereference_autocomplete_process($element, $edit, $form_state, $form)
     '#default_value' => array($field_key => $value),
     '#autocomplete_path' => 'nodereference/autocomplete/'. $field['field_name'],
     '#element_validate' => array('nodereference_autocomplete_validate'),
+
+    // The following values were set by the content module and need
+    // to be passed down to the nested element.
     '#field_name' => $element['#field_name'],
     '#delta' => $element['#delta'],
     '#columns' => $element['#columns'],
+    '#title' => $element['#title'],
   );
   return $element;
 }
