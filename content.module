@@ -775,7 +775,6 @@ function _content_sort_items_helper($a, $b) {
 function content_storage($op, $node) {
   $type_name = $node->type;
   $type = content_types($type_name);
-
   switch ($op) {
     case 'load':
       // OPTIMIZE : load all non multiple fields in a single JOIN query ?
@@ -820,11 +819,11 @@ function content_storage($op, $node) {
         $record = array();
         foreach ($schema['content fields'] as $field_name) {
           $field = content_fields($field_name, $type_name);
-          $db_info = content_database_info($field);
           // Multiple fields need specific handling, we'll deal with them later on.
           if ($field['multiple']) {
             continue;
           }
+          $db_info = content_database_info($field);
           foreach ($db_info['columns'] as $column => $attributes) {
             $record[$attributes['column']] = $node->{$field_name}[0][$column];
           }
@@ -1037,12 +1036,12 @@ function _content_widget_types() {
 function _content_type_info($reset = FALSE) {
   static $info;
 
-  // Make sure this function doesn't run until the tables have been created,
-  // for instance, when first enabled and called from content_menu().
-  if (!db_table_exists(content_field_tablename()) || !db_table_exists(content_instance_tablename())) {
-      return array();
-  }
   if ($reset || !isset($info)) {
+    // Make sure this function doesn't run until the tables have been created,
+    // for instance, when first enabled and called from content_menu().
+    if (!db_table_exists(content_field_tablename()) || !db_table_exists(content_instance_tablename())) {
+        return array();
+    }
     if ($cached = cache_get('content_type_info', content_cache_tablename())) {
       $info = $cached->data;
     }
@@ -1390,7 +1389,7 @@ function content_instance_tablename($version = NULL) {
  *
  * Needed because the table name changes depending on version.
  */function content_cache_tablename() {
-  if (!db_table_exists('cache_content')) {
+  if (variable_get('content_schema_version', -1) < 1008) {
     return 'cache';
   }
   else {

@@ -5,7 +5,7 @@
  * Implementation of hook_install().
  */
 function content_install() {
-  variable_set('content_schema_version', 6001);
+  variable_set('content_schema_version', 6002);
   drupal_install_schema('content');
 }
 
@@ -229,6 +229,7 @@ function content_update_6002() {
       }
     }
   }
+  variable_set('content_schema_version', 6002);
   content_clear_type_cache(TRUE);
   return $ret;
 }
