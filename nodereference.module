@@ -371,16 +371,14 @@ function nodereference_widget(&$form, &$form_state, $field, $items, $delta = 0) 
  * Substitute in the node title for the node nid.
  */
 function nodereference_autocomplete_value($element, $edit = FALSE) {
-  if (func_num_args() == 1) {
-    $field_key  = $element['#columns'][0];
-    if (!empty($element['#default_value'][$field_key])) {
-      $nid = $element['#default_value'][$field_key];
-      $value = db_result(db_query(db_rewrite_sql('SELECT n.title FROM {node} n WHERE n.nid = %d'), $nid));
-      $value .= ' [nid:'. $nid .']';
-      return array($field_key => $value);
-    }
-    return array($field_key => NULL);
+  $field_key  = $element['#columns'][0];
+  if (!empty($element['#default_value'][$field_key])) {
+    $nid = $element['#default_value'][$field_key];
+    $value = db_result(db_query(db_rewrite_sql('SELECT n.title FROM {node} n WHERE n.nid = %d'), $nid));
+    $value .= ' [nid:'. $nid .']';
+    return array($field_key => $value);
   }
+  return array($field_key => NULL);
 }
 
 /**
@@ -400,7 +398,6 @@ function nodereference_select_process($element, $edit, $form_state, $form) {
     '#type' => 'optionwidgets_select',
     '#default_value' => isset($element['#value']) ? $element['#value'] : '',
     '#element_validate' => array('nodereference_select_validate'),
-    '#after_build' => array('nodereference_after_build'),
 
     // The following values were set by the content module and need
     // to be passed down to the nested element.
@@ -432,7 +429,6 @@ function nodereference_autocomplete_process($element, $edit, $form_state, $form)
     '#default_value' => isset($element['#value']) ? $element['#value'] : '',
     '#autocomplete_path' => 'nodereference/autocomplete/'. $field['field_name'],
     '#element_validate' => array('nodereference_autocomplete_validate'),
-    '#after_build' => array('nodereference_after_build'),
 
     // The following values were set by the content module and need
     // to be passed down to the nested element.
@@ -445,17 +441,12 @@ function nodereference_autocomplete_process($element, $edit, $form_state, $form)
 }
 
 /**
- * Afterbuild adjustment of the element.
+ * Validate an select element.
  *
  * Remove the wrapper layer and set the right element's value.
- * Since we nested two elements, we ended up with a value like
- * $element['#parents'][...]['nid']['nid'] and we need to make it back
- * into $element['#parents'][...]['nid'].
  */
-function nodereference_after_build($element, &$form_state) {
-  array_pop($element['#parents']);
-  array_pop($element['#array_parents']);
-  return $element;
+function nodereference_select_validate($element, &$form_state) {
+  form_set_value($element, $element['#value'][$field_key]);
 }
 
 /**
@@ -469,7 +460,6 @@ function nodereference_autocomplete_validate($element, &$form_state) {
   $field_key  = $element['#columns'][0];
   $delta = $element['#delta'];
   $value = $element['#value'][$field_key];
-
   $nid = NULL;
   if (!empty($value)) {
     preg_match('/^(?:\s*|(.*) )?\[\s*nid\s*:\s*(\d+)\s*\]$/', $value, $matches);

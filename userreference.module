@@ -262,14 +262,12 @@ function userreference_widget(&$form, &$form_state, $field, $items, $delta = 0) 
  * Substitute in the user name for the uid.
  */
 function userreference_autocomplete_value($element, $edit = FALSE) {
-  if (func_num_args() == 1) {
-    $field_key  = $element['#columns'][0];
-    if (!empty($element['#default_value'][$field_key])) {
-      $value = $value = db_result(db_query("SELECT name FROM {users} WHERE uid = '%d'", $element['#default_value'][$field_key]));
-      return array($field_key => $value);
-    }
-    return array($field_key => NULL);
+  $field_key  = $element['#columns'][0];
+  if (!empty($element['#default_value'][$field_key])) {
+    $value = $value = db_result(db_query("SELECT name FROM {users} WHERE uid = '%d'", $element['#default_value'][$field_key]));
+    return array($field_key => $value);
   }
+  return array($field_key => NULL);
 }
 
 /**
@@ -289,7 +287,6 @@ function userreference_select_process($element, $edit, $form_state, $form) {
     '#type' => 'optionwidgets_select',
     '#default_value' => isset($element['#value']) ? $element['#value'] : '',
     '#element_validate' => array('userreference_select_validate'),
-    '#after_build' => array('userreference_after_build'),
 
     // The following values were set by the content module and need
     // to be passed down to the nested element.
@@ -320,7 +317,6 @@ function userreference_autocomplete_process($element, $edit, $form_state, $form)
     '#default_value' => isset($element['#value']) ? $element['#value'] : '',
     '#autocomplete_path' => 'user/autocomplete',
     '#element_validate' => array('userreference_autocomplete_validate'),
-    '#after_build' => array('userreference_after_build'),
 
     // The following values were set by the content module and need
     // to be passed down to the nested element.
@@ -336,13 +332,9 @@ function userreference_autocomplete_process($element, $edit, $form_state, $form)
  * Afterbuild adjustment of the element.
  *
  * Remove the wrapper layer and set the right element's value.
- * Since we nested two elements, we ended up with a value like
- * $element['#parents'][...]['nid']['nid'] and we need to make it back
- * into $element['#parents'][...]['nid'].
  */
-function userreference_after_build($element, &$form_state) {
-  array_pop($element['#parents']);
-  array_pop($element['#array_parents']);
+function userreference_select_validate($element, &$form_state) {
+  form_set_value($element, $element['#value'][$field_key]);
   return $element;
 }
 
