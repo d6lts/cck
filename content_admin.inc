@@ -496,7 +496,8 @@ function _content_admin_field_add_new(&$form_state, $type_name, $new_field_name 
       '#title' => t('Field name'),
       '#type' => 'textfield',
       '#default_value' => $new_field_name,
-      '#description' => t('The machine-readable name of the field. This name cannot be changed later! The name must be prefixed with \'field_\' and can include lowercase unaccentuated letters, numbers, and underscores. You\'ll be able to choose a human-readable label for the field on next page'),
+      '#field_prefix' => 'field_',
+      '#description' => t('The machine-readable name of the field. This name cannot be changed later! The name will be prefixed with \'field_\' and can include lowercase unaccentuated letters, numbers, and underscores. You\'ll be able to choose a human-readable label for the field on next page'),
       '#required' => TRUE,
     );
     $form['new']['field_widget_type'] = array(
@@ -567,18 +568,12 @@ function _content_admin_field_add_existing_submit($form, &$form_state) {
  *  Field name validation.
  */
 function _content_admin_field_add_new_validate($form, &$form_state) {
+  // Add the 'field_' prefix.
+  form_set_value($form['new']['field']['field_name'], 'field_'. $form_state['values']['field_name'], $form_state);
+
   $form_values = $form_state['values'];
-  $fields = content_fields();
-  $field_name = $form_values['field_name'];
-  if (empty($form_values['field_name'])) {
-    form_set_error('field_name', t('The field name is required!'));
-  }
-  elseif (array_key_exists($field_name, $fields)) {
+  if (array_key_exists($form_values['field_name'], content_fields())) {
     form_set_error('field_name', t('The field name %field_name already exists.', array(
-      '%field_name' => $form_values['field_name'])));
-  }
-  elseif (!preg_match('!^field_[a-z0-9_]+$!', $form_values['field_name'])) {
-    form_set_error('field_name', t('The field name %field_name is invalid. The name must be prefixed with \'field_\' and include only lowercase unaccentuated letters, numbers, and underscores.', array(
       '%field_name' => $form_values['field_name'])));
   }
   elseif ($form_values['field_name'] == 'field_instance') {
@@ -609,7 +604,7 @@ function _content_admin_field_add_new_submit($form, &$form_state) {
 
   $type   = content_types($form_values['type_name']);
   $form_state['redirect'] = 'admin/content/types/'. $type['url_str'] .'/fields/'. $form_values['field_name'];
-  }
+}
 
 /**
  * Menu callback; present a form for removing a field from a content type.
@@ -967,10 +962,9 @@ function _content_admin_field_submit($form, &$form_state) {
  * then alter the schema.
  *
  * Set $url if calling from outside FAPI, as when calling from an update.
- *
+ * Warning : this will end the execution and redirect to a batch processing page.
  */
 function content_alter_schema($previous_field, $new_field, $url = NULL) {
-
   // See what values need to be updated in the field data.
   $mask = content_alter_db_mask($previous_field, $new_field);
 
@@ -1078,22 +1072,22 @@ function content_alter_db_analyze($previous_field, $new_field) {
  * some columns still have values, so all these things need to be tested.
  */
 function content_alter_db_mask($previous_field, $new_field) {
-
   // Get an array of column values that will be dropped by this
   // schema change and create a mask to feed to content_batch_update.
-  $dropped_columns = content_alter_db_analyze($previous_field, $new_field);
-  if (empty($dropped_columns)) {
+
+  $dropped = content_alter_db_analyze($previous_field, $new_field);
+  if (empty($dropped)) {
     return array();
   }
   $mask = array();
   $alt_mask = array();
   foreach ($previous_field['columns'] as $column_name => $column) {
-    // The basic mask will ampty the dropped columns.
-    if (in_array($column_name, $dropped_columns)) {
+    // The basic mask will empty the dropped columns.
+    if (in_array($column_name, $dropped['columns'])) {
       $mask[$column_name] = NULL;
     }
     // Over the delta we'll empty all columns.
-    if (isset($dropped_columns['delta'])) {
+    if (isset($dropped['delta'])) {
       $alt_mask[$column_name] = NULL;
     }
   }
@@ -1101,8 +1095,8 @@ function content_alter_db_mask($previous_field, $new_field) {
   if (isset($alt_mask)) {
     $mask['alt_mask'] = $alt_mask;
   }
-  if (isset($dropped_columns['delta'])) {
-    $mask['delta'] = $dropped_columns['delta'];
+  if (isset($dropped['delta'])) {
+    $mask['delta'] = $dropped['delta'];
   }
   return $mask;
 }
@@ -1119,9 +1113,9 @@ function content_alter_db($previous_field, $new_field) {
     return $ret;
   }
 
+  // Gather relevant information : schema, table name...
   $previous_schema = !empty($previous_field) ? content_table_schema($previous_field) : array();
   $new_schema = !empty($new_field) ? content_table_schema($new_field) : array();
-
   if (!empty($previous_field)) {
     $previous_db_info = content_database_info($previous_field);
     $previous_table = $previous_db_info['table'];
@@ -1283,6 +1277,7 @@ function content_alter_db($previous_field, $new_field) {
       }
     }
   }
+
   return content_alter_db_cleanup($ret);
 }
 
@@ -1318,7 +1313,7 @@ function content_alter_db_cleanup($ret) {
  *   $mask is an array that contains a delta and two masks, a default mask
  *   to apply to values under the delta and an alternate mask to apply to
  *   values at or over the delta. The mask should contain only the column
- *   values to  be substituted in. It will be merged into the existing column
+ *   values to be substituted in. It will be merged into the existing column
  *   values to replace only the columns in the mask, leaving all other columns
  *   unchanged.
  *
@@ -1334,7 +1329,7 @@ function content_alter_db_cleanup($ret) {
  *      // one mask to the other.
  */
 function content_mask_batch_update($field, $mask, &$context) {
-  if(empty($field)) {
+  if (empty($field)) {
     $context['finished'] = 1;
     return;
   }
