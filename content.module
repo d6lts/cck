@@ -269,6 +269,7 @@ function content_field_form(&$form, &$form_state, $field, $get_delta = NULL) {
         }
       }
     }
+
     // If content module handles multiple values for this form element,
     // and not selecting an individual $delta, process the multiple value form.
     if (!isset($get_delta) && content_handle('widget', 'multiple values', $field) == CONTENT_HANDLE_CORE) {
@@ -302,7 +303,6 @@ function content_field_form(&$form, &$form_state, $field, $get_delta = NULL) {
         '#count' => sizeof($form_element),
       );
       $addition[$field['field_name']] = array_merge($form_element, $defaults);
-
     }
   }
   return $addition;
@@ -775,6 +775,7 @@ function _content_sort_items_helper($a, $b) {
 function content_storage($op, $node) {
   $type_name = $node->type;
   $type = content_types($type_name);
+
   switch ($op) {
     case 'load':
       // OPTIMIZE : load all non multiple fields in a single JOIN query ?
@@ -1128,7 +1129,6 @@ function content_node_type($op, $info) {
 function content_clear_type_cache($with_schema = FALSE) {
 
   cache_clear_all('content_type_info', content_cache_tablename());
-
   _content_type_info(TRUE);
 
   // Refresh the schema to pick up new information.
@@ -1388,7 +1388,8 @@ function content_instance_tablename($version = NULL) {
  * Generate table name for the content cache table.
  *
  * Needed because the table name changes depending on version.
- */function content_cache_tablename() {
+ */
+function content_cache_tablename() {
   if (variable_get('content_schema_version', -1) < 1008) {
     return 'cache';
   }
@@ -1400,6 +1401,7 @@ function content_instance_tablename($version = NULL) {
 /**
  * A basic schema used by all field and type tables.
  *
+ * This will only add the columns relevant for the specified field.
  * Leave $field['columns'] empty to get only the base schema,
  * otherwise the function will return the whole thing.
  */
@@ -1411,26 +1413,29 @@ function content_table_schema($field = NULL) {
     ),
     'primary key' => array('vid'),
   );
+
+  // Add delta column if needed.
   if (!empty($field['multiple'])) {
     $schema['fields']['delta'] = array('type' => 'int', 'unsigned' => TRUE, 'not null' => TRUE, 'default' => 0);
     $schema['primary key'][] = 'delta';
   }
   $schema['content fields'] = array();
 
+  // Add field columns column if needed.
   // This function is called from install files where it is not safe
   // to use content_fields() or content_database_info(), so we
   // just used the column values stored in the $field.
-
   // We also need the schema to include fields from disabled modules
   // or there will be no way to delete those fields.
+
   if (!empty($field['columns'])) {
     foreach ($field['columns'] as $column => $attributes) {
       $column_name =  $field['field_name'] .'_'. $column;
       unset($attributes['column']);
       unset($attributes['sortable']);
       $schema['fields'][$column_name] = $attributes;
-      $schema['content fields'][] = $field['field_name'];
     }
+    $schema['content fields'][] = $field['field_name'];
   }
   return $schema;
 }
