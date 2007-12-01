@@ -2,6 +2,14 @@
 
 5--1.x
 ======
+Features
+--------
+
+General
+
+Field / Widget modules
+- #131260  Allow userreference to filter by active/blocked status.
+
 
 Bugfix
 ------
@@ -10,6 +18,7 @@ General
 - Include views module in content_clear_type_cache() to prevent errors when this is called from .install files.
 
 Field / widget modules
+- #196575  Userreference autocomplete did not filter users by role, need custom autocomplete instead of standard user autocomplete.
 - #183816  Fix missing decimal in number formatter.
 - #140687  OptionWidgets : fix 'single checkbox' stick on checked when used with text values.
 
