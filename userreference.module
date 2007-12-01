@@ -378,14 +378,27 @@ function userreference_user($op, &$edit, &$account, $category = NULL) {
       // find cck userreference field tables
       // search through them for matching user ids and load those nodes
       $additions = array();
-      $result = db_query("SELECT * FROM {node_field} nf INNER JOIN {node_field_instance} ni ON nf.field_name = ni.field_name WHERE nf.type='userreference'");
-      while ($field = db_fetch_array($result)) {
-        $settings = unserialize($field['widget_settings']);
-        $db_info = content_database_info($field);
-        $ids = db_query("SELECT DISTINCT(nid) FROM {". $db_info['table'] ."} WHERE ". $db_info['columns']['uid']['column'] ."=". $account->uid);
+      $types = content_types();
+
+      // Find the table and columns to search through, if the same
+      // table comes up in more than one content type, we only need
+      // to search it once.
+      $search_tables = array();
+      $search_links = array();
+      foreach ($types as $type_name => $type) {
+        foreach($type['fields'] as $field) {
+          if ($field['type'] == 'userreference') {
+            $db_info = content_database_info($field);
+            $search_tables[$db_info['table']] = $db_info['columns']['uid']['column'];
+            $search_links[$db_info['table']] = $field['widget']['reverse_link'];
+          }
+        }
+      }
+      foreach ($search_tables as $table => $column) {
+        $ids = db_query("SELECT DISTINCT(nid) FROM {". $table ."} WHERE ". $column ."=". $account->uid);
         while ($data = db_fetch_object($ids)) {
           $node = node_load($data->nid);
-          $node->reverse_link = $settings['reverse_link'];
+          $node->reverse_link = $search_links[$table];
           $additions[$node->type][] = $node;
         }
       }
@@ -395,6 +408,7 @@ function userreference_user($op, &$edit, &$account, $category = NULL) {
 
     case 'view':
       $node_types = (array) content_types();
+      $values = array();
       $links = array();
       foreach ($account->content as $node_type => $nodes) {
         $links[$node_type] = array('title' => $node_types[$node_type]['label']);
