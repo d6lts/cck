@@ -494,15 +494,16 @@ function userreference_user($op, &$edit, &$account, $category = NULL) {
       // find cck userreference field tables
       // search through them for matching user ids and load those nodes
       $additions = array();
-      $result = db_query("SELECT * FROM {node_field} nf INNER JOIN {node_field_instance} ni ON nf.field_name = ni.field_name WHERE nf.type='userreference'");
-      while ($field = db_fetch_array($result)) {
-        $settings = unserialize($field['widget_settings']);
-        $db_info = content_database_info($field);
-        $ids = db_query("SELECT DISTINCT(nid) FROM {". $db_info['table'] ."} WHERE ". $db_info['columns']['uid']['column'] ."=". $account->uid);
-        while ($data = db_fetch_object($ids)) {
-          $node = node_load($data->nid);
-          $node->reverse_link = $settings['reverse_link'];
-          $additions[$node->type][] = $node;
+      $fields = content_fields();
+      foreach($fields as $field) {
+        if ($field['type'] == 'userreference') {
+          $db_info = content_database_info($field);
+          $ids = db_query("SELECT DISTINCT(nid) FROM {". $db_info['table'] ."} WHERE ". $db_info['columns']['uid']['column'] ."=". $account->uid);
+          while ($data = db_fetch_object($ids)) {
+            $node = node_load($data->nid);
+            $node->reverse_link = $settings['reverse_link'];
+            $additions[$node->type][] = $node;
+          }
         }
       }
       $account->content = $additions;
