@@ -523,6 +523,9 @@ function userreference_user($type, &$edit, &$account) {
       break;
 
     case 'view':
+      if (empty($account->userreference)) {
+        return;
+      }
       $node_types = (array) content_types();
       $links = array();
       $account->content['userreference'] = array(
