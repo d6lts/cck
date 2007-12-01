@@ -7,6 +7,20 @@
  */
 
 /**
+ * Implementation of hook_menu().
+ */
+function userreference_menu() {
+  $items = array();
+  $items['userreference/autocomplete'] = array(
+    'title' => t('Userreference autocomplete'),
+    'page callback' => 'userreference_autocomplete',
+    'access arguments' => array('access content'),
+    'type' => MENU_CALLBACK
+  );
+  return $items;
+}
+
+/**
  * Implementation of hook_theme().
  */
 function userreference_theme() {
@@ -49,13 +63,19 @@ function userreference_field_settings($op, $field) {
       $form['referenceable_roles'] = array(
         '#type' => 'checkboxes',
         '#title' => t('User roles that can be referenced'),
-        '#default_value' => is_array($field['referenceable_roles']) ? $field['referenceable_roles'] : array(),
+        '#default_value' => is_array($field['referenceable_roles']) ? array_filter($field['referenceable_roles']) : array(),
         '#options' => user_roles(1),
+      );
+      $form['referenceable_status'] = array(
+        '#type' => 'checkboxes',
+        '#title' => t('User status that can be referenced'),
+        '#default_value' => is_array($field['referenceable_status']) ? array_filter($field['referenceable_status']) : array(1),
+        '#options' => array(1 => t('Active'), 0 => t('Blocked')),
       );
       return $form;
 
     case 'save':
-      return array('referenceable_roles');
+      return array('referenceable_roles', 'referenceable_status');
 
     case 'database columns':
       $columns = array(
@@ -312,10 +332,11 @@ function userreference_autocomplete_process($element, $edit, $form_state, $form)
   // path and some extra processing to it.
   // Add a validation step where the value can be unwrapped.
   $field_key  = $element['#columns'][0];
+
   $element[$field_key] = array(
     '#type' => 'text_textfield',
     '#default_value' => isset($element['#value']) ? $element['#value'] : '',
-    '#autocomplete_path' => 'user/autocomplete',
+    '#autocomplete_path' => 'userreference/autocomplete/'. $element['#field_name'],
     '#element_validate' => array('userreference_autocomplete_validate'),
 
     // The following values were set by the content module and need
@@ -334,7 +355,8 @@ function userreference_autocomplete_process($element, $edit, $form_state, $form)
  * Remove the wrapper layer and set the right element's value.
  */
 function userreference_select_validate($element, &$form_state) {
-  form_set_value($element, $element['#value'][$field_key]);
+  $field_key  = $element['#columns'][0];
+  form_set_value($element, $element['#value'][$field_key], $form_state);
   return $element;
 }
 
@@ -345,9 +367,10 @@ function userreference_select_validate($element, &$form_state) {
  */
 function userreference_autocomplete_validate($element, &$form_state) {
   $field_key  = $element['#columns'][0];
-  $uid = $element['#value'][$field_key];
-  if (!empty($uid)) {
-    $uid = db_result(db_query("SELECT uid FROM {users} WHERE name = '%s'", $uid));
+  $user = $element['#value'][$field_key];
+  $uid = NULL;
+  if (!empty($user)) {
+    $uid = db_result(db_query("SELECT uid FROM {users} WHERE name = '%s'", $user));
   }
   form_set_value($element, $uid, $form_state);
 }
@@ -364,9 +387,37 @@ function userreference_allowed_values($field) {
 }
 
 /**
+ * Menu callback; Retrieve a pipe delimited string of autocomplete suggestions for existing users
+ */
+function userreference_autocomplete($field_name, $string = '') {
+  $fields = content_fields();
+  $field = $fields[$field_name];
+
+  $matches = array();
+  if ($string) {
+    foreach (_userreference_potential_references($field, $string) as $uid => $name) {
+      $matches[$name] = check_plain($name);
+    }
+  }
+  drupal_json($matches);
+}
+
+/**
  * Fetch an array of all candidate referenced users, for use in presenting the selection form to the user.
  */
-function _userreference_potential_references($field) {
+function _userreference_potential_references($field, $string = '') {
+  $where = array();
+  $args = array();
+  $join = array();
+
+  if (!empty($string)) {
+    $where[] = "LOWER(name) LIKE LOWER('%s%%')";
+    $args[] = $string;
+  }
+  else {
+    $where[] = "u.uid > 0";
+  }
+
   $roles = array();
   if (isset($field['referenceable_roles']) && is_array($field['referenceable_roles'])) {
     // keep only selected checkboxes
@@ -374,14 +425,25 @@ function _userreference_potential_references($field) {
     // filter invalid values that seems to get through sometimes ??
     $roles = array_intersect(array_keys(user_roles(1)), $roles);
   }
-  if (empty($roles) || in_array(DRUPAL_AUTHENTICATED_RID, $roles)) {
-    $result = db_query('SELECT u.name, u.uid FROM {users} u WHERE uid > 0 ORDER BY u.name ASC');
+  if (!empty($roles) && !in_array(DRUPAL_AUTHENTICATED_RID, $roles)) {
+    $where[] = "r.rid IN (". implode($roles, ',') .")";
+    $join[] = 'LEFT JOIN {users_roles} r ON u.uid = r.uid';
   }
-  else {
-    $result = db_query('SELECT u.name, u.uid FROM {users} u LEFT JOIN {users_roles} r ON u.uid = r.uid WHERE u.uid > 0 AND r.rid IN ('. implode($roles, ',') .') ORDER BY u.name ASC');
+
+  $status = array();
+  if (isset($field['referenceable_status']) && is_array($field['referenceable_status'])) {
+    // keep only selected checkboxes
+    $status = array_filter($field['referenceable_status']);
+  }
+  if (!empty($status)) {
+    // Limit query if only one status should be referenced.
+    if (count($status) == 1) {
+      $where[] = "u.status = ". array_pop($status);
+    }
   }
 
   $users = array();
+  $result = db_query('SELECT u.name, u.uid FROM {users} u '. implode(' ', $join) .' WHERE '. implode(' AND ', $where) .' ORDER BY u.name ASC', $args);
   while ($user = db_fetch_object($result)) {
     $users[$user->uid] = $user->name;
   }
