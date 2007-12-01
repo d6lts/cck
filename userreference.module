@@ -487,9 +487,8 @@ function _userreference_filter_handler($op, $filterinfo) {
 /**
  * Implementation of hook_user().
  */
-function userreference_user($op, &$edit, &$account, $category = NULL) {
-
-  switch ($op) {
+function userreference_user($type, &$edit, &$account) {
+  switch ($type) {
     case 'load':
       // find cck userreference field tables
       // search through them for matching user ids and load those nodes
@@ -518,23 +517,32 @@ function userreference_user($op, &$edit, &$account, $category = NULL) {
           $additions[$node->type][] = $node;
         }
       }
-      $account->content = $additions;
+      $account->userreference = $additions;
       return;
       break;
 
     case 'view':
       $node_types = (array) content_types();
       $links = array();
-      foreach ($account->content as $node_type => $nodes) {
-        $links[$node_type] = array('title' => $node_types[$node_type]['label']);
+      $account->content['userreference'] = array(
+        '#type' => 'user_profile_category',
+        '#attributes' => array('class' => 'user-member'),
+        '#title' => t('Related Content'),
+        '#weight' => 10,
+      );
+      foreach ($account->userreference as $node_type => $nodes) {
+        $values = array();
         foreach ($nodes as $node) {
           if ($node->reverse_link) {
             $values[] = l($node->title, 'node/'. $node->nid);
           }
         }
-        $links[$node->type]['value'] = '<ul><li>'. implode('</li><li>', $values) .'</li></ul>';
+        $account->content['userreference'][] =  array(
+          '#type' => 'user_profile_item',
+          '#title' => $node_types[$node_type]['name'],
+          '#value' => theme('item_list', $values),
+        );
       }
-      return array(t('Related Content') => $links);
       break;
   }
 }
