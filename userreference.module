@@ -226,6 +226,30 @@ function userreference_elements() {
 }
 
 /**
+ * Implementation of hook_widget_settings().
+ */
+function userreference_widget_settings($op, $field) {
+  switch ($op) {
+    case 'form':
+      $form = array();
+      $form['reverse_link'] = array(
+        '#type' => 'radios',
+        '#title' => t('Reverse Link'),
+        '#default_value' => isset($field['reverse_link']) ? $field['reverse_link'] : 0,
+        '#options' => array(0 => t('No'), 1 => t('Yes')),
+        '#required' => TRUE,
+        '#description' => t('If selected, a reverse link back to the referencing node will displayed on the referenced user record.'),
+      );
+      return $form;
+      break;
+
+    case 'save':
+      return array('reverse_link');
+      break;
+  }
+}
+
+/**
  * Implementation of hook_widget().
  *
  * Attach a single form element to the form. It will be built out and
@@ -457,6 +481,49 @@ function _userreference_filter_handler($op, $filterinfo) {
   $options = views_handler_filter_usercurrent();
   $options = $options + _userreference_potential_references($filterinfo['extra']['field']);
   return $options;
+}
+
+
+/**
+ * Implementation of hook_user().
+ */
+function userreference_user($op, &$edit, &$account, $category = NULL) {
+
+  switch ($op) {
+    case 'load':
+      // find cck userreference field tables
+      // search through them for matching user ids and load those nodes
+      $additions = array();
+      $result = db_query("SELECT * FROM {node_field} nf INNER JOIN {node_field_instance} ni ON nf.field_name = ni.field_name WHERE nf.type='userreference'");
+      while ($field = db_fetch_array($result)) {
+        $settings = unserialize($field['widget_settings']);
+        $db_info = content_database_info($field);
+        $ids = db_query("SELECT DISTINCT(nid) FROM {". $db_info['table'] ."} WHERE ". $db_info['columns']['uid']['column'] ."=". $account->uid);
+        while ($data = db_fetch_object($ids)) {
+          $node = node_load($data->nid);
+          $node->reverse_link = $settings['reverse_link'];
+          $additions[$node->type][] = $node;
+        }
+      }
+      $account->content = $additions;
+      return;
+      break;
+
+    case 'view':
+      $node_types = (array) content_types();
+      $links = array();
+      foreach ($account->content as $node_type => $nodes) {
+        $links[$node_type] = array('title' => $node_types[$node_type]['label']);
+        foreach ($nodes as $node) {
+          if ($node->reverse_link) {
+            $values[] = l($node->title, 'node/'. $node->nid);
+          }
+        }
+        $links[$node->type]['value'] = '<ul><li>'. implode('</li><li>', $values) .'</li></ul>';
+      }
+      return array(t('Related Content') => $links);
+      break;
+  }
 }
 
 /**
