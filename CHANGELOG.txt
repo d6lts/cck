@@ -8,6 +8,7 @@ Features
 General
 
 Field / Widget modules
+- #60713   Add optional reverse link on user profile page for userreferenced users.
 - #131260  Allow userreference to filter by active/blocked status.
 
 
