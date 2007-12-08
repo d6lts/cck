@@ -27,6 +27,9 @@
  *   An array keyed by field type name. Each element of the array is an associative
  *   array with these keys and values:
  *   - "label": The human-readable label for the field type.
+ *
+ * IMPORTANT! - field and widget names will be truncated to 32 characters in
+ * the database and in internal arrays, like content_fields().
  */
 function hook_field_info() {
   return array(
@@ -307,6 +310,9 @@ function hook_field_formatter($field, $item, $formatter, $node) {
  *   - "label": The human-readable label for the widget.
  *   - "field types": An array of field type names that can be edited using
  *     this widget.
+ *
+ * IMPORTANT! - field and widget names will be truncated to 32 characters in
+ * the database and in internal arrays, like content_fields().
  */
 function hook_widget_info() {
   return array(

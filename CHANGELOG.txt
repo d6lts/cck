@@ -16,6 +16,7 @@ Bugfix
 ------
 
 General
+- #198420  Make sure internal field and widget names are truncated to 32 characters to match the database values.
 - Include views module in content_clear_type_cache() to prevent errors when this is called from .install files.
 
 Field / widget modules

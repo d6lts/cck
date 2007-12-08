@@ -739,17 +739,24 @@ function _content_type_info($reset = FALSE) {
         $module_field_types = module_invoke($module, 'field_info');
         if ($module_field_types) {
           foreach ($module_field_types as $name => $field_info) {
-            $info['field types'][$name] = $field_info;
-            $info['field types'][$name]['module'] = $module;
-            $info['field types'][$name]['formatters'] = array();
+            // Truncate names to match the value that is stored in the database.
+            $db_name = substr($name, 0, 32);
+            $info['field types'][$db_name] = $field_info;
+            $info['field types'][$db_name]['module'] = $module;
+            $info['field types'][$db_name]['formatters'] = array();
           }
         }
 
         $module_widgets = module_invoke($module, 'widget_info');
         if ($module_widgets) {
           foreach ($module_widgets as $name => $widget_info) {
-            $info['widget types'][$name] = $widget_info;
-            $info['widget types'][$name]['module'] = $module;
+            // Truncate names to match the value that is stored in the database.
+            $db_name = substr($name, 0, 32);
+            $info['widget types'][$db_name] = $widget_info;
+            $info['widget types'][$db_name]['module'] = $module;
+            foreach ($widget_info['field types'] as $delta => $type) {
+              $info['widget types'][$db_name][$delta] = substr($type, 0, 32);
+            }
           }
         }
       }
@@ -758,8 +765,10 @@ function _content_type_info($reset = FALSE) {
         if ($module_formatters) {
           foreach ($module_formatters as $name => $formatter_info) {
             foreach ($formatter_info['field types'] as $field_type) {
-              $info['field types'][$field_type]['formatters'][$name] = $formatter_info;
-              $info['field types'][$field_type]['formatters'][$name]['module'] = $module;
+              // Truncate names to match the value that is stored in the database.
+              $db_name = substr($field_type, 0, 32);
+              $info['field types'][$db_name]['formatters'][$name] = $formatter_info;
+              $info['field types'][$db_name]['formatters'][$name]['module'] = $module;
             }
           }
         }
