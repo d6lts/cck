@@ -1178,12 +1178,11 @@ function content_alter_db($previous_field, $new_field) {
   $migrate_columns = array_intersect_assoc($new_schema['fields'], $previous_schema['fields']);
   unset($migrate_columns['nid'], $migrate_columns['vid'], $migrate_columns['delta']);
 
-  // If we're going from one multiple value to another, and the new one
-  // is smaller than the old one, drop all delta values higher than the new
-  // maximum delta value. Not needed if the new multiple is unlimited.
-  if ($previous_field['multiple'] > 0 && $new_field['multiple'] > 1 &&
-  $new_field['multiple'] < $previous_field['multiple']){
-    db_query("DELETE FROM {". $new_table ."} WHERE delta >= ". $new_field['multiple']);
+  // If we're going from one multiple value a smaller one or to single,
+  // drop all delta values higher than the new maximum delta value.
+  // Not needed if the new multiple is unlimited.
+  if ($new_field['multiple'] < $previous_field['multiple'] && $new_field['multiple'] != 1){
+    db_query("DELETE FROM {". $new_table ."} WHERE delta >= ". max(1, $new_field['multiple']));
   }
 
   // If going from multiple to non-multiple, make sure the field tables have
