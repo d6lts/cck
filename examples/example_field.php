@@ -97,6 +97,9 @@ function text_theme() {
  *
  * If your module will provide its own Views tables or arguments,
  * change CONTENT_CALLBACK_DEFAULT to CONTENT_CALLBACK_CUSTOM.
+ *
+ * IMPORTANT! - field and widget names will be truncated to 32 characters in
+ * the database and in internal arrays, like content_fields().
  */
 function text_field_info() {
   return array(
@@ -394,6 +397,9 @@ function text_field_formatter($field, $item, $formatter, $node) {
  * They're included here just so this module can be used
  * as an example for custom modules that might do things
  * differently.
+ *
+ * IMPORTANT! - field and widget names will be truncated to 32 characters in
+ * the database and in internal arrays, like content_fields().
  */
 function text_widget_info() {
   return array(

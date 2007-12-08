@@ -422,12 +422,11 @@ function nodereference_autocomplete_process($element, $edit, $form_state, $form)
   // path and some extra processing to it.
   // Add a validation step where the value can be unwrapped.
   $field_key  = $element['#columns'][0];
-  $field = $form['#field_info'][$element['#field_name']];
 
   $element[$field_key] = array(
     '#type' => 'text_textfield',
     '#default_value' => isset($element['#value']) ? $element['#value'] : '',
-    '#autocomplete_path' => 'nodereference/autocomplete/'. $field['field_name'],
+    '#autocomplete_path' => 'nodereference/autocomplete/'. $element['#field_name'],
     '#element_validate' => array('nodereference_autocomplete_validate'),
 
     // The following values were set by the content module and need
