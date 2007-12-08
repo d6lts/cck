@@ -116,20 +116,25 @@ function content_schema() {
     $content_table = _content_tablename($field['type_name'], CONTENT_DB_STORAGE_PER_CONTENT_TYPE);
     $field_table = _content_tablename($field['field_name'], CONTENT_DB_STORAGE_PER_FIELD);
 
-    // We always add a 'per content type' table.
-    // TODO : is that really still needed ?
+
+    // We always add a 'per content type' table for each content type that
+    // has fields.
     if (!isset($schema[$content_table])) {
       $schema[$content_table] = content_table_schema();
     }
 
-    // Add the 'per field' table if needed.
-    if (!isset($schema[$field_table]) && $field['db_storage'] == CONTENT_DB_STORAGE_PER_FIELD) {
-      $schema[$field_table] = content_table_schema($field);
+    $base_schema = content_table_schema($field);
+    if ($field['db_storage'] == CONTENT_DB_STORAGE_PER_FIELD) {
+      // Per-field storage : add the 'per field' table if needed.
+      if (!isset($schema[$field_table])) {
+        $schema[$field_table] = $base_schema;
+      }
     }
     else {
-      $content_schema = content_table_schema($field);
-      $schema[$content_table]['fields'] = array_merge($schema[$content_table]['fields'], $content_schema['fields']);
-      $schema[$content_table]['content fields'] = array_merge($schema[$content_table]['content fields'], $content_schema['content fields']);
+      // Per-type storage : merge the information for the field
+      // in the existing table.
+      $schema[$content_table]['fields'] = array_merge($schema[$content_table]['fields'], $base_schema['fields']);
+      $schema[$content_table]['content fields'] = array_merge($schema[$content_table]['content fields'], $base_schema['content fields']);
     }
   }
   return $schema;
