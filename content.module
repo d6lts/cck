@@ -40,13 +40,31 @@ function content_init() {
   if (module_exists('pathauto')) {
     module_load_include('inc', 'content', 'content_pathauto');
   }
-  // When adding new content types and fields, a menu rebuild is needed,
-  // but sometimes it won't work right until other processes complete.
-  // This session variable provides a way to delay the rebuild until
-  // the next page load.
-  if (isset($_SESSION['content_menu_needs_rebuild'])) {
+  if (content_menu_needs_rebuild()) {
     content_clear_type_cache(TRUE);
     menu_rebuild();
+    content_menu_needs_rebuild(FALSE);
+  }
+}
+
+/**
+ * Flag / unflag the menus fo rebuilding, or read the current
+ * value of the flag.
+ *
+ * When adding new content types and fields, a menu rebuild is needed
+ * to update field paths, but sometimes it won't work right until
+ * other processes complete.
+ * We therefore store a flag in the session and actually rebuild on next
+ * page load (content_init()).
+ */
+function content_menu_needs_rebuild($rebuild = NULL) {
+  if (!isset($rebuild)) {
+    return isset($_SESSION['content_menu_needs_rebuild']);
+  }
+  elseif ($rebuild) {
+    $_SESSION['content_menu_needs_rebuild'] = TRUE;
+  }
+  else {
     unset($_SESSION['content_menu_needs_rebuild']);
   }
 }

@@ -475,7 +475,7 @@ function content_field_instance_delete($field_name, $type_name) {
     db_query("DELETE FROM {". content_field_tablename() ."} WHERE field_name = '%s'", $field['field_name']);
 
     // Deleted fields require a menu rebuild to remove all the field paths.
-    $_SESSION['content_menu_needs_rebuild'] = TRUE;
+    content_menu_needs_rebuild(TRUE);
   }
 
   // If only one instance remains, we may need to change the database
@@ -514,16 +514,12 @@ function content_module_delete($module) {
  * @param $info
  *   value supplied by hook_node_type()
  *
- * We need a menu rebuild to get the field tabs to display on the
- * new content type edit page.
- *
- * The function node_get_types() is still missing the new type at this point,
- * so no use to call content_clear_type_cache() or menu_rebuild() here. Instead
+ * node_get_types() is still missing the new type at this point, so no
+ * use to call content_clear_type_cache() or menu_rebuild() here. Instead
  * we set a flag to make sure it gets rebuilt on next page load.
- *
  */
 function content_type_create($info) {
-  $_SESSION['content_menu_needs_rebuild'] = TRUE;
+  content_menu_needs_rebuild(TRUE);
 }
 
 /**
@@ -549,7 +545,7 @@ function content_type_update($info) {
     }
   }
   // Reset all content type info and alter the menu paths.
-  $_SESSION['content_menu_needs_rebuild'] = TRUE;
+  content_menu_needs_rebuild(TRUE);
 }
 
 /**
@@ -570,6 +566,5 @@ function content_type_delete($info) {
     drupal_set_message(t('The content fields table %name has been deleted.', array('%name' => $table)));
   }
 
-  // Reset all content type info and remove the menu paths.
-  $_SESSION['content_menu_needs_rebuild'] = TRUE;
+  content_menu_needs_rebuild(TRUE);
 }
