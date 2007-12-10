@@ -98,21 +98,20 @@ function content_field_instance_expand($field) {
   }
   $field['widget'] = !empty($field['widget_settings']) ? $field['widget_settings'] : array();
   $field['widget']['label'] = !empty($field['label']) ? $field['label'] : $field['field_name'];
-  $field['widget']['type'] = !empty($field['widget_type']) ? $field['widget_type'] : NULL;
   $field['widget']['weight'] = !empty($field['weight']) ? $field['weight'] : 0;
   $field['widget']['description'] = !empty($field['description']) ? $field['description'] : NULL;
 
+  // Only fill in widget/module and widget/type if we do have valid information.
   if (!empty($field['widget_module'])) {
-    $widget_module = $field['widget_module'];
+    $field['widget']['module'] = $field['widget_module'];
   }
   elseif (!empty($field['widget_type'])) {
     $widget_types = _content_widget_types();
-    $widget_module = $widget_types[$field['widget_type']]['module'];
+    $field['widget']['module'] = $widget_types[$field['widget_type']]['module'];
   }
-  else {
-    $widget_module = NULL;
+  if (!empty($field['widget_type'])) {
+    $field['widget']['type'] = $field['widget_type'];
   }
-  $field['widget']['module'] = $widget_module;
 
   unset($field['widget_type']);
   unset($field['weight']);
@@ -197,9 +196,13 @@ function content_field_instance_create($field) {
     $prev_field = array('widget' => array());
   }
 
-  $default_values = content_field_default_values($field['type']);
-  $default_instance_values = content_instance_default_values($field['field_name'], $field['type_name'], $field['widget']['type']);
-  $default_values = content_field_instance_expand(array_merge($default_values, $default_instance_values));
+  // If we have a field type, we can build default values for this field type.
+  $default_values = array('widget' => array());
+  if (isset($field['type'])) {
+    $default_values = content_field_default_values($field['type']);
+    $default_instance_values = content_instance_default_values($field['field_name'], $field['type_name'], $field['widget']['type']);
+    $default_values = content_field_instance_expand(array_merge($default_values, $default_instance_values));
+  }
 
   // Merge default values, previous values, and current values to create
   // a complete field array.
