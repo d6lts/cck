@@ -222,17 +222,13 @@ function content_field_instance_create($field) {
   // Get a fresh copy of the column information whenever a field is created.
   $field['columns'] = (array) module_invoke($field['module'], 'field_settings', 'database columns', $field);
 
-  // If this is the first instance, create the field.
   if (empty($prev_field['widget']) || $prior_instances < 1) {
-
+    // If this is the first instance, create the field.
     $field['db_storage'] = $field['multiple'] > 0 ? CONTENT_DB_STORAGE_PER_FIELD : CONTENT_DB_STORAGE_PER_CONTENT_TYPE;
-
     _content_field_write($field, 'create');
-    $_SESSION['content_menu_needs_rebuild'] = TRUE;
-
-  // If the database storage has changed, update the field and previous instances.
-  } elseif (!empty($prev_field['widget']) && $prev_field['db_storage'] == CONTENT_DB_STORAGE_PER_CONTENT_TYPE && count($prior_instances) > 0) {
-
+  }
+  elseif (!empty($prev_field['widget']) && $prev_field['db_storage'] == CONTENT_DB_STORAGE_PER_CONTENT_TYPE && count($prior_instances) > 0) {
+    // If the database storage has changed, update the field and previous instances.
     $field['db_storage'] = CONTENT_DB_STORAGE_PER_FIELD;
 
     foreach ($prior_instances as $instance) {
@@ -256,6 +252,7 @@ function content_field_instance_create($field) {
   content_alter_schema(array(), $field);
 
   content_clear_type_cache(TRUE);
+  content_menu_needs_rebuild(TRUE);
 
   return $field;
 }
