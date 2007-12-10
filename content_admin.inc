@@ -505,7 +505,7 @@ function _content_admin_field_add_new(&$form_state, $type_name, $new_field_name 
       '#title' => t('Field type'),
       '#required' => TRUE,
       '#options' => $field_type_options,
-      '#default_value' => array(),
+      '#default_value' => NULL,
       '#theme' => 'content_admin_field_add_new_field_widget_type',
     );
 
