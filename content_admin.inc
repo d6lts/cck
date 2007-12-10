@@ -560,7 +560,7 @@ function _content_admin_field_add_existing_submit($form, &$form_state) {
     drupal_set_message(t('Added field %label.', array(
       '%label' => $form_values['field_name'])));
   }
-  $type   = content_types($form_values['type_name']);
+  $type = content_types($form_values['type_name']);
   $form_state['redirect'] = 'admin/content/types/'. $type['url_str'] .'/fields';
 }
 
@@ -1039,23 +1039,27 @@ function content_alter_db_analyze($previous_field, $new_field) {
     }
   }
 
-  $previous_schema = !empty($previous_field) ? content_table_schema($previous_field) : array();
-  $new_schema = !empty($new_field) ? content_table_schema($new_field) : array();
-
-  if (empty($new_schema['fields'])) {
-    // No new columns, will lose all columns for a field.
-    foreach ($previous_schema['fields'] as $column => $attributes) {
-      $dropped['columns'][] = $column;
-    }
+  // Analyze possible data loss from changes in field columns.
+  $previous_schema = !empty($previous_field) ? content_table_schema($previous_field) : array('fields' => array());
+  $new_schema = !empty($new_field) ? content_table_schema($new_field) : array('fields' => array());
+  $dropped_columns = array_diff(array_keys($previous_schema['fields']), array_keys($new_schema['fields']));
+  if ($dropped_columns) {
+    $dropped['columns'] = $dropped_columns;
   }
-  else {
-    // Check both old and new columns to see if we are deleting some columns for a field.
-    foreach ($previous_schema['fields'] as $column => $attributes) {
-      if (!isset($new_schema['fields'][$column])) {
-        $dropped['columns'][] = $column;
-      }
-    }
-  }
+//  if (empty($new_schema['fields'])) {
+//    // No new columns, will lose all columns for a field.
+//    foreach ($previous_schema['fields'] as $column => $attributes) {
+//      $dropped['columns'][] = $column;
+//    }
+//  }
+//  else {
+//    // Check both old and new columns to see if we are deleting some columns for a field.
+//    foreach ($previous_schema['fields'] as $column => $attributes) {
+//      if (!isset($new_schema['fields'][$column])) {
+//        $dropped['columns'][] = $column;
+//      }
+//    }
+//  }
 
   return $dropped;
 }
@@ -1079,21 +1083,16 @@ function content_alter_db_mask($previous_field, $new_field) {
   if (empty($dropped)) {
     return array();
   }
-  $mask = array();
-  $alt_mask = array();
-  foreach ($previous_field['columns'] as $column_name => $column) {
+  $mask = array('mask' => array());
+  foreach (array_keys($previous_field['columns']) as $column_name) {
     // The basic mask will empty the dropped columns.
-    if (in_array($column_name, $dropped['columns'])) {
-      $mask[$column_name] = NULL;
+    if (isset($dropped['columns']) && in_array($column_name, $dropped['columns'])) {
+      $mask['mask'][$column_name] = NULL;
     }
     // Over the delta we'll empty all columns.
     if (isset($dropped['delta'])) {
-      $alt_mask[$column_name] = NULL;
+      $mask['alt_mask'][$column_name] = NULL;
     }
-  }
-  $mask = array('mask' => $mask);
-  if (isset($alt_mask)) {
-    $mask['alt_mask'] = $alt_mask;
   }
   if (isset($dropped['delta'])) {
     $mask['delta'] = $dropped['delta'];
@@ -1140,7 +1139,7 @@ function content_alter_db($previous_field, $new_field) {
     return content_alter_db_cleanup($ret);
   }
 
-  // All content types need a content type table.
+  // All content types that have fields need a content type table.
   if (!empty($new_field)) {
     $base_tablename = _content_tablename($new_field['type_name'], CONTENT_DB_STORAGE_PER_CONTENT_TYPE);
     if (!db_table_exists($base_tablename)) {
@@ -1188,8 +1187,7 @@ function content_alter_db($previous_field, $new_field) {
   // If going from multiple to non-multiple, make sure the field tables have
   // the right database structure to accept migrated data.
   if ($new_field['db_storage'] == CONTENT_DB_STORAGE_PER_FIELD) {
-    if (count($previous_schema['fields']) &&
-    $previous_field['db_storage'] == CONTENT_DB_STORAGE_PER_FIELD) {
+    if ($previous_field['db_storage'] == CONTENT_DB_STORAGE_PER_FIELD && count($previous_schema['fields'])) {
       // Already using per-field storage; change multiplicity if needed.
       if ($previous_field['multiple'] > 0 && $new_field['multiple'] == 0) {
         db_drop_field($ret, $new_table, 'delta');
@@ -1364,12 +1362,7 @@ function content_mask_batch_update($field, $mask, &$context) {
 
     $items = isset($node->$field_name) ? $node->$field_name : array();
     foreach ($items as $delta => $value) {
-      if (isset($mask['delta']) && isset($mask['alt_mask']) && $delta >= $mask['delta']) {
-        $field_mask = $mask['alt_mask'];
-      }
-      else {
-        $field_mask = $mask['mask'];
-      }
+      $field_mask = (isset($mask['delta']) && isset($mask['alt_mask']) && $delta >= $mask['delta']) ? $mask['alt_mask'] : $mask['mask'];
       // Merge the mask into the field values to do the replacements.
       $items[$delta] = array_merge($items[$delta], $field_mask);
     }

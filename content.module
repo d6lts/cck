@@ -219,9 +219,6 @@ function content_load($node) {
 /**
  * Create fields' form for a content type.
  *
- * Widget_invoke() is gone, this is the only place the widget function
- * is called.
- *
  * Each field defines its own component of the content entry form, via its
  * chosen widget.
  */
@@ -241,9 +238,7 @@ function content_form(&$form, &$form_state) {
 /**
  * Create a separate form element for each field.
  *
- * Extracted from content_form() to make it possible to get a subform
- * for just a single field at a time.
- *
+ * // TODO : $count param ? not used anymore ?
  * Hook_widget() picks up two new values, $count and $delta, to help
  * widgets know what information to return since multiple values are
  * sometimes controlled by the content module.
@@ -580,8 +575,8 @@ function content_view(&$node, $teaser = FALSE, $page = FALSE) {
  * Generate field render arrays.
  */
 function content_prepare_translation(&$node) {
-  $default_additions = _content_field_invoke_default('prepare translation', $node);
-  $node = (object) array_merge((array) $node, $default_additions);
+  $additions = _content_field_invoke_default('prepare translation', $node);
+  $node = (object) array_merge((array) $node, $additions);
 }
 
 /**
@@ -674,6 +669,10 @@ function content_notify($op, $module) {
  * This implementation is special, as content.module does not define any field
  * types. Instead, this function gets called after the type-specific hook, and
  * takes care of default stuff common to all field types.
+ *
+ * Db-storage ops ('load', 'insert', 'update', 'delete', 'delete revisions')
+ * are not executed field by field, and are thus handled separately in
+ * content_storage.
  */
 function content_field($op, &$node, $field, &$items, $teaser, $page) {
   switch ($op) {
@@ -688,8 +687,7 @@ function content_field($op, &$node, $field, &$items, $teaser, $page) {
 
     case 'presave':
       // If there was an AHAH add more button in this field, don't save it.
-      // TODO : this is too late to do this : currently $items in hook_field('validate')
-      // contain the extraneous 'add more' element.
+      // TODO : is it still needed ?
       unset($items[$field['field_name']. '_add_more']);
 
       // If content module is handling multiple values, don't save empty items.
@@ -752,10 +750,10 @@ function content_field($op, &$node, $field, &$items, $teaser, $page) {
  *   returns emptied and adjusted item array
  */
 function content_set_empty($field, $items) {
-  $is_empty = $field['module'] .'_content_is_empty';
+  $function = $field['module'] .'_content_is_empty';
   $max_delta = $field['multiple'] > 1 ? $field['multiple'] : 0;
   foreach ((array) $items as $delta => $item) {
-    if ($is_empty($item, $field)) {
+    if ($function($item, $field)) {
       if ($delta <= $max_delta) {
         foreach (array_keys($field['columns']) as $column) {
           $items[$delta][$column] = NULL;
@@ -912,9 +910,7 @@ function _content_field_invoke($op, &$node, $teaser = NULL, $page = NULL) {
       $items = isset($node->$field['field_name']) ? $node->$field['field_name'] : array();
 
       // Make sure AHAH 'add more' button isn't sent to the fields for processing.
-      if (isset($items[$field['field_name'] .'_add_more'])) {
-        unset($items[$field['field_name'] .'_add_more']);
-      }
+      unset($items[$field['field_name'] .'_add_more']);
 
       $module = $field_types[$field['type']]['module'];
       $function = $module .'_field';
@@ -1157,13 +1153,12 @@ function content_node_type($op, $info) {
  * Clear the cache of content_types; called in several places when content
  * information is changed.
  */
-function content_clear_type_cache($with_schema = FALSE) {
-
+function content_clear_type_cache($rebuild_schema = FALSE) {
   cache_clear_all('content_type_info', content_cache_tablename());
   _content_type_info(TRUE);
 
   // Refresh the schema to pick up new information.
-  if ($with_schema) {
+  if ($rebuild_schema) {
     $schema = drupal_get_schema(NULL, TRUE);
   }
 
