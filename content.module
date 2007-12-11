@@ -1413,10 +1413,12 @@ function content_instance_tablename($version = NULL) {
 /**
  * Generate table name for the content cache table.
  *
- * Needed because the table name changes depending on version.
+ * Needed because the table name changes depending on version. Because of
+ * a new database column, the content_cache table will be unusable until
+ * update 6000 runs, so the cache table will be used instead.
  */
 function content_cache_tablename() {
-  if (variable_get('content_schema_version', -1) < 1008) {
+  if (variable_get('content_schema_version', -1) < 6000) {
     return 'cache';
   }
   else {

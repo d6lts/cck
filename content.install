@@ -182,6 +182,18 @@ function content_update_6000() {
     }
 
   }
+
+  // Fix the cache_content schema
+  if (db_table_exists('cache_content')) {
+    db_drop_table($ret, 'cache_content');
+  }
+  db_create_table($ret, 'cache_content', drupal_get_schema_unprocessed('system', 'cache'));
+  variable_set('content_schema_version', 6000);
+
+  // The cache table had to be used to store data until this update ran,
+  // so clear cache out now that we're switching back to the cache_content table.
+  $ret[] = update_sql('DELETE FROM {cache}');
+
   return $ret;
 }
 
