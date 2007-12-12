@@ -112,6 +112,17 @@ function content_menu() {
         'type' => MENU_LOCAL_TASK,
         'weight' => 1,
       );
+      // TODO : temporary (until drag-n-drop does work)
+      $items['admin/content/types/'. $type_url_str .'/fields_dnd'] = array(
+        'title' => 'Manage fields (d-n-d)',
+        'page callback' => 'drupal_get_form',
+        'page arguments' => array('content_admin_field_overview_dnd_form', $type_name),
+        'access arguments' => array('administer content types'),
+        'file' => 'content_admin.inc',
+        'file path' => drupal_get_path('module', 'content'),
+        'type' => MENU_LOCAL_TASK,
+        'weight' => 1,
+      );
       $items['admin/content/types/'. $type_url_str .'/display'] = array(
         'title' => 'Display fields',
         'page callback' => 'drupal_get_form',
@@ -168,6 +179,9 @@ function content_theme() {
       'arguments' => array('node' => NULL, 'field' => NULL, 'items' => NULL, 'teaser' => FALSE, 'page' => FALSE),
     ),
     'content_admin_field_overview_form' => array(
+      'arguments' => array('form' => NULL),
+    ),
+    'content_admin_field_overview_dnd_form' => array(
       'arguments' => array('form' => NULL),
     ),
     'content_admin_display_overview_form' => array(
