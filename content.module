@@ -655,11 +655,49 @@ function content_notify($op, $module) {
       content_clear_type_cache(TRUE);
       break;
     case 'enable':
+      content_associate_fields($module);
       content_clear_type_cache();
       break;
     case 'disable':
       content_clear_type_cache(TRUE);
       break;
+  }
+}
+
+/**
+* Allows a module to update the database for fields and columns it controls.
+*
+* @param string $module
+*   The name of the module to update on.
+*/
+function content_associate_fields($module) {
+  $module_fields = module_invoke($module, 'field_info');
+  if ($module_fields) {
+    foreach ($module_fields as $name => $field_info) {
+      watchdog('content', t('Updating field type %type with module %module.', array('%type' => $name, '%module' => $module)));
+      db_query("UPDATE {". content_field_tablename() ."} SET module = '%s' WHERE type = '%s'", $module, $name);
+    }
+  }
+  $module_widgets = module_invoke($module, 'widget_info');
+  if ($module_widgets) {
+    foreach ($module_widgets as $name => $widget_info) {
+      watchdog('content', t('Updating widget type %type with module %module.', array('%type' => $name, '%module' => $module)));
+      db_query("UPDATE {". content_instance_tablename() ."} SET widget_module = '%s' WHERE widget_type = '%s'", $module, $name);
+    }
+  }
+  // This is called from updates and installs, so get the install-safe
+  // version of a fields array.
+  include_once('./'. drupal_get_path('module', 'content') .'/content.install');
+  $fields_set = array();
+  $types = content_install_types();
+  foreach ($types as $type_name => $fields) {
+    foreach ($fields as $field) {
+      if ($field['module'] == $module && !in_array($field['field_name'], $fields_set)) {
+        $columns = module_invoke($field['module'], 'field_settings', 'database columns', $field);
+        db_query("UPDATE {". content_field_tablename() ."} SET columns = '%s' WHERE field_name = '%s'", serialize($columns), $field['field_name']);
+        $fields_set[] = $field['field_name'];
+      }
+    }
   }
 }
 

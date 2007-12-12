@@ -57,6 +57,10 @@ function text_requirements($phase) {
 
 /**
  * Rename widgets to match hook_elements values.
+ *
+ * The change in field_types will keep content_update_6000() from correctly updating
+ * the module names in the field and instance tables, so do it here.
+ *
  */
 function text_update_6000() {
   include_once('./'. drupal_get_path('module', 'content') .'/content.module');
@@ -65,8 +69,9 @@ function text_update_6000() {
   while ($field_instance = db_fetch_array($result)) {
     $widget_settings = unserialize($field_instance['widget_settings']);
     $new_widget_type = ($widget_settings['rows'] > 1) ? 'text_textarea' : 'text_textfield';
-    $ret[] = update_sql("UPDATE {". content_instance_tablename() ."} SET widget_type = '$new_widget_type' WHERE field_name = '{$field_instance['field_name']}' AND type_name = '{$field_instance['type_name']}'");
+    $ret[] = update_sql("UPDATE {". content_instance_tablename() ."} SET widget_module = 'text', widget_type = '". $new_widget_type ."' WHERE field_name = '{$field_instance['field_name']}' AND type_name = '{$field_instance['type_name']}'");
   }
+  content_associate_fields('text');
   return $ret;
 }
 
@@ -86,24 +91,27 @@ function text_update_6001() {
   // Get the latest cache values and schema.
   content_clear_type_cache(TRUE, TRUE);
 
-  $types = content_types();
-  $fields = content_fields();
-  foreach ($fields as $field) {
-    switch ($field['type']) {
-      case 'text':
-        $db_info = content_database_info($field);
-        foreach ($db_info['columns'] as $column => $attributes) {
-          $attributes['not null'] = FALSE;
-          $column = $attributes['column'];
-          db_change_field($ret, $db_info['table'], $column,$column, $attributes);
-          db_field_set_no_default($ret, $db_info['table'], $column);
-          if ($attributes['type'] == 'varchar' || $attributes['type'] == 'text') {
-            $ret = update_sql("UPDATE {". $table ."} SET ". $column ." = NULL WHERE ". $column ." = ''");
+  include_once('./'. drupal_get_path('module', 'content') .'/content.install');
+  $types = content_install_types();
+  foreach ($types as $type_name => $fields) {
+    foreach ($fields as $field) {
+      switch ($field['type']) {
+        case 'text':
+          $db_info = content_database_info($field);
+          foreach ($db_info['columns'] as $column => $attributes) {
+            $attributes['not null'] = FALSE;
+            $column = $attributes['column'];
+            db_change_field($ret, $db_info['table'], $column,$column, $attributes);
+            db_field_set_no_default($ret, $db_info['table'], $column);
+            if ($attributes['type'] == 'varchar' || $attributes['type'] == 'text') {
+              $ret = update_sql("UPDATE {". $table ."} SET ". $column ." = NULL WHERE ". $column ." = ''");
+            }
+            else {
+              $ret = update_sql("UPDATE {". $table ."} SET ". $column ." = NULL WHERE ". $column ." = 0");
+            }
           }
-          else {
-            $ret = update_sql("UPDATE {". $table ."} SET ". $column ." = NULL WHERE ". $column ." = 0");
-          }
-        }
+          break;
+      }
     }
   }
   return $ret;

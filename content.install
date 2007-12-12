@@ -2,6 +2,58 @@
 // $Id$
 
 /**
+ * 'Safe' version of content_types() to use in updates and installs.
+ *
+ * Can't safely use content_fields() or content_types() in an update to get
+ * a fields array, especially without knowing what field modules are enabled,
+ * or the current state of the database and cache, so create a fields array
+ * from database info that is limited to fields from modules that are
+ * currently enabled.
+ */
+function content_install_types() {
+  include_once('./'. drupal_get_path('module', 'content') .'/content.module');
+  foreach (module_list() as $module) {
+    if ($field_type = module_invoke($module, 'field_info')) {
+      $module_field_types[$module] = $field_type;
+    }
+    if ($widget_type = module_invoke($module, 'widget_info')) {
+      $module_widgets[$module] = $widget_type;
+    }
+  }
+  $fields = array();
+  $db_result = db_query("SELECT * FROM {". content_instance_tablename() ."} nfi ".
+    " LEFT JOIN {". content_field_tablename() ."} nf ON nf.field_name = nfi.field_name");
+  while ($field = db_fetch_array($db_result)) {
+    // There may be module data available for currently disabled modules,
+    // or missing module data for currently enabled modules, so start over
+    // to get only field info for enabled modules.
+    unset($field['module']);
+    unset($field['widget_module']);
+    foreach ($module_field_types as $module => $types) {
+      foreach ($types as $type_name => $type) {
+        if ($field['type'] == $type_name) {
+          $field['module'] = $module;
+        }
+      }
+    }
+    foreach ($module_widgets as $module => $types) {
+      foreach ($types as $type_name => $type) {
+        if ($field['widget_type'] == $type_name) {
+          $field['widget_module'] = $module;
+        }
+      }
+    }
+    if (!empty($field['module']) && !empty($field['widget_module'])) {
+      $field['widget_settings'] = unserialize($field['widget_settings']);
+      $field['display_settings'] = unserialize($field['display_settings']);
+      $field['columns'] = module_invoke($field['module'], 'field_settings', 'database columns', $field);
+      $fields[$field['type_name']][$field['field_name']] = $field;
+    }
+  }
+  return $fields;
+}
+
+/**
  * Implementation of hook_install().
  */
 function content_install() {
@@ -22,12 +74,22 @@ function content_uninstall() {
  * Implementation of hook_enable().
  */
 function content_enable() {
+  // Make sure old data is emptied out of the caches, since it
+  // may no longer be valid since the module was last enabled,
+  // especially if not all the same field modules are enabled
+  // as before. Especially needed during updates.
+  cache_clear_all('*', 'cache_content', TRUE);
+  content_clear_type_cache(TRUE);
 }
 
 /**
  * Implementation of hook_disable().
  */
 function content_disable() {
+  // Make sure old data is emptied out of the caches, since it
+  // may no longer be valid when the module is re-enabled.
+  cache_clear_all('*', 'cache_content', TRUE);
+  content_clear_type_cache(TRUE);
 }
 
 /**
@@ -158,29 +220,7 @@ function content_update_6000() {
   db_add_field($ret, content_instance_tablename(), 'widget_module', array('type' => 'varchar', 'length' => 127, 'not null' => TRUE, 'default' => ''));
 
   foreach (module_list() as $module) {
-    $module_field_types = module_invoke($module, 'field_info');
-    if ($module_field_types) {
-      foreach ($module_field_types as $name => $field_info) {
-        $ret[] = update_sql("UPDATE {". content_field_tablename() ."} SET module = '". $module ."' WHERE type = '". $name ."'");
-        foreach (content_fields() as $field) {
-          if ($field['type'] == $name) {
-            $columns = module_invoke($module, 'field_settings', 'database columns', $field);
-            if ($columns) {
-              // Using db_query() instead of update_sql() here because serialized arrays
-              // lose data in the escaping done by update_sql().
-              db_query("UPDATE {". content_field_tablename() ."} SET columns = '%s' WHERE field_name = '%s'", serialize($columns), $field['field_name']);
-            }
-          }
-        }
-      }
-    }
-    $module_widgets = module_invoke($module, 'widget_info');
-    if ($module_widgets) {
-      foreach ($module_widgets as $name => $widget_info) {
-        $ret[] = update_sql("UPDATE {". content_instance_tablename() ."} SET widget_module = '". $module ."' WHERE widget_type = '". $name ."'");
-      }
-    }
-
+    content_associate_fields($module);
   }
 
   // Fix the cache_content schema
@@ -229,7 +269,7 @@ function content_update_6002() {
   include_once('./'. drupal_get_path('module', 'content') .'/content.module');
   $ret = array();
 
-  $db_types = content_types();
+  $db_types = content_install_types();
   $field_types = array();
 
   $result = db_query("SELECT DISTINCT type_name FROM {". content_instance_tablename() ."}");

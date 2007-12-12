@@ -63,16 +63,20 @@ function nodereference_update_6000() {
   $ret = array();
 
   content_clear_type_cache();
-  $fields = content_fields();
-  foreach ($fields as $field) {
-    switch ($field['type']) {
-      case 'nodereference':
-        $db_info = content_database_info($field);
-        $table = $db_info['table'];
-        $column = $db_info['columns']['nid']['column'] ;
-        db_change_field($ret, $table, $column, $column, array('type' => 'int', 'not null' => FALSE));
-        db_field_set_no_default($ret, $db_info['table'], $column);
-        $ret[] = update_sql("UPDATE {". $db_info['table'] ."} SET ". $column ." = NULL WHERE ". $column ." = 0");
+
+  include_once('./'. drupal_get_path('module', 'content') .'/content.install');
+  $types = content_install_types();
+  foreach ($types as $type_name => $fields) {
+    foreach ($fields as $field) {
+      switch ($field['type']) {
+        case 'nodereference':
+          $db_info = content_database_info($field);
+          $table = $db_info['table'];
+          $column = $db_info['columns']['nid']['column'] ;
+          db_change_field($ret, $table, $column, $column, array('type' => 'int', 'not null' => FALSE));
+          db_field_set_no_default($ret, $db_info['table'], $column);
+          $ret[] = update_sql("UPDATE {". $db_info['table'] ."} SET ". $column ." = NULL WHERE ". $column ." = 0");
+      }
     }
   }
   return $ret;
