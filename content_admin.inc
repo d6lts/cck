@@ -359,7 +359,7 @@ function content_admin_field_overview_dnd_form(&$form_state, $type_name) {
         $form[$key]['weight'] = array('#type' => 'weight', '#default_value' => $group['weight']);
         $form[$key]['parent'] = array('#type' => 'textfield', '#default_value' => '');
         $form[$key]['hidden_name'] = array('#type' => 'hidden', '#default_value' => $group['group_name']);
-        $form[$key]['#no_parent'] = TRUE;
+        $form[$key]['#root'] = TRUE;
         // Add child fields...
         foreach ($group['fields'] as $field_name => $field) {
           $field = $type['fields'][$field_name];
@@ -372,7 +372,7 @@ function content_admin_field_overview_dnd_form(&$form_state, $type_name) {
           $form[$field_name]['parent'] = array('#type' => 'select', '#options' => $group_options, '#default_value' => $group['group_name']);
           $form[$field_name]['hidden_name'] = array('#type' => 'hidden', '#default_value' => $field['field_name']);
           $form[$field_name]['#depth'] = 1;
-          $form[$field_name]['#no_child'] = TRUE;
+          $form[$field_name]['#leaf'] = TRUE;
         }
       }
       elseif (isset($type['fields'][$key])) {
@@ -385,7 +385,7 @@ function content_admin_field_overview_dnd_form(&$form_state, $type_name) {
         $form[$key]['weight'] = array('#type' => 'weight', '#default_value' => $field['widget']['weight']);
         $form[$key]['parent'] = array('#type' => 'select', '#options' => $group_options, '#default_value' => '');
         $form[$key]['hidden_name'] = array('#type' => 'hidden', '#default_value' => $field['field_name']);
-        $form[$key]['#no_child'] = TRUE;
+        $form[$key]['#leaf'] = TRUE;
       }
       else {
         $form[$key]['label']['#value'] = $key == 'body_filter' ? t('body') : $key;
@@ -431,15 +431,15 @@ function theme_content_admin_field_overview_dnd_form($form) {
       $row[] = drupal_render($element['configure']);
       $row[] = drupal_render($element['remove']);
       $class = isset($element['#disabled']) ? 'content-field-overview-disabled' : 'content-field-overview-enabled draggable';
-      $class .= isset($element['#no_child']) ? ' no-child' : '';
-      $class .= isset($element['#no_parent']) ? ' no-parent' : '';
+      $class .= isset($element['#leaf']) ? ' tabledrag-leaf' : '';
+      $class .= isset($element['#root']) ? ' tabledrag-root' : '';
       $rows[] = array('data' => $row, 'class' => $class);
 
     }
   }
   $output  = theme('table', $header, $rows, array('id' => 'content-field-overview'));
   $output .= drupal_render($form);
-  drupal_add_tabledrag('content-field-overview', 'match', 'parent', 'group-parent', 'group-parent', 'field-name', TRUE, 5);
+  drupal_add_tabledrag('content-field-overview', 'match', 'parent', 'group-parent', 'group-parent', 'field-name', TRUE, 1);
   drupal_add_tabledrag('content-field-overview', 'order', 'sibling', 'field-weight');
 
   return $output;
@@ -1360,6 +1360,9 @@ function content_alter_db($previous_field, $new_field) {
   // Migrate data from per-field storage, and drop per-field table.
   if ($previous_field['db_storage'] == CONTENT_DB_STORAGE_PER_FIELD &&
   $new_field['db_storage'] == CONTENT_DB_STORAGE_PER_CONTENT_TYPE) {
+      // In ordet to be able to use drupal_write_record, we need to
+      // rebuild the schema now. // TODO : we're then missing debug $ret messages...
+      content_alter_db_cleanup($ret);
     if ($previous_field['multiple']) {
       $result = db_query('SELECT * FROM {'. $previous_table .'} WHERE delta = 0');
     }
@@ -1378,7 +1381,7 @@ function content_alter_db($previous_field, $new_field) {
       }
       if (db_result(db_query('SELECT COUNT(*) FROM {'. $new_table .
       '} WHERE vid = %d AND nid = %d', $data['vid'], $data['nid']))) {
-        $keys = $field['multiple'] ? array('vid', 'delta') : array('vid');
+          $keys = $new_field['multiple'] ? array('vid', 'delta') : array('vid');
         drupal_write_record($new_table, $record, $keys);
       }
       else {
@@ -1409,7 +1412,7 @@ function content_alter_db($previous_field, $new_field) {
     }
   }
 
-  return content_alter_db_cleanup($ret);
+  return $ret;
 }
 
 /**
