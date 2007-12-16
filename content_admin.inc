@@ -397,6 +397,7 @@ function content_admin_field_overview_dnd_form(&$form_state, $type_name) {
         $form[$key]['parent'] = array('#type' => 'textfield', '#default_value' => '');
         $form[$key]['hidden_name'] = array('#type' => 'hidden', '#default_value' => $key);
         $form[$key]['#disabled'] = TRUE;
+        $form[$key]['#leaf'] = TRUE;
       }
     }
   }
