@@ -104,7 +104,7 @@ function content_requirements($phase) {
   $current_version = drupal_get_installed_schema_version('content');
   $minimum_version = 1008;
 
-  if ($current_version < $minimum_version) {
+  if (($current_version > -1) && ($current_version < $minimum_version)) {
     $requirements['content_version'] = array(
       'title' => $t('Content Version'),
       'value' => $t('Your CCK database is not up to date and will not work correctly in this version of the Content module. Please upgrade your database in Drupal 5.x to at least Content update %number, using the latest 5.x version of the Content module, before upgrading to Drupal 6.x.', array('%number' => $minimum_version)),
