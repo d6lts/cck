@@ -45,7 +45,7 @@ function text_requirements($phase) {
   $current_version = drupal_get_installed_schema_version('text');
   $minimum_version = 5;
 
-  if ($current_version < $minimum_version) {
+  if (($current_version > -1) && ($current_version < $minimum_version)) {
     $requirements['text_version'] = array(
       'title' => $t('Text Version'),
       'value' => $t('The Text fields in your CCK database are not up to date and will not work correctly in this version of the Text module. Please upgrade your database in Drupal 5.x to at least Text update %number, using the latest 5.x version of the Text module, before upgrading to Drupal 6.x.', array('%number' => $minimum_version)),
