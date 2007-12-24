@@ -12,6 +12,8 @@
  */
 function content_install_types() {
   include_once('./'. drupal_get_path('module', 'content') .'/content.module');
+
+  $module_field_types = $module_widgets = array();
   foreach (module_list() as $module) {
     if ($field_type = module_invoke($module, 'field_info')) {
       $module_field_types[$module] = $field_type;

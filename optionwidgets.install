@@ -65,9 +65,9 @@ function optionwidgets_requirements($phase) {
 function optionwidgets_update_6000() {
   include_once('./'. drupal_get_path('module', 'content') .'/content.module');
   $ret = array();
-  $result = db_query("UPDATE {". content_instance_tablename() ."} SET widget_type = 'optionwidgets_select' where widget_type = 'options_select'");
-  $result = db_query("UPDATE {". content_instance_tablename() ."} SET widget_type = 'optionwidgets_onoff' where widget_type = 'options_onoff'");
-  $result = db_query("UPDATE {". content_instance_tablename() ."} SET widget_type = 'optionwidgets_buttons' where widget_type = 'options_buttons'");
+  $ret[] = update_sql("UPDATE {". content_instance_tablename() ."} SET widget_type = 'optionwidgets_select' WHERE widget_type = 'options_select'");
+  $ret[] = update_sql("UPDATE {". content_instance_tablename() ."} SET widget_type = 'optionwidgets_onoff' WHERE widget_type = 'options_onoff'");
+  $ret[] = update_sql("UPDATE {". content_instance_tablename() ."} SET widget_type = 'optionwidgets_buttons' WHERE widget_type = 'options_buttons'");
 
   content_associate_fields('optionwidgets');
   return $ret;
