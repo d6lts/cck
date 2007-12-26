@@ -838,10 +838,16 @@ function _content_sort_items($field, $items) {
 
 /**
  * Helper function to sort items in a field according to
- * user drag-n-drop reordering.
+ * user drag-n-drop reordering (copied form element_sort(),
+ * that acts on #weight keys)
  */
 function _content_sort_items_helper($a, $b) {
-  return $a["_weight"] - $b["_weight"];
+  $a_weight = (is_array($a) && isset($a['_weight'])) ? $a['_weight'] : 0;
+  $b_weight = (is_array($b) && isset($b['_weight'])) ? $b['_weight'] : 0;
+  if ($a_weight == $b_weight) {
+    return 0;
+  }
+  return ($a_weight < $b_weight) ? -1 : 1;
 }
 
 /**
@@ -1294,7 +1300,6 @@ function content_storage_type($field) {
  * @param $array
  *   The array to be transposed. It must be at least two-dimensional, and
  *   the subarrays must all have the same keys or behavior is undefined.
- *
  * @return
  *   The transposed array.
  */
@@ -1413,7 +1418,6 @@ function _content_admin_display_contexts() {
  *   The name of the content type or content field
  * @param $storage
  *   CONTENT_DB_STORAGE_PER_FIELD or CONTENT_DB_STORAGE_PER_CONTENT_TYPE
- *
  * @return
  *   A string containing the generated name for the database table
  */
@@ -1534,14 +1538,11 @@ function content_table_schema($field = NULL) {
  *
  *  @param $entity
  *    'field' or 'widget'
- *
  *  @param $op
  *    the name of the operation ('view', 'default value'...)
- *
  *  @param $field
  *    The field array, including widget info.
-
- * @return
+ *  @return
  *    CONTENT_CALLBACK_NONE    - do nothing for this operation
  *    CONTENT_CALLBACK_CUSTOM  - use the module's callback function.
  *    CONTENT_CALLBACK_DEFAULT - use content module default behaviour
@@ -1565,14 +1566,11 @@ function content_callback($entity, $op, $field) {
  *
  *  @param $entity
  *    'field' or 'widget'
- *
  *  @param $op
  *    the name of the operation ('default values'...)
- *
  *  @param $field
  *    The field array, including widget info.
-
- * @return
+ *  @return
  *    CONTENT_HANDLE_CORE    - the content module handles this operation.
  *    CONTENT_HANDLE_MODULE  - the module handles this operation.
  */
@@ -1593,13 +1591,10 @@ function content_handle($entity, $op, $field) {
  *
  *  @param $node
  *    The node.
- *
  *  @param $field
  *    The field array.
- *
  *  @param $items
  *    The value of the field in the node.
- *
  *  @return
  *    The default value for that field.
  */
@@ -1741,8 +1736,8 @@ function template_preprocess_field(&$variables) {
  *
  * @TODO remove later
  *
- * @param unknown_type $op
- * @param unknown_type $field
+ * @param $op
+ * @param $field
  */
 function content_content_fieldapi($op, $field) {
   if (module_exists('devel')) {
