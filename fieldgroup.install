@@ -5,6 +5,7 @@
  * Implementation of hook_install().
  */
 function fieldgroup_install() {
+  include_once('./'. drupal_get_path('module', 'content') .'/content.module');
   drupal_install_schema('fieldgroup');
   content_notify('install', 'fieldgroup');
   variable_set('fieldgroup_schema_version', 6000);
