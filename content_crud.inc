@@ -499,7 +499,7 @@ function content_field_instance_delete($field_name, $type_name) {
  */
 function content_module_delete($module) {
   // Delete the field data.
-  $results = db_query("SELECT field_name, type_name FROM {". content_field_instance_tablename() ."} WHERE module = '%s'", $module);
+  $results = db_query("SELECT field_name, type_name FROM {". content_instance_tablename() ."} WHERE module = '%s'", $module);
   while ($field = db_fetch_array($results)) {
     content_field_instance_delete($field);
   }
