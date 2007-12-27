@@ -1,5 +1,6 @@
 /* $Id$ */
 
+/* Node display */
 .field .field-label,
 .field .field-label-inline,
 .field .field-label-inline-first {
@@ -28,6 +29,17 @@
 .node-form .number {
   display:inline;
   width:auto;
+}
+
+/* 'Manage fields' overview */
+table.content-field-overview, table.content-field-overview fieldset table {
+  width:100%;
+}
+table.content-field-overview td {
+  width:14%;
+}
+.content-field-overview-empty {
+  text-align:center;
 }
 
 

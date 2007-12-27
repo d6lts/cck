@@ -119,17 +119,6 @@ function content_menu() {
         'type' => MENU_LOCAL_TASK,
         'weight' => 1,
       );
-      // TODO : temporary (until drag-n-drop does work)
-      $items['admin/content/types/'. $type_url_str .'/fields_dnd'] = array(
-        'title' => 'Manage fields (d-n-d)',
-        'page callback' => 'drupal_get_form',
-        'page arguments' => array('content_admin_field_overview_dnd_form', $type_name),
-        'access arguments' => array('administer content types'),
-        'file' => 'content_admin.inc',
-        'file path' => drupal_get_path('module', 'content'),
-        'type' => MENU_LOCAL_TASK,
-        'weight' => 1,
-      );
       $items['admin/content/types/'. $type_url_str .'/display'] = array(
         'title' => 'Display fields',
         'page callback' => 'drupal_get_form',
@@ -188,9 +177,6 @@ function content_theme() {
     'content_admin_field_overview_form' => array(
       'arguments' => array('form' => NULL),
     ),
-    'content_admin_field_overview_dnd_form' => array(
-      'arguments' => array('form' => NULL),
-    ),
     'content_admin_display_overview_form' => array(
       'arguments' => array('form' => NULL),
     ),
@@ -244,9 +230,7 @@ function content_load($node) {
  * chosen widget.
  */
 function content_form(&$form, &$form_state) {
-  $node = $form['#node'];
-  $type_name = is_string($node) ? $node : (is_array($node) ? $node['type'] : $node->type);
-  $type = content_types($type_name);
+  $type = content_types($form['type']['#value']);
   if (count($type['fields'])) {
     foreach ($type['fields'] as $field_name => $field) {
       $form['#field_info'][$field['field_name']] = $field;
@@ -586,8 +570,22 @@ function content_delete_revision(&$node) {
  * Generate field render arrays.
  */
 function content_view(&$node, $teaser = FALSE, $page = FALSE) {
+  // Merge fields.
   $additions = _content_field_invoke_default('view', $node);
   $node->content = array_merge((array) $node->content, $additions);
+
+  // Adjust weights for non-cck fields.
+  $type = content_types($node->type);
+  foreach ($type['extra'] as $key => $value) {
+    // Some core 'fields' use a different key in node forms and in 'view'
+    // render arrays.
+    if (isset($value['view']) && isset($node->content[$value['view']])) {
+      $node->content[$value['view']]['#weight'] = $value['weight'];
+    }
+    elseif (isset($node->content[$key])) {
+      $node->content[$key]['#weight'] = $value['weight'];
+    }
+  }
 }
 
 /**
@@ -647,9 +645,15 @@ function content_nodeapi(&$node, $op, $teaser, $page) {
  *  Implementation of hook_form_alter().
  */
 function content_form_alter(&$form, $form_state, $form_id) {
-  if (isset($form['type'])) {
-    if ($form['type']['#value'] .'_node_form' == $form_id) {
-      $form = array_merge($form, content_form($form, $form_state));
+  if (isset($form['type']) && ($form['type']['#value'] .'_node_form' == $form_id)) {
+    // Merge field widgets.
+    $form = array_merge($form, content_form($form, $form_state));
+    // Adjust weights for non-cck fields.
+    $type = content_types($form['type']['#value']);
+    foreach ($type['extra'] as $key => $value) {
+      if (isset($form[$key])) {
+        $form[$key]['#weight'] = $value['weight'];
+      }
     }
   }
 }
@@ -829,7 +833,7 @@ function content_set_empty($field, $items) {
 function _content_sort_items($field, $items) {
   if ($field['multiple'] >= 1 && isset($items[0]['_weight'])) {
     usort($items, '_content_sort_items_helper');
-    foreach($items as $delta => $item) {
+    foreach ($items as $delta => $item) {
       unset($items[$delta]['_weight']);
     }
   }
@@ -1122,6 +1126,7 @@ function _content_type_info($reset = FALSE) {
     if (!db_table_exists(content_field_tablename()) || !db_table_exists(content_instance_tablename())) {
         return array();
     }
+
     if ($cached = cache_get('content_type_info', content_cache_tablename())) {
       $info = $cached->data;
     }
@@ -1185,8 +1190,22 @@ function _content_type_info($reset = FALSE) {
           $type['tables'][$db_info['table']] = $db_info['table'];
           $info['fields'][$field['field_name']] = $field;
         }
+
+        $extra = module_invoke_all('content_extra_fields', $type_name);
+        drupal_alter('content_extra_fields', $extra, $type_name);
+        // Add saved weights.
+        foreach (variable_get('content_extra_weights_'. $type_name, array()) as $key => $value) {
+          // Some stored entries might not exist anymore, for instance if uploads
+          // have been disabled, or vocabularies removed...
+          if (isset($extra[$key])) {
+            $extra[$key]['weight'] = $value;
+          }
+        }
+        $type['extra'] = $extra;
+
         $info['content types'][$type_name] = $type;
       }
+
       cache_set('content_type_info', $info, content_cache_tablename());
     }
   }
@@ -1743,5 +1762,67 @@ function content_content_fieldapi($op, $field) {
   if (module_exists('devel')) {
     //dsm($op);
     //dsm($field);
+  }
+}
+
+/**
+ * Implementation of hook_content_extra_fields.
+ *
+ * Informations for non-CCK 'node fields' defined in core.
+ */
+function content_content_extra_fields($type_name) {
+  $type = node_get_types('type', $type_name);
+  $extra = array();
+
+  if ($type->has_title) {
+    $extra['title'] = array('label' => $type->title_label, 'weight' => -5);
+  }
+  if ($type->has_body) {
+    $extra['body_field'] = array('label' => $type->body_label, 'weight' => 0, 'view' => 'body');
+  }
+  if (module_exists('locale') && variable_get("language_$type_name", 0)) {
+    $extra['language'] = array('label' => t('Language'), 'weight' => 0);
+  }
+  if (module_exists('menu')) {
+    $extra['menu'] = array('label' => t('Menu settings'), 'weight' => -2);
+  }
+  if (module_exists('taxonomy') && taxonomy_get_vocabularies($type_name)) {
+    $extra['taxonomy'] = array('label' => t('Taxonomy'), 'weight' => -3);
+  }
+  if (module_exists('upload') && variable_get("upload_$type_name", TRUE)) {
+    $extra['attachments'] = array('label' => t('File attachments'), 'weight' => 30, 'view' => 'files');
+  }
+
+  return $extra;
+}
+
+/**
+ * Retrieve the user-defined weight for non-CCK node 'fields'.
+ *
+ * CCK's 'Manage fields' page lets users reorder node fields, including non-CCK
+ * items (body, taxonomy, other hook_nodeapi-added elements by contrib modules...).
+ * Contrib modules that want to have their 'fields' supported need to expose
+ * them with hook_content_extra_fields, and use this function to retrieve the
+ * user-defined weight.
+ *
+ * @param $type_name
+ *   The content type name.
+ * @param $pseudo_field_name
+ *   The name of the 'field'.
+ * @return
+ *   The weight for the 'field', respecting the user settings stored
+ *   by content.module.
+ */
+function content_extra_field_weight($type_name, $pseudo_field_name) {
+  $type = content_types($type_name);
+
+  // If we don't have the requested item, this may be because the cached
+  // information for 'extra' fields hasn't been refreshed yet.
+  if (!isset($type['extra'][$pseudo_field_name])) {
+    content_clear_type_cache();
+  }
+
+  if (isset($type['extra'][$pseudo_field_name])) {
+    return $type['extra'][$pseudo_field_name]['weight'];
   }
 }

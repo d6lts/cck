@@ -543,7 +543,14 @@ function content_type_update($info) {
       drupal_set_message(t('Content fields table %old_name has been renamed to %new_name and field instances have been updated.', array(
         '%old_name' => $old_name, '%new_name' => $new_name)));
     }
+
+    // Rename the variable storing weights for non-CCK fields.
+    if ($extra = variable_get('content_extra_weights_'. $info->old_type, array())) {
+      variable_set('content_extra_weights_'. $info->type, $extra);
+      variable_del('content_extra_weights_'. $info->old_type);
+    }
   }
+
   // Reset all content type info and alter the menu paths.
   content_menu_needs_rebuild(TRUE);
 }

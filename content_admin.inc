@@ -39,407 +39,141 @@ function _content_admin_type_fields() {
 }
 
 /**
- * Menu callback; presents a listing of fields for a content type.
+ * Menu callback; listing of fields for a content type.
  *
- * Form includes form widgets to set weight and group for each item
- * and displays other form elements and their weights to make it
- * easier to place CCK fields in the form and see where they will appear.
+ * Allows fields to be reordered and nested in fieldgroups using
+ * JS drag-n-drop. Non-CCK form elements can also be moved around.
  */
 function content_admin_field_overview_form(&$form_state, $type_name) {
-  module_load_include('inc', 'node', 'node.pages');
-  $form = array();
+  // When displaying the form, make sure the list of 'extra' fields
+  // is up-to-date.
+  if (empty($form_state['post'])) {
+    content_clear_type_cache();
+  }
 
+  // Gather type information.
   $type = content_types($type_name);
-  $field_types = _content_field_types();
-
-  // Create a dummy node and form and call hook_form_alter()
-  // to produce an array of fields and weights added to the node by all modules.
-  $dummy_node = new stdClass();
-  $dummy_node->type = $type['type'];
-  $dummy_node->name = '';
-
-  // Some modules (userreview...) "hide" their node forms, resulting in no field
-  // being listed. We set a special flag to inform them this form is special.
-  $dummy_node->cck_dummy_node_form = TRUE;
-
-  $form_state = array();
-  $dummy_form = array();
-  $dummy_form = node_form($form_state, $dummy_node);
-  foreach (module_implements('form_alter') as $module) {
-    $function = $module .'_form_alter';
-    $function($dummy_form, $form_state, $dummy_node->type .'_node_form');
-  }
-
-  // Move group fields into a 'fields' subgroup to make them easier to identify.
-  // Remove fields that are used in groups from the form, the group will handle them.
+  $fields = $type['fields'];
+  $extra = $type['extra'];
+  $groups = $group_options = array();
   if (module_exists('fieldgroup')) {
-    $form['#groups']       = fieldgroup_groups($type['type']);
-    $form['#group_labels'] = _fieldgroup_groups_label($type['type']);
-    if (!$form['#groups']) {
-      drupal_set_message(t('There are no groups configured for this content type.'));
-    }
-    foreach ($form['#groups'] as $group) {
-      foreach ($group['fields'] as $field_name => $field) {
-        unset($dummy_form[$field_name]);
-      }
-    }
+    $groups = fieldgroup_groups($type['type']);
+    $group_options = _fieldgroup_groups_label($type['type']);
   }
 
-  if (!$type['fields']) {
-    drupal_set_message(t('There are no fields configured for this content type.'));
+
+  // Rows in this table are essentially nested, but for the simplicity of
+  // theme and submit functions, we keep them in a flat array, and use a
+  // $dummy render structure to figure the right display order.
+  $dummy = array();
+
+  $form = array(
+    '#tree' => TRUE,
+    '#type_name' => $type['type'],
+    '#fields' => array_keys($fields),
+    '#groups' => array_keys($groups),
+    '#extra' => array_keys($extra),
+    '#order' => array(),
+  );
+
+  // Fields.
+  foreach ($fields as $name => $field) {
+    $weight = $field['widget']['weight'];
+    $form[$name] = array(
+      'label' => array('#value' => $field['widget']['label']),
+      'name' => array('#value' => $field['field_name']),
+      'type' => array('#value' => $field['type']),
+      'configure' => array('#value' => l(t('configure'), 'admin/content/types/'. $type['url_str'] .'/fields/'. $field['field_name'] .'/edit')),
+      'remove' => array('#value' => l(t('remove'), 'admin/content/types/'. $type['url_str'] .'/fields/'. $field['field_name'] .'/remove')),
+      'weight' => array('#type' => 'textfield', '#default_value' => $weight),
+      'parent' => array('#type' => 'select', '#options' => $group_options, '#default_value' => ''),
+      'hidden_name' => array('#type' => 'hidden', '#default_value' => $field['field_name']),
+      '#leaf' => TRUE,
+    );
+    $dummy[$name] = array('#weight' => $weight, '#value' => $name .' ');
   }
-
-  if (empty($type['fields']) && empty($form['#groups'])) {
-    return $form;
-  }
-
-  $form['disabled']['#value'] = array();
-
-  // Iterate through the dummy form and add top-level fields and weights to a table.
-  // Construct the table values in an array '#table' that FAPI will ignore, keyed on the item's weight.
-  // Create separate form elements for each weight and group value and put a placeholder for each in #table.
-  $field_names = array_keys(content_fields());
-  foreach ($dummy_form as $key => $value) {
-    // Limiting weight to < 10 will keep workflow and submit elements from being added to the overview table.
-    // They're outside the weight range allowed for CCK fields, so won't interfere with field placement.
-    // Currently the 'menu' fieldset is at weight -2, so add a special check for that one.
-    if (is_array($value) && (isset($value['#weight']) || $key == 'body_filter') && $key != 'menu' && $value['#weight'] <= 10) {
-
-      // if this item is a group, insert group info into table, then add all the group fields below it
-      if (substr($key, 0, 6) == 'group_' && isset($form['#groups'])) {
-        $row = $group_form = array();
-        $row['label']     = $form['#group_labels'][$form['#groups'][$key]['group_name']];
-        $row['name']      = $form['#groups'][$key]['group_name'];
-        $row['type']      = t('group');
-        $row['weights']   = 'form-group-weights';
-        $row['groups']    = '';
-        $row['configure'] = l(t('configure'), 'admin/content/types/'. $type['url_str'] .'/groups/'. $form['#groups'][$key]['group_name'] .'/edit');
-        $row['remove']    = l(t('remove'), 'admin/content/types/'. $type['url_str'] .'/groups/'. $form['#groups'][$key]['group_name'] .'/remove');
-        $data = $row;
-
-        $form['group-weights'][$key] = array('#type' => 'weight', '#default_value' => $value['#weight']);
-        foreach ($form['#groups'][$key]['fields'] as $field_name => $field) {
-          $row = array();
-          $field = $type['fields'][$field_name];
-          $row['label']     = $field['widget']['label'];
-          $row['name']      = $field['field_name'];
-          $row['type']      = $field_types[$field['type']]['label'];
-          $row['weights']   = 'form-field-weights';
-          $row['groups']    = 'form-field-groups';
-          $row['configure'] = l(t('configure'), 'admin/content/types/'. $type['url_str'] .'/fields/'. $field_name);
-          $row['remove']    = l(t('remove'), 'admin/content/types/'. $type['url_str'] .'/fields/'. $field_name .'/remove');
-          $group_form[$field['widget']['weight']][] = array($field_name => $row);
-
-          $form['field-weights'][$field_name] = array('#type' => 'weight', '#default_value' => $field['widget']['weight']);
-          $form['field-groups'][$field_name]  = array('#type' => 'select', '#options' => $form['#group_labels'], '#default_value' => fieldgroup_get_group($type['type'], $field_name));
-          $form['field-groups-defaults'][$field_name]  = array('#type' => 'hidden', '#default_value' => fieldgroup_get_group($type['type'], $field_name));
-        }
-        // sort the group fields by weight
-        ksort($group_form);
-        $group = (array) $data + array('fields' => $group_form);
-        $form['#table'][$value['#weight']][] = array($key => $group);
-      }
-
-      // else if this item is a top-level field, insert field row into the table
-      elseif (in_array($key, $field_names)) {
-        $row = array();
-        $field = $type['fields'][$key];
-        $row['label']     = $field['widget']['label'];
-        $row['name']      = $field['field_name'];
-        $row['type']      = $field_types[$field['type']]['label'];
-        $row['weights']   = 'form-field-weights';
-        if (isset($form['#groups'])) {
-          $row['groups']  = 'form-field-groups';
-        }
-        $row['configure'] = l(t('configure'), 'admin/content/types/'. $type['url_str'] .'/fields/'. $key);
-        $row['remove']    = l(t('remove'), 'admin/content/types/'. $type['url_str'] .'/fields/'. $key .'/remove');
-        $form['#table'][$field['widget']['weight']][] = array($key => $row);
-
-        $form['field-weights'][$key] = array('#type' => 'weight', '#default_value' => $field['widget']['weight']);
-        if (isset($form['#groups'])) {
-          $form['field-groups'][$key]  = array('#type' => 'select', '#options' => $form['#group_labels'], '#default_value' => fieldgroup_get_group($type['type'], $key));
-        }
-      }
-
-      // otherwise this is some other form field or fieldset
-      // if it has a weight display it as a disabled item
-      else {
-        $row = array();
-        $row['label']     = $key == 'body_filter' ? t('body') : $key;
-        $row['name']      = $key;
-        $row['type']      = $key;
-        $row['weights']   = 'form-field-weights';
-        if (isset($form['#groups'])) {
-          $row['groups']  = '';
-        }
-        $row['configure'] = '';
-        $row['remove']    = '';
-        $form['#table'][$value['#weight']][] = array($key => $row);
-        $form['disabled']['#value'][] = $key;
-
-        $form['field-weights'][$key] = array('#type' => 'weight', '#default_value' => $value['#weight'], '#disabled' => TRUE);
-      }
+  // Groups.
+  foreach ($groups as $name => $group) {
+    $weight = $group['weight'];
+    $form[$name] = array(
+      'label' => array('#value' => $group['label']),
+      'name' => array('#value' => $group['group_name']),
+      'type' => array(),
+      'configure' => array('#value' => l(t('configure'), 'admin/content/types/'. $type['url_str'] .'/groups/'. $group['group_name'] .'/edit')),
+      'remove' => array('#value' => l(t('remove'), 'admin/content/types/'. $type['url_str'] .'/groups/'. $group['group_name'] .'/remove')),
+      'weight' => array('#type' => 'textfield', '#default_value' => $weight),
+      'parent' => array('#type' => 'hidden', '#default_value' => ''),
+      'hidden_name' => array('#type' => 'hidden', '#default_value' => $group['group_name']),
+      '#root' => TRUE,
+    );
+    $dummy[$name] = array('#weight' => $weight, '#value' => $name .' ');
+    // Adjust child fields rows.
+    foreach ($group['fields'] as $field_name => $field) {
+      $form[$field_name]['#depth'] = 1;
+      $form[$field_name]['parent']['#default_value'] = $name;
+      $dummy[$name][$field_name] = $dummy[$field_name];
+      unset($dummy[$field_name]);
     }
   }
+  // Non-CCK 'fields'.
+  foreach ($extra as $name => $label) {
+    $weight = $extra[$name]['weight'];
+    $form[$name] = array(
+      'label' => array('#value' => $extra[$name]['label']),
+      'name' => array(),
+      'type' => array(),
+      'configure' => array(),
+      'remove' => array(),
+      'weight' => array('#type' => 'textfield', '#default_value' => $weight),
+      'parent' => array('#type' => 'hidden', '#default_value' => ''),
+      'hidden_name' => array('#type' => 'hidden', '#default_value' => $name),
+      '#leaf' => TRUE,
+      '#root' => TRUE,
+      '#disabled' => TRUE,
+    );
+    $dummy[$name] = array('#weight' => $weight, '#value' => $name .' ');
+  }
 
-  // sort the table by weight
-  ksort($form['#table']);
+  // Let drupal_render figure out the right order for the rows.
+  $form['#order'] = explode(' ', trim(drupal_render($dummy)));
 
-  // add submit buttons and hidden fields
-  $form['submit']                         = array('#type' => 'submit', '#value' => t('Update'));
-  $form['field-weights']['#tree']         = TRUE;
-  $form['group-weights']['#tree']         = TRUE;
-  $form['field-groups']['#tree']          = TRUE;
-  $form['field-groups-defaults']['#tree'] = TRUE;
-  $form['disabled']['#type']              = 'hidden';
-  $form['disabled']['#value']             = serialize($form['disabled']['#value']);
-  $form['type_name']['#type']             = 'hidden';
-  $form['type_name']['#value']            = $type['type'];
-
+  $form['submit'] = array('#type' => 'submit', '#value' => t('Save'));
   return $form;
 }
 
 /**
- *  Theme the field overview table by iterating through the form and rendering form elements in table cells
+ *  Theme the field overview table.
  */
 function theme_content_admin_field_overview_form($form) {
-  if (empty($form['#table'])) {
-    return;
-  }
-
-  // The css for this form contains non-validating styles,
-  // so we use a separate file, included only on the relevant page.
-  drupal_add_css(drupal_get_path('module', 'content') .'/content_admin.css');
-
-  $disabled = unserialize($form['disabled']['#value']);
-
-  if (module_exists('fieldgroup')) {
-    $header = array(t('Label'), t('Name'), t('Type'), t('Weight'), t('Group'), array('data' => t('Operations'), 'colspan' => 2));
-    $colspan = 7;
-  }
-  else {
-    $header = array(t('Label'), t('Name'), t('Type'), t('Weight'), array('data' => t('Operations'), 'colspan' => 2));
-    $colspan = 6;
-  }
-
-  $rows = array();
-  $i = 0;
-
-  // The table was created in the form
-  // iterate through it and render form elements when placeholders are encountered
-  // then run the rows array through theme_table().
-  foreach ($form['#table'] as $weight => $frow) {
-    foreach ($frow as $delta => $item) {
-      foreach ($item as $fname => $field) {
-        $row = array();
-        $class = 'content-field-overview-enabled';
-        if (in_array($fname, $disabled)) {
-          $class = 'content-field-overview-disabled';
-        }
-        foreach ($field as $col => $cell) {
-          // display cols other than the group 'fields' col
-          if ($col != 'fields') {
-            switch ($cell) {
-            case 'form-field-weights':
-              $row[] = drupal_render($form['field-weights'][$fname]);
-              break;
-            case 'form-group-weights':
-              $row[] = drupal_render($form['group-weights'][$fname]);
-              break;
-            case 'form-field-groups':
-              $row[] = drupal_render($form['field-groups'][$fname]);
-              break;
-            default:
-              $row[] = array('data' => $cell, 'class' => $class);
-            }
-          }
-
-          elseif (isset($form['#groups'])) {
-            // if this form contains groups info and this is a group 'fields' col, finish the previous row
-            // then theme the 'fields' col with a fieldset containing a table and the group fields
-            $grows = array();
-
-            if (!empty($cell)) {
-              foreach ($cell as $gweight => $grow) {
-                foreach ($grow as $gdelta => $gitem) {
-                  foreach ($gitem as $gname => $gfield) {
-                    $grow = array();
-                    foreach ($gfield as $gcol => $gcell) {
-                      switch ($gcell) {
-                        case 'form-field-weights':
-                          $grow[] = drupal_render($form['field-weights'][$gname]);
-                          break;
-                        case 'form-field-groups':
-                          $grow[] = drupal_render($form['field-groups'][$gname]);
-                          break;
-                        default:
-                          $grow[] = $gcell;
-                      }
-                    }
-                    $grows[] = array('data' => $grow, 'class' => 'content-field-overview-enabled');
-                  }
-                }
-              }
-            }
-            else {
-              $grows[] = array(array('data' => t('No fields have been added to this group.'), 'colspan' => $colspan, 'class' => 'content-field-overview-empty'));
-            }
-
-            // add the group row in its own table above the group fields table, then reset $row().
-            $fieldset = array(
-              '#title' => t('!label (!name)', array('!label' => $form['#group_labels'][$fname], '!name' => $fname)),
-              '#collapsible' => TRUE,
-              '#collapsed' => FALSE,
-              '#value' => theme('table', array(), array(array('data' => $row, 'class' => 'content-field-overview-group'))) . theme('table', $header, $grows),
-              );
-            $row = array();
-            $row[] = array(
-              'data' => theme('fieldset', $fieldset),
-              'colspan' => $colspan,
-              'class' => 'active',
-              );
-            $grows = array();
-          }
-        }
-        $rows[] = $row;
-      }
-    }
-  }
-  $output  = theme('table', $header, $rows, array('class' => 'content-field-overview'));
-  $output .= drupal_render($form);
-  return $output;
-
-}
-
-function content_admin_field_overview_dnd_form(&$form_state, $type_name) {
-  module_load_include('inc', 'node', 'node.pages');
-
-  $type = content_types($type_name);
-  $field_types = _content_field_types();
-
-  // Create a dummy node and form and call hook_form_alter()
-  // to produce an array of fields and weights added to the node by all modules.
-  $dummy_node = new stdClass();
-  $dummy_node->type = $type['type'];
-  $dummy_node->name = '';
-
-  // Some modules (userreview...) "hide" their node forms, resulting in no field
-  // being listed. We set a special flag to inform them this form is special.
-  $dummy_node->cck_dummy_node_form = TRUE;
-
-  $form_state = array();
-  $dummy_form = array();
-  $dummy_form = node_form($form_state, $dummy_node);
-  foreach (module_implements('form_alter') as $module) {
-    $function = $module .'_form_alter';
-    $function($dummy_form, $form_state, $dummy_node->type .'_node_form');
-  }
-
-  $form = array();
-  $form['#type_name'] = $type['type'];
-  $groups = module_exists('fieldgroup') ? fieldgroup_groups($type['type']) : array();
-  $group_options = _fieldgroup_groups_label($type['type']);
-
-  if (empty($type['fields'])) {
-    drupal_set_message(t('There are no fields configured for this content type.'));
-  }
-  if (empty($groups)) { // TODO : if fieldgroups disabled
-    drupal_set_message(t('There are no groups configured for this content type.'));
-  }
-
-  foreach ($dummy_form as $key => $value) {
-    if (is_array($value) && (isset($value['#weight']) || $key == 'body_filter') && $key != 'menu' && $value['#weight'] <= 10) {
-      if (isset($groups[$key])) {
-        $group = $groups[$key];
-        $form[$key]['label']['#value'] = $group['label'];
-        $form[$key]['name']['#value'] = $group['group_name'];
-        $form[$key]['type']['#value'] = t('group');
-        $form[$key]['configure']['#value'] = l(t('configure'), 'admin/content/types/'. $type['url_str'] .'/groups/'. $group['group_name'] .'/edit');
-        $form[$key]['remove']['#value'] = l(t('remove'), 'admin/content/types/'. $type['url_str'] .'/groups/'. $group['group_name'] .'/remove');
-        $form[$key]['weight'] = array('#type' => 'weight', '#default_value' => $group['weight']);
-        $form[$key]['parent'] = array('#type' => 'textfield', '#default_value' => '');
-        $form[$key]['hidden_name'] = array('#type' => 'hidden', '#default_value' => $group['group_name']);
-        $form[$key]['#root'] = TRUE;
-        // Add child fields...
-        foreach ($group['fields'] as $field_name => $field) {
-          $field = $type['fields'][$field_name];
-          $form[$field_name]['label']['#value'] = $field['widget']['label'];
-          $form[$field_name]['name']['#value'] = $field['field_name'];
-          $form[$field_name]['type']['#value'] = $field['type'];
-          $form[$field_name]['configure']['#value'] = l(t('configure'), 'admin/content/types/'. $type['url_str'] .'/fields/'. $field['field_name'] .'/edit');
-          $form[$field_name]['remove']['#value'] = l(t('remove'), 'admin/content/types/'. $type['url_str'] .'/fields/'. $field['field_name'] .'/remove');
-          $form[$field_name]['weight'] = array('#type' => 'weight', '#default_value' => $field['widget']['weight']);
-          $form[$field_name]['parent'] = array('#type' => 'select', '#options' => $group_options, '#default_value' => $group['group_name']);
-          $form[$field_name]['hidden_name'] = array('#type' => 'hidden', '#default_value' => $field['field_name']);
-          $form[$field_name]['#depth'] = 1;
-          $form[$field_name]['#leaf'] = TRUE;
-        }
-      }
-      elseif (isset($type['fields'][$key])) {
-        $field = $type['fields'][$key];
-        $form[$key]['label']['#value'] = $field['widget']['label'];
-        $form[$key]['name']['#value'] = $field['field_name'];
-        $form[$key]['type']['#value'] = $field['type'];
-        $form[$key]['configure']['#value'] = l(t('configure'), 'admin/content/types/'. $type['url_str'] .'/fields/'. $field['field_name'] .'/edit');
-        $form[$key]['remove']['#value'] = l(t('remove'), 'admin/content/types/'. $type['url_str'] .'/fields/'. $field['field_name'] .'/remove');
-        $form[$key]['weight'] = array('#type' => 'weight', '#default_value' => $field['widget']['weight']);
-        $form[$key]['parent'] = array('#type' => 'select', '#options' => $group_options, '#default_value' => '');
-        $form[$key]['hidden_name'] = array('#type' => 'hidden', '#default_value' => $field['field_name']);
-        $form[$key]['#leaf'] = TRUE;
-      }
-      else {
-        $form[$key]['label']['#value'] = $key == 'body_filter' ? t('body') : $key;
-        $form[$key]['name']['#value'] = $key;
-        $form[$key]['type']['#value'] = '';
-        $form[$key]['configure']['#value'] = '';
-        $form[$key]['remove']['#value'] = '';
-        $form[$key]['weight'] = array('#type' => 'weight', '#default_value' => $value['#weight']);
-        $form[$key]['parent'] = array('#type' => 'textfield', '#default_value' => '');
-        $form[$key]['hidden_name'] = array('#type' => 'hidden', '#default_value' => $key);
-        $form[$key]['#disabled'] = TRUE;
-        $form[$key]['#leaf'] = TRUE;
-      }
-    }
-  }
-
-  $form['submit'] = array('#type' => 'submit', '#value' => t('Update'));
-  return $form;
-}
-
-function theme_content_admin_field_overview_dnd_form($form) {
-  drupal_set_message('NOTE : This form is not functional yet - No settings will be saved.');
-  // The css for this form contains non-validating styles,
-  // so we use a separate file, included only on the relevant page.
-  drupal_add_css(drupal_get_path('module', 'content') .'/content_admin.css');
-
   $header = array(t('Label'), t('Name'), t('Type'), t('Weight'), array('data' => t('Operations'), 'colspan' => 2));
   $rows = array();
 
-  // The table was created in the form
-  // iterate through it and render form elements when placeholders are encountered
-  // then run the rows array through theme_table().
-  foreach (element_children($form) as $key) {
+  foreach ($form['#order'] as $key) {
+    $row = array();
     $element = &$form[$key];
-    if (isset($element['configure'])) {
-      $row = array();
-      $element['weight']['#attributes']['class'] = 'field-weight';
-      $element['parent']['#attributes']['class'] = 'group-parent';
-      $element['hidden_name']['#attributes']['class'] = 'field-name';
-      $row[] = theme('indentation', isset($element['#depth']) ? $element['#depth'] : 0) . drupal_render($element['label']);
-      $row[] = drupal_render($element['name']);
-      $row[] = drupal_render($element['type']);
-      $row[] = drupal_render($element['weight']) . drupal_render($element['parent']) . drupal_render($element['hidden_name']);
-      $row[] = drupal_render($element['configure']);
-      $row[] = drupal_render($element['remove']);
-      $class = isset($element['#disabled']) ? 'content-field-overview-disabled' : 'content-field-overview-enabled draggable';
-      $class .= isset($element['#leaf']) ? ' tabledrag-leaf' : '';
-      $class .= isset($element['#root']) ? ' tabledrag-root' : '';
-      $rows[] = array('data' => $row, 'class' => $class);
-
+    $element['weight']['#attributes']['class'] = 'field-weight';
+    $element['parent']['#attributes']['class'] = 'group-parent';
+    $element['hidden_name']['#attributes']['class'] = 'field-name';
+    if (in_array($key, $form['#groups'])) {
+      $element['label']['#prefix'] = '<b>';
+      $element['label']['#suffix'] = '</b>';
     }
+    $row[] = theme('indentation', isset($element['#depth']) ? $element['#depth'] : 0) . drupal_render($element['label']);
+    $row[] = drupal_render($element['name']);
+    $row[] = drupal_render($element['type']);
+    $row[] = drupal_render($element['weight']) . drupal_render($element['parent']) . drupal_render($element['hidden_name']);
+    $row[] = drupal_render($element['configure']);
+    $row[] = drupal_render($element['remove']);
+    $class = 'draggable';
+    $class .= isset($element['#disabled']) ? ' menu-disabled' : '';
+    $class .= isset($element['#leaf']) ? ' tabledrag-leaf' : '';
+    $class .= isset($element['#root']) ? ' tabledrag-root' : '';
+    $rows[] = array('data' => $row, 'class' => $class);
   }
+
   $output  = theme('table', $header, $rows, array('id' => 'content-field-overview'));
   $output .= drupal_render($form);
+
   drupal_add_tabledrag('content-field-overview', 'match', 'parent', 'group-parent', 'group-parent', 'field-name', TRUE, 1);
   drupal_add_tabledrag('content-field-overview', 'order', 'sibling', 'field-weight');
 
@@ -450,11 +184,23 @@ function content_admin_field_overview_form_submit($form, &$form_state) {
   $form_values = $form_state['values'];
 
   // Update field weights.
-  foreach ((array) $form_values['field-weights'] as $key => $value) {
-    if ($key && !in_array($key, unserialize($form_values['disabled']))) {
+  $extra = array();
+  foreach ($form_values as $key => $value) {
+    // Groups are handled in fieldgroup_content_overview_form_submit().
+    if (in_array($key, $form['#fields'])) {
       db_query("UPDATE {". content_instance_tablename() ."} SET weight = %d WHERE type_name = '%s' AND field_name = '%s'",
-        $value, $form_values['type_name'], $key);
+        $value['weight'], $form['#type_name'], $key);
     }
+    elseif (in_array($key, $form['#extra'])) {
+      $extra[$key] = $value['weight'];
+    }
+  }
+
+  if ($extra) {
+    variable_set('content_extra_weights_'. $form['#type_name'], $extra);
+  }
+  else {
+    variable_del('content_extra_weights_'. $form['#type_name']);
   }
 
   content_clear_type_cache();
