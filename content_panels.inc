@@ -5,15 +5,20 @@
  * Callback function to supply a list of content types.
  */
 function content_panels_content_types() {
-  $items['node_cck_group'] = array(
-    'title' => t('Node CCK Group'),
-    'content_types' => 'content_admin_content_types_node_cck_group',
-    'single' => TRUE, // only provides a single content type
-    'render callback' => 'content_content_node_cck_group',
-    'add callback' => 'content_admin_edit_node_cck_group',
-    'edit callback' => 'content_admin_edit_node_cck_group',
-    'title callback' => 'content_admin_title_node_cck_group',
-  );
+	$items = array();
+	
+	if (module_exists('fieldgroup')) {
+	  $items['node_cck_group'] = array(
+	    'title' => t('Node CCK Group'),
+	    'content_types' => 'content_admin_content_types_node_cck_group',
+	    'single' => TRUE, // only provides a single content type
+	    'render callback' => 'content_content_node_cck_group',
+	    'add callback' => 'content_admin_edit_node_cck_group',
+	    'edit callback' => 'content_admin_edit_node_cck_group',
+	    'title callback' => 'content_admin_title_node_cck_group',
+	  );
+	}
+	
   return $items;
 }
 
@@ -85,7 +90,7 @@ function _content_admin_node_cck_group_options() {
   $group_list = array();
   
   // Retrieve the list of all groups on all content types
-  $types = fieldgroup_groups(NULL, FALSE, FALSE);
+  $types = module_exists('fieldgroups') ? fieldgroup_groups(NULL, FALSE, FALSE) : array();
   
   // Add each group to the list with the content type it is from in parentheses
   foreach ($types as $type) {  
