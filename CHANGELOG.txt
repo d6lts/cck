@@ -6,6 +6,7 @@ Features
 --------
 
 General
+- #203495  Initial Panels 2 integration : render a fieldgroup in a panel.
 
 Field / Widget modules
 - #60713   Add optional reverse link on user profile page for userreferenced users.
