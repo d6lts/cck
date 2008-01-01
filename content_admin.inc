@@ -433,12 +433,11 @@ function _content_admin_field_add_existing_submit($form, &$form_state) {
   module_load_include('inc', 'content', 'content_crud');
   $form_values = $form_state['values'];
 
-  if (!content_field_instance_create($form_values)) {
-    drupal_set_message(t('There was a problem adding field %label.', array(
-      '%label' => $form_values['field_name'])));
-  }
-  else {
+  if (content_field_instance_create($form_values)) {
     drupal_set_message(t('Added field %label.', array(
+      '%label' => $form_values['field_name'])));  }
+  else {
+    drupal_set_message(t('There was a problem adding field %label.', array(
       '%label' => $form_values['field_name'])));
   }
   $type = content_types($form_values['type_name']);
@@ -474,16 +473,16 @@ function _content_admin_field_add_new_submit($form, &$form_state) {
   $form_values['widget_type'] = $field_widget_type[1];
   unset($form_values['field_widget_type']);
 
-  if (!$field = content_field_instance_create($form_values)) {
-    drupal_set_message(t('There was a problem creating field %label.', array(
-      '%label' => $form_values['field_name'])));
-  }
-  else {
+  if (content_field_instance_create($form_values)) {
     drupal_set_message(t('Created field %label.', array(
       '%label' => $form_values['field_name'])));
   }
+  else {
+    drupal_set_message(t('There was a problem creating field %label.', array(
+      '%label' => $form_values['field_name'])));
+  }
 
-  $type   = content_types($form_values['type_name']);
+  $type = content_types($form_values['type_name']);
   $form_state['redirect'] = 'admin/content/types/'. $type['url_str'] .'/fields/'. $form_values['field_name'];
 }
 
