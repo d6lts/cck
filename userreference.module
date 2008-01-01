@@ -501,7 +501,7 @@ function userreference_user($type, &$edit, &$account) {
       $search_tables = array();
       $search_links = array();
       foreach ($types as $type_name => $type) {
-        foreach($type['fields'] as $field) {
+        foreach ($type['fields'] as $field) {
           if ($field['type'] == 'userreference') {
             $db_info = content_database_info($field);
             $search_tables[$db_info['table']] = $db_info['columns']['uid']['column'];

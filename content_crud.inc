@@ -188,7 +188,7 @@ function content_field_instance_create($field) {
 
   // If there are prior instances, fill out missing values from the prior values,
   // otherwise get missing values from default values.
-  $prior_instances = (array) content_field_instance_read(array('field_name' => $field['field_name']));
+  $prior_instances = content_field_instance_read(array('field_name' => $field['field_name']));
   if (!empty($prior_instances) && is_array($prior_instances)) {
     $prev_field = content_field_instance_expand($prior_instances[0]);
   }
@@ -294,7 +294,7 @@ function content_field_instance_update($field) {
   $field['columns'] = (array) module_invoke($field['module'], 'field_settings', 'database columns', $field);
 
   // If the database storage has changed, update the field and previous instances.
-  $prior_instances = (array) content_field_instance_read(array('field_name' => $field['field_name']));
+  $prior_instances = content_field_instance_read(array('field_name' => $field['field_name']));
 
   if ($prev_field['db_storage'] == CONTENT_DB_STORAGE_PER_CONTENT_TYPE && count($prior_instances) > 1) {
 

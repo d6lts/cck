@@ -10,7 +10,7 @@
  * from database info that is limited to fields from modules that are
  * currently enabled.
  */
-function content_install_types() {
+function content_types_install() {
   include_once('./'. drupal_get_path('module', 'content') .'/content.module');
 
   $module_field_types = $module_widgets = array();
@@ -271,7 +271,7 @@ function content_update_6002() {
   include_once('./'. drupal_get_path('module', 'content') .'/content.module');
   $ret = array();
 
-  $db_types = content_install_types();
+  $db_types = content_types_install();
   $field_types = array();
 
   $result = db_query("SELECT DISTINCT type_name FROM {". content_instance_tablename() ."}");

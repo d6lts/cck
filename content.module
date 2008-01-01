@@ -714,7 +714,7 @@ function content_associate_fields($module) {
   // version of a fields array.
   include_once('./'. drupal_get_path('module', 'content') .'/content.install');
   $fields_set = array();
-  $types = content_install_types();
+  $types = content_types_install();
   foreach ($types as $type_name => $fields) {
     foreach ($fields as $field) {
       if ($field['module'] == $module && !in_array($field['field_name'], $fields_set)) {
@@ -1191,6 +1191,7 @@ function _content_type_info($reset = FALSE) {
           $info['fields'][$field['field_name']] = $field;
         }
 
+        // Gather information about non-CCK 'fields'.
         $extra = module_invoke_all('content_extra_fields', $type_name);
         drupal_alter('content_extra_fields', $extra, $type_name);
         // Add saved weights.
@@ -1299,14 +1300,13 @@ function content_storage_type($field) {
     return CONTENT_DB_STORAGE_PER_FIELD;
   }
   else {
+    module_load_include('inc', 'content', 'content_crud');
     $instances = content_field_instance_read(array('field_name' => $field['field_name']));
     if (count($instances) > 1) {
       return CONTENT_DB_STORAGE_PER_FIELD;
     }
-    else {
-      return CONTENT_DB_STORAGE_PER_CONTENT_TYPE;
-    }
   }
+  return CONTENT_DB_STORAGE_PER_CONTENT_TYPE;
 }
 
 /**
