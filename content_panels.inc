@@ -90,7 +90,7 @@ function _content_admin_node_cck_group_options() {
   $group_list = array();
   
   // Retrieve the list of all groups on all content types
-  $types = module_exists('fieldgroups') ? fieldgroup_groups(NULL, FALSE, FALSE) : array();
+  $types = module_exists('fieldgroup') ? fieldgroup_groups(NULL, FALSE, FALSE) : array();
   
   // Add each group to the list with the content type it is from in parentheses
   foreach ($types as $type) {  
@@ -112,7 +112,7 @@ function content_admin_edit_node_cck_group($id, $parents, $conf = array()) {
   }
 
   $form['group'] = array(
-    '#type' => 'radios',
+    '#type' => 'select',
     '#title' => t('Which group'),
     '#options' => _content_admin_node_cck_group_options(),
     '#default_value' => $conf['group'],
