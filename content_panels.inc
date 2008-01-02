@@ -6,19 +6,19 @@
  */
 function content_panels_content_types() {
 	$items = array();
-	
-	if (module_exists('fieldgroup')) {
-	  $items['node_cck_group'] = array(
-	    'title' => t('Node CCK Group'),
-	    'content_types' => 'content_admin_content_types_node_cck_group',
-	    'single' => TRUE, // only provides a single content type
-	    'render callback' => 'content_content_node_cck_group',
-	    'add callback' => 'content_admin_edit_node_cck_group',
-	    'edit callback' => 'content_admin_edit_node_cck_group',
-	    'title callback' => 'content_admin_title_node_cck_group',
-	  );
-	}
-	
+
+  if (module_exists('fieldgroup')) {
+    $items['node_cck_group'] = array(
+      'title' => t('Node CCK Group'),
+      'content_types' => 'content_admin_content_types_node_cck_group',
+      'single' => TRUE, // only provides a single content type
+      'render callback' => 'content_content_node_cck_group',
+      'add callback' => 'content_admin_edit_node_cck_group',
+      'edit callback' => 'content_admin_edit_node_cck_group',
+      'title callback' => 'content_admin_title_node_cck_group',
+    );
+  }
+
   return $items;
 }
 
