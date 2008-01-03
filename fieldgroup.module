@@ -339,19 +339,17 @@ function fieldgroup_form_alter(&$form, $form_state, $form_id) {
     $form['widget']['description']['#weight'] = 7;
     $form['#submit'][] = 'fieldgroup_content_admin_form_submit';
   }
-  elseif ($form_id == 'content_admin_display_overview_form') {
-    $form['groups'] = fieldgroup_display_overview_form($form['type_name']['#value']);
-    $form['groups']['#theme'] = 'fieldgroup_display_overview_form';
+  elseif ($form_id == 'content_admin_field_overview_form' && !empty($form['#groups'])) {
+    $form['#submit'][] = 'fieldgroup_content_overview_form_submit';
+  }
+  elseif ($form_id == 'content_admin_display_overview_form' && !empty($form['#groups'])) {
     $form['#submit'][] = 'fieldgroup_display_overview_form_submit';
-    if (!isset($form['submit']) && count(fieldgroup_groups($form['type_name']['#value']))) {
+    if (!isset($form['submit'])) {
       $form['submit'] = array('#type' => 'submit', '#value' => t('Submit'), '#weight' => 10);
     }
   }
   elseif ($form_id == '_content_admin_field_remove') {
     $form['#submit'][] = 'fieldgroup_content_admin_field_remove_submit';
-  }
-  elseif ($form_id == 'content_admin_field_overview_form') {
-    $form['#submit'][] = 'fieldgroup_content_overview_form_submit';
   }
 }
 
@@ -363,20 +361,32 @@ function fieldgroup_content_admin_form_submit($form, &$form_state) {
 function fieldgroup_content_overview_form_submit($form, &$form_state) {
   $form_values = $form_state['values'];
   $type_name = $form['#type_name'];
-  // Update field weights.
-  $extra = array();
-  foreach ($form_values as $key => $value) {
+  foreach ($form_values as $key => $values) {
+    // Update field parenting.
     if (in_array($key, $form['#fields'])) {
       // TODO : check the parent group does exist ?
-      fieldgroup_update_fields(array('field_name' => $key, 'group' => $value['parent'], 'type_name' => $type_name));
+      fieldgroup_update_fields(array('field_name' => $key, 'group' => $values['parent'], 'type_name' => $type_name));
     }
+    // Update groups weights.
     elseif (in_array($key, $form['#groups'])) {
       db_query("UPDATE {". fieldgroup_tablename() ."} SET weight = %d WHERE type_name = '%s' AND group_name = '%s'",
-        $value['weight'], $type_name, $key);
+        $values['weight'], $type_name, $key);
     }
   }
 
   cache_clear_all('fieldgroup_data', content_cache_tablename());
+}
+
+function fieldgroup_display_overview_form_submit($form, &$form_state) {
+  $form_values = $form_state['values'];
+  $groups = fieldgroup_groups($form['#type_name']);
+  foreach ($form_values as $key => $values) {
+    if (in_array($key, $form['#groups'])) {
+      $group = $groups[$key];
+      $group['settings']['display'] = array_merge($group['settings']['display'], $values);
+      fieldgroup_save_group($form['#type_name'], $group);
+    }
+  }
 }
 
 function fieldgroup_content_admin_field_remove_submit($form, &$form_state) {
@@ -483,97 +493,6 @@ function fieldgroup_node_type($op, $info) {
   elseif ($op == 'delete') {
     db_query("DELETE FROM {". fieldgroup_tablename() ."} WHERE type_name = '%s'", $info->type);
     db_query("DELETE FROM {". fieldgroup_fields_tablename() ."} WHERE type_name = '%s'", $info->type);
-  }
-}
-
-
-/*
- * Adds a own table to the "display fields" tab
- */
-function fieldgroup_display_overview_form($content_type) {
-  $groups = fieldgroup_groups($content_type);
-  $form = array();
-  $form['#tree'] = TRUE;
-  foreach ($groups as $group_name => $group) {
-    $form[$group_name] = fieldgroup_display_overview_form_row($group);
-  }
-
-  return $form;
-}
-
-function fieldgroup_display_overview_form_row($group) {
-  $defaults = $group['settings']['display'];
-
-  $label_options = array(
-    'above' => t('Above'),
-    'hidden' => t('<Hidden>'),
-  );
-  $options = array(
-    'no_style' => t('no styling'),
-    'simple' => t('simple'),
-    'fieldset' => t('fieldset'),
-    'fieldset_collapsible' => t('fieldset - collapsible'),
-    'fieldset_collapsed' => t('fieldset - collapsed'),
-    'hidden' => t('<Hidden>'),
-  );
-
-  $row = array();
-  $row['group_label']  = array('#value' => $group['label']);
-  $row['label'] = array(
-    '#type' => 'select',
-    '#options' => $label_options,
-    '#default_value' => isset($defaults['label']) ? $defaults['label'] : 'above',
-  );
-
-  foreach (_content_admin_display_contexts() as $key => $title) {
-    $row[$key] = array(
-      '#type' => 'select',
-      '#options' => $options,
-      '#default_value' => isset($defaults[$key]) ? $defaults[$key] : 'fieldset',
-    );
-  }
-  return $row;
-}
-
-/*
- * Themes the group part of the form as table
- */
-function theme_fieldgroup_display_overview_form($form) {
-  $header = array(t('Group'), t('Label'));
-  foreach (_content_admin_display_contexts() as $key => $title) {
-    $header[] = $title;
-  }
-
-  $rows = array();
-  foreach (element_children($form) as $group) {
-    $row = array();
-    foreach (element_children($form[$group]) as $key) {
-      $row[] = drupal_render($form[$group][$key]);
-    }
-    $rows[] = $row;
-  }
-  $output = '';
-  if (!empty($rows)) {
-    $output  = theme('table', $header, $rows, array('class' => 'content-group-display-overview'));
-  }
-  $output .= drupal_render($form);
-  return $output;
-}
-
-function fieldgroup_display_overview_form_submit($form, &$form_state) {
-  $form_values = $form_state['values'];
-
-  $type = $form_values['type_name'];
-  $groups = fieldgroup_groups($form_values['type_name']);
-
-  if (isset($form_values['groups'])) {
-    foreach ($form_values['groups'] as $group_name => $groupvalues) {
-      $group = &$groups[$group_name];
-      foreach ($groupvalues as $key => $value) {
-        $group['settings']['display'][$key] = $value;
-      }
-      fieldgroup_save_group($type, $group);
-    }
   }
 }
 

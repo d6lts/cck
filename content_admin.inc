@@ -80,7 +80,7 @@ function content_admin_field_overview_form(&$form_state, $type_name) {
   foreach ($fields as $name => $field) {
     $weight = $field['widget']['weight'];
     $form[$name] = array(
-      'label' => array('#value' => $field['widget']['label']),
+      'human_name' => array('#value' => $field['widget']['label']),
       'name' => array('#value' => $field['field_name']),
       'type' => array('#value' => $field['type']),
       'configure' => array('#value' => l(t('configure'), 'admin/content/types/'. $type['url_str'] .'/fields/'. $field['field_name'] .'/edit')),
@@ -96,7 +96,7 @@ function content_admin_field_overview_form(&$form_state, $type_name) {
   foreach ($groups as $name => $group) {
     $weight = $group['weight'];
     $form[$name] = array(
-      'label' => array('#value' => $group['label']),
+      'human_name' => array('#value' => $group['label']),
       'name' => array('#value' => $group['group_name']),
       'type' => array(),
       'configure' => array('#value' => l(t('configure'), 'admin/content/types/'. $type['url_str'] .'/groups/'. $group['group_name'] .'/edit')),
@@ -119,7 +119,7 @@ function content_admin_field_overview_form(&$form_state, $type_name) {
   foreach ($extra as $name => $label) {
     $weight = $extra[$name]['weight'];
     $form[$name] = array(
-      'label' => array('#value' => $extra[$name]['label']),
+      'human_name' => array('#value' => $extra[$name]['label']),
       'name' => array(),
       'type' => array(),
       'configure' => array(),
@@ -155,10 +155,10 @@ function theme_content_admin_field_overview_form($form) {
     $element['parent']['#attributes']['class'] = 'group-parent';
     $element['hidden_name']['#attributes']['class'] = 'field-name';
     if (in_array($key, $form['#groups'])) {
-      $element['label']['#prefix'] = '<b>';
-      $element['label']['#suffix'] = '</b>';
+      $element['human_name']['#prefix'] = '<b>';
+      $element['human_name']['#suffix'] = '</b>';
     }
-    $row[] = theme('indentation', isset($element['#depth']) ? $element['#depth'] : 0) . drupal_render($element['label']);
+    $row[] = theme('indentation', isset($element['#depth']) ? $element['#depth'] : 0) . drupal_render($element['human_name']);
     $row[] = drupal_render($element['name']);
     $row[] = drupal_render($element['type']);
     $row[] = drupal_render($element['weight']) . drupal_render($element['parent']) . drupal_render($element['hidden_name']);
@@ -185,14 +185,14 @@ function content_admin_field_overview_form_submit($form, &$form_state) {
 
   // Update field weights.
   $extra = array();
-  foreach ($form_values as $key => $value) {
+  foreach ($form_values as $key => $values) {
     // Groups are handled in fieldgroup_content_overview_form_submit().
     if (in_array($key, $form['#fields'])) {
       db_query("UPDATE {". content_instance_tablename() ."} SET weight = %d WHERE type_name = '%s' AND field_name = '%s'",
-        $value['weight'], $form['#type_name'], $key);
+        $values['weight'], $form['#type_name'], $key);
     }
     elseif (in_array($key, $form['#extra'])) {
-      $extra[$key] = $value['weight'];
+      $extra[$key] = $values['weight'];
     }
   }
 
@@ -213,101 +213,177 @@ function content_admin_field_overview_form_submit($form, &$form_state) {
  * and how the field labels should be rendered
  */
 function content_admin_display_overview_form(&$form_state, $type_name) {
+  // Gather type information.
   $type = content_types($type_name);
-  $field_types = _content_field_types();
-
-  $form = array();
-  $form['type_name'] = array('#type' => 'hidden', '#value' => $type['type']);
-
-  if (empty($type['fields'])) {
+  $field_types = _content_field_types(); // TODO : needed ?
+  $fields = $type['fields'];
+  if (empty($fields)) {
     drupal_set_message(t('There are no fields configured for this content type.'));
-    return $form;
-  }
-  $form['#tree'] = TRUE;
-  foreach ($type['fields'] as $field) {
-    $form['fields'][$field['field_name']] = _content_admin_display_overview_row($field, $field_types[$field['type']]);
+    return array();
   }
 
-  $form['submit'] = array('#type' => 'submit', '#value' => t('Submit'), '#weight' => 10);
-  return $form;
-}
-
-function theme_content_admin_display_overview_form($form) {
-  $header = array(t('Field'), t('Type'), t('Label'));
-  foreach (_content_admin_display_contexts() as $key => $title) {
-    $header[] = $title;
+  $groups = $group_options = array();
+  if (module_exists('fieldgroup')) {
+    $groups = fieldgroup_groups($type['type']);
+    $group_options = _fieldgroup_groups_label($type['type']);
   }
-  $rows = array();
-  if (isset($form['fields'])) {
-    foreach (element_children($form['fields']) as $field) {
-      $row = array();
-      foreach (element_children($form['fields'][$field]) as $key) {
-        $row[] = drupal_render($form['fields'][$field][$key]);
-      }
-      $rows[] = $row;
-    }
-  }
-  $output = '';
-  if (!empty($rows)) {
-    $output  = theme('table', $header, $rows, array('class' => 'content-field-display-overview'));
-  }
-  $output .= drupal_render($form);
-  return $output;
-}
+  $contexts = _content_admin_display_contexts();
 
-function content_admin_display_overview_form_submit($form, &$form_state) {
-  module_load_include('inc', 'content', 'content_crud');
-  $form_values = $form_state['values'];
-  $type_name = $form_values['type_name'];
-  $fields = content_fields();
-  if (isset($form_values['fields'])) {
-    foreach ($form_values['fields'] as $field_name => $field_values) {
-      $field = content_fields($field_name, $type_name);
-      $field['display_settings'] = array();
-      foreach ($field_values as $key => $value) {
-        $field['display_settings'][$key] = $value;
-      }
-      $field = content_field_instance_collapse($field);
-      content_field_instance_update($field);
-    }
-    content_clear_type_cache();
-  }
-  drupal_set_message(t('Your settings have been saved.'));
-}
+  // Rows in this table are essentially nested, but for the simplicity of
+  // theme and submit functions, we keep them in a flat array, and use a
+  // $dummy render structure to figure the right display order.
+  $dummy = array();
 
-function _content_admin_display_overview_row($field, $field_type) {
-  $defaults = $field['display_settings'];
+  $form = array(
+    '#tree' => TRUE,
+    '#type_name' => $type['type'],
+    '#fields' => array_keys($fields),
+    '#groups' => array_keys($groups),
+    '#order' => array(),
+  );
 
-  $options = array();
-  foreach ($field_type['formatters'] as $name => $formatter_info) {
-    $options[$name] = $formatter_info['label'];
-  }
-  $options['hidden'] = t('<Hidden>');
-
+  // Fields.
   $label_options = array(
     'above' => t('Above'),
     'inline' => t('Inline'),
     'hidden' => t('<Hidden>'),
   );
+  foreach ($fields as $name => $field) {
+    $field_type = $field_types[$field['type']];
+    $defaults = $field['display_settings'];
+    $weight = $field['widget']['weight'];
 
-  $row = array();
-  $row['type_label']  = array('#value' => $field['widget']['label']);
-  $row['type']        = array('#value' => $field_type['label']);
-
-  $row['label']['format'] = array(
-    '#type' => 'select',
-    '#options' => $label_options,
-    '#default_value' => isset($defaults['label']['format']) ? $defaults['label']['format'] : 'above',
-  );
-
-  foreach (_content_admin_display_contexts() as $key => $title) {
-    $row[$key]['format'] = array(
-      '#type' => 'select',
-      '#options' => $options,
-      '#default_value' => isset($defaults[$key]['format']) ? $defaults[$key]['format'] : 'default',
+    $form[$name] = array(
+      'human_name' => array('#value' => $field['widget']['label']), // OK
+//      'type' => array('#value' => $field['type']), // OK ? array('#value' => $field_type['label']);
     );
+
+    // Label
+    $form[$name]['label']['format'] = array(
+      '#type' => 'select',
+      '#options' => $label_options,
+      '#default_value' => isset($defaults['label']['format']) ? $defaults['label']['format'] : 'above',
+    );
+
+    // Formatters.
+    $options = array();
+    foreach ($field_type['formatters'] as $formatter_name => $formatter_info) {
+      $options[$formatter_name] = $formatter_info['label'];
+    }
+    $options['hidden'] = t('<Hidden>');
+    foreach ($contexts as $key => $title) {
+      $form[$name][$key]['format'] = array(
+        '#type' => 'select',
+        '#options' => $options,
+        '#default_value' => isset($defaults[$key]['format']) ? $defaults[$key]['format'] : 'default',
+      );
+    }
+
+    $dummy[$name] = array('#weight' => $weight, '#value' => $name .' ');
   }
-  return $row;
+
+  // Groups.
+  $label_options = array(
+    'above' => t('Above'),
+    'hidden' => t('<Hidden>'),
+  );
+  $options = array(
+    'no_style' => t('no styling'),
+    'simple' => t('simple'),
+    'fieldset' => t('fieldset'),
+    'fieldset_collapsible' => t('fieldset - collapsible'),
+    'fieldset_collapsed' => t('fieldset - collapsed'),
+    'hidden' => t('<Hidden>'),
+  );
+  foreach ($groups as $name => $group) {
+    $defaults = $group['settings']['display'];
+    $weight = $group['weight'];
+
+    $form[$name] = array(
+      'human_name' => array('#value' => $group['label']),
+//      'type' => array(),
+    );
+    $form[$name]['label'] = array(
+      '#type' => 'select',
+      '#options' => $label_options,
+      '#default_value' => isset($defaults['label']) ? $defaults['label'] : 'above',
+    );
+    foreach ($contexts as $key => $title) {
+      $form[$name][$key]['format'] = array(
+        '#type' => 'select',
+        '#options' => $options,
+        '#default_value' => isset($defaults[$key]) ? $defaults[$key] : 'fieldset',
+      );
+    }
+    $dummy[$name] = array('#weight' => $weight, '#value' => $name .' ');
+    // Adjust child fields rows.
+    foreach ($group['fields'] as $field_name => $field) {
+      $form[$field_name]['#depth'] = 1;
+      $dummy[$name][$field_name] = $dummy[$field_name];
+      unset($dummy[$field_name]);
+    }
+  }
+
+  // Let drupal_render figure out the right order for the rows.
+  $form['#order'] = explode(' ', trim(drupal_render($dummy)));
+
+  $form['submit'] = array('#type' => 'submit', '#value' => t('Save'));
+  return $form;
+}
+
+/**
+ *  Theme the display overview table.
+ */
+function theme_content_admin_display_overview_form($form) {
+  $contexts = _content_admin_display_contexts();
+//  $header = array(t('Field'), t('Type'), t('Label'));
+  $header = array(t('Field'), t('Label'));
+  foreach ($contexts as $key => $title) {
+    $header[] = $title;
+  }
+  $rows = array();
+
+  foreach ($form['#order'] as $key) {
+    $row = array();
+    $element = &$form[$key];
+    if (in_array($key, $form['#groups'])) {
+      $element['human_name']['#prefix'] = '<b>';
+      $element['human_name']['#suffix'] = '</b>';
+    }
+    $row[] = theme('indentation', isset($element['#depth']) ? $element['#depth'] : 0) . drupal_render($element['human_name']);
+//    $row[] = drupal_render($element['type']);
+    $row[] = drupal_render($element['label']);
+    foreach ($contexts as $context => $title) {
+      $row[] = drupal_render($element[$context]['format']);
+    }
+    $rows[] = $row;
+  }
+
+  $output  = theme('table', $header, $rows);
+  $output .= drupal_render($form);
+
+  return $output;
+}
+
+/**
+ * Submit handler for the display overview form.
+ */
+function content_admin_display_overview_form_submit($form, &$form_state) {
+  module_load_include('inc', 'content', 'content_crud');
+  $form_values = $form_state['values'];
+  $fields = content_fields();
+  foreach ($form_values as $key => $values) {
+    // Groups are handled in fieldgroup_display_overview_form_submit().
+    if (in_array($key, $form['#fields'])) {
+      $field = content_fields($key, $form['#type_name']);
+      $field['display_settings'] = array_merge($field['display_settings'], $values);
+      $field = content_field_instance_collapse($field);
+      content_field_instance_update($field);
+    }
+    content_clear_type_cache();
+  }
+
+  drupal_set_message(t('Your settings have been saved.'));
 }
 
 /**
