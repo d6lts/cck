@@ -55,7 +55,7 @@ function content_init() {
 }
 
 /**
- * Flag / unflag the menus fo rebuilding, or read the current
+ * Flag / unflag the menus for rebuilding, or read the current
  * value of the flag.
  *
  * When adding new content types and fields, a menu rebuild is needed
@@ -399,7 +399,7 @@ function content_multiple_value_form(&$form, &$form_state, $field, $items) {
       '#value' => t('Add another !field value', array('!field' => t($field['widget']['label']))),
       '#description' => t("If the amount of boxes above isn't enough, click here to add more items."),
       '#weight' => $field['widget']['weight'] + $max + 1,
-      '#submit' => array('content_add_more_submit'), // If no javascript action.
+      '#submit' => array('content_add_more_submit'), // If no JavaScript action.
       '#ahah' => array(
         'path' => 'content/js_add_more/'. $content_type['url_str'] .'/'. $field_name,
         'wrapper' => $field_name_css .'-items',
@@ -419,7 +419,7 @@ function content_multiple_value_form(&$form, &$form_state, $field, $items) {
 
 /**
  * Submit handler to add more choices to a content form. This handler is used when
- * javascript is not available. It makes changes to the form state and the
+ * JavaScript is not available. It makes changes to the form state and the
  * entire form is rebuilt during the page reload.
  */
 function content_add_more_submit($form, &$form_state) {
@@ -574,7 +574,7 @@ function content_view(&$node, $teaser = FALSE, $page = FALSE) {
   $additions = _content_field_invoke_default('view', $node);
   $node->content = array_merge((array) $node->content, $additions);
 
-  // Adjust weights for non-cck fields.
+  // Adjust weights for non-CCK fields.
   $type = content_types($node->type);
   foreach ($type['extra'] as $key => $value) {
     // Some core 'fields' use a different key in node forms and in 'view'
@@ -648,7 +648,7 @@ function content_form_alter(&$form, $form_state, $form_id) {
   if (isset($form['type']) && ($form['type']['#value'] .'_node_form' == $form_id)) {
     // Merge field widgets.
     $form = array_merge($form, content_form($form, $form_state));
-    // Adjust weights for non-cck fields.
+    // Adjust weights for non-CCK fields.
     $type = content_types($form['type']['#value']);
     foreach ($type['extra'] as $key => $value) {
       if (isset($form[$key])) {
@@ -1551,7 +1551,7 @@ function content_table_schema($field = NULL) {
 }
 
 /**
- *  Helper function for determining the behaviour of a field or a widget
+ *  Helper function for determining the behavior of a field or a widget
  *  with respect to a given operation. (currently used for field 'view',
  *  and widget 'default values' and 'multiple values')
  *
@@ -1564,7 +1564,7 @@ function content_table_schema($field = NULL) {
  *  @return
  *    CONTENT_CALLBACK_NONE    - do nothing for this operation
  *    CONTENT_CALLBACK_CUSTOM  - use the module's callback function.
- *    CONTENT_CALLBACK_DEFAULT - use content module default behaviour
+ *    CONTENT_CALLBACK_DEFAULT - use content module default behavior
  *
  */
 function content_callback($entity, $op, $field) {

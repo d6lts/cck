@@ -367,7 +367,7 @@ function theme_optionwidgets_none($widget_type, $field_name, $node) {
  * FAPI themes for optionwidgets.
  *
  * The select, checkboxes or radios are already rendered by the
- * select, checkboxes, or radios themes and the html output
+ * select, checkboxes, or radios themes and the HTML output
  * lives in $element['#children']. Override this theme to
  * make custom changes to the output.
  *

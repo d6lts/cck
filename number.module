@@ -425,7 +425,7 @@ function number_process($element, $edit, $form_state, $form) {
     '#description' => t($field['widget']['description']),
     '#required' => $element['#required'],
     '#default_value' => $value,
-    // Need to allow a slighltly larger size that the field length to allow
+    // Need to allow a slightly larger size that the field length to allow
     // for some configurations where all characters won't fit in input field.
     '#size' => isset($field['scale']) ? $field['scale'] + 2 : 12,
     '#maxlength' => isset($field['scale']) ? $field['scale'] : 10,
@@ -519,7 +519,7 @@ function number_decimal_validate($element, &$form_state) {
  * FAPI theme for an individual number element.
  *
  * The textfield is already rendered by the textfield
- * theme and the html output lives in $element['#children'].
+ * theme and the HTML output lives in $element['#children'].
  * Override this theme to make custom changes to the output.
  *
  * $element['#field_name'] contains the field name

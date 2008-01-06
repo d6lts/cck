@@ -3,7 +3,7 @@
 
 /**
  *  @file
- *  Adds capability to import/export cck field data definitions.
+ *  Adds capability to import/export CCK field data definitions.
  *
  *  Emulates the import/export process introduced in Views to export the field settings arrays as text
  *  them copy and paste text to import the field settings back into another content type.
@@ -251,7 +251,7 @@ function content_copy_import_form_submit($form, &$form_state) {
   $content = NULL;
   // Convert the import formatted text back into a $content array.
   // Return if errors generated or not an array.
-  // Use '@' to surpress errors about undefined constants in the macro.
+  // Use '@' to suppress errors about undefined constants in the macro.
   @eval($form_values['macro']);
 
   // Preliminary error trapping, must have valid arrays to work with.
@@ -338,7 +338,7 @@ function content_copy_import_form_submit($form, &$form_state) {
     $content_info = _content_type_info();
 
     if (form_get_errors() || !isset($content_info['content types']) || !is_array($content_info['content types'][$type_name])) {
-       drupal_set_message(t("An error has occured adding the content type %type.<br/>Please check the errors displayed for more details.", array(
+       drupal_set_message(t("An error has occurred adding the content type %type.<br/>Please check the errors displayed for more details.", array(
             '%type' => $imported_type_name
             )));
        return;

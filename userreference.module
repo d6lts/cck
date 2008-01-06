@@ -490,7 +490,7 @@ function _userreference_filter_handler($op, $filterinfo) {
 function userreference_user($type, &$edit, &$account) {
   switch ($type) {
     case 'load':
-      // find cck userreference field tables
+      // find CCK userreference field tables
       // search through them for matching user ids and load those nodes
       $additions = array();
       $types = content_types();
@@ -555,7 +555,7 @@ function userreference_user($type, &$edit, &$account) {
  * FAPI theme for an individual elements.
  *
  * The textfield or select is already rendered by the
- * textfield or select themes and the html output
+ * textfield or select themes and the HTML output
  * lives in $element['#children']. Override this theme to
  * make custom changes to the output.
  *

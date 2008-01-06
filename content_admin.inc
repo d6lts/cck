@@ -454,7 +454,7 @@ function _content_admin_field_add_new(&$form_state, $type_name, $new_field_name 
       '#type' => 'textfield',
       '#default_value' => $new_field_name,
       '#field_prefix' => 'field_',
-      '#description' => t('The machine-readable name of the field. This name cannot be changed later! The name will be prefixed with \'field_\' and can include lowercase unaccentuated letters, numbers, and underscores. You\'ll be able to choose a human-readable label for the field on next page'),
+      '#description' => t('The machine-readable name of the field. This name cannot be changed later! The name will be prefixed with \'field_\' and can include lowercase unaccented letters, numbers, and underscores. You\'ll be able to choose a human-readable label for the field on next page'),
       '#required' => TRUE,
     );
     $form['new']['field_widget_type'] = array(
@@ -1182,7 +1182,7 @@ function content_alter_db($previous_field, $new_field) {
   // Migrate data from per-field storage, and drop per-field table.
   if ($previous_field['db_storage'] == CONTENT_DB_STORAGE_PER_FIELD &&
   $new_field['db_storage'] == CONTENT_DB_STORAGE_PER_CONTENT_TYPE) {
-      // In ordet to be able to use drupal_write_record, we need to
+      // In order to be able to use drupal_write_record, we need to
       // rebuild the schema now. // TODO : we're then missing debug $ret messages...
       content_alter_db_cleanup($ret);
     if ($previous_field['multiple']) {
@@ -1294,7 +1294,7 @@ function content_mask_batch_update($field, $mask, &$context) {
   if (!isset($context['sandbox']['progress'])) {
     $db_info = content_database_info($field);
 
-    // Might run into non-existant tables when cleaning up a corrupted
+    // Might run into non-existent tables when cleaning up a corrupted
     // database, like some of the old content storage changes in the
     // .install files.
     if (!db_table_exists($db_info['table'])) {
