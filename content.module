@@ -898,8 +898,21 @@ function content_storage($op, $node) {
       }
       return $additions;
 
-    case 'update':
     case 'insert':
+      // Manual node_save calls might not have all fields filled in.
+      // We need to make sure all tables get at least an empty record,
+      // or subsequent edits, using drupal_write_record() in update mode,
+      // won't insert any data.
+      foreach ($type['fields'] as $field) {
+        if (!isset($node->$field['field_name'])) {
+          foreach (array_keys($field['columns']) as $column) {
+            $node->{$field['field_name']}[0][$column] = NULL;
+          }
+        }
+      }
+      // Fall through to the 'update' case.
+
+    case 'update':
       foreach ($type['tables'] as $table) {
         $schema = drupal_get_schema($table);
         $record = array();
