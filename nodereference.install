@@ -45,7 +45,7 @@ function nodereference_requirements($phase) {
   // drupal_get_installed_schema_version doesn't exist when checking
   // requirements from an install profile. Our check is not needed for
   // fresh installations anyway.
-  if (function_exists('install_main')) {
+  if (!function_exists('install_main')) {
     $current_version = drupal_get_installed_schema_version('nodereference');
     $minimum_version = 3;
 
