@@ -24,28 +24,9 @@ function content_types_install() {
   }
   $fields = array();
   $db_result = db_query("SELECT * FROM {". content_instance_tablename() ."} nfi ".
-    " LEFT JOIN {". content_field_tablename() ."} nf ON nf.field_name = nfi.field_name");
+    " LEFT JOIN {". content_field_tablename() ."} nf ON nf.field_name = nfi.field_name WHERE nf.active = 1 and nfi.widget_active = 1");
   while ($field = db_fetch_array($db_result)) {
-    // There may be module data available for currently disabled modules,
-    // or missing module data for currently enabled modules, so start over
-    // to get only field info for enabled modules.
-    unset($field['module']);
-    unset($field['widget_module']);
-    foreach ($module_field_types as $module => $types) {
-      foreach ($types as $type_name => $type) {
-        if ($field['type'] == $type_name) {
-          $field['module'] = $module;
-        }
-      }
-    }
-    foreach ($module_widgets as $module => $types) {
-      foreach ($types as $type_name => $type) {
-        if ($field['widget_type'] == $type_name) {
-          $field['widget_module'] = $module;
-        }
-      }
-    }
-    if (!empty($field['module']) && !empty($field['widget_module'])) {
+    if (!empty($field['active']) && !empty($field['widget_active'])) {
       $field['widget_settings'] = unserialize($field['widget_settings']);
       $field['display_settings'] = unserialize($field['display_settings']);
       $field['columns'] = module_invoke($field['module'], 'field_settings', 'database columns', $field);
@@ -139,6 +120,7 @@ function content_schema() {
       'db_storage'      => array('type' => 'int', 'size' => 'tiny', 'not null' => TRUE, 'default' => 1),
       'module'          => array('type' => 'varchar', 'length' => 127, 'not null' => TRUE, 'default' => ''),
       'columns'         => array('type' => 'text', 'size' => 'medium', 'not null' => TRUE),
+      'active'          => array('type' => 'int', 'size' => 'tiny', 'not null' => TRUE, 'default' => 0),
     ),
     'primary key' => array('field_name'),
   );
@@ -153,6 +135,7 @@ function content_schema() {
       'display_settings' => array('type' => 'text', 'size' => 'medium', 'not null' => TRUE),
       'description'      => array('type' => 'text', 'size' => 'medium', 'not null' => TRUE),
       'widget_module'    => array('type' => 'varchar', 'length' => 127, 'not null' => TRUE, 'default' => ''),
+      'widget_active'    => array('type' => 'int', 'size' => 'tiny', 'not null' => TRUE, 'default' => 0),
     ),
     'primary key' => array('field_name', 'type_name'),
   );
@@ -180,7 +163,7 @@ function content_schema() {
   // circular logic and are safe to use here.
 
   $db_result = db_query("SELECT * FROM {". content_instance_tablename() ."} nfi ".
-    " LEFT JOIN {". content_field_tablename() ."} nf ON nf.field_name = nfi.field_name");
+    " LEFT JOIN {". content_field_tablename() ."} nf ON nf.field_name = nfi.field_name WHERE nf.active = 1 AND nfi.widget_active = 1");
   while ($field = db_fetch_array($db_result)) {
     $field['columns'] = unserialize($field['columns']);
     $content_table = _content_tablename($field['type_name'], CONTENT_DB_STORAGE_PER_CONTENT_TYPE);
@@ -224,12 +207,14 @@ function content_update_last_removed() {
 function content_update_6000() {
   include_once('./'. drupal_get_path('module', 'content') .'/content.module');
   $ret = array();
-  if (db_column_exists(content_field_tablename(), 'columns')) {
+  if (db_column_exists(content_field_tablename(), 'active')) {
     return $ret;
   }
   db_add_field($ret, content_field_tablename(), 'module', array('type' => 'varchar', 'length' => 127, 'not null' => TRUE, 'default' => ''));
   db_add_field($ret, content_field_tablename(), 'columns', array('type' => 'text', 'not null' => TRUE, 'default' => ''));
+  db_add_field($ret, content_field_tablename(), 'active', array('type' => 'int', 'size' => 'tiny', 'not null' => TRUE, 'default' => 0));
   db_add_field($ret, content_instance_tablename(), 'widget_module', array('type' => 'varchar', 'length' => 127, 'not null' => TRUE, 'default' => ''));
+  db_add_field($ret, content_instance_tablename(), 'widget_active', array('type' => 'int', 'size' => 'tiny', 'not null' => TRUE, 'default' => 0));
 
   foreach (module_list() as $module) {
     content_associate_fields($module);

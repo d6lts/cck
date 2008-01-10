@@ -721,14 +721,14 @@ function content_associate_fields($module) {
   if ($module_fields) {
     foreach ($module_fields as $name => $field_info) {
       watchdog('content', t('Updating field type %type with module %module.', array('%type' => $name, '%module' => $module)));
-      db_query("UPDATE {". content_field_tablename() ."} SET module = '%s' WHERE type = '%s'", $module, $name);
+      db_query("UPDATE {". content_field_tablename() ."} SET module = '%s', active = %d WHERE type = '%s'", $module, 1, $name);
     }
   }
   $module_widgets = module_invoke($module, 'widget_info');
   if ($module_widgets) {
     foreach ($module_widgets as $name => $widget_info) {
       watchdog('content', t('Updating widget type %type with module %module.', array('%type' => $name, '%module' => $module)));
-      db_query("UPDATE {". content_instance_tablename() ."} SET widget_module = '%s' WHERE widget_type = '%s'", $module, $name);
+      db_query("UPDATE {". content_instance_tablename() ."} SET widget_module = '%s', widget_active = %d WHERE widget_type = '%s'", $module, 1, $name);
     }
   }
   // This is called from updates and installs, so get the install-safe

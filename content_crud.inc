@@ -35,10 +35,13 @@ function content_field_default_values($field_type) {
   $field = array();
   $field['module'] = $module;
   $field['type'] = $field_type;
+  $field['active'] = 0;
 
   $field['columns'] = module_invoke($module, 'field_settings', 'database columns', $field);
   // Ensure columns always default to NULL values.
   foreach ((array) $field['columns'] as $column_name => $column) {
+    // If content_invoke works, it must be active.
+    $field['active'] = 1;
     $field['columns'][$column_name]['not null'] = FALSE;
   }
 
@@ -71,6 +74,7 @@ function content_instance_default_values($field_name, $type_name, $widget_type) 
   $widget['description'] = '';
   $widget['widget_type'] = $widget_type;
   $widget['widget_module'] = $module;
+  $widget['widget_active'] = 0;
 
   $setting_names = array_merge(array('label' => 'above'), _content_admin_display_contexts());
   $widget['display_settings'] = array();
@@ -82,6 +86,8 @@ function content_instance_default_values($field_name, $type_name, $widget_type) 
   $setting_names = module_invoke($widget['widget_module'], 'widget_settings', 'save', $widget);
   $widget['widget_settings'] = array();
   if (is_array($setting_names)) {
+    // If widget_invoke works, must be active.
+    $widget['widget_active'] = 1;
     foreach ($setting_names as $setting) {
       $widget['widget_settings'][$setting] = NULL;
     }
@@ -157,7 +163,6 @@ function content_field_instance_collapse($field) {
     $widget_module = NULL;
   }
   $field['widget_module'] = $widget_module;
-
   unset($field['widget_settings']['type']);
   unset($field['widget_settings']['weight']);
   unset($field['widget_settings']['label']);
@@ -411,12 +416,13 @@ function content_field_instance_read($param = NULL) {
       $args[] = $value;
     }
   }
+
   if (count($cond)) {
-    $cond = " WHERE ". implode(' AND ', $cond);
+    $cond = " AND ". implode(' AND ', $cond);
   }
   $db_result = db_query("SELECT * FROM {". content_instance_tablename() ."} nfi ".
     " JOIN ". content_field_tablename() ."} nf ON nfi.field_name = nf.field_name ".
-    $cond ." ORDER BY nfi.weight ASC, nfi.label ASC", $args);
+    " WHERE nf.active = 1 AND nfi.widget_active = 1 ". $cond ." ORDER BY nfi.weight ASC, nfi.label ASC", $args);
 
   $fields = array();
   while ($instance = db_fetch_array($db_result)) {
