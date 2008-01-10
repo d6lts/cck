@@ -156,7 +156,7 @@ function fieldgroup_edit_group_form(&$form_state, $content_type, $group_name, $a
     '#required' => FALSE,
   );
   module_load_include('inc', 'content', 'content_admin');
-  foreach (array_merge(array_keys(_content_admin_display_contexts()), array('label')) as $key) {
+  foreach (array_merge(array_keys(_content_admin_display_contexts(CONTENT_CONTEXTS_SIMPLE)), array('label')) as $key) {
     $form['settings']['display'][$key] = array('#type' => 'value', '#value' => isset($group['settings']['display'][$key]) ? $group['settings']['display'][$key] : 'fieldset');
   }
   $form['weight'] = array('#type' => 'hidden', '#default_value' => isset($group['weight']) ? $group['weight'] : 0);
@@ -383,7 +383,8 @@ function fieldgroup_display_overview_form_submit($form, &$form_state) {
   foreach ($form_values as $key => $values) {
     if (in_array($key, $form['#groups'])) {
       $group = $groups[$key];
-      $group['settings']['display'] = array_merge($group['settings']['display'], $values);
+      // We have numeric keys here, so we can't use array_merge.
+      $group['settings']['display'] = $values + $group['settings']['display'];
       fieldgroup_save_group($form['#type_name'], $group);
     }
   }

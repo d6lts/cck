@@ -8,6 +8,10 @@
 define('CONTENT_DB_STORAGE_PER_FIELD', 0);
 define('CONTENT_DB_STORAGE_PER_CONTENT_TYPE', 1);
 
+define('CONTENT_CONTEXTS_SIMPLE', 0);
+define('CONTENT_CONTEXTS_ADVANCED', 1);
+define('CONTENT_CONTEXTS_ALL', 2);
+
 define('CONTENT_CALLBACK_NONE', 0x0001);
 define('CONTENT_CALLBACK_DEFAULT', 0x0002);
 define('CONTENT_CALLBACK_CUSTOM', 0x0004);
@@ -16,8 +20,13 @@ define('CONTENT_HANDLE_CORE', 0x0001);
 define('CONTENT_HANDLE_MODULE', 0x0002);
 
 function content_help($path, $arg) {
-  if (preg_match('!^admin/content/types/.*/display$!', $path)) {
-    return t("Configure how this content type's fields and field labels should be displayed when it's viewed in teaser and full-page mode.");
+  if (preg_match('!^admin/content/types/.*/display!', $path)) {
+    if (preg_match('!^admin/content/types/.*/display$!', $path)) {
+      return t("Configure how this content type's fields and field labels should be displayed when it's viewed in teaser and full-page mode.");
+    }
+    else {
+      return t("Configure how this content type's fields and field labels should be displayed when it's rendered in the following contexts.");
+    }
   }
 }
 
@@ -128,6 +137,18 @@ function content_menu() {
         'file path' => drupal_get_path('module', 'content'),
         'type' => MENU_LOCAL_TASK,
         'weight' => 2,
+      );
+      $items['admin/content/types/'. $type_url_str .'/display/general'] = array(
+        'title' => 'General',
+        'page arguments' => array('content_admin_display_overview_form', $type_name),
+        'type' => MENU_DEFAULT_LOCAL_TASK,
+        'weight' => 0,
+      );
+      $items['admin/content/types/'. $type_url_str .'/display/advanced'] = array(
+        'title' => 'Advanced',
+        'page arguments' => array('content_admin_display_overview_form', $type_name, (string)CONTENT_CONTEXTS_ADVANCED),
+        'type' => MENU_LOCAL_TASK,
+        'weight' => 1,
       );
       $items['admin/content/types/'. $type_url_str .'/add_field'] = array(
         'title' => 'Add field',
@@ -1428,16 +1449,20 @@ function content_format($field, $item, $formatter = 'default', $node = NULL) {
 /**
  * Array of possible display contexts for fields.
  */
-function _content_admin_display_contexts() {
-  $contexts = array(
-    'teaser' => t('Teaser'),
-    'full' => t('Full'),
-    NODE_BUILD_RSS => t('RSS Item'),
-    NODE_BUILD_PRINT => t('Print'),
-  );
-  if (module_exists('search')) {
-    $contexts[NODE_BUILD_SEARCH_INDEX] = t('Search Index');
-    $contexts[NODE_BUILD_SEARCH_RESULT] = t('Search Result');
+function _content_admin_display_contexts($selector = CONTENT_CONTEXTS_ALL) {
+  $contexts = array();
+
+  if ($selector == CONTENT_CONTEXTS_ALL || $selector == CONTENT_CONTEXTS_SIMPLE) {
+    $contexts['teaser'] = t('Teaser');
+    $contexts['full'] = t('Full node');
+  }
+
+  if ($selector == CONTENT_CONTEXTS_ALL || $selector == CONTENT_CONTEXTS_ADVANCED) {
+    $contexts[NODE_BUILD_RSS] = t('RSS Item');
+    if (module_exists('search')) {
+      $contexts[NODE_BUILD_SEARCH_INDEX] = t('Search Index');
+      $contexts[NODE_BUILD_SEARCH_RESULT] = t('Search Result');
+    }
   }
 
   return $contexts;

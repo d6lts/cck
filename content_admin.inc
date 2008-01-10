@@ -212,7 +212,7 @@ function content_admin_field_overview_form_submit($form, &$form_state) {
  * Form includes form widgets to select which fields appear for teaser, full node...
  * and how the field labels should be rendered
  */
-function content_admin_display_overview_form(&$form_state, $type_name) {
+function content_admin_display_overview_form(&$form_state, $type_name, $contexts_selector = CONTENT_CONTEXTS_SIMPLE) {
   // Gather type information.
   $type = content_types($type_name);
   $field_types = _content_field_types(); // TODO : needed ?
@@ -227,7 +227,7 @@ function content_admin_display_overview_form(&$form_state, $type_name) {
     $groups = fieldgroup_groups($type['type']);
     $group_options = _fieldgroup_groups_label($type['type']);
   }
-  $contexts = _content_admin_display_contexts();
+  $contexts = _content_admin_display_contexts($contexts_selector);
 
   // Rows in this table are essentially nested, but for the simplicity of
   // theme and submit functions, we keep them in a flat array, and use a
@@ -239,6 +239,7 @@ function content_admin_display_overview_form(&$form_state, $type_name) {
     '#type_name' => $type['type'],
     '#fields' => array_keys($fields),
     '#groups' => array_keys($groups),
+    '#contexts' => $contexts_selector,
     '#order' => array(),
   );
 
@@ -255,7 +256,6 @@ function content_admin_display_overview_form(&$form_state, $type_name) {
 
     $form[$name] = array(
       'human_name' => array('#value' => $field['widget']['label']), // OK
-//      'type' => array('#value' => $field['type']), // OK ? array('#value' => $field_type['label']);
     );
 
     // Label
@@ -301,7 +301,6 @@ function content_admin_display_overview_form(&$form_state, $type_name) {
 
     $form[$name] = array(
       'human_name' => array('#value' => $group['label']),
-//      'type' => array(),
     );
     $form[$name]['label'] = array(
       '#type' => 'select',
@@ -335,8 +334,7 @@ function content_admin_display_overview_form(&$form_state, $type_name) {
  *  Theme the display overview table.
  */
 function theme_content_admin_display_overview_form($form) {
-  $contexts = _content_admin_display_contexts();
-//  $header = array(t('Field'), t('Type'), t('Label'));
+  $contexts = _content_admin_display_contexts($form['#contexts']);
   $header = array(t('Field'), t('Label'));
   foreach ($contexts as $key => $title) {
     $header[] = $title;
@@ -351,7 +349,6 @@ function theme_content_admin_display_overview_form($form) {
       $element['human_name']['#suffix'] = '</b>';
     }
     $row[] = theme('indentation', isset($element['#depth']) ? $element['#depth'] : 0) . drupal_render($element['human_name']);
-//    $row[] = drupal_render($element['type']);
     $row[] = drupal_render($element['label']);
     foreach ($contexts as $context => $title) {
       $row[] = drupal_render($element[$context]['format']);
@@ -376,7 +373,8 @@ function content_admin_display_overview_form_submit($form, &$form_state) {
     // Groups are handled in fieldgroup_display_overview_form_submit().
     if (in_array($key, $form['#fields'])) {
       $field = content_fields($key, $form['#type_name']);
-      $field['display_settings'] = array_merge($field['display_settings'], $values);
+      // We have numeric keys here, so we can't use array_merge.
+      $field['display_settings'] = $values + $field['display_settings'];
       $field = content_field_instance_collapse($field);
       content_field_instance_update($field);
     }
