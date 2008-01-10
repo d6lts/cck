@@ -41,8 +41,12 @@ function number_update_last_removed() {
  * Rename old decimal fields, which were really floats, to float
  */
 function number_update_6000() {
-  include_once('./'. drupal_get_path('module', 'content') .'/content.module');
   $ret = array();
+  if (!module_exists('content') || !module_exists('number')) {
+    return array('success' => FALSE);
+  }
+
+  include_once('./'. drupal_get_path('module', 'content') .'/content.module');
   $ret[] = update_sql("UPDATE {". content_field_tablename() ."} SET type='number_float' WHERE type = 'number_decimal'");
 
   content_clear_type_cache();

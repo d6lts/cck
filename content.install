@@ -205,6 +205,9 @@ function content_update_last_removed() {
  * is no other way to find the associated fields.
  */
 function content_update_6000() {
+  if (!module_exists('content')) {
+    return array('success' => FALSE);
+  }
   include_once('./'. drupal_get_path('module', 'content') .'/content.module');
   $ret = array();
   if (db_column_exists(content_field_tablename(), 'active')) {
@@ -246,6 +249,9 @@ function content_update_6000() {
  * with 'content_field'.
  */
 function content_update_6001() {
+  if (!module_exists('content')) {
+    return array('success' => FALSE);
+  }
   include_once('./'. drupal_get_path('module', 'content') .'/content.module');
   $ret = array();
   if (db_table_exists('content_node_field')) {
@@ -263,6 +269,9 @@ function content_update_6001() {
  * Switching to adding those tables only when needed.
  */
 function content_update_6002() {
+  if (!module_exists('content')) {
+    return array('success' => FALSE);
+  }
   include_once('./'. drupal_get_path('module', 'content') .'/content.module');
   $ret = array();
 
