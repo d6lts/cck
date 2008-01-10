@@ -25,7 +25,7 @@ function content_help($path, $arg) {
       return t("Configure how this content type's fields and field labels should be displayed when it's viewed in teaser and full-page mode.");
     }
     else {
-      return t("Configure how this content type's fields and field labels should be displayed when it's rendered in the following contexts.");
+      return t("Configure how this content type's fields should be displayed when it's rendered in the following contexts.");
     }
   }
 }

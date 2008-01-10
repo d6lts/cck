@@ -259,11 +259,13 @@ function content_admin_display_overview_form(&$form_state, $type_name, $contexts
     );
 
     // Label
-    $form[$name]['label']['format'] = array(
-      '#type' => 'select',
-      '#options' => $label_options,
-      '#default_value' => isset($defaults['label']['format']) ? $defaults['label']['format'] : 'above',
-    );
+    if ($contexts_selector == CONTENT_CONTEXTS_SIMPLE) {
+      $form[$name]['label']['format'] = array(
+        '#type' => 'select',
+        '#options' => $label_options,
+        '#default_value' => isset($defaults['label']['format']) ? $defaults['label']['format'] : 'above',
+      );
+    }
 
     // Formatters.
     $options = array();
