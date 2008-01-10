@@ -38,32 +38,8 @@ function fieldgroup_disable() {
   content_notify('disable', 'fieldgroup');
 }
 
-/**
- * Test and report installation requirements.
- */
-function fieldgroup_requirements($phase) {
-  $requirements = array();
-
-  // Ensure translations don't break at install time
-  $t = get_t();
-
-  // drupal_get_installed_schema_version doesn't exist when checking
-  // requirements from an install profile. Our check is not needed for
-  // fresh installations anyway.
-  if (!function_exists('install_main')) {
-    $current_version = drupal_get_installed_schema_version('fieldgroup');
-    $minimum_version = 4;
-
-    if (($current_version > -1) && ($current_version < $minimum_version)) {
-      $requirements['fieldgroup_version'] = array(
-        'title' => $t('Fieldgroup Version'),
-        'value' => $t('The Fieldgroup data in your CCK database are not up to date and will not work correctly in this version of the Fieldgroup module. Please upgrade your database in Drupal 5.x to at least Fieldgroup update %number, using the latest 5.x version of the Fieldgroup module, before upgrading to Drupal 6.x.', array('%number' => $minimum_version)),
-        'severity' => REQUIREMENT_ERROR,
-      );
-    }
-  }
-
-  return $requirements;
+function fieldgroup_update_last_removed() {
+  return 4;
 }
 
 /**

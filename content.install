@@ -210,6 +210,10 @@ function content_schema() {
   return $schema;
 }
 
+function content_update_last_removed() {
+  return 1008;
+}
+
 /**
  * Add module name to fields table to make it easier to identify the fields to delete when a module
  * is uninstalled.

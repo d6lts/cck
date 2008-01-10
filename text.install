@@ -33,32 +33,8 @@ function text_disable() {
   content_notify('disable', 'text');
 }
 
-/**
- * Test and report installation requirements.
- */
-function text_requirements($phase) {
-  $requirements = array();
-
-  // Ensure translations don't break at install time
-  $t = get_t();
-
-  // drupal_get_installed_schema_version doesn't exist when checking
-  // requirements from an install profile. Our check is not needed for
-  // fresh installations anyway.
-  if (!function_exists('install_main')) {
-    $current_version = drupal_get_installed_schema_version('text');
-    $minimum_version = 5;
-
-    if (($current_version > -1) && ($current_version < $minimum_version)) {
-      $requirements['text_version'] = array(
-        'title' => $t('Text Version'),
-        'value' => $t('The Text fields in your CCK database are not up to date and will not work correctly in this version of the Text module. Please upgrade your database in Drupal 5.x to at least Text update %number, using the latest 5.x version of the Text module, before upgrading to Drupal 6.x.', array('%number' => $minimum_version)),
-        'severity' => REQUIREMENT_ERROR,
-      );
-    }
-  }
-
-  return $requirements;
+function text_update_last_removed() {
+  return 5;
 }
 
 /**
