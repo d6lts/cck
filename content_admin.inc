@@ -221,7 +221,7 @@ function content_admin_display_overview_form(&$form_state, $type_name, $contexts
   $fields = $type['fields'];
   if (empty($fields)) {
     drupal_set_message(t('There are no fields configured for this content type.'));
-    return array();
+    return array('#contexts' => array(), '#order' => array());
   }
 
   $groups = $group_options = array();
