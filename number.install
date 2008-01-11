@@ -42,10 +42,6 @@ function number_update_last_removed() {
  */
 function number_update_6000() {
   $ret = array();
-  if (!module_exists('content') || !module_exists('number')) {
-    return array('success' => FALSE);
-  }
-
   include_once('./'. drupal_get_path('module', 'content') .'/content.module');
   $ret[] = update_sql("UPDATE {". content_field_tablename() ."} SET type='number_float' WHERE type = 'number_decimal'");
 

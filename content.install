@@ -10,7 +10,7 @@
  * from database info that is limited to fields from modules that are
  * currently enabled.
  */
-function content_types_install() {
+function content_install_types() {
   include_once('./'. drupal_get_path('module', 'content') .'/content.module');
 
   $module_field_types = $module_widgets = array();
@@ -24,9 +24,28 @@ function content_types_install() {
   }
   $fields = array();
   $db_result = db_query("SELECT * FROM {". content_instance_tablename() ."} nfi ".
-    " LEFT JOIN {". content_field_tablename() ."} nf ON nf.field_name = nfi.field_name WHERE nf.active = 1 and nfi.widget_active = 1");
+    " LEFT JOIN {". content_field_tablename() ."} nf ON nf.field_name = nfi.field_name");
   while ($field = db_fetch_array($db_result)) {
-    if (!empty($field['active']) && !empty($field['widget_active'])) {
+    // There may be module data available for currently disabled modules,
+    // or missing module data for currently enabled modules, so start over
+    // to get only field info for enabled modules.
+    unset($field['module']);
+    unset($field['widget_module']);
+    foreach ($module_field_types as $module => $types) {
+      foreach ($types as $type_name => $type) {
+        if ($field['type'] == $type_name) {
+          $field['module'] = $module;
+        }
+      }
+    }
+    foreach ($module_widgets as $module => $types) {
+      foreach ($types as $type_name => $type) {
+        if ($field['widget_type'] == $type_name) {
+          $field['widget_module'] = $module;
+        }
+      }
+    }
+    if (!empty($field['module']) && !empty($field['widget_module'])) {
       $field['widget_settings'] = unserialize($field['widget_settings']);
       $field['display_settings'] = unserialize($field['display_settings']);
       $field['columns'] = module_invoke($field['module'], 'field_settings', 'database columns', $field);
@@ -177,9 +196,6 @@ function content_update_last_removed() {
  * is no other way to find the associated fields.
  */
 function content_update_6000() {
-  if (!module_exists('content')) {
-    return array('success' => FALSE);
-  }
   include_once('./'. drupal_get_path('module', 'content') .'/content.module');
   $ret = array();
   if (db_column_exists(content_field_tablename(), 'active')) {
@@ -191,6 +207,7 @@ function content_update_6000() {
   db_add_field($ret, content_instance_tablename(), 'widget_module', array('type' => 'varchar', 'length' => 127, 'not null' => TRUE, 'default' => ''));
   db_add_field($ret, content_instance_tablename(), 'widget_active', array('type' => 'int', 'size' => 'tiny', 'not null' => TRUE, 'default' => 0));
 
+  // This will update the table for any modules enabled at this time.
   foreach (module_list() as $module) {
     content_associate_fields($module);
   }
@@ -221,9 +238,6 @@ function content_update_6000() {
  * with 'content_field'.
  */
 function content_update_6001() {
-  if (!module_exists('content')) {
-    return array('success' => FALSE);
-  }
   include_once('./'. drupal_get_path('module', 'content') .'/content.module');
   $ret = array();
   if (db_table_exists('content_node_field')) {
@@ -241,9 +255,6 @@ function content_update_6001() {
  * Switching to adding those tables only when needed.
  */
 function content_update_6002() {
-  if (!module_exists('content')) {
-    return array('success' => FALSE);
-  }
   include_once('./'. drupal_get_path('module', 'content') .'/content.module');
   $ret = array();
 

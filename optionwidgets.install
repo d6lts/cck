@@ -45,9 +45,6 @@ function optionwidgets_update_last_removed() {
  * the module names in the field and instance tables, so do it here.
  */
 function optionwidgets_update_6000() {
-  if (!module_exists('content') || !module_exists('optionwidgets')) {
-    return array('success' => FALSE);
-  }
   include_once('./'. drupal_get_path('module', 'content') .'/content.module');
   $ret = array();
   $ret[] = update_sql("UPDATE {". content_instance_tablename() ."} SET widget_type = 'optionwidgets_select' WHERE widget_type = 'options_select'");

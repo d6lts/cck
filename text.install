@@ -45,9 +45,6 @@ function text_update_last_removed() {
  *
  */
 function text_update_6000() {
-  if (!module_exists('content') || !module_exists('text')) {
-    return array('success' => FALSE);
-  }
   include_once('./'. drupal_get_path('module', 'content') .'/content.module');
   $ret = array();
   $result = db_query("SELECT * FROM {". content_instance_tablename() ."} WHERE widget_type = 'text'");
@@ -70,9 +67,6 @@ function text_update_6000() {
  *
  */
 function text_update_6001() {
-  if (!module_exists('content') || !module_exists('text')) {
-    return array('success' => FALSE);
-  }
   include_once('./'. drupal_get_path('module', 'content') .'/content.module');
   $ret = array();
 
