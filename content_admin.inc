@@ -1108,9 +1108,9 @@ function content_alter_db($previous_field, $new_field) {
   // Migrate data from per-field storage, and drop per-field table.
   if ($previous_field['db_storage'] == CONTENT_DB_STORAGE_PER_FIELD &&
   $new_field['db_storage'] == CONTENT_DB_STORAGE_PER_CONTENT_TYPE) {
-      // In order to be able to use drupal_write_record, we need to
-      // rebuild the schema now. // TODO : we're then missing debug $ret messages...
-      content_alter_db_cleanup($ret);
+    // In order to be able to use drupal_write_record, we need to
+    // rebuild the schema now.
+    content_alter_db_cleanup($ret);
     if ($previous_field['multiple']) {
       $result = db_query('SELECT * FROM {'. $previous_table .'} WHERE delta = 0');
     }
@@ -1160,6 +1160,10 @@ function content_alter_db($previous_field, $new_field) {
     }
   }
 
+  // TODO : debugging stuff - should be removed
+  if (module_exists('devel')) {
+    //dsm($ret);
+  }
   return $ret;
 }
 
@@ -1276,8 +1280,7 @@ function content_alter_db_mask($previous_field, $new_field) {
 /**
  * Content Field Batch Update Operation
  *
- * Batch update a field's values in all nodes that have that
- * field, using content_field_replace().
+ * Find all nodes that contain a field and update their values.
  *
  * @param $updates
  *   an array like:
@@ -1349,7 +1352,7 @@ function content_field_batch_update($updates, &$context) {
  *
  * Replace field values in a node from an array of update values.
  *
- * Supply a an array of one or more fields and masks of field column values
+ * Supply an array of one or more fields and masks of field column values
  * to be replaced into field values, one mask for basic values and an optional
  * different mask for values in field items equal to or higher than a
  * specified delta.
@@ -1357,6 +1360,10 @@ function content_field_batch_update($updates, &$context) {
  * The masks should contain only the column values to be substituted in.
  * The supplied values will be merged into the existing values to replace
  * only the values in the mask, leaving all other values unchanged.
+ *
+ * The ability to set different masks starting at a delta allows the
+ * possibility of setting values above a certain delta to NULL prior
+ * to altering the database schema.
  *
  * @param $nid
  * @param $updates
