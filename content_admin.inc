@@ -20,11 +20,11 @@ function _content_admin_type_fields() {
     $row[] = $field['type'];
 
     $types = array();
-    $result = db_query("SELECT nt.name, nt.type FROM {".
-    content_instance_tablename() ."} nfi LEFT JOIN {node_type} nt ".
-    "ON nt.type = nfi.type_name WHERE nfi.field_name = '%s' ".
+    $result = db_query("SELECT nt.name, nt.type FROM {". content_instance_tablename() ."} nfi ".
+    "LEFT JOIN {node_type} nt ON nt.type = nfi.type_name ".
+    "WHERE nfi.field_name = '%s' ".
     // Keep disabled modules out of table.
-    " AND nf.active = 1 AND nfi.widget_active = 1 ".
+    "AND nfi.widget_active = 1 ".
     "ORDER BY nt.name ASC", $field['field_name']);
     while ($type = db_fetch_array($result)) {
       $content_type = content_types($type['type']);
