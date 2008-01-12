@@ -252,11 +252,9 @@ function content_load($node) {
  */
 function content_form(&$form, &$form_state) {
   $type = content_types($form['type']['#value']);
-  if (count($type['fields'])) {
-    foreach ($type['fields'] as $field_name => $field) {
-      $form['#field_info'][$field['field_name']] = $field;
-      $form += (array) content_field_form($form, $form_state, $field);
-    }
+  foreach ($type['fields'] as $field_name => $field) {
+    $form['#field_info'][$field['field_name']] = $field;
+    $form += (array) content_field_form($form, $form_state, $field);
   }
   return $form;
 }
@@ -1009,28 +1007,26 @@ function _content_field_invoke($op, &$node, $teaser = NULL, $page = NULL) {
   $field_types = _content_field_types();
 
   $return = array();
-  if (count($type['fields'])) {
-    foreach ($type['fields'] as $field) {
-      $items = isset($node->$field['field_name']) ? $node->$field['field_name'] : array();
+  foreach ($type['fields'] as $field) {
+    $items = isset($node->$field['field_name']) ? $node->$field['field_name'] : array();
 
-      // Make sure AHAH 'add more' button isn't sent to the fields for processing.
-      unset($items[$field['field_name'] .'_add_more']);
+    // Make sure AHAH 'add more' button isn't sent to the fields for processing.
+    unset($items[$field['field_name'] .'_add_more']);
 
-      $module = $field_types[$field['type']]['module'];
-      $function = $module .'_field';
-      if (function_exists($function)) {
-        $result = $function($op, $node, $field, $items, $teaser, $page);
-        if (is_array($result)) {
-          $return = array_merge($return, $result);
-        }
-        else if (isset($result)) {
-          $return[] = $result;
-        }
+    $module = $field_types[$field['type']]['module'];
+    $function = $module .'_field';
+    if (function_exists($function)) {
+      $result = $function($op, $node, $field, $items, $teaser, $page);
+      if (is_array($result)) {
+        $return = array_merge($return, $result);
       }
-      // test for values in $items in case modules added items on insert
-      if (isset($node->$field['field_name']) || count($items)) {
-        $node->$field['field_name'] = $items;
+      else if (isset($result)) {
+        $return[] = $result;
       }
+    }
+    // test for values in $items in case modules added items on insert
+    if (isset($node->$field['field_name']) || count($items)) {
+      $node->$field['field_name'] = $items;
     }
   }
   return $return;
@@ -1050,7 +1046,7 @@ function _content_field_invoke_default($op, &$node, $teaser = NULL, $page = NULL
   if (in_array($op, array('load', 'insert', 'update', 'delete','delete revision'))) {
     return content_storage($op, $node);
   }
-  elseif (count($type['fields'])) {
+  else {
     foreach ($type['fields'] as $field) {
       $items = isset($node->$field['field_name']) ? $node->$field['field_name'] : array();
       if (count($field['columns'])) {
