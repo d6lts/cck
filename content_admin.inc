@@ -24,7 +24,7 @@ function _content_admin_type_fields() {
     content_instance_tablename() ."} nfi LEFT JOIN {node_type} nt ".
     "ON nt.type = nfi.type_name WHERE nfi.field_name = '%s' ".
     // Keep disabled modules out of table.
-    " AND nf.acive = 1 AND nfi.widget_active = 1 ".
+    " AND nf.active = 1 AND nfi.widget_active = 1 ".
     "ORDER BY nt.name ASC", $field['field_name']);
     while ($type = db_fetch_array($result)) {
       $content_type = content_types($type['type']);
