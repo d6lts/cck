@@ -796,20 +796,22 @@ function _content_admin_field(&$form_state, $type_name, $field_name) {
  * Validate a field's settings.
  */
 function _content_admin_field_validate($form, &$form_state) {
+  include_once('./'. drupal_get_path('module', 'content') .'/content_crud.inc');
   $form_values = $form_state['values'];
+  $previous_field = unserialize($form_values['previous_field']);
+  $field = content_field_instance_expand($form_values);
+  $field['db_storage'] = content_storage_type($field);
 
-  $type = content_types($form_values['type_name']);
-  $field = $type['fields'][$form_values['field_name']];
   $field_types = _content_field_types();
   $field_type = $field_types[$field['type']];
   $widget_types = _content_widget_types();
   $widget_type = $widget_types[$field['widget']['type']];
 
-  $previous_field = unserialize($form_values['previous_field']);
   if ($dropped_data = content_alter_db_analyze($previous_field, $field)) {
     // @TODO
     // This is a change that might result in loss of data.
     // Add a confirmation form here.
+    // dsm($dropped_data);
   }
 
   module_invoke($field_type['module'], 'field_settings', 'validate', array_merge($field, $form_values));
@@ -932,7 +934,6 @@ function content_alter_schema($previous_field, $new_field) {
  */
 function content_alter_db_analyze($previous_field, $new_field) {
   $dropped = array();
-
   // There is no loss of data if there was no previous data.
   if (empty($previous_field)) {
     return $dropped;
@@ -949,8 +950,8 @@ function content_alter_db_analyze($previous_field, $new_field) {
     // Changing from one multiple value to another will cause loss of all
     // values for deltas greater than or equal to the new multiple value.
     elseif (isset($previous_field['multiple']) && isset($new_field['multiple'])) {
-      if ($previous_field['multiple'] != $new_field['multiple'] &&
-      $previous_field['multiple'] > 0) {
+      if ($previous_field['multiple'] > $new_field['multiple'] &&
+      $new_field['multiple'] > 1) {
         $dropped['delta'] = $new_field['multiple'];
       }
     }
