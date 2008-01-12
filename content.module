@@ -1080,18 +1080,14 @@ function content_types($type_name = NULL) {
   $type_name = !empty($type_name) ? str_replace('-', '_', $type_name) : NULL;
 
   $info = _content_type_info();
-  if (!isset($info['content types'])) {
-    return array();
-  }
-  if (isset($type_name)) {
+  if (isset($info['content types'])) {
+    if (!isset($type_name)) {
+      return $info['content types'];
+    }
     if (isset($info['content types'][$type_name])) {
       return $info['content types'][$type_name];
     }
-    else {
-      return NULL;
-    }
   }
-  return $info['content types'];
 }
 
 /**
@@ -1105,28 +1101,19 @@ function content_types($type_name = NULL) {
  */
 function content_fields($field_name = NULL, $content_type_name = NULL) {
   $info = _content_type_info();
-  if (!isset($info['fields'])) {
-    return array();
-  }
-  if (isset($field_name)) {
+  if (isset($info['fields'])) {
+    if (!isset($field_name)) {
+      return $info['fields'];
+    }
     if (isset($info['fields'][$field_name])) {
-      if (isset($content_type_name)) {
-        if (isset($info['content types'][$content_type_name]['fields'][$field_name])) {
-          return $info['content types'][$content_type_name]['fields'][$field_name];
-        }
-        else {
-          return NULL;
-        }
-      }
-      else {
+      if (!isset($content_type_name)) {
         return $info['fields'][$field_name];
       }
-    }
-    else {
-      return NULL;
+      if (isset($info['content types'][$content_type_name]['fields'][$field_name])) {
+        return $info['content types'][$content_type_name]['fields'][$field_name];
+      }
     }
   }
-  return $info['fields'];
 }
 
 /**
@@ -1304,7 +1291,6 @@ function content_clear_type_cache($rebuild_schema = FALSE) {
  *       database column that stores the data.
  */
 function content_database_info($field) {
-  $columns = $field['columns'];
   $db_info = array();
 
   if ($field['db_storage'] == CONTENT_DB_STORAGE_PER_FIELD) {
@@ -1314,15 +1300,12 @@ function content_database_info($field) {
     $db_info['table'] = _content_tablename($field['type_name'], CONTENT_DB_STORAGE_PER_CONTENT_TYPE);
   }
 
-  if (is_array($columns) && count($columns)) {
-    $db_info['columns'] = $columns;
-    foreach ($columns as $column_name => $attributes) {
-      $db_info['columns'][$column_name]['column'] = $field['field_name'] .'_'. $column_name;
-    }
+  $db_info['columns'] = (array) $field['columns'];
+  // Generate column names for this field from generic column names.
+  foreach ($db_info['columns'] as $column_name => $attributes) {
+    $db_info['columns'][$column_name]['column'] = $field['field_name'] .'_'. $column_name;
   }
-  else {
-    $db_info['columns'] = array();
-  }
+
   return $db_info;
 }
 
