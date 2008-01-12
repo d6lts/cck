@@ -770,6 +770,18 @@ function content_field($op, &$node, $field, &$items, $teaser, $page) {
       break;
 
     case 'presave':
+      // Manual node_save calls might not have all fields filled in.
+      // On node insert, we need to make sure all tables get at least an empty
+      // record, or subsequent edits, using drupal_write_record() in update mode,
+      // won't insert any data.
+      // Missing fields on node update are handled in content_storage().
+      if (empty($items) && !isset($node->nid)) {
+        foreach (array_keys($field['columns']) as $column) {
+          $items[0][$column] = NULL;
+        }
+        $node->$field['field_name'] = $items;
+      }
+
       // If there was an AHAH add more button in this field, don't save it.
       // TODO : is it still needed ?
       unset($items[$field['field_name']. '_add_more']);
@@ -920,32 +932,21 @@ function content_storage($op, $node) {
       return $additions;
 
     case 'insert':
-      // Manual node_save calls might not have all fields filled in.
-      // We need to make sure all tables get at least an empty record,
-      // or subsequent edits, using drupal_write_record() in update mode,
-      // won't insert any data.
-      foreach ($type['fields'] as $field) {
-        if (!isset($node->$field['field_name'])) {
-          foreach (array_keys($field['columns']) as $column) {
-            $node->{$field['field_name']}[0][$column] = NULL;
-          }
-        }
-      }
-      // Fall through to the 'update' case.
-
     case 'update':
       foreach ($type['tables'] as $table) {
         $schema = drupal_get_schema($table);
         $record = array();
         foreach ($schema['content fields'] as $field_name) {
-          $field = content_fields($field_name, $type_name);
-          // Multiple fields need specific handling, we'll deal with them later on.
-          if ($field['multiple']) {
-            continue;
-          }
-          $db_info = content_database_info($field);
-          foreach ($db_info['columns'] as $column => $attributes) {
-            $record[$attributes['column']] = $node->{$field_name}[0][$column];
+          if (isset($node->$field_name)) {
+            $field = content_fields($field_name, $type_name);
+            // Multiple fields need specific handling, we'll deal with them later on.
+            if ($field['multiple']) {
+              continue;
+            }
+            $db_info = content_database_info($field);
+            foreach ($db_info['columns'] as $column => $attributes) {
+              $record[$attributes['column']] = $node->{$field_name}[0][$column];
+            }
           }
         }
         if (count($record)) {
@@ -962,7 +963,7 @@ function content_storage($op, $node) {
 
       // Handle multiple fields.
       foreach ($type['fields'] as $field) {
-        if ($field['multiple']) {
+        if ($field['multiple'] && isset($node->$field['field_name'])) {
           $db_info = content_database_info($field);
           // Delete and insert, rather than update, in case a value was added.
           if ($op == 'update') {
