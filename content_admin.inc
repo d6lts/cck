@@ -915,53 +915,12 @@ function _content_admin_field_submit($form, &$form_state) {
  *
  * Alter the database schema.
  *
- * Analyze the changes to see which ones will delete data,
- * delete the data one node at a time to allow hooks to fire,
- * then alter the schema.
+ * TODO figure out an API-safe way to use batching to update the nodes that
+ * will be affected by this change so the node_save() hooks will fire.
  *
- * Set $url if calling from outside FAPI, as when calling from an update.
- * Warning : this will end the execution and redirect to a batch processing page.
  */
-function content_alter_schema($previous_field, $new_field, $url = NULL) {
-  // See what values need to be updated in the field data.
-  $mask = content_alter_db_mask($previous_field, $new_field);
-
-  // We use batch processing to prevent timeout when updating a large number
-  // of nodes. If there is no previous data to adjust, we can just go straight
-  // to altering the schema, otherwise use batch processing to update
-  // the database one node at a time, then update the schema.
-  if (empty($mask)) {
-    return content_alter_db($previous_field, $new_field);
-  }
-  $batch = array(
-    'operations' => array(
-      array('content_mask_batch_update', array($previous_field, $mask)),
-      array('content_alter_db', array($previous_field, $new_field))
-    ),
-    'finished' => '_content_alter_schema_finished',
-    'title' => t('Processing'),
-    'error_message' => t('The update has encountered an error.'),
-    'file' => './'. drupal_get_path('module', 'content') .'/content_admin.inc',
-  );
-  batch_set($batch);
-  if (!empty($url)) {
-    batch_process($url, $url);
-  }
-}
-
-/**
- * Content Schema Alter Batch 'finished' callback.
- */
-function _content_alter_schema_finished($success, $results, $operations) {
-  if ($success) {
-    drupal_set_message(t('The database has been altered and data has been migrated or deleted.'));
-  }
-  else {
-    drupal_set_message(t('An error occurred and database alteration did not complete.'), 'error');
-    $message = format_plural(count($results), '1 item successfully processed:', '@count items successfully processed:');
-    $message .= theme('item_list', $results);
-    drupal_set_message($message);
-  }
+function content_alter_schema($previous_field, $new_field) {
+ content_alter_db($previous_field, $new_field);
 }
 
 /**
@@ -1020,42 +979,6 @@ function content_alter_db_analyze($previous_field, $new_field) {
 //  }
 
   return $dropped;
-}
-
-/**
- * Create a mask for the column data that should be deleted in each field.
- *
- * This is a bit tricky. We could theoretically have some columns
- * that should be set to empty and others with valid info that should
- * not be emptied out. But if delta values > X are to be wiped out, they
- * need to wipe out even columns that still have values. And the NULL
- * values in these columns after the alteration may be enough to make
- * the item 'empty', as defined by hook_content_is_empty(), even if
- * some columns still have values, so all these things need to be tested.
- */
-function content_alter_db_mask($previous_field, $new_field) {
-  // Get an array of column values that will be dropped by this
-  // schema change and create a mask to feed to content_batch_update.
-
-  $dropped = content_alter_db_analyze($previous_field, $new_field);
-  if (empty($dropped)) {
-    return array();
-  }
-  $mask = array('mask' => array());
-  foreach (array_keys($previous_field['columns']) as $column_name) {
-    // The basic mask will empty the dropped columns.
-    if (isset($dropped['columns']) && in_array($column_name, $dropped['columns'])) {
-      $mask['mask'][$column_name] = NULL;
-    }
-    // Over the delta we'll empty all columns.
-    if (isset($dropped['delta'])) {
-      $mask['alt_mask'][$column_name] = NULL;
-    }
-  }
-  if (isset($dropped['delta'])) {
-    $mask['delta'] = $dropped['delta'];
-  }
-  return $mask;
 }
 
 /**
@@ -1258,40 +1181,124 @@ function content_alter_db_cleanup($ret) {
 }
 
 /**
- * Content Mask Batch Update Operation
+ * Batching process for changing the field schema,
+ * running each affected node through node_save() first, to
+ * fire all hooks.
  *
- * Used here to do the mass delete for content_alter_schema, but designed to
- * be called by other batch functions. Supply a mask of field column values
- * to be replaced into field values, one mask for basic values and an optional
- * different mask for values in field items equal to or higher than a specified
- * delta.
- *
- * @param $field
- * @param $mask
- *   $mask is an array that contains a delta and two masks, a default mask
- *   to apply to values under the delta and an alternate mask to apply to
- *   values at or over the delta. The mask should contain only the column
- *   values to be substituted in. It will be merged into the existing column
- *   values to replace only the columns in the mask, leaving all other columns
- *   unchanged.
- *
- *   The format of the mask is array(
- *    'mask' => array()
- *      // Keyed array of column names and replacement values for use
- *      // below delta, or for all values if no delta is supplied.
- *    'alt_mask' => array()
- *      // Optional, keyed array of column names and replacement values for use
- *      // at or above delta, if a delta is supplied.
- *    'delta' => #
- *      // Optional, the number to use as the delta value where you switch from
- *      // one mask to the other.
+ * TODO This is just a placeholder for now because batching can't be safely
+ * used with API hooks. Need to come back and figure out how to incorporate
+ * this and get it working properly when the fields are altered via the API.
  */
-function content_mask_batch_update($field, $mask, &$context) {
+function content_alter_fields($previous_field, $new_field) {
+  // See what values need to be updated in the field data.
+  $mask = content_alter_db_mask($previous_field, $new_field);
+
+  // We use batch processing to prevent timeout when updating a large number
+  // of nodes. If there is no previous data to adjust, we can just go straight
+  // to altering the schema, otherwise use batch processing to update
+  // the database one node at a time, then update the schema.
+  if (empty($mask)) {
+    return content_alter_db($previous_field, $new_field);
+  }
+  $updates = array(
+    'mask' => $mask['mask'],
+    'alt_mask' => $mask['alt_mask'],
+    'delta' => $mask['delta'],
+    );
+  $batch = array(
+    'operations' => array(
+      array('content_field_batch_update', array($previous_field['field_name'] => $updates)),
+      array('content_alter_db', array($previous_field, $new_field))
+    ),
+    'finished' => '_content_alter_fields_finished',
+    'title' => t('Processing'),
+    'error_message' => t('The update has encountered an error.'),
+    'file' => './'. drupal_get_path('module', 'content') .'/content_admin.inc',
+  );
+  batch_set($batch);
+  if (!empty($url)) {
+    batch_process($url, $url);
+  }
+}
+
+/**
+ * Content Replace Fields 'finished' callback.
+ */
+function _content_alter_fields_finished($success, $results, $operations) {
+  if ($success) {
+    drupal_set_message(t('The database has been altered and data has been migrated or deleted.'));
+  }
+  else {
+    drupal_set_message(t('An error occurred and database alteration did not complete.'), 'error');
+    $message = format_plural(count($results), '1 item successfully processed:', '@count items successfully processed:');
+    $message .= theme('item_list', $results);
+    drupal_set_message($message);
+  }
+}
+
+/**
+ * Create a mask for the column data that should be deleted in each field.
+ *
+ * This is a bit tricky. We could theoretically have some columns
+ * that should be set to empty and others with valid info that should
+ * not be emptied out. But if delta values > X are to be wiped out, they
+ * need to wipe out even columns that still have values. And the NULL
+ * values in these columns after the alteration may be enough to make
+ * the item 'empty', as defined by hook_content_is_empty(), even if
+ * some columns still have values, so all these things need to be tested.
+ */
+function content_alter_db_mask($previous_field, $new_field) {
+  // Get an array of column values that will be dropped by this
+  // schema change and create a mask to feed to content_batch_update.
+
+  $dropped = content_alter_db_analyze($previous_field, $new_field);
+  if (empty($dropped)) {
+    return array();
+  }
+  $mask = array('mask' => array());
+  foreach (array_keys($previous_field['columns']) as $column_name) {
+    // The basic mask will empty the dropped columns.
+    if (isset($dropped['columns']) && in_array($column_name, $dropped['columns'])) {
+      $mask['mask'][$column_name] = NULL;
+    }
+    // Over the delta we'll empty all columns.
+    if (isset($dropped['delta'])) {
+      $mask['alt_mask'][$column_name] = NULL;
+    }
+  }
+  if (isset($dropped['delta'])) {
+    $mask['delta'] = $dropped['delta'];
+  }
+  return $mask;
+}
+
+/**
+ * Content Field Batch Update Operation
+ *
+ * Batch update a field's values in all nodes that have that
+ * field, using content_field_replace().
+ *
+ * @param $updates
+ *   an array like:
+ *   'field_name' => array(
+ *     'mask' => array()
+ *       // Keyed array of column names and replacement values for use
+ *       // below delta, or for all values if no delta is supplied.
+ *     'alt_mask' => array()
+ *       // Optional, keyed array of column names and replacement values for use
+ *       // at or above delta, if a delta is supplied.
+ *     'delta' => #
+ *       // Optional, the number to use as the delta value where you switch from
+ *       // one mask to the other.
+ *     ),
+ */
+function content_field_batch_update($updates, &$context) {
   if (empty($field)) {
     $context['finished'] = 1;
     return;
   }
-  $field_name = $field['field_name'];
+  $field_name = $updates['field_name'];
+  $field = content_fields($field_name);
 
   if (!isset($context['sandbox']['progress'])) {
     $db_info = content_database_info($field);
@@ -1319,19 +1326,7 @@ function content_mask_batch_update($field, $mask, &$context) {
     // For each nid, load the node, empty the column values
     // or the whole field, and re-save it.
     $nid = array_shift($context['sandbox']['nodes']);
-    $node = node_load($nid, NULL, TRUE);
-
-    $items = isset($node->$field_name) ? $node->$field_name : array();
-    foreach ($items as $delta => $value) {
-      $field_mask = (isset($mask['delta']) && isset($mask['alt_mask']) && $delta >= $mask['delta']) ? $mask['alt_mask'] : $mask['mask'];
-      // Merge the mask into the field values to do the replacements.
-      $items[$delta] = array_merge($items[$delta], $field_mask);
-    }
-    // Test if the new values will make items qualify as empty.
-    $items = content_set_empty($field, $items);
-
-    $node->$field_name = $items;
-    node_save($node);
+    $node = content_field_replace($nid, array($updates));
 
     // Store result for post-processing in the finished callback.
     $context['results'][] = l($node->title, 'node/'. $node->nid);
@@ -1346,4 +1341,50 @@ function content_mask_batch_update($field, $mask, &$context) {
   if ($context['sandbox']['progress'] != $context['sandbox']['max']) {
     $context['finished'] = $context['sandbox']['progress'] / $context['sandbox']['max'];
   }
+}
+
+/**
+ * Content Field Replace
+ *
+ * Replace field values in a node from an array of update values.
+ *
+ * Supply a an array of one or more fields and masks of field column values
+ * to be replaced into field values, one mask for basic values and an optional
+ * different mask for values in field items equal to or higher than a
+ * specified delta.
+ *
+ * The masks should contain only the column values to be substituted in.
+ * The supplied values will be merged into the existing values to replace
+ * only the values in the mask, leaving all other values unchanged.
+ *
+ * @param $nid
+ * @param $updates
+ *   an array like:
+ *   'field_name' => array(
+ *     'mask' => array()
+ *       // Keyed array of column names and replacement values for use
+ *       // below delta, or for all values if no delta is supplied.
+ *     'alt_mask' => array()
+ *       // Optional, keyed array of column names and replacement values for use
+ *       // at or above delta, if a delta is supplied.
+ *     'delta' => #
+ *       // Optional, the number to use as the delta value where you switch from
+ *       // one mask to the other.
+ *     ),
+ */
+function content_field_replace($nid, $updates) {
+  $node = node_load($nid, NULL, TRUE);
+  foreach ($updates as $field_name => $update) {
+    $items = isset($node->$field_name) ? $node->$field_name : array();
+    foreach ($items as $delta => $value) {
+      $field_mask = (isset($update['delta']) && isset($update['alt_mask']) && $delta >= $update['delta']) ? $update['alt_mask'] : $mask['mask'];
+      // Merge the mask into the field values to do the replacements.
+      $items[$delta] = array_merge($items[$delta], $field_mask);
+    }
+    // Test if the new values will make items qualify as empty.
+    $items = content_set_empty($field, $items);
+    $node->$field_name = $items;
+  }
+  node_save($node);
+  return $node;
 }
