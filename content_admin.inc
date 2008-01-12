@@ -1060,8 +1060,8 @@ function content_alter_db($previous_field, $new_field) {
 
   // If we're going from one multiple value a smaller one or to single,
   // drop all delta values higher than the new maximum delta value.
-  // Not needed if the new multiple is unlimited.
-  if ($new_field['multiple'] < $previous_field['multiple'] && $new_field['multiple'] != 1){
+  // Not needed if the new multiple is unlimited or if the new table is the content table.
+  if ($new_table != $base_tablename && $new_field['multiple'] < $previous_field['multiple'] && $new_field['multiple'] != 1){
     db_query("DELETE FROM {". $new_table ."} WHERE delta >= ". max(1, $new_field['multiple']));
   }
 
