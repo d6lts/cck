@@ -1,6 +1,10 @@
 <?php
 // $Id$
 
+// Updates happen in random order, whether or not the module is enabled,
+// so include critical code here just to be sure.
+include_once('./'. drupal_get_path('module', 'content') .'/content.module');
+
 /**
  * Implementation of hook_install().
  */
@@ -45,7 +49,6 @@ function text_update_last_removed() {
  *
  */
 function text_update_6000() {
-  include_once('./'. drupal_get_path('module', 'content') .'/content.module');
   $ret = array();
   $result = db_query("SELECT * FROM {". content_instance_tablename() ."} WHERE widget_type = 'text'");
   while ($field_instance = db_fetch_array($result)) {
@@ -67,7 +70,6 @@ function text_update_6000() {
  *
  */
 function text_update_6001() {
-  include_once('./'. drupal_get_path('module', 'content') .'/content.module');
   $ret = array();
 
   // Get the latest cache values and schema.

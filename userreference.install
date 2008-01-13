@@ -1,6 +1,10 @@
 <?php
 // $Id$
 
+// Updates happen in random order, whether or not the module is enabled,
+// so include critical code here just to be sure.
+include_once('./'. drupal_get_path('module', 'content') .'/content.module');
+
 /**
  * Implementation of hook_install().
  */
