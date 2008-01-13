@@ -82,7 +82,7 @@ function content_instance_default_values($field_name, $type_name, $widget_type) 
   );
 
   if (module_exists($module)) {
-    $widget['active'] = 1;
+    $widget['widget_active'] = 1;
   }
 
   $settings_names = array_merge(array('label'), array_keys(_content_admin_display_contexts()));
