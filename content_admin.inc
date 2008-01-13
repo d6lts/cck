@@ -221,7 +221,7 @@ function content_admin_display_overview_form(&$form_state, $type_name, $contexts
   $fields = $type['fields'];
   if (empty($fields)) {
     drupal_set_message(t('There are no fields configured for this content type.'));
-    return array('#contexts' => array(), '#order' => array());
+    return array();
   }
 
   $groups = $group_options = array();
@@ -338,31 +338,34 @@ function content_admin_display_overview_form(&$form_state, $type_name, $contexts
  *  Theme the display overview table.
  */
 function theme_content_admin_display_overview_form($form) {
-  $contexts = _content_admin_display_contexts($form['#contexts']);
-  $header = array(t('Field'), t('Label'));
-  foreach ($contexts as $key => $title) {
-    $header[] = $title;
-  }
-  $rows = array();
-
-  foreach ($form['#order'] as $key) {
-    $row = array();
-    $element = &$form[$key];
-    if (in_array($key, $form['#groups'])) {
-      $element['human_name']['#prefix'] = '<b>';
-      $element['human_name']['#suffix'] = '</b>';
+  $output = '';
+  if (isset($form['#order'])) {
+    $contexts = _content_admin_display_contexts($form['#contexts']);
+    $header = array(t('Field'), t('Label'));
+    foreach ($contexts as $key => $title) {
+      $header[] = $title;
     }
-    $row[] = theme('indentation', isset($element['#depth']) ? $element['#depth'] : 0) . drupal_render($element['human_name']);
-    $row[] = drupal_render($element['label']);
-    foreach ($contexts as $context => $title) {
-      $row[] = drupal_render($element[$context]['format']);
+    $rows = array();
+
+    foreach ($form['#order'] as $key) {
+      $row = array();
+      $element = &$form[$key];
+      if (in_array($key, $form['#groups'])) {
+        $element['human_name']['#prefix'] = '<b>';
+        $element['human_name']['#suffix'] = '</b>';
+      }
+      $row[] = theme('indentation', isset($element['#depth']) ? $element['#depth'] : 0) . drupal_render($element['human_name']);
+      $row[] = drupal_render($element['label']);
+      foreach ($contexts as $context => $title) {
+        $row[] = drupal_render($element[$context]['format']);
+      }
+      $rows[] = $row;
     }
-    $rows[] = $row;
+
+    $output .= theme('table', $header, $rows);
   }
 
-  $output  = theme('table', $header, $rows);
   $output .= drupal_render($form);
-
   return $output;
 }
 
@@ -616,7 +619,6 @@ function _content_admin_field_remove_submit($form, &$form_state) {
     $form_state['redirect'] = 'admin/content/types/'. $type['url_str'] .'/fields';
   }
 }
-
 
 /**
  * Menu callback; presents the field editing page.
