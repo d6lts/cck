@@ -32,16 +32,19 @@ function content_field_default_values($field_type) {
   $field_types = _content_field_types();
   $module = $field_types[$field_type]['module'];
 
-  $field = array();
-  $field['module'] = $module;
-  $field['type'] = $field_type;
-  $field['active'] = 0;
+  $field = array(
+    'module' => $module,
+    'type' => $field_type,
+    'active' => 0,
+  );
+
+  if (module_exists($module)) {
+    $field['active'] = 1;
+  }
 
   $field['columns'] = module_invoke($module, 'field_settings', 'database columns', $field);
   // Ensure columns always default to NULL values.
   foreach ((array) $field['columns'] as $column_name => $column) {
-    // If content_invoke works, it must be active.
-    $field['active'] = 1;
     $field['columns'][$column_name]['not null'] = FALSE;
   }
 
@@ -50,7 +53,7 @@ function content_field_default_values($field_type) {
   $field['db_storage'] = CONTENT_DB_STORAGE_PER_CONTENT_TYPE;
 
   // Make sure field settings all have an index in the array.
-  $setting_names = module_invoke($field['module'], 'field_settings', 'save', $field);
+  $setting_names = module_invoke($module, 'field_settings', 'save', $field);
   if (is_array($setting_names)) {
     foreach ($setting_names as $setting) {
       $field[$setting] = NULL;
@@ -66,31 +69,33 @@ function content_instance_default_values($field_name, $type_name, $widget_type) 
   $widget_types = _content_widget_types();
   $module = $widget_types[$widget_type]['module'];
 
-  $widget = array();
-  $widget['label'] = $field_name;
-  $widget['field_name'] = $field_name;
-  $widget['type_name'] = $type_name;
-  $widget['weight'] = 0;
-  $widget['description'] = '';
-  $widget['widget_type'] = $widget_type;
-  $widget['widget_module'] = $module;
-  $widget['widget_active'] = 0;
+  $widget = array(
+    'field_name' => $field_name,
+    'type_name' => $type_name,
+    'weight' => 0,
+    'label' => $field_name,
+    'description' => '',
+    'widget_type' => $widget_type,
+    'widget_module' => $module,
+    'display_settings' => array(),
+    'widget_settings' => array(),
+  );
 
-  $setting_names = array_merge(array('label' => 'above'), _content_admin_display_contexts());
+  if (module_exists($module)) {
+    $field['active'] = 1;
+  }
+
+  $settings_names = array_merge(array('label'), array_keys(_content_admin_display_contexts()));
   $widget['display_settings'] = array();
-  foreach ($setting_names as $setting => $label) {
-    $widget['display_settings'][$setting]['format'] = $setting == 'label' ? 'above' : 'default';
+  foreach ($settings_names as $name) {
+    $widget['display_settings'][$name]['format'] = ($name == 'label') ? 'above' : 'default';
   }
 
   // Make sure widget settings all have an index in the array.
-  $setting_names = module_invoke($widget['widget_module'], 'widget_settings', 'save', $widget);
+  $settings_names = module_invoke($module, 'widget_settings', 'save', $widget);
   $widget['widget_settings'] = array();
-  if (is_array($setting_names)) {
-    // If widget_invoke works, must be active.
-    $widget['widget_active'] = 1;
-    foreach ($setting_names as $setting) {
-      $widget['widget_settings'][$setting] = NULL;
-    }
+  foreach ((array) $settings_names as $name) {
+    $widget['widget_settings'][$name] = NULL;
   }
   return $widget;
 }
