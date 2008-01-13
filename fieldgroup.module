@@ -286,7 +286,7 @@ function fieldgroup_groups($content_type = '', $sorted = FALSE, $reset = FALSE) 
 function _fieldgroup_groups_label($content_type) {
   $groups = fieldgroup_groups($content_type);
 
-  $labels[''] = t('No group');
+  $labels[''] = '<'. t('none') .'>';
   foreach ($groups as $group_name => $group) {
     $labels[$group_name] = t($group['label']);
   }

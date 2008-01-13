@@ -745,12 +745,18 @@ function _content_admin_field(&$form_state, $type_name, $field_name) {
     '#default_value' => $field['required'],
   );
   $options = drupal_map_assoc(range(2, 10));
+  $description = '<p>'. t('Select %none if this field should not allow multiple values, '
+    ."%unlimited to provide an 'Add more' button so the user can add as many values as they like, "
+    .'or select a number to set a specific number of multiple values for this field.',
+     array('%none' => $option_none, '%unlimited' => $option_unlimited)) .'</p>'
+    .'<p><strong>' . t('Warning! Changing the multiple values setting after data has been '
+    .'created could result in the loss of data!') .'</strong></p>';
   $form['field']['multiple'] = array(
     '#type' => 'select',
     '#title' => t('Multiple values'),
     '#options' => array_merge(array(0 => t('None'), 1 => t('Unlimited')), $options),
     '#default_value' => $field['multiple'],
-    '#description' => t('<p>Select \'None\' if this field should not allow multiple values, \'Unlimited\' to provide an \'Add more\' button so the user can add as many values as they like, or select a number to set a specific number of multiple values for this field.</p><p><strong>Warning! Changing the multiple values setting after data has been created could result in the loss of data!</strong></p>')
+    '#description' => $description,
   );
 
   $form['field']['previous_field'] = array(

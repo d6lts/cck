@@ -492,13 +492,14 @@ function nodereference_allowed_values($field) {
     $options[$key] = _nodereference_item($field, $value);
   }
   if (!$field['required']) {
-    $options = array(0 => t('<none>')) + $options;
+    $options = array(0 => '<'. t('none') .'>') + $options;
   }
   return $options;
 }
 
 /**
- * Fetch an array of all candidate referenced nodes, for use in presenting the selection form to the user.
+ * Fetch an array of all candidate referenced nodes,
+ * for use in presenting the selection form to the user.
  */
 function _nodereference_potential_references($field, $return_full_nodes = FALSE, $string = '', $exact_string = false) {
   if (module_exists('views') && isset($field['advanced_view']) && $field['advanced_view'] != '--' && ($view = views_get_view($field['advanced_view']))) {

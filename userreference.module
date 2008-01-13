@@ -405,7 +405,7 @@ function userreference_autocomplete_validate($element, &$form_state) {
 function userreference_allowed_values($field) {
   $options = _userreference_potential_references($field);
   if (!$field['required']) {
-    $options = array('none' => t('<none>')) + $options;
+    $options = array('none' => '<'. t('none') .'>') + $options;
   }
   return $options;
 }
@@ -482,7 +482,6 @@ function _userreference_filter_handler($op, $filterinfo) {
   $options = $options + _userreference_potential_references($filterinfo['extra']['field']);
   return $options;
 }
-
 
 /**
  * Implementation of hook_user().
