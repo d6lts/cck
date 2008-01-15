@@ -5,22 +5,16 @@
  * @file
  * Defines selection, check box and radio button widgets for text and numeric fields.
  */
-
-/**
- * Implementation of hook_help().
- */
-function optionwidgets_help($path, $arg) {
-  if (preg_match('|^admin/content/types/[^/]*/fields/[^/]*$|', $path)) {
-    if (($field = content_fields($arg[5], $arg[3])) && in_array($field['widget']['type'], array_keys(optionwidgets_widget_info()))) {
-      $output = t('Create a list of options as a list in <strong>Allowed values</strong> or as an array in Php code at the bottom of this page. These values will be the same for the %field in all content types. ', array('%field' => $field['widget']['label']));
-      if ($field['widget']['type'] == 'optionwidgets_onoff') {
-        $output .= '<br/>'. t('For a \'Single on/off checkbox\' widget, define the \'off\' value first, then the \'on\' value in the <strong>Allowed values</strong> section. Note that the checkbox will be labeled with the label of the \'on\' value.');
-      }
-      else {
-        $output .= '<br/>'. t('The \'Checkboxes / radio buttons\' widget will display checkboxes if the multiple values option is selected for this field, otherwise radios will be displayed.');
-      }
-      return $output;
+function optionwidgets_form_alter(&$form, $form_state, $form_id) {
+  if ($form_id == '_content_admin_field') {
+    $output = t('<p>Create a list of options as a list in <strong>Allowed values</strong> or as an array in Php code. These values will be the same for %field in all content types.</p>', array('%field' => $form['widget']['label']['#default_value']));
+    if ($form['widget']['widget_type']['#default_value'] == 'optionwidgets_onoff') {
+      $output .= t('<p>For a \'Single on/off checkbox\' widget, define the \'off\' value first, then the \'on\' value in the <strong>Allowed values</strong> section. Note that the checkbox will be labeled with the label of the \'on\' value.</p>');
     }
+    elseif ($form['widget']['widget_type']['#default_value'] == 'optionwidgets_buttons') {
+      $output .= t('<p>The \'Checkboxes / radio buttons\' widget will display checkboxes if the multiple values option is selected for this field, otherwise radios will be displayed.</p>');
+    }
+    $form['field']['allowed_values']['#description'] .= $output;
   }
 }
 
