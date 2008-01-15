@@ -426,7 +426,7 @@ function content_field_instance_read($param = NULL) {
     $cond = " AND ". implode(' AND ', $cond);
   }
   $db_result = db_query("SELECT * FROM {". content_instance_tablename() ."} nfi ".
-    " JOIN ". content_field_tablename() ."} nf ON nfi.field_name = nf.field_name ".
+    " JOIN {". content_field_tablename() ."} nf ON nfi.field_name = nf.field_name ".
     " WHERE nf.active = 1 AND nfi.widget_active = 1 ". $cond ." ORDER BY nfi.weight ASC, nfi.label ASC", $args);
 
   $fields = array();
