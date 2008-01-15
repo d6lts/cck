@@ -381,7 +381,6 @@ function userreference_autocomplete_process($element, $edit, $form_state, $form)
 function userreference_select_validate($element, &$form_state) {
   $field_key  = $element['#columns'][0];
   form_set_value($element, $element['#value'][$field_key], $form_state);
-  return $element;
 }
 
 /**

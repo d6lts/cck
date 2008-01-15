@@ -326,7 +326,7 @@ function content_field_form(&$form, &$form_state, $field, $get_delta = NULL) {
           '#title' => t($field['widget']['label']),
           '#delta' => $delta,
         );
-        $form_element[$delta] = array_merge($element, $defaults);
+        $form_element = array_merge($element, $defaults);
       }
     }
 

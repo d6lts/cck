@@ -203,7 +203,6 @@ function optionwidgets_select_process($element, $edit, &$form_state, $form) {
   if (empty($edit)) {
     $element['#value'] = optionwidgets_data2form($element, $element['#default_value'], $field);
   }
-
   $element[$field_key] = array(
     '#type' => 'select',
     '#title' => $element['#title'],
@@ -211,7 +210,7 @@ function optionwidgets_select_process($element, $edit, &$form_state, $form) {
     '#required' => $field['required'],
     '#multiple' => $field['multiple'],
     '#options' => optionwidgets_options($field),
-    '#default_value' => isset($element['#value']) ? $element['#value'] : NULL,
+    '#default_value' => isset($element['#value'][$field_key]) ? $element['#value'][$field_key] : NULL,
   );
 
   // Make sure field info will be available to the validator which
@@ -274,6 +273,9 @@ function optionwidgets_validate($element, &$form_state) {
   $updated = optionwidgets_form2data($element, $element['#value'], $field);
   $parents = $element['#parents'];
   array_pop($parents);
+  dsm($element['#value']);
+  dsm($updated);
+  dsm($parents);
   form_set_value(array('#parents' => $parents), $updated, $form_state);
 }
 
