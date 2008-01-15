@@ -140,7 +140,7 @@ function optionwidgets_elements() {
  * @return
  *   the form item for a single element for this field
  */
-function optionwidgets_widget(&$form, &$form_state, $field, $items, $delta = 0) {
+function optionwidgets_widget(&$form, &$form_state, $field, $items, $delta = NULL) {
   $element = array(
     '#type' => $field['widget']['type'],
     '#default_value' => !empty($items) ? $items : array(),

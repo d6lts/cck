@@ -698,9 +698,18 @@ function _content_admin_field(&$form_state, $type_name, $field_name) {
     $widget_field = $field;
     $widget_field['required'] = FALSE;
     $widget_form = array('#node' => $node);
-    $widget_items = array($field['field_name'] => $default_value);
+    // When multiple values are handled by the content module, we'll have a zero
+    // delta, but when multiple values are handled by the widget module, we
+    // must use the returned value as-is.
+    if (content_handle('widget', 'multiple values', $field) == CONTENT_HANDLE_CORE) {
+      $widget_items = array($field['field_name'] => array(0 => $default_value));
+    }
+    else {
+      $widget_items = array($field['field_name'] => array($default_value));
+    }
     $widget_form_state = array('values' => $widget_items);
     $form_element = content_field_form($widget_form, $widget_form_state, $widget_field, 0);
+
     $form['widget']['default_value_fieldset']['default_value_widget'] = $form_element;
     $form['widget']['default_value_fieldset']['default_value_widget']['#tree'] = TRUE;
     $form['widget']['default_value_fieldset']['advanced_options'] = array(
@@ -861,8 +870,11 @@ function _content_admin_field_validate($form, &$form_state) {
         form_set_value(array('#parents' => array('default_value')), array(), $form_state);
       }
     }
-    else {
-      $default_value = $form_values['default_value_widget'][$field['field_name']];
+    elseif (!empty($form_values['default_value_widget'])) {
+      // Fields that handle their own multiple values may use an expected
+      // value as the top-level key, so just pop off the top element.
+      $key = array_shift(array_keys($form_values['default_value_widget']));
+      $default_value = $form_values['default_value_widget'][$key];
       $is_code = FALSE;
       form_set_value(array('#parents' => array('default_value_php')), '', $form_state);
       form_set_value(array('#parents' => array('default_value')), $default_value, $form_state);
