@@ -256,7 +256,7 @@ function content_update_6001() {
 function content_update_6002() {
   $ret = array();
 
-  $db_types = content_types_install();
+  $db_types = content_install_types();
   $field_types = array();
 
   $result = db_query("SELECT DISTINCT type_name FROM {". content_instance_tablename() ."}");
