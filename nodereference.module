@@ -445,7 +445,8 @@ function nodereference_autocomplete_process($element, $edit, $form_state, $form)
  * Remove the wrapper layer and set the right element's value.
  */
 function nodereference_select_validate($element, &$form_state) {
-  form_set_value($element, $element['#value'][$field_key]);
+  $field_key  = $element['#columns'][0];
+  form_set_value($element, $element['#value'][$field_key], $form_state);
 }
 
 /**
