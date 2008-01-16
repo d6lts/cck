@@ -1257,7 +1257,7 @@ function content_node_type($op, $info) {
  * information is changed.
  */
 function content_clear_type_cache($rebuild_schema = FALSE) {
-  cache_clear_all('content_type_info', content_cache_tablename());
+  cache_clear_all('*', content_cache_tablename(), TRUE);
   _content_type_info(TRUE);
 
   // Refresh the schema to pick up new information.
