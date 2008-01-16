@@ -850,7 +850,11 @@ function content_node_type($op, $info) {
  * information is changed.
  */
 function content_clear_type_cache() {
-  cache_clear_all('content_type_info', 'cache_content');
+  // If type type cache needs to be cleared because type information has
+  // changed, the cached node values also need to be emptied so they
+  // don't carry stale values.
+  // TODO see if there is a less destructive way to do this.
+  cache_clear_all('*', 'cache_content', TRUE);
 
   _content_type_info(TRUE);
 

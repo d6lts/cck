@@ -713,7 +713,7 @@ function _content_admin_field_remove_submit($form_id, $form_values) {
     content_field_instance_delete($form_values);
 
     drupal_set_message(t('Removed field %field from %type.', array('%field' => $field['widget']['label'], '%type' => $type['name'])));
-
+    content_clear_type_cache();
     return 'admin/content/types/'. $type['url_str'] .'/fields';
   }
 }

@@ -17,6 +17,8 @@ Bugfix
 ------
 
 General
+- #210683  Execute content_clear_type_cache() after removing fields from nodes.
+- #210683  Clear node values from cache if field information is changed so stale values don't appear in node_load().
 - #198420  Make sure internal field and widget names are truncated to 32 characters to match the database values.
 - Include views module in content_clear_type_cache() to prevent errors when this is called from .install files.
 
