@@ -14,7 +14,7 @@ include_once('./'. drupal_get_path('module', 'content') .'/content.module');
  * from database info that is limited to fields from modules that are
  * currently enabled.
  */
-function content_install_types() {
+function content_types_install() {
   $module_field_types = $module_widgets = array();
   foreach (module_list() as $module) {
     if ($field_type = module_invoke($module, 'field_info')) {
@@ -256,7 +256,7 @@ function content_update_6001() {
 function content_update_6002() {
   $ret = array();
 
-  $db_types = content_install_types();
+  $db_types = content_types_install();
   $field_types = array();
 
   $result = db_query("SELECT DISTINCT type_name FROM {". content_instance_tablename() ."}");

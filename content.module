@@ -733,7 +733,7 @@ function content_associate_fields($module) {
   // version of a fields array.
   include_once('./'. drupal_get_path('module', 'content') .'/content.install');
   $fields_set = array();
-  $types = content_install_types();
+  $types = content_types_install();
   foreach ($types as $type_name => $fields) {
     foreach ($fields as $field) {
       if ($field['module'] == $module && !in_array($field['field_name'], $fields_set)) {
