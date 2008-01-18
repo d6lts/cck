@@ -1018,7 +1018,6 @@ function content_alter_db($previous_field, $new_field) {
     $new_db_info = content_database_info($new_field);
     $new_table = $new_db_info['table'];
   }
-
   // Deleting this field entirely is a simple case.
   if (empty($new_field)) {
     if ($previous_field['db_storage'] == CONTENT_DB_STORAGE_PER_FIELD) {
@@ -1142,7 +1141,7 @@ function content_alter_db($previous_field, $new_field) {
       }
       if (db_result(db_query('SELECT COUNT(*) FROM {'. $new_table .
       '} WHERE vid = %d AND nid = %d', $data['vid'], $data['nid']))) {
-          $keys = $new_field['multiple'] ? array('vid', 'delta') : array('vid');
+        $keys = $new_field['multiple'] ? array('vid', 'delta') : array('vid');
         drupal_write_record($new_table, $record, $keys);
       }
       else {

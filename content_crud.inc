@@ -474,8 +474,6 @@ function content_field_instance_delete($field_name, $type_name) {
   // Invoke hook_content_fieldapi().
   module_invoke_all('content_fieldapi', 'delete instance', $field);
 
-  content_alter_schema($field, array());
-
   db_query("DELETE FROM {". content_instance_tablename() .
     "} WHERE field_name = '%s' AND type_name = '%s'", $field['field_name'], $field['type_name']);
 
@@ -495,7 +493,10 @@ function content_field_instance_delete($field_name, $type_name) {
 
     // Multiple-valued fields are always stored per-field-type.
     $instance = $instances[0];
+    $new_instance = $instance;
     $new_instance['db_storage'] = CONTENT_DB_STORAGE_PER_CONTENT_TYPE;
+    _content_field_write($new_instance, 'update');
+
     content_alter_schema($instance, $new_instance);
   }
 
