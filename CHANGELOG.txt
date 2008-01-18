@@ -17,6 +17,7 @@ Bugfix
 ------
 
 General
+- #211566  Limit data to nodes of the right content type when migrating data from per field to per type tables.
 - #210683  Execute content_clear_type_cache() after removing fields from nodes.
 - #210683  Clear node values from cache if field information is changed so stale values don't appear in node_load().
 - #198420  Make sure internal field and widget names are truncated to 32 characters to match the database values.
