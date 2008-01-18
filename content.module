@@ -950,7 +950,11 @@ function content_storage($op, $node) {
         if (count($record)) {
           $record['nid'] = $node->nid;
           $record['vid'] = $node->vid;
-          if ($op == 'update') {
+          // Can't rely on the insert/update op of the node to decide if this
+          // is an insert or an update, a node or revision may have existed
+          // before any fields were created, if so there will not be an entry for
+          // this revision in the content_type table.
+          if (db_result(db_query("SELECT COUNT(*) FROM {". $table ."} WHERE vid = %d", $node->vid))) {
             drupal_write_record($table, $record, array('vid'));
           }
           else {
