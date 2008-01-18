@@ -5,7 +5,7 @@
  * Callback function to supply a list of content types.
  */
 function content_panels_content_types() {
-	$items = array();
+  $items = array();
 
   if (module_exists('fieldgroup')) {
     $items['node_cck_group'] = array(
@@ -23,7 +23,7 @@ function content_panels_content_types() {
 }
 
 /**
- * 'Render' callback for the 'CCK group' content type. 
+ * 'Render' callback for the 'CCK group' content type.
  */
 function content_content_node_cck_group($conf, $panel_args, $context) {
   $node = isset($context->data) ? drupal_clone($context->data) : NULL;
@@ -32,13 +32,13 @@ function content_content_node_cck_group($conf, $panel_args, $context) {
   if ($node) {
     // Assemble the fields into groups
     $node = node_build_content($node);
-  
+
     // Get the "machine name" of the group from the options
     $groupname = $conf['group'];
 
     // Set the subject to the nice name of the group
     $block->subject = $node->content[$groupname]['#title'];
-    
+
     // Print out the contents of the given group
     // Note, not using drupal_render($node->content[$groupname]) here to avoid printing the fieldset
     if (is_array($node->content[$groupname])) {
@@ -50,12 +50,12 @@ function content_content_node_cck_group($conf, $panel_args, $context) {
         }
       }
     }
-    
+
     if (empty($output)) {
       // Output the given empty text
       $output = $conf['empty'];
     }
-    $block->content = $output;   
+    $block->content = $output;
     $block->delta = $node->nid;
   }
   else {
@@ -83,27 +83,9 @@ function content_admin_content_types_node_cck_group() {
   );
 }
 
-/**
- * Helper function : build the list of groups for the 'edit' form. 
- */
-function _content_admin_node_cck_group_options() {
-  $group_list = array();
-  
-  // Retrieve the list of all groups on all content types
-  $types = module_exists('fieldgroup') ? fieldgroup_groups(NULL, FALSE, FALSE) : array();
-  
-  // Add each group to the list with the content type it is from in parentheses
-  foreach ($types as $type) {  
-    foreach ($type as $group) {
-      $group_list[$group['group_name']] = $group['label'] . ' (' . $group['type_name'] . ')';
-    }
-  }
-
-  return $group_list;
-}
 
 /**
- * 'Edit' callback for the 'CCK group' content type. 
+ * 'Edit' callback for the 'CCK group' content type.
  */
 function content_admin_edit_node_cck_group($id, $parents, $conf = array()) {
   // Apply defaults
@@ -111,15 +93,25 @@ function content_admin_edit_node_cck_group($id, $parents, $conf = array()) {
     $conf = array('title' => '', 'group' => '', 'empty' => '');
   }
 
+  // Retrieve the list of all groups on all content types
+  $group_list = array();
+  $types = module_exists('fieldgroup') ? fieldgroup_groups(NULL, FALSE, FALSE) : array();
+  // Add each group to the list with the content type it is from in parentheses
+  foreach ($types as $type) {
+    foreach ($type as $group) {
+      $group_list[$group['group_name']] = $group['label'] . ' (' . $group['type_name'] . ')';
+    }
+  }
+
   $form['group'] = array(
     '#type' => 'select',
     '#title' => t('Which group'),
-    '#options' => _content_admin_node_cck_group_options(),
+    '#options' => $group_list,
     '#default_value' => $conf['group'],
     '#prefix' => '<div class="clear-block no-float">',
     '#suffix' => '</div>',
   );
-  
+
   $form['empty'] = array(
     '#type' => 'textarea',
     '#title' => 'Empty text',
@@ -134,7 +126,7 @@ function content_admin_edit_node_cck_group($id, $parents, $conf = array()) {
 }
 
 /**
- * 'Title' callback for the 'CCK group' content type. 
+ * 'Title' callback for the 'CCK group' content type.
  */
 function content_admin_title_node_cck_group($conf, $context) {
   return t('"@s" node cck group', array('@s' => $context->identifier));
