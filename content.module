@@ -952,8 +952,12 @@ function content_storage($op, $node) {
           $record['vid'] = $node->vid;
           // Can't rely on the insert/update op of the node to decide if this
           // is an insert or an update, a node or revision may have existed
-          // before any fields were created, if so there will not be an entry for
-          // this revision in the content_type table.
+          // before any fields were created, so there may not be an entry here.
+
+          // TODO - should we auto create an entry for all existing nodes when
+          // fields are added to content types -- either a NULL value
+          // or the default value? May need to offer the user an option of
+          // how to handle that.
           if (db_result(db_query("SELECT COUNT(*) FROM {". $table ."} WHERE vid = %d", $node->vid))) {
             drupal_write_record($table, $record, array('vid'));
           }
