@@ -18,15 +18,16 @@
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: PROJECT VERSION\n"
+"Project-Id-Version: CCK 5.x-1.x\n"
 "POT-Creation-Date: 2007-05-18 17:31+0200\n"
-"PO-Revision-Date: 2007-08-18 14:24+0700\n"
-"Last-Translator: \n"
-"Language-Team: LANGUAGE <EMAIL@ADDRESS>\n"
+"PO-Revision-Date: 2008-01-18 09:18+0700\n"
+"Last-Translator: The Hong Truong <thehongtt@gmail.com>\n"
+"Language-Team: Vietnamese Translation Team <thehong@toila.net>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=INTEGER; plural=EXPRESSION;\n"
+"Plural-Forms: nplurals=2; plural=(n!=1);\n"
+"X-Poedit-SourceCharset: utf-8\n"
 
 #: field.php:106
 #: text.module:34
@@ -120,7 +121,7 @@ msgstr "Các trường"
 #: nodereference.module:202
 #: userreference.module:142
 msgid "<none>"
-msgstr "<không>"
+msgstr "<rỗng>"
 
 #: number.module:57
 #: text.module:41
@@ -187,7 +188,7 @@ msgstr "Tạo một danh sách các tùy chọn giống như danh sách trong <s
 
 #: optionwidgets.module:40
 msgid " For a single on/off checkbox, define the 'off' value first, then the 'on' value in the <strong>Allowed values</strong> section."
-msgstr ""
+msgstr "Với hộp chọn đơn bật/tắt, định nghĩa giá trị 'tắt' trước, tiếp sau, giá trị 'bật' trong mục  <strong>Các giá trị được phép</strong>"
 
 #: optionwidgets.module:43
 msgid " The Check boxes/radio buttons widget will display checkboxes if the multiple values option is selected for this field, otherwise radios will be displayed."
@@ -447,7 +448,7 @@ msgstr "Nhập vào"
 
 #: content_copy.module:81
 msgid "This form will process a content type and one or more fields from that type and export the settings. The export created by this process can be copied and pasted as an import into the current or any other database. The import will add the fields to into an existing content type or create a new content type that includes the selected fields."
-msgstr ""
+msgstr "Biểu mẫu này sẽ xử lý một kiểu nội dung vào một/nhiều trường từ kiểu nội dung đó và xuất ra các thiết lập. Bản xuất ra được tạo bởi quá trình xử lý này có thể được sao chép và dán vào cơ sở dữ liệu hiện tại hoặc cơ sở dữ liệu khác, sử dụng chức năng nhập vào. Chức năng nhập vào sẽ thêm các trường vào kiểu nội dung hiện có hoặc tạo một kiểu nội dung mới bao gồm các trường đã được chọn."
 
 #: content_copy.module:90
 msgid "Types"
@@ -659,7 +660,7 @@ msgstr "Nâng cao - Các node có thể được tham khảo (View)"
 
 #: nodereference.module:67
 msgid "View"
-msgstr "View"
+msgstr "Xem"
 
 #: nodereference.module:70
 msgid "Choose the \"Views module\" view that selects the nodes that can be referenced.<br>Note :<ul><li>This will discard the \"Content types\" settings above. Use the view's \"filters\" section instead.</li><li>Use the view's \"fields\" section to display additional informations about candidate nodes on node creation/edition form.</li><li>Use the view's \"sort criteria\" section to determine the order in which candidate nodes will be displayed.</li></ul>"
@@ -818,3 +819,4 @@ msgstr "Tham khảo người dùng"
 #: userreference.info:0
 msgid "Defines a field type for referencing a user from a node."
 msgstr "Định nghĩa một kiểu trường để tham khảo đến một người dùng từ một node."
+
