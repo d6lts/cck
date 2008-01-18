@@ -1124,10 +1124,10 @@ function content_alter_db($previous_field, $new_field) {
     // rebuild the schema now.
     content_alter_db_cleanup($ret);
     if ($previous_field['multiple']) {
-      $result = db_query('SELECT * FROM {'. $previous_table .'} WHERE delta = 0');
+      $result = db_query("SELECT * FROM {". $previous_table ."} c JOIN {node} n ON c.nid = n.nid WHERE delta = 0 AND n.type = '%s'", $new_field['type_name']);
     }
     else {
-      $result = db_query('SELECT * FROM {'. $previous_table .'}');
+      $result = db_query("SELECT * FROM {". $previous_table ."} c JOIN {node} n ON c.nid = n.nid WHERE n.type = '%s'", $new_field['type_name']);
     }
     $record = array();
     while ($data = db_fetch_array($result)) {
