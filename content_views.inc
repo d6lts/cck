@@ -67,8 +67,12 @@ function content_views_field_tables($field) {
       'addlfields' => $addlfields,
       'sortable' => isset($main_column['sortable']) ? $main_column['sortable'] : FALSE,
       'query_handler' => 'content_views_field_query_handler',
-      'handler' => array('content_views_field_handler_group' => t('Group multiple values'),
-                         'content_views_field_handler_ungroup' => t('Do not group multiple values')),
+      'handler' => array(
+        'content_views_field_handler_group' => t('Group multiple values'),
+        'content_views_field_handler_ungroup' => t('Do not group multiple values'),
+        'content_views_field_handler_first' => t('Show first value only'),
+        'content_views_field_handler_last' => t('Show last value only'),
+      ),
       'option' => array('#type' => 'select', '#options' => $formatters),
       'content_db_info' => $db_info,
       'content_field' => $field,
@@ -114,13 +118,14 @@ function content_views_field_tables($field) {
 }
 
 function content_views_field_query_handler($field, &$fieldinfo, &$query) {
-  if ($field['handler'] == 'content_views_field_handler_group') {
+  if (in_array($field['handler'], array('content_views_field_handler_group', 'content_views_field_handler_first', 'content_views_field_handler_last'))) {
     // we manage the addition of fields ourselves
     // if not multiple field, add the columns to the query
     if (!$fieldinfo['content_field']['multiple']) {
       $query->add_field($field['field'], $field['tablename'], $field['queryname']);
-      foreach ($fieldinfo['addlfields'] as $name)
+      foreach ($fieldinfo['addlfields'] as $name) {
         $query->add_field($name, $field['tablename'], "$field[tablename]_$name");
+      }
     }
     // if multiple field, no field gets added (they are retrieved later
     // in content_views_field_handler in order to avoid duplicate results)
@@ -137,21 +142,25 @@ function content_views_field_query_handler($field, &$fieldinfo, &$query) {
   }
 }
 
-function content_views_field_handler_group($field_info, $field_data, $value, $data) {
+function content_views_field_handler_group($field_info, $field_data, $value, $data, $from = 0, $count = 'all', $order = 'ASC') {
   $field = $field_info['content_field'];
   $items = array();
   if ($field['multiple']) {
     foreach ($field_info['content_db_info']['columns'] as $column => $attributes) {
       $query_columns[] = "node_data_$field[field_name].$attributes[column] AS $column";
     }
-    // Add node.nid to the beginning of the list to keep db_rewrite_sql()
-    // from mistakenly adding DISTINCT to nodereference fields.
+    // Add node.nid as the first item in the field list to keep db_rewrite_sql()
+    // from trying to force DISTINCT on the nid field of nodereference fields.
     $query = "SELECT node.nid, ". implode(', ', $query_columns) .
              " FROM {node} node".
              " LEFT JOIN {". $field_info['content_db_info']['table'] ."} node_data_$field[field_name] ON node.vid = node_data_$field[field_name].vid".
              " WHERE node.nid = ". $data->nid .
-             " ORDER BY node_data_$field[field_name].delta";
-    $result = db_query(db_rewrite_sql($query, 'node'));
+             " ORDER BY node_data_$field[field_name].delta $order";
+    $query = db_rewrite_sql($query, 'node');
+    // Select all deltas or only a subset.
+    // Currently only 'all' and first / last items are proposed to the user.
+    $result = ($count == 'all') ? db_query($query) : db_query_range($query, $from, $count);
+
     while ($item = db_fetch_array($result)) {
       $items[] = content_format($field, $item, $field_data['options'], $data);
     }
@@ -160,6 +169,14 @@ function content_views_field_handler_group($field_info, $field_data, $value, $da
   else {
     return content_views_field_handler_ungroup($field_info, $field_data, $value, $data);
   }
+}
+
+function content_views_field_handler_first($field_info, $field_data, $value, $data) {
+  return content_views_field_handler_group($field_info, $field_data, $value, $data, 0, 1, 'ASC');
+}
+
+function content_views_field_handler_last($field_info, $field_data, $value, $data) {
+  return content_views_field_handler_group($field_info, $field_data, $value, $data, 0, 1, 'DESC');
 }
 
 function content_views_field_handler_ungroup($field_info, $field_data, $value, $data) {
