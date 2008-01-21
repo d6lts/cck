@@ -326,7 +326,16 @@ function content_field_form(&$form, &$form_state, $field, $get_delta = NULL) {
           '#title' => t($field['widget']['label']),
           '#delta' => $delta,
         );
-        $form_element = array_merge($element, $defaults);
+        // If we're processing a specific delta value for a field where the
+        // content module handles multiples, set the delta in the result.
+        // For fields that handle their own processing, we can't make assumptions
+        // about how the field is structured, just merge in the returned value.
+        if (content_handle('widget', 'multiple values', $field) == CONTENT_HANDLE_CORE) {
+          $form_element[$delta] = array_merge($element, $defaults);
+        }
+        else {
+          $form_element = array_merge($element, $defaults);
+        }
       }
     }
 
