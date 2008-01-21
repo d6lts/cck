@@ -109,7 +109,7 @@ function content_field_instance_expand($field) {
   }
   $field['widget'] = !empty($field['widget_settings']) ? $field['widget_settings'] : array();
   $field['widget']['label'] = !empty($field['label']) ? $field['label'] : $field['field_name'];
-  $field['widget']['weight'] = !empty($field['weight']) ? $field['weight'] : 0;
+  $field['widget']['weight'] = !empty($field['weight']) ? $field['weight'] : NULL;
   $field['widget']['description'] = !empty($field['description']) ? $field['description'] : NULL;
 
   // Only fill in widget/module and widget/type if we do have valid information.
@@ -188,12 +188,15 @@ function content_field_instance_collapse($field) {
  *   Required values:
  *   - field_name, the name of the field to be created
  *   - type_name, the content type of the instance to be created
+ *
+ *   If there is no prior instance to create this from, we also need:
  *   - type, the type of field to create
  *   - widget_type, the type of widget to use
  */
 function content_field_instance_create($field) {
   include_once('./'. drupal_get_path('module', 'content') .'/content_admin.inc');
 
+  $form_values = $field;
   $field = content_field_instance_expand($field);
 
   // If there are prior instances, fill out missing values from the prior values,
@@ -201,6 +204,14 @@ function content_field_instance_create($field) {
   $prior_instances = content_field_instance_read(array('field_name' => $field['field_name']));
   if (!empty($prior_instances) && is_array($prior_instances)) {
     $prev_field = content_field_instance_expand($prior_instances[0]);
+
+    // Weight, label, and description may have been forced into the $field
+    // by content_field_instance_expand(). If there is a previous instance to
+    // get these values from and there was no value supplied originally, use
+    // the previous value.
+    $field['widget']['weight'] = isset($form_values['weight']) ? $form_values['weight'] : $prev_field['widget']['weight'];
+    $field['widget']['label']  = isset($form_values['label']) ? $form_values['label'] : $prev_field['widget']['label'];
+    $field['widget']['description'] = isset($form_values['description']) ? $form_values['description'] : $prev_field['widget']['description'];
   }
   else {
     $prev_field = array('widget' => array());
