@@ -587,7 +587,7 @@ function content_type_update($info) {
 function content_type_delete($info) {
   $fields = content_field_instance_read(array('type_name' => $info->type));
   foreach ($fields as $field) {
-    content_field_instance_delete($field);
+    content_field_instance_delete($field['field_name'], $info->type);
   }
   $table = _content_tablename($info->type, CONTENT_DB_STORAGE_PER_CONTENT_TYPE);
   if (db_table_exists($table)) {
