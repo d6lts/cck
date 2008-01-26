@@ -151,11 +151,11 @@ function content_field_instance_collapse($field) {
     return $field;
   }
   $field['widget_settings'] = !empty($field['widget']) ? $field['widget'] : array();
-  $field['widget_type'] = !empty($field['widget']['type']) ? $field['widget']['type'] : NULL;
+  $field['widget_type'] = !empty($field['widget']['type']) ? $field['widget']['type'] : '';
   $field['weight'] = !empty($field['widget']['weight']) ? $field['widget']['weight'] : 0;
   $field['label'] = !empty($field['widget']['label']) ? $field['widget']['label'] : $field['field_name'];
-  $field['description'] = !empty($field['widget']['description']) ? $field['widget']['description'] : NULL;
-  $field['type_name'] = !empty($field['type_name']) ? $field['type_name'] : NULL;
+  $field['description'] = !empty($field['widget']['description']) ? $field['widget']['description'] : '';
+  $field['type_name'] = !empty($field['type_name']) ? $field['type_name'] : '';
 
   if (!empty($field['widget']['module'])) {
     $widget_module = $field['widget']['module'];
@@ -165,7 +165,7 @@ function content_field_instance_collapse($field) {
     $widget_module = $widget_types[$field['widget']['type']]['module'];
   }
   else {
-    $widget_module = NULL;
+    $widget_module = '';
   }
   $field['widget_module'] = $widget_module;
   unset($field['widget_settings']['type']);
