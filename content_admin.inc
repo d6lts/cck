@@ -28,7 +28,7 @@ function _content_admin_type_fields() {
     "ORDER BY nt.name ASC", $field['field_name']);
     while ($type = db_fetch_array($result)) {
       $content_type = content_types($type['type']);
-      $types[] = l($type['name'], 'admin/content/types/'. $content_type['url_str'] .'/fields');
+      $types[] = l($type['name'], 'admin/content/node-type/'. $content_type['url_str'] .'/fields');
     }
     $row[] = implode(', ', $types);
 
@@ -85,8 +85,8 @@ function content_admin_field_overview_form(&$form_state, $type_name) {
       'human_name' => array('#value' => $field['widget']['label']),
       'name' => array('#value' => $field['field_name']),
       'type' => array('#value' => $field['type']),
-      'configure' => array('#value' => l(t('configure'), 'admin/content/types/'. $type['url_str'] .'/fields/'. $field['field_name'] .'/edit')),
-      'remove' => array('#value' => l(t('remove'), 'admin/content/types/'. $type['url_str'] .'/fields/'. $field['field_name'] .'/remove')),
+      'configure' => array('#value' => l(t('configure'), 'admin/content/node-type/'. $type['url_str'] .'/fields/'. $field['field_name'] .'/edit')),
+      'remove' => array('#value' => l(t('remove'), 'admin/content/node-type/'. $type['url_str'] .'/fields/'. $field['field_name'] .'/remove')),
       'weight' => array('#type' => 'textfield', '#default_value' => $weight),
       'parent' => array('#type' => 'select', '#options' => $group_options, '#default_value' => ''),
       'hidden_name' => array('#type' => 'hidden', '#default_value' => $field['field_name']),
@@ -101,8 +101,8 @@ function content_admin_field_overview_form(&$form_state, $type_name) {
       'human_name' => array('#value' => $group['label']),
       'name' => array('#value' => $group['group_name']),
       'type' => array(),
-      'configure' => array('#value' => l(t('configure'), 'admin/content/types/'. $type['url_str'] .'/groups/'. $group['group_name'] .'/edit')),
-      'remove' => array('#value' => l(t('remove'), 'admin/content/types/'. $type['url_str'] .'/groups/'. $group['group_name'] .'/remove')),
+      'configure' => array('#value' => l(t('configure'), 'admin/content/node-type/'. $type['url_str'] .'/groups/'. $group['group_name'] .'/edit')),
+      'remove' => array('#value' => l(t('remove'), 'admin/content/node-type/'. $type['url_str'] .'/groups/'. $group['group_name'] .'/remove')),
       'weight' => array('#type' => 'textfield', '#default_value' => $weight),
       'parent' => array('#type' => 'hidden', '#default_value' => ''),
       'hidden_name' => array('#type' => 'hidden', '#default_value' => $group['group_name']),
@@ -522,7 +522,7 @@ function _content_admin_field_add_existing_submit($form, &$form_state) {
       '%label' => $form_values['field_name'])));
   }
   $type = content_types($form_values['type_name']);
-  $form_state['redirect'] = 'admin/content/types/'. $type['url_str'] .'/fields';
+  $form_state['redirect'] = 'admin/content/node-type/'. $type['url_str'] .'/fields';
 }
 
 /**
@@ -564,7 +564,7 @@ function _content_admin_field_add_new_submit($form, &$form_state) {
   }
 
   $type = content_types($form_values['type_name']);
-  $form_state['redirect'] = 'admin/content/types/'. $type['url_str'] .'/fields/'. $form_values['field_name'];
+  $form_state['redirect'] = 'admin/content/node-type/'. $type['url_str'] .'/fields/'. $form_values['field_name'];
 }
 
 /**
@@ -587,7 +587,7 @@ function _content_admin_field_remove(&$form_state, $type_name, $field_name) {
   $output = confirm_form($form,
     t('Are you sure you want to remove the field %field?', array(
       '%field' => $field['widget']['label'])),
-    'admin/content/types/'. $type['url_str'] .'/fields',
+    'admin/content/node-type/'. $type['url_str'] .'/fields',
     t('If you have any content left in this field, it will be lost. This action cannot be undone.'),
     t('Remove'), t('Cancel'),
     'confirm'
@@ -616,7 +616,7 @@ function _content_admin_field_remove_submit($form, &$form_state) {
         '%field' => $field['widget']['label'],
         '%type' => $type['name'])));
     }
-    $form_state['redirect'] = 'admin/content/types/'. $type['url_str'] .'/fields';
+    $form_state['redirect'] = 'admin/content/node-type/'. $type['url_str'] .'/fields';
   }
 }
 
@@ -922,7 +922,7 @@ function _content_admin_field_submit($form, &$form_state) {
 
   drupal_set_message(t('Saved field %label.', array('%label' => $form_values['label'])));
   $type   = content_types($form_values['type_name']);
-  $form_state['redirect'] = 'admin/content/types/'. $type['url_str'] .'/fields';
+  $form_state['redirect'] = 'admin/content/node-type/'. $type['url_str'] .'/fields';
 }
 
 /**

@@ -20,8 +20,8 @@ define('CONTENT_HANDLE_CORE', 0x0001);
 define('CONTENT_HANDLE_MODULE', 0x0002);
 
 function content_help($path, $arg) {
-  if (preg_match('!^admin/content/types/.*/display!', $path)) {
-    if (preg_match('!^admin/content/types/.*/display$!', $path)) {
+  if (preg_match('!^admin/content/node-type/.*/display!', $path)) {
+    if (preg_match('!^admin/content/node-type/.*/display$!', $path)) {
       return t("Configure how this content type's fields and field labels should be displayed when it's viewed in teaser and full-page mode.");
     }
     else {
@@ -114,11 +114,11 @@ function content_menu() {
     // needed to avoid errors on initial installation.
     if (!empty($content_type)) {
       $type_url_str = $content_type['url_str'];
-      $items['admin/content/types/'. $type_url_str .'/edit'] = array(
+      $items['admin/content/node-type/'. $type_url_str .'/edit'] = array(
         'title' => t('Edit'),
         'type' => MENU_DEFAULT_LOCAL_TASK,
       );
-      $items['admin/content/types/'. $type_url_str .'/fields'] = array(
+      $items['admin/content/node-type/'. $type_url_str .'/fields'] = array(
         'title' => 'Manage fields',
         'page callback' => 'drupal_get_form',
         'page arguments' => array('content_admin_field_overview_form', $type_name),
@@ -128,7 +128,7 @@ function content_menu() {
         'type' => MENU_LOCAL_TASK,
         'weight' => 1,
       );
-      $items['admin/content/types/'. $type_url_str .'/display'] = array(
+      $items['admin/content/node-type/'. $type_url_str .'/display'] = array(
         'title' => 'Display fields',
         'page callback' => 'drupal_get_form',
         'page arguments' => array('content_admin_display_overview_form', $type_name),
@@ -138,19 +138,19 @@ function content_menu() {
         'type' => MENU_LOCAL_TASK,
         'weight' => 2,
       );
-      $items['admin/content/types/'. $type_url_str .'/display/general'] = array(
+      $items['admin/content/node-type/'. $type_url_str .'/display/general'] = array(
         'title' => 'General',
         'page arguments' => array('content_admin_display_overview_form', $type_name),
         'type' => MENU_DEFAULT_LOCAL_TASK,
         'weight' => 0,
       );
-      $items['admin/content/types/'. $type_url_str .'/display/advanced'] = array(
+      $items['admin/content/node-type/'. $type_url_str .'/display/advanced'] = array(
         'title' => 'Advanced',
         'page arguments' => array('content_admin_display_overview_form', $type_name, (string)CONTENT_CONTEXTS_ADVANCED),
         'type' => MENU_LOCAL_TASK,
         'weight' => 1,
       );
-      $items['admin/content/types/'. $type_url_str .'/add_field'] = array(
+      $items['admin/content/node-type/'. $type_url_str .'/add_field'] = array(
         'title' => 'Add field',
         'page callback' => '_content_admin_field_add',
         'page arguments' => array($type_name),
@@ -162,7 +162,7 @@ function content_menu() {
       );
       foreach ($content_type['fields'] as $field) {
         $field_name = $field['field_name'];
-        $items['admin/content/types/'. $type_url_str .'/fields/'. $field_name] = array(
+        $items['admin/content/node-type/'. $type_url_str .'/fields/'. $field_name] = array(
           'title' => t($field['widget']['label']),
           'page callback' => 'drupal_get_form',
           'page arguments' => array('_content_admin_field', $type_name, $field_name),
@@ -171,7 +171,7 @@ function content_menu() {
           'file path' => drupal_get_path('module', 'content'),
           'type' => MENU_LOCAL_TASK,
         );
-        $items['admin/content/types/'. $type_url_str .'/fields/'. $field_name .'/remove'] = array(
+        $items['admin/content/node-type/'. $type_url_str .'/fields/'. $field_name .'/remove'] = array(
           'title' => 'Remove field',
           'page callback' => 'drupal_get_form',
           'page arguments' => array('_content_admin_field_remove', $type_name, $field_name),

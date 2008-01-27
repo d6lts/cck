@@ -26,7 +26,7 @@ function fieldgroup_menu() {
     // needed to avoid errors on initial installation.
     if (!empty($content_type)) {
       $type_url_str = $content_type['url_str'];
-      $items['admin/content/types/'. $type_url_str .'/add_group'] = array(
+      $items['admin/content/node-type/'. $type_url_str .'/add_group'] = array(
         'title' => 'Add group',
         'page callback' => 'drupal_get_form',
         'page arguments' => array('fieldgroup_edit_group_form', $content_type, '', 'add'),
@@ -34,14 +34,14 @@ function fieldgroup_menu() {
         'type' => MENU_LOCAL_TASK,
         'weight' => 3,
       );
-      $items['admin/content/types/'. $type_url_str .'/groups/%/edit'] = array(
+      $items['admin/content/node-type/'. $type_url_str .'/groups/%/edit'] = array(
         'title' => 'Edit group',
         'page callback' => 'drupal_get_form',
         'page arguments' => array('fieldgroup_edit_group_form', $content_type, 5, 'edit'),
         'access arguments' => array('administer content types'),
         'type' => MENU_CALLBACK,
       );
-      $items['admin/content/types/'. $type_url_str .'/groups/%/remove'] = array(
+      $items['admin/content/node-type/'. $type_url_str .'/groups/%/remove'] = array(
         'title' => 'Edit group',
         'page callback' => 'drupal_get_form',
         'page arguments' => array('fieldgroup_remove_group', $content_type, 5),
@@ -209,7 +209,7 @@ function fieldgroup_edit_group_submit($form, &$form_state) {
   // (the description is not displayed either)
   // fixed when the 'display field' form is submitted.
   fieldgroup_save_group($content_type['type'], $form_values);
-  $form_state['redirect'] = 'admin/content/types/'. $content_type['url_str'] .'/fields';
+  $form_state['redirect'] = 'admin/content/node-type/'. $content_type['url_str'] .'/fields';
 }
 
 function fieldgroup_remove_group(&$form_state, $content_type, $group_name) {
@@ -228,7 +228,7 @@ function fieldgroup_remove_group(&$form_state, $content_type, $group_name) {
   return confirm_form($form,
                   t('Are you sure you want to remove the group %label?',
                   array('%label' => t($group['label']))),
-                  'admin/content/types/'. $content_type['url_str'] .'/fields', t('This action cannot be undone.'),
+                  'admin/content/node-type/'. $content_type['url_str'] .'/fields', t('This action cannot be undone.'),
                   t('Remove'), t('Cancel'));
 }
 
@@ -238,7 +238,7 @@ function fieldgroup_remove_group_submit($form, &$form_state) {
   $group_name = $form['#group_name'];
   fieldgroup_delete($content_type['type'], $group_name);
   drupal_set_message('The group has been removed.');
-  $form_state['redirect'] = 'admin/content/types/'. $content_type['url_str'] .'/fields';
+  $form_state['redirect'] = 'admin/content/node-type/'. $content_type['url_str'] .'/fields';
 }
 
 /*
