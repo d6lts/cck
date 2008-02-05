@@ -1707,11 +1707,8 @@ function theme_content_multiple_values($element) {
     $table_id = $element['#field_name'] .'_values';
     $order_class = $element['#field_name'] .'-delta-order';
     $header = array(
-      // TODO : field label should be in first header with a colspan of 2,
-      // but this breaks tabledrag.js column hiding...
-      '',
-      $element['#title'],
-      t('Order')
+      array('data' => $element['#title'], 'colspan' => 2),
+      t('Order'),
     );
     $rows = array();
 
