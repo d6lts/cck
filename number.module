@@ -109,7 +109,13 @@ function number_field_settings($op, $field) {
         '#default_value' => !empty($field['suffix']) ? $field['suffix'] : '',
         '#description' => t('Define a string that should suffixed to the value, like m², m/s², kb/s. Leave blank for none. Separate singular and plural values with a pipe (pound|pounds). '),
       );
-      $form['allowed_values'] = array(
+      $form['allowed_values_fieldset'] = array(
+        '#type' => 'fieldset',
+        '#title' => t('Allowed values'),
+        '#collapsible' => TRUE,
+        '#collapsed' => TRUE,
+      );
+      $form['allowed_values_fieldset']['allowed_values'] = array(
         '#type' => 'textarea',
         '#title' => t('Allowed values list'),
         '#default_value' => !empty($field['allowed_values']) ? $field['allowed_values'] : '',
@@ -117,13 +123,13 @@ function number_field_settings($op, $field) {
         '#rows' => 10,
         '#description' => t('The possible values this field can contain. Enter one value per line, in the format key|label. The key is the value that will be stored in the database and it must match the field storage type, %type. The label is optional and the key will be used as the label if no label is specified.', array('%type' => $field['type'])),
       );
-      $form['advanced_options'] = array(
+      $form['allowed_values_fieldset']['advanced_options'] = array(
         '#type' => 'fieldset',
         '#title' => t('Php code'),
         '#collapsible' => TRUE,
-        '#collapsed' => TRUE,
+        '#collapsed' => empty($field['allowed_values_php']),
       );
-      $form['advanced_options']['allowed_values_php'] = array(
+      $form['allowed_values_fieldset']['advanced_options']['allowed_values_php'] = array(
         '#type' => 'textarea',
         '#title' => t('Code'),
         '#default_value' => !empty($field['allowed_values_php']) ? $field['allowed_values_php'] : '',
