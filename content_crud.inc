@@ -358,16 +358,14 @@ function content_field_instance_update($field) {
  */
 function _content_field_write($field, $op = 'update') {
   // Rearrange the data to create the global_settings array.
-  $field_settings = array();
+  $field['global_settings'] = array();
   $setting_names = module_invoke($field['module'], 'field_settings', 'save', $field);
   if (is_array($setting_names)) {
     foreach ($setting_names as $setting) {
-      $field_settings[$setting] = isset($field[$setting]) ? $field[$setting] : '';
+      $field['global_settings'][$setting] = isset($field[$setting]) ? $field[$setting] : '';
       unset($field[$setting]);
     }
   }
-  $field['global_settings'] = serialize($field_settings);
-  $field['columns'] = serialize($field['columns']);
 
   switch ($op) {
     case 'create':
@@ -391,16 +389,13 @@ function _content_field_instance_write($field, $op = 'update') {
   $field = content_field_instance_collapse($field);
 
   // Rearrange the data to create the widget_settings array.
-  $field_settings = $field['widget_settings'];
   $setting_names = module_invoke($field['widget_module'], 'widget_settings', 'save', $field);
   if (is_array($setting_names)) {
     foreach ($setting_names as $setting) {
-      $field_settings[$setting] = isset($field[$setting]) ? $field[$setting] : '';
+      $field['widget_settings'][$setting] = isset($field[$setting]) ? $field[$setting] : '';
       unset($field[$setting]);
     }
   }
-  $field['widget_settings'] = serialize($field_settings);
-  $field['display_settings'] = serialize($field['display_settings']);
 
   switch ($op) {
     case 'create':
