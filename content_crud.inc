@@ -366,6 +366,8 @@ function _content_field_write($field, $op = 'update') {
       unset($field[$setting]);
     }
   }
+  // 'columns' is a reserved word in MySQL4, so our column is named 'db_columns'.
+  $field['db_columns'] = $field['columns'];
 
   switch ($op) {
     case 'create':
@@ -375,6 +377,7 @@ function _content_field_write($field, $op = 'update') {
       drupal_write_record(content_field_tablename(), $field, 'field_name');
       break;
   }
+  unset($field['db_columns']);
   return $field;
 }
 
@@ -437,8 +440,9 @@ function content_field_instance_read($param = NULL) {
 
   $fields = array();
   while ($instance = db_fetch_array($db_result)) {
-
-    $instance['columns'] = (array) (!empty($instance['columns']) ? unserialize($instance['columns']) : array());
+    // 'columns' is a reserved word in MySQL4, so our column is named 'db_columns'.
+    $instance['columns'] = (array) (!empty($instance['db_columns']) ? unserialize($instance['db_columns']) : array());
+    unset($instance['db_columns']);
     $instance['global_settings'] = (array) (!empty($instance['global_settings']) ? unserialize($instance['global_settings']) : array());
 
     foreach ($instance['global_settings'] as $key => $value) {

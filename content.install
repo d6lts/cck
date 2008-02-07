@@ -33,6 +33,10 @@ function content_types_install() {
     // to get only field info for enabled modules.
     unset($field['module']);
     unset($field['widget_module']);
+    // 'columns' is a reserved word in MySQL4, so our column is named 'db_columns'.
+    $field['columns'] = $field['db_columns'];
+    unset($field['db_columns']);
+
     foreach ($module_field_types as $module => $types) {
       foreach ($types as $type_name => $type) {
         if ($field['type'] == $type_name) {
@@ -112,7 +116,7 @@ function content_schema() {
       'multiple'        => array('type' => 'int', 'size' => 'tiny', 'not null' => TRUE, 'default' => 0),
       'db_storage'      => array('type' => 'int', 'size' => 'tiny', 'not null' => TRUE, 'default' => 1),
       'module'          => array('type' => 'varchar', 'length' => 127, 'not null' => TRUE, 'default' => ''),
-      'columns'         => array('type' => 'text', 'size' => 'medium', 'not null' => TRUE, 'serialize' => TRUE),
+      'db_columns'      => array('type' => 'text', 'size' => 'medium', 'not null' => TRUE, 'serialize' => TRUE),
       'active'          => array('type' => 'int', 'size' => 'tiny', 'not null' => TRUE, 'default' => 0),
     ),
     'primary key' => array('field_name'),
@@ -157,7 +161,10 @@ function content_schema() {
   $db_result = db_query("SELECT * FROM {". content_instance_tablename() ."} nfi ".
     " LEFT JOIN {". content_field_tablename() ."} nf ON nf.field_name = nfi.field_name WHERE nf.active = 1 AND nfi.widget_active = 1");
   while ($field = db_fetch_array($db_result)) {
-    $field['columns'] = unserialize($field['columns']);
+    // 'columns' is a reserved word in MySQL4, so our db column is named 'db_columns'.
+    $field['columns'] = unserialize($field['db_columns']);
+    unset($field['db_columns']);
+
     $content_table = _content_tablename($field['type_name'], CONTENT_DB_STORAGE_PER_CONTENT_TYPE);
     $field_table = _content_tablename($field['field_name'], CONTENT_DB_STORAGE_PER_FIELD);
 
@@ -202,7 +209,7 @@ function content_update_6000() {
     return $ret;
   }
   db_add_field($ret, content_field_tablename(), 'module', array('type' => 'varchar', 'length' => 127, 'not null' => TRUE, 'default' => ''));
-  db_add_field($ret, content_field_tablename(), 'columns', array('type' => 'text', 'not null' => TRUE, 'default' => ''));
+  db_add_field($ret, content_field_tablename(), 'db_columns', array('type' => 'text', 'not null' => TRUE, 'default' => ''));
   db_add_field($ret, content_field_tablename(), 'active', array('type' => 'int', 'size' => 'tiny', 'not null' => TRUE, 'default' => 0));
   db_add_field($ret, content_instance_tablename(), 'widget_module', array('type' => 'varchar', 'length' => 127, 'not null' => TRUE, 'default' => ''));
   db_add_field($ret, content_instance_tablename(), 'widget_active', array('type' => 'int', 'size' => 'tiny', 'not null' => TRUE, 'default' => 0));
