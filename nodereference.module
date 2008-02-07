@@ -564,7 +564,7 @@ function _nodereference_potential_references($field, $return_full_nodes = FALSE,
     }
 
     $result = db_query(db_rewrite_sql("SELECT n.nid, n.title AS node_title, n.type AS node_type FROM {node} n WHERE ". $related_clause ." ORDER BY n.title, n.type"), $args);
-  }
+  //}
 
   $rows = array();
 
@@ -575,7 +575,7 @@ function _nodereference_potential_references($field, $return_full_nodes = FALSE,
     else {
       $rows[$node->nid] = $node->node_title;
     }
-//  }
+  }
 
   return $rows;
 }
