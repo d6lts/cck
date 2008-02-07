@@ -191,9 +191,9 @@ function content_menu() {
  */
 function content_theme() {
   return array(
-    'field' => array(
+    'content_field_view' => array(
       'template' => 'field',
-      'arguments' => array('node' => NULL, 'field' => NULL, 'items' => NULL, 'teaser' => FALSE, 'page' => FALSE),
+      'arguments' => array('element' => NULL),
     ),
     'content_admin_field_overview_form' => array(
       'arguments' => array('form' => NULL),
@@ -598,6 +598,9 @@ function content_delete_revision(&$node) {
  * Generate field render arrays.
  */
 function content_view(&$node, $teaser = FALSE, $page = FALSE) {
+  // Let field modules sanitize their data for output.
+  _content_field_invoke('sanitize', $node, $teaser, $page);
+
   // Merge fields.
   $additions = _content_field_invoke_default('view', $node);
   $node->content = array_merge((array) $node->content, $additions);
@@ -809,25 +812,118 @@ function content_field($op, &$node, $field, &$items, $teaser, $page) {
       else {
         $context = $node->build_mode;
       }
+      $field_types = _content_field_types();
+      $formatters = $field_types[$field['type']]['formatters'];
+      $formatter_name = isset($field['display_settings'][$context]['format']) ? $field['display_settings'][$context]['format'] : 'default';
 
-      $formatter = isset($field['display_settings'][$context]['format']) ? $field['display_settings'][$context]['format'] : 'default';
-      $value = '';
-
-      if ($formatter != 'hidden') {
-        foreach ($items as $delta => $item) {
-          $items[$delta]['view'] = content_format($field, $item, $formatter, $node);
-        }
-        // Do not include field labels when indexing content.
-        if ($context == NODE_BUILD_SEARCH_INDEX) {
-          $field['display_settings']['label']['format'] = 'hidden';
-        }
-        $value = theme('field', $node, $field, $items, $teaser, $page);
+      // Do not include field labels when indexing content.
+      if ($context == NODE_BUILD_SEARCH_INDEX) {
+        $field['display_settings']['label']['format'] = 'hidden';
       }
+
       $addition[$field['field_name']] = array(
+        '#type' => 'content_field_view',
+        '#title' => $field['widget']['label'],
         '#weight' => $field['widget']['weight'],
-        '#value' => $value,
-        '#access' => $formatter != 'hidden',
+        '#field_name' => $field['field_name'],
+        '#access' => $formatter_name != 'hidden',
+        '#node' => $node,
+        '#teaser' => $teaser,
+        '#page' => $page,
       );
+
+      if (!isset($formatters[$formatter_name]) && $formatter != 'hidden') {
+        // This might happen when the selected formatter has been renamed in the
+        // module, or if the module has been disabled since then.
+        $formatter_name = 'default';
+      }
+
+      if (isset($formatters[$formatter_name])) {
+        $formatter = $formatters[$formatter_name];
+        $theme = $formatter['module']. '_formatter_'. $formatter_name;
+
+        if (content_handle('formatter', 'multiple values', $formatter) == CONTENT_HANDLE_CORE) {
+          // Single value formatter.
+          $addition[$field['field_name']]['items'] = array();
+          foreach ($items as $delta => $item) {
+          $addition[$field['field_name']][$delta] = array(
+              '#theme' => $theme,
+              '#field_name' => $field['field_name'],
+              '#type_name' => $node->type,
+              '#formatter' => $formatter_name,
+              '#item' => $item,
+              '#weight' => $delta,
+            );
+          }
+        }
+        else {
+          // Multiple values formatter.
+          $addition[$field['field_name']]['items'] = array(
+            '#theme' => $theme,
+            '#field_name' => $field['field_name'],
+            '#type_name' => $node->type,
+            '#formatter' => $formatter_name,
+          );
+          foreach ($items as $delta => $item) {
+            $addition[$field['field_name']]['items'][$delta] = array(
+              '#field_name' => $field['field_name'],
+              '#type_name' => $node->type,
+              '#item' => $item,
+              '#weight' => $delta,
+            );
+          }
+        }
+      }
+
+// 'Single value' formatter :
+//  $node->content['field_foo'] = array(
+//    '#type' => 'content_field_view',
+//    '#title' => 'label'
+//    '#field_name' => 'field_name',
+//    '#access' => $formatter_name != 'hidden',
+//    '#node' => $node,
+//    0 => array(
+//      '#theme' => $theme,
+//      '#field_name' => 'field_name',
+//      '#type_name' => $node->type,
+//      '#formatter' => $formatter_name,
+//      '#item' => $items[0],
+//
+//    ),
+//    1 => array(
+//      '#theme' => $theme,
+//      '#field_name' => 'field_name',
+//      '#type_name' => $node->type,
+//      '#formatter' => $formatter_name,
+//      '#item' => $items[1],
+//    ),
+//  );
+//
+//
+// 'Multiple value' formatter :
+//  $node->content['field_foo'] = array(
+//    '#type' => 'content_field_view',
+//    '#title' => 'label'
+//    '#field_name' => 'field_name',
+//    '#access' => $formatter_name != 'hidden',
+//    '#node' => $node,
+//    'items' => array(
+//      '#theme' => $theme,
+//      '#field_name' => 'field_name',
+//      '#type_name' => $node->type,
+//      '#formatter' => $formatter_name,
+//      0 => array(
+//        '#field_name' => $field['field_name'],
+//        '#type_name' => $node->type,
+//        '#item' => $items[0],
+//      ),
+//      0 => array(
+//        '#field_name' => $field['field_name'],
+//        '#type_name' => $node->type,
+//        '#item' => $items[1],
+//      ),
+//    ),
+//  );
       return $addition;
 
     case 'prepare translation':
@@ -1419,14 +1515,16 @@ function content_allowed_values($field) {
  * @param $field
  *   Either a field array or the name of the field.
  * @param $item
- *   The field item to be formatted (such as $node->field_foo[0]).
+ *   The field item(s) to be formatted (such as $node->field_foo[0],
+ *   or $node->field_foo if the formatter handles multiple values itself)
  * @param $formatter
  *   The name of the formatter to use.
  * @param $node
- *   Optionally, the containing node object for context purposes.
+ *   Optionally, the containing node object for context purposes and
+ *   field-instance options.
  *
  * @return
- *   A string containing the contents of the field item sanitized for display.
+ *   A string containing the contents of the field item(s) sanitized for display.
  *   It will have been passed through the necessary check_plain() or check_markup()
  *   functions as necessary.
  */
@@ -1436,11 +1534,57 @@ function content_format($field, $item, $formatter = 'default', $node = NULL) {
   }
   $field_types = _content_field_types();
   $formatters = $field_types[$field['type']]['formatters'];
-
-  if (!isset($formatter, $formatters)) {
+  if (!isset($formatters[$formatter])) {
     $formatter = 'default';
   }
-  return module_invoke($formatters[$formatter]['module'], 'field_formatter', $field, $item, $formatter, $node);
+
+  $formatter_name = $formatter;
+  $formatter = $formatters[$formatter_name];
+  $theme = $formatter['module']. '_formatter_'. $formatter_name;
+
+  if (content_handle('formatter', 'multiple values', $formatter) == CONTENT_HANDLE_CORE) {
+    // Single value formatter.
+
+    // hook_field('sanitize') expects an array of items, so we build one.
+    $items = array($item);
+    $function = $field['module'] .'_field';
+    if (function_exists($function)) {
+      $function('sanitize', $node, $field, $items, FALSE, FALSE);
+    }
+
+    $element = array(
+      '#theme' =>  $theme,
+      '#field_name' => $field['field_name'],
+      '#type_name' => isset($node->type) ? $node->type : '',
+      '#formatter' => $formatter,
+      '#item' => $items[0],
+    );
+  }
+  else {
+    // Multiple values formatter.
+    $items = $item;
+    $function = $field['module'] .'_field';
+    if (function_exists($function)) {
+      $function('sanitize', $node, $field, $items, FALSE, FALSE);
+    }
+
+    $element = array(
+      '#theme' => $theme,
+      '#field_name' => $field['field_name'],
+      '#type_name' => isset($node->type) ? $node->type : '',
+      '#formatter' => $formatter_name,
+    );
+    foreach ($items as $delta => $item) {
+      $element[$delta] = array(
+        '#field_name' => $field['field_name'],
+        '#type_name' => isset($node->type) ? $node->type : '',
+        '#item' => $item,
+        '#weight' => $delta,
+      );
+    }
+  }
+
+  return theme($theme, $element);
 }
 
 /**
@@ -1615,18 +1759,22 @@ function content_callback($entity, $op, $field) {
 }
 
 /**
- *  Helper function for determining the handling of a field or a widget
- *  with respect to a given operation. (currently used for widget 'multiple values')
+ *  Helper function for determining the handling of a field, widget or
+ *  formatter with respect to a given operation.
+ *
+ *  Currently used for widgets and formatters 'multiple values'.
  *
  *  @param $entity
- *    'field' or 'widget'
+ *    'field', 'widget' or 'formatter'
  *  @param $op
  *    the name of the operation ('default values'...)
- *  @param $field
- *    The field array, including widget info.
+ *  @param $object
+ *    - if $entity is 'field' or 'widget' : the field array,
+ *      including widget info.
+ *    - if $entity is 'formater' : the formatter array.
  *  @return
  *    CONTENT_HANDLE_CORE    - the content module handles this operation.
- *    CONTENT_HANDLE_MODULE  - the module handles this operation.
+ *    CONTENT_HANDLE_MODULE  - the implementing module handles this operation.
  */
 function content_handle($entity, $op, $field) {
   switch ($entity) {
@@ -1637,6 +1785,11 @@ function content_handle($entity, $op, $field) {
     case 'widget':
       $info = module_invoke($field['widget']['module'], "widget_info");
       return $info[$field['widget']['type']][$op];
+
+    case 'formatter':
+      // Much simpler, formatters arrays *are* the 'formatter_info' itself.
+      // We let content_handle deal with them only for code consistency.
+      return isset($formatter[$op]) ? $formatter[$op] : CONTENT_HANDLE_CORE;
   }
 }
 
@@ -1684,12 +1837,8 @@ function content_default_value(&$form, &$form_state, $field, $delta) {
  */
 function content_elements() {
   return array(
-    'content_multiple_values' => array(
-      // TODO : right now this element is similar to a fieldset,
-      // #input could be FALSE...
-      // Do we need an 'element' at all, for that matter ?
-      '#input' => TRUE,
-    )
+    'content_multiple_values' => array(),
+    'content_field_view' => array(),
   );
 }
 
@@ -1758,11 +1907,39 @@ function theme_content_multiple_values($element) {
  *
  * @see field.tpl.php
  */
-function template_preprocess_field(&$variables) {
+function template_preprocess_content_field_view(&$variables) {
+  $element = $variables['element'];
+
+  $variables['node'] = $element['#node'];
+  $variables['field'] = content_fields($element['#field_name'], $element['#node']->type);
+  $variables['items'] = array();
+
+  if (!isset($element['items'])) {
+    // Single value formatter.
+    foreach (element_children($element) as $delta) {
+      $variables['items'][$delta] = $element[$delta];
+      $variables['items'][$delta]['view'] = $element[$delta]['#children'];
+    }
+  }
+  else  {
+    // Multiple values formatter.
+    // We display the 'all items' output as $items[0], as if it was the
+    // output of a single valued field.
+    // Raw values are still exposed for all items.
+    foreach (element_children($element['items']) as $delta) {
+      $variables['items'][$delta] = $element['items'][$delta];
+    }
+    $variables['items'][0]['view'] = $element['items']['#children'];
+  }
+
+  $variables['teaser'] =  $element['#teaser'];
+  $variables['page'] =  $element['#page'];
+
   $field = $variables['field'];
   $field_empty = TRUE;
+
   foreach ($variables['items'] as $delta => $item) {
-    if (empty($item['view']) && $item['view'] !== 0) {
+    if (!isset($item['view']) || (empty($item['view']) && $item['view'] !== 0)) {
       $variables['items'][$delta]['empty'] = TRUE;
     }
     else {
@@ -1770,6 +1947,7 @@ function template_preprocess_field(&$variables) {
       $variables['items'][$delta]['empty'] = FALSE;
     }
   }
+
   $additions = array(
     'field_type' => $field['type'],
     'field_name' => $field['field_name'],

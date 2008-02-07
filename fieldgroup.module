@@ -59,11 +59,12 @@ function fieldgroup_menu() {
 function fieldgroup_theme() {
   return array(
     'fieldgroup_simple' => array(
+      'template' => 'fieldgroup',
       'arguments' => array('element' => NULL),
-      ),
+    ),
     'fieldgroup_display_overview_form' => array(
       'arguments' => array('form' => NULL),
-      ),
+    ),
   );
 }
 
@@ -412,11 +413,11 @@ function fieldgroup_nodeapi(&$node, $op, $teaser, $page) {
           '#title' => $label ? t($group['label']) : '',
           '#description' => $label ? t($group['settings']['display']['description']) : '',
           '#weight' => $group['weight'],
-          '#attributes' => array('class' => 'fieldgroup '. strtr($group['group_name'], '_', '-')),
         );
-        switch ($group['settings']['display'][$context]) {
+        switch ($group['settings']['display'][$context]['format']) {
           case 'simple':
             $element['#type'] = 'fieldgroup_simple';
+            $element['#group_name'] = $group_name;
             break;
           case 'hidden':
             $element['#access'] = FALSE;
@@ -428,42 +429,42 @@ function fieldgroup_nodeapi(&$node, $op, $teaser, $page) {
             $element['#collapsible'] = TRUE;
           case 'fieldset':
             $element['#type'] = 'fieldset';
+            $element['#attributes'] = array('class' => 'fieldgroup '. strtr($group['group_name'], '_', '-'));
             break;
         }
         $node->content[$group_name] = $element;
 
-        $visible = FALSE;
         foreach ($group['fields'] as $field_name => $field) {
           if (isset($node->content[$field_name])) {
             $node->content[$group_name][$field_name] = $node->content[$field_name];
-            if ($node->content[$field_name]['#access'] && !empty($node->content[$field_name]['#value'])) {
-              $visible = TRUE;
-            }
             unset($node->content[$field_name]);
           }
-        }
-        if (!$visible) {
-          // Hide the group, because the fields are empty or not accessible.
-          unset($node->content[$group_name]);
         }
       }
       break;
   }
 }
 
-/*
- * Theme a simple fieldgroup on node view.
+/**
+ * Process variables for fieldgroup.tpl.php.
+ *
+ * The $variables array contains the following arguments:
+ * - $group_name
+ * - $group_name_css
+ * - $label
+ * - $description
+ * - $content
+ *
+ * @see fieldgroup.tpl.php
  */
-function theme_fieldgroup_simple($element) {
-  $output = '<div'. drupal_attributes($element['#attributes']) .'>';
-  if ($element['#title']) {
-    $output .= '<h2>'. $element['#title'] .'</h2>';
-    $output .= ($element['#description'] ? '<div class="description">'. $element['#description'] .'</div>' : '');
-  }
-  $output .= '<div class="content">'. $element['#children'] .'</div>';
-  $output .= '</div>';
+function template_preprocess_fieldgroup_simple(&$variables) {
+  $element = $variables['element'];
 
-  return $output;
+  $variables['group_name'] = $element['#group_name'];
+  $variables['group_name_css'] = strtr($element['#group_name'], '_', '-');
+  $variables['label'] = isset($element['#title']) ? $element['#title'] : '';;
+  $variables['description'] = isset($element['#description']) ? $element['#description'] : '';;
+  $variables['content'] = isset($element['#children']) ? $element['#children'] : '';
 }
 
 /*

@@ -12,6 +12,15 @@
 function number_theme() {
   return array(
     'number' => array('arguments' => array('element' => NULL)),
+    'number_formatter_default' => array('arguments' => array('element' => NULL), 'function' => 'theme_number_formatter_generic'),
+    'number_formatter_us_0' => array('arguments' => array('element' => NULL), 'function' => 'theme_number_formatter_generic'),
+    'number_formatter_us_1' => array('arguments' => array('element' => NULL), 'function' => 'theme_number_formatter_generic'),
+    'number_formatter_us_2' => array('arguments' => array('element' => NULL), 'function' => 'theme_number_formatter_generic'),
+    'number_formatter_be_0' => array('arguments' => array('element' => NULL), 'function' => 'theme_number_formatter_generic'),
+    'number_formatter_be_1' => array('arguments' => array('element' => NULL), 'function' => 'theme_number_formatter_generic'),
+    'number_formatter_fr_0' => array('arguments' => array('element' => NULL), 'function' => 'theme_number_formatter_generic'),
+    'number_formatter_fr_1' => array('arguments' => array('element' => NULL), 'function' => 'theme_number_formatter_generic'),
+    'number_formatter_unformatted' => array('arguments' => array('element' => NULL)),
   );
 }
 
@@ -254,78 +263,64 @@ function number_field_formatter_info() {
 }
 
 /**
- * Implementation of hook_field_formatter().
+ * Proxy theme function for 'unformatted' number field formatter.
  */
-function number_field_formatter($field, $item, $formatter, $node) {
-  // If the value is empty, we have $item['value'] = NULL
-  if (is_null($item['value'])) {
-    return '';
-  }
+function theme_number_formatter_unformatted($element) {
+  return $element['#item']['value'];
+}
 
-  $item['value'] = check_plain($item['value']);
+/**
+ * Proxy theme function for number field formatters.
+ */
+function theme_number_formatter_generic($element) {
+  $field = content_fields($element['#field_name'], $element['#type_name']);
+  $value = $element['#item']['value'];
 
-  if ($formatter == 'unformatted') {
-    return $item['value'];
-  }
-  $allowed_values = content_allowed_values($field);
-  if (!empty($allowed_values) && isset($allowed_values[$item['value']])) {
-    if ($allowed_values[$item['value']] != $item['value']) {
-      return $allowed_values[$item['value']];
+  if (($allowed_values = content_allowed_values($field))) {
+    if (isset($allowed_values[$value]) && $allowed_values[$value] != $value) {
+      return $allowed_values[$value];
     }
   }
 
-  switch ($formatter) {
-  case 'us_0':
-    $value = number_format($item['value'], 0, '.', ',');
-    break;
-  case 'us_1':
-    $value = number_format($item['value'], 1, '.', ',');
-    break;
-  case 'us_2':
-    $value = number_format($item['value'], 2, '.', ',');
-    break;
-  case 'be_0':
-    $value = number_format($item['value'], 0, ',', '.');
-    break;
-  case 'be_1':
-    $value = number_format($item['value'], 1, ',', '.');
-    break;
-  case 'be_2':
-    $value = number_format($item['value'], 2, ',', '.');
-    break;
-  case 'fr_0':
-    $value = number_format($item['value'], 0, ', ', ' ');
-    break;
-  case 'fr_1':
-    $value = number_format($item['value'], 1, ', ', ' ');
-    break;
-  case 'fr_2':
-    $value = number_format($item['value'], 2, ', ', ' ');
-    break;
-  default:
-    $value = ($item['value']);
-    break;
+  switch ($element['#formatter']) {
+    case 'us_0':
+      $output = number_format($value, 0, '.', ',');
+      break;
+    case 'us_1':
+      $output = number_format($value, 1, '.', ',');
+      break;
+    case 'us_2':
+      $output = number_format($value, 2, '.', ',');
+      break;
+    case 'be_0':
+      $output = number_format($value, 0, ',', '.');
+      break;
+    case 'be_1':
+      $output = number_format($value, 1, ',', '.');
+      break;
+    case 'be_2':
+      $output = number_format($value, 2, ',', '.');
+      break;
+    case 'fr_0':
+      $output = number_format($value, 0, ', ', ' ');
+      break;
+    case 'fr_1':
+      $output = number_format($value, 1, ', ', ' ');
+      break;
+    case 'fr_2':
+      $output = number_format($value, 2, ', ', ' ');
+      break;
+    default:
+      $output = $value;
+      break;
   }
+
   $prefixes = explode('|', $field['prefix']);
   $suffixes = explode('|', $field['suffix']);
-  if ($prefixes) {
-    if (sizeof($prefixes) > 1) {
-      $prefix = format_plural($item['value'], $prefixes[0], $prefixes[1]);
-    }
-    else {
-      $prefix = $field['prefix'];
-    }
-  }
-  if ($suffixes) {
-    if (sizeof($suffixes) > 1) {
-      $suffix = format_plural($item['value'], $suffixes[0], $suffixes[1]);
-    }
-    else {
-      $suffix = $field['suffix'];
-    }
-  }
-  return $prefix . $value . $suffix;
+  $prefix = (count($prefixes) > 1) ? format_plural($value, $prefixes[0], $prefixes[1]) : $prefixes[0];
+  $suffix = (count($suffixes) > 1) ? format_plural($value, $suffixes[0], $suffixes[1]) : $suffixes[0];
 
+  return $prefix . $output . $suffix;
 }
 
 /**

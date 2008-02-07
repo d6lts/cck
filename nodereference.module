@@ -37,6 +37,17 @@ function nodereference_theme() {
     'nodereference_autocomplete' => array(
       'arguments' => array('element' => NULL),
     ),
+    'nodereference_formatter_default' => array(
+      'arguments' => array('element'),
+    ),
+    'nodereference_formatter_full' => array(
+      'arguments' => array('element'),
+      'function' => 'theme_nodereference_formatter_full_teaser',
+    ),
+    'nodereference_formatter_teaser' => array(
+      'arguments' => array('element'),
+      'function' => 'theme_nodereference_formatter_full_teaser',
+    ),
   );
 }
 
@@ -198,57 +209,66 @@ function nodereference_field_formatter_info() {
 }
 
 /**
- * Implementation of hook_field_formatter().
+ * Theme function for 'default' nodereference field formatter.
  */
-function nodereference_field_formatter($field, $item, $formatter, $node) {
-  static $titles = array();
-
-  // We store the rendered nids in order to prevent infinite recursion
-  // when using the 'full node' / 'teaser' formatters.
-  static $recursion_queue = array();
-
-  if (empty($item['nid']) || !is_numeric($item['nid'])) {
-    return '';
+function theme_nodereference_formatter_default($element) {
+  $output = '';
+  if (!empty($element['#item']['nid']) && is_numeric($element['#item']['nid'])) {
+    $output = l(_nodereference_titles($element['#item']['nid']), 'node/'. $element['#item']['nid']);
   }
+  return $output;
+}
 
-  if ($formatter == 'full' || $formatter == 'teaser') {
+/**
+ * Theme function for 'plain' nodereference field formatter.
+ */
+function theme_nodereference_formatter_plain($element) {
+  $output = '';
+  if (!empty($element['#item']['nid']) && is_numeric($element['#item']['nid'])) {
+    $output = check_plain(_nodereference_titles($element['#item']['nid']));
+  }
+  return $output;
+}
+
+/**
+ * Proxy theme function for 'full' and 'teaser' nodereference field formatters.
+ */
+function theme_nodereference_formatter_full_teaser($element) {
+  static $recursion_queue = array();
+  $output = '';
+  if (!empty($element['#item']['nid']) && is_numeric($element['#item']['nid'])) {
     // If no 'referencing node' is set, we are starting a new 'reference thread'
     if (!isset($node->referencing_node)) {
       $recursion_queue = array();
     }
     $recursion_queue[] = $node->nid;
-    if (in_array($item['nid'], $recursion_queue)) {
+    if (in_array($element['#item']['nid'], $recursion_queue)) {
       // Prevent infinite recursion caused by reference cycles :
       // if the node has already been rendered earlier in this 'thread',
       // we fall back to 'default' (node title) formatter.
-      $formatter = 'default';
+      return theme('nodereference_formatter_default', $element);
     }
-    else {
-      $referenced_node = node_load($item['nid']);
-      $referenced_node->referencing_node = $node;
-      $referenced_node->referencing_field = $field;
-      $titles[$item['nid']] = $referenced_node->title;
-    }
+    $referenced_node = node_load($element['#item']['nid']);
+    $referenced_node->referencing_node = $node;
+    $referenced_node->referencing_field = $field;
+    _nodereference_titles($element['#item']['nid'], $referenced_node->title);
+    $output = node_view($referenced_node, $element['#formatter'] == 'teaser');
   }
+  return $output;
+}
 
-  if (!isset($titles[$item['nid']])) {
-    $title = db_result(db_query("SELECT title FROM {node} WHERE nid=%d", $item['nid']));
-    $titles[$item['nid']] = $title ? $title : '';
+/**
+ * Helper function for formatters.
+ *
+ * Store node titles collected in the curent request.
+ */
+function _nodereference_titles($nid, $known_title = NULL) {
+  static $titles = array();
+  if (!isset($titles[$nid])) {
+    $title = $known_title ? $known_title : db_result(db_query("SELECT title FROM {node} WHERE nid=%d", $nid));
+    $titles[$nid] = $title ? $title : '';
   }
-
-  switch ($formatter) {
-    case 'full':
-      return node_view($referenced_node, FALSE);
-
-    case 'teaser':
-      return node_view($referenced_node, TRUE);
-
-    case 'plain':
-      return check_plain($titles[$item['nid']]);
-
-    default:
-      return l($titles[$item['nid']], 'node/'. $item['nid']);
-  }
+  return $titles[$nid];
 }
 
 /**
@@ -564,7 +584,7 @@ function _nodereference_potential_references($field, $return_full_nodes = FALSE,
     }
 
     $result = db_query(db_rewrite_sql("SELECT n.nid, n.title AS node_title, n.type AS node_type FROM {node} n WHERE ". $related_clause ." ORDER BY n.title, n.type"), $args);
-  //}
+//  }
 
   $rows = array();
 

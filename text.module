@@ -17,6 +17,18 @@ function text_theme() {
     'text_textfield' => array(
       'arguments' => array('element' => NULL),
     ),
+    'text_formatter_default' => array(
+      'arguments' => array('element' => NULL),
+    ),
+    'text_formatter_plain' => array(
+      'arguments' => array('element' => NULL),
+    ),
+    'text_formatter_trimmed' => array(
+      'arguments' => array('element' => NULL),
+    ),
+    'text_formatter_foo' => array(
+      'arguments' => array('element' => NULL),
+    ),
   );
 }
 
@@ -160,6 +172,16 @@ function text_field($op, &$node, $field, &$items, $teaser, $page) {
       }
       break;
 
+    case 'sanitize':
+      foreach ($items as $delta => $item) {
+        if (!empty($field['text_processing'])) {
+          $text = check_markup($item['value'], $item['format'], is_null($node) || $node->build_mode == NODE_BUILD_PREVIEW);
+        }
+        else {
+          $text = check_plain($item['value']);
+        }
+        $items[$delta]['safe'] = $text;
+      }
   }
 }
 
@@ -194,43 +216,33 @@ function text_field_formatter_info() {
 }
 
 /**
- * Implementation of hook_field_formatter().
- *
- * The $node argument is necessary so that filter access can be checked on
- * node preview.
+ * Theme function for 'default' text field formatter.
  */
-function text_field_formatter($field, $item, $formatter, $node) {
-  if (!isset($item['value'])) {
-    return '';
-  }
-
-  $allowed_values = content_allowed_values($field);
-  if (!empty($allowed_values) && isset($allowed_values[$item['value']])) {
-    return $allowed_values[$item['value']];
-  }
-
-  switch ($formatter) {
-    case 'plain':
-      $text = strip_tags($item['value']);
-      break;
-
-    case 'trimmed':
-      $text = node_teaser($item['value'], $field['text_processing'] ? $item['format'] : NULL);
-      break;
-
-    case 'default':
-      $text = $item['value'];
-  }
-
-  // TODO : undefined index text_processing / format on node preview
-  if ($field['text_processing']) {
-    return check_markup($text, $item['format'], is_null($node) || $node->build_mode == NODE_BUILD_PREVIEW);
-  }
-  else {
-    return check_plain($text);
-  }
+function theme_text_formatter_default($element) {
+  return ($allowed =_text_allowed_values($element)) ? $allowed : $element['#item']['safe'];
 }
 
+/**
+ * Theme function for 'plain' text field formatter.
+ */
+function theme_text_formatter_plain($element) {
+  return ($allowed =_text_allowed_values($element)) ? $allowed : strip_tags($element['#item']['safe']);
+}
+
+/**
+ * Theme function for 'trimmed' text field formatter.
+ */
+function theme_text_formatter_trimmed($element) {
+  $field = content_fields($element['#field_name'], $element['#type_name']);
+  return ($allowed =_text_allowed_values($element)) ? $allowed : node_teaser($element['#item']['safe'], $field['text_processing'] ? $element['#item']['format'] : NULL);
+}
+
+function _text_allowed_values($element) {
+  $field = content_fields($element['#field_name'], $element['#type_name']);
+  if (($allowed_values = content_allowed_values($field)) && isset($allowed_values[$element['#item']['value']])) {
+    return $allowed_values[$element['#item']['value']];
+  }
+}
 
 /**
  * Implementation of hook_widget_info().
@@ -290,7 +302,7 @@ function text_elements() {
       '#process' => array('text_textarea_process'),
       '#filter_value' => FILTER_FORMAT_DEFAULT,
       ),
-    );
+  );
 }
 
 /**

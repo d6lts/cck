@@ -31,6 +31,12 @@ function userreference_theme() {
     'userreference_autocomplete' => array(
       'arguments' => array('element' => NULL),
     ),
+    'userreference_formatter_default' => array(
+      'arguments' => array('element'),
+    ),
+    'userreference_formatter_plain' => array(
+      'arguments' => array('element'),
+    ),
   );
 }
 
@@ -142,24 +148,25 @@ function userreference_field_formatter_info() {
 }
 
 /**
- * Implementation of hook_field_formatter().
+ * Theme function for 'default' userreference field formatter.
  */
-function userreference_field_formatter($field, $item, $formatter, $node) {
-  $text = '';
-  if (isset($item['uid'])) {
-    $referenced_user = user_load(array('uid' => $item['uid']));
-    if ($referenced_user) {
-      $text = theme('username', $referenced_user);
-    }
+function theme_userreference_formatter_default($element) {
+  $output = '';
+  if (isset($item['uid']) && $account = user_load(array('uid' => $item['uid']))) {
+    $output = theme('username', $referenced_user);
   }
+  return $output;
+}
 
-  switch ($formatter) {
-    case 'plain':
-      return strip_tags($text);
-
-    default:
-      return $text;
+/**
+ * Theme function for 'plain' userreference field formatter.
+ */
+function theme_userreference_formatter_plain($element) {
+  $output = '';
+  if (isset($item['uid']) && $account = user_load(array('uid' => $item['uid']))) {
+    $output = $account->name;
   }
+  return $output;
 }
 
 /**
