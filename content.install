@@ -283,3 +283,15 @@ function content_update_6002() {
   content_clear_type_cache(TRUE);
   return $ret;
 }
+
+/**
+ * 'db_columns' column 1st got introduced as 'columns', which is forbidden in MySQL 4.
+ * This update function will only be useful for early testers...
+ */
+function content_update_6003() {
+  $ret = array();
+  if (db_column_exists('content_node_field', 'columns')) {
+    db_change_field($ret, 'content_node_field', 'columns', 'db_columns', array('type' => 'text', 'size' => 'medium', 'not null' => TRUE));
+  }
+  return $ret;
+}
