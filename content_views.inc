@@ -7,6 +7,59 @@
  */
 
 /**
+ * Implementation of hook_views_data().
+ *
+ * Exposes all fields to the views system.
+ */
+function content_views_data() {
+  $data = array();
+  foreach (content_fields() as $field) {
+    $module = $field['module'];
+    $result = module_invoke($module, 'field_settings', 'views_data', $field);
+    if (empty($result)) {
+      $result = content_views_field_views_data($field);
+    }
+    if (is_array($result)) {
+      $data = array_merge($data, $result);
+    }
+  }
+  return $data;
+}
+
+
+function content_views_field_views_data($field) {
+  $field_types = _content_field_types();
+  $db_info = content_database_info($field);
+  $table_alias = 'node_data_'. $field['field_name'];
+
+  $data = array();
+  $data['table']['group']  = t('Fields');
+  $data['table']['join']['node']['handler'] = 'views_join';
+  $data['table']['join']['node']['arguments'] = array($db_info['table'], 'node', 'vid', 'vid');
+
+  $data[$field['field_name']] = array(
+    'title' => $field['widget']['label'] .' ('. $field['field_name'] .') - '. $field_types[$field['type']]['label'],
+    'help' => t('TODO'),
+    'field' => array(
+      'handler' => 'views_handler_field_node',
+      'arguments' => array(TRUE),
+    ),
+    'argument' => array(
+      'handler' => 'views_handler_argument_nid',
+      'arguments' => array('title'),
+    ),
+    'filter' => array(
+      'handler' => 'views_handler_filter',
+    ),
+    'sort' => array(
+      'handler' => 'views_handler_sort',
+    ),
+  );
+
+  return array($table_alias => $data);
+}
+
+/**
  * Implementation of hook_views_tables().
  *
  * Exposes all fields to the views system.

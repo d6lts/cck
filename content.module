@@ -50,9 +50,9 @@ function content_flush_caches() {
  */
 function content_init() {
   drupal_add_css(drupal_get_path('module', 'content') .'/content.css');
-//  if (module_exists('views')) {
-//    module_load_include('inc', 'content', 'content_views');
-//  }
+  if (module_exists('views')) {
+    module_load_include('inc', 'content', 'content_views');
+  }
   if (module_exists('pathauto')) {
     module_load_include('inc', 'content', 'content_pathauto');
   }
