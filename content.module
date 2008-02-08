@@ -806,31 +806,22 @@ function content_field($op, &$node, $field, &$items, $teaser, $page) {
       break;
 
     case 'view':
+      $element = array();
+
       if ($node->build_mode == NODE_BUILD_NORMAL) {
         $context = $teaser ? 'teaser' : 'full';
       }
       else {
         $context = $node->build_mode;
       }
-      $field_types = _content_field_types();
-      $formatters = $field_types[$field['type']]['formatters'];
-      $formatter_name = isset($field['display_settings'][$context]['format']) ? $field['display_settings'][$context]['format'] : 'default';
-
       // Do not include field labels when indexing content.
       if ($context == NODE_BUILD_SEARCH_INDEX) {
         $field['display_settings']['label']['format'] = 'hidden';
       }
 
-      $addition[$field['field_name']] = array(
-        '#type' => 'content_field_view',
-        '#title' => $field['widget']['label'],
-        '#weight' => $field['widget']['weight'],
-        '#field_name' => $field['field_name'],
-        '#access' => $formatter_name != 'hidden',
-        '#node' => $node,
-        '#teaser' => $teaser,
-        '#page' => $page,
-      );
+      $field_types = _content_field_types();
+      $formatters = $field_types[$field['type']]['formatters'];
+      $formatter_name = isset($field['display_settings'][$context]['format']) ? $field['display_settings'][$context]['format'] : 'default';
 
       if (!isset($formatters[$formatter_name]) && $formatter != 'hidden') {
         // This might happen when the selected formatter has been renamed in the
@@ -841,71 +832,37 @@ function content_field($op, &$node, $field, &$items, $teaser, $page) {
       if (isset($formatters[$formatter_name])) {
         $formatter = $formatters[$formatter_name];
         $theme = $formatter['module']. '_formatter_'. $formatter_name;
-
-        if (content_handle('formatter', 'multiple values', $formatter) == CONTENT_HANDLE_CORE) {
-          // Single value formatter.
-          $addition[$field['field_name']]['items'] = array();
-          foreach ($items as $delta => $item) {
-          $addition[$field['field_name']][$delta] = array(
-              '#theme' => $theme,
-              '#field_name' => $field['field_name'],
-              '#type_name' => $node->type,
-              '#formatter' => $formatter_name,
-              '#item' => $item,
-              '#weight' => $delta,
-            );
-          }
-        }
-        else {
-          // Multiple values formatter.
-          $addition[$field['field_name']]['items'] = array(
-            '#theme' => $theme,
-            '#field_name' => $field['field_name'],
-            '#type_name' => $node->type,
-            '#formatter' => $formatter_name,
-          );
-          foreach ($items as $delta => $item) {
-            $addition[$field['field_name']]['items'][$delta] = array(
-              '#field_name' => $field['field_name'],
-              '#type_name' => $node->type,
-              '#item' => $item,
-              '#weight' => $delta,
-            );
-          }
-        }
-      }
+        $single = (content_handle('formatter', 'multiple values', $formatter) == CONTENT_HANDLE_CORE);
 
 // 'Single value' formatter :
 //  $node->content['field_foo'] = array(
 //    '#type' => 'content_field_view',
 //    '#title' => 'label'
 //    '#field_name' => 'field_name',
-//    '#access' => $formatter_name != 'hidden',
 //    '#node' => $node,
-//    0 => array(
-//      '#theme' => $theme,
-//      '#field_name' => 'field_name',
-//      '#type_name' => $node->type,
-//      '#formatter' => $formatter_name,
-//      '#item' => $items[0],
-//
-//    ),
-//    1 => array(
-//      '#theme' => $theme,
-//      '#field_name' => 'field_name',
-//      '#type_name' => $node->type,
-//      '#formatter' => $formatter_name,
-//      '#item' => $items[1],
+//    'items' =>
+//      0 => array(
+//        '#theme' => $theme,
+//        '#field_name' => 'field_name',
+//        '#type_name' => $node->type,
+//        '#formatter' => $formatter_name,
+//        '#item' => $items[0],
+//      ),
+//      1 => array(
+//        '#theme' => $theme,
+//        '#field_name' => 'field_name',
+//        '#type_name' => $node->type,
+//        '#formatter' => $formatter_name,
+//        '#item' => $items[1],
+//      ),
 //    ),
 //  );
-//
-//
+
 // 'Multiple value' formatter :
 //  $node->content['field_foo'] = array(
 //    '#type' => 'content_field_view',
 //    '#title' => 'label'
 //    '#field_name' => 'field_name',
-//    '#access' => $formatter_name != 'hidden',
 //    '#node' => $node,
 //    'items' => array(
 //      '#theme' => $theme,
@@ -913,18 +870,55 @@ function content_field($op, &$node, $field, &$items, $teaser, $page) {
 //      '#type_name' => $node->type,
 //      '#formatter' => $formatter_name,
 //      0 => array(
-//        '#field_name' => $field['field_name'],
-//        '#type_name' => $node->type,
 //        '#item' => $items[0],
 //      ),
-//      0 => array(
-//        '#field_name' => $field['field_name'],
-//        '#type_name' => $node->type,
+//      1 => array(
 //        '#item' => $items[1],
 //      ),
 //    ),
 //  );
-      return $addition;
+
+        $element = array(
+          '#type' => 'content_field_view',
+          '#title' => $field['widget']['label'],
+          '#weight' => $field['widget']['weight'],
+          '#field_name' => $field['field_name'],
+          '#access' => $formatter_name != 'hidden',
+          '#node' => $node,
+          '#teaser' => $teaser,
+          '#page' => $page,
+          '#single' => $single,
+          'items' => array(),
+        );
+
+        // Fill-in items.
+        foreach ($items as $delta => $item) {
+          $element['items'][$delta] = array(
+            '#item' => $item,
+            '#weight' => $delta,
+          );
+        }
+
+        // Append formatter information either on each item ('single-value' formatter)
+        // or at the upper 'items' level ('multiple-value' formatter)
+        $format_info = array(
+          '#theme' => $theme,
+          '#field_name' => $field['field_name'],
+          '#type_name' => $node->type,
+          '#formatter' => $formatter_name,
+        );
+        if ($single) {
+          foreach ($items as $delta => $item) {
+            $element['items'][$delta] += $format_info;
+          }
+        }
+        else {
+          $element['items'] += $format_info;
+        }
+
+      }
+
+      return array($field['field_name'] => $element);
 
     case 'prepare translation':
       $addition = array();
@@ -1542,6 +1536,13 @@ function content_format($field, $item, $formatter = 'default', $node = NULL) {
   $formatter = $formatters[$formatter_name];
   $theme = $formatter['module']. '_formatter_'. $formatter_name;
 
+  $element = array(
+    '#theme' => $theme,
+    '#field_name' => $field['field_name'],
+    '#type_name' => isset($node->type) ? $node->type : '',
+    '#formatter' => $formatter_name,
+  );
+
   if (content_handle('formatter', 'multiple values', $formatter) == CONTENT_HANDLE_CORE) {
     // Single value formatter.
 
@@ -1552,13 +1553,7 @@ function content_format($field, $item, $formatter = 'default', $node = NULL) {
       $function('sanitize', $node, $field, $items, FALSE, FALSE);
     }
 
-    $element = array(
-      '#theme' =>  $theme,
-      '#field_name' => $field['field_name'],
-      '#type_name' => isset($node->type) ? $node->type : '',
-      '#formatter' => $formatter,
-      '#item' => $items[0],
-    );
+    $element['#item'] = $items[0];
   }
   else {
     // Multiple values formatter.
@@ -1568,16 +1563,8 @@ function content_format($field, $item, $formatter = 'default', $node = NULL) {
       $function('sanitize', $node, $field, $items, FALSE, FALSE);
     }
 
-    $element = array(
-      '#theme' => $theme,
-      '#field_name' => $field['field_name'],
-      '#type_name' => isset($node->type) ? $node->type : '',
-      '#formatter' => $formatter_name,
-    );
     foreach ($items as $delta => $item) {
       $element[$delta] = array(
-        '#field_name' => $field['field_name'],
-        '#type_name' => isset($node->type) ? $node->type : '',
         '#item' => $item,
         '#weight' => $delta,
       );
@@ -1909,16 +1896,17 @@ function theme_content_multiple_values($element) {
  */
 function template_preprocess_content_field_view(&$variables) {
   $element = $variables['element'];
+  $field = content_fields($element['#field_name'], $element['#node']->type);
 
   $variables['node'] = $element['#node'];
-  $variables['field'] = content_fields($element['#field_name'], $element['#node']->type);
+  $variables['field'] = $field;
   $variables['items'] = array();
 
-  if (!isset($element['items'])) {
+  if ($element['#single']) {
     // Single value formatter.
-    foreach (element_children($element) as $delta) {
-      $variables['items'][$delta] = $element[$delta];
-      $variables['items'][$delta]['view'] = $element[$delta]['#children'];
+    foreach (element_children($element['items']) as $delta) {
+      $variables['items'][$delta] = $element['items'][$delta]['#item'];
+      $variables['items'][$delta]['view'] = $element['items'][$delta]['#children'];
     }
   }
   else  {
@@ -1927,15 +1915,14 @@ function template_preprocess_content_field_view(&$variables) {
     // output of a single valued field.
     // Raw values are still exposed for all items.
     foreach (element_children($element['items']) as $delta) {
-      $variables['items'][$delta] = $element['items'][$delta];
+      $variables['items'][$delta] = $element['items'][$delta]['#item'];
     }
     $variables['items'][0]['view'] = $element['items']['#children'];
   }
 
-  $variables['teaser'] =  $element['#teaser'];
-  $variables['page'] =  $element['#page'];
+  $variables['teaser'] = $element['#teaser'];
+  $variables['page'] = $element['#page'];
 
-  $field = $variables['field'];
   $field_empty = TRUE;
 
   foreach ($variables['items'] as $delta => $item) {
@@ -1958,6 +1945,7 @@ function template_preprocess_content_field_view(&$variables) {
     'field_empty' => $field_empty,
   );
   $variables = array_merge($variables, $additions);
+
 }
 
 /**
