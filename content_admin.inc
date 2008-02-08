@@ -708,6 +708,7 @@ function _content_admin_field(&$form_state, $type_name, $field_name) {
       $widget_items = array($field['field_name'] => array($default_value));
     }
     $widget_form_state = array('values' => $widget_items);
+    module_load_include('inc', 'content', 'content_node_form');
     $form_element = content_field_form($widget_form, $widget_form_state, $widget_field, 0);
 
     $form['widget']['default_value_fieldset']['default_value_widget'] = $form_element;
