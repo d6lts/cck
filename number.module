@@ -423,7 +423,7 @@ function number_process($element, $edit, $form_state, $form) {
   $element[$field_key] = array(
     '#type' => 'textfield',
     '#title' => $element['#title'],
-    '#description' => t($field['widget']['description']),
+    '#description' => $element['#description'],
     '#required' => $element['#required'],
     '#default_value' => $value,
     // Need to allow a slightly larger size that the field length to allow

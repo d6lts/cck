@@ -390,7 +390,7 @@ function text_textfield_process($element, $edit, $form_state, $form) {
   $element[$field_key] = array(
     '#type' => 'textfield',
     '#title' => $element['#title'],
-    '#description' => t($field['widget']['description']),
+    '#description' => $element['#description'],
     '#required' => $element['#required'],
     '#default_value' => isset($element['#value'][$field_key]) ? $element['#value'][$field_key] : NULL,
     '#autocomplete_path' => $element['#autocomplete_path'],
@@ -419,7 +419,7 @@ function text_textarea_process($element, $edit, $form_state, $form) {
   $element[$field_key] = array(
     '#type' => 'textarea',
     '#title' => $element['#title'],
-    '#description' => t($field['widget']['description']),
+    '#description' => $element['#description'],
     '#required' => $element['#required'],
     '#default_value' => isset($element['#value'][$field_key]) ? $element['#value'][$field_key] : NULL,
     '#rows' => !empty($field['widget']['rows']) ? $field['widget']['rows'] : 10,

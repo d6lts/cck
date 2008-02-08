@@ -143,7 +143,8 @@ function content_multiple_value_form(&$form, &$form_state, $field, $items) {
     // children are already rendered, and we can't do the table layout.
     //'#type' => 'content_multiple_values',
     '#theme' => 'content_multiple_values',
-    '#title' => t($field['widget']['label'])
+    '#title' => t($field['widget']['label']),
+    '#description' => t($field['widget']['description']),
   );
   $function = $field['module'] .'_widget';
 
@@ -152,6 +153,7 @@ function content_multiple_value_form(&$form, &$form_state, $field, $items) {
       $defaults = array(
         '#field_name' => $field_name,
         '#title' => ($field['multiple'] >= 1) ? '' : t($field['widget']['label']),
+        '#description' => ($field['multiple'] >= 1) ? '' : t($field['widget']['description']),
         '#required' => $delta == 0 && $field['required'],
         '#weight' => $delta,
         '#delta' => $delta,
@@ -246,6 +248,7 @@ function theme_content_multiple_values($element) {
     }
 
     $output .= theme('table', $header, $rows, array('id' => $table_id, 'class' => 'content-multiple-table'));
+    $output .= $element['#description'] ? '<div class="description">'. $element['#description'] .'</div>' : '';
     $output .= drupal_render($element[$element['#field_name'] .'_add_more']);
 
     drupal_add_tabledrag($table_id, 'order', 'sibling', $order_class);

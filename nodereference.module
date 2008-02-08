@@ -425,6 +425,7 @@ function nodereference_select_process($element, $edit, $form_state, $form) {
     '#delta' => $element['#delta'],
     '#columns' => $element['#columns'],
     '#title' => $element['#title'],
+    '#description' => $element['#description'],
   );
   return $element;
 }
@@ -455,6 +456,7 @@ function nodereference_autocomplete_process($element, $edit, $form_state, $form)
     '#delta' => $element['#delta'],
     '#columns' => $element['#columns'],
     '#title' => $element['#title'],
+    '#description' => $element['#description'],
   );
   return $element;
 }
