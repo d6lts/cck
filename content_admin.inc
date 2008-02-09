@@ -638,7 +638,7 @@ function _content_admin_field(&$form_state, $type_name, $field_name) {
   $form = array('#field_info' => array($field['field_name'] => $field));
   $form['widget'] = array(
     '#type' => 'fieldset',
-    '#title' => t('Widget settings'),
+    '#title' => t('%type settings', array('%type' => $type['name'])),
     '#description' => t('These settings apply only to the %field field as it appears in the %type content type.', array(
       '%field' => $field['widget']['label'],
       '%type' => $type['name'])),
@@ -746,7 +746,7 @@ function _content_admin_field(&$form_state, $type_name, $field_name) {
 
   $form['field'] = array(
     '#type' => 'fieldset',
-    '#title' => t('Data settings'),
+    '#title' => t('Global settings'),
     '#description' => t('These settings apply to the %field field in every content type in which it appears.', array('%field' => $field['widget']['label'])),
   );
   $form['field']['required'] = array(
