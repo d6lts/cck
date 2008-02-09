@@ -266,7 +266,7 @@ function text_widget_info() {
         ),
     ),
     'text_textarea' => array(
-      'label' => 'Text Area',
+      'label' => 'Text Area (multiple rows)',
       'field types' => array('text'),
       'multiple values' => CONTENT_HANDLE_CORE,
       'callbacks' => array(
