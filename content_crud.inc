@@ -562,8 +562,8 @@ function content_type_update($info) {
     if (db_table_exists($old_name)) {
       $ret = array();
       db_rename_table($ret, $old_name, $new_name);
-      drupal_set_message(t('Content fields table %old_name has been renamed to %new_name and field instances have been updated.', array(
-        '%old_name' => $old_name, '%new_name' => $new_name)));
+      watchdog('Content fields table %old_name has been renamed to %new_name and field instances have been updated.', array(
+        '%old_name' => $old_name, '%new_name' => $new_name));
     }
 
     // Rename the variable storing weights for non-CCK fields.
@@ -592,7 +592,7 @@ function content_type_delete($info) {
   if (db_table_exists($table)) {
     $ret = array();
     db_drop_table($ret, $table);
-    drupal_set_message(t('The content fields table %name has been deleted.', array('%name' => $table)));
+    watchdog('The content fields table %name has been deleted.', array('%name' => $table));
   }
 
   content_menu_needs_rebuild(TRUE);
