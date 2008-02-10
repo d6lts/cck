@@ -6,6 +6,8 @@
  * Interface between content.module and views.module.
  */
 
+views_include_handlers();
+
 /**
  * Implementation of hook_views_data().
  *
