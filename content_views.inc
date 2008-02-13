@@ -42,38 +42,46 @@ function content_views_field_views_data($field) {
   }
 
   $data = array();
-  $data['table']['group']  = t('Fields');
+  $data['table']['group']  = t('Field');
   $data['table']['join']['node'] = array(
     'handler' => 'views_join',
     'arguments' => array($db_info['table'], 'node', 'vid', 'vid')
   );
 
+  $columns = array();
+  foreach ($db_info['columns'] as $attributes) {
+    $columns[] = $attributes['column'];
+  }
+
   $data[$field['field_name']] = array(
     // TODO : we probably need the actual table and column ?
-
     // Group by field type.
     'group' => $field_types[$field['type']]['label'],
-    'title' => $field['widget']['label'] .' ('. $field['field_name'] .')',
-    'help' => t('Appears in : %types', array('%types' => implode(', ', $types))),
+    'title' => $field['widget']['label'],
+    'help' => $field['field_name'] .' - '. t('Appears in : @types', array('@types' => implode(', ', $types))),
     'field' => array(
-      'field' => '', // TODO
+      'field' => $columns[0],
+      'tablename' => $db_info['table'],
       'handler' => 'views_handler_field_content',
-      'arguments' => array(TRUE), // TODO : ??
-      'content_field_name' => $field['field_name'], // TODO : could this be moved one level up ?
-  ),
+      'arguments' => array(TRUE, $columns, $field['field_name']), // TODO : TRUE is 'sortable'
+    ),
     'argument' => array(
-      'field' => '', // TODO
+      'field' => $columns[0],
+      'tablename' => $db_info['table'],
       'handler' => 'views_handler_argument_content',
-      'arguments' => array('title'), // TODO : ??
-      'content_field_name' => $field['field_name'], // TODO : could this be moved one level up ?
+      'arguments' => array($columns, $field['field_name']), // TODO : ??
     ),
     'filter' => array(
-      'field' => '', // TODO
+      'field' => $columns[0],
+      'tablename' => $db_info['table'],
       'handler' => 'views_handler_filter',
+      'arguments' => array($columns, $field['field_name']), // TODO : ??
     ),
     'sort' => array(
-      'field' => '', // TODO
+      'field' => $columns[0],
+      'tablename' => $db_info['table'],
       'handler' => 'views_handler_sort',
+      'arguments' => array($columns, $field['field_name']), // TODO : ??
     ),
   );
 
@@ -86,20 +94,34 @@ function content_views_field_views_data($field) {
 class views_handler_field_content extends views_handler_field_node {
   var $content_field;
 
-  /**
-   * Init function :
-   * - make $field available in $this->content_field
-   * - add all columns used for this field.
-   */
-  // TODO : what about construct($click_sortable, $additional_fields) ?
+  // TODO : ?
   function init(&$view, &$data) {
     parent::init($view, $data);
-    $this->content_field = content_fields($data['content_field_name']);
-
-    foreach ($this->content_field['columns'] as $attributes) {
-      $this->additional_fields[] = $attributes['column'];
-    }
   }
+
+  /**
+   * Construct function.
+   * Arguments are taken from the 'arguments' entry in the field definition.
+   *
+   * - make $field available in $this->content_field
+   */
+  function construct($click_sortable = FALSE, $additional_fields = array(), $field_name) {
+    parent::construct($click_sortable, $additional_fields);
+
+    $this->content_field = content_fields($field_name);
+  }
+
+  /**
+   * Called to determine what to tell the clicksorter.
+   */
+//  function click_sort() {
+//    return "$this->field_alias";
+//  }
+
+  // TODO : ?
+//  function options(&$option) {
+//    // add additional stuff to the field ?
+//  }
 
   /**
    * Provide formatter and 'group multiple values' option.
@@ -107,9 +129,7 @@ class views_handler_field_content extends views_handler_field_node {
   function options_form(&$form) {
     // TODO : not sure we want this (link to node ... ) ?
     parent::options_form($view, $data);
-
     $field = $this->content_field;
-    $options = $this->data->options;
 
     $field_types = _content_field_types();
     $formatters = array();
@@ -124,13 +144,13 @@ class views_handler_field_content extends views_handler_field_node {
       '#type' => 'select',
       '#options' => $formatters,
       '#required' => TRUE,
-      '#default_value' => isset($options['format']) ? $options['format'] : 'default',
+      '#default_value' => isset($this->data->format) ? $this->data->format : 'default',
     );
 
     $form['group_multiple'] = array(
       '#title' => t('Group Multiple values'),
       '#type' => 'checkbox',
-      '#default_value' => isset($options['group_multiple']) ? $options['group_multiiple'] : TRUE,
+      '#default_value' => isset($this->data->group_multiple) ? $this->data->group_multiple : TRUE,
     );
 
     $form['multiple'] = array(
@@ -141,21 +161,44 @@ class views_handler_field_content extends views_handler_field_node {
       '#type' => 'textfield',
       '#size' => 5,
       '#field_prefix' => t('Show '),
-      '#field_suffix' => t(' values'),
-      '#default_value' => isset($options['multiple_number']) ? $options['multiple_number'] : '',
+      '#field_suffix' => t(' values,'),
+      '#default_value' => isset($this->data->multiple['multiple_number']) ? $this->data->multiple['multiple_number'] : '',
     );
     $form['multiple']['multiple_from'] = array(
       '#type' => 'textfield',
       '#size' => 5,
-      '#field_prefix' => t('from '),
-      '#default_value' => isset($options['multiple_from']) ? $options['multiple_from'] : '',
+      '#field_prefix' => t('starting from '),
+      '#default_value' => isset($this->data->multiple['multiple_from']) ? $this->data->multiple['multiple_from'] : '',
     );
     $form['multiple']['multiple_reversed'] = array(
       '#title' => t('Start from last values'), // TODO
       '#type' => 'checkbox',
-      '#default_value' => $options['multiple_reversed'],
+      '#default_value' => isset($this->data->multiple['multiple_reversed']) ? $this->data->multiple['multiple_reversed'] : 0,
     );
 
+  }
+
+  /**
+   * Validate the options form.
+   */
+  function options_validate($form, &$form_state) { }
+
+  /**
+   * Perform any necessary changes to the form values prior to storage.
+   * There is no need for this function to actually store the data.
+   */
+  function options_submit($form, &$form_state) { }
+
+  /**
+   * Provide text for the administrative summary
+   */
+  function admin_summary() {
+    // Display the formatter name.
+    $field = $this->content_field;
+    $field_types = _content_field_types();
+    if (isset($field_types[$field['type']]['formatters'][$this->data->format])) {
+      return t($field_types[$field['type']]['formatters'][$this->data->format]['label']);
+    }
   }
 
   /**
@@ -203,7 +246,7 @@ class views_handler_field_content extends views_handler_field_node {
                // TODO : check the alias generated by Views
                " LEFT JOIN {". $field['table'] ."} node_data_$field[field_name] ON node.vid = node_data_$field[field_name].vid".
                // TODO : check $values->{$this->nid_field}
-               " WHERE node.nid = $values->{$this->nid_field}".
+               " WHERE node.nid = ".$values->{$this->nid_field}.
                " ORDER BY node_data_$field[field_name].delta ". ($options['multiple_reversed'] ? 'ASC' : 'DESC');
       $query = db_rewrite_sql($query, 'node');
       // Select all deltas or only a subset.
@@ -471,15 +514,15 @@ function content_views_field_tables($field) {
  * Perform filtering by an argument for field data stored via content.module.
  */
 function content_views_argument_handler($op, &$query, $argtype, $arg = '') {
-  if ($op == 'filter') {
-    $field_name = substr($argtype['type'], 9);
-  }
-  else {
-    $field_name = substr($argtype, 9);
-  }
+//  if ($op == 'filter') {
+//    $field_name = substr($argtype['type'], 9);
+//  }
+//  else {
+//    $field_name = substr($argtype, 9);
+//  }
 
-  $field = content_fields($field_name);
-  $db_info = content_database_info($field);
+//  $field = content_fields($field_name);
+//  $db_info = content_database_info($field);
   $main_column = reset($db_info['columns']);
 
   // The table name used here is the Views alias for the table, not the actual
