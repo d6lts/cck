@@ -82,26 +82,26 @@ function number_field_settings($op, $field) {
         '#default_value' => is_numeric($field['max']) ? $field['max'] : '',
       );
       if ($field['type'] == 'number_decimal') {
-        $form['scale'] = array(
-          '#type' => 'select',
-          '#options' => drupal_map_assoc(range(10, 32)),
-          '#title' => t('Scale'),
-          '#description' => t('The total number of digits to store in the database, including those to the right of the decimal.'),
-          '#default_value' => is_numeric($field['scale']) ? $field['scale'] : 10,
-        );
         $form['precision'] = array(
           '#type' => 'select',
-          '#options' => drupal_map_assoc(range(0, 2)),
+          '#options' => drupal_map_assoc(range(10, 32)),
           '#title' => t('Precision'),
+          '#description' => t('The total number of digits to store in the database, including those to the right of the decimal.'),
+          '#default_value' => is_numeric($field['precision']) ? $field['precision'] : 10,
+        );
+        $form['scale'] = array(
+          '#type' => 'select',
+          '#options' => drupal_map_assoc(range(0, 2)),
+          '#title' => t('Scale'),
           '#description' => t('The number of digits to the right of the decimal.'),
-          '#default_value' => is_numeric($field['precision']) ? $field['precision'] : 2,
+          '#default_value' => is_numeric($field['scale']) ? $field['scale'] : 2,
         );
         $form['decimal'] = array(
           '#type' => 'select',
-          '#options' => array('.' => 'decimal point', ',' => 'comma', ' ', 'space'),
+          '#options' => array('.' => 'decimal point', ',' => 'comma', ' ' => 'space'),
           '#title' => t('Decimal marker'),
           '#description' => t('The character users will input to mark the decimal point in forms.'),
-          '#default_value' => !empty($field['scale']) ? $field['scale'] : '.',
+          '#default_value' => !empty($field['decimal']) ? $field['decimal'] : '.',
         );
       }
       $form['append']['prefix'] = array(
@@ -159,7 +159,7 @@ function number_field_settings($op, $field) {
     case 'save':
       $values = array('prefix', 'suffix', 'min', 'max', 'allowed_values', 'allowed_values_php');
       if ($field['type'] == 'number_decimal') {
-        $values = array_merge($values, array('scale', 'precision', 'decimal'));
+        $values = array_merge($values, array('precision', 'scale', 'decimal'));
       }
       return $values;
 
@@ -175,8 +175,8 @@ function number_field_settings($op, $field) {
         );
       }
       if ($field['type'] == 'number_decimal') {
-        $scale = isset($field['scale']) ? $field['scale'] : 10;
-        $precision = isset($field['precision']) ? $field['precision'] : 2;
+        $precision = isset($field['precision']) ? $field['precision'] : 10;
+        $scale = isset($field['scale']) ? $field['scale'] : 2;
         return array(
           'value' => array('type' => 'numeric', 'precision' => $precision, 'scale' => $scale, 'not null' => FALSE, 'sortable' => TRUE),
         );
@@ -428,8 +428,8 @@ function number_process($element, $edit, $form_state, $form) {
     '#default_value' => $value,
     // Need to allow a slightly larger size that the field length to allow
     // for some configurations where all characters won't fit in input field.
-    '#size' => isset($field['scale']) ? $field['scale'] + 2 : 12,
-    '#maxlength' => isset($field['scale']) ? $field['scale'] : 10,
+    '#size' => isset($field['precision']) ? $field['precision'] + 2 : 12,
+    '#maxlength' => isset($field['precision']) ? $field['precision'] : 10,
     '#attributes' => array('class' => 'number'),
   );
 
@@ -453,8 +453,8 @@ function number_process($element, $edit, $form_state, $form) {
     case 'number_decimal':
       $element['#element_validate'] = array('number_decimal_validate');
       $element['#decimal'] = isset($field['decimal']) ? $field['decimal'] : '.';
-      $element['#scale'] = isset($field['scale']) ? $field['scale'] : 10;
-      $element['#precision'] = isset($field['precision']) ? $field['precision'] : 2;
+      $element['#precision'] = isset($field['precision']) ? $field['precision'] : 10;
+      $element['#scale'] = isset($field['scale']) ? $field['scale'] : 2;
       break;
   }
   return $element;
@@ -511,7 +511,7 @@ function number_decimal_validate($element, &$form_state) {
       drupal_set_message( t('Only numbers and the decimal character (%decimal) are allowed in %field. %start was changed to %value.', array(
       '%decimal' => $element['#decimal'], '%field' => t($element[$field_key]['#title']), '%start' => $start, '%value' => $value)));
     }
-    $value = round($value, $element['#precision']);
+    $value = round($value, $element['#scale']);
     form_set_value($element[$field_key], $value, $form_state);
   }
 }
