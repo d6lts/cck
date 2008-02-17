@@ -444,23 +444,23 @@ function content_notify($op, $module) {
 }
 
 /**
-* Allows a module to update the database for fields and columns it controls.
-*
-* @param string $module
-*   The name of the module to update on.
-*/
+ * Allows a module to update the database for fields and columns it controls.
+ *
+ * @param string $module
+ *   The name of the module to update on.
+ */
 function content_associate_fields($module) {
   $module_fields = module_invoke($module, 'field_info');
   if ($module_fields) {
     foreach ($module_fields as $name => $field_info) {
-      watchdog('content', t('Updating field type %type with module %module.', array('%type' => $name, '%module' => $module)));
+      watchdog('content', 'Updating field type %type with module %module.', array('%type' => $name, '%module' => $module));
       db_query("UPDATE {". content_field_tablename() ."} SET module = '%s', active = %d WHERE type = '%s'", $module, 1, $name);
     }
   }
   $module_widgets = module_invoke($module, 'widget_info');
   if ($module_widgets) {
     foreach ($module_widgets as $name => $widget_info) {
-      watchdog('content', t('Updating widget type %type with module %module.', array('%type' => $name, '%module' => $module)));
+      watchdog('content', 'Updating widget type %type with module %module.', array('%type' => $name, '%module' => $module));
       db_query("UPDATE {". content_instance_tablename() ."} SET widget_module = '%s', widget_active = %d WHERE widget_type = '%s'", $module, 1, $name);
     }
   }
