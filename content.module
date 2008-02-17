@@ -517,7 +517,7 @@ function content_field($op, &$node, $field, &$items, $teaser, $page) {
 
       // If there was an AHAH add more button in this field, don't save it.
       // TODO : is it still needed ?
-      unset($items[$field['field_name']. '_add_more']);
+      unset($items[$field['field_name'] .'_add_more']);
 
       // If content module is handling multiple values, don't save empty items.
       if (content_handle('widget', 'multiple values', $field) == CONTENT_HANDLE_CORE) {
@@ -554,7 +554,7 @@ function content_field($op, &$node, $field, &$items, $teaser, $page) {
 
       if (isset($formatters[$formatter_name])) {
         $formatter = $formatters[$formatter_name];
-        $theme = $formatter['module']. '_formatter_'. $formatter_name;
+        $theme = $formatter['module'] .'_formatter_'. $formatter_name;
         $single = (content_handle('formatter', 'multiple values', $formatter) == CONTENT_HANDLE_CORE);
 
 // 'Single value' formatter :
@@ -873,7 +873,7 @@ function _content_field_invoke_default($op, &$node, $teaser = NULL, $page = NULL
   $return = array();
   // The operations involving database queries are better off handled by table
   // rather than by field.
-  if (in_array($op, array('load', 'insert', 'update', 'delete','delete revision'))) {
+  if (in_array($op, array('load', 'insert', 'update', 'delete', 'delete revision'))) {
     return content_storage($op, $node);
   }
   else {
@@ -1257,7 +1257,7 @@ function content_format($field, $item, $formatter = 'default', $node = NULL) {
 
   $formatter_name = $formatter;
   $formatter = $formatters[$formatter_name];
-  $theme = $formatter['module']. '_formatter_'. $formatter_name;
+  $theme = $formatter['module'] .'_formatter_'. $formatter_name;
 
   $element = array(
     '#theme' => $theme,

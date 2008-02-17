@@ -86,7 +86,7 @@ function text_update_6001() {
           foreach ($db_info['columns'] as $column => $attributes) {
             $attributes['not null'] = FALSE;
             $column = $attributes['column'];
-            db_change_field($ret, $table, $column,$column, $attributes);
+            db_change_field($ret, $table, $column, $column, $attributes);
             // TODO : errors on text/blob columns : no default value allowed (!)
             db_field_set_no_default($ret, $table, $column);
             if ($attributes['type'] == 'varchar' || $attributes['type'] == 'text') {
