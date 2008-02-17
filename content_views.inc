@@ -35,7 +35,7 @@ function content_views_field_views_data($field) {
   $table_alias = 'node_data_'. $field['field_name'];
 
   $types = array();
-  foreach (content_types() as $type) {
+  foreach(content_types() as $type) {
     if (isset($type['fields'][$field['field_name']])) {
       $types[] = $type['name'];
     }
@@ -63,30 +63,37 @@ function content_views_field_views_data($field) {
       'field' => $columns[0],
       'tablename' => $db_info['table'],
       'handler' => 'views_handler_field_content',
-      'arguments' => array(TRUE, $columns, $field['field_name']), // TODO : TRUE is 'sortable'
+      'click sortable' => '', // TODO
+      'additional fields' => $columns,
+      'content_field_name' => $field['field_name'],
     ),
     'argument' => array(
       'field' => $columns[0],
       'tablename' => $db_info['table'],
       'handler' => 'views_handler_argument_content',
-      'arguments' => array($columns, $field['field_name']), // TODO : ??
+      'name field' => '', // TODO
+      'additional fields' => $columns,
+      'content_field_name' => $field['field_name'],
     ),
     'filter' => array(
       'field' => $columns[0],
       'tablename' => $db_info['table'],
-      'handler' => 'views_handler_filter',
-      'arguments' => array($columns, $field['field_name']), // TODO : ??
+      'handler' => 'views_handler_filter_content',
+      'additional fields' => $columns,
+      'content_field_name' => $field['field_name'],
     ),
     'sort' => array(
       'field' => $columns[0],
       'tablename' => $db_info['table'],
       'handler' => 'views_handler_sort',
-      'arguments' => array($columns, $field['field_name']), // TODO : ??
+      'additional fields' => $columns,
+      'content_field_name' => $field['field_name'],
     ),
   );
 
   // TODO : provide several filters, arguments, sorts... ?
   // TODO : allow field modules to provide filters etc on all their columns if needed ?
+  // TODO : 'empty / not empty' filter
 
   return array($table_alias => $data);
 }
@@ -95,21 +102,23 @@ class views_handler_field_content extends views_handler_field_node {
   var $content_field;
 
   // TODO : ?
-  function init(&$view, &$data) {
-    parent::init($view, $data);
+//  function init(&$view, &$data) {
+//    parent::init($view, $data);
+//  }
+
+  function set_definition($definition) {
+    parent::set_definition($definition);
+
+    $this->content_field = content_fields($definition['content_field_name']);
   }
 
   /**
    * Construct function.
    * Arguments are taken from the 'arguments' entry in the field definition.
-   *
-   * - make $field available in $this->content_field
    */
-  function construct($click_sortable = FALSE, $additional_fields = array(), $field_name) {
-    parent::construct($click_sortable, $additional_fields);
-
-    $this->content_field = content_fields($field_name);
-  }
+//  function construct() {
+//    parent::construct();
+//  }
 
   /**
    * Called to determine what to tell the clicksorter.
@@ -118,10 +127,21 @@ class views_handler_field_content extends views_handler_field_node {
 //    return "$this->field_alias";
 //  }
 
-  // TODO : ?
-//  function options(&$option) {
-//    // add additional stuff to the field ?
-//  }
+  /**
+   * Provide a simple default initializer -- should be overridden.
+   */
+  function options(&$item) {
+    parent::options($item);
+
+    $item->format = 'default';
+    $item->group_multiple = TRUE;
+    $item->multiple = array(
+      'multiple_number' => '',
+      'multiple_from' => '',
+      'multiple_reversed' => FALSE,
+    );
+
+  }
 
   /**
    * Provide formatter and 'group multiple values' option.
@@ -144,15 +164,16 @@ class views_handler_field_content extends views_handler_field_node {
       '#type' => 'select',
       '#options' => $formatters,
       '#required' => TRUE,
-      '#default_value' => isset($this->data->format) ? $this->data->format : 'default',
+      '#default_value' => $this->data->format,
     );
 
     $form['group_multiple'] = array(
       '#title' => t('Group Multiple values'),
       '#type' => 'checkbox',
-      '#default_value' => isset($this->data->group_multiple) ? $this->data->group_multiple : TRUE,
+      '#default_value' => $this->data->group_multiple,
     );
 
+    // TODO : values come out of this nested in an array, as if #tree = TRUE...
     $form['multiple'] = array(
       '#prefix' => '<div class="container-inline">',
       '#suffix' => '</div>',
@@ -162,18 +183,18 @@ class views_handler_field_content extends views_handler_field_node {
       '#size' => 5,
       '#field_prefix' => t('Show '),
       '#field_suffix' => t(' values,'),
-      '#default_value' => isset($this->data->multiple['multiple_number']) ? $this->data->multiple['multiple_number'] : '',
+      '#default_value' => $this->data->multiple['multiple_number'],
     );
     $form['multiple']['multiple_from'] = array(
       '#type' => 'textfield',
       '#size' => 5,
       '#field_prefix' => t('starting from '),
-      '#default_value' => isset($this->data->multiple['multiple_from']) ? $this->data->multiple['multiple_from'] : '',
+      '#default_value' => $this->data->multiple['multiple_from'],
     );
     $form['multiple']['multiple_reversed'] = array(
       '#title' => t('Start from last values'), // TODO
       '#type' => 'checkbox',
-      '#default_value' => isset($this->data->multiple['multiple_reversed']) ? $this->data->multiple['multiple_reversed'] : 0,
+      '#default_value' => $this->data->multiple['multiple_reversed'],
     );
 
   }
@@ -206,11 +227,11 @@ class views_handler_field_content extends views_handler_field_node {
    */
   function query() {
     $field = $this->content_field;
-    $options = $this->data->options;
 
 //  if (in_array($field['handler'], array('content_views_field_handler_group', 'content_views_field_handler_first', 'content_views_field_handler_last'))) {
 // TODO : multiple_number / multiple_from
-    if ($options['group_multiple'] && $field['multiple']) {
+// We can also optimize the query when only one value should be retrieved
+    if ($this->data->group_multiple && $field['multiple']) {
       // 'Group multiple values' : we don't add anything to the query.
       // The data is retrieved in render() in order to avoid duplicate results.
 
@@ -229,13 +250,12 @@ class views_handler_field_content extends views_handler_field_node {
 
   function render($values) {
     $field = $this->content_field;
-    $options = $this->data->options;
-
-    if ($options['group_multiple'] && $field['multiple']) {
+    $db_info = content_database_info($field);
+    if ($this->data->group_multiple && $field['multiple']) {
       // 'Group multiple values' : we retrieve all the values in a separate query...
       // TODO : does Views2 allow something smarter ?
 
-      foreach ($field['columns'] as $column => $attributes) {
+      foreach ($db_info['columns'] as $column => $attributes) {
         // TODO : check the alias generated by Views
         $query_columns[] = "node_data_$field[field_name].$attributes[column] AS $column";
       }
@@ -244,18 +264,18 @@ class views_handler_field_content extends views_handler_field_node {
       $query = "SELECT node.nid, ". implode(', ', $query_columns) .
                " FROM {node} node".
                // TODO : check the alias generated by Views
-               " LEFT JOIN {". $field['table'] ."} node_data_$field[field_name] ON node.vid = node_data_$field[field_name].vid".
+               " LEFT JOIN {". $db_info['table'] ."} node_data_$field[field_name] ON node.vid = node_data_$field[field_name].vid".
                // TODO : check $values->{$this->nid_field}
-               " WHERE node.nid = ". $values->{$this->nid_field} .
-               " ORDER BY node_data_$field[field_name].delta ". ($options['multiple_reversed'] ? 'ASC' : 'DESC');
+               " WHERE node.nid = ".$values->{$this->nid_field}.
+               " ORDER BY node_data_$field[field_name].delta ". ($this->data->multiple['multiple_reversed'] ? 'DESC' : 'ASC');
       $query = db_rewrite_sql($query, 'node');
       // Select all deltas or only a subset.
       // Currently only 'all' and first / last items are proposed to the user.
-      $result = $options['multiple_number'] ? db_query($query) : db_query_range($query, $options['multiple_from'], $options['multiple_number']);
+      $result = $this->data->multiple['multiple_number'] ? db_query_range($query, $this->data->multiple['multiple_from'], $this->data->multiple['multiple_number']) : db_query($query);
 
       $items = array();
       while ($item = db_fetch_array($result)) {
-        $items[] = content_format($field, $item, $options['format'], $values);
+        $items[] = content_format($field, $item, $this->data->format, $values);
       }
       // TODO : could we use generic field theming here ?
       return theme('content_view_multiple_field', $items, $field, $values);
@@ -263,20 +283,131 @@ class views_handler_field_content extends views_handler_field_node {
     else {
       // Non-multiple field or 'Group multiple values' unchecked :
       $item = array();
-      foreach ($field['columns'] as $column => $attributes) {
+      foreach ($db_info['columns'] as $column => $attributes) {
         // TODO : check generated alias...
         $item[$column] = $values->{$this->table_alias .'_'. $attributes['column']};
       }
-      return content_format($field, $item, $field_data['options'], $values);
+      return content_format($field, $item, $this->data->format, $values);
     }
   }
 }
 
 function theme_content_view_multiple_field($items, $field, $values) {
+  $output = '';
   foreach ($items as $item) {
     $output .= '<div class="field-item">'. $item .'</div>';
   }
   return $output;
+}
+
+// TODO : should probably derive from views_handler_filter when fields
+// have a way to set their own operators
+class views_handler_filter_content extends views_handler_filter_equality  {
+  var $content_field;
+
+  /**
+   * Init function :
+   */
+//  function init(&$view, &$data) {
+//    parent::init($view, $data);
+//  }
+
+  function set_definition($definition) {
+    parent::set_definition($definition);
+
+    $this->content_field = content_fields($definition['content_field_name']);
+  }
+
+  /**
+   * Construct function.
+   * Arguments are taken from the 'arguments' entry in the field definition.
+   *
+   * - make $field available in $this->content_field
+   */
+  function construct() {
+    parent::construct();
+
+    $this->additional_fields = $this->$definition['additional_fields'];
+  }
+
+  /**
+   * Provide a simple default initializer -- should be overridden.
+   */
+  function options(&$item) {
+    parent::options($item);
+  }
+
+//  function admin_summary() {
+//    return check_plain($this->data->operator['operator']) . ' ' . check_plain($this->data->value['value']);
+//  }
+//
+  /**
+   * Provide the basic form which calls through to subforms.
+   * If overridden, it is best to call through to the parent.
+   */
+  function options_form(&$form, &$form_state) {
+    parent::options_form($form, $form_state);
+  }
+//
+//  /**
+//   * Simple validate handler
+//   */
+//  function options_validate(&$form, &$form_state) {
+//    $this->operator_validate($form['operator'], $form_state);
+//    $this->value_validate($form['value'], $form_state);
+//  }
+//
+//  /**
+//   * Simple submit handler
+//   */
+//  function options_submit(&$form, &$form_state) {
+//    $this->operator_submit($form['operator'], $form_state);
+//    $this->value_submit($form['value'], $form_state);
+//  }
+//
+//  /**
+//   * Provide a form for setting the operator.
+//   */
+//  function operator_form(&$form, &$form_state) { }
+//
+//  /**
+//   * Validate the operator form.
+//   */
+//  function operator_validate($form, &$form_state) { }
+//
+//  /**
+//   * Perform any necessary changes to the form values prior to storage.
+//   * There is no need for this function to actually store the data.
+//   */
+//  function operator_submit($form, &$form_state) { }
+//
+//  /**
+//   * Provide a form for setting options.
+//   */
+//  function value_form(&$form, &$form_state) { }
+//
+//  /**
+//   * Validate the options form.
+//   */
+//  function value_validate($form, &$form_state) { }
+//
+//  /**
+//   * Perform any necessary changes to the form values prior to storage.
+//   * There is no need for this function to actually store the data.
+//   */
+//  function value_submit($form, &$form_state) { }
+//
+//  /**
+//   * Add this filter to the query.
+//   *
+//   * Due to the nature of fapi, the value and the operator have an unintended
+//   * level of indirection. You will find them in $this->data->operator['operator']
+//   * and $this->data->value['value'] respectively.
+//   */
+//  function query() {
+//    $this->ensure_my_table();
+//    $this->query->add_where($this->data->group, "$this->table_alias.$this->real_field " . $this->data->operator['operator'] . " '%s'", $this->data->value['value']);
+//  }
 }
 
 class views_handler_argument_content extends views_handler_argument {
@@ -284,11 +415,28 @@ class views_handler_argument_content extends views_handler_argument {
 
   /**
    * Init function :
+   */
+//  function init(&$view, &$data) {
+//    parent::init($view, $data);
+//  }
+
+  function set_definition($definition) {
+    parent::set_definition($definition);
+
+    $this->content_field = content_fields($definition['content_field_name']);
+  }
+
+  /**
+   * Construct function.
+   * Arguments are taken from the 'arguments' entry in the field definition.
+   *
    * - make $field available in $this->content_field
    */
-  function init(&$view, &$data) {
-    parent::init($view, $data);
-    $this->content_field = content_fields($data['content_field_name']);
+  function construct() {
+    parent::construct();
+
+    // TODO : here we have to add additional fields ourselves ?
+    $this->additional_fields = $this->$definition['additional_fields'];
   }
 
   // TODO ...
@@ -384,15 +532,15 @@ function content_views_field_tables($field) {
         $filter_name = '';
         if (count($filters) > 1) {
           $filter_name = (!empty($filter['name'])) ? $filter['name'] : $key;
-          $filter_name = ' - '. $filter_name;
+          $filter_name = ' - '.$filter_name;
         }
         $name = $field_types[$field['type']]['label'] .': '. $field['widget']['label'] . $filter_name .' ('. $field['field_name'] .')';
         $init = array(
           'name' => $name,
-          'field' => $main_column['column'],
-          'content_db_info' => $db_info,
-          'content_field' => $field,
-          'content_field_module' => $module,
+//          'field' => $main_column['column'],
+//          'content_db_info' => $db_info,
+//          'content_field' => $field,
+//          'content_field_module' => $module,
         );
         $table['filters'][$main_column['column'] .'_'. $key] = array_merge($filter, $init);
       }
