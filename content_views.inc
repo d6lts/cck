@@ -129,12 +129,12 @@ class views_handler_field_content extends views_handler_field_node {
   /**
    * Provide a simple default initializer -- should be overridden.
    */
-  function options(&$item) {
-    parent::options($item);
+  function options(&$options) {
+    parent::options($options);
 
-    $item->format = 'default';
-    $item->group_multiple = TRUE;
-    $item->multiple = array(
+    $options['format'] = 'default';
+    $options['group_multiple'] = TRUE;
+    $options['multiple'] = array(
       'multiple_number' => '',
       'multiple_from' => '',
       'multiple_reversed' => FALSE,
@@ -149,6 +149,7 @@ class views_handler_field_content extends views_handler_field_node {
     // TODO : not sure we want this (link to node ... ) ?
     parent::options_form($view, $data);
     $field = $this->content_field;
+    $options = $this->options;
 
     $field_types = _content_field_types();
     $formatters = array();
@@ -163,13 +164,13 @@ class views_handler_field_content extends views_handler_field_node {
       '#type' => 'select',
       '#options' => $formatters,
       '#required' => TRUE,
-      '#default_value' => $this->data->format,
+      '#default_value' => $options['format'],
     );
 
     $form['group_multiple'] = array(
       '#title' => t('Group Multiple values'),
       '#type' => 'checkbox',
-      '#default_value' => $this->data->group_multiple,
+      '#default_value' => $options['group_multiple'],
     );
 
     // TODO : values come out of this nested in an array, as if #tree = TRUE...
@@ -182,18 +183,18 @@ class views_handler_field_content extends views_handler_field_node {
       '#size' => 5,
       '#field_prefix' => t('Show '),
       '#field_suffix' => t(' values,'),
-      '#default_value' => $this->data->multiple['multiple_number'],
+      '#default_value' => $options['multiple']['multiple_number'],
     );
     $form['multiple']['multiple_from'] = array(
       '#type' => 'textfield',
       '#size' => 5,
       '#field_prefix' => t('starting from '),
-      '#default_value' => $this->data->multiple['multiple_from'],
+      '#default_value' => $options['multiple']['multiple_from'],
     );
     $form['multiple']['multiple_reversed'] = array(
       '#title' => t('Start from last values'), // TODO
       '#type' => 'checkbox',
-      '#default_value' => $this->data->multiple['multiple_reversed'],
+      '#default_value' => $options['multiple']['multiple_reversed'],
     );
 
   }
@@ -216,8 +217,8 @@ class views_handler_field_content extends views_handler_field_node {
     // Display the formatter name.
     $field = $this->content_field;
     $field_types = _content_field_types();
-    if (isset($field_types[$field['type']]['formatters'][$this->data->format])) {
-      return t($field_types[$field['type']]['formatters'][$this->data->format]['label']);
+    if (isset($field_types[$field['type']]['formatters'][$this->options['format']])) {
+      return t($field_types[$field['type']]['formatters'][$this->options['format']]['label']);
     }
   }
 
@@ -226,11 +227,12 @@ class views_handler_field_content extends views_handler_field_node {
    */
   function query() {
     $field = $this->content_field;
+    $options = $this->options;
 
 //  if (in_array($field['handler'], array('content_views_field_handler_group', 'content_views_field_handler_first', 'content_views_field_handler_last'))) {
 // TODO : multiple_number / multiple_from
 // We can also optimize the query when only one value should be retrieved
-    if ($this->data->group_multiple && $field['multiple']) {
+    if ($options['group_multiple'] && $field['multiple']) {
       // 'Group multiple values' : we don't add anything to the query.
       // The data is retrieved in render() in order to avoid duplicate results.
       $this->field_alias = $this->real_field;
@@ -251,7 +253,9 @@ class views_handler_field_content extends views_handler_field_node {
   function render($values) {
     $field = $this->content_field;
     $db_info = content_database_info($field);
-    if ($this->data->group_multiple && $field['multiple']) {
+    $options = $this->options;
+
+    if ($options['group_multiple'] && $field['multiple']) {
       // 'Group multiple values' : we retrieve all the values in a separate query...
       // TODO : does Views2 allow something smarter ?
 
@@ -264,14 +268,14 @@ class views_handler_field_content extends views_handler_field_node {
                " FROM {node} node".
                " LEFT JOIN {". $db_info['table'] ."} node_data_$field[field_name] ON node.vid = node_data_$field[field_name].vid".
                " WHERE node.nid = ".$values->{$this->nid_field}.
-               " ORDER BY node_data_$field[field_name].delta ". ($this->data->multiple['multiple_reversed'] ? 'DESC' : 'ASC');
+               " ORDER BY node_data_$field[field_name].delta ". ($options['multiple']['multiple_reversed'] ? 'DESC' : 'ASC');
       $query = db_rewrite_sql($query, 'node');
       // Select all deltas or only a subset.
-      $result = $this->data->multiple['multiple_number'] ? db_query_range($query, $this->data->multiple['multiple_from'], $this->data->multiple['multiple_number']) : db_query($query);
+      $result = $options['multiple']['multiple_number'] ? db_query_range($query, $options['multiple']['multiple_from'], $options['multiple']['multiple_number']) : db_query($query);
 
       $items = array();
       while ($item = db_fetch_array($result)) {
-        $items[] = content_format($field, $item, $this->data->format, $values);
+        $items[] = content_format($field, $item, $options['format'], $values);
       }
       // TODO : could we use generic field theming here ?
       return theme('content_view_multiple_field', $items, $field, $values);
@@ -282,7 +286,7 @@ class views_handler_field_content extends views_handler_field_node {
       foreach ($db_info['columns'] as $column => $attributes) {
         $item[$column] = $values->{$this->table_alias .'_'. $attributes['column']};
       }
-      return content_format($field, $item, $this->data->format, $values);
+      return content_format($field, $item, $options['format'], $values);
     }
   }
 }
@@ -324,8 +328,8 @@ class views_handler_filter_content extends views_handler_filter_equality  {
   /**
    * Provide a simple default initializer -- should be overridden.
    */
-  function options(&$item) {
-    parent::options($item);
+  function options(&$options) {
+    parent::options($options);
   }
 
 //  function admin_summary() {
