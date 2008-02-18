@@ -133,8 +133,8 @@ class views_handler_field_content extends views_handler_field_node {
     parent::options($options);
 
     $options['format'] = 'default';
-    $options['group_multiple'] = TRUE;
     $options['multiple'] = array(
+      'group' => TRUE,
       'multiple_number' => '',
       'multiple_from' => '',
       'multiple_reversed' => FALSE,
@@ -167,16 +167,13 @@ class views_handler_field_content extends views_handler_field_node {
       '#default_value' => $options['format'],
     );
 
-    $form['group_multiple'] = array(
+    $form['multiple'] = array(
+      '#access' => $field['multiple'],
+    );
+    $form['multiple']['group'] = array(
       '#title' => t('Group Multiple values'),
       '#type' => 'checkbox',
       '#default_value' => $options['group_multiple'],
-    );
-
-    // TODO : values come out of this nested in an array, as if #tree = TRUE...
-    $form['multiple'] = array(
-      '#prefix' => '<div class="container-inline">',
-      '#suffix' => '</div>',
     );
     $form['multiple']['multiple_number'] = array(
       '#type' => 'textfield',
@@ -184,6 +181,7 @@ class views_handler_field_content extends views_handler_field_node {
       '#field_prefix' => t('Show '),
       '#field_suffix' => t(' values,'),
       '#default_value' => $options['multiple']['multiple_number'],
+      '#prefix' => '<div class="container-inline">',
     );
     $form['multiple']['multiple_from'] = array(
       '#type' => 'textfield',
@@ -192,9 +190,10 @@ class views_handler_field_content extends views_handler_field_node {
       '#default_value' => $options['multiple']['multiple_from'],
     );
     $form['multiple']['multiple_reversed'] = array(
-      '#title' => t('Start from last values'), // TODO
+      '#title' => t('Start from last values'),
       '#type' => 'checkbox',
       '#default_value' => $options['multiple']['multiple_reversed'],
+      '#suffix' => '</div>',
     );
 
   }
@@ -232,7 +231,7 @@ class views_handler_field_content extends views_handler_field_node {
 //  if (in_array($field['handler'], array('content_views_field_handler_group', 'content_views_field_handler_first', 'content_views_field_handler_last'))) {
 // TODO : multiple_number / multiple_from
 // We can also optimize the query when only one value should be retrieved
-    if ($options['group_multiple'] && $field['multiple']) {
+    if ($options['multiple']['group'] && $field['multiple']) {
       // 'Group multiple values' : we don't add anything to the query.
       // The data is retrieved in render() in order to avoid duplicate results.
       $this->field_alias = $this->real_field;
@@ -245,7 +244,7 @@ class views_handler_field_content extends views_handler_field_node {
     }
     else {
       // Non-multiple field or 'Group multiple values' unchecked :
-      // we defer to the regular field query.
+      // we defer to the generic field handler query.
       parent::query();
     }
   }
@@ -255,9 +254,8 @@ class views_handler_field_content extends views_handler_field_node {
     $db_info = content_database_info($field);
     $options = $this->options;
 
-    if ($options['group_multiple'] && $field['multiple']) {
+    if ($options['multiple']['group'] && $field['multiple']) {
       // 'Group multiple values' : we retrieve all the values in a separate query...
-      // TODO : does Views2 allow something smarter ?
 
       foreach ($db_info['columns'] as $column => $attributes) {
         $query_columns[] = "node_data_$field[field_name].$attributes[column] AS $column";
