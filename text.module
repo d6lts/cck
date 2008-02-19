@@ -203,17 +203,17 @@ function text_field_formatter_info() {
     'default' => array(
       'label' => 'Default',
       'field types' => array('text'),
-      'multiple values' => FALSE,
+      'multiple values' => CONTENT_HANDLE_CORE,
     ),
     'plain' => array(
       'label' => 'Plain text',
       'field types' => array('text'),
-      'multiple values' => FALSE,
+      'multiple values' => CONTENT_HANDLE_CORE,
     ),
     'trimmed' => array(
       'label' => 'Trimmed',
       'field types' => array('text'),
-      'multiple values' => FALSE,
+      'multiple values' => CONTENT_HANDLE_CORE,
     ),
   );
 }

@@ -254,16 +254,84 @@ function text_content_is_empty($item, $field) {
 
 /**
  * Implementation of hook_field_formatter_info().
+ *
+ * The default behavior of formatters is that they will create
+ * a theme for a single field value.
+ *
+ * Setting 'multiple values' to CONTENT_HANDLE_FIELD will create
+ * a formatter that will receive all the values of a field so you
+ * can, for instance, plot all the values on a map or in a graph.
+ *
+ * The 'view' operation (handled by the Content module) constructs the
+ * $node in a way that you can use drupal_render() to display the
+ * formatted output for an individual field.
+ *
+ * i.e. print drupal_render($node->field_foo);
+ *
+ * The code now supports both single value formatters, which theme an
+ * individual item value as has been done in previous version of CCK,
+ * and multiple value formatters, which theme all values for the field
+ * in a single theme. The multiple value formatters could be used, for
+ * instance, to plot field values on a single map or display them
+ * in a graph. Single value formatters are the default, multiple value
+ * formatters can be designated as such in formatter_info().
+ *
+ * The node array will look like:
+ *
+ *  'Single value' formatter :
+ *   $node->content['field_foo'] = array(
+ *     '#type' => 'content_field_view',
+ *     '#title' => 'label'
+ *     '#field_name' => 'field_name',
+ *     '#node' => $node,
+ *     'items' =>
+ *       0 => array(
+ *         '#theme' => $theme,
+ *         '#field_name' => 'field_name',
+ *         '#type_name' => $node->type,
+ *         '#formatter' => $formatter_name,
+ *         '#item' => $items[0],
+ *       ),
+ *       1 => array(
+ *         '#theme' => $theme,
+ *         '#field_name' => 'field_name',
+ *         '#type_name' => $node->type,
+ *         '#formatter' => $formatter_name,
+ *         '#item' => $items[1],
+ *       ),
+ *     ),
+ *   );
+ *  'Multiple value' formatter :
+ *   $node->content['field_foo'] = array(
+ *     '#type' => 'content_field_view',
+ *     '#title' => 'label'
+ *     '#field_name' => 'field_name',
+ *     '#node' => $node,
+ *     'items' => array(
+ *       '#theme' => $theme,
+ *       '#field_name' => 'field_name',
+ *       '#type_name' => $node->type,
+ *       '#formatter' => $formatter_name,
+ *       0 => array(
+ *         '#item' => $items[0],
+ *       ),
+ *       1 => array(
+ *         '#item' => $items[1],
+ *       ),
+ *     ),
+ *   );
  */
 function text_field_formatter_info() {
   return array(
     'default' => array(
       'label' => 'Default',
       'field types' => array('text'),
+      'multiple values' => CONTENT_HANDLE_CORE,
     ),
     'plain' => array(
       'label' => 'Plain text',
       'field types' => array('text'),
+      'multiple values' => CONTENT_HANDLE_CORE,
     ),
   );
 }

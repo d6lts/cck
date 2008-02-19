@@ -192,22 +192,22 @@ function nodereference_field_formatter_info() {
     'default' => array(
       'label' => 'Title (link)',
       'field types' => array('nodereference'),
-      'multiple values' => FALSE,
+      'multiple values' => CONTENT_HANDLE_CORE,
     ),
     'plain' => array(
       'label' => 'Title (no link)',
       'field types' => array('nodereference'),
-      'multiple values' => FALSE,
+      'multiple values' => CONTENT_HANDLE_CORE,
     ),
     'full' => array(
       'label' => 'Full node',
       'field types' => array('nodereference'),
-      'multiple values' => FALSE,
+      'multiple values' => CONTENT_HANDLE_CORE,
     ),
     'teaser' => array(
       'label' => 'Teaser',
       'field types' => array('nodereference'),
-      'multiple values' => FALSE,
+      'multiple values' => CONTENT_HANDLE_CORE,
     ),
   );
 }

@@ -139,12 +139,12 @@ function userreference_field_formatter_info() {
     'default' => array(
       'label' => 'Default',
       'field types' => array('userreference'),
-      'multiple values' => FALSE,
+      'multiple values' => CONTENT_HANDLE_CORE,
     ),
     'plain' => array(
       'label' => 'Plain text',
       'field types' => array('userreference'),
-      'multiple values' => FALSE,
+      'multiple values' => CONTENT_HANDLE_CORE,
     ),
   );
 }
