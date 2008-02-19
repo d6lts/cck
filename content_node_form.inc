@@ -59,8 +59,11 @@ function content_field_form(&$form, &$form_state, $field, $get_delta = NULL) {
     }
     elseif (empty($node->nid)) {
       if (content_callback('widget', 'default value', $field) != CONTENT_CALLBACK_NONE) {
-        $callback = content_callback('widget', 'default value', $field) == CONTENT_CALLBACK_CUSTOM ? $module .'_default_value' : 'content_default_value';
-        // TODO : bogus ? content_callback isn't supposed to return a callback name
+        // If a module wants to insert custom default values here,
+        // it should provide a hook_default_value() function to call,
+        // otherwise the content module's content_default_value() function
+        // will be used.
+        $callback = content_callback('widget', 'default value', $field) == CONTENT_CALLBACK_CUSTOM ? $field['widget']['module'] .'_default_value' : 'content_default_value';
         if (function_exists($callback)) {
           $items = $callback($form, $form_state, $field, 0);
         }
