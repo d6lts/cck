@@ -825,6 +825,7 @@ function _content_admin_field_validate($form, &$form_state) {
     // dsm($dropped_data);
   }
 
+  module_invoke($widget_type['module'], 'widget_settings', 'validate', array_merge($field, $form_values));
   module_invoke($field_type['module'], 'field_settings', 'validate', array_merge($field, $form_values));
 
   // If content.module is handling the default value,
