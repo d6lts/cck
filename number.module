@@ -248,17 +248,17 @@ function number_content_is_empty($item, $field) {
 function number_field_formatter_info() {
 
   return array(
-    'default' => array('label' => '9999',             'field types' => array('number_integer', 'number_decimal', 'number_float')),
-    'us_0'    => array('label' => '9,999',            'field types' => array('number_integer', 'number_decimal', 'number_float')),
-    'us_1'    => array('label' => '9,999.9',          'field types' => array('number_decimal', 'number_float')),
-    'us_2'    => array('label' => '9,999.99',         'field types' => array('number_decimal', 'number_float')),
-    'be_0'    => array('label' => '9.999',            'field types' => array('number_integer', 'number_decimal', 'number_float')),
-    'be_1'    => array('label' => '9.999,9',          'field types' => array('number_decimal', 'number_float')),
-    'be_2'    => array('label' => '9.999,99',         'field types' => array('number_decimal', 'number_float')),
-    'fr_0'    => array('label' => '9 999',            'field types' => array('number_integer', 'number_decimal', 'number_float')),
-    'fr_1'    => array('label' => '9 999, 9',         'field types' => array('number_decimal', 'number_float')),
-    'fr_2'    => array('label' => '9 999, 99',        'field types' => array('number_decimal', 'number_float')),
-    'unformatted' => array('label' => 'unformatted',  'field types' => array('number_integer', 'number_decimal', 'number_float')),
+    'default' => array('label' => '9999',            'multiple values' => FALSE, 'field types' => array('number_integer', 'number_decimal', 'number_float')),
+    'us_0'    => array('label' => '9,999',           'multiple values' => FALSE, 'field types' => array('number_integer', 'number_decimal', 'number_float')),
+    'us_1'    => array('label' => '9,999.9',         'multiple values' => FALSE, 'field types' => array('number_decimal', 'number_float')),
+    'us_2'    => array('label' => '9,999.99',        'multiple values' => FALSE, 'field types' => array('number_decimal', 'number_float')),
+    'be_0'    => array('label' => '9.999',           'multiple values' => FALSE, 'field types' => array('number_integer', 'number_decimal', 'number_float')),
+    'be_1'    => array('label' => '9.999,9',         'multiple values' => FALSE, 'field types' => array('number_decimal', 'number_float')),
+    'be_2'    => array('label' => '9.999,99',        'multiple values' => FALSE, 'field types' => array('number_decimal', 'number_float')),
+    'fr_0'    => array('label' => '9 999',           'multiple values' => FALSE, 'field types' => array('number_integer', 'number_decimal', 'number_float')),
+    'fr_1'    => array('label' => '9 999, 9',        'multiple values' => FALSE, 'field types' => array('number_decimal', 'number_float')),
+    'fr_2'    => array('label' => '9 999, 99',       'multiple values' => FALSE, 'field types' => array('number_decimal', 'number_float')),
+    'unformatted' => array('label' => 'unformatted', 'multiple values' => FALSE, 'field types' => array('number_integer', 'number_decimal', 'number_float')),
   );
 }
 

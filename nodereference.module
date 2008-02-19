@@ -192,18 +192,22 @@ function nodereference_field_formatter_info() {
     'default' => array(
       'label' => 'Title (link)',
       'field types' => array('nodereference'),
+      'multiple values' => FALSE,
     ),
     'plain' => array(
       'label' => 'Title (no link)',
       'field types' => array('nodereference'),
+      'multiple values' => FALSE,
     ),
     'full' => array(
       'label' => 'Full node',
       'field types' => array('nodereference'),
+      'multiple values' => FALSE,
     ),
     'teaser' => array(
       'label' => 'Teaser',
       'field types' => array('nodereference'),
+      'multiple values' => FALSE,
     ),
   );
 }

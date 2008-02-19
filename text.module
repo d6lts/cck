@@ -203,14 +203,17 @@ function text_field_formatter_info() {
     'default' => array(
       'label' => 'Default',
       'field types' => array('text'),
+      'multiple values' => FALSE,
     ),
     'plain' => array(
       'label' => 'Plain text',
       'field types' => array('text'),
+      'multiple values' => FALSE,
     ),
     'trimmed' => array(
       'label' => 'Trimmed',
       'field types' => array('text'),
+      'multiple values' => FALSE,
     ),
   );
 }

@@ -490,6 +490,63 @@ function content_associate_fields($module) {
  * Db-storage ops ('load', 'insert', 'update', 'delete', 'delete revisions')
  * are not executed field by field, and are thus handled separately in
  * content_storage.
+ *
+ * The 'view' operation constructs the $node in a way that you can use
+ * drupal_render() to display the formatted output for an individual field.
+ * i.e. print drupal_render($node->field_foo);
+ *
+ * The code now supports both single value formatters, which theme an
+ * individual item value as has been done in previous version of CCK,
+ * and multiple value formatters, which theme all values for the field
+ * in a single theme. The multiple value formatters could be used, for
+ * instance, to plot field values on a single map or display them
+ * in a graph. Single value formatters are the default, multiple value
+ * formatters can be designated as such in formatter_info().
+ *
+ * The node array will look like:
+ *
+ *  'Single value' formatter :
+ *   $node->content['field_foo'] = array(
+ *     '#type' => 'content_field_view',
+ *     '#title' => 'label'
+ *     '#field_name' => 'field_name',
+ *     '#node' => $node,
+ *     'items' =>
+ *       0 => array(
+ *         '#theme' => $theme,
+ *         '#field_name' => 'field_name',
+ *         '#type_name' => $node->type,
+ *         '#formatter' => $formatter_name,
+ *         '#item' => $items[0],
+ *       ),
+ *       1 => array(
+ *         '#theme' => $theme,
+ *         '#field_name' => 'field_name',
+ *         '#type_name' => $node->type,
+ *         '#formatter' => $formatter_name,
+ *         '#item' => $items[1],
+ *       ),
+ *     ),
+ *   );
+ *  'Multiple value' formatter :
+ *   $node->content['field_foo'] = array(
+ *     '#type' => 'content_field_view',
+ *     '#title' => 'label'
+ *     '#field_name' => 'field_name',
+ *     '#node' => $node,
+ *     'items' => array(
+ *       '#theme' => $theme,
+ *       '#field_name' => 'field_name',
+ *       '#type_name' => $node->type,
+ *       '#formatter' => $formatter_name,
+ *       0 => array(
+ *         '#item' => $items[0],
+ *       ),
+ *       1 => array(
+ *         '#item' => $items[1],
+ *       ),
+ *     ),
+ *   );
  */
 function content_field($op, &$node, $field, &$items, $teaser, $page) {
   switch ($op) {
@@ -556,50 +613,6 @@ function content_field($op, &$node, $field, &$items, $teaser, $page) {
         $formatter = $formatters[$formatter_name];
         $theme = $formatter['module'] .'_formatter_'. $formatter_name;
         $single = (content_handle('formatter', 'multiple values', $formatter) == CONTENT_HANDLE_CORE);
-
-// 'Single value' formatter :
-//  $node->content['field_foo'] = array(
-//    '#type' => 'content_field_view',
-//    '#title' => 'label'
-//    '#field_name' => 'field_name',
-//    '#node' => $node,
-//    'items' =>
-//      0 => array(
-//        '#theme' => $theme,
-//        '#field_name' => 'field_name',
-//        '#type_name' => $node->type,
-//        '#formatter' => $formatter_name,
-//        '#item' => $items[0],
-//      ),
-//      1 => array(
-//        '#theme' => $theme,
-//        '#field_name' => 'field_name',
-//        '#type_name' => $node->type,
-//        '#formatter' => $formatter_name,
-//        '#item' => $items[1],
-//      ),
-//    ),
-//  );
-
-// 'Multiple value' formatter :
-//  $node->content['field_foo'] = array(
-//    '#type' => 'content_field_view',
-//    '#title' => 'label'
-//    '#field_name' => 'field_name',
-//    '#node' => $node,
-//    'items' => array(
-//      '#theme' => $theme,
-//      '#field_name' => 'field_name',
-//      '#type_name' => $node->type,
-//      '#formatter' => $formatter_name,
-//      0 => array(
-//        '#item' => $items[0],
-//      ),
-//      1 => array(
-//        '#item' => $items[1],
-//      ),
-//    ),
-//  );
 
         $element = array(
           '#type' => 'content_field_view',
@@ -1228,6 +1241,11 @@ function content_allowed_values($field) {
 
 /**
  * Format a field item for display.
+ *
+ * Used to display a field's values outside the context of the $node, as
+ * when fields are displayed in Views, or to display a field in a template
+ * using a different formatter than the one set up on the Display Fields tab
+ * for the node's context.
  *
  * @param $field
  *   Either a field array or the name of the field.
