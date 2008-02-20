@@ -112,16 +112,13 @@ function content_field_instance_expand($field) {
   $field['widget']['weight'] = !empty($field['weight']) ? $field['weight'] : NULL;
   $field['widget']['description'] = !empty($field['description']) ? $field['description'] : NULL;
 
-  // Only fill in widget/module and widget/type if we do have valid information.
-  if (!empty($field['widget_module'])) {
-    $field['widget']['module'] = $field['widget_module'];
-  }
-  elseif (!empty($field['widget_type'])) {
+  if (!empty($field['widget_type'])) {
+    $field['widget']['type'] = $field['widget_type'];
     $widget_types = _content_widget_types();
     $field['widget']['module'] = $widget_types[$field['widget_type']]['module'];
   }
-  if (!empty($field['widget_type'])) {
-    $field['widget']['type'] = $field['widget_type'];
+  elseif (!empty($field['widget_module'])) {
+    $field['widget']['module'] = $field['widget_module'];
   }
 
   unset($field['widget_type']);
