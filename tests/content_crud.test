@@ -11,9 +11,9 @@ class ContentCrudTestCase extends DrupalTestCase {
   var $nodes          = array();
   var $last_field     = NULL;
   var $next_field_n   = 1;
-  
+
   // Database schema related helper functions
- 
+
   /**
    * Checks that the database itself and the reported database schema match the
    * expected columns for the given tables.
@@ -45,7 +45,7 @@ class ContentCrudTestCase extends DrupalTestCase {
    */
   function assertSchemaMatchesTables($tables) {
     $groups = array('per_field' => 'content_', 'per_type' => 'content_type_');
-    
+
     foreach ($groups as $group => $table_prefix) {
       if (isset($tables[$group])) {
         foreach ($tables[$group] as $entity => $columns) {
@@ -70,7 +70,7 @@ class ContentCrudTestCase extends DrupalTestCase {
       }
     }
   }
-  
+
   /**
    * Helper function for assertSchemaMatchesTables
    * Checks that the given database table does NOT exist
@@ -86,7 +86,7 @@ class ContentCrudTestCase extends DrupalTestCase {
    * @param $table Name of the table to check
    * @param $columns Array of column names
    */
-  function _assertSchemaMatches($table, $columns) {    
+  function _assertSchemaMatches($table, $columns) {
     $schema = drupal_get_schema($table, TRUE);
     $mismatches = array();
     if ($schema === FALSE) {
@@ -108,7 +108,7 @@ class ContentCrudTestCase extends DrupalTestCase {
     }
     $this->assertEqual(count($mismatches), 0, t('Table !table matches schema: !details',
       array('!table' => $table, '!details' => implode($mismatches, ', '))));
-    
+
     if (!$this->enabled_schema) {
       $this->enabled_schema = $this->drupalModuleEnable('schema');
     }
@@ -128,9 +128,9 @@ class ContentCrudTestCase extends DrupalTestCase {
     $this->assertEqual($compare['status'], 'same', t('Table schema for !table matches database: !details',
       array('!table' => $table, '!details' => implode($compare['reasons'], ', '))));
   }
-   
+
   // Node data helper functions
-  
+
   /**
    * Helper function for assertNodeSaveValues. Recursively checks that
    * all the keys of a table are present in a second and have the same value.
@@ -194,7 +194,7 @@ class ContentCrudTestCase extends DrupalTestCase {
       $this->assertFalse(isset($node[$field]), t('Node should be lacking field !key', array('!key' => $field)));
     }
   }
-  
+
   /**
    * Creates random values for a text field
    * @return An array containing a value key and a format key
@@ -205,9 +205,9 @@ class ContentCrudTestCase extends DrupalTestCase {
       'format' => 2,
     );
   }
-  
+
   // Login/user helper functions
-  
+
   /**
    * Creates a user / role with certain permissions and then logs in as that user
    * @param $permissions Array containing list of permissions. If not given, defaults to
@@ -225,9 +225,9 @@ class ContentCrudTestCase extends DrupalTestCase {
     $user = $this->drupalCreateUserRolePerm($permissions);
     $this->drupalLoginUser($user);
   }
-  
+
   // Creation helper functions
-  
+
   /**
    * Creates a number of content types with predictable names (simpletest_t1 ... simpletest_tN)
    * These content types can later be accessed via $this->content_types[0 ... N-1]
@@ -244,7 +244,7 @@ class ContentCrudTestCase extends DrupalTestCase {
     }
     content_clear_type_cache();
   }
-  
+
   /**
    * Creates a number of nodes of each acquired content type.
    * Remember to call acquireContentTypes() before calling this, else the content types won't exist.
@@ -258,7 +258,7 @@ class ContentCrudTestCase extends DrupalTestCase {
       }
     }
   }
-  
+
   /**
    * Creates a field instance with a predictable name. Also makes all future calls to functions
    * which take an optional field use this one as the default.
@@ -281,7 +281,7 @@ class ContentCrudTestCase extends DrupalTestCase {
     $this->last_field = content_field_instance_create($settings);
     return $this->last_field;
   }
-  
+
   /**
    * Creates a textfield instance. Identical to createField() except it ensures that the text module
    * is enabled, and adds default settings of type (text) and widget_type (text_textfield) if they
@@ -297,9 +297,9 @@ class ContentCrudTestCase extends DrupalTestCase {
     $settings = $settings + $defaults;
     return $this->createField($settings, $content_type);
   }
-  
+
   // Field manipulation helper functions
-  
+
   /**
    * Updates a field instance. Also makes all future calls to functions which take an optional
    * field use the updated one as the default.
@@ -320,7 +320,7 @@ class ContentCrudTestCase extends DrupalTestCase {
     $this->last_field = content_field_instance_update($settings);
     return $this->last_field;
   }
-  
+
   /**
    * Makes a copy of a field instance on a different content type, effectively sharing the field with a new
    * content type. Also makes all future calls to functions which take an optional field use the shared one
@@ -340,7 +340,7 @@ class ContentCrudTestCase extends DrupalTestCase {
     $this->last_field = content_field_instance_create($field);
     return $this->last_field;
   }
-  
+
   /**
    * Deletes an instance of a field.
    * @param $content_type Either a content type object, or the index of an acquired content type (used only
@@ -367,7 +367,7 @@ class ContentCrudSingleToMultipleTest extends ContentCrudTestCase {
       'group' => t('CCK'),
     );
   }
-  
+
   function testSingleToMultiple() {
     // Acquire the context
     $this->loginWithPermissions();
@@ -398,7 +398,7 @@ class ContentCrudSingleToMultipleTest extends ContentCrudTestCase {
       ),
     ));
     $this->assertNodeValues(0, $node0values);
-    
+
     // Share the text field with other content types
     for ($share_with_content_type = 1; $share_with_content_type <= 2; $share_with_content_type++) {
       $this->shareField($share_with_content_type);
@@ -439,7 +439,7 @@ class ContentCrudMultipleToSingleTest extends ContentCrudTestCase {
       'group' => t('CCK'),
     );
   }
-  
+
   function testMultipleToSingle() {
     // Acquire the context
     $this->loginWithPermissions();
@@ -463,7 +463,7 @@ class ContentCrudMultipleToSingleTest extends ContentCrudTestCase {
         2 => $this->createRandomTextFieldData(),
       )
     ));
-    
+
     // Change to a simple text field
     $this->updateField(array('multiple' => 0));
     $this->assertSchemaMatchesTables(array(
@@ -479,7 +479,7 @@ class ContentCrudMultipleToSingleTest extends ContentCrudTestCase {
         0 => $this->createRandomTextFieldData(),
       )
     ));
-    
+
     // Share the text field with other content type
     $this->shareField(1);
     $this->assertSchemaMatchesTables(array(
@@ -497,7 +497,7 @@ class ContentCrudMultipleToSingleTest extends ContentCrudTestCase {
       )
     ));
     $this->assertNodeValues(0, $node0values);
-    
+
     // Share the text field with a 3rd type
     $this->shareField(2);
     $this->assertSchemaMatchesTables(array(
@@ -505,14 +505,14 @@ class ContentCrudMultipleToSingleTest extends ContentCrudTestCase {
         'simpletest_t3' => array(),
       )
     ));
-    $this->assertNodeSaveValues(1, array(
+    $this->assertNodeSaveValues(2, array(
       'simpletest_f1' => array(
         0 => $this->createRandomTextFieldData(),
       )
     ));
     $this->assertNodeValues(1, $node1values);
     $this->assertNodeValues(0, $node0values);
-    
+
     // Remove text field from 3rd type
     $this->deleteField(2);
     $this->assertSchemaMatchesTables(array(
@@ -521,7 +521,7 @@ class ContentCrudMultipleToSingleTest extends ContentCrudTestCase {
       )
     ));
     $this->assertNodeMissingFields($this->nodes[2], array('simpletest_f1'));
-    
+
     // Remove text field from other type
     $this->deleteField(1);
     $this->assertSchemaMatchesTables(array(
@@ -535,7 +535,7 @@ class ContentCrudMultipleToSingleTest extends ContentCrudTestCase {
     ));
     $this->assertNodeMissingFields(1, array('simpletest_f1'));
     $this->assertNodeValues(0, $node0values);
-    
+
     // Remove text field from original type
     $this->deleteField(0);
     $this->assertSchemaMatchesTables(array(
