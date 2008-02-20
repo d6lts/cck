@@ -31,71 +31,76 @@ function content_views_data() {
 
 function content_views_field_views_data($field) {
   $field_types = _content_field_types();
-  $db_info = content_database_info($field);
-  $table_alias = 'node_data_'. $field['field_name'];
 
-  $types = array();
-  foreach(content_types() as $type) {
-    if (isset($type['fields'][$field['field_name']])) {
-      $types[] = $type['name'];
+  // Check the field module is available.
+  // TODO : is this really how we should do it ?
+  if (isset($field_types[$field['type']])) {
+    $db_info = content_database_info($field);
+    $table_alias = 'node_data_'. $field['field_name'];
+
+    $types = array();
+    foreach(content_types() as $type) {
+      if (isset($type['fields'][$field['field_name']])) {
+        $types[] = $type['name'];
+      }
     }
+
+    $data = array();
+    $data['table']['group']  = t('Field');
+    $data['table']['join']['node'] = array(
+      'handler' => 'views_join',
+      'arguments' => array($db_info['table'], 'node', 'vid', 'vid')
+    );
+
+    $columns = array();
+    foreach ($db_info['columns'] as $attributes) {
+      $columns[] = $attributes['column'];
+    }
+
+    $data[$field['field_name']] = array(
+      // Group by field type.
+      // TODO : undefined index : 'text'
+      'group' => $field_types[$field['type']]['label'],
+      'title' => $field['widget']['label'],
+      'help' => $field['field_name'] .' - '. t('Appears in : @types', array('@types' => implode(', ', $types))),
+      'field' => array(
+        'field' => $columns[0],
+        'tablename' => $db_info['table'],
+        'handler' => 'views_handler_field_content',
+        'click sortable' => '', // TODO
+        'additional fields' => $columns,
+        'content_field_name' => $field['field_name'],
+      ),
+      'argument' => array(
+        'field' => $columns[0],
+        'tablename' => $db_info['table'],
+        'handler' => 'views_handler_argument_content',
+        'name field' => '', // TODO
+        'additional fields' => $columns,
+        'content_field_name' => $field['field_name'],
+      ),
+      'filter' => array(
+        'field' => $columns[0],
+        'tablename' => $db_info['table'],
+        'handler' => 'views_handler_filter_content',
+        'additional fields' => $columns,
+        'content_field_name' => $field['field_name'],
+      ),
+      'sort' => array(
+        'field' => $columns[0],
+        'tablename' => $db_info['table'],
+        'handler' => 'views_handler_sort',
+        'additional fields' => $columns,
+        'content_field_name' => $field['field_name'],
+      ),
+    );
+
+    // TODO : provide several filters, arguments, sorts... ?
+    // TODO : allow field modules to provide filters etc on columns other than first one
+    // TODO : generic 'empty / not empty' filter
+
+    return array($table_alias => $data);
   }
-
-  $data = array();
-  $data['table']['group']  = t('Field');
-  $data['table']['join']['node'] = array(
-    'handler' => 'views_join',
-    'arguments' => array($db_info['table'], 'node', 'vid', 'vid')
-  );
-
-  $columns = array();
-  foreach ($db_info['columns'] as $attributes) {
-    $columns[] = $attributes['column'];
-  }
-
-  $data[$field['field_name']] = array(
-    // TODO : we probably need the actual table and column ?
-    // Group by field type.
-    'group' => $field_types[$field['type']]['label'],
-    'title' => $field['widget']['label'],
-    'help' => $field['field_name'] .' - '. t('Appears in : @types', array('@types' => implode(', ', $types))),
-    'field' => array(
-      'field' => $columns[0],
-      'tablename' => $db_info['table'],
-      'handler' => 'views_handler_field_content',
-      'click sortable' => '', // TODO
-      'additional fields' => $columns,
-      'content_field_name' => $field['field_name'],
-    ),
-    'argument' => array(
-      'field' => $columns[0],
-      'tablename' => $db_info['table'],
-      'handler' => 'views_handler_argument_content',
-      'name field' => '', // TODO
-      'additional fields' => $columns,
-      'content_field_name' => $field['field_name'],
-    ),
-    'filter' => array(
-      'field' => $columns[0],
-      'tablename' => $db_info['table'],
-      'handler' => 'views_handler_filter_content',
-      'additional fields' => $columns,
-      'content_field_name' => $field['field_name'],
-    ),
-    'sort' => array(
-      'field' => $columns[0],
-      'tablename' => $db_info['table'],
-      'handler' => 'views_handler_sort',
-      'additional fields' => $columns,
-      'content_field_name' => $field['field_name'],
-    ),
-  );
-
-  // TODO : provide several filters, arguments, sorts... ?
-  // TODO : allow field modules to provide filters etc on columns other than first one
-  // TODO : generic 'empty / not empty' filter
-
-  return array($table_alias => $data);
 }
 
 class views_handler_field_content extends views_handler_field_node {
