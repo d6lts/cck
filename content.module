@@ -398,7 +398,7 @@ function content_nodeapi(&$node, $op, $teaser, $page) {
  *  Implementation of hook_form_alter().
  */
 function content_form_alter(&$form, $form_state, $form_id) {
-  if (isset($form['type']) && ($form['type']['#value'] .'_node_form' == $form_id)) {
+  if (isset($form['type']) && isset($form['#node']) && $form['type']['#value'] .'_node_form' == $form_id) {
     module_load_include('inc', 'content', 'content_node_form');
     // Merge field widgets.
     $form = array_merge($form, content_form($form, $form_state));
