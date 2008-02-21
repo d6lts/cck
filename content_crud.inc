@@ -520,7 +520,7 @@ function content_module_delete($module) {
   // Delete the field data.
   $results = db_query("SELECT field_name, type_name FROM {". content_instance_tablename() ."} WHERE widget_module = '%s'", $module);
   while ($field = db_fetch_array($results)) {
-    content_field_instance_delete($field);
+    content_field_instance_delete($field['field_name'], $field['type_name']);
   }
   // Force the caches and static arrays to update to the new info.
   _content_type_info(TRUE, TRUE);
