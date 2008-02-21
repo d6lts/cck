@@ -1594,7 +1594,7 @@ function template_preprocess_content_field_view(&$variables) {
     // Single value formatter.
     foreach (element_children($element['items']) as $delta) {
       $variables['items'][$delta] = $element['items'][$delta]['#item'];
-      $variables['items'][$delta]['view'] = $element['items'][$delta]['#children'];
+      $variables['items'][$delta]['view'] = isset($element['items'][$delta]['#children']) ? $element['items'][$delta]['#children'] : '';
     }
   }
   else  {
