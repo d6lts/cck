@@ -634,8 +634,7 @@ function _content_admin_field(&$form_state, $type_name, $field_name) {
 
   drupal_set_title(isset($field['widget']['label']) ? $field['widget']['label'] : $field['field_name']);
 
-  // Set up form info that the default value widget will need to find in the form.
-  $form = array('#field_info' => array($field['field_name'] => $field));
+  $form = array();
   $form['widget'] = array(
     '#type' => 'fieldset',
     '#title' => t('%type settings', array('%type' => $type['name'])),
@@ -697,6 +696,8 @@ function _content_admin_field(&$form_state, $type_name, $field_name) {
     // Make sure the default value is not a required field.
     $widget_field = $field;
     $widget_field['required'] = FALSE;
+    // Set up form info that the default value widget will need to find in the form.
+    $form['#field_info'] = array($widget_field['field_name'] => $widget_field);
     $widget_form = array('#node' => $node);
     // When multiple values are handled by the content module, we'll have a zero
     // delta, but when multiple values are handled by the widget module, we
