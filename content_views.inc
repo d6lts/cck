@@ -59,7 +59,6 @@ function content_views_field_views_data($field) {
 
     $data[$field['field_name']] = array(
       // Group by field type.
-      // TODO : undefined index : 'text'
       'group' => $field_types[$field['type']]['label'],
       'title' => $field['widget']['label'],
       'help' => $field['field_name'] .' - '. t('Appears in : @types', array('@types' => implode(', ', $types))),
@@ -105,15 +104,6 @@ function content_views_field_views_data($field) {
 
 class views_handler_field_content extends views_handler_field_node {
   var $content_field;
-
-  // TODO : ?
-//  function init(&$view, &$data) {
-//    parent::init($view, $data);
-//  }
-
-//  function set_definition($definition) {
-//    parent::set_definition($definition);
-//  }
 
   /**
    * Construct function.
@@ -178,7 +168,7 @@ class views_handler_field_content extends views_handler_field_node {
     $form['multiple']['group'] = array(
       '#title' => t('Group Multiple values'),
       '#type' => 'checkbox',
-      '#default_value' => $options['group_multiple'],
+      '#default_value' => $options['multiple']['group'],
     );
     $form['multiple']['multiple_number'] = array(
       '#type' => 'textfield',
@@ -260,11 +250,13 @@ class views_handler_field_content extends views_handler_field_node {
     $options = $this->options;
 
     if ($options['multiple']['group'] && $field['multiple']) {
+      // TODO : do this in pre_render for all rows in one query !!
       // 'Group multiple values' : we retrieve all the values in a separate query...
 
       foreach ($db_info['columns'] as $column => $attributes) {
         $query_columns[] = "node_data_$field[field_name].$attributes[column] AS $column";
       }
+
       // Add node.nid as the first item in the field list to keep db_rewrite_sql()
       // from trying to force DISTINCT on the nid field of nodereference fields.
       $query = "SELECT node.nid, ". implode(', ', $query_columns) .
@@ -306,17 +298,6 @@ function theme_content_view_multiple_field($items, $field, $values) {
 // have a way to set their own operators
 class views_handler_filter_content extends views_handler_filter_equality  {
   var $content_field;
-
-  /**
-   * Init function :
-   */
-//  function init(&$view, &$data) {
-//    parent::init($view, $data);
-//  }
-
-//  function set_definition($definition) {
-//    parent::set_definition($definition);
-//  }
 
   /**
    * Construct function.
