@@ -951,18 +951,16 @@ function _content_field_invoke_default($op, &$node, $teaser = NULL, $page = NULL
   else {
     foreach ($type['fields'] as $field) {
       $items = isset($node->$field['field_name']) ? $node->$field['field_name'] : array();
-      if (count($field['columns'])) {
-        $result = content_field($op, $node, $field, $items, $teaser, $page);
-        if (is_array($result)) {
-          $return = array_merge($return, $result);
-        }
-        else if (isset($result)) {
-          $return[] = $result;
-        }
+      $result = content_field($op, $node, $field, $items, $teaser, $page);
+      if (is_array($result)) {
+        $return = array_merge($return, $result);
       }
-      if (isset($node->$field['field_name'])) {
-        $node->$field['field_name'] = $items;
+      else if (isset($result)) {
+        $return[] = $result;
       }
+    }
+    if (isset($node->$field['field_name'])) {
+      $node->$field['field_name'] = $items;
     }
   }
   return $return;
