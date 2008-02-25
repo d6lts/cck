@@ -163,17 +163,18 @@ function optionwidgets_buttons_process($element, $edit, &$form_state, $form) {
   $field = $form['#field_info'][$field_name];
   $field_key  = $element['#columns'][0];
 
-  if (empty($edit)) {
+  if (!$form_state['submitted']) {
     $element['#value'] = optionwidgets_data2form($element, $element['#default_value'], $field);
   }
+  $options = optionwidgets_options($field);
   $element[$field_key] = array(
     '#type' => $field['multiple'] ? 'checkboxes' : 'radios',
     '#title' => $element['#title'],
     '#description' => $element['#description'],
     '#required' => $field['required'],
     '#multiple' => $field['multiple'],
-    '#options' => optionwidgets_options($field),
-    '#default_value' => isset($element['#value']) ? $element['#value'] : NULL,
+    '#options' => $options,
+    '#default_value' => isset($element['#value'][$field_key]) ? $element['#value'][$field_key] : NULL,
   );
 
   // Make sure field info will be available to the validator which
@@ -196,16 +197,17 @@ function optionwidgets_select_process($element, $edit, &$form_state, $form) {
   $field = $form['#field_info'][$field_name];
   $field_key  = $element['#columns'][0];
 
-  if (empty($edit)) {
+  if (!$form_state['submitted']) {
     $element['#value'] = optionwidgets_data2form($element, $element['#default_value'], $field);
   }
+  $options = optionwidgets_options($field);
   $element[$field_key] = array(
     '#type' => 'select',
     '#title' => $element['#title'],
     '#description' => $element['#description'],
     '#required' => $field['required'],
     '#multiple' => $field['multiple'],
-    '#options' => optionwidgets_options($field),
+    '#options' => $options,
     '#default_value' => isset($element['#value'][$field_key]) ? $element['#value'][$field_key] : NULL,
   );
 
@@ -235,16 +237,20 @@ function optionwidgets_onoff_process($element, $edit, &$form_state, $form) {
   $field = $form['#field_info'][$field_name];
   $field_key  = $element['#columns'][0];
 
-  if (empty($edit)) {
+  if (!$form_state['submitted']) {
     $element['#value'] = optionwidgets_data2form($element, $element['#value'], $field);
   }
-  $on_value = array_shift(optionwidgets_options($field));
+  $options = optionwidgets_options($field);
+  $keys = array_keys($options);
+  $on_value = $keys[1];
   $element[$field_key] = array(
     '#type' => 'checkbox',
+    // TODO : D5 used $options[$on_value] - was this intentionally dropped ?
     '#title' => $element['#title'],
     '#description' => t($field['widget']['description']),
+    // TODO : is #required relevant ? doesn't work anyway...
     '#required' => $field['required'],
-    '#default_value' => isset($element['#value'][0]) ? $element['#value'][0] == $on_value : FALSE,
+    '#default_value' => isset($element['#value'][$field_key][0]) ? $element['#value'][$field_key][0] == $on_value : FALSE,
     '#return_value' => $on_value,
   );
 
@@ -266,9 +272,7 @@ function optionwidgets_onoff_process($element, $edit, &$form_state, $form) {
 function optionwidgets_validate($element, &$form_state) {
   $field = $form_state['#field_info'][$element['#field_name']];
   $updated = optionwidgets_form2data($element, $element['#value'], $field);
-  $parents = $element['#parents'];
-  array_pop($parents);
-  form_set_value(array('#parents' => $parents), $updated, $form_state);
+  form_set_value($element, $updated, $form_state);
 }
 
 /**
@@ -316,9 +320,14 @@ function optionwidgets_form2data($element, $items, $field) {
       $values[] = $value;
     }
   }
-  if ($element['#type'] == 'optionwidgets_onoff' && empty($values)) {
-    $keys = array_keys($options);
-    $values[] = array_key_exists(0, $keys) ? $keys[0] : '';
+  if (empty($values)) {
+    if ($element['#type'] == 'optionwidgets_onoff') {
+      $keys = array_keys($options);
+      $values[] = array_key_exists(0, $keys) ? $keys[0] : '';
+    }
+    else {
+      $values[] = NULL;
+    }
   }
   return content_transpose_array_rows_cols(array($field_key => $values));
 }
@@ -331,15 +340,10 @@ function optionwidgets_form2data($element, $items, $field) {
  */
 function optionwidgets_options($field) {
   $function = $field['module'] .'_allowed_values';
-  if (function_exists($function)) {
-    $options = $function($field);
-  }
-  else {
-    $values = content_allowed_values($field);
-    $options = (array) $values;
-  }
-  if (!$field['required']) {
-    $options = array('' => '') + $options;
+  $options = function_exists($function) ? $function($field) : (array) content_allowed_values($field);
+  // Add an empty choice for non required radios and single-selects.
+  if ($field['widget']['type'] != 'optionwidgets_onoff' && !$field['required'] && !$field['multiple']) {
+    $options = array('' => theme('optionwidgets_none', $field)) + $options;
   }
   return $options;
 }
@@ -348,8 +352,8 @@ function optionwidgets_options($field) {
  *  Theme the label for the empty value for options that are not required.
  *  The default theme will display N/A for a radio list and blank for a select.
  */
-function theme_optionwidgets_none($widget_type, $field_name, $node) {
-  switch ($widget_type) {
+function theme_optionwidgets_none($field) {
+  switch ($field['widget']['type']) {
   case 'optionwidgets_buttons':
     return t('N/A');
   default :
