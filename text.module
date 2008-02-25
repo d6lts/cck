@@ -11,7 +11,7 @@
  */
 function text_field_info() {
   return array(
-    'text' => array('label' => 'Text'),
+    'text' => array('label' => t('Text')),
   );
 }
 
@@ -187,15 +187,15 @@ function text_field($op, &$node, $field, &$items, $teaser, $page) {
 function text_field_formatter_info() {
   return array(
     'default' => array(
-      'label' => 'Default',
+      'label' => t('Default'),
       'field types' => array('text'),
     ),
     'plain' => array(
-      'label' => 'Plain text',
+      'label' => t('Plain text'),
       'field types' => array('text'),
     ),
     'trimmed' => array(
-      'label' => 'Trimmed',
+      'label' => t('Trimmed'),
       'field types' => array('text'),
     ),
   );
@@ -244,7 +244,7 @@ function text_field_formatter($field, $item, $formatter, $node) {
 function text_widget_info() {
   return array(
     'text' => array(
-      'label' => 'Text Field',
+      'label' => t('Text Field'),
       'field types' => array('text'),
     ),
   );

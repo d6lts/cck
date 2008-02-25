@@ -24,6 +24,7 @@ General
 - #198420  Make sure internal field and widget names are truncated to 32 characters to match the database values.
 - Include views module in content_clear_type_cache() to prevent errors when this is called from .install files.
 - #226549  Fix untranslatable message on fieldgroup deletion
+- #226607  Fix untranslatable human names for field widget types.
 
 Field / widget modules
 - #196575  Userreference : autocomplete did not filter users by role, need custom autocomplete instead of standard user autocomplete.

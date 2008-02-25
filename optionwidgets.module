@@ -31,15 +31,15 @@ function optionwidgets_widget_info() {
   $option_types = array('text', 'number_integer', 'number_decimal');
   return array(
     'options_select' => array(
-      'label' => 'Select list',
+      'label' => t('Select list'),
       'field types' => $option_types,
     ),
     'options_buttons' => array(
-      'label' => 'Check boxes/radio buttons',
+      'label' => t('Check boxes/radio buttons'),
       'field types' => $option_types,
     ),
     'options_onoff' => array(
-      'label' => 'Single on/off checkbox',
+      'label' => t('Single on/off checkbox'),
       'field types' => $option_types,
     ),
   );

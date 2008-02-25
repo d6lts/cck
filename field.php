@@ -33,8 +33,8 @@
  */
 function hook_field_info() {
   return array(
-    'number_integer' => array('label' => 'Integer'),
-    'number_decimal' => array('label' => 'Decimal'),
+    'number_integer' => array('label' => t('Integer')),
+    'number_decimal' => array('label' => t('Decimal')),
   );
 }
 
@@ -239,15 +239,15 @@ function hook_field($op, &$node, $field, &$node_field, $teaser, $page) {
 function hook_field_formatter_info() {
   return array(
     'default' => array(
-      'label' => 'Default',
+      'label' => t('Default'),
       'field types' => array('text'),
     ),
     'plain' => array(
-      'label' => 'Plain text',
+      'label' => t('Plain text'),
       'field types' => array('text'),
     ),
     'trimmed' => array(
-      'label' => 'Trimmed',
+      'label' => t('Trimmed'),
       'field types' => array('text'),
     ),
   );
@@ -317,7 +317,7 @@ function hook_field_formatter($field, $item, $formatter, $node) {
 function hook_widget_info() {
   return array(
     'text' => array(
-      'label' => 'Text Field',
+      'label' => t('Text Field'),
       'field types' => array('text'),
     ),
   );
