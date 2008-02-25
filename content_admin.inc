@@ -34,9 +34,12 @@ function _content_admin_type_fields() {
 
     $rows[] = $row;
   }
-
-  $output = theme('table', $header, $rows);
-
+  if (!empty($rows)) {
+    $output = t('No fields have been defined for any content type yet.');
+  }
+  else {
+    $output = theme('table', $header, $rows);
+  }
   return $output;
 }
 
