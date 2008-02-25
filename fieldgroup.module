@@ -220,7 +220,7 @@ function fieldgroup_remove_group_submit($form_id, &$form_values, $content_type, 
   db_query("DELETE FROM {node_group_fields} WHERE  type_name = '%s' AND group_name = '%s'", $content_type['type'], $group_name);
   cache_clear_all('fieldgroup_data', 'cache_content');
 
-  drupal_set_message('The group has been removed.');
+  drupal_set_message(t('The group %group_name has been removed.', array('%group_name' => $group_name)));
   return 'admin/content/types/'. $content_type['url_str'] .'/fields';
 }
 
