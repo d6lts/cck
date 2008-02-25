@@ -117,10 +117,6 @@ function content_menu() {
     // needed to avoid errors on initial installation.
     if (!empty($content_type)) {
       $type_url_str = $content_type['url_str'];
-      $items['admin/content/node-type/'. $type_url_str .'/edit'] = array(
-        'title' => t('Edit'),
-        'type' => MENU_DEFAULT_LOCAL_TASK,
-      );
       $items['admin/content/node-type/'. $type_url_str .'/fields'] = array(
         'title' => 'Manage fields',
         'page callback' => 'drupal_get_form',
@@ -168,7 +164,7 @@ function content_menu() {
           'page arguments' => array('_content_admin_field', $type_name, $field_name),
           'access arguments' => array('administer content types'),
           'file' => 'content_admin.inc',
-          'type' => MENU_CALLBACK,
+          'type' => MENU_LOCAL_TASK,
         );
         $items['admin/content/node-type/'. $type_url_str .'/fields/'. $field_name .'/remove'] = array(
           'title' => 'Remove field',
