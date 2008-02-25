@@ -238,7 +238,7 @@ function fieldgroup_remove_group_submit($form, &$form_state) {
   $content_type = $form['#content_type'];
   $group_name = $form['#group_name'];
   fieldgroup_delete($content_type['type'], $group_name);
-  drupal_set_message('The group has been removed.');
+  drupal_set_message(t('The group %group_name has been removed.', array('%group_name' => $group_name)));
   $form_state['redirect'] = 'admin/content/node-type/'. $content_type['url_str'] .'/fields';
 }
 
