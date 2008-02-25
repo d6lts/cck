@@ -10,9 +10,9 @@ General
 - #189807  Views field handlers : show first or last of multiple values
 
 Field / Widget modules
-- #60713   Add optional reverse link on user profile page for userreferenced users.
-- #131260  Allow userreference to filter by active/blocked status.
-
+- #60713   Userreference : Add optional reverse link on user profile page for referenced users.
+- #131260  Userreference : Allow filter referenceable users by active/blocked status.
+- #221288  Text : Views argument can filter by the first letters of the values
 
 Bugfix
 ------
@@ -23,10 +23,11 @@ General
 - #210683  Clear node values from cache if field information is changed so stale values don't appear in node_load().
 - #198420  Make sure internal field and widget names are truncated to 32 characters to match the database values.
 - Include views module in content_clear_type_cache() to prevent errors when this is called from .install files.
+- #226549  Fix untranslatable message on fieldgroup deletion
 
 Field / widget modules
-- #196575  Userreference autocomplete did not filter users by role, need custom autocomplete instead of standard user autocomplete.
-- #183816  Fix missing decimal in number formatter.
+- #196575  Userreference : autocomplete did not filter users by role, need custom autocomplete instead of standard user autocomplete.
+- #183816  Number : Fix missing decimal in formatter.
 - #140687  OptionWidgets : fix 'single checkbox' stick on checked when used with text values.
 
 5--1.6-1
