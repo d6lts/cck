@@ -159,7 +159,7 @@ function content_menu() {
       foreach ($content_type['fields'] as $field) {
         $field_name = $field['field_name'];
         $items['admin/content/node-type/'. $type_url_str .'/fields/'. $field_name] = array(
-          'title' => t($field['widget']['label']),
+          'title' => $field['widget']['label'],
           'page callback' => 'drupal_get_form',
           'page arguments' => array('_content_admin_field', $type_name, $field_name),
           'access arguments' => array('administer content types'),
