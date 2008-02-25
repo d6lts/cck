@@ -416,6 +416,62 @@ function content_form_alter(&$form, $form_state, $form_id) {
 }
 
 /**
+ * Theme an individual form element.
+ *
+ * Combine multiple values into a table with drag-n-drop reordering.
+ */
+function theme_content_multiple_values($element) {
+  $field_name = $element['#field_name'];
+  $field = content_fields($field_name);
+  $output = '';
+
+  if ($field['multiple'] >= 1) {
+    $table_id = $element['#field_name'] .'_values';
+    $order_class = $element['#field_name'] .'-delta-order';
+    $header = array(
+      array('data' => $element['#title'], 'colspan' => 2),
+      t('Order'),
+    );
+    $rows = array();
+
+    foreach (element_children($element) as $key) {
+      if ($key !== $element['#field_name'] .'_add_more') {
+        $element[$key]['_weight']['#attributes']['class'] = $order_class;
+        $delta_element = drupal_render($element[$key]['_weight']);
+        $cells = array(
+          array('data' => '', 'class' => 'content-multiple-drag'),
+          drupal_render($element[$key]),
+          array('data' => $delta_element, 'class' => 'delta-order'),
+        );
+        $rows[] = array(
+          'data' => $cells,
+          'class' => 'draggable',
+        );
+      }
+    }
+
+    $output .= theme('table', $header, $rows, array('id' => $table_id, 'class' => 'content-multiple-table'));
+    $output .= $element['#description'] ? '<div class="description">'. $element['#description'] .'</div>' : '';
+    $output .= drupal_render($element[$element['#field_name'] .'_add_more']);
+
+    drupal_add_tabledrag($table_id, 'order', 'sibling', $order_class);
+
+    // Change the button title to reflect the behavior when using JavaScript.
+    // TODO : this should be made a behavior, so it can be reattached when the
+    // form is AHAH-updated
+    $field_name_css = str_replace('_', '-', $field_name);
+    drupal_add_js('if (Drupal.jsEnabled) { $(document).ready(function() { $("#edit-'. $field_name_css .'-'. $field_name_css .'-add-more").val("'. t('Add another item') .'"); }); }', 'inline');
+  }
+  else {
+    foreach (element_children($element) as $key) {
+      $output .= drupal_render($element[$key]);
+    }
+  }
+
+  return $output;
+}
+
+/**
  * Modules notify Content module when uninstalled, disabled, etc.
  *
  * @param string $op
