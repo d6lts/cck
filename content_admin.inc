@@ -536,6 +536,10 @@ function _content_admin_field_add_new_validate($form, &$form_state) {
   form_set_value($form['new']['field']['field_name'], 'field_'. $form_state['values']['field_name'], $form_state);
 
   $form_values = $form_state['values'];
+  if (!preg_match('!^field_[a-z0-9_]+$!', $form_values['field_name'])) {
+	  form_set_error('field_name', t('The field name %field_name is invalid. The name must include only lowercase unaccentuated letters, numbers, and underscores.', array(
+	    '%field_name' => $form_values['field_name'])));
+	}
   if (array_key_exists($form_values['field_name'], content_fields())) {
     form_set_error('field_name', t('The field name %field_name already exists.', array(
       '%field_name' => $form_values['field_name'])));
