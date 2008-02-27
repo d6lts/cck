@@ -403,6 +403,7 @@ function content_form_alter(&$form, $form_state, $form_id) {
     $form = array_merge($form, content_form($form, $form_state));
     // Adjust weights for non-CCK fields.
     $type = content_types($form['type']['#value']);
+
     foreach ($type['extra'] as $key => $value) {
       if (isset($form[$key])) {
         $form[$key]['#weight'] = $value['weight'];
@@ -1086,7 +1087,7 @@ function _content_field_invoke_default($op, &$node, $teaser = NULL, $page = NULL
         $return[] = $result;
       }
     }
-    if (isset($node->$field['field_name'])) {
+    if (isset($field) && isset($node->$field['field_name'])) {
       $node->$field['field_name'] = $items;
     }
   }
