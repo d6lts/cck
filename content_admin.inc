@@ -122,21 +122,23 @@ function content_admin_field_overview_form(&$form_state, $type_name) {
   }
   // Non-CCK 'fields'.
   foreach ($extra as $name => $label) {
-    $weight = $extra[$name]['weight'];
-    $form[$name] = array(
-      'human_name' => array('#value' => $extra[$name]['label']),
-      'name' => array(),
-      'type' => array(),
-      'configure' => array(),
-      'remove' => array(),
-      'weight' => array('#type' => 'textfield', '#default_value' => $weight),
-      'parent' => array('#type' => 'hidden', '#default_value' => ''),
-      'hidden_name' => array('#type' => 'hidden', '#default_value' => $name),
-      '#leaf' => TRUE,
-      '#root' => TRUE,
-      '#disabled' => TRUE,
-    );
-    $dummy[$name] = array('#weight' => $weight, '#value' => $name .' ');
+    if ($name != 'menu') {
+      $weight = $extra[$name]['weight'];
+      $form[$name] = array(
+        'human_name' => array('#value' => $extra[$name]['label']),
+        'name' => array(),
+        'type' => array(),
+        'configure' => array(),
+        'remove' => array(),
+        'weight' => array('#type' => 'textfield', '#default_value' => $weight),
+        'parent' => array('#type' => 'hidden', '#default_value' => ''),
+        'hidden_name' => array('#type' => 'hidden', '#default_value' => $name),
+        '#leaf' => TRUE,
+        '#root' => TRUE,
+        '#disabled' => TRUE,
+      );
+      $dummy[$name] = array('#weight' => $weight, '#value' => $name .' ');
+    }
   }
 
   // Let drupal_render figure out the right order for the rows.
@@ -202,6 +204,16 @@ function content_admin_field_overview_form_submit($form, &$form_state) {
   }
 
   if ($extra) {
+    // We don't show menu on the drag 'n drop list because it's too
+    // confusing, but we need to keep the menu right under the
+    // title in the form.
+
+    // TODO will this make it impossible for other modules to form_alter
+    // the menu somewhere else? Maybe it should just get moved back
+    // down to the bottom of the page. We can't leave it where it is
+    // if the title gets moved or it may end up by itself at the top
+    // of the page.
+    $extra['menu'] = $extra['title'] + .1;
     variable_set('content_extra_weights_'. $form['#type_name'], $extra);
   }
   else {
