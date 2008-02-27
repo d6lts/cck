@@ -488,7 +488,7 @@ function _content_admin_field_add_new(&$form_state, $type_name, $new_field_name 
 
     $form['new']['submit'] = array(
       '#type' => 'submit',
-      '#value' => t('Create field'),
+      '#value' => t('Continue'),
     );
     $form['new']['type_name'] = array(
       '#type' => 'value',
