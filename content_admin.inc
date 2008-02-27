@@ -35,7 +35,7 @@ function _content_admin_type_fields() {
     $rows[] = $row;
   }
   if (empty($rows)) {
-    $output = t('No fields have been defined for any content type yet.', 'warning');
+    $output = t('No fields have been defined for any content type yet.');
   }
   else {
     $output = theme('table', $header, $rows);
@@ -86,7 +86,7 @@ function content_admin_field_overview_form(&$form_state, $type_name) {
     '#extra' => array_keys($extra),
     '#order' => array(),
     '#prefix' => t('<p>To change the order of a field, grab a drag-and-drop handle under the Label column and drag the field to a new location in the list. (Grab a handle by clicking and holding the mouse while hovering over a handle icon.) Remember that your changes will not be saved until you click the Save button at the bottom of the page.</p>'),
-    );
+  );
 
   // Fields.
   foreach ($fields as $name => $field) {
@@ -129,23 +129,21 @@ function content_admin_field_overview_form(&$form_state, $type_name) {
   }
   // Non-CCK 'fields'.
   foreach ($extra as $name => $label) {
-    if ($name != 'menu') {
-      $weight = $extra[$name]['weight'];
-      $form[$name] = array(
-        'human_name' => array('#value' => $extra[$name]['label']),
-        'name' => array(),
-        'type' => array(),
-        'configure' => array(),
-        'remove' => array(),
-        'weight' => array('#type' => 'textfield', '#default_value' => $weight),
-        'parent' => array('#type' => 'hidden', '#default_value' => ''),
-        'hidden_name' => array('#type' => 'hidden', '#default_value' => $name),
-        '#leaf' => TRUE,
-        '#root' => TRUE,
-        '#disabled' => TRUE,
-      );
-      $dummy[$name] = array('#weight' => $weight, '#value' => $name .' ');
-    }
+    $weight = $extra[$name]['weight'];
+    $form[$name] = array(
+      'human_name' => array('#value' => $extra[$name]['label']),
+      'name' => array(),
+      'type' => array(),
+      'configure' => array(),
+      'remove' => array(),
+      'weight' => array('#type' => 'textfield', '#default_value' => $weight),
+      'parent' => array('#type' => 'hidden', '#default_value' => ''),
+      'hidden_name' => array('#type' => 'hidden', '#default_value' => $name),
+      '#leaf' => TRUE,
+      '#root' => TRUE,
+      '#disabled' => TRUE,
+    );
+    $dummy[$name] = array('#weight' => $weight, '#value' => $name .' ');
   }
 
   // Let drupal_render figure out the right order for the rows.
@@ -214,16 +212,6 @@ function content_admin_field_overview_form_submit($form, &$form_state) {
   }
 
   if ($extra) {
-    // We don't show menu on the drag 'n drop list because it's too
-    // confusing, but we need to keep the menu right under the
-    // title in the form.
-
-    // TODO will this make it impossible for other modules to form_alter
-    // the menu somewhere else? Maybe it should just get moved back
-    // down to the bottom of the page. We can't leave it where it is
-    // if the title gets moved or it may end up by itself at the top
-    // of the page.
-    $extra['menu'] = $extra['title'] + .1;
     variable_set('content_extra_weights_'. $form['#type_name'], $extra);
   }
   else {

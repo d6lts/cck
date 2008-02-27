@@ -406,6 +406,11 @@ function content_form_alter(&$form, $form_state, $form_id) {
     foreach ($type['extra'] as $key => $value) {
       if (isset($form[$key])) {
         $form[$key]['#weight'] = $value['weight'];
+        // Special case for the 'menu path' fieldset : we keep it
+        // just below the title.
+        if ($key == 'title' && isset($form['menu'])) {
+          $form['menu']['#weight'] = $value['weight'] + .1;
+        }
       }
     }
   }
@@ -1853,9 +1858,6 @@ function content_content_extra_fields($type_name) {
   }
   if (module_exists('locale') && variable_get("language_$type_name", 0)) {
     $extra['language'] = array('label' => t('Language'), 'weight' => 0);
-  }
-  if (module_exists('menu')) {
-    $extra['menu'] = array('label' => t('Menu settings'), 'weight' => -2);
   }
   if (module_exists('taxonomy') && taxonomy_get_vocabularies($type_name)) {
     $extra['taxonomy'] = array('label' => t('Taxonomy'), 'weight' => -3);
