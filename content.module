@@ -29,7 +29,7 @@ function content_help($path, $arg) {
     }
   }
   if (preg_match('!^admin/content/node-type/.*/fields$!', $path)) {
-    return t('This page provides a drag-and-drop interface for controlling the order of fields in the input form. To change the order of a field, grab a drag-and-drop handle under the Label column and drag the field to a new location in the list. (Grab a handle by clicking and holding the mouse while hovering over a handle icon.) Remember that your changes will not be saved until you click the Save button at the bottom of the page.');
+    return t('Control the order of fields in the input form.');
   }
 }
 

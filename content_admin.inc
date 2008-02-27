@@ -34,8 +34,8 @@ function _content_admin_type_fields() {
 
     $rows[] = $row;
   }
-  if (!empty($rows)) {
-    $output = t('No fields have been defined for any content type yet.');
+  if (empty($rows)) {
+    $output = t('No fields have been defined for any content type yet.', 'warning');
   }
   else {
     $output = theme('table', $header, $rows);
@@ -59,6 +59,12 @@ function content_admin_field_overview_form(&$form_state, $type_name) {
   // Gather type information.
   $type = content_types($type_name);
   $fields = $type['fields'];
+  if (empty($fields)) {
+    drupal_set_message(t('There are no fields configured for this content type. You can !link.', array(
+      '!link' => l(t('add a new field'), str_replace('/fields', '/add_field', $_GET['q'])))), 'warning');
+    return array();
+  }
+
   $extra = $type['extra'];
   $groups = $group_options = array();
   if (module_exists('fieldgroup')) {
@@ -79,7 +85,8 @@ function content_admin_field_overview_form(&$form_state, $type_name) {
     '#groups' => array_keys($groups),
     '#extra' => array_keys($extra),
     '#order' => array(),
-  );
+    '#prefix' => t('<p>To change the order of a field, grab a drag-and-drop handle under the Label column and drag the field to a new location in the list. (Grab a handle by clicking and holding the mouse while hovering over a handle icon.) Remember that your changes will not be saved until you click the Save button at the bottom of the page.</p>'),
+    );
 
   // Fields.
   foreach ($fields as $name => $field) {
@@ -152,6 +159,9 @@ function content_admin_field_overview_form(&$form_state, $type_name) {
  *  Theme the field overview table.
  */
 function theme_content_admin_field_overview_form($form) {
+  if (empty($form['#order'])) {
+    return;
+  }
   $header = array(t('Label'), t('Name'), t('Type'), t('Weight'), array('data' => t('Operations'), 'colspan' => 2));
   $rows = array();
 
@@ -235,7 +245,8 @@ function content_admin_display_overview_form(&$form_state, $type_name, $contexts
   $field_types = _content_field_types(); // TODO : needed ?
   $fields = $type['fields'];
   if (empty($fields)) {
-    drupal_set_message(t('There are no fields configured for this content type.'));
+    drupal_set_message(t('There are no fields configured for this content type. You can !link.', array(
+      '!link' => l(t('add a new field'), str_replace('/fields', '/add_field', $_GET['q'])))), 'warning');
     return array();
   }
 
