@@ -347,6 +347,7 @@ function userreference_select_process($element, $edit, $form_state, $form) {
     '#delta' => $element['#delta'],
     '#columns' => $element['#columns'],
     '#title' => $element['#title'],
+    '#required' => $element['#required'],
     '#description' => $element['#description'],
   );
   return $element;
@@ -379,6 +380,7 @@ function userreference_autocomplete_process($element, $edit, $form_state, $form)
     '#delta' => $element['#delta'],
     '#columns' => $element['#columns'],
     '#title' => $element['#title'],
+    '#required' => $element['#required'],
     '#description' => $element['#description'],
   );
   return $element;
