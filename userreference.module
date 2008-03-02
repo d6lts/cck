@@ -317,7 +317,7 @@ function userreference_widget(&$form, &$form_state, $field, $items, $delta = 0) 
 function userreference_autocomplete_value($element, $edit = FALSE) {
   $field_key  = $element['#columns'][0];
   if (!empty($element['#default_value'][$field_key])) {
-    $value = $value = db_result(db_query("SELECT name FROM {users} WHERE uid = '%d'", $element['#default_value'][$field_key]));
+    $value = db_result(db_query("SELECT name FROM {users} WHERE uid = '%d'", $element['#default_value'][$field_key]));
     return array($field_key => $value);
   }
   return array($field_key => NULL);
