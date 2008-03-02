@@ -187,7 +187,6 @@ function theme_content_admin_field_overview_form($form) {
   }
 
   $output  = theme('table', $header, $rows, array('id' => 'content-field-overview'));
-  $output .= drupal_render($form);
 
   drupal_add_tabledrag('content-field-overview', 'match', 'parent', 'group-parent', 'group-parent', 'field-name', TRUE, 1);
   drupal_add_tabledrag('content-field-overview', 'order', 'sibling', 'field-weight');
@@ -196,6 +195,8 @@ function theme_content_admin_field_overview_form($form) {
   $form['submit']['#attributes']['class'] = 'content-admin-field-overview-submit';
   drupal_add_js('if (Drupal.jsEnabled) { $(document).ready(function() { $(".content-admin-field-overview-submit").hide(); }); }', 'inline');
   drupal_add_js(drupal_get_path('module', 'content') .'/content.js');
+
+  $output .= drupal_render($form);
 
   return $output;
 }
