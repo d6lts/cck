@@ -11,6 +11,7 @@ General
 
 Field / Widget modules
 - #60713   Userreference : Add optional reverse link on user profile page for referenced users.
+- #228979  Userreference : Don't show empty section for reverse links in user profile page.
 - #131260  Userreference : Allow filter referenceable users by active/blocked status.
 - #221288  Text : Views argument can filter by the first letters of the values
 
