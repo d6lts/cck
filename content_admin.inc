@@ -192,6 +192,11 @@ function theme_content_admin_field_overview_form($form) {
   drupal_add_tabledrag('content-field-overview', 'match', 'parent', 'group-parent', 'group-parent', 'field-name', TRUE, 1);
   drupal_add_tabledrag('content-field-overview', 'order', 'sibling', 'field-weight');
 
+  // Hide the 'Save' button, show it when fields are swapped.
+  $form['submit']['#attributes']['class'] = 'content-admin-field-overview-submit';
+  drupal_add_js('if (Drupal.jsEnabled) { $(document).ready(function() { $(".content-admin-field-overview-submit").hide(); }); }', 'inline');
+  drupal_add_js(drupal_get_path('module', 'content') .'/content.js');
+
   return $output;
 }
 
@@ -548,9 +553,9 @@ function _content_admin_field_add_new_validate($form, &$form_state) {
 
   $form_values = $form_state['values'];
   if (!preg_match('!^field_[a-z0-9_]+$!', $form_values['field_name'])) {
-	  form_set_error('field_name', t('The field name %field_name is invalid. The name must include only lowercase unaccentuated letters, numbers, and underscores.', array(
-	    '%field_name' => $form_values['field_name'])));
-	}
+    form_set_error('field_name', t('The field name %field_name is invalid. The name must include only lowercase unaccentuated letters, numbers, and underscores.', array(
+      '%field_name' => $form_values['field_name'])));
+  }
   if (array_key_exists($form_values['field_name'], content_fields())) {
     form_set_error('field_name', t('The field name %field_name already exists.', array(
       '%field_name' => $form_values['field_name'])));
