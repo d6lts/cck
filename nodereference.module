@@ -517,7 +517,7 @@ function theme_nodereference_item_advanced($item, $view) {
 }
 
 function theme_nodereference_item_simple($item) {
-  return check_plain($item->node_title);
+  return $item->node_title;
 }
 
 /**
