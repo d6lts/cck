@@ -230,8 +230,8 @@ function content_admin_field_overview_form_submit($form, &$form_state) {
 /**
  * Menu callback; presents a listing of fields display settings for a content type.
  *
- * Form includes form widgets to select which fields appear for teaser, full node...
- * and how the field labels should be rendered
+ * Form includes form widgets to select which fields appear for teaser, full node
+ * and how the field labels should be rendered.
  */
 function content_admin_display_overview_form(&$form_state, $type_name, $contexts_selector = CONTENT_CONTEXTS_SIMPLE) {
   // Gather type information.
@@ -708,7 +708,6 @@ function _content_admin_field(&$form_state, $type_name, $field_name) {
 
   // Add handling for default value if not provided by field.
   if (content_callback('widget', 'default value', $field) == CONTENT_CALLBACK_DEFAULT) {
-    $form['#attributes'] = array("enctype" => "multipart/form-data");
     $form['widget']['default_value_fieldset'] = array(
       '#type' => 'fieldset',
       '#title' => t('Default value'),
