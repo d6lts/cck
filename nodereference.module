@@ -622,7 +622,7 @@ function nodereference_autocomplete($field_name, $string = '') {
   drupal_json($matches);
 }
 
-function _nodereference_item($field, $item, $html = false) {
+function _nodereference_item($field, $item, $html = FALSE) {
 //  if (module_exists('views') && isset($field['advanced_view']) && $field['advanced_view'] != '--' && ($view = views_get_view($field['advanced_view']))) {
 //    $output = theme('nodereference_item_advanced', $item, $view);
 //    if (!$html) {
@@ -633,6 +633,7 @@ function _nodereference_item($field, $item, $html = false) {
 //  }
 //  else {
     $output = theme('nodereference_item_simple', $item);
+    $output = $html ? check_plain($output) : $output;
 //  }
   return $output;
 }
