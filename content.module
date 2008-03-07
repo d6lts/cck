@@ -72,8 +72,8 @@ function content_init() {
   if (module_exists('views')) {
     module_load_include('inc', 'content', 'content_views');
   }
-  if (module_exists('pathauto')) {
-    module_load_include('inc', 'content', 'content_pathauto');
+  if (module_exists('token') && !function_exists('content_token_values')) {
+    module_load_include('inc', 'content', 'content_token');
   }
   if (content_menu_needs_rebuild()) {
     content_clear_type_cache(TRUE);
