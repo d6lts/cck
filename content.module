@@ -542,8 +542,8 @@ function content_associate_fields($module) {
   }
   // This is called from updates and installs, so get the install-safe
   // version of a fields array.
-  include_once('./'. drupal_get_path('module', 'content') .'/content.install');
   $fields_set = array();
+  module_load_include('install', 'content');
   $types = content_types_install();
   foreach ($types as $type_name => $fields) {
     foreach ($fields as $field) {
@@ -580,8 +580,6 @@ function content_associate_fields($module) {
  * formatters can be designated as such in formatter_info().
  *
  * The node array will look like:
- *
- *  'Single value' formatter :
  *   $node->content['field_foo'] = array(
  *     '#type' => 'content_field_view',
  *     '#title' => 'label'
@@ -589,38 +587,26 @@ function content_associate_fields($module) {
  *     '#node' => $node,
  *     'items' =>
  *       0 => array(
+ *         '#item' => $items[0],
+ *         // Only for 'single-value' formatters
  *         '#theme' => $theme,
  *         '#field_name' => 'field_name',
  *         '#type_name' => $node->type,
  *         '#formatter' => $formatter_name,
- *         '#item' => $items[0],
  *       ),
  *       1 => array(
+ *         '#item' => $items[1],
+ *         // Only for 'single-value' formatters
  *         '#theme' => $theme,
  *         '#field_name' => 'field_name',
  *         '#type_name' => $node->type,
  *         '#formatter' => $formatter_name,
- *         '#item' => $items[1],
  *       ),
- *     ),
- *   );
- *  'Multiple value' formatter :
- *   $node->content['field_foo'] = array(
- *     '#type' => 'content_field_view',
- *     '#title' => 'label'
- *     '#field_name' => 'field_name',
- *     '#node' => $node,
- *     'items' => array(
+ *       // Only for 'multiple-value' formatters
  *       '#theme' => $theme,
  *       '#field_name' => 'field_name',
  *       '#type_name' => $node->type,
  *       '#formatter' => $formatter_name,
- *       0 => array(
- *         '#item' => $items[0],
- *       ),
- *       1 => array(
- *         '#item' => $items[1],
- *       ),
  *     ),
  *   );
  */
@@ -772,6 +758,10 @@ function content_set_empty($field, $items) {
   return $items;
 }
 
+/**
+ * Helper function to sort items in a field according to
+ * user drag-n-drop reordering.
+ */
 function _content_sort_items($field, $items) {
   if ($field['multiple'] >= 1 && isset($items[0]['_weight'])) {
     usort($items, '_content_sort_items_helper');
@@ -783,9 +773,8 @@ function _content_sort_items($field, $items) {
 }
 
 /**
- * Helper function to sort items in a field according to
- * user drag-n-drop reordering (copied form element_sort(),
- * that acts on #weight keys)
+ * Sort function for items order.
+ * (copied form element_sort(), which acts on #weight keys)
  */
 function _content_sort_items_helper($a, $b) {
   $a_weight = (is_array($a) && isset($a['_weight'])) ? $a['_weight'] : 0;
@@ -1315,7 +1304,7 @@ function content_clear_type_cache($rebuild_schema = FALSE) {
 
 //  if (module_exists('views')) {
 //    // Needed because this can be called from .install files
-//    include_once('./'. drupal_get_path('module', 'views') .'/views.module');
+//    module_load_include('module', 'views');
 //    views_invalidate_cache();
 //  }
 }
