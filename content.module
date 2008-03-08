@@ -665,7 +665,7 @@ function content_field($op, &$node, $field, &$items, $teaser, $page) {
       $formatters = $field_types[$field['type']]['formatters'];
       $formatter_name = isset($field['display_settings'][$context]['format']) ? $field['display_settings'][$context]['format'] : 'default';
 
-      if (!isset($formatters[$formatter_name]) && $formatter != 'hidden') {
+      if (!isset($formatters[$formatter_name]) && $formatter_name != 'hidden') {
         // This might happen when the selected formatter has been renamed in the
         // module, or if the module has been disabled since then.
         $formatter_name = 'default';
