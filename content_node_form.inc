@@ -147,6 +147,7 @@ function content_multiple_value_form(&$form, &$form_state, $field, $items) {
     //'#type' => 'content_multiple_values',
     '#theme' => 'content_multiple_values',
     '#title' => t($field['widget']['label']),
+    '#required' => $field['required'],
     '#description' => t($field['widget']['description']),
   );
   $function = $field['module'] .'_widget';
