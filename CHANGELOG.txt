@@ -27,6 +27,7 @@ General
 - Include views module in content_clear_type_cache() to prevent errors when this is called from .install files.
 - #226549  Fix untranslatable message on fieldgroup deletion
 - #226607  Fix untranslatable human names for field widget types.
+- #168526  Fix display settings lost on content type import / export
 
 Field / widget modules
 - #196575  Userreference : autocomplete did not filter users by role, need custom autocomplete instead of standard user autocomplete.
