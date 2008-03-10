@@ -20,6 +20,12 @@
  *
  *  Content type, group and field names will be imported exactly as exported.
  *  If the names are already in use, no import will be performed.
+ *
+ *
+ *  Note: The "display fields" information is being handled a little differently than the rest of the
+ *  data that's imported and exported.  Instead of calling through the create and playback macros,
+ *  we get and set the data directly from/into the database.  the reason for this is that the
+ *  playback macro method does not lend itself well to the display fields.
  */
 
 /**
@@ -467,10 +473,12 @@ function content_copy_record_macro($form, &$form_state) {
       $subs['type'] = $edit;
       $GLOBALS['content_copy']['count'] += sizeof($edit) + 5;
       break;
+
     case 'fieldgroup_edit_group_form':
       $subs['groups'][] = $edit;
       $GLOBALS['content_copy']['count'] += sizeof($edit) + 5;
       break;
+
     default:
       if (isset($edit['field_widget_type'])) {
         $tmp = explode('-', $edit['field_widget_type']);
@@ -479,8 +487,30 @@ function content_copy_record_macro($form, &$form_state) {
       else {
         $field_name = isset($edit['field_name']) ? $edit['field_name'] : '';
       }
+
+      // The display settings are being fetched directly from the DB. During import,
+      // we'll re-insert the data directly as well.
+      //
+      $query = 'SELECT display_settings FROM {node_field_instance} WHERE field_name = \'%s\'';
+      $row_info = db_fetch_array(db_query($query, $field_name));
+
+      // If an error occurs, notify the user.
+      if ($db_err = db_error()) {
+        drupal_set_message(t("An error occurred when exporting the 'display settings' data for the field %field_name.<br/>The db error is: '%db_err'.", array(
+             '%field_name' => $field_name,
+             '%db_err' => $db_err
+        )));
+      }
+      else {
+        // The db fetch occurred successfully, unserialize the data blob and
+        // insert it into a new "display_settings" field of the data.
+        if ($display_settings != unserialize($row_info['display_settings'])) {
+          $edit['display_settings'] = $display_settings;
+        }
+      }
       $subs['fields'][] = $edit;
       $GLOBALS['content_copy']['count'] += sizeof($edit) + 5;
+      break;
   }
 
   $GLOBALS['content_copy']['submissions'] = $subs;
