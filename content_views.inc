@@ -17,7 +17,7 @@ function content_views_data() {
   $data = array();
   foreach (content_fields() as $field) {
     $module = $field['module'];
-    $result = module_invoke($module, 'field_settings', 'views_data', $field);
+    $result = module_invoke($module, 'field_settings', 'views data', $field);
     if (empty($result)) {
       $result = content_views_field_views_data($field);
     }
@@ -58,10 +58,9 @@ function content_views_field_views_data($field) {
     }
 
     $data[$field['field_name']] = array(
-      // Group by field type.
-      'group' => $field_types[$field['type']]['label'],
-      'title' => $field['widget']['label'],
-      'help' => $field['field_name'] .' - '. t('Appears in : @types', array('@types' => implode(', ', $types))),
+      'group' => t('Field'),
+      'title' => t($field['widget']['label']) .' ('. $field['field_name'] .')',
+      'help' =>  t($field_types[$field['type']]['label']) .' - '. t('Appears in : @types', array('@types' => implode(', ', $types))),
       'field' => array(
         'field' => $columns[0],
         'tablename' => $db_info['table'],
@@ -80,8 +79,9 @@ function content_views_field_views_data($field) {
       ),
       'filter' => array(
         'field' => $columns[0],
+        'title' => t('@label empty', array('@label' => $field['widget']['label'])),
         'tablename' => $db_info['table'],
-        'handler' => 'views_handler_filter_content',
+        'handler' => 'views_handler_filter_content_is_empty',
         'additional fields' => $columns,
         'content_field_name' => $field['field_name'],
       ),
@@ -95,8 +95,7 @@ function content_views_field_views_data($field) {
     );
 
     // TODO : provide several filters, arguments, sorts... ?
-    // TODO : allow field modules to provide filters etc on columns other than first one
-    // TODO : generic 'empty / not empty' filter
+    // TODO : allow field modules to provide filters etc on columns other than first one ?
 
     return array($table_alias => $data);
   }
@@ -104,10 +103,8 @@ function content_views_field_views_data($field) {
 
 class views_handler_field_content extends views_handler_field_node {
   var $content_field;
+  var $defer_query;
 
-  /**
-   * Construct function.
-   */
   function construct() {
     parent::construct();
 
@@ -121,9 +118,6 @@ class views_handler_field_content extends views_handler_field_node {
 //    return "$this->field_alias";
 //  }
 
-  /**
-   * Provide a simple default initializer -- should be overridden.
-   */
   function options(&$options) {
     parent::options($options);
 
@@ -142,6 +136,7 @@ class views_handler_field_content extends views_handler_field_node {
    */
   function options_form(&$form) {
     // TODO : not sure we want this (link to node ... ) ?
+    // TODO : How come we don't get the 'label' textfield ?
     parent::options_form($view, $data);
     $field = $this->content_field;
     $options = $this->options;
@@ -193,21 +188,13 @@ class views_handler_field_content extends views_handler_field_node {
 
   }
 
-  /**
-   * Validate the options form.
-   */
   function options_validate($form, &$form_state) { }
-
-  /**
-   * Perform any necessary changes to the form values prior to storage.
-   * There is no need for this function to actually store the data.
-   */
-  function options_submit($form, &$form_state) { }
 
   /**
    * Provide text for the administrative summary
    */
   function admin_summary() {
+    // TODO : how come "Field : field_texte" is displayed (and not "Text : field_texte") ?
     // Display the formatter name.
     $field = $this->content_field;
     $field_types = _content_field_types();
@@ -216,9 +203,6 @@ class views_handler_field_content extends views_handler_field_node {
     }
   }
 
-  /**
-   * Called to add the field to a query.
-   */
   function query() {
     $field = $this->content_field;
     $options = $this->options;
@@ -226,9 +210,11 @@ class views_handler_field_content extends views_handler_field_node {
 //  if (in_array($field['handler'], array('content_views_field_handler_group', 'content_views_field_handler_first', 'content_views_field_handler_last'))) {
 // TODO : multiple_number / multiple_from
 // We can also optimize the query when only one value should be retrieved
-    if ($options['multiple']['group'] && $field['multiple']) {
-      // 'Group multiple values' : we don't add anything to the query.
-      // The data is retrieved in render() in order to avoid duplicate results.
+    $this->defer_query = $options['multiple']['group'] && $field['multiple'];
+
+    if ($this->defer_query) {
+      // We don't add anything to the query. The data is retrieved in pre_render()
+      // in order to avoid duplicate results.
       $this->field_alias = $this->real_field;
 
       // If the field is sortable (table sort), we just have to join the table
@@ -238,8 +224,7 @@ class views_handler_field_content extends views_handler_field_node {
 //      }
     }
     else {
-      // Non-multiple field or 'Group multiple values' unchecked :
-      // we defer to the generic field handler query.
+      // Use the generic field handler query.
       parent::query();
     }
   }
@@ -249,7 +234,11 @@ class views_handler_field_content extends views_handler_field_node {
     $db_info = content_database_info($field);
     $options = $this->options;
 
-    if ($options['multiple']['group'] && $field['multiple']) {
+    // $values will be used as a fake $node object; we provide a build_mode
+    // for rendering.
+    $values->build_mode = 'views';
+
+    if ($this->defer_query) {
       // TODO : do this in pre_render for all rows in one query !!
       // 'Group multiple values' : we retrieve all the values in a separate query...
 
@@ -294,99 +283,49 @@ function theme_content_view_multiple_field($items, $field, $values) {
   return $output;
 }
 
-// TODO : should probably derive from views_handler_filter when fields
-// have a way to set their own operators
-class views_handler_filter_content extends views_handler_filter_equality  {
+class views_handler_filter_content_is_empty extends views_handler_filter_boolean_operator {
   var $content_field;
 
-  /**
-   * Construct function.
-   */
   function construct() {
     parent::construct();
-
     $this->content_field = content_fields($this->definition['content_field_name']);
     $this->additional_fields = $this->definition['additional fields'];
   }
 
-  /**
-   * Provide a simple default initializer -- should be overridden.
-   */
-  function options(&$options) {
-    parent::options($options);
+
+  function admin_summary() {
+    if (!empty($this->options['exposed'])) {
+      return t('exposed');
+    }
+
+    return ($this->value == 'NULL') ? t('is True') : t('is False');
   }
 
-//  function admin_summary() {
-//    return check_plain($this->data->operator['operator']) . ' ' . check_plain($this->data->value['value']);
-//  }
-//
-  /**
-   * Provide the basic form which calls through to subforms.
-   * If overridden, it is best to call through to the parent.
-   */
-  function options_form(&$form, &$form_state) {
-    parent::options_form($form, $form_state);
+  function value_form(&$form, &$form_state) {
+    $form['value'] = array(
+      '#type' => 'select',
+      '#options' => array('NOT NULL' => t('Not empty'), 'NULL' => t('Empty')),
+      '#default_value' => $this->value,
+      '#field_prefix' => 'Is ',
+    );
   }
-//
-//  /**
-//   * Simple validate handler
-//   */
-//  function options_validate(&$form, &$form_state) {
-//    $this->operator_validate($form['operator'], $form_state);
-//    $this->value_validate($form['value'], $form_state);
-//  }
-//
-//  /**
-//   * Simple submit handler
-//   */
-//  function options_submit(&$form, &$form_state) {
-//    $this->operator_submit($form['operator'], $form_state);
-//    $this->value_submit($form['value'], $form_state);
-//  }
-//
-//  /**
-//   * Provide a form for setting the operator.
-//   */
-//  function operator_form(&$form, &$form_state) { }
-//
-//  /**
-//   * Validate the operator form.
-//   */
-//  function operator_validate($form, &$form_state) { }
-//
-//  /**
-//   * Perform any necessary changes to the form values prior to storage.
-//   * There is no need for this function to actually store the data.
-//   */
-//  function operator_submit($form, &$form_state) { }
-//
-//  /**
-//   * Provide a form for setting options.
-//   */
-//  function value_form(&$form, &$form_state) { }
-//
-//  /**
-//   * Validate the options form.
-//   */
-//  function value_validate($form, &$form_state) { }
-//
-//  /**
-//   * Perform any necessary changes to the form values prior to storage.
-//   * There is no need for this function to actually store the data.
-//   */
-//  function value_submit($form, &$form_state) { }
-//
-//  /**
-//   * Add this filter to the query.
-//   *
-//   * Due to the nature of fapi, the value and the operator have an unintended
-//   * level of indirection. You will find them in $this->data->operator['operator']
-//   * and $this->data->value['value'] respectively.
-//   */
-//  function query() {
-//    $this->ensure_my_table();
-//    $this->query->add_where($this->data->group, "$this->table_alias.$this->real_field " . $this->data->operator['operator'] . " '%s'", $this->data->value['value']);
-//  }
+
+  function query() {
+    $this->ensure_my_table();
+    if ($this->value == 'NULL') {
+      foreach ($this->additional_fields as $column) {
+        $this->query->add_where($this->options['group'], "$this->table_alias.$column IS NULL");
+      }
+    }
+    else {
+      // TODO : does groups allow something smarter ?
+      $where = array();
+      foreach ($this->additional_fields as $column) {
+        $where[] = "$this->table_alias.$column IS NOT NULL";
+      }
+      $this->query->add_where($this->options['group'], implode(") OR (", $where));
+    }
+  }
 }
 
 /**
