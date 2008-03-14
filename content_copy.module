@@ -266,6 +266,8 @@ function content_copy_import_form_submit($form, &$form_state) {
     return;
   }
 
+  module_load_include('inc', 'content', 'content_crud');
+
   // Get all type and field info for this database.
   $content_info = _content_type_info();
 
@@ -291,7 +293,8 @@ function content_copy_import_form_submit($form, &$form_state) {
   }
 
   // Make sure that all the field and widget modules in the import are enabled in this database.
-  foreach ($imported_fields as $field) {
+  foreach ($imported_fields as $import) {
+    $field = content_field_instance_collapse($import);
     if (empty($field['module']) || empty($field['widget_module'])) {
       $not_enabled[] = $field['field_name'];
     }
@@ -367,7 +370,6 @@ function content_copy_import_form_submit($form, &$form_state) {
   }
 
   // Iterate through the field forms in the import and execute each.
-  module_load_include('inc', 'content', 'content_crud');
   foreach ($imported_fields as $field) {
 
     // Make sure the field doesn't already exist in the type.
