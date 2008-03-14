@@ -57,7 +57,7 @@ function content_views_field_views_data($field) {
       $columns[] = $attributes['column'];
     }
 
-    $data[$columns[0]] = array(
+    $data[$field['field_name']] = array(
       'group' => t('Field'),
       'title' => t($field['widget']['label']) .' ('. $field['field_name'] .')',
       'help' =>  t($field_types[$field['type']]['label']) .' - '. t('Appears in : @types', array('@types' => implode(', ', $types))),
