@@ -12,28 +12,41 @@
  * the right results, usually needed to set field options or values.
  */
 function content_views_convert($display, $type, &$view, $views_field) {
-  static $views_fields;
+  //static $views_fields;
 
   if (empty($views_fields)) {
     $views_fields = array();
-    foreach (content_fields() as $field) {
-      $module = $field['module'];
-      $result = module_invoke($module, 'field_settings', 'views data', $field);
-      if (empty($result)) {
-        // In Views 1, the views field name had the column name appended,
-        // like field_name_value.
-        $views_fields[$field['field_name'] .'_'. $field['columns'][0]] = $field;
+    $types = content_types();
+    foreach ($types as $ctype) {
+      foreach ($ctype['fields'] as $field) {
+        $module = $field['module'];
+        $result = module_invoke($module, 'field_settings', 'views data', $field);
+        if (empty($result)) {
+          // In Views 1, the views field name had the column name appended,
+          // like field_name_value or field_username_uid.
+          $column = array_shift(array_keys($field['columns']));
+          $views_fields[$field['field_name'] .'_'. $column] = $field;
+        }
       }
     }
   }
-
-  if (!in_array($field['field'], array_keys($views_fields))) {
+  // Is this a field that CCK should handle? If not, return.
+  if (!in_array($views_field['field'], array_keys($views_fields))) {
     return;
   }
-  // For Views 2, switch back to using the field name.
-  $views_field['field'] = $views_fields[$views_fields['field']['field_name']];
-  $view->add_item($display, $type, $field['tablename'], $field['field']);
+  // For Views 2, switch back to using the field name, make sure a
+  // handler exists, and add the field. The changed field name means
+  // that the first attempt to add the field would have failed.
+  $field = $views_field;
+  $field['field'] = $views_fields[$views_field['field']]['field_name'];
+  if (views_get_handler($field['tablename'], $field['field'], $type)) {
+    $view->add_item($display, $type, $field['tablename'], $field['field']);
+  }
+  else {
+    return;
+  }
 
+  // Now update values, options, etc. to those selected in the imported view.
   switch ($type) {
     case 'field':
       $view->display[$type]->display_options['fields'][$field['field']]['format'] = $field['options'];
