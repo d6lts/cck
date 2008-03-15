@@ -12,7 +12,7 @@
  * the right results, usually needed to set field options or values.
  */
 function content_views_convert($display, $type, &$view, $views_field) {
-  //static $views_fields;
+  static $views_fields;
 
   if (empty($views_fields)) {
     $views_fields = array();
@@ -39,7 +39,7 @@ function content_views_convert($display, $type, &$view, $views_field) {
   // that the first attempt to add the field would have failed.
   $field = $views_field;
   $field['field'] = $views_fields[$views_field['field']]['field_name'];
-  if (views_get_handler($field['tablename'], $field['field'], $type)) {
+  if ($type != 'exposed_filter' && views_get_handler($field['tablename'], $field['field'], $type)) {
     $view->add_item($display, $type, $field['tablename'], $field['field']);
   }
   else {
@@ -60,6 +60,16 @@ function content_views_convert($display, $type, &$view, $views_field) {
 
     case 'filter':
       // TODO
+      return;
+
+    case 'exposed_filter':
+      // Because of the change in field name, the exposed filters never got set up correctly.
+      $view->display[$display]->display_options['filters'][$field['field']]['exposed'] = 1;
+      $view->display[$display]->display_options['filters'][$field['field']]['expose']['identifier'] = $field['field'];
+      $view->display[$display]->display_options['filters'][$field['field']]['expose']['label'] = $field['label'];
+      $view->display[$display]->display_options['filters'][$field['field']]['expose']['operator'] = $field['operator'];
+      $view->display[$display]->display_options['filters'][$field['field']]['expose']['optional'] = $field['optional'];
+      $view->display[$display]->display_options['filters'][$field['field']]['expose']['single'] = $field['single'];
       return;
 
     case 'argument':
