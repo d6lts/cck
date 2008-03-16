@@ -106,7 +106,7 @@ function number_field_settings($op, $field) {
           'default' => array(
             'list' => $allowed_values,
             'list-type' => 'list',
-            'operator' => 'views_handler_operator_or',
+            'operator' => 'views_handler_operator_andor',
             'value-type' => 'array',
           ),
         );
