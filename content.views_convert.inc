@@ -64,12 +64,17 @@ function content_views_convert($display, $type, &$view, $views_field) {
 
     case 'exposed_filter':
       // Because of the change in field name, the exposed filters never got set up correctly.
-      $view->display[$display]->display_options['filters'][$field['field']]['exposed'] = 1;
-      $view->display[$display]->display_options['filters'][$field['field']]['expose']['identifier'] = $field['field'];
-      $view->display[$display]->display_options['filters'][$field['field']]['expose']['label'] = $field['label'];
-      $view->display[$display]->display_options['filters'][$field['field']]['expose']['operator'] = $field['operator'];
-      $view->display[$display]->display_options['filters'][$field['field']]['expose']['optional'] = $field['optional'];
-      $view->display[$display]->display_options['filters'][$field['field']]['expose']['single'] = $field['single'];
+      // Not enough information provided to tell which exposed filter this is,
+      // need to submit a Views patch to pass that info. This will work as long as there
+      // is only one exposed filter.
+      $count = 1;
+
+      $view->display[$display]->display_options['filters'][$field_name]['exposed'] = 1;
+      $view->display[$display]->display_options['filters'][$field_name]['expose']['identifier'] = 'filter' . $count;
+      $view->display[$display]->display_options['filters'][$field_name]['expose']['label'] = $field['label'];
+      $view->display[$display]->display_options['filters'][$field_name]['expose']['operator'] = $field['operator'] ? 'op' . $count : '';
+      $view->display[$display]->display_options['filters'][$field_name]['expose']['optional'] = $field['optional'];
+      $view->display[$display]->display_options['filters'][$field_name]['expose']['single'] = $field['single'];
       return;
 
     case 'argument':
