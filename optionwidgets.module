@@ -309,7 +309,7 @@ function optionwidgets_form2data($element, $items, $field) {
   $field_key = $element['#columns'][0];
   $options = optionwidgets_options($field);
 
-  $keys = !empty($items[$field_key]) ? $items[$field_key] : array();
+  $keys = isset($items[$field_key]) ? $items[$field_key] : array();
   if (!is_array($keys)) {
     $keys = array($keys);
   }
