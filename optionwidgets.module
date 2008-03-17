@@ -245,14 +245,11 @@ function optionwidgets_onoff_process($element, $edit, &$form_state, $form) {
   }
   $options = optionwidgets_options($field);
   $keys = array_keys($options);
-  $on_value = $keys[1];
+  $on_value = !empty($keys) ? $keys[1] : NULL;
   $element[$field_key] = array(
     '#type' => 'checkbox',
-    // TODO : D5 used $options[$on_value] - was this intentionally dropped ?
-    '#title' => $element['#title'],
+    '#title' => $options[$on_value],
     '#description' => t($field['widget']['description']),
-    // TODO : is #required relevant ? doesn't work anyway...
-    '#required' => $field['required'],
     '#default_value' => isset($element['#value'][$field_key][0]) ? $element['#value'][$field_key][0] == $on_value : FALSE,
     '#return_value' => $on_value,
   );
