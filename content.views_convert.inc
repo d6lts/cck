@@ -69,12 +69,12 @@ function content_views_convert($display, $type, &$view, $views_field) {
       // is only one exposed filter.
       $count = 1;
 
-      $view->display[$display]->display_options['filters'][$field_name]['exposed'] = 1;
-      $view->display[$display]->display_options['filters'][$field_name]['expose']['identifier'] = 'filter' . $count;
-      $view->display[$display]->display_options['filters'][$field_name]['expose']['label'] = $field['label'];
-      $view->display[$display]->display_options['filters'][$field_name]['expose']['operator'] = $field['operator'] ? 'op' . $count : '';
-      $view->display[$display]->display_options['filters'][$field_name]['expose']['optional'] = $field['optional'];
-      $view->display[$display]->display_options['filters'][$field_name]['expose']['single'] = $field['single'];
+      $view->display[$display]->display_options['filters'][$field['field']]['exposed'] = 1;
+      $view->display[$display]->display_options['filters'][$field['field']]['expose']['identifier'] = 'filter' . $count;
+      $view->display[$display]->display_options['filters'][$field['field']]['expose']['label'] = $field['label'];
+      $view->display[$display]->display_options['filters'][$field['field']]['expose']['operator'] = $field['operator'] ? 'op' . $count : '';
+      $view->display[$display]->display_options['filters'][$field['field']]['expose']['optional'] = $field['optional'];
+      $view->display[$display]->display_options['filters'][$field['field']]['expose']['single'] = $field['single'];
       return;
 
     case 'argument':
