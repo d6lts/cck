@@ -134,10 +134,10 @@ class views_handler_field_content extends views_handler_field_node {
   /**
    * Provide formatter and 'group multiple values' option.
    */
-  function options_form(&$form) {
+  function options_form(&$form, &$form_state) {
     // TODO : not sure we want this (link to node ... ) ?
     // TODO : How come we don't get the 'label' textfield ?
-    parent::options_form($view, $data);
+    parent::options_form($view, $form_state);
     $field = $this->content_field;
     $options = $this->options;
 
