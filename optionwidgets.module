@@ -97,16 +97,19 @@ function optionwidgets_elements() {
     'optionwidgets_select' => array(
       '#input' => TRUE,
       '#columns' => array('value'), '#delta' => 0,
+      '#element_validate' => array('optionwidgets_validate'),
       '#process' => array('optionwidgets_select_process'),
       ),
     'optionwidgets_buttons' => array(
       '#input' => TRUE,
       '#columns' => array('value'), '#delta' => 0,
+      '#element_validate' => array('optionwidgets_validate'),
       '#process' => array('optionwidgets_buttons_process'),
       ),
     'optionwidgets_onoff' => array(
       '#input' => TRUE,
       '#columns' => array('value'), '#delta' => 0,
+      '#element_validate' => array('optionwidgets_validate'),
       '#process' => array('optionwidgets_onoff_process'),
       ),
     );
@@ -180,7 +183,6 @@ function optionwidgets_buttons_process($element, $edit, &$form_state, $form) {
   // Make sure field info will be available to the validator which
   // does not get the values in $form.
   $form_state['#field_info'][$field['field_name']] = $field;
-  $element['#element_validate'][] = 'optionwidgets_validate';
   return $element;
 }
 
@@ -220,7 +222,6 @@ function optionwidgets_select_process($element, $edit, &$form_state, $form) {
   // in the meantime avoid using $form_state['storage'] to store anything.
 
   $form_state['#field_info'][$field['field_name']] = $field;
-  $element['#element_validate'][] = 'optionwidgets_validate';
   return $element;
 }
 
@@ -257,7 +258,6 @@ function optionwidgets_onoff_process($element, $edit, &$form_state, $form) {
   // Make sure field info will be available to the validator which
   // does not get the values in $form.
   $form_state['#field_info'][$field['field_name']] = $field;
-  $element['#element_validate'][] = 'optionwidgets_validate';
   return $element;
 }
 

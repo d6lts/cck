@@ -434,7 +434,7 @@ function nodereference_select_process($element, $edit, $form_state, $form) {
   $element[$field_key] = array(
     '#type' => 'optionwidgets_select',
     '#default_value' => isset($element['#value']) ? $element['#value'] : '',
-    '#element_validate' => array('nodereference_select_validate'),
+    '#element_validate' => array('optionwidgets_validate', 'nodereference_select_validate'),
 
     // The following values were set by the content module and need
     // to be passed down to the nested element.
@@ -487,7 +487,8 @@ function nodereference_autocomplete_process($element, $edit, $form_state, $form)
  */
 function nodereference_select_validate($element, &$form_state) {
   $field_key  = $element['#columns'][0];
-  form_set_value($element, $element['#value'][$field_key], $form_state);
+  array_pop($element['#parents']);
+  form_set_value($element, $form_state['values'][$element['#field_name']][$field_key], $form_state);
 }
 
 /**
