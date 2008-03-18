@@ -136,8 +136,7 @@ class views_handler_field_content extends views_handler_field_node {
    */
   function options_form(&$form, &$form_state) {
     // TODO : not sure we want this (link to node ... ) ?
-    // TODO : How come we don't get the 'label' textfield ?
-    parent::options_form($view, $form_state);
+    parent::options_form($form, $form_state);
     $field = $this->content_field;
     $options = $this->options;
 
