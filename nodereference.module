@@ -96,14 +96,6 @@ function nodereference_field_settings($op, $field) {
           $views[t('Existing Views')][$view->name] = $view->name;
         }
 
-        // TODO Do we really want default views, too, or do enabled ones get included in the above function??
-        // If we really need to check for them separately, come back and fix this section, otherwise delete it.
-        //views_load_cache();
-        //$default_views = _views_get_default_views();
-        //foreach ($default_views as $view) {
-        //  $views[t('Default Views')][$view->name] = $view->name;
-        //}
-
         if (count($views) > 1) {
           $form['advanced'] = array(
              '#type' => 'fieldset',
@@ -549,21 +541,29 @@ function nodereference_allowed_values($field) {
  * for use in presenting the selection form to the user.
  */
 function _nodereference_potential_references($field, $return_full_nodes = FALSE, $string = '', $exact_string = false) {
-  if (module_exists('views') && isset($field['advanced_view']) && $field['advanced_view'] != '--' && ($view = views_get_view($field['advanced_view']))) {
+  // TODO Once filtering by title is working, get rid of "empty($string)" constraint to use this with autocomplete.
+  if (empty($string) && module_exists('views') && isset($field['advanced_view']) && $field['advanced_view'] != '--' && ($view = views_get_view($field['advanced_view']))) {
     // advanced field : referenceable nodes defined by a view
     // let views.module build the query
 
-    // TODO, update all of this for Views 2
+    $view->init();
+
+    // TODO is this the right way to do this?
+    // make sure the fields get included in the query
+    $view->set_display('page');
+    $view->display['page']->style_plugin = 'list';
 
     // arguments for the view
-    //$view_args = array();
-    //if (isset($field['advanced_view_args'])) {
+    if (isset($field['advanced_view_args'])) {
       // TODO: Support Tokens using token.module ?
-      //$view_args = array_map(trim, explode(',', $field['advanced_view_args']));
-    //}
+      $view_args = array();
+      $view_args = array_map('trim', explode(',', $field['advanced_view_args']));
+      $view->set_arguments($view_args);
+    }
 
+    // TODO Filtering by title is not yet working in Views 2, can't do this yet??
     //if (isset($string)) {
-      //views_view_add_filter($view, 'node', 'title', $exact_string ? '=' : 'contains', $string, null);
+    //  views_view_add_filter($view, 'node', 'title', $exact_string ? '=' : 'contains', $string, null);
     //}
 
     // we do need title field, so add it if not present (unlikely, but...)
@@ -574,12 +574,9 @@ function _nodereference_potential_references($field, $return_full_nodes = FALSE,
     //views_load_cache();
     //views_sanitize_view($view);
 
-    // make sure the fields get included in the query
-    $view->init('page');
-    //$view->page_type = 'list';
-
     // make sure the query is not cached
     $view->is_cacheable = FALSE;
+
     $view->execute();
     $options = array();
     foreach ($view->result as $row) {
