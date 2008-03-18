@@ -237,7 +237,7 @@ function nodereference_widget($op, &$node, $field, &$items) {
 
         $options = _nodereference_potential_references($field, TRUE);
         foreach ($options as $key => $value) {
-          $options[$key] = _nodereference_item($field, $value);
+          $options[$key] = _nodereference_item($field, $value, FALSE);
         }
         if (!$field['required']) {
           $options = array(0 => t('<none>')) + $options;
@@ -479,7 +479,7 @@ function nodereference_autocomplete($field_name, $string = '') {
   $matches = array();
 
   foreach (_nodereference_potential_references($field, TRUE, $string) as $row) {
-    $matches[$row->node_title .' [nid:'. $row->nid .']'] = _nodereference_item($field, $row, TRUE);
+    $matches[$row->node_title .' [nid:'. $row->nid .']'] = _nodereference_item($field, $row);
   }
   print drupal_to_js($matches);
   exit();
