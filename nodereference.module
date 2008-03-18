@@ -89,48 +89,52 @@ function nodereference_field_settings($op, $field) {
         '#default_value' => is_array($field['referenceable_types']) ? $field['referenceable_types'] : array(),
         '#options' => node_get_types('names'),
       );
-//      if (module_exists('views')) {
-//        $views = array('--' => '--');
-//        $result = db_query("SELECT name FROM {view_view} ORDER BY name");
-//        while ($view = db_fetch_array($result)) {
-//          $views[t('Existing Views')][$view['name']] = $view['name'];
-//        }
-//        views_load_cache();
-//        $default_views = _views_get_default_views();
-//        foreach ($default_views as $view) {
-//          $views[t('Default Views')][$view->name] = $view->name;
-//        }
-//        if (count($views) > 1) {
-//          $form['advanced'] = array(
-//             '#type' => 'fieldset',
-//             '#title' => t('Advanced - Nodes that can be referenced (View)'),
-//             '#collapsible' => TRUE,
-//             '#collapsed' => !isset($field['advanced_view']) || $field['advanced_view'] == '--',
-//           );
-//          $form['advanced']['advanced_view'] = array(
-//            '#type' => 'select',
-//            '#title' => t('View'),
-//            '#options' => $views,
-//            '#default_value' => isset($field['advanced_view']) ? $field['advanced_view'] : '--',
-//            '#description' => t('Choose the "Views module" view that selects the nodes that can be referenced.<br>Note :<ul><li>This will discard the "Content types" settings above. Use the view\'s "filters" section instead.</li><li>Use the view\'s "fields" section to display additional informations about candidate nodes on node creation/edition form.</li><li>Use the view\'s "sort criteria" section to determine the order in which candidate nodes will be displayed.</li></ul>'),
-//          );
-//          $form['advanced']['advanced_view_args'] = array(
-//            '#type' => 'textfield',
-//            '#title' => t('View arguments'),
-//            '#default_value' => isset($field['advanced_view_args']) ? $field['advanced_view_args'] : '',
-//            '#required' => FALSE,
-//            '#description' => t('Provide a comma separated list of arguments to pass to the view.'),
-//          );
-//        }
-//      }
+      if (module_exists('views')) {
+        $views = array('--' => '--');
+        $all_views = views_get_all_views();
+        foreach ($all_views as $view) {
+          $views[t('Existing Views')][$view->name] = $view->name;
+        }
+
+        // TODO Do we really want default views, too, or do enabled ones get included in the above function??
+        // If we really need to check for them separately, come back and fix this section, otherwise delete it.
+        //views_load_cache();
+        //$default_views = _views_get_default_views();
+        //foreach ($default_views as $view) {
+        //  $views[t('Default Views')][$view->name] = $view->name;
+        //}
+
+        if (count($views) > 1) {
+          $form['advanced'] = array(
+             '#type' => 'fieldset',
+             '#title' => t('Advanced - Nodes that can be referenced (View)'),
+             '#collapsible' => TRUE,
+             '#collapsed' => !isset($field['advanced_view']) || $field['advanced_view'] == '--',
+           );
+          $form['advanced']['advanced_view'] = array(
+            '#type' => 'select',
+            '#title' => t('View'),
+            '#options' => $views,
+            '#default_value' => isset($field['advanced_view']) ? $field['advanced_view'] : '--',
+            '#description' => t('Choose the "Views module" view that selects the nodes that can be referenced.<br>Note :<ul><li>This will discard the "Content types" settings above. Use the view\'s "filters" section instead.</li><li>Use the view\'s "fields" section to display additional informations about candidate nodes on node creation/edition form.</li><li>Use the view\'s "sort criteria" section to determine the order in which candidate nodes will be displayed.</li></ul>'),
+          );
+          $form['advanced']['advanced_view_args'] = array(
+            '#type' => 'textfield',
+            '#title' => t('View arguments'),
+            '#default_value' => isset($field['advanced_view_args']) ? $field['advanced_view_args'] : '',
+            '#required' => FALSE,
+            '#description' => t('Provide a comma separated list of arguments to pass to the view.'),
+          );
+        }
+      }
       return $form;
 
     case 'save':
       $settings = array('referenceable_types');
-//      if (module_exists('views')) {
-//        $settings[] = 'advanced_view';
-//        $settings[] = 'advanced_view_args';
-//      }
+      if (module_exists('views')) {
+        $settings[] = 'advanced_view';
+        $settings[] = 'advanced_view_args';
+      }
       return $settings;
 
     case 'database columns':
@@ -545,40 +549,49 @@ function nodereference_allowed_values($field) {
  * for use in presenting the selection form to the user.
  */
 function _nodereference_potential_references($field, $return_full_nodes = FALSE, $string = '', $exact_string = false) {
-//  if (module_exists('views') && isset($field['advanced_view']) && $field['advanced_view'] != '--' && ($view = views_get_view($field['advanced_view']))) {
-//    // advanced field : referenceable nodes defined by a view
-//    // let views.module build the query
-//
-//    // arguments for the view
-//    $view_args = array();
-//    if (isset($field['advanced_view_args'])) {
-//      // TODO: Support Tokens using token.module ?
-//      $view_args = array_map(trim, explode(',', $field['advanced_view_args']));
-//    }
-//
-//    if (isset($string)) {
-//      views_view_add_filter($view, 'node', 'title', $exact_string ? '=' : 'contains', $string, null);
-//    }
-//
-//    // we do need title field, so add it if not present (unlikely, but...)
-//    $has_title = array_reduce($view->field, create_function('$a, $b', 'return ($b["field"] == "title") || $a;'), false);
-//    if (!$has_title) {
-//      views_view_add_field($view, 'node', 'title', '');
-//    }
-//    views_load_cache();
-//    views_sanitize_view($view);
-//
-//    // make sure the fields get included in the query
-//    $view->page = true;
-//    $view->page_type = 'list';
-//
-//    // make sure the query is not cached
-//    $view->is_cacheable = FALSE;
-//
-//    $view_result = views_build_view('result', $view, $view_args);
-//    $result = $view_result['result'];
-//  }
-//  else {
+  if (module_exists('views') && isset($field['advanced_view']) && $field['advanced_view'] != '--' && ($view = views_get_view($field['advanced_view']))) {
+    // advanced field : referenceable nodes defined by a view
+    // let views.module build the query
+
+    // TODO, update all of this for Views 2
+
+    // arguments for the view
+    //$view_args = array();
+    //if (isset($field['advanced_view_args'])) {
+      // TODO: Support Tokens using token.module ?
+      //$view_args = array_map(trim, explode(',', $field['advanced_view_args']));
+    //}
+
+    //if (isset($string)) {
+      //views_view_add_filter($view, 'node', 'title', $exact_string ? '=' : 'contains', $string, null);
+    //}
+
+    // we do need title field, so add it if not present (unlikely, but...)
+    //$has_title = array_reduce($view->field, create_function('$a, $b', 'return ($b["field"] == "title") || $a;'), false);
+    //if (!$has_title) {
+    //  views_view_add_field($view, 'node', 'title', '');
+    //}
+    //views_load_cache();
+    //views_sanitize_view($view);
+
+    // make sure the fields get included in the query
+    $view->init('page');
+    //$view->page_type = 'list';
+
+    // make sure the query is not cached
+    $view->is_cacheable = FALSE;
+    $view->execute();
+    $options = array();
+    foreach ($view->result as $row) {
+      foreach ($view->field as $field) {
+        if (!empty($field['handler']) && is_object($field['handler'])) {
+          $options[$row->nid][] = theme('views_view_field', $view, $field, $row);
+        }
+      }
+    }
+    return $options;
+  }
+  else {
     // standard field : referenceable nodes defined by content types
     // build the appropriate query
     $related_types = array();
@@ -606,7 +619,7 @@ function _nodereference_potential_references($field, $return_full_nodes = FALSE,
     }
 
     $result = db_query(db_rewrite_sql("SELECT n.nid, n.title AS node_title, n.type AS node_type FROM {node} n WHERE ". $related_clause ." ORDER BY n.title, n.type"), $args);
-//  }
+  }
 
   $rows = array();
 
@@ -637,30 +650,32 @@ function nodereference_autocomplete($field_name, $string = '') {
 }
 
 function _nodereference_item($field, $item, $html = FALSE) {
-//  if (module_exists('views') && isset($field['advanced_view']) && $field['advanced_view'] != '--' && ($view = views_get_view($field['advanced_view']))) {
-//    $output = theme('nodereference_item_advanced', $item, $view);
-//    if (!$html) {
-//      // Views theming runs check_plain (htmlentities) on the values.
-//      // We reverse that with html_entity_decode.
-//      $output = html_entity_decode(strip_tags($output), ENT_QUOTES);
-//    }
-//  }
-//  else {
+  if (module_exists('views') && isset($field['advanced_view']) && $field['advanced_view'] != '--' && ($view = views_get_view($field['advanced_view']))) {
+    $field_names = array();
+    foreach ($view->field as $name => $viewfield) {
+      $field_names[] = $name;
+    }
+    $output = theme('nodereference_item_advanced', $item, $field_names, $view);
+    if (!$html) {
+      // Views theming runs check_plain (htmlentities) on the values.
+      // We reverse that with html_entity_decode.
+      $output = html_entity_decode(strip_tags($output), ENT_QUOTES);
+    }
+  }
+  else {
     $output = theme('nodereference_item_simple', $item);
     $output = $html ? check_plain($output) : $output;
-//  }
+  }
   return $output;
 }
 
-function theme_nodereference_item_advanced($item, $view) {
-  $fields = _views_get_fields();
+function theme_nodereference_item_advanced($item, $field_names, $view) {
   $item_fields = array();
-  foreach ($view->field as $field) {
-    $value = views_theme_field('views_handle_field', $field['queryname'], $fields, $field, $item, $view);
+  foreach ($item as $delta => $value) {
     // remove link tags (ex : for node titles)
     $value = preg_replace('/<a[^>]*>(.*)<\/a>/iU', '$1', $value);
     if (!empty($value)) {
-      $item_fields[] = "<span class='view-field view-data-$field[queryname]'>$value</span>";;
+      $item_fields[] = "<span class='view-field view-data-$field_names[$delta]'>$value</span>";;
     }
   }
   $output = implode(' - ', $item_fields);
