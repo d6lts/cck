@@ -112,7 +112,7 @@ function text_theme() {
 function text_field_info() {
   return array(
     'text' => array(
-      'label' => 'Text',
+      'label' => t('Text'),
       ),
     );
 }
@@ -324,12 +324,12 @@ function text_content_is_empty($item, $field) {
 function text_field_formatter_info() {
   return array(
     'default' => array(
-      'label' => 'Default',
+      'label' => t('Default'),
       'field types' => array('text'),
       'multiple values' => CONTENT_HANDLE_CORE,
     ),
     'plain' => array(
-      'label' => 'Plain text',
+      'label' => t('Plain text'),
       'field types' => array('text'),
       'multiple values' => CONTENT_HANDLE_CORE,
     ),
@@ -397,7 +397,7 @@ function text_field_formatter($field, $item, $formatter, $node) {
 function text_widget_info() {
   return array(
     'text_textfield' => array(
-      'label' => 'Text Field',
+      'label' => t('Text Field'),
       'field types' => array('text'),
     ),
   );

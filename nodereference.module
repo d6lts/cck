@@ -65,7 +65,7 @@ function nodereference_theme() {
 function nodereference_field_info() {
   return array(
     'nodereference' => array(
-      'label' => 'Node Reference',
+      'label' => t('Node Reference'),
       'description' => t('Store the id of a related node as an integer value.'),
       'callbacks' => array(
         'tables' => CONTENT_CALLBACK_DEFAULT,
@@ -199,22 +199,22 @@ function nodereference_content_is_empty($item, $field) {
 function nodereference_field_formatter_info() {
   return array(
     'default' => array(
-      'label' => 'Title (link)',
+      'label' => t('Title (link)'),
       'field types' => array('nodereference'),
       'multiple values' => CONTENT_HANDLE_CORE,
     ),
     'plain' => array(
-      'label' => 'Title (no link)',
+      'label' => t('Title (no link)'),
       'field types' => array('nodereference'),
       'multiple values' => CONTENT_HANDLE_CORE,
     ),
     'full' => array(
-      'label' => 'Full node',
+      'label' => t('Full node'),
       'field types' => array('nodereference'),
       'multiple values' => CONTENT_HANDLE_CORE,
     ),
     'teaser' => array(
-      'label' => 'Teaser',
+      'label' => t('Teaser'),
       'field types' => array('nodereference'),
       'multiple values' => CONTENT_HANDLE_CORE,
     ),
@@ -301,20 +301,20 @@ function _nodereference_titles($nid, $known_title = NULL) {
 function nodereference_widget_info() {
   return array(
     'nodereference_select' => array(
-      'label' => 'Select List',
+      'label' => t('Select List'),
       'field types' => array('nodereference'),
       'multiple values' => CONTENT_HANDLE_MODULE,
       'callbacks' => array(
         'default value' => CONTENT_CALLBACK_DEFAULT,
-        ),
+      ),
     ),
     'nodereference_autocomplete' => array(
-      'label' => 'Autocomplete Text Field',
+      'label' => t('Autocomplete Text Field'),
       'field types' => array('nodereference'),
       'multiple values' => CONTENT_HANDLE_CORE,
       'callbacks' => array(
         'default value' => CONTENT_CALLBACK_DEFAULT,
-        ),
+      ),
     ),
   );
 }

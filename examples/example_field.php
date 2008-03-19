@@ -104,7 +104,7 @@ function text_theme() {
 function text_field_info() {
   return array(
     'text' => array(
-      'label' => 'Text',
+      'label' => t('Text'),
       'callbacks' => array(
         'tables' => CONTENT_CALLBACK_DEFAULT,
         'arguments' => CONTENT_CALLBACK_DEFAULT,
@@ -380,17 +380,17 @@ function text_content_is_empty($item, $field) {
 function text_field_formatter_info() {
   return array(
     'default' => array(
-      'label' => 'Default',
+      'label' => t('Default'),
       'field types' => array('text'),
       'multiple values' => CONTENT_HANDLE_CORE,
     ),
     'plain' => array(
-      'label' => 'Plain text',
+      'label' => t('Plain text'),
       'field types' => array('text'),
       'multiple values' => CONTENT_HANDLE_CORE,
     ),
     'trimmed' => array(
-      'label' => 'Trimmed',
+      'label' => t('Trimmed'),
       'field types' => array('text'),
       'multiple values' => CONTENT_HANDLE_CORE,
     ),
@@ -473,7 +473,7 @@ function text_field_formatter($field, $item, $formatter, $node) {
 function text_widget_info() {
   return array(
     'text_textfield' => array(
-      'label' => 'Text Field',
+      'label' => t('Text Field'),
       'field types' => array('text'),
       'multiple values' => CONTENT_HANDLE_CORE,
       'callbacks' => array(
@@ -481,7 +481,7 @@ function text_widget_info() {
         ),
     ),
     'text_textarea' => array(
-      'label' => 'Text Area',
+      'label' => t('Text Area'),
       'field types' => array('text'),
       'multiple values' => CONTENT_HANDLE_CORE,
       'callbacks' => array(

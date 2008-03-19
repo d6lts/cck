@@ -49,7 +49,7 @@ function userreference_theme() {
 function userreference_field_info() {
   return array(
     'userreference' => array(
-      'label' => 'User Reference',
+      'label' => t('User Reference'),
       'description' => t('Store the id of a related user as an integer value.'),
       'callbacks' => array(
         'tables' => CONTENT_CALLBACK_DEFAULT,
@@ -137,12 +137,12 @@ function userreference_content_is_empty($item, $field) {
 function userreference_field_formatter_info() {
   return array(
     'default' => array(
-      'label' => 'Default',
+      'label' => t('Default'),
       'field types' => array('userreference'),
       'multiple values' => CONTENT_HANDLE_CORE,
     ),
     'plain' => array(
-      'label' => 'Plain text',
+      'label' => t('Plain text'),
       'field types' => array('userreference'),
       'multiple values' => CONTENT_HANDLE_CORE,
     ),
@@ -188,7 +188,7 @@ function theme_userreference_formatter_plain($element) {
 function userreference_widget_info() {
   return array(
     'userreference_select' => array(
-      'label' => 'Select List',
+      'label' => t('Select List'),
       'field types' => array('userreference'),
       'multiple values' => CONTENT_HANDLE_MODULE,
       'callbacks' => array(
@@ -196,7 +196,7 @@ function userreference_widget_info() {
         ),
     ),
     'userreference_autocomplete' => array(
-      'label' => 'Autocomplete Text Field',
+      'label' => t('Autocomplete Text Field'),
       'field types' => array('userreference'),
       'multiple values' => CONTENT_HANDLE_CORE,
       'callbacks' => array(

@@ -38,7 +38,7 @@ function number_theme() {
 function number_field_info() {
   return array(
     'number_integer' => array(
-      'label' => 'Integer',
+      'label' => t('Integer'),
       'description' => t('Store a number in the database as an integer.'),
       'callbacks' => array(
         'tables' => CONTENT_CALLBACK_DEFAULT,
@@ -46,7 +46,7 @@ function number_field_info() {
         ),
       ),
     'number_decimal' => array(
-      'label' => 'Decimal',
+      'label' => t('Decimal'),
       'description' => t('Store a number in the database in a fixed decimal format.'),
       'callbacks' => array(
         'tables' => CONTENT_CALLBACK_DEFAULT,
@@ -54,7 +54,7 @@ function number_field_info() {
         ),
       ),
     'number_float' => array(
-      'label' => 'Float',
+      'label' => t('Float'),
       'description' => t('Store a number in the database in a floating point format.'),
       'callbacks' => array(
         'tables' => CONTENT_CALLBACK_DEFAULT,
@@ -258,7 +258,7 @@ function number_field_formatter_info() {
     'fr_0'    => array('label' => '9 999',           'multiple values' => CONTENT_HANDLE_CORE, 'field types' => array('number_integer', 'number_decimal', 'number_float')),
     'fr_1'    => array('label' => '9 999, 9',        'multiple values' => CONTENT_HANDLE_CORE, 'field types' => array('number_decimal', 'number_float')),
     'fr_2'    => array('label' => '9 999, 99',       'multiple values' => CONTENT_HANDLE_CORE, 'field types' => array('number_decimal', 'number_float')),
-    'unformatted' => array('label' => 'unformatted', 'multiple values' => CONTENT_HANDLE_CORE, 'field types' => array('number_integer', 'number_decimal', 'number_float')),
+    'unformatted' => array('label' => t('unformatted'), 'multiple values' => CONTENT_HANDLE_CORE, 'field types' => array('number_integer', 'number_decimal', 'number_float')),
   );
 }
 
@@ -337,12 +337,12 @@ function theme_number_formatter_generic($element) {
 function number_widget_info() {
   return array(
     'number' => array(
-      'label' => 'Text Field',
+      'label' => t('Text Field'),
       'field types' => array('number_integer', 'number_decimal', 'number_float'),
       'multiple values' => CONTENT_HANDLE_CORE,
       'callbacks' => array(
         'default value' => CONTENT_CALLBACK_DEFAULT,
-        ),
+      ),
     ),
   );
 }
