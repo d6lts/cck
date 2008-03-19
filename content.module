@@ -339,7 +339,7 @@ function content_view(&$node, $teaser = FALSE, $page = FALSE) {
   _content_field_invoke('sanitize', $node, $teaser, $page);
 
   // Merge fields.
-  $additions = _content_field_invoke_default('view', $node);
+  $additions = _content_field_invoke_default('view', $node, $teaser, $page);
   $node->content = array_merge((array) $node->content, $additions);
 
   // Adjust weights for non-CCK fields.
