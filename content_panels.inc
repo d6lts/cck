@@ -27,6 +27,8 @@ function content_panels_content_types() {
  */
 function content_content_node_cck_group($conf, $panel_args, $context) {
   $node = isset($context->data) ? drupal_clone($context->data) : NULL;
+
+  $blok = new stdClass();
   $block->module = 'cck_group';
 
   if ($node) {
@@ -36,26 +38,19 @@ function content_content_node_cck_group($conf, $panel_args, $context) {
     // Get the "machine name" of the group from the options
     $groupname = $conf['group'];
 
-    // Set the subject to the nice name of the group
-    $block->subject = $node->content[$groupname]['#title'];
-
     // Print out the contents of the given group
     // Note, not using drupal_render($node->content[$groupname]) here to avoid printing the fieldset
+    $vars = array();
     if (is_array($node->content[$groupname])) {
       foreach ($node->content[$groupname] as $key => $value) {
-        if (is_array($value)) {
-          if (array_key_exists('#value', $value)) {
-            $output .= $value['#value'] ;
-          }
+        if (isset($value['#value'])) {
+          $vars[$key] = $value['#value'];
         }
       }
     }
 
-    if (empty($output)) {
-      // Output the given empty text
-      $output = $conf['empty'];
-    }
-    $block->content = $output;
+    $block->subject = $node->content[$groupname]['#title'];
+    $block->content = $vars ? theme('panels_content_group', $vars, $node->nid) : $conf['empty'];
     $block->delta = $node->nid;
   }
   else {
@@ -65,6 +60,13 @@ function content_content_node_cck_group($conf, $panel_args, $context) {
   }
 
   return $block;
+}
+
+/**
+ * Allows users to theme the group
+ */
+function theme_panels_content_group($vars, $nid) {
+  return implode('', $fields);
 }
 
 /**
