@@ -506,7 +506,7 @@ function content_copy_record_macro($form, &$form_state) {
       else {
         // The db fetch occurred successfully, unserialize the data blob and
         // insert it into a new "display_settings" field of the data.
-        if ($display_settings != unserialize($row_info['display_settings'])) {
+        if ($display_settings = unserialize($row_info['display_settings'])) {
           $edit['display_settings'] = $display_settings;
         }
       }
