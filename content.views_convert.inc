@@ -1,4 +1,5 @@
 <?php
+echo 'CCK';
 //$Id$
 /**
  * @file
@@ -49,12 +50,12 @@ function content_views_convert($display, $type, &$view, $views_field) {
   // Now update values, options, etc. to those selected in the imported view.
   switch ($type) {
     case 'field':
-      $view->display[$type]->display_options['fields'][$field['field']]['format'] = $field['options'];
+      $view->display[$display]->display_options['fields'][$field['field']]['format'] = $field['options'];
       if ($field['handler'] == 'content_views_field_handler_group') {
-        $view->display[$type]->display_options['fields'][$field['field']]['multiple']['group'] = 1;
+        $view->display[$display]->display_options['fields'][$field['field']]['multiple']['group'] = 1;
       }
       else {
-        $view->display[$type]->display_options['fields'][$field['field']]['multiple']['group'] = 0;
+        $view->display[$display]->display_options['fields'][$field['field']]['multiple']['group'] = 0;
       }
       return;
 
