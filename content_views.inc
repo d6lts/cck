@@ -47,11 +47,6 @@ function content_views_field_views_data($field) {
 
     $data = array();
     $data['table']['group']  = t('Field');
-    $data['table']['base'] = array(
-      'field' => 'vid',
-      'title' => t('Field'),
-      'help' => t('The field type allows views of Content module fields.'),
-    );
 
     $data['table']['join']['node'] = array(
       'handler' => 'views_join',
