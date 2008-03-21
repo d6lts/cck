@@ -99,6 +99,19 @@ function userreference_field_settings($op, $field) {
           'extra' => array('field' => $field),
         ),
       );
+
+    case 'views data':
+      $data = content_views_field_views_data($field);
+      $db_info = content_database_info($field);
+      $table_alias = 'node_data_'. $field['field_name'];
+
+      $data[$table_alias][$field['field_name']]['relationship'] = array(
+        'base' => 'users',
+        'field' => $db_info['columns']['uid']['column'],
+        'handler' => 'views_handler_relationship',
+      );
+      return $data;
+
   }
 }
 

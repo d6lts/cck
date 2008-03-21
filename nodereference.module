@@ -152,10 +152,9 @@ function nodereference_field_settings($op, $field) {
       $table_alias = 'node_data_'. $field['field_name'];
 
       $data[$table_alias][$field['field_name']]['relationship'] = array(
+        'base' => 'node',
         'field' => $db_info['columns']['nid']['column'],
-        'tablename' => $db_info['table'],
         'handler' => 'views_handler_relationship',
-        'content_field_name' => $field['field_name'],
       );
       return $data;
   }
