@@ -302,7 +302,7 @@ function _fieldgroup_field_get_group($content_type, $field_name) {
  * Implementation of hook_form_alter()
  */
 function fieldgroup_form_alter(&$form, $form_state, $form_id) {
-  if (isset($form['type']) && $form['type']['#value'] .'_node_form' == $form_id) {
+  if (isset($form['type']) && isset($form['#node']) && $form['type']['#value'] .'_node_form' == $form_id) {
     foreach (fieldgroup_groups($form['type']['#value']) as $group_name => $group) {
       $form[$group_name] = array(
         '#type' => 'fieldset',
