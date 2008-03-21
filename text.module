@@ -93,7 +93,7 @@ function text_field_settings($op, $field) {
       );
       $form['allowed_values_fieldset']['advanced_options'] = array(
         '#type' => 'fieldset',
-        '#title' => t('Php code'),
+        '#title' => t('PHP code'),
         '#collapsible' => TRUE,
         '#collapsed' => empty($field['allowed_values_php']),
       );

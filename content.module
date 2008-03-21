@@ -1399,7 +1399,7 @@ function content_transpose_array_rows_cols($array) {
  *  Create an array of the allowed values for this field.
  *
  *  Used by number and text fields, expects to find either
- *  php code that will return the correct value, or a string
+ *  PHP code that will return the correct value, or a string
  *  with keys and labels separated with '|' and with each
  *  new value on its own line.
  */
