@@ -12,7 +12,7 @@
 function optionwidgets_help($section) {
   if (preg_match('|^admin/content/types/([^/]*)/fields/([^/]*)$|', $section, $matches)) {
     if (($field = content_fields($matches[2], $matches[1])) && in_array($field['widget']['type'], array_keys(optionwidgets_widget_info()))) {
-      $output = t('Create a list of options as a list in <strong>Allowed values</strong> or as an array in Php code at the bottom of this page. These values will be the same for the %field in all content types. ', array('%field' => $field['widget']['label']));
+      $output = t('Create a list of options as a list in <strong>Allowed values</strong> or as an array in PHP code at the bottom of this page. These values will be the same for the %field in all content types. ', array('%field' => $field['widget']['label']));
       if ($field['widget']['type'] == 'options_onoff') {
         $output .= '<br/>'. t('For a \'Single on/off checkbox\' widget, define the \'off\' value first, then the \'on\' value in the <strong>Allowed values</strong> section. Note that the checkbox will be labeled with the label of the \'on\' value.');
       }
