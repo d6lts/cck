@@ -47,7 +47,6 @@ function content_views_field_views_data($field) {
 
     $data = array();
     $data['table']['group']  = t('Field');
-
     $data['table']['join']['node'] = array(
       'handler' => 'views_join',
       'arguments' => array($db_info['table'], 'node', 'vid', 'vid')
@@ -121,6 +120,10 @@ class views_handler_field_content extends views_handler_field_node {
 
   function options(&$options) {
     parent::options($options);
+    $field = $this->content_field;
+
+    // Override views_handler_field_node's default label
+    $options['label'] = $field['widget']['label'];
 
     $options['format'] = 'default';
     $options['multiple'] = array(
@@ -129,15 +132,15 @@ class views_handler_field_content extends views_handler_field_node {
       'multiple_from' => '',
       'multiple_reversed' => FALSE,
     );
-
   }
 
   /**
    * Provide formatter and 'group multiple values' option.
    */
   function options_form(&$form, &$form_state) {
-    // TODO : not sure we want this (link to node ... ) ?
     parent::options_form($form, $form_state);
+    // TODO : do we want the 'link to node' checkbox ? That's usually formatters business...
+
     $field = $this->content_field;
     $options = $this->options;
 
@@ -185,7 +188,6 @@ class views_handler_field_content extends views_handler_field_node {
       '#default_value' => $options['multiple']['multiple_reversed'],
       '#suffix' => '</div>',
     );
-
   }
 
   function options_validate($form, &$form_state) { }
@@ -229,48 +231,75 @@ class views_handler_field_content extends views_handler_field_node {
     }
   }
 
-  function render($values) {
+  function pre_render($values) {
     $field = $this->content_field;
     $db_info = content_database_info($field);
     $options = $this->options;
 
-    // $values will be used as a fake $node object; we provide a build_mode
-    // for rendering.
-    $values->build_mode = 'views';
+    $this->field_values = array();
 
-    if ($this->defer_query) {
-      // TODO : do this in pre_render for all rows in one query !!
-      // 'Group multiple values' : we retrieve all the values in a separate query...
+    if ($this->defer_query && $values) {
+      // Build the list of nids to retrieve.
+      // TODO : try fetching from cache_content first ??
+      $nids = array();
+      foreach ($values as $value) {
+        $nids[] = $value->nid;
+      }
 
+      // List columns to retrieve.
+      $table_alias = "node_data_$field[field_name]";
+      $query_columns = array("$table_alias.delta AS delta");
       foreach ($db_info['columns'] as $column => $attributes) {
-        $query_columns[] = "node_data_$field[field_name].$attributes[column] AS $column";
+        $query_columns[] = "$table_alias.$attributes[column] AS $column";
       }
 
       // Add node.nid as the first item in the field list to keep db_rewrite_sql()
       // from trying to force DISTINCT on the nid field of nodereference fields.
       $query = "SELECT node.nid, ". implode(', ', $query_columns) .
                " FROM {node} node".
-               " LEFT JOIN {". $db_info['table'] ."} node_data_$field[field_name] ON node.vid = node_data_$field[field_name].vid".
-               " WHERE node.nid = ".$values->{$this->nid_field}.
-               " ORDER BY node_data_$field[field_name].delta ". ($options['multiple']['multiple_reversed'] ? 'DESC' : 'ASC');
+               " LEFT JOIN {". $db_info['table'] ."} $table_alias ON node.vid = $table_alias.vid".
+               " WHERE node.nid IN (". implode(',', $nids) .")".
+               " ORDER BY nid ASC, node_data_$field[field_name].delta ". ($options['multiple']['multiple_reversed'] ? 'DESC' : 'ASC');
       $query = db_rewrite_sql($query, 'node');
-      // Select all deltas or only a subset.
+
+      // TODO : Select all deltas or only a subset.
       $result = $options['multiple']['multiple_number'] ? db_query_range($query, $options['multiple']['multiple_from'], $options['multiple']['multiple_number']) : db_query($query);
 
-      $items = array();
       while ($item = db_fetch_array($result)) {
-        $items[] = content_format($field, $item, $options['format'], $values);
+        $this->field_values[$item['nid']][$item['delta']] = $item;
       }
-      // TODO : could we use generic field theming here ?
+    }
+    else {
+      foreach ($values as $value) {
+        $item = array();
+        foreach ($db_info['columns'] as $column => $attributes) {
+          $item[$column] = $value->{$this->table_alias .'_'. $attributes['column']};
+        }
+        $this->field_values[$value->{$this->nid_field}][0] = $item;
+      }
+    }
+  }
+
+  function render($values) {
+    $field = $this->content_field;
+    $options = $this->options;
+
+    // $values will be used as a fake $node object; we provide a build_mode
+    // for rendering.
+    // TODO : we can stick any value in there - what would make most sense ?  row_style ?
+    $values->build_mode = 'views';
+
+    $items = array();
+    foreach ($this->field_values[$values->{$this->nid_field}] as $item) {
+      $items[] = content_format($field, $item, $options['format'], $values);
+    }
+
+    if (count($items) > 1) {
+      // TODO : could we use generic field display ?
       return theme('content_view_multiple_field', $items, $field, $values);
     }
     else {
-      // Non-multiple field or 'Group multiple values' unchecked :
-      $item = array();
-      foreach ($db_info['columns'] as $column => $attributes) {
-        $item[$column] = $values->{$this->table_alias .'_'. $attributes['column']};
-      }
-      return content_format($field, $item, $options['format'], $values);
+      return $items[0];
     }
   }
 }
