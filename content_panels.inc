@@ -66,7 +66,7 @@ function content_content_node_cck_group($conf, $panel_args, $context) {
  * Allows users to theme the group
  */
 function theme_panels_content_group($vars, $nid) {
-  return implode('', $fields);
+  return implode('', $vars);
 }
 
 /**
