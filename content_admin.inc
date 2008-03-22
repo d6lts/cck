@@ -714,29 +714,22 @@ function _content_admin_field(&$form_state, $type_name, $field_name) {
       '#collapsible' => TRUE,
       '#collapsed' => TRUE,
     );
+
+    // Default value widget.
     $default_value = isset($field['widget']['default_value']) ? $field['widget']['default_value'] : array();
-    $node = array();
+    $widget_form = array('#node' => (object) array('type' => $type_name));
+    $widget_form_state = array('values' => array($field['field_name'] => $default_value));
     // Make sure the default value is not a required field.
     $widget_field = $field;
     $widget_field['required'] = FALSE;
-    // Set up form info that the default value widget will need to find in the form.
-    $form['#field_info'] = array($widget_field['field_name'] => $widget_field);
-    $widget_form = array('#node' => $node);
-    // When multiple values are handled by the content module, we'll have a zero
-    // delta, but when multiple values are handled by the widget module, we
-    // must use the returned value as-is.
-    if (content_handle('widget', 'multiple values', $field) == CONTENT_HANDLE_CORE) {
-      $widget_items = array($field['field_name'] => array(0 => $default_value));
-    }
-    else {
-      $widget_items = array($field['field_name'] => array($default_value));
-    }
-    $widget_form_state = array('values' => $widget_items);
     module_load_include('inc', 'content', 'content_node_form');
     $form_element = content_field_form($widget_form, $widget_form_state, $widget_field, 0);
-
     $form['widget']['default_value_fieldset']['default_value_widget'] = $form_element;
     $form['widget']['default_value_fieldset']['default_value_widget']['#tree'] = TRUE;
+    // Set up form info that the default value widget will need to find in the form.
+    $form['#field_info'] = array($widget_field['field_name'] => $widget_field);
+
+    // Advanced : PHP code.
     $form['widget']['default_value_fieldset']['advanced_options'] = array(
       '#type' => 'fieldset',
       '#title' => t('PHP code'),
