@@ -133,3 +133,107 @@ function content_admin_edit_node_cck_group($id, $parents, $conf = array()) {
 function content_admin_title_node_cck_group($conf, $context) {
   return t('"@s" node cck group', array('@s' => $context->identifier));
 }
+
+
+function content_panels_relationships() {
+  $args = array();
+  if (module_exists('nodereference')) {
+    $args['node_from_noderef'] = array(
+      'title' => t('Node from reference'),
+      'keyword' => 'nodereference',
+      'description' => t('Adds a node from a node reference in a node context; if multiple nodes are referenced, this will get the first referenced node only.'),
+      'required context' => new panels_required_context(t('Node'), 'node'),
+      'context' => 'content_node_from_noderef_context',
+      'settings form' => 'content_node_from_noderef_settings_form',
+      'settings form validate' => 'content_node_from_noderef_settings_form_validate',
+    );
+  }
+  if (module_exists('userreference')) {
+    $args['user_from_userref'] = array(
+      'title' => t('User from reference'),
+      'keyword' => 'userreference',
+      'description' => t('Adds a user from a user reference in a node context; if multiple users are referenced, this will get the first referenced user only.'),
+      'required context' => new panels_required_context(t('Node'), 'node'),
+      'context' => 'content_user_from_userref_context',
+      'settings form' => 'content_usere_from_userref_settings_form',
+      'settings form validate' => 'content_user_from_userref_settings_form_validate',
+    );
+  }
+  return $args;
+}
+
+/**
+ * Return a new context based on an existing context
+ */
+function content_node_from_noderef_context($context = NULL, $conf) {
+  // If unset it wants a generic, unfilled context, which is just NULL
+  if (empty($context->data)) {
+    return panels_context_create_empty('node', NULL);
+  }
+
+  if (isset($context->data->{$conf['field_name']}[0]['nid']) && ($nid = $context->data->{$conf['field_name']}[0]['nid'])) {
+    if ($node = node_load($nid)) {
+      return panels_context_create('node', $node);
+    }
+  }
+}
+
+/**
+ * Settings form for the relationship
+ */
+function content_node_from_noderef_settings_form($conf) {
+  $options = array();
+  foreach (content_fields() as $field) {
+    if ($field['type'] == 'nodereference') {
+      $options[$field['field_name']] = t($field['widget']['label']);
+    }
+  }
+  $form['field_name'] = array(
+    '#title' => t('Node reference field'),
+    '#type' => 'select',
+    '#options' => $options,
+    '#default_value' => $conf['field_name'],
+    '#prefix' => '<div class="clear-block">',
+    '#suffix' => '</div>',
+  );
+
+  return $form;
+}
+
+/**
+ * Return a new context based on an existing context
+ */
+function content_user_from_userref_context($context = NULL, $conf) {
+  // If unset it wants a generic, unfilled context, which is just NULL
+  if (empty($context->data)) {
+    return panels_context_create_empty('user', NULL);
+  }
+
+  if (isset($context->data->{$conf['field_name']}[0]['uid']) && ($uid = $context->data->{$conf['field_name']}[0]['uid'])) {
+    if ($account = user_load(array('uid' => $uid))) {
+      return panels_context_create('user', $account);
+    }
+  }
+}
+
+/**
+ * Settings form for the relationship
+ */
+function content_user_from_userref_context_settings_form($conf) {
+  $options = array();
+  foreach (content_fields() as $field) {
+    if ($field['type'] == 'userreference') {
+      $options[$field['field_name']] = t($field['widget']['label']);
+    }
+  }
+  $form['field_name'] = array(
+    '#title' => t('User reference field'),
+    '#type' => 'select',
+    '#options' => $options,
+    '#default_value' => $conf['field_name'],
+    '#prefix' => '<div class="clear-block">',
+    '#suffix' => '</div>',
+  );
+
+  return $form;
+}
