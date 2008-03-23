@@ -275,7 +275,7 @@ class views_handler_field_content extends views_handler_field_node {
         foreach ($db_info['columns'] as $column => $attributes) {
           $item[$column] = $value->{$this->table_alias .'_'. $attributes['column']};
         }
-        $this->field_values[$value->{$this->nid_field}][0] = $item;
+        $this->field_values[$value->{$this->additional_fields['nid']}][0] = $item;
       }
     }
   }
@@ -290,7 +290,7 @@ class views_handler_field_content extends views_handler_field_node {
     $values->build_mode = 'views';
 
     $items = array();
-    foreach ($this->field_values[$values->{$this->nid_field}] as $item) {
+    foreach ($this->field_values[$values->{$this->additional_fields['nid']}] as $item) {
       $items[] = content_format($field, $item, $options['format'], $values);
     }
 
