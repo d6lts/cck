@@ -6,7 +6,6 @@
  */
 function content_panels_content_types() {
   $items = array();
-
   if (module_exists('fieldgroup')) {
     $items['node_cck_group'] = array(
       'title' => t('Node CCK Group'),
@@ -18,7 +17,6 @@ function content_panels_content_types() {
       'title callback' => 'content_admin_title_node_cck_group',
     );
   }
-
   return $items;
 }
 
@@ -42,10 +40,8 @@ function content_content_node_cck_group($conf, $panel_args, $context) {
     // Note, not using drupal_render($node->content[$groupname]) here to avoid printing the fieldset
     $vars = array();
     if (is_array($node->content[$groupname])) {
-      foreach ($node->content[$groupname] as $key => $value) {
-        if (isset($value['#value'])) {
-          $vars[$key] = $value['#value'];
-        }
+      foreach (element_children($node->content[$groupname]) as $key) {
+        $vars[$key] = drupal_render($node->content[$groupname][$key]);
       }
     }
 
