@@ -57,6 +57,25 @@ function content_views_field_views_data($field) {
       $columns[] = $attributes['column'];
     }
 
+    // Identify likely filters for each column based on field type.
+    $filters = array();
+    foreach($db_info['columns'] as $column => $attributes) {
+      switch ($attributes['type']) {
+        case 'numeric':
+        case 'int':
+        case 'mediumint':
+        case 'tinyint':
+        case 'bigint':
+        case 'serial':
+        case 'float':
+          $filters[] = 'views_handler_filter_numeric_content';
+          break;
+        default:
+          $filters[] = 'views_handler_filter_string_content';
+          break;
+      }
+    }
+
     $data[$field['field_name']] = array(
       'group' => t('Field'),
       'title' => t($field['widget']['label']) .' ('. $field['field_name'] .')',
@@ -79,9 +98,9 @@ function content_views_field_views_data($field) {
       ),
       'filter' => array(
         'field' => $columns[0],
-        'title' => t('@label empty', array('@label' => $field['widget']['label'])),
+        'title' => t($field['widget']['label']),
         'tablename' => $db_info['table'],
-        'handler' => 'views_handler_filter_content_is_empty',
+        'handler' => $filters[0],
         'additional fields' => $columns,
         'content_field_name' => $field['field_name'],
       ),
@@ -94,8 +113,26 @@ function content_views_field_views_data($field) {
       ),
     );
 
-    // TODO : provide several filters, arguments, sorts... ?
-    // TODO : allow field modules to provide filters etc on columns other than first one ?
+    // Add an empty/not empty filter for each field.
+    // This can't be combined with the filters above because they
+    // expect a value or they won't work, a particular problem
+    // if this filter is exposed.
+    $data[$field['field_name'] .'_empty'] = array(
+      'group' => t('Field'),
+      'title' => t('@field empty', array('@field' => $field['widget']['label'])) .' ('. $field['field_name'] .')',
+      'help' =>  t($field_types[$field['type']]['label']) .' - '. t('Appears in : @types', array('@types' => implode(', ', $types))),
+      'filter' => array(
+        'field' => $columns[0],
+        'title' => t('@field empty', array('@field' => $field['widget']['label'])),
+        'tablename' => $db_info['table'],
+        'handler' => 'views_handler_filter_content_is_empty',
+        'additional fields' => $columns,
+        'content_field_name' => $field['field_name'],
+      ),
+  );
+
+  // TODO : provide several filters, arguments, sorts... ?
+  // TODO : allow field modules to provide filters etc on columns other than first one ?
 
     return array($table_alias => $data);
   }
@@ -107,7 +144,6 @@ class views_handler_field_content extends views_handler_field_node {
 
   function construct() {
     parent::construct();
-
     $this->content_field = content_fields($this->definition['content_field_name']);
   }
 
@@ -312,6 +348,21 @@ function theme_content_view_multiple_field($items, $field, $values) {
   return $output;
 }
 
+/**
+ * Subclassed string filter adds content fields and empty/not empty
+ */
+class views_handler_filter_string_content extends views_handler_filter_string {
+  // exposed filter options
+  var $no_single = TRUE;
+  var $content_field;
+
+  function construct() {
+    parent::construct();
+    $this->content_field = content_fields($this->definition['content_field_name']);
+    $this->additional_fields = $this->definition['additional fields'];
+  }
+}
+
 class views_handler_filter_content_is_empty extends views_handler_filter_boolean_operator {
   var $content_field;
 
@@ -354,6 +405,21 @@ class views_handler_filter_content_is_empty extends views_handler_filter_boolean
       }
       $this->query->add_where($this->options['group'], implode(") OR (", $where));
     }
+  }
+}
+
+/**
+ * Subclassed numeric filter adds content fields and empty/not empty
+ */
+class views_handler_filter_numeric_content extends views_handler_filter_numeric {
+  // exposed filter options
+  var $no_single = TRUE;
+  var $content_field;
+
+  function construct() {
+    parent::construct();
+    $this->content_field = content_fields($this->definition['content_field_name']);
+    $this->additional_fields = $this->definition['additional fields'];
   }
 }
 
@@ -620,6 +686,7 @@ function content_views_argument_handler($op, &$query, $argtype, $arg = '') {
     case 'filter':
       $query->ensure_table($table);
       switch ($main_column['type']) {
+        case 'numeric':
         case 'int':
         case 'mediumint':
         case 'tinyint':
