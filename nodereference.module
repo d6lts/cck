@@ -200,7 +200,7 @@ function nodereference_field_formatter($field, $item, $formatter, $node) {
       return check_plain($titles[$item['nid']]);
 
     default:
-      return l($titles[$item['nid']], 'node/'. $item['nid']);
+      return $titles[$item['nid']] ? l($titles[$item['nid']], 'node/'. $item['nid']) : '';
   }
 }
 
