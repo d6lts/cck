@@ -1254,10 +1254,10 @@ function content_alter_db_field($previous_field, $previous_columns, $new_field, 
           }
         }
         if ($previous_field['multiple']) {
-          $result = db_query("SELECT ". implode(', ', $column_names) ." FROM {". $previous_db_info['table'] ."} c JOIN {node} n ON c.nid = n.nid WHERE delta = 0 AND n.type = '%s'", $new_field['type_name']);
+          $result = db_query("SELECT ". implode(', ', $column_names) .", c.vid, c.nid FROM {". $previous_db_info['table'] ."} c JOIN {node} n ON c.nid = n.nid WHERE delta = 0 AND n.type = '%s'", $new_field['type_name']);
         }
         else {
-          $result = db_query("SELECT ". implode(', ', $column_names) ."  FROM {". $previous_db_info['table'] ."} c JOIN {node} n ON c.nid = n.nid WHERE n.type = '%s'", $new_field['type_name']);
+          $result = db_query("SELECT ". implode(', ', $column_names) .", c.vid, c.nid FROM {". $previous_db_info['table'] ."} c JOIN {node} n ON c.nid = n.nid WHERE n.type = '%s'", $new_field['type_name']);
         }
         while ($data = db_fetch_array($result)) {
           $column_assignments = $column_assignments_default;
