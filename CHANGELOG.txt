@@ -32,6 +32,7 @@ General
 - #226549  Fix untranslatable message on fieldgroup deletion.
 - #226607  Fix untranslatable human names for field widget types.
 - #168526  Fix display settings lost on content type import / export
+- #139554, #144706 : remove unneeded db_rewrite_sql in Views 'group multiple values' handler.
 
 Field / widget modules
 - #196575  Userreference : autocomplete did not filter users by role, need custom autocomplete instead of standard user autocomplete.

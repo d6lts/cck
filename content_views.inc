@@ -146,17 +146,18 @@ function content_views_field_handler_group($field_info, $field_data, $value, $da
   $field = $field_info['content_field'];
   $items = array();
   if ($field['multiple']) {
+    $table_alias = "node_data_$field[field_name]";
     foreach ($field_info['content_db_info']['columns'] as $column => $attributes) {
-      $query_columns[] = "node_data_$field[field_name].$attributes[column] AS $column";
+      $query_columns[] = "$table_alias.$attributes[column] AS $column";
     }
-    // Add node.nid as the first item in the field list to keep db_rewrite_sql()
-    // from trying to force DISTINCT on the nid field of nodereference fields.
-    $query = "SELECT node.nid, ". implode(', ', $query_columns) .
+    // Note : this query doesn't need to run through db_rewrite_sql, since the
+    // nids we retrieve have been selected by the views query, which already takes
+    // care of this.
+    $query = "SELECT ". implode(', ', $query_columns) .
              " FROM {node} node".
-             " LEFT JOIN {". $field_info['content_db_info']['table'] ."} node_data_$field[field_name] ON node.vid = node_data_$field[field_name].vid".
+             " LEFT JOIN {". $field_info['content_db_info']['table'] ."} $table_alias ON node.vid = $table_alias.vid".
              " WHERE node.nid = ". $data->nid .
-             " ORDER BY node_data_$field[field_name].delta $order";
-    $query = db_rewrite_sql($query, 'node');
+             " ORDER BY $table_alias.delta $order";
     // Select all deltas or only a subset.
     // Currently only 'all' and first / last items are proposed to the user.
     $result = ($count == 'all') ? db_query($query) : db_query_range($query, $from, $count);
