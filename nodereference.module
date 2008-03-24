@@ -260,11 +260,12 @@ function theme_nodereference_formatter_full_teaser($element) {
       // we fall back to 'default' (node title) formatter.
       return theme('nodereference_formatter_default', $element);
     }
-    $referenced_node = node_load($element['#item']['nid']);
-    $referenced_node->referencing_node = $node;
-    $referenced_node->referencing_field = $field;
-    _nodereference_titles($element['#item']['nid'], $referenced_node->title);
-    $output = node_view($referenced_node, $element['#formatter'] == 'teaser');
+    if ($referenced_node = node_load($element['#item']['nid'])) {
+      $referenced_node->referencing_node = $node;
+      $referenced_node->referencing_field = $field;
+      _nodereference_titles($element['#item']['nid'], $referenced_node->title);
+      $output = node_view($referenced_node, $element['#formatter'] == 'teaser');
+    }
   }
   return $output;
 }
