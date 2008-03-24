@@ -289,15 +289,14 @@ class views_handler_field_content extends views_handler_field_node {
         $query_columns[] = "$table_alias.$attributes[column] AS $column";
       }
 
-      // Add node.nid as the first item in the field list to keep db_rewrite_sql()
-      // from trying to force DISTINCT on the nid field of nodereference fields.
-      $query = "SELECT node.nid, ". implode(', ', $query_columns) .
+      // Note : this query doesn't need to run through db_rewrite_sql, since the
+      // nids we retrieve have been selected by the views query, which already takes
+      // care of this.
+      $query = "SELECT ". implode(', ', $query_columns) .
                " FROM {node} node".
                " LEFT JOIN {". $db_info['table'] ."} $table_alias ON node.vid = $table_alias.vid".
                " WHERE node.nid IN (". implode(',', $nids) .")".
-               " ORDER BY nid ASC, node_data_$field[field_name].delta ". ($options['multiple']['multiple_reversed'] ? 'DESC' : 'ASC');
-      $query = db_rewrite_sql($query, 'node');
-
+               " ORDER BY nid ASC, $table_alias.delta ". ($options['multiple']['multiple_reversed'] ? 'DESC' : 'ASC');
       // TODO : Select all deltas or only a subset.
       $result = $options['multiple']['multiple_number'] ? db_query_range($query, $options['multiple']['multiple_from'], $options['multiple']['multiple_number']) : db_query($query);
 
