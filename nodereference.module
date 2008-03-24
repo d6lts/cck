@@ -225,8 +225,8 @@ function nodereference_field_formatter_info() {
  */
 function theme_nodereference_formatter_default($element) {
   $output = '';
-  if (!empty($element['#item']['nid']) && is_numeric($element['#item']['nid'])) {
-    $output = l(_nodereference_titles($element['#item']['nid']), 'node/'. $element['#item']['nid']);
+  if (!empty($element['#item']['nid']) && is_numeric($element['#item']['nid']) && ($title = _nodereference_titles($element['#item']['nid']))) {
+    $output = l($title, 'node/'. $element['#item']['nid']);
   }
   return $output;
 }
@@ -236,8 +236,8 @@ function theme_nodereference_formatter_default($element) {
  */
 function theme_nodereference_formatter_plain($element) {
   $output = '';
-  if (!empty($element['#item']['nid']) && is_numeric($element['#item']['nid'])) {
-    $output = check_plain(_nodereference_titles($element['#item']['nid']));
+  if (!empty($element['#item']['nid']) && is_numeric($element['#item']['nid']) && ($title = _nodereference_titles($element['#item']['nid']))) {
+    $output = check_plain($title);
   }
   return $output;
 }
