@@ -177,8 +177,7 @@ function nodereference_field_formatter($field, $item, $formatter, $node) {
       // we fall back to 'default' (node title) formatter.
       $formatter = 'default';
     }
-    else {
-      $referenced_node = node_load($item['nid']);
+    elseif ($referenced_node = node_load($item['nid'])) {
       $referenced_node->referencing_node = $node;
       $referenced_node->referencing_field = $field;
       $titles[$item['nid']] = $referenced_node->title;
@@ -192,10 +191,10 @@ function nodereference_field_formatter($field, $item, $formatter, $node) {
 
   switch ($formatter) {
     case 'full':
-      return node_view($referenced_node, FALSE);
+      return $referenced_node ? node_view($referenced_node, FALSE) : '';
 
     case 'teaser':
-      return node_view($referenced_node, TRUE);
+      return $referenced_node ? node_view($referenced_node, TRUE) : '';
 
     case 'plain':
       return check_plain($titles[$item['nid']]);
