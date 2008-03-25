@@ -9,6 +9,14 @@
 views_include_handlers();
 
 /**
+ * Helper function so it is possible to change the Views tablename
+ * in the future without re-writing code.
+ */
+function content_views_tablename($field) {
+  return $table_alias = 'node_data_'. $field['field_name'];
+}
+
+/**
  * Implementation of hook_views_data().
  *
  * Exposes all fields to the views system.
@@ -36,7 +44,7 @@ function content_views_field_views_data($field) {
   // TODO : is this really how we should do it ?
   if (isset($field_types[$field['type']])) {
     $db_info = content_database_info($field);
-    $table_alias = 'node_data_'. $field['field_name'];
+    $table_alias = content_views_tablename($field);
 
     $types = array();
     foreach(content_types() as $type) {
@@ -76,7 +84,7 @@ function content_views_field_views_data($field) {
       }
     }
 
-    $data[$field['field_name']] = array(
+    $data[$columns[0]] = array(
       'group' => t('Field'),
       'title' => t($field['widget']['label']) .' ('. $field['field_name'] .')',
       'help' =>  t($field_types[$field['type']]['label']) .' - '. t('Appears in : @types', array('@types' => implode(', ', $types))),
@@ -114,10 +122,9 @@ function content_views_field_views_data($field) {
     );
 
     // Add an empty/not empty filter for each field.
-    // This can't be combined with the filters above because they
-    // expect a value or they won't work, a particular problem
-    // if this filter is exposed.
-    $data[$field['field_name'] .'_empty'] = array(
+    // TODO explore ways to incorporate this into other filters
+    // so each field will have only one filter that includes this option.
+    $data[$columns[0] .'_empty'] = array(
       'group' => t('Field'),
       'title' => t('@field empty', array('@field' => $field['widget']['label'])) .' ('. $field['field_name'] .')',
       'help' =>  t($field_types[$field['type']]['label']) .' - '. t('Appears in : @types', array('@types' => implode(', ', $types))),
@@ -129,11 +136,10 @@ function content_views_field_views_data($field) {
         'additional fields' => $columns,
         'content_field_name' => $field['field_name'],
       ),
-  );
+    );
 
-  // TODO : provide several filters, arguments, sorts... ?
-  // TODO : allow field modules to provide filters etc on columns other than first one ?
-
+    // TODO : provide several filters, arguments, sorts... ?
+    // TODO : provide automatic filters for each column, not just the first?
     return array($table_alias => $data);
   }
 }
@@ -283,7 +289,7 @@ class views_handler_field_content extends views_handler_field_node {
       }
 
       // List columns to retrieve.
-      $table_alias = "node_data_$field[field_name]";
+      $table_alias = content_views_tablename($field);
       $query_columns = array("$table_alias.delta AS delta");
       foreach ($db_info['columns'] as $column => $attributes) {
         $query_columns[] = "$table_alias.$attributes[column] AS $column";
@@ -348,11 +354,9 @@ function theme_content_view_multiple_field($items, $field, $values) {
 }
 
 /**
- * Subclassed string filter adds content fields and empty/not empty
+ * Subclassed string filter adds content fields
  */
 class views_handler_filter_string_content extends views_handler_filter_string {
-  // exposed filter options
-  var $no_single = TRUE;
   var $content_field;
 
   function construct() {
@@ -362,6 +366,35 @@ class views_handler_filter_string_content extends views_handler_filter_string {
   }
 }
 
+/**
+ * Subclassed numeric filter adds content fields
+ */
+class views_handler_filter_numeric_content extends views_handler_filter_numeric {
+  var $content_field;
+
+  function construct() {
+    parent::construct();
+    $this->content_field = content_fields($this->definition['content_field_name']);
+    $this->additional_fields = $this->definition['additional fields'];
+  }
+}
+
+/**
+ * Subclassed 'in' filter adds content fields
+ */
+class views_handler_filter_in_operator_content extends views_handler_filter_in_operator {
+  var $content_field;
+
+  function construct() {
+    parent::construct();
+    $this->content_field = content_fields($this->definition['content_field_name']);
+    $this->additional_fields = $this->definition['additional fields'];
+  }
+}
+
+/**
+ * Subclassed empty/not empty filter adds content fields and empty/not empty handler
+ */
 class views_handler_filter_content_is_empty extends views_handler_filter_boolean_operator {
   var $content_field;
 
@@ -404,21 +437,6 @@ class views_handler_filter_content_is_empty extends views_handler_filter_boolean
       }
       $this->query->add_where($this->options['group'], implode(") OR (", $where));
     }
-  }
-}
-
-/**
- * Subclassed numeric filter adds content fields and empty/not empty
- */
-class views_handler_filter_numeric_content extends views_handler_filter_numeric {
-  // exposed filter options
-  var $no_single = TRUE;
-  var $content_field;
-
-  function construct() {
-    parent::construct();
-    $this->content_field = content_fields($this->definition['content_field_name']);
-    $this->additional_fields = $this->definition['additional fields'];
   }
 }
 

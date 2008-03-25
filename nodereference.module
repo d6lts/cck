@@ -135,23 +135,16 @@ function nodereference_field_settings($op, $field) {
       );
       return $columns;
 
-    case 'filters':
-      return array(
-        'default' => array(
-          'list' => '_nodereference_filter_handler',
-          'list-type' => 'list',
-          'operator' => 'views_handler_operator_or',
-          'value-type' => 'array',
-          'extra' => array('field' => $field),
-        ),
-      );
-
     case 'views data':
       $data = content_views_field_views_data($field);
       $db_info = content_database_info($field);
-      $table_alias = 'node_data_'. $field['field_name'];
+      $table_alias = content_views_tablename($field);
 
-      $data[$table_alias][$field['field_name']]['relationship'] = array(
+      // Swap the filter handler to the 'in' operator.
+      $data[$table_alias][$field['field_name'] .'_nid']['filter']['handler'] = 'views_handler_filter_in_operator_content';
+
+      // Add a relationship for related node.
+      $data[$table_alias][$field['field_name'] .'_nid']['relationship'] = array(
         'base' => 'node',
         'field' => $db_info['columns']['nid']['column'],
         'handler' => 'views_handler_relationship',

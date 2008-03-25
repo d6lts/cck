@@ -182,24 +182,16 @@ function number_field_settings($op, $field) {
         );
       }
 
-    case 'filters':
+    case 'views data':
       $allowed_values = content_allowed_values($field);
       if (count($allowed_values)) {
-        return array(
-          'default' => array(
-            'list' => $allowed_values,
-            'list-type' => 'list',
-            'operator' => 'views_handler_operator_or',
-            'value-type' => 'array',
-          ),
-        );
-      }
-      else {
-        return array(
-          'default' => array(
-            'operator' => 'views_handler_operator_gtlt',
-          ),
-        );
+        $data = content_views_field_views_data($field);
+        $db_info = content_database_info($field);
+        $table_alias = content_views_tablename($field);
+
+        // Swap the filter handler to the 'in' operator.
+        $data[$table_alias][$field['field_name'] .'_value']['filter']['handler'] = 'views_handler_filter_in_operator_content';
+        return $data;
       }
       break;
   }
