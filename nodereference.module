@@ -534,19 +534,26 @@ function nodereference_allowed_values($field) {
  * for use in presenting the selection form to the user.
  */
 function _nodereference_potential_references($field, $return_full_nodes = FALSE, $string = '', $exact_string = false) {
-  // TODO Once filtering by title is working, get rid of "empty($string)" constraint to use this with autocomplete.
-  if (empty($string) && module_exists('views') && isset($field['advanced_view']) && $field['advanced_view'] != '--' && ($view = views_get_view($field['advanced_view']))) {
+  if (module_exists('views')
+  && isset($field['advanced_view'])
+  && $field['advanced_view'] != '--'
+  && ($view = views_get_view($field['advanced_view']))) {
     // advanced field : referenceable nodes defined by a view
     // let views.module build the query
 
     $view->init();
 
     // TODO is this the right way to do this?
-    // make sure the fields get included in the query
-    $view->set_display('page');
-    $view->display['page']->style_plugin = 'list';
+    // make sure the fields get included in the query.
 
-    // arguments for the view
+    // TODO Which display should we use here?
+    // In our Views 1 to Views 2 updates we are
+    // putting fields in the 'default' display.
+    $display = 'default';
+    $view->set_display($display);
+    $view->display[$display]->style_plugin = 'list';
+
+    // Add arguments for the view.
     if (isset($field['advanced_view_args'])) {
       // TODO: Support Tokens using token.module ?
       $view_args = array();
@@ -554,20 +561,21 @@ function _nodereference_potential_references($field, $return_full_nodes = FALSE,
       $view->set_arguments($view_args);
     }
 
-    // TODO Filtering by title is not yet working in Views 2, can't do this yet??
-    //if (isset($string)) {
-    //  views_view_add_filter($view, 'node', 'title', $exact_string ? '=' : 'contains', $string, null);
-    //}
+    if (isset($string)) {
+      //We do need title field, so add it if not present (unlikely, but...)
+      if (!array_key_exists('title', $view->display[$display]->display_options['fields'])) {
+        $view->add_item($display, 'field', 'node', 'title');
+      }
+      // We use the title filter in the view, so make sure it's there.
+      if (!array_key_exists('title', $view->display[$display]->display_options['filters'])) {
+        $view->add_item($display, 'filter', 'node', 'title');
+      }
+      // TODO Is this the best way to set values?
+      $view->display[$display]->display_options['filters']['title']['value'] = $string;
+      $view->display[$display]->display_options['filters']['title']['operator'] = $exact_string ? '=' : 'contains';
+    }
 
-    // we do need title field, so add it if not present (unlikely, but...)
-    //$has_title = array_reduce($view->field, create_function('$a, $b', 'return ($b["field"] == "title") || $a;'), false);
-    //if (!$has_title) {
-    //  views_view_add_field($view, 'node', 'title', '');
-    //}
-    //views_load_cache();
-    //views_sanitize_view($view);
-
-    // make sure the query is not cached
+    // Make sure the query is not cached
     $view->is_cacheable = FALSE;
 
     $view->execute();
@@ -642,8 +650,9 @@ function nodereference_autocomplete($field_name, $string = '') {
 function _nodereference_item($field, $item, $html = FALSE) {
   if (module_exists('views') && isset($field['advanced_view']) && $field['advanced_view'] != '--' && ($view = views_get_view($field['advanced_view']))) {
     $field_names = array();
+    $view->execute();
     foreach ($view->field as $name => $viewfield) {
-      $field_names[] = $name;
+      $field_names[] = isset($viewfield->definition['content_field_name']) ? $viewfield->definition['content_field_name'] : $name;
     }
     $output = theme('nodereference_item_advanced', $item, $field_names, $view);
     if (!$html) {
