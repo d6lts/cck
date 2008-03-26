@@ -54,7 +54,7 @@ function content_views_field_views_data($field) {
     }
 
     $data = array();
-    $data['table']['group']  = t('Field');
+    $data['table']['group']  = $field_types[$field['type']]['label'];
     $data['table']['join']['node'] = array(
       'handler' => 'views_join',
       'arguments' => array($db_info['table'], 'node', 'vid', 'vid')
@@ -85,7 +85,7 @@ function content_views_field_views_data($field) {
     }
 
     $data[$columns[0]] = array(
-      'group' => t('Field'),
+      'group' => t($field_types[$field['type']]['label']),
       'title' => t($field['widget']['label']) .' ('. $field['field_name'] .')',
       'help' =>  t($field_types[$field['type']]['label']) .' - '. t('Appears in : @types', array('@types' => implode(', ', $types))),
       'field' => array(
@@ -221,7 +221,6 @@ class views_handler_field_content extends views_handler_field_node {
    * Provide text for the administrative summary
    */
   function admin_summary() {
-    // TODO : how come "Field : field_texte" is displayed (and not "Text : field_texte") ?
     // Display the formatter name.
     $field = $this->content_field;
     $field_types = _content_field_types();
@@ -391,27 +390,6 @@ class views_handler_argument_content extends views_handler_argument {
     $this->additional_fields = $this->definition['additional fields'];
   }
 }
-
-/**
- * Implementation of hook_views_tables().
- *
- * Exposes all fields to the views system.
- */
-//function content_views_tables() {
-//  $field_types = _content_field_types();
-//  $return = array();
-//  foreach (content_fields() as $field) {
-//    $module = $field_types[$field['type']]['module'];
-//    $result = module_invoke($module, 'field_settings', 'tables', $field);
-//    if (empty($result)) {
-//      $result = content_views_field_tables($field);
-//    }
-//    if (is_array($result)) {
-//      $return = array_merge($return, $result);
-//    }
-//  }
-//  return $return;
-//}
 
 function content_views_field_tables($field) {
   $field_types = _content_field_types();
