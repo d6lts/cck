@@ -121,23 +121,6 @@ function content_views_field_views_data($field) {
       ),
     );
 
-    // Add an empty/not empty filter for each field.
-    // TODO explore ways to incorporate this into other filters
-    // so each field will have only one filter that includes this option.
-    $data[$columns[0] .'_empty'] = array(
-      'group' => t('Field'),
-      'title' => t('@field empty', array('@field' => $field['widget']['label'])) .' ('. $field['field_name'] .')',
-      'help' =>  t($field_types[$field['type']]['label']) .' - '. t('Appears in : @types', array('@types' => implode(', ', $types))),
-      'filter' => array(
-        'field' => $columns[0],
-        'title' => t('@field empty', array('@field' => $field['widget']['label'])),
-        'tablename' => $db_info['table'],
-        'handler' => 'views_handler_filter_content_is_empty',
-        'additional fields' => $columns,
-        'content_field_name' => $field['field_name'],
-      ),
-    );
-
     // TODO : provide several filters, arguments, sorts... ?
     // TODO : provide automatic filters for each column, not just the first?
     return array($table_alias => $data);
@@ -363,6 +346,7 @@ class views_handler_filter_string_content extends views_handler_filter_string {
     parent::construct();
     $this->content_field = content_fields($this->definition['content_field_name']);
     $this->additional_fields = $this->definition['additional fields'];
+    $this->definition['allow empty'] = TRUE;
   }
 }
 
@@ -376,6 +360,7 @@ class views_handler_filter_numeric_content extends views_handler_filter_numeric 
     parent::construct();
     $this->content_field = content_fields($this->definition['content_field_name']);
     $this->additional_fields = $this->definition['additional fields'];
+    $this->definition['allow empty'] = TRUE;
   }
 }
 
@@ -389,54 +374,6 @@ class views_handler_filter_in_operator_content extends views_handler_filter_in_o
     parent::construct();
     $this->content_field = content_fields($this->definition['content_field_name']);
     $this->additional_fields = $this->definition['additional fields'];
-  }
-}
-
-/**
- * Subclassed empty/not empty filter adds content fields and empty/not empty handler
- */
-class views_handler_filter_content_is_empty extends views_handler_filter_boolean_operator {
-  var $content_field;
-
-  function construct() {
-    parent::construct();
-    $this->content_field = content_fields($this->definition['content_field_name']);
-    $this->additional_fields = $this->definition['additional fields'];
-  }
-
-
-  function admin_summary() {
-    if (!empty($this->options['exposed'])) {
-      return t('exposed');
-    }
-
-    return ($this->value == 'NULL') ? t('is True') : t('is False');
-  }
-
-  function value_form(&$form, &$form_state) {
-    $form['value'] = array(
-      '#type' => 'select',
-      '#options' => array('NOT NULL' => t('Not empty'), 'NULL' => t('Empty')),
-      '#default_value' => $this->value,
-      '#field_prefix' => 'Is ',
-    );
-  }
-
-  function query() {
-    $this->ensure_my_table();
-    if ($this->value == 'NULL') {
-      foreach ($this->additional_fields as $column) {
-        $this->query->add_where($this->options['group'], "$this->table_alias.$column IS NULL");
-      }
-    }
-    else {
-      // TODO : does groups allow something smarter ?
-      $where = array();
-      foreach ($this->additional_fields as $column) {
-        $where[] = "$this->table_alias.$column IS NOT NULL";
-      }
-      $this->query->add_where($this->options['group'], implode(") OR (", $where));
-    }
   }
 }
 
