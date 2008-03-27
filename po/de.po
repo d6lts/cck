@@ -17,7 +17,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: CCK\n"
 "POT-Creation-Date: 2008-03-24 03:11+0100\n"
-"PO-Revision-Date: 2008-03-24 19:35+0100\n"
+"PO-Revision-Date: 2008-03-27 19:18+0100\n"
 "Last-Translator: Alexander Hass\n"
 "Language-Team: German <lukas.gangoly@univie.ac.at>\n"
 "MIME-Version: 1.0\n"
@@ -426,11 +426,11 @@ msgstr ""
 
 #: content_panels.inc:188
 msgid "Node reference field"
-msgstr "Verweis auf Beitrag"
+msgstr ""
 
 #: content_panels.inc:226
 msgid "User reference field"
-msgstr "Verweis auf Benutzer"
+msgstr ""
 
 #: content_views.inc:71
 msgid "Group multiple values"
@@ -740,7 +740,7 @@ msgstr "Autovervollständigung der Beitragsverweise"
 #: nodereference.module:29
 #: nodereference.info:0
 msgid "Node Reference"
-msgstr "Beitragsverweis"
+msgstr ""
 
 #: nodereference.module:42
 msgid "Content types that can be referenced"
@@ -944,7 +944,7 @@ msgstr ""
 #: userreference.module:28
 #: userreference.info:0
 msgid "User Reference"
-msgstr "Verweis auf Benutzer"
+msgstr ""
 
 #: userreference.module:41
 msgid "User roles that can be referenced"
