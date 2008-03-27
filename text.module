@@ -389,6 +389,9 @@ function text_textfield_process($element, $edit, $form_state, $form) {
     '#autocomplete_path' => $element['#autocomplete_path'],
   );
 
+  if (!empty($field['max_length'])) {
+    $element[$field_key]['#maxlength'] = $field['max_length'];
+  }
   if (!empty($field['text_processing'])) {
     $filter_key = $element['#columns'][1];
     $format = isset($element['#value'][$filter_key]) ? $element['#value'][$filter_key] : FILTER_FORMAT_DEFAULT;
