@@ -261,12 +261,15 @@ class views_handler_field_content extends views_handler_field_node {
   }
 
   function pre_render($values) {
+    // There are no values to render in a summary view.
+    if (isset($this->view->build_info['summary'])) {
+      return;
+    }
     $field = $this->content_field;
     $db_info = content_database_info($field);
     $options = $this->options;
 
     $this->field_values = array();
-
     if ($this->defer_query && $values) {
       // Build the list of nids to retrieve.
       // TODO : try fetching from cache_content first ??
