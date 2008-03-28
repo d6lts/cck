@@ -142,6 +142,21 @@ class views_handler_field_content extends views_handler_field_node {
   }
 
   /**
+   * This provides a method of controlling field-level access in Views.
+   */
+  function access() {
+    // Avoid FALSE returns for non-existant hooks by using module_implements()
+    // to check only modules that implement the hook.
+    $modules = module_implements('content_views_access');
+    foreach ($modules as $module) {
+      if (module_invoke($module, 'content_views_access', $this->definition['content_field_name']) === FALSE) {
+        return FALSE;
+      }
+    }
+    return parent::access();
+  }
+
+  /**
    * Called to determine what to tell the clicksorter.
    */
 //  function click_sort() {

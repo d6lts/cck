@@ -313,15 +313,26 @@ function fieldgroup_form_alter(&$form, $form_state, $form_id) {
         '#description' => t($group['settings']['form']['description']),
         '#attributes' => array('class' => strtr($group['group_name'], '_', '-')),
       );
+      
+      $has_accessible_field = FALSE;
       foreach ($group['fields'] as $field_name => $field) {
         if (isset($form[$field_name])) {
           $form[$group_name][$field_name] = $form[$field_name];
+          // Track whether this group has any accessible fields within it.
+          if ($form[$field_name]['#access'] !== FALSE) {
+            $has_accessible_field = TRUE;
+          }
           unset($form[$field_name]);
         }
       }
       if (!empty($group['fields']) && !element_children($form[$group_name])) {
         //hide the fieldgroup, because the fields are hidden too
         unset($form[$group_name]);
+      }
+      
+      if (!$has_accessible_field) {
+        // Hide the fieldgroup, because the fields are inaccessible.
+        $form[$group_name]['#access'] = FALSE;
       }
     }
 

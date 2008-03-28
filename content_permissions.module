@@ -1,0 +1,54 @@
+<?php
+
+/**
+ * TODO:
+ *   Views access implementation
+ *   Fieldgroups
+ */
+
+
+/**
+ *  Implementation of hook_perm().
+ */
+function content_permissions_perm() {
+  foreach (content_fields() as $field) {
+    $perms[] = "edit ". $field['field_name'];
+    $perms[] = "view ". $field['field_name'];
+  }
+  return $perms;
+}
+
+/**
+ *  Implementation of hook_form_alter().
+ */
+function content_permissions_form_alter(&$form, $form_state, $form_id) {
+  if (isset($form['type']) && isset($form['#node']) && $form['type']['#value'] .'_node_form' == $form_id) {
+    $type = content_types($form['type']['#value']);
+    foreach ($type['fields'] as $field_name => $field) {
+      if (isset($form[$field_name])) {
+        $form[$field_name]['#access'] = user_access('edit '. $field_name);
+      }
+    }
+  }
+}
+
+/**
+ *  Implementation of hook_nodeapi().
+ */
+function content_permissions_nodeapi(&$node, $op, $a3 = NULL, $a4 = NULL) {
+  if ($op == 'view') {
+    $type = content_types($node->type);
+    foreach ($type['fields'] as $field_name => $field) {
+      if (isset($node->content[$field_name])) {
+        $node->content[$field_name]['#access'] = user_access('view '. $field_name);
+      }
+    }
+  }
+}
+
+/**
+ *  Implementation of hook_content_views_access().
+ */
+function content_permissions_content_views_access($field_name) {
+  return user_access('view '. $field_name);
+}
