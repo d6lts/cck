@@ -273,7 +273,8 @@ class views_handler_field_content extends views_handler_field_node {
    */
   function options_form(&$form, &$form_state) {
     parent::options_form($form, $form_state);
-    // TODO : do we want the 'link to node' checkbox ? That's usually formatters business...
+    // TODO : do we want the 'link to node' checkbox ?
+    // That's usually formatters business...
 
     $field = $this->content_field;
     $options = $this->options;
@@ -285,7 +286,6 @@ class views_handler_field_content extends views_handler_field_node {
         $formatters[$name] = t($info['label']);
       }
     }
-
     $form['format'] = array(
       '#title' => t('Format'),
       '#type' => 'select',
@@ -309,46 +309,21 @@ class views_handler_field_content extends views_handler_field_node {
     }
   }
 
-  function pre_render($values) {
-    // There are no values to render in a summary view.
-    if (isset($this->view->build_info['summary'])) {
-      return;
-    }
-    $field = $this->content_field;
-    $db_info = content_database_info($field);
-    $options = $this->options;
-
-    $this->field_values = array();
-    foreach ($values as $value) {
-      $item = array();
-      foreach ($db_info['columns'] as $column => $attributes) {
-        $item[$column] = $value->{$this->table_alias .'_'. $attributes['column']};
-      }
-      $this->field_values[$value->{$this->additional_fields['nid']}][0] = $item;
-    }
-  }
-
   function render($values) {
     $field = $this->content_field;
     $options = $this->options;
+    $db_info = content_database_info($field);
 
-    // $values will be used as a fake $node object; we provide a build_mode
-    // for rendering.
-    // TODO : we can stick any value in there - what would make most sense ?  row_style ?
+    // $values will be used as a fake $node object;
+    // we provide a build_mode for rendering.
+    // TODO : we can stick any value in there -
+    // what would make most sense ?  row_style ?
     $values->build_mode = 'views';
-
-    $items = array();
-    foreach ($this->field_values[$values->{$this->additional_fields['nid']}] as $item) {
-      $items[] = content_format($field, $item, $options['format'], $values);
+    $item = array();
+    foreach ($db_info['columns'] as $column => $attributes) {
+      $item[$column] = $values->{$this->table_alias .'_'. $attributes['column']};
     }
-
-    if (count($items) > 1) {
-      // TODO : could we use generic field display ?
-      return theme('content_view_multiple_field', $items, $field, $values);
-    }
-    else {
-      return $items[0];
-    }
+    return content_format($field, $item, $options['format'], $values);
   }
 }
 
@@ -415,71 +390,98 @@ class views_handler_field_content_multiple extends views_handler_field_content {
     $field = $this->content_field;
     $options = $this->options;
 
-//  if (in_array($field['handler'], array('content_views_field_handler_group', 'content_views_field_handler_first', 'content_views_field_handler_last'))) {
-// TODO : multiple_number / multiple_from
-// We can also optimize the query when only one value should be retrieved
+    //  if (in_array($field['handler'], array('content_views_field_handler_group', 'content_views_field_handler_first', 'content_views_field_handler_last'))) {
+    // TODO : multiple_number / multiple_from
+    // We can also optimize the query when only one value should be retrieved
     $this->defer_query = $options['multiple']['group'] && $field['multiple'];
 
-    if ($this->defer_query) {
-      // We don't add anything to the query. The data is retrieved in pre_render()
-      // in order to avoid duplicate results.
-      $this->field_alias = $this->real_field;
+    // If this is not a grouped field, use the generic field handler query.
+    if (!$this->defer_query) {
+      return parent::query();
+    }
 
-      // If the field is sortable (table sort), we just have to join the table
-      // ("Node: Distinct" will be required to avoid duplicates...)
-//      if ($field['sortable']) {
-//        $this->ensure_my_table();
-//      }
-    }
-    else {
-      // Use the generic field handler query.
-      parent::query();
-    }
+    // We don't add anything to the query. The data is retrieved in pre_render()
+    // in order to avoid duplicate results.
+    $this->field_alias = $this->real_field;
+
+    // If the field is sortable (table sort), we just have to join the table
+    // ("Node: Distinct" will be required to avoid duplicates...)
+    // if ($field['sortable']) {
+    //   $this->ensure_my_table();
+    // }
   }
 
   function pre_render($values) {
     // There are no values to render in a summary view.
     if (isset($this->view->build_info['summary'])) {
-      return;
+      return parent::pre_render($values);
     }
-    if ($this->defer_query && $values) {
-      $field = $this->content_field;
-      $db_info = content_database_info($field);
-      $options = $this->options;
+    // If this is not a grouped field, use the parent pre_render().
+    if (!$this->defer_query || empty($values)) {
+      return parent::pre_render($values);
+    }
 
-      $this->field_values = array();
+    $field = $this->content_field;
+    $db_info = content_database_info($field);
+    $options = $this->options;
 
-      // Build the list of nids to retrieve.
-      // TODO : try fetching from cache_content first ??
-      $nids = array();
-      foreach ($values as $value) {
-        $nids[] = $value->nid;
-      }
+    $this->field_values = array();
+    // Build the list of nids to retrieve.
+    // TODO : try fetching from cache_content first ??
+    $nids = array();
+    foreach ($values as $value) {
+      $nids[] = $value->nid;
+    }
 
-      // List columns to retrieve.
-      $table_alias = content_views_tablename($field);
-      $query_columns = array("$table_alias.delta AS delta");
-      foreach ($db_info['columns'] as $column => $attributes) {
-        $query_columns[] = "$table_alias.$attributes[column] AS $column";
-      }
+    // List columns to retrieve.
+    $table_alias = content_views_tablename($field);
+    $query_columns = array("$table_alias.delta AS delta");
+    foreach ($db_info['columns'] as $column => $attributes) {
+      $query_columns[] = "$table_alias.$attributes[column] AS $column";
+    }
 
-      // Note : this query doesn't need to run through db_rewrite_sql, since the
-      // nids we retrieve have been selected by the views query, which already takes
-      // care of this.
-      $query = "SELECT node.nid, ". implode(', ', $query_columns) .
-               " FROM {node} node".
-               " LEFT JOIN {". $db_info['table'] ."} $table_alias ON node.vid = $table_alias.vid".
-               " WHERE node.nid IN (". implode(',', $nids) .")".
-               " ORDER BY node.nid ASC, $table_alias.delta ". ($options['multiple']['multiple_reversed'] ? 'DESC' : 'ASC');
-      // TODO : Select all deltas or only a subset.
-      $result = $options['multiple']['multiple_number'] ? db_query_range($query, $options['multiple']['multiple_from'], $options['multiple']['multiple_number']) : db_query($query);
+    // Note : this query doesn't need to run through db_rewrite_sql, since the
+    // nids we retrieve have been selected by the views query, which already takes
+    // care of this.
+    $query = "SELECT node.nid, ". implode(', ', $query_columns) .
+             " FROM {node} node".
+             " LEFT JOIN {". $db_info['table'] ."} $table_alias ON node.vid = $table_alias.vid".
+             " WHERE node.nid IN (". implode(',', $nids) .")".
+             " ORDER BY node.nid ASC, $table_alias.delta ". ($options['multiple']['multiple_reversed'] ? 'DESC' : 'ASC');
+    // TODO : Select all deltas or only a subset.
+    $result = $options['multiple']['multiple_number'] ? db_query_range($query, $options['multiple']['multiple_from'], $options['multiple']['multiple_number']) : db_query($query);
 
-      while ($item = db_fetch_array($result)) {
-        $this->field_values[$item['nid']][$item['delta']] = $item;
-      }
+    while ($item = db_fetch_array($result)) {
+      $this->field_values[$item['nid']][$item['delta']] = $item;
+    }
+  }
+
+  function render($values) {
+    // If this is not a grouped field, use the parent render().
+    if (!$this->defer_query) {
+      return parent::render($values);
+    }
+
+    $field = $this->content_field;
+    $options = $this->options;
+
+    // $values will be used as a fake $node object;
+    // we provide a build_mode for rendering.
+    // TODO : we can stick any value in there -
+    // what would make most sense ?  row_style ?
+    $values->build_mode = 'views';
+
+    $items = array();
+    foreach ($this->field_values[$values->{$this->additional_fields['nid']}] as $item) {
+      $items[] = content_format($field, $item, $options['format'], $values);
+    }
+
+    if (count($items) > 1) {
+      // TODO : could we use generic field display ?
+      return theme('content_view_multiple_field', $items, $field, $values);
     }
     else {
-      parent::pre_render($values);
+      return $items[0];
     }
   }
 }
