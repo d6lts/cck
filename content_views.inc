@@ -173,6 +173,26 @@ class views_handler_filter_in_operator_content extends views_handler_filter_in_o
     parent::construct();
     $this->content_field = content_fields($this->definition['content_field_name']);
     $this->additional_fields = $this->definition['additional fields'];
+    $field = $this->content_field;
+    $this->value_title = $field['widget']['label'];
+    $this->value_options = $this->allowed_values();
+  }
+
+  // Get allowed values from hook_allowed_values(), if any,
+  // or from content_allowed_values();
+  function allowed_values() {
+    $field = $this->content_field;
+    $function = $field['module'] .'_allowed_values';
+    $options = function_exists($function) ? $function($field) : content_allowed_values($field);
+    return (array) $options;
+  }
+
+  function options(&$options) {
+    parent::options($options);
+    // Set the default value to the first value, so that there is something
+    // reasonable there.
+    $keys = array_keys($this->allowed_values());
+    $options['value'] = array(array_shift($keys));
   }
 }
 
@@ -269,7 +289,7 @@ class views_handler_field_content extends views_handler_field_node {
   }
 
   /**
-   * Provide formatter and 'group multiple values' option.
+   * Provide formatter option.
    */
   function options_form(&$form, &$form_state) {
     parent::options_form($form, $form_state);
@@ -348,7 +368,7 @@ class views_handler_field_content_multiple extends views_handler_field_content {
   }
 
   /**
-   * Provide formatter and 'group multiple values' option.
+   * Provide 'group multiple values' option.
    */
   function options_form(&$form, &$form_state) {
     parent::options_form($form, $form_state);
