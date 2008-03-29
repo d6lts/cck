@@ -93,7 +93,7 @@ function content_views_field_views_data($field) {
       'field' => array(
         'field' => $columns[0],
         'tablename' => $db_info['table'],
-        'handler' => 'views_handler_field_content',
+        'handler' => 'views_handler_field_content_multiple',
         'click sortable' => '', // TODO
         'additional fields' => $columns,
         'content_field_name' => $field['field_name'],
@@ -121,7 +121,7 @@ function content_views_field_views_data($field) {
       $data[$columns[0]]['sort'] = array(
         'field' => $columns[0],
         'tablename' => $db_info['table'],
-        'handler' => 'views_handler_sort',
+        'handler' => 'views_handler_sort_content',
         'additional fields' => $columns,
         'content_field_name' => $field['field_name'],
       );
@@ -132,9 +132,105 @@ function content_views_field_views_data($field) {
   }
 }
 
+/**
+ * The subclass simply adds properties,
+ * for field-specific subclasses to use if they need to.
+ */
+class views_handler_filter_string_content extends views_handler_filter_string {
+  var $content_field;
+
+  function construct() {
+    parent::construct();
+    $this->content_field = content_fields($this->definition['content_field_name']);
+    $this->additional_fields = $this->definition['additional fields'];
+    $this->definition['allow empty'] = TRUE;
+  }
+}
+
+/**
+ * The subclass simply adds properties,
+ * for field-specific subclasses to use if they need to.
+ */
+class views_handler_filter_numeric_content extends views_handler_filter_numeric {
+  var $content_field;
+
+  function construct() {
+    parent::construct();
+    $this->content_field = content_fields($this->definition['content_field_name']);
+    $this->additional_fields = $this->definition['additional fields'];
+    $this->definition['allow empty'] = TRUE;
+  }
+}
+
+/**
+ * The subclass simply adds properties,
+ * for field-specific subclasses to use if they need to.
+ */
+class views_handler_filter_in_operator_content extends views_handler_filter_in_operator {
+  var $content_field;
+
+  function construct() {
+    parent::construct();
+    $this->content_field = content_fields($this->definition['content_field_name']);
+    $this->additional_fields = $this->definition['additional fields'];
+  }
+}
+
+/**
+ * The subclass simply adds properties,
+ * for field-specific subclasses to use if they need to.
+ */
+class views_handler_sort_content extends views_handler_sort {
+  var $content_field;
+
+  function construct() {
+    parent::construct();
+
+    $this->content_field = content_fields($this->definition['content_field_name']);
+    $this->additional_fields = $this->definition['additional fields'];
+  }
+}
+
+/**
+ * The subclass simply adds properties,
+ * for field-specific subclasses to use if they need to.
+ */
+class views_handler_argument_content extends views_handler_argument {
+  var $content_field;
+
+  function construct() {
+    parent::construct();
+
+    $this->content_field = content_fields($this->definition['content_field_name']);
+    $this->additional_fields = $this->definition['additional fields'];
+  }
+}
+
+/**
+ * The subclass simply adds properties,
+ * for field-specific subclasses to use if they need to.
+ */
+class views_handler_argument_string_content extends views_handler_argument_string {
+  var $content_field;
+
+  function construct() {
+    parent::construct();
+
+    $this->content_field = content_fields($this->definition['content_field_name']);
+    $this->additional_fields = $this->definition['additional fields'];
+  }
+}
+
+/**
+ * The subclass adds basic field and formatter info,
+ * for field-specific subclasses to use if they need to.
+ *
+ * Fields could extend this class if they want field and formatter handling
+ * but don't want the multiple value grouping options created by
+ * views_handler_field_content_multiple.
+ */
 class views_handler_field_content extends views_handler_field_node {
   var $content_field;
-  var $defer_query;
 
   function construct() {
     parent::construct();
@@ -169,14 +265,7 @@ class views_handler_field_content extends views_handler_field_node {
 
     // Override views_handler_field_node's default label
     $options['label'] = $field['widget']['label'];
-
     $options['format'] = 'default';
-    $options['multiple'] = array(
-      'group' => TRUE,
-      'multiple_number' => '',
-      'multiple_from' => '',
-      'multiple_reversed' => FALSE,
-    );
   }
 
   /**
@@ -204,6 +293,93 @@ class views_handler_field_content extends views_handler_field_node {
       '#required' => TRUE,
       '#default_value' => $options['format'],
     );
+  }
+
+  function options_validate($form, &$form_state) { }
+
+  /**
+   * Provide text for the administrative summary
+   */
+  function admin_summary() {
+    // Display the formatter name.
+    $field = $this->content_field;
+    $field_types = _content_field_types();
+    if (isset($field_types[$field['type']]['formatters'][$this->options['format']])) {
+      return t($field_types[$field['type']]['formatters'][$this->options['format']]['label']);
+    }
+  }
+
+  function pre_render($values) {
+    // There are no values to render in a summary view.
+    if (isset($this->view->build_info['summary'])) {
+      return;
+    }
+    $field = $this->content_field;
+    $db_info = content_database_info($field);
+    $options = $this->options;
+
+    $this->field_values = array();
+    foreach ($values as $value) {
+      $item = array();
+      foreach ($db_info['columns'] as $column => $attributes) {
+        $item[$column] = $value->{$this->table_alias .'_'. $attributes['column']};
+      }
+      $this->field_values[$value->{$this->additional_fields['nid']}][0] = $item;
+    }
+  }
+
+  function render($values) {
+    $field = $this->content_field;
+    $options = $this->options;
+
+    // $values will be used as a fake $node object; we provide a build_mode
+    // for rendering.
+    // TODO : we can stick any value in there - what would make most sense ?  row_style ?
+    $values->build_mode = 'views';
+
+    $items = array();
+    foreach ($this->field_values[$values->{$this->additional_fields['nid']}] as $item) {
+      $items[] = content_format($field, $item, $options['format'], $values);
+    }
+
+    if (count($items) > 1) {
+      // TODO : could we use generic field display ?
+      return theme('content_view_multiple_field', $items, $field, $values);
+    }
+    else {
+      return $items[0];
+    }
+  }
+}
+
+/**
+ * An extended subclass for field handling that adds multiple field grouping.
+ *
+ * Fields that want multiple value grouping options in addition to basic
+ * field and formatter handling can extend this class.
+ */
+class views_handler_field_content_multiple extends views_handler_field_content {
+  var $defer_query;
+
+  function options(&$options) {
+    parent::options($options);
+    $field = $this->content_field;
+    $options['multiple'] = array(
+      'group' => TRUE,
+      'multiple_number' => '',
+      'multiple_from' => '',
+      'multiple_reversed' => FALSE,
+    );
+  }
+
+  /**
+   * Provide formatter and 'group multiple values' option.
+   */
+  function options_form(&$form, &$form_state) {
+    parent::options_form($form, $form_state);
+
+    $field = $this->content_field;
+    $options = $this->options;
 
     $form['multiple'] = array(
       '#access' => $field['multiple'],
@@ -233,20 +409,6 @@ class views_handler_field_content extends views_handler_field_node {
       '#default_value' => $options['multiple']['multiple_reversed'],
       '#suffix' => '</div>',
     );
-  }
-
-  function options_validate($form, &$form_state) { }
-
-  /**
-   * Provide text for the administrative summary
-   */
-  function admin_summary() {
-    // Display the formatter name.
-    $field = $this->content_field;
-    $field_types = _content_field_types();
-    if (isset($field_types[$field['type']]['formatters'][$this->options['format']])) {
-      return t($field_types[$field['type']]['formatters'][$this->options['format']]['label']);
-    }
   }
 
   function query() {
@@ -280,12 +442,13 @@ class views_handler_field_content extends views_handler_field_node {
     if (isset($this->view->build_info['summary'])) {
       return;
     }
-    $field = $this->content_field;
-    $db_info = content_database_info($field);
-    $options = $this->options;
-
-    $this->field_values = array();
     if ($this->defer_query && $values) {
+      $field = $this->content_field;
+      $db_info = content_database_info($field);
+      $options = $this->options;
+
+      $this->field_values = array();
+
       // Build the list of nids to retrieve.
       // TODO : try fetching from cache_content first ??
       $nids = array();
@@ -316,36 +479,7 @@ class views_handler_field_content extends views_handler_field_node {
       }
     }
     else {
-      foreach ($values as $value) {
-        $item = array();
-        foreach ($db_info['columns'] as $column => $attributes) {
-          $item[$column] = $value->{$this->table_alias .'_'. $attributes['column']};
-        }
-        $this->field_values[$value->{$this->additional_fields['nid']}][0] = $item;
-      }
-    }
-  }
-
-  function render($values) {
-    $field = $this->content_field;
-    $options = $this->options;
-
-    // $values will be used as a fake $node object; we provide a build_mode
-    // for rendering.
-    // TODO : we can stick any value in there - what would make most sense ?  row_style ?
-    $values->build_mode = 'views';
-
-    $items = array();
-    foreach ($this->field_values[$values->{$this->additional_fields['nid']}] as $item) {
-      $items[] = content_format($field, $item, $options['format'], $values);
-    }
-
-    if (count($items) > 1) {
-      // TODO : could we use generic field display ?
-      return theme('content_view_multiple_field', $items, $field, $values);
-    }
-    else {
-      return $items[0];
+      parent::pre_render($values);
     }
   }
 }
@@ -356,75 +490,4 @@ function theme_content_view_multiple_field($items, $field, $values) {
     $output .= '<div class="field-item">'. $item .'</div>';
   }
   return $output;
-}
-
-/**
- * Subclassed string filter adds content fields
- */
-class views_handler_filter_string_content extends views_handler_filter_string {
-  var $content_field;
-
-  function construct() {
-    parent::construct();
-    $this->content_field = content_fields($this->definition['content_field_name']);
-    $this->additional_fields = $this->definition['additional fields'];
-    $this->definition['allow empty'] = TRUE;
-  }
-}
-
-/**
- * Subclassed numeric filter adds content fields
- */
-class views_handler_filter_numeric_content extends views_handler_filter_numeric {
-  var $content_field;
-
-  function construct() {
-    parent::construct();
-    $this->content_field = content_fields($this->definition['content_field_name']);
-    $this->additional_fields = $this->definition['additional fields'];
-    $this->definition['allow empty'] = TRUE;
-  }
-}
-
-/**
- * Subclassed 'in' filter adds content fields
- */
-class views_handler_filter_in_operator_content extends views_handler_filter_in_operator {
-  var $content_field;
-
-  function construct() {
-    parent::construct();
-    $this->content_field = content_fields($this->definition['content_field_name']);
-    $this->additional_fields = $this->definition['additional fields'];
-  }
-}
-
-/**
- * The views_handler_argument_content subclass simply adds properties,
- * for field-specific subclasses to use if they need to.
- */
-class views_handler_argument_content extends views_handler_argument {
-  var $content_field;
-
-  function construct() {
-    parent::construct();
-
-    $this->content_field = content_fields($this->definition['content_field_name']);
-    $this->additional_fields = $this->definition['additional fields'];
-  }
-}
-
-/**
- * The views_handler_argument_content subclass simply adds properties,
- * for field-specific subclasses to use if they need to.
- */
-class views_handler_argument_string_content extends views_handler_argument_string {
-  var $content_field;
-
-  function construct() {
-    parent::construct();
-
-    $this->content_field = content_fields($this->definition['content_field_name']);
-    $this->additional_fields = $this->definition['additional fields'];
-  }
 }
