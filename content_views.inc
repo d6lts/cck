@@ -303,11 +303,11 @@ class views_handler_field_content extends views_handler_field_node {
       // Note : this query doesn't need to run through db_rewrite_sql, since the
       // nids we retrieve have been selected by the views query, which already takes
       // care of this.
-      $query = "SELECT ". implode(', ', $query_columns) .
+      $query = "SELECT node.nid, ". implode(', ', $query_columns) .
                " FROM {node} node".
                " LEFT JOIN {". $db_info['table'] ."} $table_alias ON node.vid = $table_alias.vid".
                " WHERE node.nid IN (". implode(',', $nids) .")".
-               " ORDER BY nid ASC, $table_alias.delta ". ($options['multiple']['multiple_reversed'] ? 'DESC' : 'ASC');
+               " ORDER BY node.nid ASC, $table_alias.delta ". ($options['multiple']['multiple_reversed'] ? 'DESC' : 'ASC');
       // TODO : Select all deltas or only a subset.
       $result = $options['multiple']['multiple_number'] ? db_query_range($query, $options['multiple']['multiple_from'], $options['multiple']['multiple_number']) : db_query($query);
 
