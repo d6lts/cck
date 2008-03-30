@@ -56,14 +56,15 @@ function content_views_field_views_data($field) {
     $data = array();
     $data['table']['group']  = $field_types[$field['type']]['label'];
     $data['table']['join']['node'] = array(
-      'handler' => 'views_join',
-      'arguments' => array($db_info['table'], 'node', 'vid', 'vid')
+      'table' => $db_info['table'],
+      'left_field' => 'vid',
+      'field' => 'vid',
     );
 
     $columns = array();
     $arguments = array();
     $filters = array();
-    foreach($db_info['columns'] as $column => $attributes) {
+    foreach ($db_info['columns'] as $column => $attributes) {
       $columns[] = $attributes['column'];
       $sorts[] = !empty($attributes['sortable']) ? TRUE : FALSE;
 
