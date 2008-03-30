@@ -13,7 +13,7 @@ views_include_handlers();
  * in the future without re-writing code.
  */
 function content_views_tablename($field) {
-  return $table_alias = 'node_data_'. $field['field_name'];
+  return 'node_data_'. $field['field_name'];
 }
 
 /**
@@ -187,22 +187,6 @@ class views_handler_filter_many_to_one_content extends views_handler_filter_many
     return (array) $options;
   }
 
-  function options(&$options) {
-    parent::options($options);
-    // Set the default value to the first value, so that there is something
-    // reasonable there.
-    $keys = array_keys($this->allowed_values());
-    $options['value'] = array(array_shift($keys));
-  }
-
-  function value_form(&$form, &$form_state) {
-    $form['value'] = array(
-      '#type' => count($this->value_options) < 2 ? 'checkboxes' : 'select',
-      '#title' => $this->value_title,
-      '#options' => $this->value_options,
-      '#default_value' => (array) $this->value,
-    );
-  }
 }
 
 /**
@@ -487,7 +471,7 @@ class views_handler_field_content_multiple extends views_handler_field_content {
 
   function render($values) {
     // If this is not a grouped field, use the parent render().
-    if (!$this->defer_query) {
+    if (!$this->defer_query || empty($this->field_values)) {
       return parent::render($values);
     }
 
