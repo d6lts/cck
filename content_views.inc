@@ -194,6 +194,15 @@ class views_handler_filter_in_operator_content extends views_handler_filter_in_o
     $keys = array_keys($this->allowed_values());
     $options['value'] = array(array_shift($keys));
   }
+
+  function value_form(&$form, &$form_state) {
+    $form['value'] = array(
+      '#type' => count($this->value_options) < 2 ? 'checkboxes' : 'select',
+      '#title' => $this->value_title,
+      '#options' => $this->value_options,
+      '#default_value' => (array) $this->value,
+    );
+  }
 }
 
 /**
