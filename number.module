@@ -190,7 +190,7 @@ function number_field_settings($op, $field) {
         $table_alias = content_views_tablename($field);
 
         // Swap the filter handler to the 'in' operator.
-        $data[$table_alias][$field['field_name'] .'_value']['filter']['handler'] = 'views_handler_filter_in_operator_content';
+        $data[$table_alias][$field['field_name'] .'_value']['filter']['handler'] = 'views_handler_filter_many_to_one_content';
         return $data;
       }
       break;

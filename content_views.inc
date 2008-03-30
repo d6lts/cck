@@ -166,7 +166,7 @@ class views_handler_filter_numeric_content extends views_handler_filter_numeric 
  * The subclass simply adds properties,
  * for field-specific subclasses to use if they need to.
  */
-class views_handler_filter_in_operator_content extends views_handler_filter_in_operator {
+class views_handler_filter_many_to_one_content extends views_handler_filter_many_to_one {
   var $content_field;
 
   function construct() {
