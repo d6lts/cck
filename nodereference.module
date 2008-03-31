@@ -577,8 +577,7 @@ function _nodereference_potential_references($field, $return_full_nodes = FALSE,
 
     // Make sure the query is not cached
     $view->is_cacheable = FALSE;
-
-    $view->execute();
+    $view->render();
     $options = array();
     foreach ($view->result as $row) {
       foreach ($view->field as $field) {
@@ -650,7 +649,7 @@ function nodereference_autocomplete($field_name, $string = '') {
 function _nodereference_item($field, $item, $html = FALSE) {
   if (module_exists('views') && isset($field['advanced_view']) && $field['advanced_view'] != '--' && ($view = views_get_view($field['advanced_view']))) {
     $field_names = array();
-    $view->execute();
+    $view->render();
     foreach ($view->field as $name => $viewfield) {
       $field_names[] = isset($viewfield->definition['content_field_name']) ? $viewfield->definition['content_field_name'] : $name;
     }
