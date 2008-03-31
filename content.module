@@ -75,7 +75,7 @@ function content_init() {
   if (module_exists('token') && !function_exists('content_token_values')) {
     module_load_include('inc', 'content', 'content.token');
   }
-  if (module_exists('content_diff') && !function_exists('content_diff')) {
+  if (module_exists('diff') && !function_exists('content_diff')) {
     module_load_include('inc', 'content', 'content.diff');
   }
   if (content_menu_needs_rebuild()) {
