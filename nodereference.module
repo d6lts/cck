@@ -686,15 +686,6 @@ function theme_nodereference_item_simple($item) {
 }
 
 /**
- * Provide a list of users to filter on.
- */
-function _nodereference_filter_handler($op, $filterinfo) {
-  $options = array(0 => t('<empty>'));
-  $options = $options + _nodereference_potential_references($filterinfo['extra']['field']);
-  return $options;
-}
-
-/**
  * FAPI theme for an individual elements.
  *
  * The textfield or select is already rendered by the
