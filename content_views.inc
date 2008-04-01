@@ -80,6 +80,9 @@ function content_views_field_views_data($field) {
           $filters[] = 'views_handler_filter_numeric_content';
           $arguments[] = 'views_handler_argument_content';
           break;
+        case 'text':
+        case 'blob':
+          // TODO add markup handlers for these types
         default:
           $filters[] = 'views_handler_filter_string_content';
           $arguments[] = 'views_handler_argument_string_content';
@@ -104,6 +107,7 @@ function content_views_field_views_data($field) {
         'field' => $columns[0],
         'tablename' => $db_info['table'],
         'handler' => $arguments[0],
+        'click sortable' => $sorts[0], // TODO used in once place in node.views.inc, should we use it here?
         'name field' => '', // TODO
         'additional fields' => $columns,
         'content_field_name' => $field['field_name'],
