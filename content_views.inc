@@ -95,9 +95,10 @@ function content_views_field_views_data($field) {
         'field' => $columns[0],
         'tablename' => $db_info['table'],
         'handler' => 'views_handler_field_content_multiple',
-        'click sortable' => '', // TODO
+        'click sortable' => $sorts[0],
         'additional fields' => $columns,
         'content_field_name' => $field['field_name'],
+        'allow_empty' => TRUE,
       ),
       'argument' => array(
         'field' => $columns[0],
@@ -106,6 +107,7 @@ function content_views_field_views_data($field) {
         'name field' => '', // TODO
         'additional fields' => $columns,
         'content_field_name' => $field['field_name'],
+        'allow_empty' => TRUE,
       ),
       'filter' => array(
         'field' => $columns[0],
@@ -114,6 +116,7 @@ function content_views_field_views_data($field) {
         'handler' => $filters[0],
         'additional fields' => $columns,
         'content_field_name' => $field['field_name'],
+        'allow_empty' => TRUE,
       ),
     );
     // TODO do we need different handling for sorts with Views 2,
@@ -125,6 +128,7 @@ function content_views_field_views_data($field) {
         'handler' => 'views_handler_sort_content',
         'additional fields' => $columns,
         'content_field_name' => $field['field_name'],
+        'allow_empty' => TRUE,
       );
     }
 
@@ -144,7 +148,6 @@ class views_handler_filter_string_content extends views_handler_filter_string {
     parent::construct();
     $this->content_field = content_fields($this->definition['content_field_name']);
     $this->additional_fields = $this->definition['additional fields'];
-    $this->definition['allow empty'] = TRUE;
   }
 }
 
@@ -159,7 +162,6 @@ class views_handler_filter_numeric_content extends views_handler_filter_numeric 
     parent::construct();
     $this->content_field = content_fields($this->definition['content_field_name']);
     $this->additional_fields = $this->definition['additional fields'];
-    $this->definition['allow empty'] = TRUE;
   }
 }
 
@@ -265,13 +267,6 @@ class views_handler_field_content extends views_handler_field_node {
     }
     return parent::access();
   }
-
-  /**
-   * Called to determine what to tell the clicksorter.
-   */
-//  function click_sort() {
-//    return "$this->field_alias";
-//  }
 
   function options(&$options) {
     parent::options($options);
