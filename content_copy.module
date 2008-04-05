@@ -62,6 +62,8 @@ function content_copy_menu($may_cache) {
  *  A form to export field definitions.
  */
 function content_copy_export_form($form_values = NULL) {
+  include_once('./'. drupal_get_path('module', 'content') .'/content_admin.inc');
+  include_once('./'. drupal_get_path('module', 'node') .'/content_types.inc');
 
   $step = intval($form_values['step'] + 1);
 
@@ -98,7 +100,7 @@ function content_copy_export_form($form_values = NULL) {
         '#multiple' => FALSE,
         '#options' => $types,
         '#description' => t('Select the content type to export.'),
-        );
+      );
 
       // For some reason using #default_value in step 2 won't initialize
       // all fields as checked, but setting a hidden value in step 1 will do it.
@@ -106,12 +108,12 @@ function content_copy_export_form($form_values = NULL) {
         $form['groups'] = array(
           '#type' => 'hidden',
           '#value' => serialize(array_keys(content_copy_groups())),
-          );
+        );
       }
       $form['fields'] = array(
         '#type' => 'hidden',
         '#value' => serialize(array_keys(content_fields())),
-        );
+      );
       break;
 
     case 2: // Select groups and fields.
@@ -119,7 +121,7 @@ function content_copy_export_form($form_values = NULL) {
       $form['type_name'] = array(
         '#type' => 'hidden',
         '#value' => $type_name,
-        );
+      );
       if (module_exists('fieldgroup') && !empty($groups)) {
         $form['groups'] = array(
           '#title' => t('Groups'),
@@ -127,9 +129,9 @@ function content_copy_export_form($form_values = NULL) {
           '#multiple' => TRUE,
           '#options' => $groups,
           '#description' => t('Select the group definitions to export from %type.', array(
-            '%type' => node_get_types('name', $type_name
-            ))),
-          );
+            '%type' => node_get_types('name', $type_name)
+          )),
+        );
       }
       $form['fields'] = array(
         '#title' => t('Fields'),
@@ -137,9 +139,9 @@ function content_copy_export_form($form_values = NULL) {
         '#multiple' => TRUE,
         '#options' => $fields,
         '#description' => t('Select the field definitions to export from %type.', array(
-          '%type' => node_get_types('name', $type_name
-          ))),
-        );
+          '%type' => node_get_types('name', $type_name)
+        )),
+      );
       break;
 
     case 3: // Display the export macro.
@@ -152,7 +154,7 @@ function content_copy_export_form($form_values = NULL) {
         '#value' => content_copy_export($form_id, $form_values),
         '#rows' => max(40, $GLOBALS['content_copy']['count']),
         '#description' => t('Copy the export text and paste it into another content type using the import function.'),
-        );
+      );
 
       break;
   }
@@ -216,6 +218,8 @@ function content_copy_export($form_id, $form_values) {
  *  A form to import formatted text created with export.
  */
 function content_copy_import_form($type_name = '') {
+  include_once('./'. drupal_get_path('module', 'content') .'/content_admin.inc');
+  include_once('./'. drupal_get_path('module', 'node') .'/content_types.inc');
 
   $form['#prefix'] = t('This form will import field definitions exported from another content type or another database.<br/>Note that fields cannot be duplicated within the same content type, so imported fields will be added only if they do not already exist in the selected type.');
   $form['type_name'] = array(
@@ -224,14 +228,14 @@ function content_copy_import_form($type_name = '') {
     '#default_value' => $type_name,
     '#title' => t('Content type'),
     '#description' => t('Select the content type to import these fields into.<br/>Select &lt;Create&gt; to create a new content type to contain the fields.'),
-    );
+  );
   $form['macro'] = array(
     '#type' => 'textarea',
     '#rows' => 40,
     '#title' => t('Import data'),
     '#required' => TRUE,
     '#description' => t('Paste the text created by a content export into this field.'),
-    );
+  );
   $form['submit'] = array(
     '#type' => 'submit',
     '#value' => t('Submit'),
@@ -487,7 +491,6 @@ function content_copy_form_alter($form_id, &$form) {
  *  Get all the fields for a content type.
  */
 function content_copy_fields($type_name) {
-
   $fields = array();
   if (!$type_name) {
     return $fields;
@@ -522,7 +525,6 @@ function content_copy_groups($type_name = '') {
   }
   return $groups;
 }
-
 
 /**
  *  Get all content types.
@@ -594,7 +596,6 @@ function content_copy_record_macro($form_id, $edit, $form) {
 
   $GLOBALS['content_copy']['submissions'] = $subs;
 }
-
 
 /**
  * @return a code representation of the recorded macro.
