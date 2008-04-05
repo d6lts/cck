@@ -1680,11 +1680,11 @@ function content_callback($entity, $op, $field) {
   switch ($entity) {
     case 'field':
       $info = module_invoke($field['module'], "field_info");
-      return $info[$field['type']]['callbacks'][$op];
+      return isset($info[$field['type']]['callbacks'][$op]) ? $info[$field['type']]['callbacks'][$op] : CONTENT_CALLBACK_DEFAULT;
 
     case 'widget':
       $info = module_invoke($field['widget']['module'], "widget_info");
-      return $info[$field['widget']['type']]['callbacks'][$op];
+      return isset($info[$field['widget']['type']]['callbacks'][$op]) ? $info[$field['widget']['type']]['callbacks'][$op] : CONTENT_CALLBACK_DEFAULT;
   }
 }
 
@@ -1710,11 +1710,11 @@ function content_handle($entity, $op, $object) {
   switch ($entity) {
     case 'field':
       $info = module_invoke($object['module'], "field_info");
-      return $info[$object['type']][$op];
+      return isset($info[$object['type']][$op]) ? $info[$object['type']][$op] : CONTENT_HANDLE_CORE;
 
     case 'widget':
       $info = module_invoke($object['widget']['module'], "widget_info");
-      return $info[$object['widget']['type']][$op];
+      return isset($info[$object['widget']['type']][$op]) ? $info[$object['widget']['type']][$op] : CONTENT_HANDLE_CORE;
 
     case 'formatter':
       // Much simpler, formatters arrays *are* the 'formatter_info' itself.
