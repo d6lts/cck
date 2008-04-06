@@ -541,29 +541,32 @@ function userreference_user($type, &$edit, &$account) {
       break;
 
     case 'view':
-      if (empty($account->userreference)) {
-        return;
-      }
-      $node_types = (array) content_types();
-      $links = array();
-      $account->content['userreference'] = array(
-        '#type' => 'user_profile_category',
-        '#attributes' => array('class' => 'user-member'),
-        '#title' => t('Related Content'),
-        '#weight' => 10,
-      );
-      foreach ($account->userreference as $node_type => $nodes) {
+      if (!empty($account->userreference)) {
+        $node_types = content_types();
+        $additions = array();
         $values = array();
-        foreach ($nodes as $node) {
-          if ($node->reverse_link) {
-            $values[] = l($node->title, 'node/'. $node->nid);
+        foreach ($account->userreference as $node_type => $nodes) {
+          foreach ($nodes as $node) {
+            if ($node->reverse_link) {
+              $values[$node_type][] = l($node->title, 'node/'. $node->nid);
+            }
+          }
+          if (isset($values[$node_type])) {
+            $additions[] = array(
+              '#type' => 'user_profile_item',
+              '#title' => $node_types[$node_type]['name'],
+              '#value' => theme('item_list', $values[$node_type]),
+            );
           }
         }
-        $account->content['userreference'][] =  array(
-          '#type' => 'user_profile_item',
-          '#title' => $node_types[$node_type]['name'],
-          '#value' => theme('item_list', $values),
-        );
+        if ($additions) {
+          $account->content['userreference'] = $additions + array(
+            '#type' => 'user_profile_category',
+            '#attributes' => array('class' => 'user-member'),
+            '#title' => t('Related Content'),
+            '#weight' => 10,
+          );
+        }
       }
       break;
   }
