@@ -385,8 +385,8 @@ function userreference_user($op, &$edit, &$account, $category = NULL) {
       $search_tables = array();
       $search_links = array();
       foreach ($types as $type_name => $type) {
-        foreach($type['fields'] as $field) {
-          if ($field['type'] == 'userreference' && $field[]) {
+        foreach ($type['fields'] as $field) {
+          if ($field['type'] == 'userreference') {
             $db_info = content_database_info($field);
             $search_tables[$db_info['table']] = $db_info['columns']['uid']['column'];
             $search_links[$db_info['table']] = $field['widget']['reverse_link'];
