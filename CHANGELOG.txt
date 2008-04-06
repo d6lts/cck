@@ -33,6 +33,7 @@ General
 - #226607  Fix untranslatable human names for field widget types.
 - #168526  Fix display settings lost on content type import / export
 - #139554, #144706 : remove unneeded db_rewrite_sql in Views 'group multiple values' handler.
+- #242737  Content_copy : include required files for safe drupal_execute() of import / export forms
 
 Field / widget modules
 - #196575  Userreference : autocomplete did not filter users by role, need custom autocomplete instead of standard user autocomplete.
@@ -40,6 +41,8 @@ Field / widget modules
 - #140687  OptionWidgets : fix 'single checkbox' stick on checked when used with text values.
 - #186775  Nodereference : fix 'Invalid argument supplied for foreach()' when formatter is 'full node'
            and referenced node has been deleted.
+- #242917  Userreference / reversed link : do not list unpublished nodes.
+           Also, fix the query to rely only on current revisions of the nodes, and run it through db_rewrite_sql.
 
 5--1.6-1
 ========

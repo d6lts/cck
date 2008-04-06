@@ -372,7 +372,6 @@ function _userreference_filter_handler($op, $filterinfo) {
  * Implementation of hook_user().
  */
 function userreference_user($op, &$edit, &$account, $category = NULL) {
-
   switch ($op) {
     case 'load':
       // find cck userreference field tables
@@ -387,7 +386,7 @@ function userreference_user($op, &$edit, &$account, $category = NULL) {
       $search_links = array();
       foreach ($types as $type_name => $type) {
         foreach($type['fields'] as $field) {
-          if ($field['type'] == 'userreference') {
+          if ($field['type'] == 'userreference' && $field[]) {
             $db_info = content_database_info($field);
             $search_tables[$db_info['table']] = $db_info['columns']['uid']['column'];
             $search_links[$db_info['table']] = $field['widget']['reverse_link'];
@@ -395,7 +394,7 @@ function userreference_user($op, &$edit, &$account, $category = NULL) {
         }
       }
       foreach ($search_tables as $table => $column) {
-        $ids = db_query("SELECT DISTINCT(nid) FROM {". $table ."} WHERE ". $column ."=". $account->uid);
+        $ids = db_query(db_rewrite_sql("SELECT DISTINCT(n.nid) FROM {node} n LEFT JOIN {". $table ."} f ON n.vid = f.vid WHERE f.". $column ."=". $account->uid. " AND n.status = 1"));
         while ($data = db_fetch_object($ids)) {
           // TODO, do we really want a complete node_load() here? We only need the title to create a link.
           $node = node_load($data->nid);
