@@ -6,21 +6,24 @@ function content_token_values($type, $object = NULL) {
   $tokens = array();
   if ($type == 'node') {
     $node = $object;
+    $node->build_mode = 'token_values';
+    $node->content = array();
     content_view($node);
+    // The formatted values will only be known after the content has been rendered.
+    drupal_render($node->content);
+    content_alter($node);
 
     $field_types = _content_field_types();
-
-    foreach (content_fields() as $field) {
-
-      $items = $node->$field['field_name'];
-      if (!empty($items)) {
-        $function = $field_types[$field['type']]['module'] . '_token_values';
-        if (function_exists($function)) {
-          $sub_list = $function('field', $items);
-          foreach($sub_list as $token => $value) {
-            $tokens[$field['field_name'] .'-'. $token] = $value;
-          }
+    $type = content_types($node->type);
+    foreach ($type['fields'] as $field) {
+      $items = $node->{$field['field_name']};
+      $function = $field_types[$field['type']]['module'] . '_token_values';
+      if (!empty($items) && function_exists($function)) {
+        $token_values = $function('field', $items);
+        foreach($token_values as $token => $value) {
+          $tokens[$field['field_name'] .'-'. $token] = $value;
         }
+
       }
     }
   }
@@ -114,6 +117,7 @@ if (module_exists('text')) {
   function text_token_values($type, $object = NULL) {
     if ($type == 'field') {
       $item = $object[0];
+
       $tokens['raw']  = $item['value'];
       $tokens['formatted'] = $item['view'];
       return $tokens;
@@ -147,6 +151,9 @@ if (module_exists('userreference')) {
   }
 }
 
+/**
+ * These definitions should go in the relevant modules.
+ */
 if (module_exists('link')) {
   function link_token_list($type = 'all') {
     if ($type == 'field' || $type == 'all') {

@@ -360,6 +360,16 @@ function content_view(&$node, $teaser = FALSE, $page = FALSE) {
 }
 
 /**
+ * Nodeapi 'alter' op.
+ *
+ * Add back the formatted values in the 'view' element for all fields,
+ * so that node templates can use it.
+ */
+function content_alter(&$node, $teaser = FALSE, $page = FALSE) {
+  _content_field_invoke_default('alter', $node, $teaser, $page);
+}
+
+/**
  * Nodeapi 'prepare translation' op.
  *
  * Generate field render arrays.
@@ -403,6 +413,10 @@ function content_nodeapi(&$node, $op, $teaser, $page) {
 
     case 'view':
       content_view($node, $teaser, $page);
+      break;
+
+    case 'alter':
+      content_alter($node, $teaser, $page);
       break;
 
     case 'prepare translation':
@@ -725,6 +739,28 @@ function content_field($op, &$node, $field, &$items, $teaser, $page) {
       }
 
       return array($field['field_name'] => $element);
+
+    case 'alter':
+      // Add back the formatted values in the 'view' element,
+      // so that node templates can use it.
+      if (isset($node->content[$field['field_name']])) {
+        $element = $node->content[$field['field_name']];
+        if ($element['#single']) {
+          // Single value formatter.
+          foreach (element_children($element['items']) as $delta) {
+            // Use isset() to avoid undefined index message on #children when field values are empty.
+            $items[$delta]['view'] = isset($element['items'][$delta]['#children']) ? $element['items'][$delta]['#children'] : '';
+          }
+        }
+        else  {
+          // Multiple values formatter.
+          $items[0]['view'] = $element['items']['#children'];
+        }
+      }
+      else {
+        $items[0]['view'] = '';
+      }
+      break;
 
     case 'prepare translation':
       $addition = array();
