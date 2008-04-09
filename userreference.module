@@ -160,8 +160,9 @@ function userreference_field_formatter_info() {
  */
 function theme_userreference_formatter_default($element) {
   $output = '';
-  if (isset($item['uid']) && $account = user_load(array('uid' => $item['uid']))) {
-    $output = theme('username', $referenced_user);
+
+  if (isset($element['#item']['uid']) && $account = user_load(array('uid' => $element['#item']['uid']))) {
+    $output = theme('username', $account);
   }
   return $output;
 }
@@ -171,7 +172,7 @@ function theme_userreference_formatter_default($element) {
  */
 function theme_userreference_formatter_plain($element) {
   $output = '';
-  if (isset($item['uid']) && $account = user_load(array('uid' => $item['uid']))) {
+  if (isset($element['#item']['uid']) && $account = user_load(array('uid' => $element['#item']['uid']))) {
     $output = $account->name;
   }
   return $output;
