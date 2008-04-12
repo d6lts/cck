@@ -163,6 +163,7 @@ function content_menu() {
       $items['admin/content/node-type/'. $type_url_str .'/display/advanced'] = array(
         'title' => 'Advanced',
         'page arguments' => array('content_admin_display_overview_form', $type_name, (string)CONTENT_CONTEXTS_ADVANCED),
+        'access arguments' => array('administer content types'),
         'type' => MENU_LOCAL_TASK,
         'weight' => 1,
       );
