@@ -313,7 +313,7 @@ function fieldgroup_form_alter(&$form, $form_state, $form_id) {
         '#description' => t($group['settings']['form']['description']),
         '#attributes' => array('class' => strtr($group['group_name'], '_', '-')),
       );
-      
+
       $has_accessible_field = FALSE;
       foreach ($group['fields'] as $field_name => $field) {
         if (isset($form[$field_name])) {
@@ -329,7 +329,7 @@ function fieldgroup_form_alter(&$form, $form_state, $form_id) {
         //hide the fieldgroup, because the fields are hidden too
         unset($form[$group_name]);
       }
-      
+
       if (!$has_accessible_field) {
         // Hide the fieldgroup, because the fields are inaccessible.
         $form[$group_name]['#access'] = FALSE;
@@ -449,6 +449,33 @@ function fieldgroup_nodeapi(&$node, $op, $teaser, $page) {
           if (isset($node->content[$field_name])) {
             $node->content[$group_name][$field_name] = $node->content[$field_name];
             unset($node->content[$field_name]);
+          }
+        }
+      }
+      break;
+
+    case 'alter':
+      // Add back the formatted values in the 'view' element,
+      // so that node templates can use it.
+      $context = $teaser ? 'teaser' : 'full';
+      foreach (fieldgroup_groups($node->type) as $group_name => $group) {
+        foreach ($group['fields'] as $field_name => $field) {
+          if (isset($node->content[$group_name][$field['field_name']])) {
+            $element = $node->content[$group_name][$field['field_name']];
+            if ($element['#single']) {
+              // Single value formatter.
+              foreach (element_children($element['items']) as $delta) {
+                // Use isset() to avoid undefined index message on #children when field values are empty.
+                $node->{$field_name}[$delta]['view'] = isset($element['items'][$delta]['#children']) ? $element['items'][$delta]['#children'] : '';
+              }
+            }
+            else  {
+              // Multiple values formatter.
+              $node->{$field_name}[0]['view'] = $element['items']['#children'];
+            }
+          }
+          else {
+            $node->{$field_name}[0]['view'] = '';
           }
         }
       }
