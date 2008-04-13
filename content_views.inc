@@ -182,6 +182,9 @@ class views_handler_filter_many_to_one_content extends views_handler_filter_many
     $this->additional_fields = $this->definition['additional fields'];
     $field = $this->content_field;
     $this->value_title = $field['widget']['label'];
+  }
+
+  function get_value_options() {
     $this->value_options = $this->allowed_values();
   }
 
