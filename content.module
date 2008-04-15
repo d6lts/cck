@@ -1238,6 +1238,7 @@ function _content_type_info($reset = FALSE) {
         'content types' => array(),
       );
 
+      // Populate field types.
       foreach (module_list() as $module) {
         $module_field_types = module_invoke($module, 'field_info');
         if ($module_field_types) {
@@ -1249,35 +1250,42 @@ function _content_type_info($reset = FALSE) {
             $info['field types'][$db_name]['formatters'] = array();
           }
         }
+      }
 
-        $module_widgets = module_invoke($module, 'widget_info');
-        if ($module_widgets) {
+      // Populate widget types and formatters for known field types.
+      foreach (module_list() as $module) {
+        if ($module_widgets = module_invoke($module, 'widget_info')) {
           foreach ($module_widgets as $name => $widget_info) {
             // Truncate names to match the value that is stored in the database.
             $db_name = substr($name, 0, 32);
             $info['widget types'][$db_name] = $widget_info;
             $info['widget types'][$db_name]['module'] = $module;
-            foreach ($widget_info['field types'] as $delta => $type) {
-              $info['widget types'][$db_name][$delta] = substr($type, 0, 32);
+            // Replace field types with db_compatible version of known field types.
+            $info['widget types'][$db_name]['field types'] = array();
+            foreach ($widget_info['field types'] as $field_type) {
+              $field_type_db_name = substr($field_type, 0, 32);
+              if (isset($info['field types'][$field_type_db_name])) {
+                $info['widget types'][$db_name]['field types'] = $field_type_db_name;
+              }
             }
           }
         }
-      }
 
-      foreach (module_list() as $module) {
-        $module_formatters = module_invoke($module, 'field_formatter_info');
-        if ($module_formatters) {
+        if ($module_formatters = module_invoke($module, 'field_formatter_info')) {
           foreach ($module_formatters as $name => $formatter_info) {
             foreach ($formatter_info['field types'] as $field_type) {
               // Truncate names to match the value that is stored in the database.
               $db_name = substr($field_type, 0, 32);
-              $info['field types'][$db_name]['formatters'][$name] = $formatter_info;
-              $info['field types'][$db_name]['formatters'][$name]['module'] = $module;
+              if (isset($info['field types'][$db_name])) {
+                $info['field types'][$db_name]['formatters'][$name] = $formatter_info;
+                $info['field types'][$db_name]['formatters'][$name]['module'] = $module;
+              }
             }
           }
         }
       }
 
+      // Populate actual field instances.
       module_load_include('inc', 'content', 'content_crud');
       foreach (node_get_types() as $type_name => $data) {
         $type = (array) $data;
