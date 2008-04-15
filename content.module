@@ -1262,7 +1262,9 @@ function _content_type_info($reset = FALSE) {
             }
           }
         }
+      }
 
+      foreach (module_list() as $module) {
         $module_formatters = module_invoke($module, 'field_formatter_info');
         if ($module_formatters) {
           foreach ($module_formatters as $name => $formatter_info) {
