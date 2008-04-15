@@ -1265,7 +1265,7 @@ function _content_type_info($reset = FALSE) {
             foreach ($widget_info['field types'] as $field_type) {
               $field_type_db_name = substr($field_type, 0, 32);
               if (isset($info['field types'][$field_type_db_name])) {
-                $info['widget types'][$db_name]['field types'] = $field_type_db_name;
+                $info['widget types'][$db_name]['field types'][] = $field_type_db_name;
               }
             }
           }
