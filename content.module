@@ -204,10 +204,13 @@ function content_menu() {
  * Implementation of hook_theme().
  */
 function content_theme() {
+  $path = drupal_get_path('module', 'content') .'/theme';
+    
   return array(
     'content_field_view' => array(
       'template' => 'field',
       'arguments' => array('element' => NULL),
+      'path' => $path,
     ),
     'content_admin_field_overview_form' => array(
       'arguments' => array('form' => NULL),
