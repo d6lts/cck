@@ -722,7 +722,7 @@ function _content_admin_field(&$form_state, $type_name, $field_name) {
     // Make sure the default value is not a required field.
     $widget_field = $field;
     $widget_field['required'] = FALSE;
-    module_load_include('inc', 'content', 'includes/content_node_form');
+    module_load_include('inc', 'content', 'includes/content.node_form');
     $form_element = content_field_form($widget_form, $widget_form_state, $widget_field, 0);
     $form['widget']['default_value_fieldset']['default_value_widget'] = $form_element;
     $form['widget']['default_value_fieldset']['default_value_widget']['#tree'] = TRUE;
