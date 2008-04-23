@@ -116,7 +116,7 @@ function number_field_settings($op, $field) {
         '#title' => t('Suffix'),
         '#size' => 60,
         '#default_value' => !empty($field['suffix']) ? $field['suffix'] : '',
-        '#description' => t('Define a string that should suffixed to the value, like m², m/s², kb/s. Leave blank for none. Separate singular and plural values with a pipe (pound|pounds). '),
+        '#description' => t('Define a string that should suffixed to the value, like m², m/s², kb/s. Leave blank for none. Separate singular and plural values with a pipe (pound|pounds).'),
       );
       $form['allowed_values_fieldset'] = array(
         '#type' => 'fieldset',
@@ -143,7 +143,7 @@ function number_field_settings($op, $field) {
         '#title' => t('Code'),
         '#default_value' => !empty($field['allowed_values_php']) ? $field['allowed_values_php'] : '',
         '#rows' => 6,
-        '#description' => t('Advanced Usage Only: PHP code that returns a keyed array of allowed values. Should not include &lt;?php ?&gt; delimiters. If this field is filled out, the array returned by this code will override the allowed values list above.'),
+        '#description' => t('Advanced usage only: PHP code that returns a keyed array of allowed values. Should not include &lt;?php ?&gt; delimiters. If this field is filled out, the array returned by this code will override the allowed values list above.'),
       );
       return $form;
 
@@ -329,7 +329,7 @@ function theme_number_formatter_generic($element) {
 function number_widget_info() {
   return array(
     'number' => array(
-      'label' => t('Text Field'),
+      'label' => t('Text field'),
       'field types' => array('number_integer', 'number_decimal', 'number_float'),
       'multiple values' => CONTENT_HANDLE_CORE,
       'callbacks' => array(

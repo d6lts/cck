@@ -397,7 +397,7 @@ function text_field_formatter($field, $item, $formatter, $node) {
 function text_widget_info() {
   return array(
     'text_textfield' => array(
-      'label' => t('Text Field'),
+      'label' => t('Text field'),
       'field types' => array('text'),
     ),
   );

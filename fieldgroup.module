@@ -123,7 +123,7 @@ function fieldgroup_edit_group_form(&$form_state, $content_type, $group_name, $a
   $form['settings']['form'] = array(
     '#type' => 'fieldset',
     '#title' => 'Form settings',
-    '#description' => t('These settings apply to the group in the node editing form'),
+    '#description' => t('These settings apply to the group in the node editing form.'),
   );
   $form['settings']['form']['style'] = array(
     '#type' => 'radios',
@@ -357,7 +357,7 @@ function fieldgroup_form_alter(&$form, $form_state, $form_id) {
   elseif ($form_id == 'content_admin_display_overview_form' && !empty($form['#groups'])) {
     $form['#submit'][] = 'fieldgroup_display_overview_form_submit';
     if (!isset($form['submit'])) {
-      $form['submit'] = array('#type' => 'submit', '#value' => t('Submit'), '#weight' => 10);
+      $form['submit'] = array('#type' => 'submit', '#value' => t('Save'), '#weight' => 10);
     }
   }
   elseif ($form_id == '_content_admin_field_remove') {

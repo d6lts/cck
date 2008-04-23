@@ -179,7 +179,7 @@ function text_field_settings($op, $field) {
       );
       $form['advanced_options'] = array(
         '#type' => 'fieldset',
-        '#title' => t('Php code'),
+        '#title' => t('PHP code'),
         '#collapsible' => TRUE,
         '#collapsed' => TRUE,
       );
@@ -188,7 +188,7 @@ function text_field_settings($op, $field) {
         '#title' => t('Code'),
         '#default_value' => !empty($field['allowed_values_php']) ? $field['allowed_values_php'] : '',
         '#rows' => 6,
-        '#description' => t('Advanced Usage Only: PHP code that returns a keyed array of allowed values. Should not include &lt;?php ?&gt; delimiters. If this field is filled out, the array returned by this code will override the allowed values list above.'),
+        '#description' => t('Advanced usage only: PHP code that returns a keyed array of allowed values. Should not include &lt;?php ?&gt; delimiters. If this field is filled out, the array returned by this code will override the allowed values list above.'),
       );
       return $form;
 
@@ -473,7 +473,7 @@ function text_field_formatter($field, $item, $formatter, $node) {
 function text_widget_info() {
   return array(
     'text_textfield' => array(
-      'label' => t('Text Field'),
+      'label' => t('Text field'),
       'field types' => array('text'),
       'multiple values' => CONTENT_HANDLE_CORE,
       'callbacks' => array(
@@ -481,7 +481,7 @@ function text_widget_info() {
         ),
     ),
     'text_textarea' => array(
-      'label' => t('Text Area'),
+      'label' => t('Text area'),
       'field types' => array('text'),
       'multiple values' => CONTENT_HANDLE_CORE,
       'callbacks' => array(

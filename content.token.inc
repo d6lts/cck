@@ -57,9 +57,9 @@ if (module_exists('nodereference')) {
     if ($type == 'field' || $type == 'all') {
       $tokens = array();
 
-      $tokens['node reference']['nid']   = t("Referenced node ID.");
-      $tokens['node reference']['title'] = t("Referenced node title.");
-      $tokens['node reference']['link']  = t("Formatted html link to the node.");
+      $tokens['node reference']['nid']   = t('Referenced node ID');
+      $tokens['node reference']['title'] = t('Referenced node title');
+      $tokens['node reference']['link']  = t('Formatted HTML link to the node');
 
       return $tokens;
     }
@@ -83,8 +83,8 @@ if (module_exists('number')) {
     if ($type == 'field' || $type == 'all') {
       $tokens = array();
 
-      $tokens['number']['raw']       = t("Raw number value.");
-      $tokens['number']['formatted'] = t("Formatted number value.");
+      $tokens['number']['raw']       = t('Raw number value');
+      $tokens['number']['formatted'] = t('Formatted number value');
 
       return $tokens;
     }
@@ -107,8 +107,8 @@ if (module_exists('text')) {
     if ($type == 'field' || $type == 'all') {
       $tokens = array();
 
-      $tokens['text']['raw']       = t("Raw, unfiltered text.");
-      $tokens['text']['formatted'] = t("Formatted and filtered text.");
+      $tokens['text']['raw']       = t('Raw, unfiltered text');
+      $tokens['text']['formatted'] = t('Formatted and filtered text');
 
       return $tokens;
     }
@@ -130,9 +130,9 @@ if (module_exists('userreference')) {
     if ($type == 'field' || $type == 'all') {
       $tokens = array();
 
-      $tokens['user reference']['uid']   = t("Referenced user ID");
-      $tokens['user reference']['name']  = t("Referenced user name");
-      $tokens['user reference']['link']  = t("Formatted html link to referenced user");
+      $tokens['user reference']['uid']   = t('Referenced user ID');
+      $tokens['user reference']['name']  = t('Referenced user name');
+      $tokens['user reference']['link']  = t('Formatted HTML link to referenced user');
 
       return $tokens;
     }
@@ -159,9 +159,9 @@ if (module_exists('link')) {
     if ($type == 'field' || $type == 'all') {
       $tokens = array();
 
-      $tokens['link']['url']    = t("Link URL");
-      $tokens['link']['title']  = t("Link title");
-      $tokens['link']['view']   = t("Formatted html link");
+      $tokens['link']['url']   = t('Link URL');
+      $tokens['link']['title'] = t('Link title');
+      $tokens['link']['view']  = t('Formatted HTML link');
 
       return $tokens;
     }
@@ -185,14 +185,14 @@ if (module_exists('imagefield')) {
     if ($type == 'field' || $type == 'all') {
       $tokens = array();
 
-      $tokens['image']['fid']       = t("Image file ID");
-      $tokens['image']['title']     = t("Image title");
-      $tokens['image']['alt']       = t("Image alt text");
-      $tokens['image']['filename']  = t("Image file name");
-      $tokens['image']['filepath']  = t("Image path");
-      $tokens['image']['filemime']  = t("Image MIME type");
-      $tokens['image']['filesize']  = t("Image file size");
-      $tokens['image']['view']      = t("Fully formatted HTML image tag");
+      $tokens['image']['fid']       = t('Image file ID');
+      $tokens['image']['title']     = t('Image title');
+      $tokens['image']['alt']       = t('Image alt text');
+      $tokens['image']['filename']  = t('Image file name');
+      $tokens['image']['filepath']  = t('Image path');
+      $tokens['image']['filemime']  = t('Image MIME type');
+      $tokens['image']['filesize']  = t('Image file size');
+      $tokens['image']['view']      = t('Fully formatted HTML image tag');
 
       return $tokens;
     }

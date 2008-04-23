@@ -376,14 +376,14 @@ class views_handler_field_content_multiple extends views_handler_field_content {
       '#access' => $field['multiple'],
     );
     $form['multiple']['group'] = array(
-      '#title' => t('Group Multiple values'),
+      '#title' => t('Group multiple values'),
       '#type' => 'checkbox',
       '#default_value' => $options['multiple']['group'],
     );
     $form['multiple']['multiple_number'] = array(
       '#type' => 'textfield',
       '#size' => 5,
-      '#field_prefix' => t('Show '),
+      '#field_prefix' => t('Show') .' ',
       '#field_suffix' => t(' values,'),
       '#default_value' => $options['multiple']['multiple_number'],
       '#prefix' => '<div class="container-inline">',
@@ -391,7 +391,7 @@ class views_handler_field_content_multiple extends views_handler_field_content {
     $form['multiple']['multiple_from'] = array(
       '#type' => 'textfield',
       '#size' => 5,
-      '#field_prefix' => t('starting from '),
+      '#field_prefix' => t('Starting from') .' ',
       '#default_value' => $options['multiple']['multiple_from'],
     );
     $form['multiple']['multiple_reversed'] = array(

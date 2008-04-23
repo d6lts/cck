@@ -12,8 +12,8 @@
  */
 function content_permissions_perm() {
   foreach (content_fields() as $field) {
-    $perms[] = "edit ". $field['field_name'];
-    $perms[] = "view ". $field['field_name'];
+    $perms[] = 'edit '. $field['field_name'];
+    $perms[] = 'view '. $field['field_name'];
   }
   return $perms;
 }

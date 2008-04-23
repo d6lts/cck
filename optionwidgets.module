@@ -7,12 +7,12 @@
  */
 function optionwidgets_form_alter(&$form, $form_state, $form_id) {
   if ($form_id == '_content_admin_field') {
-    $output = t('<p>Create a list of options as a list in <strong>Allowed values</strong> or as an array in PHP code. These values will be the same for %field in all content types.</p>', array('%field' => $form['widget']['label']['#default_value']));
+    $output = '<p>'. t('Create a list of options as a list in <strong>Allowed values</strong> or as an array in PHP code. These values will be the same for %field in all content types.', array('%field' => $form['widget']['label']['#default_value'])) .'</p>';
     if ($form['widget']['widget_type']['#default_value'] == 'optionwidgets_onoff') {
-      $output .= t('<p>For a \'Single on/off checkbox\' widget, define the \'off\' value first, then the \'on\' value in the <strong>Allowed values</strong> section. Note that the checkbox will be labeled with the label of the \'on\' value.</p>');
+      $output .= '<p>'. t("For a 'single on/off checkbox' widget, define the 'off' value first, then the 'on' value in the <strong>Allowed values</strong> section. Note that the checkbox will be labeled with the label of the 'on' value.") .'</p>';
     }
     elseif ($form['widget']['widget_type']['#default_value'] == 'optionwidgets_buttons') {
-      $output .= t('<p>The \'Checkboxes / radio buttons\' widget will display checkboxes if the multiple values option is selected for this field, otherwise radios will be displayed.</p>');
+      $output .= '<p>'. t("The 'checkboxes/radio buttons' widget will display checkboxes if the multiple values option is selected for this field, otherwise radios will be displayed.") .'</p>';
     }
     if (in_array($form['type']['#value'], array('text', 'number_integer', 'number_float', 'number_decimal'))
     && in_array($form['widget']['widget_type']['#default_value'], array('optionwidgets_onoff', 'optionwidgets_buttons', 'optionwidgets_select'))) {

@@ -49,8 +49,8 @@ function userreference_theme() {
 function userreference_field_info() {
   return array(
     'userreference' => array(
-      'label' => t('User Reference'),
-      'description' => t('Store the id of a related user as an integer value.'),
+      'label' => t('User reference'),
+      'description' => t('Store the ID of a related user as an integer value.'),
       'callbacks' => array(
         'tables' => CONTENT_CALLBACK_DEFAULT,
         'arguments' => CONTENT_CALLBACK_DEFAULT,
@@ -119,7 +119,7 @@ function userreference_field($op, &$node, $field, &$items, $teaser, $page) {
           $error_field = $item['error_field'];
           unset($item['error_field']);
           if (!empty($item['uid']) && !in_array($item['uid'], array_keys(_userreference_potential_references($field)))) {
-            form_set_error($error_field, t('%name : Invalid user.', array('%name' => t($field['widget']['label']))));
+            form_set_error($error_field, t('%name: Invalid user.', array('%name' => t($field['widget']['label']))));
           }
         }
       }
@@ -195,7 +195,7 @@ function theme_userreference_formatter_plain($element) {
 function userreference_widget_info() {
   return array(
     'userreference_select' => array(
-      'label' => t('Select List'),
+      'label' => t('Select list'),
       'field types' => array('userreference'),
       'multiple values' => CONTENT_HANDLE_MODULE,
       'callbacks' => array(
@@ -203,7 +203,7 @@ function userreference_widget_info() {
         ),
     ),
     'userreference_autocomplete' => array(
-      'label' => t('Autocomplete Text Field'),
+      'label' => t('Autocomplete text field'),
       'field types' => array('userreference'),
       'multiple values' => CONTENT_HANDLE_CORE,
       'callbacks' => array(
@@ -250,7 +250,7 @@ function userreference_widget_settings($op, $field) {
       $form = array();
       $form['reverse_link'] = array(
         '#type' => 'radios',
-        '#title' => t('Reverse Link'),
+        '#title' => t('Reverse link'),
         '#default_value' => isset($field['reverse_link']) ? $field['reverse_link'] : 0,
         '#options' => array(0 => t('No'), 1 => t('Yes')),
         '#required' => TRUE,
@@ -564,7 +564,7 @@ function userreference_user($type, &$edit, &$account) {
           $account->content['userreference'] = $additions + array(
             '#type' => 'user_profile_category',
             '#attributes' => array('class' => 'user-member'),
-            '#title' => t('Related Content'),
+            '#title' => t('Related content'),
             '#weight' => 10,
           );
         }

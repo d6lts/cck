@@ -61,7 +61,7 @@ function content_admin_field_overview_form(&$form_state, $type_name) {
   $fields = $type['fields'];
   if (empty($fields)) {
     drupal_set_message(t('There are no fields configured for this content type. You can !link.', array(
-      '!link' => l(t('add a new field'), str_replace('/fields', '/add_field', $_GET['q'])))), 'warning');
+      '!link' => l(t('Add a new field'), str_replace('/fields', '/add_field', $_GET['q'])))), 'warning');
     return array();
   }
 
@@ -85,7 +85,7 @@ function content_admin_field_overview_form(&$form_state, $type_name) {
     '#groups' => array_keys($groups),
     '#extra' => array_keys($extra),
     '#order' => array(),
-    '#prefix' => t('<p>To change the order of a field, grab a drag-and-drop handle under the Label column and drag the field to a new location in the list. (Grab a handle by clicking and holding the mouse while hovering over a handle icon.) Remember that your changes will not be saved until you click the Save button at the bottom of the page.</p>'),
+    '#prefix' => '<p>'. t('To change the order of a field, grab a drag-and-drop handle under the Label column and drag the field to a new location in the list. (Grab a handle by clicking and holding the mouse while hovering over a handle icon.) Remember that your changes will not be saved until you click the Save button at the bottom of the page.') .'</p>',
   );
 
   // Fields.
@@ -95,8 +95,8 @@ function content_admin_field_overview_form(&$form_state, $type_name) {
       'human_name' => array('#value' => $field['widget']['label']),
       'name' => array('#value' => $field['field_name']),
       'type' => array('#value' => $field['type']),
-      'configure' => array('#value' => l(t('configure'), 'admin/content/node-type/'. $type['url_str'] .'/fields/'. $field['field_name'] .'/edit')),
-      'remove' => array('#value' => l(t('remove'), 'admin/content/node-type/'. $type['url_str'] .'/fields/'. $field['field_name'] .'/remove')),
+      'configure' => array('#value' => l(t('Configure'), 'admin/content/node-type/'. $type['url_str'] .'/fields/'. $field['field_name'] .'/edit')),
+      'remove' => array('#value' => l(t('Remove'), 'admin/content/node-type/'. $type['url_str'] .'/fields/'. $field['field_name'] .'/remove')),
       'weight' => array('#type' => 'textfield', '#default_value' => $weight),
       'parent' => array('#type' => 'select', '#options' => $group_options, '#default_value' => ''),
       'hidden_name' => array('#type' => 'hidden', '#default_value' => $field['field_name']),
@@ -111,8 +111,8 @@ function content_admin_field_overview_form(&$form_state, $type_name) {
       'human_name' => array('#value' => $group['label']),
       'name' => array('#value' => $group['group_name']),
       'type' => array(),
-      'configure' => array('#value' => l(t('configure'), 'admin/content/node-type/'. $type['url_str'] .'/groups/'. $group['group_name'] .'/edit')),
-      'remove' => array('#value' => l(t('remove'), 'admin/content/node-type/'. $type['url_str'] .'/groups/'. $group['group_name'] .'/remove')),
+      'configure' => array('#value' => l(t('Configure'), 'admin/content/node-type/'. $type['url_str'] .'/groups/'. $group['group_name'] .'/edit')),
+      'remove' => array('#value' => l(t('Remove'), 'admin/content/node-type/'. $type['url_str'] .'/groups/'. $group['group_name'] .'/remove')),
       'weight' => array('#type' => 'textfield', '#default_value' => $weight),
       'parent' => array('#type' => 'hidden', '#default_value' => ''),
       'hidden_name' => array('#type' => 'hidden', '#default_value' => $group['group_name']),
@@ -170,8 +170,8 @@ function theme_content_admin_field_overview_form($form) {
     $element['parent']['#attributes']['class'] = 'group-parent';
     $element['hidden_name']['#attributes']['class'] = 'field-name';
     if (in_array($key, $form['#groups'])) {
-      $element['human_name']['#prefix'] = '<b>';
-      $element['human_name']['#suffix'] = '</b>';
+      $element['human_name']['#prefix'] = '<strong>';
+      $element['human_name']['#suffix'] = '</strong>';
     }
     $row[] = theme('indentation', isset($element['#depth']) ? $element['#depth'] : 0) . drupal_render($element['human_name']);
     $row[] = drupal_render($element['name']);
@@ -240,7 +240,7 @@ function content_admin_display_overview_form(&$form_state, $type_name, $contexts
   $fields = $type['fields'];
   if (empty($fields)) {
     drupal_set_message(t('There are no fields configured for this content type. You can !link.', array(
-      '!link' => l(t('add a new field'), str_replace('/fields', '/add_field', $_GET['q'])))), 'warning');
+      '!link' => l(t('Add a new field'), str_replace('/fields', '/add_field', $_GET['q'])))), 'warning');
     return array();
   }
 
@@ -371,8 +371,8 @@ function theme_content_admin_display_overview_form($form) {
       $row = array();
       $element = &$form[$key];
       if (in_array($key, $form['#groups'])) {
-        $element['human_name']['#prefix'] = '<b>';
-        $element['human_name']['#suffix'] = '</b>';
+        $element['human_name']['#prefix'] = '<strong>';
+        $element['human_name']['#suffix'] = '</strong>';
       }
       $row[] = theme('indentation', isset($element['#depth']) ? $element['#depth'] : 0) . drupal_render($element['human_name']);
       $row[] = drupal_render($element['label']);
@@ -479,7 +479,7 @@ function _content_admin_field_add_new(&$form_state, $type_name, $new_field_name 
       '#type' => 'textfield',
       '#default_value' => $new_field_name,
       '#field_prefix' => 'field_',
-      '#description' => t('The machine-readable name of the field. This name cannot be changed later! The name will be prefixed with \'field_\' and can include lowercase unaccented letters, numbers, and underscores. You\'ll be able to choose a human-readable label for the field on next page'),
+      '#description' => t("The machine-readable name of the field. This name cannot be changed later! The name will be prefixed with 'field_' and can include lowercase unaccented letters, numbers, and underscores. You'll be able to choose a human-readable label for the field on next page."),
       '#required' => TRUE,
     );
     $form['new']['field_widget_type'] = array(
@@ -511,7 +511,7 @@ function theme_content_admin_field_add_new_field_widget_type($form) {
   $field_types = _content_field_types();
   $widget_types = _content_widget_types();
   $output = '';
-  $output .= t('<p>Choose the type of value to store and an input method from the list below.</p>');
+  $output .= '<p>'. t('Choose the type of value to store and an input method from the list below.') .'</p>';
   $output .= '<dl>';
   foreach ($field_types as $field_name => $field_type) {
     $output .= '<dt>'. $field_type['label'] .'</dt>';
@@ -562,7 +562,7 @@ function _content_admin_field_add_new_validate($form, &$form_state) {
       '%field_name' => $form_values['field_name'])));
   }
   elseif ($form_values['field_name'] == 'field_instance') {
-    form_set_error('field_name', t('The name \'field_instance\' is a reserved name.'));
+    form_set_error('field_name', t("The name 'field_instance' is a reserved name."));
   }
 }
 
@@ -636,7 +636,7 @@ function _content_admin_field_remove_submit($form, &$form_state) {
         '%type' => $type['name'])));
     }
     else {
-      drupal_set_message(t('There was a problem deleting %field from %type', array(
+      drupal_set_message(t('There was a problem deleting %field from %type.', array(
         '%field' => $field['widget']['label'],
         '%type' => $type['name'])));
     }
@@ -754,7 +754,7 @@ function _content_admin_field(&$form_state, $type_name, $field_name) {
       '#default_value' => isset($field['widget']['default_value_php']) ? $field['widget']['default_value_php'] : '',
       '#rows' => 6,
       '#tree' => TRUE,
-      '#description' => t('Advanced Usage Only: PHP code that returns a default value. Should not include &lt;?php ?&gt; delimiters. If this field is filled out, the value returned by this code will override any value specified above. Expected format :<pre>!sample</pre>Using !link_devel\'s \'devel load\' tab on a %type content page might help you figure out the expected format.', array(
+      '#description' => t("Advanced usage only: PHP code that returns a default value. Should not include &lt;?php ?&gt; delimiters. If this field is filled out, the value returned by this code will override any value specified above. Expected format :<pre>!sample</pre>Using !link_devel's 'devel load' tab on a %type content page might help you figure out the expected format.", array(
         '!sample' => $sample,
         '!link_devel' => l('devel.module', 'http://www.drupal.org/project/devel'),
         '%type' => $type_name)),
@@ -776,7 +776,7 @@ function _content_admin_field(&$form_state, $type_name, $field_name) {
     '#title' => t('Number of values'),
     '#options' => array(1 => t('Unlimited'), 0 => 1) + drupal_map_assoc(range(2, 10)),
     '#default_value' => $field['multiple'],
-    '#description' => t('Select a specific number of values for this field, or \'Unlimited\' to provide an \'Add more\' button so the users can add as many values as they like.') .'<br/><strong>'. t('Warning! Changing this setting after data has been created could result in the loss of data!') .'</strong>',
+    '#description' => t("Select a specific number of values for this field, or 'Unlimited' to provide an 'Add more' button so the users can add as many values as they like.") .'<br/><strong>'. t('Warning! Changing this setting after data has been created could result in the loss of data!') .'</strong>',
   );
 
   $form['field']['previous_field'] = array(
@@ -877,7 +877,7 @@ function _content_admin_field_validate($form, &$form_state) {
   1 => array('. implode(', ', $columns) .'),
   2 => ...
 );';
-        form_set_error('default_value_php', t('The default value PHP code returned an incorrect value<br/>Expected format : <pre>!sample</pre> Returned value : @value', array(
+        form_set_error('default_value_php', t('The default value PHP code returned an incorrect value.<br/>Expected format: <pre>!sample</pre> Returned value: @value', array(
           '!sample' => $sample,
           '@value' => print_r($return, true))));
         return;
