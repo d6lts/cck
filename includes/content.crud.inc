@@ -191,7 +191,7 @@ function content_field_instance_collapse($field) {
  *   - widget_type, the type of widget to use
  */
 function content_field_instance_create($field) {
-  include_once('./'. drupal_get_path('module', 'content') .'/content_admin.inc');
+  include_once('./'. drupal_get_path('module', 'content') .'/includes/content.admin.inc');
 
   $form_values = $field;
   $field = content_field_instance_expand($field);
@@ -284,7 +284,7 @@ function content_field_instance_create($field) {
  *   array of form values.
  */
 function content_field_instance_update($field) {
-  include_once('./'. drupal_get_path('module', 'content') .'/content_admin.inc');
+  include_once('./'. drupal_get_path('module', 'content') .'/includes/content.admin.inc');
 
   // Get the previous value from the table.
   $previous = content_field_instance_read(array('field_name' => $field['field_name'], 'type_name' => $field['type_name']));
@@ -473,7 +473,7 @@ function content_field_instance_read($param = NULL) {
  * Delete an existing field instance.
  */
 function content_field_instance_delete($field_name, $type_name) {
-  include_once('./'. drupal_get_path('module', 'content') .'/content_admin.inc');
+  include_once('./'. drupal_get_path('module', 'content') .'/includes/content.admin.inc');
 
   // Get the previous field value.
   $field = array_pop(content_field_instance_read(array('field_name' => $field_name, 'type_name' => $type_name)));

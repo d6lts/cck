@@ -393,7 +393,7 @@ function theme_content_admin_display_overview_form($form) {
  * Submit handler for the display overview form.
  */
 function content_admin_display_overview_form_submit($form, &$form_state) {
-  module_load_include('inc', 'content', 'content_crud');
+  module_load_include('inc', 'content', 'includes/content.crud');
   $form_values = $form_state['values'];
   $fields = content_fields();
   foreach ($form_values as $key => $values) {
@@ -531,7 +531,7 @@ function theme_content_admin_field_add_new_field_widget_type($form) {
  * Add an existing field to a content type.
  */
 function _content_admin_field_add_existing_submit($form, &$form_state) {
-  module_load_include('inc', 'content', 'content_crud');
+  module_load_include('inc', 'content', 'includes/content.crud');
   $form_values = $form_state['values'];
 
   if (content_field_instance_create($form_values)) {
@@ -570,7 +570,7 @@ function _content_admin_field_add_new_validate($form, &$form_state) {
  * Create a new field for a content type.
  */
 function _content_admin_field_add_new_submit($form, &$form_state) {
-  module_load_include('inc', 'content', 'content_crud');
+  module_load_include('inc', 'content', 'includes/content.crud');
   $form_values = $form_state['values'];
 
   $field_widget_type = explode('-', $form_values['field_widget_type']);
@@ -624,7 +624,7 @@ function _content_admin_field_remove(&$form_state, $type_name, $field_name) {
  * Remove a field from a content type.
  */
 function _content_admin_field_remove_submit($form, &$form_state) {
-  module_load_include('inc', 'content', 'content_crud');
+  module_load_include('inc', 'content', 'includes/content.crud');
   $form_values = $form_state['values'];
 
   $type = content_types($form_values['type_name']);
@@ -722,7 +722,7 @@ function _content_admin_field(&$form_state, $type_name, $field_name) {
     // Make sure the default value is not a required field.
     $widget_field = $field;
     $widget_field['required'] = FALSE;
-    module_load_include('inc', 'content', 'content_node_form');
+    module_load_include('inc', 'content', 'includes/content_node_form');
     $form_element = content_field_form($widget_form, $widget_form_state, $widget_field, 0);
     $form['widget']['default_value_fieldset']['default_value_widget'] = $form_element;
     $form['widget']['default_value_fieldset']['default_value_widget']['#tree'] = TRUE;
@@ -824,7 +824,7 @@ function _content_admin_field(&$form_state, $type_name, $field_name) {
  * Validate a field's settings.
  */
 function _content_admin_field_validate($form, &$form_state) {
-  include_once('./'. drupal_get_path('module', 'content') .'/content_crud.inc');
+  include_once('./'. drupal_get_path('module', 'content') .'/includes/content.crud.inc');
   $form_values = $form_state['values'];
   $previous_field = unserialize($form_values['previous_field']);
   $field = content_field_instance_expand($form_values);
@@ -929,7 +929,7 @@ function _content_admin_field_validate($form, &$form_state) {
  * Save a field's settings after editing.
  */
 function _content_admin_field_submit($form, &$form_state) {
-  module_load_include('inc', 'content', 'content_crud');
+  module_load_include('inc', 'content', 'includes/content.crud');
   $form_values = $form_state['values'];
 
   // If the widget type has changed, update the widget module, too.
@@ -1249,7 +1249,7 @@ function content_alter_fields($previous_field, $new_field) {
     'finished' => '_content_alter_fields_finished',
     'title' => t('Processing'),
     'error_message' => t('The update has encountered an error.'),
-    'file' => './'. drupal_get_path('module', 'content') .'/content_admin.inc',
+    'file' => './'. drupal_get_path('module', 'content') .'/includes/content.admin.inc',
   );
   batch_set($batch);
   if (!empty($url)) {

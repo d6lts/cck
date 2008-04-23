@@ -57,7 +57,7 @@ function content_copy_menu() {
  *  A form to export field definitions.
  */
 function content_copy_export_form(&$form_state) {
-  include_once('./'. drupal_get_path('module', 'content') .'/content_admin.inc');
+  include_once('./'. drupal_get_path('module', 'content') .'/includes/content.admin.inc');
   include_once('./'. drupal_get_path('module', 'node') .'/content_types.inc');
 
   $form_values = isset($form_state['values']) ? $form_state['values'] : array();
@@ -180,8 +180,8 @@ function content_copy_export($form_values) {
   module_load_include('inc', 'node', 'content_types');
   drupal_execute('node_type_form', $node_state, node_get_types('type', $form_values['type_name']));
 
-  module_load_include('inc', 'content', 'content_admin');
-  module_load_include('inc', 'content', 'content_crud');
+  module_load_include('inc', 'content', 'includes/content.admin');
+  module_load_include('inc', 'content', 'includes/content.crud');
 
   // Get an array of groups to export.
   // Record a macro for each group by submitting the group edit form.
@@ -221,7 +221,7 @@ function content_copy_export($form_values) {
  *  A form to import formatted text created with export.
  */
 function content_copy_import_form(&$form_state, $type_name = '') {
-  include_once('./'. drupal_get_path('module', 'content') .'/content_admin.inc');
+  include_once('./'. drupal_get_path('module', 'content') .'/includes/content.admin.inc');
   include_once('./'. drupal_get_path('module', 'node') .'/content_types.inc');
 
   $form['#prefix'] = t('This form will import field definitions exported from another content type or another database.<br/>Note that fields cannot be duplicated within the same content type, so imported fields will be added only if they do not already exist in the selected type.');
@@ -271,7 +271,7 @@ function content_copy_import_form_submit($form, &$form_state) {
     return;
   }
 
-  module_load_include('inc', 'content', 'content_crud');
+  module_load_include('inc', 'content', 'includes/content.crud');
 
   // Get all type and field info for this database.
   $content_info = _content_type_info();
@@ -342,7 +342,7 @@ function content_copy_import_form_submit($form, &$form_state) {
     $node_state = array('values' => array('type_name' => $imported_type_name));
 
     // There's no API for creating node types, we still have to use drupal_execute().
-    module_load_include('inc', 'node', 'content_types');
+    module_load_include('inc', 'node', 'includes/content_types');
     drupal_execute('node_type_form', $node_state, $node);
 
     // Reset type and database values once new type has been added.

@@ -156,7 +156,7 @@ function fieldgroup_edit_group_form(&$form_state, $content_type, $group_name, $a
     '#description' => t('A description of the group.'),
     '#required' => FALSE,
   );
-  module_load_include('inc', 'content', 'content_admin');
+  module_load_include('inc', 'content', 'includes/content.admin');
   foreach (array_merge(array_keys(_content_admin_display_contexts(CONTENT_CONTEXTS_SIMPLE)), array('label')) as $key) {
     $form['settings']['display'][$key] = array('#type' => 'value', '#value' => isset($group['settings']['display'][$key]) ? $group['settings']['display'][$key] : 'fieldset');
   }

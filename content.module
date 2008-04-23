@@ -68,15 +68,15 @@ function content_flush_caches() {
  * Implementation of hook_init().
  */
 function content_init() {
-  drupal_add_css(drupal_get_path('module', 'content') .'/content.css');
+  drupal_add_css(drupal_get_path('module', 'content') .'/theme/content.css');
   if (module_exists('views')) {
-    module_load_include('inc', 'content', 'content_views');
+    module_load_include('inc', 'content', 'includes/content.views');
   }
   if (module_exists('token') && !function_exists('content_token_values')) {
-    module_load_include('inc', 'content', 'content.token');
+    module_load_include('inc', 'content', 'includes/content.token');
   }
   if (module_exists('diff') && !function_exists('content_diff')) {
-    module_load_include('inc', 'content', 'content.diff');
+    module_load_include('inc', 'content', 'includes/content.diff');
   }
   if (content_menu_needs_rebuild()) {
     content_clear_type_cache(TRUE);
@@ -116,7 +116,7 @@ function content_menu() {
     'title' => 'Fields',
     'page callback' => '_content_admin_type_fields',
     'access arguments' => array('administer content types'),
-    'file' => 'content_admin.inc',
+    'file' => 'includes/content.admin.inc',
     'type' => MENU_LOCAL_TASK,
   );
   // Callback for AHAH add more buttons.
@@ -124,7 +124,7 @@ function content_menu() {
     'page callback' => 'content_add_more_js',
     // TODO : access rule ?
     'access arguments' => array('access content'),
-    'file' => 'content_node_form.inc',
+    'file' => 'includes/content.node_form.inc',
     'type' => MENU_CALLBACK,
   );
 
@@ -141,7 +141,7 @@ function content_menu() {
         'page callback' => 'drupal_get_form',
         'page arguments' => array('content_admin_field_overview_form', $type_name),
         'access arguments' => array('administer content types'),
-        'file' => 'content_admin.inc',
+        'file' => 'includes/content.admin.inc',
         'type' => MENU_LOCAL_TASK,
         'weight' => 1,
       );
@@ -150,7 +150,7 @@ function content_menu() {
         'page callback' => 'drupal_get_form',
         'page arguments' => array('content_admin_display_overview_form', $type_name),
         'access arguments' => array('administer content types'),
-        'file' => 'content_admin.inc',
+        'file' => 'includes/content.admin.inc',
         'type' => MENU_LOCAL_TASK,
         'weight' => 2,
       );
@@ -172,7 +172,7 @@ function content_menu() {
         'page callback' => '_content_admin_field_add',
         'page arguments' => array($type_name),
         'access arguments' => array('administer content types'),
-        'file' => 'content_admin.inc',
+        'file' => 'includes/content.admin.inc',
         'type' => MENU_LOCAL_TASK,
         'weight' => 3,
       );
@@ -183,7 +183,7 @@ function content_menu() {
           'page callback' => 'drupal_get_form',
           'page arguments' => array('_content_admin_field', $type_name, $field_name),
           'access arguments' => array('administer content types'),
-          'file' => 'content_admin.inc',
+          'file' => 'includes/content.admin.inc',
           'type' => MENU_LOCAL_TASK,
         );
         $items['admin/content/node-type/'. $type_url_str .'/fields/'. $field_name .'/remove'] = array(
@@ -191,7 +191,7 @@ function content_menu() {
           'page callback' => 'drupal_get_form',
           'page arguments' => array('_content_admin_field_remove', $type_name, $field_name),
           'access arguments' => array('administer content types'),
-          'file' => 'content_admin.inc',
+          'file' => 'includes/content.admin.inc',
           'type' => MENU_CALLBACK,
         );
       }
@@ -432,7 +432,7 @@ function content_nodeapi(&$node, $op, $teaser, $page) {
  */
 function content_form_alter(&$form, $form_state, $form_id) {
   if (isset($form['type']) && isset($form['#node']) && $form['type']['#value'] .'_node_form' == $form_id) {
-    module_load_include('inc', 'content', 'content_node_form');
+    module_load_include('inc', 'content', 'includes/content.node_form');
     // Merge field widgets.
     $form = array_merge($form, content_form($form, $form_state));
     // Adjust weights for non-CCK fields.
@@ -528,7 +528,7 @@ function content_notify($op, $module) {
       content_clear_type_cache();
       break;
     case 'uninstall':
-      module_load_include('inc', 'content', 'content_crud');
+      module_load_include('inc', 'content', 'includes/content.crud');
       content_module_delete($module);
       content_clear_type_cache(TRUE);
       break;
@@ -1286,7 +1286,7 @@ function _content_type_info($reset = FALSE) {
       }
 
       // Populate actual field instances.
-      module_load_include('inc', 'content', 'content_crud');
+      module_load_include('inc', 'content', 'includes/content.crud');
       foreach (node_get_types() as $type_name => $data) {
         $type = (array) $data;
         $type['url_str'] = str_replace('_', '-', $type['type']);
@@ -1329,15 +1329,15 @@ function _content_type_info($reset = FALSE) {
 function content_node_type($op, $info) {
   switch ($op) {
     case 'insert':
-      module_load_include('inc', 'content', 'content_crud');
+      module_load_include('inc', 'content', 'includes/content.crud');
       content_type_create($info);
       break;
     case 'update':
-      module_load_include('inc', 'content', 'content_crud');
+      module_load_include('inc', 'content', 'includes/content.crud');
       content_type_update($info);
       break;
     case 'delete':
-      module_load_include('inc', 'content', 'content_crud');
+      module_load_include('inc', 'content', 'includes/content.crud');
       content_type_delete($info);
       break;
   }
@@ -1405,7 +1405,7 @@ function content_storage_type($field) {
     return CONTENT_DB_STORAGE_PER_FIELD;
   }
   else {
-    module_load_include('inc', 'content', 'content_crud');
+    module_load_include('inc', 'content', 'includes/content.crud');
     $instances = content_field_instance_read(array('field_name' => $field['field_name']));
     if (count($instances) > 1) {
       return CONTENT_DB_STORAGE_PER_FIELD;
