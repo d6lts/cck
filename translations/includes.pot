@@ -1,0 +1,406 @@
+# $Id$
+#
+# LANGUAGE translation of Drupal (includes)
+# Copyright YEAR NAME <EMAIL@ADDRESS>
+# Generated from files:
+#  content.admin.inc,v 1.172 2008/04/23 22:26:09 karens
+#  content.crud.inc,v 1.73 2008/04/23 19:00:12 karens
+#  content.node_form.inc,v 1.6 2008/04/23 18:01:39 dww
+#  content.token.inc,v 1.4 2008/04/23 18:01:41 dww
+#  content.views.inc,v 1.63 2008/04/23 18:01:44 dww
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PROJECT VERSION\n"
+"POT-Creation-Date: 2008-04-24 19:53+0200\n"
+"PO-Revision-Date: YYYY-mm-DD HH:MM+ZZZZ\n"
+"Last-Translator: NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <EMAIL@ADDRESS>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=INTEGER; plural=EXPRESSION;\n"
+
+#: includes/content.admin.inc:15;478
+msgid "Field name"
+msgstr ""
+
+#: includes/content.admin.inc:15;487
+msgid "Field type"
+msgstr ""
+
+#: includes/content.admin.inc:15
+msgid "Used in"
+msgstr ""
+
+#: includes/content.admin.inc:38
+msgid "No fields have been defined for any content type yet."
+msgstr ""
+
+#: includes/content.admin.inc:63;242
+msgid "There are no fields configured for this content type. You can !link."
+msgstr ""
+
+#: includes/content.admin.inc:64;243
+msgid "Add a new field"
+msgstr ""
+
+#: includes/content.admin.inc:88
+msgid "To change the order of a field, grab a drag-and-drop handle under the Label column and drag the field to a new location in the list. (Grab a handle by clicking and holding the mouse while hovering over a handle icon.) Remember that your changes will not be saved until you click the Save button at the bottom of the page."
+msgstr ""
+
+#: includes/content.admin.inc:98;114
+msgid "Configure"
+msgstr ""
+
+#: includes/content.admin.inc:163
+msgid "Name"
+msgstr ""
+
+#: includes/content.admin.inc:163
+msgid "Type"
+msgstr ""
+
+#: includes/content.admin.inc:163
+msgid "Weight"
+msgstr ""
+
+#: includes/content.admin.inc:163
+msgid "Operations"
+msgstr ""
+
+#: includes/content.admin.inc:270;311
+msgid "Above"
+msgstr ""
+
+#: includes/content.admin.inc:271
+msgid "Inline"
+msgstr ""
+
+#: includes/content.admin.inc:272;297;312;320
+msgid "<Hidden>"
+msgstr ""
+
+#: includes/content.admin.inc:315
+msgid "no styling"
+msgstr ""
+
+#: includes/content.admin.inc:316
+msgid "simple"
+msgstr ""
+
+#: includes/content.admin.inc:317
+msgid "fieldset"
+msgstr ""
+
+#: includes/content.admin.inc:318
+msgid "fieldset - collapsible"
+msgstr ""
+
+#: includes/content.admin.inc:319
+msgid "fieldset - collapsed"
+msgstr ""
+
+#: includes/content.admin.inc:364
+msgid "Field"
+msgstr ""
+
+#: includes/content.admin.inc:411
+msgid "Your settings have been saved."
+msgstr ""
+
+#: includes/content.admin.inc:441
+msgid "Add existing field"
+msgstr ""
+
+#: includes/content.admin.inc:475
+msgid "Create new field"
+msgstr ""
+
+#: includes/content.admin.inc:482
+msgid "The machine-readable name of the field. This name cannot be changed later! The name will be prefixed with 'field_' and can include lowercase unaccented letters, numbers, and underscores. You'll be able to choose a human-readable label for the field on next page."
+msgstr ""
+
+#: includes/content.admin.inc:496
+msgid "Continue"
+msgstr ""
+
+#: includes/content.admin.inc:504
+msgid "No field modules are enabled. You need to <a href=\"!modules_url\">enable one</a>, such as text.module, before you can add new fields."
+msgstr ""
+
+#: includes/content.admin.inc:514
+msgid "Choose the type of value to store and an input method from the list below."
+msgstr ""
+
+#: includes/content.admin.inc:538
+msgid "Added field %label."
+msgstr ""
+
+#: includes/content.admin.inc:541
+msgid "There was a problem adding field %label."
+msgstr ""
+
+#: includes/content.admin.inc:557
+msgid "The field name %field_name is invalid. The name must include only lowercase unaccentuated letters, numbers, and underscores."
+msgstr ""
+
+#: includes/content.admin.inc:561
+msgid "The field name %field_name already exists."
+msgstr ""
+
+#: includes/content.admin.inc:565
+msgid "The name 'field_instance' is a reserved name."
+msgstr ""
+
+#: includes/content.admin.inc:582
+msgid "Created field %label."
+msgstr ""
+
+#: includes/content.admin.inc:586
+msgid "There was a problem creating field %label."
+msgstr ""
+
+#: includes/content.admin.inc:612
+msgid "Are you sure you want to remove the field %field?"
+msgstr ""
+
+#: includes/content.admin.inc:615
+msgid "If you have any content left in this field, it will be lost. This action cannot be undone."
+msgstr ""
+
+#: includes/content.admin.inc:634
+msgid "Removed field %field from %type."
+msgstr ""
+
+#: includes/content.admin.inc:639
+msgid "There was a problem deleting %field from %type."
+msgstr ""
+
+#: includes/content.admin.inc:664
+msgid "%type settings"
+msgstr ""
+
+#: includes/content.admin.inc:665
+msgid "These settings apply only to the %field field as it appears in the %type content type."
+msgstr ""
+
+#: includes/content.admin.inc:681
+msgid "Widget"
+msgstr ""
+
+#: includes/content.admin.inc:705
+msgid "Instructions to present to the user below this field on the editing form."
+msgstr ""
+
+#: includes/content.admin.inc:713
+msgid "Default value"
+msgstr ""
+
+#: includes/content.admin.inc:757
+msgid "Advanced usage only: PHP code that returns a default value. Should not include &lt;?php ?&gt; delimiters. If this field is filled out, the value returned by this code will override any value specified above. Expected format :<pre>!sample</pre>Using !link_devel's 'devel load' tab on a %type content page might help you figure out the expected format."
+msgstr ""
+
+#: includes/content.admin.inc:766
+msgid "Global settings"
+msgstr ""
+
+#: includes/content.admin.inc:767
+msgid "These settings apply to the %field field in every content type in which it appears."
+msgstr ""
+
+#: includes/content.admin.inc:771
+msgid "Required"
+msgstr ""
+
+#: includes/content.admin.inc:776
+msgid "Number of values"
+msgstr ""
+
+#: includes/content.admin.inc:777
+msgid "Unlimited"
+msgstr ""
+
+#: includes/content.admin.inc:779
+msgid "Select a specific number of values for this field, or 'Unlimited' to provide an 'Add more' button so the users can add as many values as they like."
+msgstr ""
+
+#: includes/content.admin.inc:779
+msgid "Warning! Changing this setting after data has been created could result in the loss of data!"
+msgstr ""
+
+#: includes/content.admin.inc:794
+msgid "Save field settings"
+msgstr ""
+
+#: includes/content.admin.inc:880
+msgid "The default value PHP code returned an incorrect value.<br/>Expected format: <pre>!sample</pre> Returned value: @value"
+msgstr ""
+
+#: includes/content.admin.inc:917
+msgid "The default value PHP code created @value which is invalid."
+msgstr ""
+
+#: includes/content.admin.inc:921
+msgid "The default value is invalid."
+msgstr ""
+
+#: includes/content.admin.inc:942
+msgid "Saved field %label."
+msgstr ""
+
+#: includes/content.admin.inc:1250
+msgid "Processing"
+msgstr ""
+
+#: includes/content.admin.inc:1251
+msgid "The update has encountered an error."
+msgstr ""
+
+#: includes/content.admin.inc:1265
+msgid "The database has been altered and data has been migrated or deleted."
+msgstr ""
+
+#: includes/content.admin.inc:1268
+msgid "An error occurred and database alteration did not complete."
+msgstr ""
+
+#: includes/content.admin.inc:1371
+msgid "Processing %title"
+msgstr ""
+
+#: includes/content.admin.inc:1269
+msgid "1 item successfully processed:"
+msgid_plural "@count items successfully processed:"
+msgstr[0] ""
+msgstr[1] ""
+
+#: includes/content.crud.inc:562
+msgid "Content fields table %old_name has been renamed to %new_name and field instances have been updated."
+msgstr ""
+
+#: includes/content.crud.inc:592
+msgid "The content fields table %name has been deleted."
+msgstr ""
+
+#: includes/content.node_form.inc:194
+msgid "Add another !field value"
+msgstr ""
+
+#: includes/content.node_form.inc:195
+msgid "If the amount of boxes above isn't enough, click here to add more items."
+msgstr ""
+
+#: includes/content.token.inc:60
+msgid "Referenced node ID"
+msgstr ""
+
+#: includes/content.token.inc:61
+msgid "Referenced node title"
+msgstr ""
+
+#: includes/content.token.inc:62
+msgid "Formatted HTML link to the node"
+msgstr ""
+
+#: includes/content.token.inc:86
+msgid "Raw number value"
+msgstr ""
+
+#: includes/content.token.inc:87
+msgid "Formatted number value"
+msgstr ""
+
+#: includes/content.token.inc:110
+msgid "Raw, unfiltered text"
+msgstr ""
+
+#: includes/content.token.inc:111
+msgid "Formatted and filtered text"
+msgstr ""
+
+#: includes/content.token.inc:133
+msgid "Referenced user ID"
+msgstr ""
+
+#: includes/content.token.inc:134
+msgid "Referenced user name"
+msgstr ""
+
+#: includes/content.token.inc:135
+msgid "Formatted HTML link to referenced user"
+msgstr ""
+
+#: includes/content.token.inc:162
+msgid "Link URL"
+msgstr ""
+
+#: includes/content.token.inc:163
+msgid "Link title"
+msgstr ""
+
+#: includes/content.token.inc:164
+msgid "Formatted HTML link"
+msgstr ""
+
+#: includes/content.token.inc:188
+msgid "Image file ID"
+msgstr ""
+
+#: includes/content.token.inc:189
+msgid "Image title"
+msgstr ""
+
+#: includes/content.token.inc:190
+msgid "Image alt text"
+msgstr ""
+
+#: includes/content.token.inc:191
+msgid "Image file name"
+msgstr ""
+
+#: includes/content.token.inc:192
+msgid "Image path"
+msgstr ""
+
+#: includes/content.token.inc:193
+msgid "Image MIME type"
+msgstr ""
+
+#: includes/content.token.inc:194
+msgid "Image file size"
+msgstr ""
+
+#: includes/content.token.inc:195
+msgid "Fully formatted HTML image tag"
+msgstr ""
+
+#: includes/content.views.inc:96
+msgid "Appears in : @types"
+msgstr ""
+
+#: includes/content.views.inc:306
+msgid "Format"
+msgstr ""
+
+#: includes/content.views.inc:379
+msgid "Group multiple values"
+msgstr ""
+
+#: includes/content.views.inc:386
+msgid "Show"
+msgstr ""
+
+#: includes/content.views.inc:387
+msgid " values,"
+msgstr ""
+
+#: includes/content.views.inc:394
+msgid "Starting from"
+msgstr ""
+
+#: includes/content.views.inc:398
+msgid "Start from last values"
+msgstr ""
+
