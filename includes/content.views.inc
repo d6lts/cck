@@ -102,6 +102,9 @@ function content_views_field_views_data($field) {
         'additional fields' => $columns,
         'content_field_name' => $field['field_name'],
         'allow_empty' => TRUE,
+        // Access control modules should implement content_views_access_callback().
+        'access callback' => 'content_views_access_callback',
+        'access arguments' => array($field),        
       ),
       'argument' => array(
         'field' => $columns[0],
@@ -258,21 +261,6 @@ class views_handler_field_content extends views_handler_field_node {
   function construct() {
     parent::construct();
     $this->content_field = content_fields($this->definition['content_field_name']);
-  }
-
-  /**
-   * This provides a method of controlling field-level access in Views.
-   */
-  function access() {
-    // Avoid FALSE returns for non-existant hooks by using module_implements()
-    // to check only modules that implement the hook.
-    $modules = module_implements('content_views_access');
-    foreach ($modules as $module) {
-      if (module_invoke($module, 'content_views_access', $this->definition['content_field_name']) === FALSE) {
-        return FALSE;
-      }
-    }
-    return parent::access();
   }
 
   function options(&$options) {

@@ -1,12 +1,5 @@
 <?php
-
-/**
- * TODO:
- *   Views access implementation
- *   Fieldgroups
- */
-
-
+// $Id$
 /**
  *  Implementation of hook_perm().
  */
@@ -19,7 +12,7 @@ function content_permissions_perm() {
 }
 
 /**
- *  Implementation of hook_form_alter().
+ *  Implementation of hook_form_alter(). Remove inaccessible fields from node display.
  */
 function content_permissions_form_alter(&$form, $form_state, $form_id) {
   if (isset($form['type']) && isset($form['#node']) && $form['type']['#value'] .'_node_form' == $form_id) {
@@ -33,7 +26,7 @@ function content_permissions_form_alter(&$form, $form_state, $form_id) {
 }
 
 /**
- *  Implementation of hook_nodeapi().
+ *  Implementation of hook_nodeapi(). Remove inaccessible fields from node display.
  */
 function content_permissions_nodeapi(&$node, $op, $a3 = NULL, $a4 = NULL) {
   if ($op == 'view') {
@@ -47,8 +40,10 @@ function content_permissions_nodeapi(&$node, $op, $a3 = NULL, $a4 = NULL) {
 }
 
 /**
- *  Implementation of hook_content_views_access().
+ *  The default field access callback. Remove inaccessible fields from Views.
+ * 
+ * @see content_views_field_views_data(). 
  */
-function content_permissions_content_views_access($field_name) {
-  return user_access('view '. $field_name);
+function content_views_access_callback($field) {
+  return user_access('view '. $field['field_name']);
 }
