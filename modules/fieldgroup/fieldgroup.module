@@ -23,7 +23,7 @@ function fieldgroup_menu() {
   if (!defined('MAINTENANCE_MODE')) {
     foreach (node_get_types() as $type) {
       $type_name = $type->type;
-      $content_type = content_types($type_name);  foreach (node_get_types() as $type) {
+      $content_type = content_types($type_name);  
       $type_url_str = $content_type['url_str'];
       $items['admin/content/node-type/'. $type_url_str .'/add_group'] = array(
         'title' => 'Add group',
