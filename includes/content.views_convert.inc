@@ -1,5 +1,4 @@
 <?php
-echo 'CCK';
 //$Id$
 /**
  * @file
