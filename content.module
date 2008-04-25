@@ -1358,11 +1358,11 @@ function content_clear_type_cache($rebuild_schema = FALSE) {
     $schema = drupal_get_schema(NULL, TRUE);
   }
 
-//  if (module_exists('views')) {
-//    // Needed because this can be called from .install files
-//    module_load_include('module', 'views');
-//    views_invalidate_cache();
-//  }
+  if (module_exists('views')) {
+    // Needed because this can be called from .install files
+    module_load_include('module', 'views');
+    views_invalidate_cache();
+  }
 }
 
 /**
