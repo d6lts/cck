@@ -175,7 +175,9 @@ function content_menu() {
         'type' => MENU_LOCAL_TASK,
         'weight' => 3,
       );
-      foreach ($content_type['fields'] as $field) {
+      // Cast as an array in case this is called before any fields have
+      // been added, like when a new content type is created.
+      foreach ((array) $content_type['fields'] as $field) {
         $field_name = $field['field_name'];
         $items['admin/content/node-type/'. $type_url_str .'/fields/'. $field_name] = array(
           'title' => $field['widget']['label'],
