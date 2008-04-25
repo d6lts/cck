@@ -12,7 +12,7 @@
 function nodereference_menu() {
   $items = array();
   $items['nodereference/autocomplete'] = array(
-    'title' => t('Nodereference autocomplete'),
+    'title' => 'Nodereference autocomplete',
     'page callback' => 'nodereference_autocomplete',
     'access arguments' => array('access content'),
     'type' => MENU_CALLBACK

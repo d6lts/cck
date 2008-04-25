@@ -12,7 +12,7 @@
 function userreference_menu() {
   $items = array();
   $items['userreference/autocomplete'] = array(
-    'title' => t('Userreference autocomplete'),
+    'title' => 'Userreference autocomplete',
     'page callback' => 'userreference_autocomplete',
     'access arguments' => array('access content'),
     'type' => MENU_CALLBACK
