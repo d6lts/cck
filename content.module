@@ -128,13 +128,12 @@ function content_menu() {
     'type' => MENU_CALLBACK,
   );
 
-  foreach (node_get_types() as $type) {
-    $type_name = $type->type;
-    $content_type = content_types($type_name);
-
-    // Make sure this doesn't fire until content_types is working,
-    // needed to avoid errors on initial installation.
-    if (!empty($content_type)) {
+  // Make sure this doesn't fire until content_types is working,
+  // needed to avoid errors on initial installation.
+  if (!defined('MAINTENANCE_MODE')) {
+    foreach (node_get_types() as $type) {
+      $type_name = $type->type;
+      $content_type = content_types($type_name);  
       $type_url_str = $content_type['url_str'];
       $items['admin/content/node-type/'. $type_url_str .'/fields'] = array(
         'title' => 'Manage fields',
