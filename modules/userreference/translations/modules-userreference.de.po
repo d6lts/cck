@@ -17,7 +17,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: CCK\n"
 "POT-Creation-Date: 2008-04-24 19:53+0200\n"
-"PO-Revision-Date: 2008-04-24 20:36+0100\n"
+"PO-Revision-Date: 2008-04-26 15:05+0100\n"
 "Last-Translator: Alexander Hass\n"
 "Language-Team: German <lukas.gangoly@univie.ac.at>\n"
 "MIME-Version: 1.0\n"
@@ -29,13 +29,12 @@ msgstr ""
 "X-Poedit-SourceCharset: utf-8\n"
 
 #: modules/userreference/userreference.module:52
-#, fuzzy
 msgid "User reference"
-msgstr "Verweis auf Benutzer"
+msgstr "Benutzerverweis"
 
 #: modules/userreference/userreference.module:53
 msgid "Store the ID of a related user as an integer value."
-msgstr ""
+msgstr "Speichert die ID eines ähnlichen Benutzers als ganzzahligen Wert."
 
 #: modules/userreference/userreference.module:71
 msgid "User roles that can be referenced"
@@ -59,7 +58,7 @@ msgstr "%name: Ungültiger Benutzer."
 
 #: modules/userreference/userreference.module:253
 msgid "Reverse link"
-msgstr ""
+msgstr "‚Zurück‘-Verweis"
 
 #: modules/userreference/userreference.module:255
 msgid "No"
@@ -71,10 +70,9 @@ msgstr "Ja"
 
 #: modules/userreference/userreference.module:257
 msgid "If selected, a reverse link back to the referencing node will displayed on the referenced user record."
-msgstr ""
+msgstr "Sobald ausgewählt, wird auf dem verwiesenen Benutzerdatensatz ein ‚Zurück‘-Verweis zu dem verweisenden Beitrag angezeigt."
 
 #: modules/userreference/userreference.module:567
-#, fuzzy
 msgid "Related content"
 msgstr "Ähnlicher Inhalt"
 
@@ -84,13 +82,13 @@ msgstr "Autovervollständigung der Benutzerverweise"
 
 #: modules/userreference/userreference.module:0
 msgid "userreference"
-msgstr "Verweis auf Benutzer"
+msgstr "Benutzerverweis"
 
 #: modules/userreference/userreference.info:0
 msgid "User Reference"
-msgstr "Verweis auf Benutzer"
+msgstr "Benutzerverweis"
 
 #: modules/userreference/userreference.info:0
 msgid "Defines a field type for referencing a user from a node."
-msgstr "Definiert einen Feldtyp für den Verweis von einem Beitrag zu einem Benutzer."
+msgstr "Definiert einen Feldtyp mit dem von einem Beitrag auf einen Benutzer verwiesen werden kann."
 

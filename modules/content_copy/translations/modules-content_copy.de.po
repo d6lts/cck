@@ -17,7 +17,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: CCK\n"
 "POT-Creation-Date: 2008-04-24 19:53+0200\n"
-"PO-Revision-Date: 2008-04-24 20:16+0100\n"
+"PO-Revision-Date: 2008-04-26 13:59+0100\n"
 "Last-Translator: Alexander Hass\n"
 "Language-Team: German <lukas.gangoly@univie.ac.at>\n"
 "MIME-Version: 1.0\n"
@@ -126,7 +126,7 @@ msgstr "Das Feld %field_label (%field_name) wurde zu dem Inhaltstyp %type hinzug
 
 #: modules/content_copy/content_copy.module:505
 msgid "An error occurred when exporting the 'display settings' data for the field %field_name.<br/>The db error is: '%db_err'."
-msgstr ""
+msgstr "Beim Exportieren der ‚Anzeige-Einstellungs‘-Daten für das Feld %field_name ist ein Fehler aufgetreten.<br />Der DB-Fehler ist: ‚%db_err‘."
 
 #: modules/content_copy/content_copy.module:0
 msgid "content_copy"

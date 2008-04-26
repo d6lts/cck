@@ -17,7 +17,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: CCK\n"
 "POT-Creation-Date: 2008-04-24 19:53+0200\n"
-"PO-Revision-Date: 2008-04-24 20:52+0100\n"
+"PO-Revision-Date: 2008-04-26 13:53+0100\n"
 "Last-Translator: Alexander Hass\n"
 "Language-Team: German <lukas.gangoly@univie.ac.at>\n"
 "MIME-Version: 1.0\n"
@@ -74,7 +74,7 @@ msgstr "Die Anzeige von Feldern dieses Inhaltstyps konfigurieren, wenn dieser im
 
 #: content.module:48
 msgid "Control the order of fields in the input form."
-msgstr ""
+msgstr "Die Reihenfolge der Felder im Eingabeformular steuern."
 
 #: content.module:469
 msgid "This field is required."
@@ -90,7 +90,7 @@ msgstr "Reihenfolge"
 
 #: content.module:506
 msgid "Add another item"
-msgstr ""
+msgstr "Einen weiteren Eintrag hinzufügen"
 
 #: content.module:1581
 msgid "RSS Item"
@@ -118,11 +118,11 @@ msgstr "Dateianhänge"
 
 #: content.module:558
 msgid "Updating field type %type with module %module."
-msgstr ""
+msgstr "Feldtyp %type wird mit Modul %module aktualisiert."
 
 #: content.module:565
 msgid "Updating widget type %type with module %module."
-msgstr ""
+msgstr "Widget %type wird mit Modul %module aktualisiert."
 
 #: content.module:140
 msgid "Manage fields"

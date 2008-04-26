@@ -17,7 +17,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: CCK\n"
 "POT-Creation-Date: 2008-04-24 19:53+0200\n"
-"PO-Revision-Date: 2008-04-24 20:29+0100\n"
+"PO-Revision-Date: 2008-04-26 14:43+0100\n"
 "Last-Translator: Alexander Hass\n"
 "Language-Team: German <lukas.gangoly@univie.ac.at>\n"
 "MIME-Version: 1.0\n"
@@ -30,27 +30,27 @@ msgstr ""
 
 #: modules/number/number.module:41
 msgid "Integer"
-msgstr ""
+msgstr "Ganzzahl"
 
 #: modules/number/number.module:42
 msgid "Store a number in the database as an integer."
-msgstr ""
+msgstr "Speichert die Zahl in der Datenbank als Ganzzahl."
 
 #: modules/number/number.module:49
 msgid "Decimal"
-msgstr ""
+msgstr "Dezimalzahl"
 
 #: modules/number/number.module:50
 msgid "Store a number in the database in a fixed decimal format."
-msgstr ""
+msgstr "Speichert die Zahl in der Datenbank in einem festen Dezimalformat."
 
 #: modules/number/number.module:57
 msgid "Float"
-msgstr ""
+msgstr "Fließkommazahl"
 
 #: modules/number/number.module:58
 msgid "Store a number in the database in a floating point format."
-msgstr ""
+msgstr "Speichert die Zahl in der Datenbank in einem Fließkommaformat."
 
 #: modules/number/number.module:76
 msgid "Minimum"
@@ -66,23 +66,23 @@ msgstr "Präzision"
 
 #: modules/number/number.module:89
 msgid "The total number of digits to store in the database, including those to the right of the decimal."
-msgstr ""
+msgstr "Die gesamte Anzahl der in der Datenbank zu speichernden Stellen, inclusive der rechts vom Dezimaltrennzeichen angegebenen."
 
 #: modules/number/number.module:95
 msgid "Scale"
-msgstr ""
+msgstr "Skalierung"
 
 #: modules/number/number.module:96
 msgid "The number of digits to the right of the decimal."
-msgstr ""
+msgstr "Die Anzahl der rechts vom Dezimaltrennzeichen angegebenen Stellen."
 
 #: modules/number/number.module:102
 msgid "Decimal marker"
-msgstr ""
+msgstr "Dezimalzeichen"
 
 #: modules/number/number.module:103
 msgid "The character users will input to mark the decimal point in forms."
-msgstr ""
+msgstr "Das von Benutzern in Formularen zu verwendende Zeichen zur Trennung von Dezimalenstellen."
 
 #: modules/number/number.module:109
 msgid "Prefix"
@@ -102,11 +102,11 @@ msgstr "Eine Zeichenkette angeben, welche dem Wert angehängt werden soll, z.b. 
 
 #: modules/number/number.module:152
 msgid "\"Minimum\" must be a number."
-msgstr "„Minimum“ muss eine Nummer sein."
+msgstr "„Minimum“ muss eine Zahl sein."
 
 #: modules/number/number.module:155
 msgid "\"Maximum\" must be a number."
-msgstr "„Maximum“ muss eine Nummer sein."
+msgstr "„Maximum“ muss eine Zahl sein."
 
 #: modules/number/number.module:212
 msgid "The value of %name may be no smaller than %min."
@@ -122,23 +122,23 @@ msgstr "unformatiert"
 
 #: modules/number/number.module:466
 msgid "Only numbers and decimals are allowed in %field. %start was changed to %value."
-msgstr ""
+msgstr "In %field sind nur Dezimalzahlen zulässig. %start wurde auf %value geändert."
 
 #: modules/number/number.module:484
 msgid "Only numbers are allowed in %field. %start was changed to %value."
-msgstr ""
+msgstr "In %field sind nur Zahlen zulässig. %start wurde auf %value geändert."
 
 #: modules/number/number.module:503
 msgid "Only numbers and the decimal character (%decimal) are allowed in %field. %start was changed to %value."
-msgstr ""
+msgstr "In %field sind nur Zahlen und das Dezimaltrennzeichen (%decimal) zulässig. %start wurde auf %value geändert."
 
 #: modules/number/number.module:0
 msgid "number"
-msgstr "Nummer"
+msgstr "Zahl"
 
 #: modules/number/number.info:0
 msgid "Number"
-msgstr "Nummer"
+msgstr "Zahl"
 
 #: modules/number/number.info:0
 msgid "Defines numeric field types."
