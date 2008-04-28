@@ -6,6 +6,7 @@ Features
 --------
 
 General
+- #97375   Panels 2 integration : add fields and move non-content module integration to relevant modules - fieldgroup, nodereference, userreference.
 - #203495  Panels 2 integration : render a fieldgroup in a panel.
 -          Panels 2 integration : reletionships for nodereference and userreference fields.
 - #189807  Views field handlers : show first or last of multiple values.
