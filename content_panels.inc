@@ -1,33 +1,162 @@
 <?php
 // $Id$
+/**
+ * Panels 2 interface for CCK fieldgroups and fields.
+ * 
+ * TODO:
+ * 
+ * - Adjust the fields and groups that are displayed for context, when that
+ *   capability is added to Panels.
+ * 
+ */
 
 /**
- * Callback function to supply a list of content types.
+ * Implementation of hook_panels_content_types()
  */
 function content_panels_content_types() {
   $items = array();
+  $items['content_field'] = array(
+    'title' => t('Content field'),
+    'single' => TRUE,
+    'content_types' => 'content_panels_content_types_field',
+    'add callback' => 'content_panels_edit_field',
+    'edit callback' => 'content_panels_edit_field',
+    'render callback' => 'content_panels_render_field',
+    'title callback' => 'content_panels_title_content',
+    );
   if (module_exists('fieldgroup')) {
-    $items['node_cck_group'] = array(
-      'title' => t('Node CCK Group'),
-      'content_types' => 'content_admin_content_types_node_cck_group',
+    $items['content_fieldgroup'] = array(
+      'title' => t('Content fieldgroup'),
+      'content_types' => 'content_panels_content_types_node_fieldgroup',
       'single' => TRUE, // only provides a single content type
-      'render callback' => 'content_content_node_cck_group',
-      'add callback' => 'content_admin_edit_node_cck_group',
-      'edit callback' => 'content_admin_edit_node_cck_group',
-      'title callback' => 'content_admin_title_node_cck_group',
+      'render callback' => 'content_panels_node_fieldgroup',
+      'add callback' => 'content_panels_edit_node_fieldgroup',
+      'edit callback' => 'content_panels_edit_node_fieldgroup',
+      'title callback' => 'content_panels_title_node_fieldgroup',
     );
   }
   return $items;
 }
 
+function content_panels_content_types_field() {
+  return array(
+    'description' => array(
+      'title' => t('Content field'),
+      'icon' => 'icon_node.png',
+      'path' => panels_get_path('content_types/node'),
+      'description' => t('A content field from the referenced node.'),
+      'required context' => new panels_required_context(t('Node'), 'node'),
+      'category' => array(t('Node context'), -9),
+    ),
+  );
+}
+
+function content_panels_edit_field($id, $parents, $conf = array()) {
+
+  $form = array();
+  $form['label'] = array(
+    '#type' => 'select',
+    '#title' => t('Label'),
+    '#default_value' => $conf['label'],
+    '#options' => array(
+      'normal' => t('Block title'),
+      'above' => t('Above'),
+      'inline' => t('Inline'),
+      'hidden' => t('hidden'),
+    ),
+    '#description' => t('Configure how the label is going to be displayed'),
+  );
+
+  
+  $options = array('' => '');
+  $fields = content_fields();
+  $field_types = _content_field_types();
+  foreach ($fields as $field_name => $field) {
+    $type_info = $field_types[$field['type']];
+    foreach ($type_info['formatters'] as $formatter_name => $formatter) {
+      $label  = $type_info['label'] .':'. $field['widget']['label'] ;
+      $label .= $field['widget']['label'] != $field_name ? ' ('. $field_name .')' : '';
+      $options[$label][$field_name .':'. $formatter_name] = $formatter['label'];
+    }
+  }
+  ksort($options);
+  $form['field_formatter'] = array(
+    '#type' => 'select',
+    '#title' => t('Field / Formatter'),
+    '#default_value' => $conf['field_formatter'],
+    '#options' => $options,
+    '#description' => t('Select a field and formatter.'),
+    '#required' => TRUE,
+  );
+  return $form;
+}
+
 /**
- * 'Render' callback for the 'CCK group' content type.
+ * 'Title' callback for the 'field' content type.
  */
-function content_content_node_cck_group($conf, $panel_args, $context) {
+function content_panels_title_content($conf, $context) {
+  $data =explode(':', $conf['field_formatter']);
+  $field_name = $data[0];
+  $formatter = $data[1];
+  $fields = content_fields();
+  $field = $fields[$field_name];
+  $field_types = _content_field_types();
+  return t('"@s" field @name', array('@s' => $context->identifier, '@name' => $field_types[$field['type']]['label'] .': '. $field['widget']['label'] .' ('. $field['field_name'])) .')';
+}
+
+function content_panels_render_field($conf, $panel_args, $context) {
+  if (!empty($context) && empty($context->data)) {
+    return;
+  }
+
+  $node = isset($context->data) ? drupal_clone($context->data) : NULL;
+  $info = _content_type_info($id);
+  $data = explode(':', $conf['field_formatter']);
+  $field_name = $data[0];
+  $formatter = $data[1];
+  
+  $field = $info['fields'][$field_name];
+  $field_info = $info['field types'][$field['type']];
+
+  $field['display_settings']['label']['format'] = $conf['title_formatter'] == 'normal' ? 'hidden' : $conf['title_formatter'];
+  $field['display_settings']['full']['format'] = $formatter;
+
+  $block->module = 'content';
+  $block->delta = $conf['field_name'];
+
+  if ($conf['label'] == 'normal') {
+    $block->title = $field['widget']['label'];
+  }
+  $node_field = isset($node->$field['field_name']) ? $node->$field['field_name'] : array();
+
+  if (content_handle('field', 'view', $field) == CONTENT_CALLBACK_CUSTOM) {
+    $field_types = _content_field_types();
+    $module = $field_types[$field['type']]['module'];
+    $function = $module .'_field';
+    if (function_exists($function)) {
+      $value = $function('view', $node, $field, $node_field, 0, 0);
+    }
+  }
+  else {
+    foreach ($node_field as $delta => $item) {
+      $node_field[$delta]['view'] = content_format($field, $item, $conf['formatter'], $node);
+    }
+    $value = theme('field', $node, $field, $node_field, 0, 0);
+  }
+  $block->content = $value;
+
+  return $block;
+}
+
+
+/**
+ * 'Render' callback for the 'fieldgroup' content type.
+ */
+function content_panels_node_fieldgroup($conf, $panel_args, $context) {
   $node = isset($context->data) ? drupal_clone($context->data) : NULL;
 
-  $blok = new stdClass();
-  $block->module = 'cck_group';
+  $block = new stdClass();
+  $block->module = 'content';
 
   if ($node) {
     // Assemble the fields into groups
@@ -51,7 +180,7 @@ function content_content_node_cck_group($conf, $panel_args, $context) {
   }
   else {
     $block->subject = $conf['group'];
-    $block->content = t('Group content goes here.');
+    $block->content = t('Content fieldgroup content goes here.');
     $block->delta = 'unknown';
   }
 
@@ -68,24 +197,23 @@ function theme_panels_content_group($vars, $nid) {
 /**
  * Return all content types available.
  */
-function content_admin_content_types_node_cck_group() {
+function content_panels_content_types_node_fieldgroup() {
   return array(
     'description' => array(
-      'title' => t('CCK Group'),
+      'title' => t('Content fieldgroup'),
       'icon' => 'icon_node.png',
       'path' => panels_get_path('content_types/node'),
-      'description' => t('Group contents.'),
+      'description' => t('All fields from a fieldgroup on the referenced node.'),
       'required context' => new panels_required_context(t('Node'), 'node'),
       'category' => array(t('Node context'), -9),
     ),
   );
 }
 
-
 /**
- * 'Edit' callback for the 'CCK group' content type.
+ * 'Edit' callback for the 'fieldgroup' content type.
  */
-function content_admin_edit_node_cck_group($id, $parents, $conf = array()) {
+function content_panels_edit_node_fieldgroup($id, $parents, $conf = array()) {
   // Apply defaults
   if (empty($conf)) {
     $conf = array('title' => '', 'group' => '', 'empty' => '');
@@ -101,9 +229,14 @@ function content_admin_edit_node_cck_group($id, $parents, $conf = array()) {
     }
   }
 
+  $form['type_name'] = array(
+    '#type' => 'value',
+    '#value' => $group['type_name'],
+  );
+
   $form['group'] = array(
     '#type' => 'select',
-    '#title' => t('Which group'),
+    '#title' => t('Fieldgroup'),
     '#options' => $group_list,
     '#default_value' => $conf['group'],
     '#prefix' => '<div class="clear-block no-float">',
@@ -124,10 +257,12 @@ function content_admin_edit_node_cck_group($id, $parents, $conf = array()) {
 }
 
 /**
- * 'Title' callback for the 'CCK group' content type.
+ * 'Title' callback for the 'fieldgroup' content type.
  */
-function content_admin_title_node_cck_group($conf, $context) {
-  return t('"@s" node cck group', array('@s' => $context->identifier));
+function content_panels_title_node_fieldgroup($conf, $context) {
+  $types = module_exists('fieldgroup') ? fieldgroup_groups(NULL, FALSE, FALSE) : array();
+  $type = $types[$conf['type_name']][$conf['group']];
+  return t('"@s" fieldgroup @name', array('@s' => $context->identifier, '@name' => $type['label']));
 }
 
 
@@ -233,3 +368,4 @@ function content_user_from_userref_context_settings_form($conf) {
 
   return $form;
 }
+
