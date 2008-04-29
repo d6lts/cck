@@ -81,7 +81,7 @@ function content_panels_edit_field($id, $parents, $conf = array()) {
  * 'Title' callback for the 'field' content type.
  */
 function content_panels_title_content($conf, $context) {
-  $data =explode(':', $conf['field_formatter']);
+  $data = explode(':', $conf['field_formatter']);
   $field_name = $data[0];
   $formatter = $data[1];
   $fields = content_fields();
@@ -103,7 +103,7 @@ function content_panels_render_field($conf, $panel_args, $context) {
   $field = $info['fields'][$field_name];
   $field_info = $info['field types'][$field['type']];
 
-  $field['display_settings']['label']['format'] = $conf['title_formatter'] == 'normal' ? 'hidden' : $conf['title_formatter'];
+  $field['display_settings']['label']['format'] = $conf['title_formatter'] == 'normal' ? 'hidden' : $conf['label'];
   $field['display_settings']['full']['format'] = $formatter;
 
   $block->module = 'content';
@@ -113,7 +113,6 @@ function content_panels_render_field($conf, $panel_args, $context) {
     $block->title = $field['widget']['label'];
   }
   $node_field = isset($node->$field['field_name']) ? $node->$field['field_name'] : array();
-
   if (content_handle('field', 'view', $field) == CONTENT_CALLBACK_CUSTOM) {
     $field_types = _content_field_types();
     $module = $field_types[$field['type']]['module'];
