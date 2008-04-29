@@ -375,7 +375,7 @@ function userreference_user($op, &$edit, &$account, $category = NULL) {
   switch ($op) {
     case 'load':
       // Only add links if we are on the user 'view' page.      
-      if (arg(0) != 'user' && !arg(2)) {
+      if (arg(0) != 'user' || arg(2)) {
         return;
       }
       // find cck userreference field tables
