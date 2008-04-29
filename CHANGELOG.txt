@@ -23,6 +23,7 @@ Bugfix
 ------
 
 General
+- #243196 Make reverse user link code more efficient, load only on user profile page when reverse link has been chosen.
 - #237804  Critical bugfix : unsharing a field deletes the field's data for the remaining content type.
            (introduced previously in the 5.x-1.7 cycle - 5.x-1.6 was not affected.
 - #211566  Limit data to nodes of the right content type when migrating data from per field to per type tables.
