@@ -81,7 +81,7 @@ function userreference_field($op, &$node, $field, &$items, $teaser, $page) {
       foreach ($items as $delta => $item) {
         $error_field = isset($item['error_field']) ? $item['error_field'] : '';
         unset($item['error_field']);
-        if (!empty($item['uid']) && !in_array($item['uid'], array_keys(_userreference_potential_references($field)))) {
+        if (!empty($item['uid']) && !in_array($item['uid'], array_keys(_userreference_potential_references($field, '', $item['uid'])))) {
           form_set_error($error_field, t('%name : Invalid user.', array('%name' => t($field['widget']['label']))));
         }
       }
@@ -314,7 +314,7 @@ function userreference_autocomplete($field_name, $string = '') {
 /**
  * Fetch an array of all candidate referenced users, for use in presenting the selection form to the user.
  */
-function _userreference_potential_references($field, $string = '') {
+function _userreference_potential_references($field, $string = '', $uid = NULL) {
   $where = array();
   $args = array();
   $join = array();
@@ -322,6 +322,9 @@ function _userreference_potential_references($field, $string = '') {
   if (!empty($string)) {
     $where[] = "LOWER(name) LIKE LOWER('%s%%')";
     $args[] = $string;
+  }
+  elseif (!empty($uid) && is_numeric($uid)) {
+    $where[] = "u.uid = $uid";    
   }
   else {
     $where[] = "u.uid > 0";
