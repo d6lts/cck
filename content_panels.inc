@@ -103,7 +103,7 @@ function content_panels_render_field($conf, $panel_args, $context) {
   $field = $info['fields'][$field_name];
   $field_info = $info['field types'][$field['type']];
 
-  $field['display_settings']['label']['format'] = $conf['title_formatter'] == 'normal' ? 'hidden' : $conf['label'];
+  $field['display_settings']['label']['format'] = $conf['label'] == 'normal' ? 'hidden' : $conf['label'];
   $field['display_settings']['full']['format'] = $formatter;
 
   $block->module = 'content';
