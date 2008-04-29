@@ -12,7 +12,6 @@ General
 - #189807  Views field handlers : show first or last of multiple values.
 
 Field / Widget modules
-- #194788  Remove duplicate check_plain in nodereference.
 - #60713   Userreference : Add optional reverse link on user profile page for referenced users.
 - #228979  Userreference : Don't show empty section for reverse links in user profile page.
 - #131260  Userreference : Allow filter referenceable users by active/blocked status.
@@ -23,7 +22,6 @@ Bugfix
 ------
 
 General
-- #243196 Make reverse user link code more efficient, load only on user profile page when reverse link has been chosen.
 - #237804  Critical bugfix : unsharing a field deletes the field's data for the remaining content type.
            (introduced previously in the 5.x-1.7 cycle - 5.x-1.6 was not affected.
 - #211566  Limit data to nodes of the right content type when migrating data from per field to per type tables.
@@ -38,9 +36,11 @@ General
 - #242737  Content_copy : include required files for safe drupal_execute() of import / export forms
 
 Field / widget modules
+- #243196  Userreference : Make reverse user link code more efficient, load only on user profile page when reverse link has been chosen.
 - #196575  Userreference : autocomplete did not filter users by role, need custom autocomplete instead of standard user autocomplete.
 - #183816  Number : Fix missing decimal in formatter.
 - #140687  OptionWidgets : fix 'single checkbox' stick on checked when used with text values.
+- #194788  Nodereference : Remove duplicate check_plain in nodereference.
 - #186775  Nodereference : fix 'Invalid argument supplied for foreach()' when formatter is 'full node'
            and referenced node has been deleted.
 - #242917  Userreference / reversed link : do not list unpublished nodes.
