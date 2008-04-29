@@ -118,7 +118,7 @@ function userreference_field($op, &$node, $field, &$items, $teaser, $page) {
         if (is_array($item) && !empty($item['error_field'])) {
           $error_field = $item['error_field'];
           unset($item['error_field']);
-          if (!empty($item['uid']) && !in_array($item['uid'], array_keys(_userreference_potential_references($field, '', $item['uid'])))) {
+          if (!empty($item['uid']) && !array_key_exists($item['uid'], _userreference_potential_references($field, '', $item['uid']))) {
             form_set_error($error_field, t('%name: Invalid user.', array('%name' => t($field['widget']['label']))));
           }
         }
