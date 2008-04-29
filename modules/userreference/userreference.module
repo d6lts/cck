@@ -509,6 +509,10 @@ function _userreference_filter_handler($op, $filterinfo) {
 function userreference_user($type, &$edit, &$account) {
   switch ($type) {
     case 'load':
+      // Only add links if we are on the user 'view' page.      
+      if (arg(0) != 'user' || arg(2)) {
+        return;
+      }
       // find CCK userreference field tables
       // search through them for matching user ids and load those nodes
       $additions = array();
@@ -521,7 +525,8 @@ function userreference_user($type, &$edit, &$account) {
       $search_links = array();
       foreach ($types as $type_name => $type) {
         foreach ($type['fields'] as $field) {
-          if ($field['type'] == 'userreference') {
+          // Only add tables when reverse link has been selected.
+          if ($field['type'] == 'userreference' && !empty($field['widget']['reverse_link'])) {
             $db_info = content_database_info($field);
             $search_tables[$db_info['table']] = $db_info['columns']['uid']['column'];
             $search_links[$db_info['table']] = $field['widget']['reverse_link'];
