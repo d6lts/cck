@@ -472,7 +472,7 @@ function content_copy_record_macro($form, &$form_state) {
 
   $form_id = $form_state['values']['form_id'];
   if (isset($edit['type_name']) || isset($edit['submit']) || isset($edit['delete']) || isset($edit['form_id'])) {
-    unset($edit['type_name'], $edit['submit'], $edit['delete'], $edit['form_id']);
+    unset($edit['type_name'], $edit['submit'], $edit['delete'], $edit['form_id'], $edit['previous_field']);
   }
   switch ($form_id) {
     case 'node_type_form':
@@ -497,7 +497,7 @@ function content_copy_record_macro($form, &$form_state) {
       // The display settings are being fetched directly from the DB. During import,
       // we'll re-insert the data directly as well.
       //
-      $query = 'SELECT display_settings FROM {node_field_instance} WHERE field_name = \'%s\'';
+      $query = 'SELECT display_settings FROM {'. content_instance_tablename() .'} WHERE field_name = \'%s\'';
       $row_info = db_fetch_array(db_query($query, $field_name));
 
       // If an error occurs, notify the user.
