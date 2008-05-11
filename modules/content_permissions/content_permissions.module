@@ -4,6 +4,7 @@
  *  Implementation of hook_perm().
  */
 function content_permissions_perm() {
+  $perms = array();
   foreach (content_fields() as $field) {
     $perms[] = 'edit '. $field['field_name'];
     $perms[] = 'view '. $field['field_name'];
