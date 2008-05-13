@@ -649,6 +649,11 @@ function content_field($op, &$node, $field, &$items, $teaser, $page) {
       break;
 
     case 'presave':
+      if ($node->devel_generate) {
+        include_once('./'. drupal_get_path('module', 'content') .'/includes/content.devel.inc');
+        content_generate_fields($node);
+      }
+      
       // Manual node_save calls might not have all fields filled in.
       // On node insert, we need to make sure all tables get at least an empty
       // record, or subsequent edits, using drupal_write_record() in update mode,
