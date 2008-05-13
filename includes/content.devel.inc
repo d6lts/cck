@@ -54,15 +54,25 @@ function content_generate_fields(&$node) {
 }
 
 /**
- * A simple function to return multiple values for fields that might use
- * multiple value widgets but don't need any other special multiple 
+ * A simple function to return multiple values for fields that use
+ * custom multiple value widgets but don't need any other special multiple 
  * values handling. This will call the field generation function
  * a random number of times and compile the results into a node array.
  */
 function content_devel_multiple($function, $node, $field) {
   $node_field = array();
   if (function_exists($function)) {
-    $max = rand(0, 5);
+    switch ($field['multiple']) {
+      case 0:
+        $max = 0;
+        break;
+      case 1:
+        $max = rand(0, 3); //just an arbitrary number for 'unlimited'
+        break;
+      default:
+        $max = $field['multiple'];
+        break;
+    }
     for ($i = 0; $i <= $max; $i++) {
       $node_field[$i] = $function($node, $field);
     }
