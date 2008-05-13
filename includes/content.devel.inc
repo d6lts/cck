@@ -1,13 +1,12 @@
 <?php
 //$Id$
-
 /**
- * Enrich the $node that is about to be saved with arbitrary information in each of its CCK fields.
- * Not yet implemented by CCK fields. See http://drupal.org/node/187599 for status.
- *
- * Borrows from _content_field_invoke() but calls fields multiple times if content.module handles multiples.
- * 
- * @return void
+ * @file
+ * Functions needed for Devel module integration.
+ */
+/**
+ * Enrich the $node that is about to be saved with arbitrary 
+ * information in each of its CCK fields.
  **/
 function content_generate_fields(&$node) {
   $type_name = $node->type;
@@ -27,7 +26,7 @@ function content_generate_fields(&$node) {
             $max = 0;
             break;
           case 1:
-            $max = 2; //just an arbitrary number for 'unlimited'
+            $max = rand(0, 3); //just an arbitrary number for 'unlimited'
             break;
           default:
             $max = $field['multiple'];
@@ -39,13 +38,13 @@ function content_generate_fields(&$node) {
         $function = $module .'_content_generate';
         if (function_exists($function)) {
           $result = $function($node, $field); // $items, $teaser, $page
-          if (content_callback('field', 'multiple values', $field) == CONTENT_CALLBACK_DEFAULT) {
-            // When multiples are handled by the content module, add a delta for each result.
-            $node_field[$i] = $result;
-          }
-          else {
+          if (content_handle('widget', 'multiple values', $field) == CONTENT_HANDLE_MODULE) {
             // Fields that handle their own multiples will add their own deltas.
             $node_field = $result;
+          }
+          else {
+            // When multiples are handled by the content module, add a delta for each result.
+            $node_field[$i] = $result;
           }
         }
       }
@@ -54,8 +53,34 @@ function content_generate_fields(&$node) {
   }
 }
 
+/**
+ * A simple function to return multiple values for fields that might use
+ * multiple value widgets but don't need any other special multiple 
+ * values handling. This will call the field generation function
+ * a random number of times and compile the results into a node array.
+ */
+function content_devel_multiple($function, $node, $field) {
+  $node_field = array();
+  if (function_exists($function)) {
+    $max = rand(0, 5);
+    for ($i = 0; $i <= $max; $i++) {
+      $node_field[$i] = $function($node, $field);
+    }
+  }
+  return $node_field;
+}
+
 if (module_exists('text')) {
   function text_content_generate($node, $field) {
+    if (content_handle('widget', 'multiple values', $field) == CONTENT_HANDLE_MODULE) {
+      return content_devel_multiple('_text_content_generate', $node, $field);
+    }
+    else {
+      return _text_content_generate($node, $field);
+    }
+  }
+  
+  function _text_content_generate($node, $field) {
     $node_field = array();
     if ($field['widget']['rows'] > 1) {
       $format = $field['text_processing'] ? rand(0, 3) : 0;
@@ -82,6 +107,15 @@ if (module_exists('text')) {
 
 if (module_exists('number')) {
   function number_content_generate($node, $field) {
+    if (content_handle('widget', 'multiple values', $field) == CONTENT_HANDLE_MODULE) {
+      return content_devel_multiple('_number_content_generate', $node, $field);
+    }
+    else {
+      return _number_content_generate($node, $field);
+    }
+  }
+
+  function _number_content_generate($node, $field) {
     $node_field = array();
     $allowed_values = content_allowed_values($field);
     if (!empty($allowed_values)) {
@@ -116,6 +150,15 @@ if (module_exists('number')) {
 
 if (module_exists('nodereference')) {
   function nodereference_content_generate($node, $field) {
+    if (content_handle('widget', 'multiple values', $field) == CONTENT_HANDLE_MODULE) {
+      return content_devel_multiple('_nodereference_content_generate', $node, $field);
+    }
+    else {
+      return _nodereference_content_generate($node, $field);
+    }
+  }
+  
+  function _nodereference_content_generate($node, $field) {
     $node_field = array();
     $allowed_values = nodereference_allowed_values($field);
     unset($allowed_values[0]);
@@ -129,6 +172,15 @@ if (module_exists('nodereference')) {
 
 if (module_exists('userreference')) {
   function userreference_content_generate($node, $field) {
+    if (content_handle('widget', 'multiple values', $field) == CONTENT_HANDLE_MODULE) {
+      return content_devel_multiple('_userreference_content_generate', $node, $field);
+    }
+    else {
+      return _userreference_content_generate($node, $field);
+    }
+  }
+  
+  function _userreference_content_generate($node, $field) {
     $node_field = array();
     $allowed_values = userreference_allowed_values($field);
     if (isset($allowed_values['none'])) {
