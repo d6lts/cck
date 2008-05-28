@@ -87,6 +87,7 @@ function content_field_form(&$form, &$form_state, $field, $get_delta = NULL) {
           // TODO : should we add some logic for title and description too ?
           '#columns'  => array_keys($field['columns']),
           '#title' => t($field['widget']['label']),
+          '#description' => t($field['widget']['description']),
           '#delta' => $delta,
         );
         // If we're processing a specific delta value for a field where the
