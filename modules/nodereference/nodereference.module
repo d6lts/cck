@@ -93,7 +93,10 @@ function nodereference_field_settings($op, $field) {
         $views = array('--' => '--');
         $all_views = views_get_all_views();
         foreach ($all_views as $view) {
-          $views[t('Existing Views')][$view->name] = $view->name;
+          // Only views that have fields will work for our purpose.
+          if (!empty($view->display['default']->display_options['fields'])) {
+            $views[t('Existing Views')][$view->name] = $view->name;
+          }
         }
 
         if (count($views) > 1) {
@@ -108,7 +111,7 @@ function nodereference_field_settings($op, $field) {
             '#title' => t('View'),
             '#options' => $views,
             '#default_value' => isset($field['advanced_view']) ? $field['advanced_view'] : '--',
-            '#description' => t('Choose the "Views module" view that selects the nodes that can be referenced.<br>Note :<ul><li>This will discard the "Content types" settings above. Use the view\'s "filters" section instead.</li><li>Use the view\'s "fields" section to display additional informations about candidate nodes on node creation/edition form.</li><li>Use the view\'s "sort criteria" section to determine the order in which candidate nodes will be displayed.</li></ul>'),
+            '#description' => t('Choose the "Views module" view that selects the nodes that can be referenced.<br>Note :<ul><li>Only views that have fields will work for this purpose.</li><li>This will discard the "Content types" settings above. Use the view\'s "filters" section instead.</li><li>Use the view\'s "fields" section to display additional informations about candidate nodes on node creation/edition form.</li><li>Use the view\'s "sort criteria" section to determine the order in which candidate nodes will be displayed.</li></ul>'),
           );
           $form['advanced']['advanced_view_args'] = array(
             '#type' => 'textfield',
@@ -552,7 +555,8 @@ function _nodereference_potential_references($field, $return_full_nodes = FALSE,
     $display = 'default';
     $view->set_display($display);
     $view->display[$display]->style_plugin = 'list';
-
+    $view->display[$display]->row_plugin = 'fields';
+    
     // Add arguments for the view.
     if (isset($field['advanced_view_args'])) {
       // TODO: Support Tokens using token.module ?
@@ -582,7 +586,7 @@ function _nodereference_potential_references($field, $return_full_nodes = FALSE,
     foreach ($view->result as $row) {
       foreach ($view->field as $field) {
         if (!empty($field['handler']) && is_object($field['handler'])) {
-          $options[$row->nid][] = theme('views_view_field', $view, $field, $row);
+          $options[$row->nid][] = theme('views_view_field', $view, $field['handler'], $row);
         }
       }
     }
