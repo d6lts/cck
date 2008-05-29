@@ -452,10 +452,9 @@ class views_handler_field_content_multiple extends views_handler_field_content {
       $query_columns[] = "$table_alias.$attributes[column] AS $column";
     }
 
-    // Note : this query doesn't need to run through db_rewrite_sql, since the
-    // nids we retrieve have been selected by the views query, which already takes
-    // care of this.
-    $query = "SELECT node.nid, ". implode(', ', $query_columns) .
+    // Make sure node.nid is aliased so it isn't confused with 
+    // nodereference's nid column.
+    $query = "SELECT node.nid AS parent_nid, ". implode(', ', $query_columns) .
              " FROM {node} node".
              " LEFT JOIN {". $db_info['table'] ."} $table_alias ON node.vid = $table_alias.vid".
              " WHERE node.nid IN (". implode(',', $nids) .")".
@@ -464,7 +463,7 @@ class views_handler_field_content_multiple extends views_handler_field_content {
     $result = $options['multiple']['multiple_number'] ? db_query_range($query, $options['multiple']['multiple_from'], $options['multiple']['multiple_number']) : db_query($query);
 
     while ($item = db_fetch_array($result)) {
-      $this->field_values[$item['nid']][$item['delta']] = $item;
+      $this->field_values[$item['parent_nid']][$item['delta']] = $item;
     }
   }
 
