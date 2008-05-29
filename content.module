@@ -1184,19 +1184,23 @@ function content_types($type_name = NULL) {
  * Return a list of all fields.
  *
  * @param $field_name
- *   If set, return information on just this field.
+ *   If not empty, return information on just this field.
  * @param $content_type_name
- *   If set, return information of the field within the context of this content
+ *   If not empty, return information of the field within the context of this content
  *   type.
+ * 
+ * Be sure to check empty() instead of isset() on field_name and
+ * content_type_name to avoid bad results when the value is set
+ * but empty, as sometimes happens in the formatter.
  */
 function content_fields($field_name = NULL, $content_type_name = NULL) {
   $info = _content_type_info();
   if (isset($info['fields'])) {
-    if (!isset($field_name)) {
+    if (empty($field_name)) {
       return $info['fields'];
     }
     if (isset($info['fields'][$field_name])) {
-      if (!isset($content_type_name)) {
+      if (empty($content_type_name)) {
         return $info['fields'][$field_name];
       }
       if (isset($info['content types'][$content_type_name]['fields'][$field_name])) {
@@ -1543,6 +1547,7 @@ function content_format($field, $item, $formatter = 'default', $node = NULL) {
     '#field_name' => $field['field_name'],
     '#type_name' => isset($node->type) ? $node->type : (isset($node->node_type) ? $node->node_type : ''),
     '#formatter' => $formatter_name,
+    '#node' => $node,
   );
 
   if (content_handle('formatter', 'multiple values', $formatter) == CONTENT_HANDLE_CORE) {
