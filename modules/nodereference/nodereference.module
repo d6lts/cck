@@ -114,7 +114,7 @@ function nodereference_field_settings($op, $field) {
             '#title' => t('View'),
             '#options' => $views,
             '#default_value' => isset($field['advanced_view']) ? $field['advanced_view'] : '--',
-            '#description' => t('Choose the "Views module" view that selects the nodes that can be referenced.<br>Note :<ul><li>Only views that have fields will work for this purpose.</li><li>This will discard the "Content types" settings above. Use the view\'s "filters" section instead.</li><li>Use the view\'s "fields" section to display additional informations about candidate nodes on node creation/edition form.</li><li>Use the view\'s "sort criteria" section to determine the order in which candidate nodes will be displayed.</li></ul>'),
+            '#description' => t('Choose the "Views module" view that selects the nodes that can be referenced.<br />Note :<ul><li>Only views that have fields will work for this purpose.</li><li>This will discard the "Content types" settings above. Use the view\'s "filters" section instead.</li><li>Use the view\'s "fields" section to display additional informations about candidate nodes on node creation/edition form.</li><li>Use the view\'s "sort criteria" section to determine the order in which candidate nodes will be displayed.</li></ul>'),
           );
           $form['advanced']['advanced_view_args'] = array(
             '#type' => 'textfield',
@@ -172,7 +172,7 @@ function nodereference_field($op, &$node, $field, &$items, $teaser, $page) {
           unset($item['error_field']);
           if (!empty($item['nid'])) {
             if (!in_array($item['nid'], array_keys($refs))) {
-              form_set_error($error_field, t('%name : This post can\'t be referenced.', array('%name' => t($field['widget']['label']))));
+              form_set_error($error_field, t("%name : This post can't be referenced.", array('%name' => t($field['widget']['label']))));
             }
           }
         }
