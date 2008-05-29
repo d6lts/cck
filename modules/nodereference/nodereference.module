@@ -40,6 +40,9 @@ function nodereference_theme() {
     'nodereference_formatter_default' => array(
       'arguments' => array('element'),
     ),
+    'nodereference_formatter_plain' => array(
+      'arguments' => array('element'),
+    ),
     'nodereference_formatter_full' => array(
       'arguments' => array('element'),
       'function' => 'theme_nodereference_formatter_full_teaser',
