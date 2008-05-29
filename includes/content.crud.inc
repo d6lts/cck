@@ -533,12 +533,13 @@ function content_module_delete($module) {
  * @param $info
  *   value supplied by hook_node_type()
  *
- * node_get_types() is still missing the new type at this point, so no
- * use to call content_clear_type_cache() or menu_rebuild() here. Instead
- * we set a flag to make sure it gets rebuilt on next page load.
+ * node_get_types() is still missing the new type at this point due to
+ * a static caching bug. We ask it to rebuild its cache so that
+ * content_clear_type_cache() can do its job properly.
  */
 function content_type_create($info) {
-  content_menu_needs_rebuild(TRUE);
+  node_get_types(NULL, NULL, TRUE);
+  content_clear_type_cache(TRUE);
 }
 
 /**

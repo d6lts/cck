@@ -94,6 +94,9 @@ function content_init() {
  * other processes complete.
  * We therefore store a flag in the session and actually rebuild on next
  * page load (content_init()).
+ * 
+ * TODO see if this is still needed after the patch at #258127 fixed
+ * the problem with the node_type cache.
  */
 function content_menu_needs_rebuild($rebuild = NULL) {
   if (!isset($rebuild)) {
