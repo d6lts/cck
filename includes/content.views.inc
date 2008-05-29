@@ -327,7 +327,7 @@ class views_handler_field_content extends views_handler_field_node {
     foreach ($db_info['columns'] as $column => $attributes) {
       $item[$column] = $values->{$this->table_alias .'_'. $attributes['column']};
     }
-    return content_format($field, $item, $options['format'], $values);
+    return $this->render_link(content_format($field, $item, $options['format'], $values), $values);
   }
 }
 
@@ -474,10 +474,18 @@ class views_handler_field_content_multiple extends views_handler_field_content {
     // TODO : we can stick any value in there -
     // what would make most sense ?  row_style ?
     $values->build_mode = 'views';
-
+    
+    // This needs to be set for the $this->render_link() to work. It would
+    // have been set in the query, if we hadn't bypassed the normal query.
+    // TODO there may be a better way to do this.
+    $this->aliases['nid'] = 'nid';
+    
     $items = array();
     foreach ($this->field_values[$values->{$this->additional_fields['nid']}] as $item) {
-      $items[] = content_format($field, $item, $options['format'], $values);
+      $value = content_format($field, $item, $options['format'], $values);
+      if (!empty($value)) {
+        $items[] = $this->render_link($value, $values);
+      }
     }
 
     if (count($items) > 1) {
