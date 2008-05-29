@@ -747,7 +747,6 @@ function content_field($op, &$node, $field, &$items, $teaser, $page) {
         }
 
       }
-
       return array($field['field_name'] => $element);
 
     case 'alter':
@@ -1534,10 +1533,12 @@ function content_format($field, $item, $formatter = 'default', $node = NULL) {
   $formatter = $formatters[$formatter_name];
   $theme = $formatter['module'] .'_formatter_'. $formatter_name;
 
+  // A real node will have the type name at node->type, a Views
+  // node will have the type name at node->node_type.
   $element = array(
     '#theme' => $theme,
     '#field_name' => $field['field_name'],
-    '#type_name' => isset($node->type) ? $node->type : '',
+    '#type_name' => isset($node->type) ? $node->type : (isset($node->node_type) ? $node->node_type : ''),
     '#formatter' => $formatter_name,
   );
 

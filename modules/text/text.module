@@ -231,7 +231,7 @@ function theme_text_formatter_trimmed($element) {
 }
 
 function _text_allowed_values($element) {
-  $field = content_fields($element['#field_name']);
+  $field = content_fields($element['#field_name'], $element['#type_name']);
   if (($allowed_values = content_allowed_values($field)) && isset($allowed_values[$element['#item']['value']])) {
     return $allowed_values[$element['#item']['value']];
   }
