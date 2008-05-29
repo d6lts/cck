@@ -556,10 +556,12 @@ function _nodereference_potential_references($field, $return_full_nodes = FALSE,
     // In our Views 1 to Views 2 updates we are
     // putting fields in the 'default' display.
     $display = 'default';
-    $view->set_display($display);
+    $view->init_display($display);
     $view->display[$display]->style_plugin = 'list';
     $view->display[$display]->row_plugin = 'fields';
-    
+    $view->display_handler->set_option('use_pager', FALSE);
+    $view->display_handler->set_option('items_per_page', 0);
+        
     // Add arguments for the view.
     if (isset($field['advanced_view_args'])) {
       // TODO: Support Tokens using token.module ?
@@ -584,7 +586,7 @@ function _nodereference_potential_references($field, $return_full_nodes = FALSE,
 
     // Make sure the query is not cached
     $view->is_cacheable = FALSE;
-    $view->render();
+    $view->execute_display($display);
     $options = array();
     foreach ($view->result as $row) {
       foreach ($view->field as $field) {
