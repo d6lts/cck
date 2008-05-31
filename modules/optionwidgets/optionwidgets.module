@@ -296,8 +296,7 @@ function optionwidgets_data2form($element, $items, $field) {
     return array($field_key => $keys);
   }
   else {
-    $value = !empty($keys) ? reset($keys) : array();
-    return array($field_key => $value);
+    return !empty($keys) ? array($field_key => $value) : array();
   }
 }
 
