@@ -479,12 +479,22 @@ function nodereference_autocomplete_process($element, $edit, $form_state, $form)
  * Validate an select element.
  *
  * Remove the wrapper layer and set the right element's value.
+ * We don't know exactly where this element is, so we drill down
+ * through the element until we get to our key.
  */
 function nodereference_select_validate($element, &$form_state) {
-  $field_name = $element['#field_name'];
   $field_key  = $element['#columns'][0];
-  array_pop($element['#parents']);
-  form_set_value($element, $element['#value'][$field_key], $form_state);
+  $new_parents = array();
+  $value = $form_state['values'];
+  foreach ($element['#parents'] as $parent) {
+    $value = $value[$parent];
+    if ($parent == $field_key) {
+      $element['#parents'] = $new_parents;
+      form_set_value($element, $value, $form_state);    
+      break;
+    }
+    $new_parents[] = $parent;
+  }
 }
 
 /**
