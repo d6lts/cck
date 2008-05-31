@@ -419,7 +419,6 @@ function _content_admin_field_add($type_name) {
   if (!isset($_POST['edit'])) {
     content_clear_type_cache();
   }
-  $output = drupal_get_form('_content_admin_field_add_existing', $type_name);
   $output .= drupal_get_form('_content_admin_field_add_new', $type_name);
   return $output;
 }
@@ -457,17 +456,41 @@ function _content_admin_field_add_existing(&$form_state, $type_name) {
   return $form;
 }
 
+/**
+ * Multi-step processing to add a new field.
+ * 
+ * TODO improve on this using jQuery or AHAH to show/hide applicable values.
+ */
 function _content_admin_field_add_new(&$form_state, $type_name, $new_field_name = '') {
+  $form_values = $form_state['values'];
+  
+  // Show the form to add existing values the first time through, then
+  // quit showing it if we are processing a multi-step form to add a 
+  // new field.
+  $form = array();
+  if (empty($form_state['values']['field_name'])) {
+    $form['#prefix'] = drupal_get_form('_content_admin_field_add_existing', $type_name);
+  }
+  
+  if (!empty($form_values['field_name'])) {
+    $new_field_name = str_replace('field_', '', $form_values['field_name']);
+  }
   $field_types = _content_field_types();
   $widget_types = _content_widget_types();
-  $form = array();
   $field_type_options = array();
+  $widget_type_options = array();
   foreach ($field_types as $field_name => $field_type) {
     foreach ($widget_types as $widget_name => $widget_type) {
       if (in_array($field_name, $widget_type['field types'])) {
-        $field_type_options[$field_name .'-'. $widget_name] = $widget_type['label'];
+        $field_type_options[$field_name] = $field_type['label'];
+        $widget_type_options[$field_name][$widget_name] = $widget_type['label'];
       }
     }
+  }
+  asort($field_type_options);
+  $copy = $widget_type_options;
+  foreach ($copy as $field_name => $widgets) {
+    //$widget_type_options[$field_name] = asort($widgets);
   }
   if (count($field_type_options) > 0) {
     $form['new'] = array(
@@ -482,14 +505,37 @@ function _content_admin_field_add_new(&$form_state, $type_name, $new_field_name 
       '#description' => t("The machine-readable name of the field. This name cannot be changed later! The name will be prefixed with 'field_' and can include lowercase unaccented letters, numbers, and underscores. The length of the name, including the prefix, is limited to no more than 32 letters. You'll be able to choose a human-readable label for the field on next page."),
       '#required' => TRUE,
     );
-    $form['new']['field_widget_type'] = array(
-      '#type' => 'radios',
-      '#title' => t('Field type'),
-      '#required' => TRUE,
-      '#options' => $field_type_options,
-      '#default_value' => NULL,
-      '#theme' => 'content_admin_field_add_new_field_widget_type',
-    );
+    if (empty($form_values['type'])) {
+      $form['new']['type'] = array(
+        '#type' => 'select',
+        '#title' => t('Field type'),
+        '#required' => TRUE,
+        '#options' => $field_type_options,
+        '#default_value' => NULL,
+        '#description' => t('Select the type of data you would like to store in the database with this field.'),
+      );
+      $form['widget_type'] = array('#type' => 'hidden', '#value' => '');
+    }
+    else {
+      $form['new']['type'] = array(
+        '#type' => 'select',
+        '#title' => t('Field type'),
+        '#required' => TRUE,
+        '#options' => $field_type_options,
+        '#default_value' => $form_values['type'],
+        '#description' => t('Select the type of data you would like to store in the database with this field.'),
+        '#disabled' => TRUE,
+      );
+      $form['type'] = array('#type' => 'hidden', '#value' => $form_values['type']);
+      $form['new']['widget_type'] = array(
+        '#type' => 'select',
+        '#title' => t('Widget type'),
+        '#required' => TRUE,
+        '#options' => $widget_type_options[$form_values['type']],
+        '#default_value' => NULL,
+        '#description' => t('Select the type of form element you would like to present to the user in when creating this field.'),
+      );
+    }
 
     $form['new']['submit'] = array(
       '#type' => 'submit',
@@ -505,26 +551,6 @@ function _content_admin_field_add_new(&$form_state, $type_name, $new_field_name 
   }
 
   return $form;
-}
-
-function theme_content_admin_field_add_new_field_widget_type($form) {
-  $field_types = _content_field_types();
-  $widget_types = _content_widget_types();
-  $output = '';
-  $output .= '<p>'. t('Choose the type of value to store and an input method from the list below.') .'</p>';
-  $output .= '<dl>';
-  foreach ($field_types as $field_name => $field_type) {
-    $output .= '<dt>'. $field_type['label'] .'</dt>';
-    $output .= '<dd><em>'. $field_type['description'] .'</em></dd>';
-    foreach ($widget_types as $widget_name => $widget_type) {
-      if (in_array($field_name, $widget_type['field types'])) {
-        $output .= '<dd>'. drupal_render($form[$field_name .'-'. $widget_name]) .'</dd>';
-      }
-    }
-  }
-  $output .= '</dl>';
-
-  return $output;
 }
 
 /**
@@ -576,23 +602,24 @@ function _content_admin_field_add_new_validate($form, &$form_state) {
 function _content_admin_field_add_new_submit($form, &$form_state) {
   module_load_include('inc', 'content', 'includes/content.crud');
   $form_values = $form_state['values'];
-
-  $field_widget_type = explode('-', $form_values['field_widget_type']);
-  $form_values['type'] = $field_widget_type[0];
-  $form_values['widget_type'] = $field_widget_type[1];
-  unset($form_values['field_widget_type']);
-
-  if (content_field_instance_create($form_values)) {
-    drupal_set_message(t('Created field %label.', array(
-      '%label' => $form_values['field_name'])));
+  if (empty($form_values['type']) || empty($form_values['widget_type'])) {
+    $form_state['storage'] = $form_state['values'];
   }
   else {
-    drupal_set_message(t('There was a problem creating field %label.', array(
-      '%label' => $form_values['field_name'])));
-  }
+    $form_state['rebuild'] = FALSE;
+    unset($form_state['storage']);
+    if (content_field_instance_create($form_values)) {
+      drupal_set_message(t('Created field %label.', array(
+        '%label' => $form_values['field_name'])));
+    }
+    else {
+      drupal_set_message(t('There was a problem creating field %label.', array(
+        '%label' => $form_values['field_name'])));
+    }
 
-  $type = content_types($form_values['type_name']);
-  $form_state['redirect'] = 'admin/content/node-type/'. $type['url_str'] .'/fields/'. $form_values['field_name'];
+    $type = content_types($form_values['type_name']);
+    $form_state['redirect'] = 'admin/content/node-type/'. $type['url_str'] .'/fields/'. $form_values['field_name'];
+  }
 }
 
 /**
