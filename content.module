@@ -757,14 +757,18 @@ function content_field($op, &$node, $field, &$items, $teaser, $page) {
       // so that node templates can use it.
       if (isset($node->content[$field['field_name']])) {
         $element = $node->content[$field['field_name']];
-        if ($element['#single']) {
+        if (!isset($element['#single'])) {
+          // If not set at all, this is a hidden or inaccessible field.
+          return;
+        }
+        elseif (!empty($element['#single'])) {
           // Single value formatter.
           foreach (element_children($element['items']) as $delta) {
             // Use isset() to avoid undefined index message on #children when field values are empty.
             $items[$delta]['view'] = isset($element['items'][$delta]['#children']) ? $element['items'][$delta]['#children'] : '';
           }
         }
-        else  {
+        elseif (isset($element['items']['#children']))  {
           // Multiple values formatter.
           $items[0]['view'] = $element['items']['#children'];
         }
