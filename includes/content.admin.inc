@@ -479,7 +479,7 @@ function _content_admin_field_add_new(&$form_state, $type_name, $new_field_name 
       '#type' => 'textfield',
       '#default_value' => $new_field_name,
       '#field_prefix' => 'field_',
-      '#description' => t("The machine-readable name of the field. This name cannot be changed later! The name will be prefixed with 'field_' and can include lowercase unaccented letters, numbers, and underscores. You'll be able to choose a human-readable label for the field on next page."),
+      '#description' => t("The machine-readable name of the field. This name cannot be changed later! The name will be prefixed with 'field_' and can include lowercase unaccented letters, numbers, and underscores. The length of the name, including the prefix, is limited to no more than 32 letters. You'll be able to choose a human-readable label for the field on next page."),
       '#required' => TRUE,
     );
     $form['new']['field_widget_type'] = array(
@@ -555,6 +555,10 @@ function _content_admin_field_add_new_validate($form, &$form_state) {
   $form_values = $form_state['values'];
   if (!preg_match('!^field_[a-z0-9_]+$!', $form_values['field_name'])) {
     form_set_error('field_name', t('The field name %field_name is invalid. The name must include only lowercase unaccentuated letters, numbers, and underscores.', array(
+      '%field_name' => $form_values['field_name'])));
+  }
+  if (strlen($form_values['field_name']) > 26) {
+    form_set_error('field_name', t('The field name %field_name is too long. The name is limited to 32 characters, including the \'field_\' prefix.', array(
       '%field_name' => $form_values['field_name'])));
   }
   if (array_key_exists($form_values['field_name'], content_fields())) {
