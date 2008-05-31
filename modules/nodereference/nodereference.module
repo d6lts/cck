@@ -541,7 +541,7 @@ function nodereference_allowed_values($field) {
  */
 function _nodereference_potential_references($field, $return_full_nodes = FALSE, $string = '', $exact_string = false) {
   if (module_exists('views')
-  && isset($field['advanced_view'])
+  && !empty($field['advanced_view'])
   && $field['advanced_view'] != '--'
   && ($view = nodereference_get_view($field, $string, $exact_string))) {
     // advanced field : referenceable nodes defined by a view
@@ -604,9 +604,12 @@ function _nodereference_potential_references($field, $return_full_nodes = FALSE,
  * so in that case we need to refresh the view.
  */
 function nodereference_get_view($field, $string = '', $exact_string = false) {
-  //static $view = NULL, $prev_string, $prev_exact_string;
+  static $view = NULL, $prev_string, $prev_exact_string;
   $view_name = $field['advanced_view'];
-  if (!isset($view) || $view->name != $view_name || $prev_string != $string || $prev_exact_string != $exact_string) {
+  if (module_exists('views')
+  && !empty($view_name)
+  && $view_name != '--'
+  && (!isset($view) || $view->name != $view_name || $prev_string != $string || $prev_exact_string != $exact_string)) {
     $prev_string = $string;
     $prev_exact_string = $exact_string;
     $view = views_get_view($view_name);
