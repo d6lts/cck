@@ -168,7 +168,9 @@ function optionwidgets_buttons_process($element, $edit, &$form_state, $form) {
   $field = $form['#field_info'][$field_name];
   $field_key  = $element['#columns'][0];
 
-  if (!$form_state['submitted'] || !empty($form_state['node_preview'])) {
+  // See if this element is in the database format or the transformed format,
+  // and transform it if necessary.
+  if (is_array($element['#value']) && !array_key_exists($field_key, $element['#value'])) {
     $element['#value'] = optionwidgets_data2form($element, $element['#default_value'], $field);
   }
   $options = optionwidgets_options($field);
@@ -201,9 +203,12 @@ function optionwidgets_select_process($element, $edit, &$form_state, $form) {
   $field = $form['#field_info'][$field_name];
   $field_key  = $element['#columns'][0];
   
-  if (!$form_state['submitted'] || !empty($form_state['node_preview'])) {
+  // See if this element is in the database format or the transformed format,
+  // and transform it if necessary.
+  if (is_array($element['#value']) && !array_key_exists($field_key, $element['#value'])) {
     $element['#value'] = optionwidgets_data2form($element, $element['#default_value'], $field);
   }
+  
   $options = optionwidgets_options($field);
   $element[$field_key] = array(
     '#type' => 'select',
@@ -214,7 +219,7 @@ function optionwidgets_select_process($element, $edit, &$form_state, $form) {
     '#options' => $options,
     '#default_value' => isset($element['#value'][$field_key]) ? $element['#value'][$field_key] : NULL,
   );
-
+  
   // Make sure field info will be available to the validator which
   // does not get the values in $form.
 
@@ -240,8 +245,10 @@ function optionwidgets_onoff_process($element, $edit, &$form_state, $form) {
   $field = $form['#field_info'][$field_name];
   $field_key  = $element['#columns'][0];
 
-  if (!$form_state['submitted'] || !empty($form_state['node_preview'])) {
-    $element['#value'] = optionwidgets_data2form($element, $element['#value'], $field);
+  // See if this element is in the database format or the transformed format,
+  // and transform it if necessary.
+  if (is_array($element['#value']) && !array_key_exists($field_key, $element['#value'])) {
+    $element['#value'] = optionwidgets_data2form($element, $element['#default_value'], $field);
   }
   $options = optionwidgets_options($field);
   $keys = array_keys($options);
