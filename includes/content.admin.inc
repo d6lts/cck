@@ -488,10 +488,7 @@ function _content_admin_field_add_new(&$form_state, $type_name, $new_field_name 
     }
   }
   asort($field_type_options);
-  $copy = $widget_type_options;
-  foreach ($copy as $field_name => $widgets) {
-    //$widget_type_options[$field_name] = asort($widgets);
-  }
+  
   if (count($field_type_options) > 0) {
     $form['new'] = array(
       '#type' => 'fieldset',
@@ -603,11 +600,10 @@ function _content_admin_field_add_new_submit($form, &$form_state) {
   module_load_include('inc', 'content', 'includes/content.crud');
   $form_values = $form_state['values'];
   if (empty($form_values['type']) || empty($form_values['widget_type'])) {
-    $form_state['storage'] = $form_state['values'];
+    $form_state['rebuild'] = TRUE;
   }
   else {
     $form_state['rebuild'] = FALSE;
-    unset($form_state['storage']);
     if (content_field_instance_create($form_values)) {
       drupal_set_message(t('Created field %label.', array(
         '%label' => $form_values['field_name'])));
