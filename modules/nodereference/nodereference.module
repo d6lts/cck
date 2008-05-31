@@ -481,9 +481,10 @@ function nodereference_autocomplete_process($element, $edit, $form_state, $form)
  * Remove the wrapper layer and set the right element's value.
  */
 function nodereference_select_validate($element, &$form_state) {
+  $field_name = $element['#field_name'];
   $field_key  = $element['#columns'][0];
   array_pop($element['#parents']);
-  form_set_value($element, $form_state['values'][$element['#field_name']][$field_key], $form_state);
+  form_set_value($element, $element['#value'][$field_key], $form_state);
 }
 
 /**
@@ -546,7 +547,11 @@ function _nodereference_potential_references($field, $return_full_nodes = FALSE,
   && ($view = nodereference_get_view($field, $string, $exact_string))) {
     // advanced field : referenceable nodes defined by a view
     // let views.module build the query
-    return $view->result;
+    $options = array();
+    foreach ($view->result as $item) {
+      $options[$item->nid] = _nodereference_item($field, $item);
+    }
+    return $options;
   }
   else {
     // standard field : referenceable nodes defined by content types
@@ -697,6 +702,7 @@ function _nodereference_item($field, $item, $html = FALSE) {
 
 function theme_nodereference_item_advanced($item, $field_names, $view) {
   $item_fields = array();
+  $item = (array) $item;
   foreach ($item as $delta => $value) {
     // remove link tags (ex : for node titles)
     $value = preg_replace('/<a[^>]*>(.*)<\/a>/iU', '$1', $value);
