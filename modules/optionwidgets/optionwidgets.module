@@ -168,7 +168,7 @@ function optionwidgets_buttons_process($element, $edit, &$form_state, $form) {
   $field = $form['#field_info'][$field_name];
   $field_key  = $element['#columns'][0];
 
-  if (!$form_state['submitted']) {
+  if (!$form_state['submitted'] || !empty($form_state['node_preview'])) {
     $element['#value'] = optionwidgets_data2form($element, $element['#default_value'], $field);
   }
   $options = optionwidgets_options($field);
@@ -200,8 +200,8 @@ function optionwidgets_select_process($element, $edit, &$form_state, $form) {
   $field_name = $element['#field_name'];
   $field = $form['#field_info'][$field_name];
   $field_key  = $element['#columns'][0];
-
-  if (!$form_state['submitted']) {
+  
+  if (!$form_state['submitted'] || !empty($form_state['node_preview'])) {
     $element['#value'] = optionwidgets_data2form($element, $element['#default_value'], $field);
   }
   $options = optionwidgets_options($field);
@@ -240,7 +240,7 @@ function optionwidgets_onoff_process($element, $edit, &$form_state, $form) {
   $field = $form['#field_info'][$field_name];
   $field_key  = $element['#columns'][0];
 
-  if (!$form_state['submitted']) {
+  if (!$form_state['submitted'] || !empty($form_state['node_preview'])) {
     $element['#value'] = optionwidgets_data2form($element, $element['#value'], $field);
   }
   $options = optionwidgets_options($field);
