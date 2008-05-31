@@ -546,15 +546,7 @@ function _nodereference_potential_references($field, $return_full_nodes = FALSE,
   && ($view = nodereference_get_view($field, $string, $exact_string))) {
     // advanced field : referenceable nodes defined by a view
     // let views.module build the query
-    $options = array();
-    foreach ($view->result as $row) {
-      foreach ($view->field as $field) {
-        if (!empty($field['handler']) && is_object($field['handler'])) {
-          $options[$row->nid][] = theme('views_view_field', $view, $field['handler'], $row);
-        }
-      }
-    }
-    return $options;
+    return $view->result;
   }
   else {
     // standard field : referenceable nodes defined by content types
@@ -612,7 +604,7 @@ function _nodereference_potential_references($field, $return_full_nodes = FALSE,
  * so in that case we need to refresh the view.
  */
 function nodereference_get_view($field, $string = '', $exact_string = false) {
-  static $view = NULL, $prev_string, $prev_exact_string;
+  //static $view = NULL, $prev_string, $prev_exact_string;
   $view_name = $field['advanced_view'];
   if (!isset($view) || $view->name != $view_name || $prev_string != $string || $prev_exact_string != $exact_string) {
     $prev_string = $string;
@@ -672,10 +664,10 @@ function nodereference_autocomplete($field_name, $string = '') {
   $fields = content_fields();
   $field = $fields[$field_name];
   $matches = array();
+  
   $references = _nodereference_potential_references($field, TRUE, $string);
-
   foreach ($references as $row) {
-    $matches[$row->node_title .' [nid:'. $row->nid .']'] = _nodereference_item($field, $row, TRUE);
+    $matches[$row->node_title .' [nid:'. $row->nid .']'] = _nodereference_item($field, $row);
   }
   drupal_json($matches);
 }
