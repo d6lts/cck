@@ -423,7 +423,7 @@ function text_textarea_process($element, $edit, $form_state, $form) {
   );
 
   if (!empty($field['text_processing'])) {
-    $filter_key  = $element['#columns'][1];
+    $filter_key  = count($element['#columns'] == 2) ? $element['#columns'][1] : 'format';
     $format = isset($element['#value'][$filter_key]) ? $element['#value'][$filter_key] : FILTER_FORMAT_DEFAULT;
     $parents = array_merge($element['#parents'] , array($filter_key));
     $element[$filter_key] = filter_form($format, 1, $parents);
