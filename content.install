@@ -36,7 +36,7 @@ function content_types_install() {
     unset($field['module']);
     unset($field['widget_module']);
     // 'columns' is a reserved word in MySQL4, so our column is named 'db_columns'.
-    $field['columns'] = $field['db_columns'];
+    $field['columns'] = isset($field['db_columns']) ? $field['db_columns'] : array();
     unset($field['db_columns']);
 
     foreach ($module_field_types as $module => $types) {

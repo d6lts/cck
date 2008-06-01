@@ -1252,7 +1252,7 @@ function _content_type_info($reset = FALSE) {
   if ($reset || !isset($info)) {
     // Make sure this function doesn't run until the tables have been created,
     // for instance, when first enabled and called from content_menu().
-    if (!db_table_exists(content_field_tablename()) || !db_table_exists(content_instance_tablename())) {
+    if (!db_column_exists(content_field_tablename(), 'active')) {
         return array();
     }
 
