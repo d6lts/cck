@@ -851,7 +851,7 @@ function _content_sort_items_helper($a, $b) {
 function content_storage($op, $node) {
   $type_name = $node->type;
   $type = content_types($type_name);
-
+  
   switch ($op) {
     case 'load':
       // OPTIMIZE : load all non multiple fields in a single JOIN query ?
@@ -1168,6 +1168,9 @@ function _content_field_invoke_default($op, &$node, $teaser = NULL, $page = NULL
  *
  * @param $content_type_name
  *   If set, return information on just this type.
+ * 
+ * Do some type checking and set up empty arrays for missing
+ * info to avoid foreach errors elsewhere in the code.
  */
 function content_types($type_name = NULL) {
   // handle type name with either an underscore or a dash
@@ -1179,9 +1182,16 @@ function content_types($type_name = NULL) {
       return $info['content types'];
     }
     if (isset($info['content types'][$type_name])) {
+      if (!isset($info['content_types']['tables'])) {
+        $info['content_types']['tables'] = array();
+      }
+      if (!isset($info['content_types']['fields'])) {
+        $info['content_types']['fields'] = array();
+      }
       return $info['content types'][$type_name];
     }
   }
+  return array('tables' => array(), 'fields' => array());
 }
 
 /**
