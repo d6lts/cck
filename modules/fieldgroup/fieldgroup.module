@@ -336,7 +336,7 @@ function fieldgroup_form_alter(&$form, $form_state, $form_id) {
     }
 
   }
-  elseif ($form_id == '_content_admin_field') {
+  elseif ($form_id == '_content_admin_field' && isset($form['widget'])) {
     $content_type = content_types($form['type_name']['#value']);
     $form['widget']['group'] = array(
       '#type' => 'select',

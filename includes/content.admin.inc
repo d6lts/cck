@@ -419,8 +419,38 @@ function _content_admin_field_add($type_name) {
   if (!isset($_POST['edit'])) {
     content_clear_type_cache();
   }
-  $output .= drupal_get_form('_content_admin_field_add_new', $type_name);
+  $output = '';
+  $options = content_field_type_options();
+  if (!empty($options)) {
+    $output .= drupal_get_form('content_admin_field_main', array('type_name' => $type_name));
+  }
+  else {
+    drupal_set_message(t('No field modules are enabled. You need to <a href="!modules_url">enable one</a>, such as text.module, before you can add new fields.', array('!modules_url' => url('admin/build/modules'))), 'error');
+  }
   return $output;
+}
+
+/**
+ * Arrays of field type and widget type options.
+ */
+function content_field_type_options($type = NULL) {
+  $field_types = _content_field_types();
+  $widget_types = _content_widget_types();
+  $field_type_options = array();
+  $widget_type_options = array();
+  foreach ($field_types as $field_type_name => $field_type) {
+    foreach ($widget_types as $widget_type_name => $widget_type) {
+      if (in_array($field_type_name, $widget_type['field types'])) {
+        $field_type_options[$field_type_name] = $field_type['label'];
+        $widget_type_options[$field_type_name][$widget_type_name] = $widget_type['label'];
+      }
+    }
+  }
+  asort($field_type_options);
+  if (!empty($type)) {
+    return $widget_type_options[$type];
+  }
+  return $field_type_options;
 }
 
 function _content_admin_field_add_existing(&$form_state, $type_name) {
@@ -457,100 +487,6 @@ function _content_admin_field_add_existing(&$form_state, $type_name) {
 }
 
 /**
- * Multi-step processing to add a new field.
- * 
- * TODO improve on this using jQuery or AHAH to show/hide applicable values.
- */
-function _content_admin_field_add_new(&$form_state, $type_name, $new_field_name = '') {
-  $form_values = $form_state['values'];
-  
-  // Show the form to add existing values the first time through, then
-  // quit showing it if we are processing a multi-step form to add a 
-  // new field.
-  $form = array();
-  if (empty($form_state['values']['field_name'])) {
-    $form['#prefix'] = drupal_get_form('_content_admin_field_add_existing', $type_name);
-  }
-  
-  if (!empty($form_values['field_name'])) {
-    $new_field_name = str_replace('field_', '', $form_values['field_name']);
-  }
-  $field_types = _content_field_types();
-  $widget_types = _content_widget_types();
-  $field_type_options = array();
-  $widget_type_options = array();
-  foreach ($field_types as $field_name => $field_type) {
-    foreach ($widget_types as $widget_name => $widget_type) {
-      if (in_array($field_name, $widget_type['field types'])) {
-        $field_type_options[$field_name] = $field_type['label'];
-        $widget_type_options[$field_name][$widget_name] = $widget_type['label'];
-      }
-    }
-  }
-  asort($field_type_options);
-  
-  if (count($field_type_options) > 0) {
-    $form['new'] = array(
-      '#type' => 'fieldset',
-      '#title' => t('Create new field'),
-    );
-    $form['new']['field']['field_name'] = array(
-      '#title' => t('Field name'),
-      '#type' => 'textfield',
-      '#default_value' => $new_field_name,
-      '#field_prefix' => 'field_',
-      '#description' => t("The machine-readable name of the field. This name cannot be changed later! The name will be prefixed with 'field_' and can include lowercase unaccented letters, numbers, and underscores. The length of the name, including the prefix, is limited to no more than 32 letters. You'll be able to choose a human-readable label for the field on next page."),
-      '#required' => TRUE,
-    );
-    if (empty($form_values['type'])) {
-      $form['new']['type'] = array(
-        '#type' => 'select',
-        '#title' => t('Field type'),
-        '#required' => TRUE,
-        '#options' => $field_type_options,
-        '#default_value' => NULL,
-        '#description' => t('Select the type of data you would like to store in the database with this field.'),
-      );
-      $form['widget_type'] = array('#type' => 'hidden', '#value' => '');
-    }
-    else {
-      $form['new']['type'] = array(
-        '#type' => 'select',
-        '#title' => t('Field type'),
-        '#required' => TRUE,
-        '#options' => $field_type_options,
-        '#default_value' => $form_values['type'],
-        '#description' => t('Select the type of data you would like to store in the database with this field.'),
-        '#disabled' => TRUE,
-      );
-      $form['type'] = array('#type' => 'hidden', '#value' => $form_values['type']);
-      $form['new']['widget_type'] = array(
-        '#type' => 'select',
-        '#title' => t('Widget type'),
-        '#required' => TRUE,
-        '#options' => $widget_type_options[$form_values['type']],
-        '#default_value' => NULL,
-        '#description' => t('Select the type of form element you would like to present to the user in when creating this field.'),
-      );
-    }
-
-    $form['new']['submit'] = array(
-      '#type' => 'submit',
-      '#value' => t('Continue'),
-    );
-    $form['new']['type_name'] = array(
-      '#type' => 'value',
-      '#value' => $type_name,
-    );
-  }
-  else {
-    drupal_set_message(t('No field modules are enabled. You need to <a href="!modules_url">enable one</a>, such as text.module, before you can add new fields.', array('!modules_url' => url('admin/build/modules'))), 'error');
-  }
-
-  return $form;
-}
-
-/**
  * Add an existing field to a content type.
  */
 function _content_admin_field_add_existing_submit($form, &$form_state) {
@@ -569,48 +505,192 @@ function _content_admin_field_add_existing_submit($form, &$form_state) {
 }
 
 /**
+ * A form element for selecting field, widget, and label.
+ */
+function content_admin_field_main(&$form_state, $form_values) {
+  module_load_include('inc', 'content', 'includes/content.crud');
+  
+  $form = array();
+  if (!empty($form_state['storage'])) {
+    $form_values = $form_state['storage'];
+  }
+  
+  $type_name = $form_values['type_name'];
+  $field_name = isset($form_values['field_name']) ? $form_values['field_name'] : '';
+  $field_type = isset($form_values['type']) ? $form_values['type'] : '';
+  $label = isset($form_values['label']) ? $form_values['label'] : '';
+  
+  // Remove the 'field_' prefix from the field name.
+  if (substr($field_name, 0, 6) == 'field_') {
+    $field_name = substr($field_name, 6);
+  }
+  
+  // If we haven't chosen a field name yet, include an option to 
+  // share an existing field instead.
+  if (empty($field_name)) {
+    $form['#prefix'] = drupal_get_form('_content_admin_field_add_existing', $type_name);
+  }
+  
+  // See if we're editing an existing field or a new field.
+  $instances = content_field_instance_read(array('field_name' => $field_name, 'type_name' => $type_name));
+  if (count($instances) < 1) {
+    $form['new'] = array(
+      '#type' => 'fieldset',
+      '#title' => t('Create new field'),
+    );
+    $new = TRUE;
+  }
+  else {
+    $form['new'] = array(
+      '#type' => 'fieldset',
+      '#title' => t('Edit field'),
+    );  
+    $new = FALSE;
+  }
+  $form['new']['label'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Label'),
+    '#default_value' => $label,
+    '#required' => TRUE,
+    '#description' => t('A human-readable name to be used as the label for this field.'),
+  );
+  $form['new']['field_name'] = array(
+    '#title' => t('Field name'),
+    '#type' => 'textfield',
+    '#default_value' => $field_name,
+    '#field_prefix' => 'field_',
+    '#description' => t("The machine-readable name of the field."),
+    '#required' => TRUE,
+    );
+  if (!empty($field_name)) {
+    $form['new']['field_name']['#description'] .= t(" This name cannot be changed.");
+    $form['new']['field_name']['#disabled'] = TRUE;
+    $form['new']['field_name']['#required'] = FALSE;
+    $form['new']['field_name']['#value'] = $field_name;
+    $form['new_field_name'] = array('#type' => 'hidden', '#value' => FALSE);
+  }
+  else {
+    $form['new']['field_name']['#description'] .= t(" This name cannot be changed later! The name will be prefixed with 'field_' and can include lowercase unaccented letters, numbers, and underscores. The length of the name, including the prefix, is limited to no more than 32 letters.");
+    $form['new_field_name'] = array('#type' => 'hidden', '#value' => TRUE);
+  }
+  
+  if (empty($field_type)) {
+    $form['new']['type'] = array(
+      '#type' => 'select',
+      '#title' => t('Field type'),
+      '#required' => TRUE,
+      '#options' => content_field_type_options(),
+      '#default_value' => NULL,
+      '#description' => t('The type of data you would like to store in the database with this field.'),
+    );
+    $form['widget_type'] = array('#type' => 'hidden', '#value' => '');
+  }
+  else {
+    $form['new']['type'] = array(
+      '#type' => 'select',
+      '#title' => t('Field type'),
+      '#options' => content_field_type_options(),
+      '#default_value' => $field_type,
+      '#description' => t('The type of data you would like to store in the database with this field. This option cannot be changed.'),
+      '#disabled' => TRUE,
+    );
+    $form['new']['widget_type'] = array(
+      '#type' => 'select',
+      '#title' => t('Widget type'),
+      '#required' => TRUE,
+      '#options' => content_field_type_options($field_type),
+      '#default_value' => NULL,
+      '#description' => t('The type of form element you would like to present to the user in when creating this field.'),
+    );
+  }
+
+  $form['type_name'] = array(
+    '#type' => 'value',
+    '#value' => $type_name,
+  );
+  $form['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('Continue'),
+  );
+  // Make sure to use the right validation and submission functions,
+  // needed when this form is invoked from the field edit page.
+  $form['#validate'] = array('content_admin_field_main_validate');
+  $form['#submit'] = array('content_admin_field_main_submit');
+  return $form;
+}
+
+/**
  *  Field name validation.
  */
-function _content_admin_field_add_new_validate($form, &$form_state) {
-  // Add the 'field_' prefix.
-  form_set_value($form['new']['field']['field_name'], 'field_'. $form_state['values']['field_name'], $form_state);
-
+function content_admin_field_main_validate($form, &$form_state) {
   $form_values = $form_state['values'];
-  if (!preg_match('!^field_[a-z0-9_]+$!', $form_values['field_name'])) {
-    form_set_error('field_name', t('The field name %field_name is invalid. The name must include only lowercase unaccentuated letters, numbers, and underscores.', array(
-      '%field_name' => $form_values['field_name'])));
+  $field_name = $form_values['field_name'];
+  
+  // Add the 'field_' prefix.
+  if (!empty($field_name) && substr($field_name, 0, 6) != 'field_') {
+    $field_name = 'field_'. $field_name;
   }
-  if (strlen($form_values['field_name']) > 26) {
-    form_set_error('field_name', t('The field name %field_name is too long. The name is limited to 32 characters, including the \'field_\' prefix.', array(
-      '%field_name' => $form_values['field_name'])));
-  }
-  if (array_key_exists($form_values['field_name'], content_fields())) {
-    form_set_error('field_name', t('The field name %field_name already exists.', array(
-      '%field_name' => $form_values['field_name'])));
-  }
-  elseif ($form_values['field_name'] == 'field_instance') {
-    form_set_error('field_name', t("The name 'field_instance' is a reserved name."));
+  form_set_value($form['new']['field_name'], $field_name, $form_state);
+  
+  // Testing for a valid name only needs to be done the first time through.
+  if (isset($form_values['new_field_name']) && $form_values['new_field_name']) {
+    if (!preg_match('!^field_[a-z0-9_]+$!', $field_name)) {
+      form_set_error('field_name', t('The field name %field_name is invalid. The name must include only lowercase unaccentuated letters, numbers, and underscores.', array(
+        '%field_name' => $field_name)));
+    }
+    if (strlen($field_name) > 32) {
+      form_set_error('field_name', t('The field name %field_name is too long. The name is limited to 32 characters, including the \'field_\' prefix.', array(
+        '%field_name' => $field_name)));
+    }
+    if (array_key_exists($field_name, content_fields())) {
+      form_set_error('field_name', t('The field name %field_name already exists.', array(
+        '%field_name' => $field_name)));
+    }
+    elseif ($field_name == 'field_instance') {
+      form_set_error('field_name', t("The name 'field_instance' is a reserved name."));
+    }
   }
 }
 
 /**
  * Create a new field for a content type.
  */
-function _content_admin_field_add_new_submit($form, &$form_state) {
-  module_load_include('inc', 'content', 'includes/content.crud');
+function content_admin_field_main_submit($form, &$form_state) {
   $form_values = $form_state['values'];
+  $form_state['storage'] = $form_values;
   if (empty($form_values['type']) || empty($form_values['widget_type'])) {
     $form_state['rebuild'] = TRUE;
   }
   else {
+    module_load_include('inc', 'content', 'includes/content.crud');
+    // Unset $form_state['storage'] so FAPI doesn't force 
+    // $form_state['rebuild'] to TRUE.
+    unset($form_state['storage']);
     $form_state['rebuild'] = FALSE;
-    if (content_field_instance_create($form_values)) {
-      drupal_set_message(t('Created field %label.', array(
-        '%label' => $form_values['field_name'])));
+    
+    $label = $form_values['label'];
+    
+    // Are we creating or updating this field?
+    $instances = content_field_instance_read(array('field_name' => $form_values['field_name'], 'type_name' => $form_values['type_name']));
+    if (sizeof($instances) < 1) {
+      if (content_field_instance_create($form_values)) {
+        drupal_set_message(t('Created field %label.', array(
+          '%label' => $label)));
+      }
+      else {
+        drupal_set_message(t('There was a problem creating field %label.', array(
+          '%label' => $label)));
+      }
     }
     else {
-      drupal_set_message(t('There was a problem creating field %label.', array(
-        '%label' => $form_values['field_name'])));
+      if (content_field_instance_update($form_values)) {
+        drupal_set_message(t('Update field %label.', array(
+          '%label' => $label)));
+      }
+      else {
+        drupal_set_message(t('There was a problem updating field %label.', array(
+          '%label' => $label)));
+      }
     }
 
     $type = content_types($form_values['type_name']);
@@ -684,37 +764,59 @@ function _content_admin_field(&$form_state, $type_name, $field_name) {
   $widget_type = $widget_types[$field['widget']['type']];
 
   drupal_set_title(isset($field['widget']['label']) ? $field['widget']['label'] : $field['field_name']);
-
+  
+  // See if we need to change the widget type or label.
+  
+  // TODO: $form_state['post']['op'] is deprecated, so this isn't the right
+  // way to do this, need to find better method.
+  if (isset($form_state['post']['op']) && $form_state['post']['op'] == t('Change basic information')) {
+    $form_values = array(
+      'type_name' => $type_name, 
+      'field_name' => $field_name, 
+      'type' => $field['type'],
+      'widget_type' => $field['widget']['type'],
+      );
+    $form = drupal_retrieve_form('content_admin_field_main', $form_state, $form_values); 
+    return $form; 
+  }
+  
   $form = array();
+  $form['main'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Basic information.'),
+    );
+  $form['main']['label'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Label'),
+    '#default_value' => $field['widget']['label'],
+    '#disabled' => TRUE,
+  );
+  $form['main']['type'] = array(
+    '#type' => 'select',
+    '#title' => t('Field'),
+    '#options' => content_field_type_options(),
+    '#default_value' => $field['type'],
+    '#disabled' => TRUE,
+  );
+  $form['main']['widget_type'] = array(
+    '#type' => 'select',
+    '#title' => t('Widget'),
+    '#options' => content_field_type_options($field['type']),
+    '#default_value' => $field['widget']['type'] ? $field['widget']['type'] : $default_widget,
+    '#disabled' => TRUE,
+  );
+  $form['main']['change'] = array(
+    '#type' => 'submit',
+    '#value' => t('Change basic information'),
+    //'#submit' => 'content_admin_change',
+  );
+  
   $form['widget'] = array(
     '#type' => 'fieldset',
     '#title' => t('%type settings', array('%type' => $type['name'])),
     '#description' => t('These settings apply only to the %field field as it appears in the %type content type.', array(
       '%field' => $field['widget']['label'],
       '%type' => $type['name'])),
-  );
-  $options = array();
-  foreach ($widget_types as $possible_widget_name => $possible_widget_type) {
-    if (in_array($field['type'], $possible_widget_type['field types'])) {
-      $options[$possible_widget_name] = $possible_widget_type['label'];
-    }
-  }
-  if (count($options) == 1) {
-    $key = array_keys($options);
-    $default_widget = array_pop($key);
-  }
-  $form['widget']['widget_type'] = array(
-    '#type' => 'radios',
-    '#title' => t('Widget'),
-    '#options' => $options,
-    '#default_value' => $field['widget']['type'] ? $field['widget']['type'] : $default_widget,
-    '#required' => TRUE,
-  );
-  $form['widget']['label'] = array(
-    '#type' => 'textfield',
-    '#title' => t('Label'),
-    '#default_value' => $field['widget']['label'],
-    '#required' => TRUE,
   );
   $form['widget']['weight'] = array(
     '#type' => 'hidden',
