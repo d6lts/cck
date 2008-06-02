@@ -514,7 +514,7 @@ function content_admin_field_main(&$form_state, $form_values) {
   if (!empty($form_state['storage'])) {
     $form_values = $form_state['storage'];
   }
-  
+    
   $type_name = $form_values['type_name'];
   $field_name = isset($form_values['field_name']) ? $form_values['field_name'] : '';
   $field_type = isset($form_values['type']) ? $form_values['type'] : '';
@@ -550,9 +550,9 @@ function content_admin_field_main(&$form_state, $form_values) {
   $form['new']['label'] = array(
     '#type' => 'textfield',
     '#title' => t('Label'),
-    '#default_value' => $label,
+    '#value' => $label,
     '#required' => TRUE,
-    '#description' => t('A human-readable name to be used as the label for this field.'),
+    '#description' => t('A human-readable name to be used as the label for this field in the %type content type.', array('%type' => $type_name)),
   );
   $form['new']['field_name'] = array(
     '#title' => t('Field name'),
@@ -599,7 +599,7 @@ function content_admin_field_main(&$form_state, $form_values) {
       '#title' => t('Widget type'),
       '#required' => TRUE,
       '#options' => content_field_type_options($field_type),
-      '#default_value' => NULL,
+      '#default_value' => $form_values['widget_type'],
       '#description' => t('The type of form element you would like to present to the user in when creating this field.'),
     );
   }
@@ -608,14 +608,20 @@ function content_admin_field_main(&$form_state, $form_values) {
     '#type' => 'value',
     '#value' => $type_name,
   );
+  $form['needs_update'] = array(
+    '#type' => 'hidden',
+    '#value' => !empty($form_values['needs_update']),
+    );
   $form['submit'] = array(
     '#type' => 'submit',
     '#value' => t('Continue'),
   );
+  
   // Make sure to use the right validation and submission functions,
   // needed when this form is invoked from the field edit page.
   $form['#validate'] = array('content_admin_field_main_validate');
   $form['#submit'] = array('content_admin_field_main_submit');
+  
   return $form;
 }
 
@@ -625,7 +631,7 @@ function content_admin_field_main(&$form_state, $form_values) {
 function content_admin_field_main_validate($form, &$form_state) {
   $form_values = $form_state['values'];
   $field_name = $form_values['field_name'];
-  
+    
   // Add the 'field_' prefix.
   if (!empty($field_name) && substr($field_name, 0, 6) != 'field_') {
     $field_name = 'field_'. $field_name;
@@ -656,10 +662,12 @@ function content_admin_field_main_validate($form, &$form_state) {
  * Create a new field for a content type.
  */
 function content_admin_field_main_submit($form, &$form_state) {
+  echo 'SUBMIT';
   $form_values = $form_state['values'];
   $form_state['storage'] = $form_values;
-  if (empty($form_values['type']) || empty($form_values['widget_type'])) {
+  if (empty($form_values['type']) || empty($form_values['widget_type']) || !empty($form_state['values']['needs_update'])) {
     $form_state['rebuild'] = TRUE;
+    $form_state['values']['needs_update'] = FALSE;
   }
   else {
     module_load_include('inc', 'content', 'includes/content.crud');
@@ -776,8 +784,11 @@ function _content_admin_field(&$form_state, $type_name, $field_name) {
       'type' => $field['type'],
       'widget_type' => $field['widget']['type'],
       'label' => $field['widget']['label'],
+      'needs_update' => TRUE,
       );
-    $form = drupal_retrieve_form('content_admin_field_main', $form_state, $form_values); 
+    //$form = drupal_rebuild_form('content_admin_field_main', $form_state, array($form_state, $form_values));
+    $form['markup'] = array('#value' => drupal_get_form('content_admin_field_main', $form_values));
+    $form_state['redirect'] = 'admin/content/node-type/'. $type['url_str'] .'/fields/'. $field_name;
     return $form; 
   }
   
@@ -954,6 +965,9 @@ function _content_admin_field(&$form_state, $type_name, $field_name) {
  * Validate a field's settings.
  */
 function _content_admin_field_validate($form, &$form_state) {
+  if (empty($form['widget'])) {
+    return;
+  }
   include_once('./'. drupal_get_path('module', 'content') .'/includes/content.crud.inc');
   $form_values = $form_state['values'];
   $previous_field = unserialize($form_values['previous_field']);
@@ -1059,6 +1073,9 @@ function _content_admin_field_validate($form, &$form_state) {
  * Save a field's settings after editing.
  */
 function _content_admin_field_submit($form, &$form_state) {
+  if (empty($form['widget'])) {
+    return;
+  }
   module_load_include('inc', 'content', 'includes/content.crud');
   $form_values = $form_state['values'];
 
