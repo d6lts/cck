@@ -522,7 +522,7 @@ function content_admin_field_main(&$form_state, $form_values) {
   
   // Remove the 'field_' prefix from the field name.
   if (substr($field_name, 0, 6) == 'field_') {
-    $field_name = substr($field_name, 6);
+    $trimmed_field_name = substr($field_name, 6);
   }
   
   // If we haven't chosen a field name yet, include an option to 
@@ -543,7 +543,7 @@ function content_admin_field_main(&$form_state, $form_values) {
   else {
     $form['new'] = array(
       '#type' => 'fieldset',
-      '#title' => t('Edit field'),
+      '#title' => t('Edit basic information'),
     );  
     $new = FALSE;
   }
@@ -557,7 +557,7 @@ function content_admin_field_main(&$form_state, $form_values) {
   $form['new']['field_name'] = array(
     '#title' => t('Field name'),
     '#type' => 'textfield',
-    '#default_value' => $field_name,
+    '#default_value' => $trimmed_field_name,
     '#field_prefix' => 'field_',
     '#description' => t("The machine-readable name of the field."),
     '#required' => TRUE,
@@ -566,7 +566,7 @@ function content_admin_field_main(&$form_state, $form_values) {
     $form['new']['field_name']['#description'] .= t(" This name cannot be changed.");
     $form['new']['field_name']['#disabled'] = TRUE;
     $form['new']['field_name']['#required'] = FALSE;
-    $form['new']['field_name']['#value'] = $field_name;
+    $form['new']['field_name']['#value'] = $trimmed_field_name;
     $form['new_field_name'] = array('#type' => 'hidden', '#value' => FALSE);
   }
   else {
@@ -775,6 +775,7 @@ function _content_admin_field(&$form_state, $type_name, $field_name) {
       'field_name' => $field_name, 
       'type' => $field['type'],
       'widget_type' => $field['widget']['type'],
+      'label' => $field['widget']['label'],
       );
     $form = drupal_retrieve_form('content_admin_field_main', $form_state, $form_values); 
     return $form; 
