@@ -521,6 +521,7 @@ function content_admin_field_main(&$form_state, $form_values) {
   $label = isset($form_values['label']) ? $form_values['label'] : '';
   
   // Remove the 'field_' prefix from the field name.
+  $trimmed_field_name = $field_name;
   if (substr($field_name, 0, 6) == 'field_') {
     $trimmed_field_name = substr($field_name, 6);
   }
@@ -662,12 +663,10 @@ function content_admin_field_main_validate($form, &$form_state) {
  * Create a new field for a content type.
  */
 function content_admin_field_main_submit($form, &$form_state) {
-  echo 'SUBMIT';
   $form_values = $form_state['values'];
   $form_state['storage'] = $form_values;
-  if (empty($form_values['type']) || empty($form_values['widget_type']) || !empty($form_state['values']['needs_update'])) {
+  if (empty($form_values['type']) || empty($form_values['widget_type'])) {
     $form_state['rebuild'] = TRUE;
-    $form_state['values']['needs_update'] = FALSE;
   }
   else {
     module_load_include('inc', 'content', 'includes/content.crud');
@@ -784,11 +783,8 @@ function _content_admin_field(&$form_state, $type_name, $field_name) {
       'type' => $field['type'],
       'widget_type' => $field['widget']['type'],
       'label' => $field['widget']['label'],
-      'needs_update' => TRUE,
       );
-    //$form = drupal_rebuild_form('content_admin_field_main', $form_state, array($form_state, $form_values));
     $form['markup'] = array('#value' => drupal_get_form('content_admin_field_main', $form_values));
-    $form_state['redirect'] = 'admin/content/node-type/'. $type['url_str'] .'/fields/'. $field_name;
     return $form; 
   }
   
@@ -820,7 +816,6 @@ function _content_admin_field(&$form_state, $type_name, $field_name) {
   $form['main']['change'] = array(
     '#type' => 'submit',
     '#value' => t('Change basic information'),
-    //'#submit' => 'content_admin_change',
   );
   
   $form['widget'] = array(
