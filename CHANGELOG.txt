@@ -1,0 +1,55 @@
+//$Id$
+
+CCK 6.2.x
+=========
+
+Content Generate (new feature)
+- #257874 and #187599 provide a way to auto-generate field content for the devel module.
+- #261633 E_All fix for content_generate.
+
+Usability
+- #227439, #227437, #227945 Rework field and widget type handling to simplify the intial screen when choosing a field and widget type by making it a two-step process where you see only the widgets that apply to the field. Move the setting of the field label to the same place where you set the field name. Change the field edit screen to keep it from showing all the different widgets again and instead just display the current widget. Then add a button to change the widget which will take you to another screen to make the change since the rest of the page will need to change when the widget changes. Keep the changes to the widget label  in that separate process, too, since that affects the menu tabs that need to be changed before redirecting back to the main page.
+
+Update processing
+- #256141 Add old updates back to fieldgroup.install for situations where the module was briefly enabled and then disabled and never used so the update process doesn't throw an error for the missing updates.
+- Fix potential E_All error in userreference after update.
+- Fix E_All error that can come up after update if text module is using format column.
+- Change the check in _content_type_info to be sure the new 'active' column exists before trying to query the table during installation and updates. Also fix E_All notice for non-existant db_columns during install and update.
+- #237585 Try to avoid foreach errors on missing content type information by creating empty arrays in content_info.
+
+Optionwidgets
+- #224391 Get default values working again for optionwidgets. 
+- #251157 Make sure optionwidgets selections are not lost when previewing node.
+- #253038 Make sure empty optionwidget values are always arrays.
+
+Nodereference
+- #264345 Create a nodereference wrapper for setting and rendering a view and store the rendered view in a static variable to ensure the same view is not rendered over and over in the same session.
+- #263936 Make sure nodereference select views do not try to use paging and do not limit the items per page.
+- Clean up autocomplete handling that uses Views as a selector.
+- #262112 Add missing hook_theme definition for the plain formatter.
+- #256440 Nodereference was passing wrong object to Views for the Views node selection option. Also need to limit available views to those that have fields defined so we can add the title to the view and so there is something meaningful to display in the select list.
+
+Views Integration
+- #264479 Make sure we don't try to init() a view for fields that don't have one selected.
+- #263936 Set arguments in execute_display. Also make sure to pass $string and $exact_string to the view.
+- #257566 Move all content fields into a single group in the Views UI.
+- #242856 Make sure the node.nid is aliased when creating our grouped fields query so the parent node isn't confused with nodereference's nid column.
+- #261528 Add in missing code to create the link to the node if that option is requested.
+
+Content Copy
+- #225664 Make sure groups get imported as well as fields.
+
+Formatters
+- #264768 Make sure handling for all possible states of #single is properly set up.
+- #260253 $node->type isn't always set, and if missing the formatters that use $fields($field_name, $type_name) to retrieve the field array end up with an empty value. Add the node type to all content fields views so we can be sure it's available and alter the content_format logic to look for the node type both at $node->type and at $node->node_type, where Views will put it, to properly set the content type.
+
+General
+- #256116 Add a TODO to reconsider handling of CCK data when a content type is deleted.
+- Small fix to content_generate to get auto-generation of number values working.
+- #265334 Avoid format error messages in the unusual case where you have created CCK content and then delete the content type without deleting the node, since core does not delete the nodes in that case.
+- #227256 Add an additional check when creating a new field that the length is no more than 32 characters.
+- #260253 When content_type is set but empty, nothing is returned from content_fields(). Fix that by checking for empty() instead of isset(). This is a more general problem that should be fixed in content_fields().
+- #258127 Eliminate need to defer the rebuild of the menu, also adding TODO to see if content_menu_needs_rebuild() can be eliminated.
+- #257304 Make sure the widget description is never NULL to avoid problems when a NULL value gets wrapped with t().
+- #259704 Make sure help text always appears.
+- #255113 Make sure empty filtered text fields don't pick up unintended values from check_plain().
