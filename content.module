@@ -355,14 +355,20 @@ function content_view(&$node, $teaser = FALSE, $page = FALSE) {
 
   // Adjust weights for non-CCK fields.
   $type = content_types($node->type);
-  foreach ($type['extra'] as $key => $value) {
-    // Some core 'fields' use a different key in node forms and in 'view'
-    // render arrays.
-    if (isset($value['view']) && isset($node->content[$value['view']])) {
-      $node->content[$value['view']]['#weight'] = $value['weight'];
-    }
-    elseif (isset($node->content[$key])) {
-      $node->content[$key]['#weight'] = $value['weight'];
+  
+  // Could be unset in the unusual situation where you have created
+  // CCK content and then delete the content type without deleting
+  // the node, since core does not delete the nodes in that case.
+  if (isset($type['extra'])) {
+    foreach ($type['extra'] as $key => $value) {
+      // Some core 'fields' use a different key in node forms and in 'view'
+      // render arrays.
+      if (isset($value['view']) && isset($node->content[$value['view']])) {
+        $node->content[$value['view']]['#weight'] = $value['weight'];
+      }
+      elseif (isset($node->content[$key])) {
+        $node->content[$key]['#weight'] = $value['weight'];
+      }
     }
   }
 }
