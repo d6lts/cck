@@ -135,18 +135,18 @@ if (module_exists('number')) {
     else {
       $min = is_numeric($field['min']) ? $field['min'] : 0;
       switch ($field['type']) {
-        case 'integer':
+        case 'number_integer':
           $max = is_numeric($field['max']) ? $field['max'] : 10000;
           $scale = 0;
           break;
       
-        case 'decimal':
+        case 'number_decimal':
           $precision = is_numeric($field['precision']) ? $field['precision'] : 10;
           $scale = is_numeric($field['scale']) ? $field['scale'] : 2;
           $max = is_numeric($field['max']) ? $field['max'] : pow(10, $precision);
           break;
         
-        case 'float':
+        case 'number_float':
           $precision = rand(10, 32);
           $scale = rand(0, 2);
           $max = is_numeric($field['max']) ? $field['max'] : pow(10, $precision);
