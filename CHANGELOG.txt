@@ -1,7 +1,11 @@
 //$Id$
 
-CCK 6.2.x
-=========
+CCK 6.2.dev
+============
+- Alter content_types_install() to make sure it picks up all the regular field and widget values out of the database. Some of the field values were missing, which caused some of the other values to get set incorrectly during updates and when modules are enabled.
+
+CCK 6.2.beta
+============
 
 Content Generate (new feature)
 - #257874 and #187599 provide a way to auto-generate field content for the devel module.
