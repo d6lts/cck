@@ -580,8 +580,15 @@ function content_type_update($info) {
  *
  * @param $info
  *   value supplied by hook_node_type()
+ * 
+ * TODO should we skip doing this entirely since core leaves the
+ * nodes in the database as orphans and wait until the nodes are 
+ * deleted to respond?
+ * 
  */
 function content_type_delete($info) {
+  // This isn't right either, since content_field_instance_read()
+  // only picks up active fields, so inactive ones won't get deleted.
   $fields = content_field_instance_read(array('type_name' => $info->type));
   foreach ($fields as $field) {
     content_field_instance_delete($field['field_name'], $info->type);
