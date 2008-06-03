@@ -509,12 +509,11 @@ function _content_admin_field_add_existing_submit($form, &$form_state) {
  */
 function content_admin_field_main(&$form_state, $form_values) {
   module_load_include('inc', 'content', 'includes/content.crud');
-  
   $form = array();
   if (!empty($form_state['storage'])) {
     $form_values = $form_state['storage'];
   }
-    
+  
   $type_name = $form_values['type_name'];
   $type = content_types($type_name);
   $field_name = isset($form_values['field_name']) ? $form_values['field_name'] : '';
@@ -572,7 +571,7 @@ function content_admin_field_main(&$form_state, $form_values) {
   $form['new']['label'] = array(
     '#type' => 'textfield',
     '#title' => t('Label'),
-    '#value' => $label,
+    '#default_value' => $label,
     '#required' => TRUE,
     '#description' => t('A human-readable name to be used as the label for this field in the %type content type.', array('%type' => $type['name'])),
   );
@@ -797,7 +796,7 @@ function _content_admin_field(&$form_state, $type_name, $field_name) {
   $form['main']['label'] = array(
     '#type' => 'textfield',
     '#title' => t('Label'),
-    '#default_value' => $field['widget']['label'],
+    '#value' => $field['widget']['label'],
     '#disabled' => TRUE,
   );
   $form['main']['field_name'] = array(
