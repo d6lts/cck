@@ -14,7 +14,7 @@ function optionwidgets_form_alter(&$form, $form_state, $form_id) {
     elseif ($form['main']['widget_type']['#default_value'] == 'optionwidgets_buttons') {
       $output .= '<p>'. t("The 'checkboxes/radio buttons' widget will display checkboxes if the multiple values option is selected for this field, otherwise radios will be displayed.") .'</p>';
     }
-    if (in_array($form['main']['type']['#default_value'], array('text', 'number_integer', 'number_float', 'number_decimal'))
+    if (in_array($form['main']['type']['#value'], array('text', 'number_integer', 'number_float', 'number_decimal'))
     && in_array($form['main']['widget_type']['#default_value'], array('optionwidgets_onoff', 'optionwidgets_buttons', 'optionwidgets_select'))) {
       $form['field']['allowed_values_fieldset']['#collapsed'] = FALSE;
       $form['field']['allowed_values_fieldset']['#description'] = $output;
