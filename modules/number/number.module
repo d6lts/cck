@@ -307,8 +307,8 @@ function theme_number_formatter_generic($element) {
       break;
   }
 
-  $prefixes = explode('|', $field['prefix']);
-  $suffixes = explode('|', $field['suffix']);
+  $prefixes = isset($field['prefix']) ? explode('|', $field['prefix']) : array(0 => '');
+  $suffixes = isset($field['suffix']) ? explode('|', $field['suffix']) : array(0 => '');
   $prefix = (count($prefixes) > 1) ? format_plural($value, $prefixes[0], $prefixes[1]) : $prefixes[0];
   $suffix = (count($suffixes) > 1) ? format_plural($value, $suffixes[0], $suffixes[1]) : $suffixes[0];
 
