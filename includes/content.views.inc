@@ -499,8 +499,11 @@ class views_handler_field_content_multiple extends views_handler_field_content {
       // TODO : could we use generic field display ?
       return theme('content_view_multiple_field', $items, $field, $values);
     }
-    else {
+    elseif (count($items) == 1) {
       return $items[0];
+    }
+    else {
+      return '';
     }
   }
 }
