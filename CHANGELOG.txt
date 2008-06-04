@@ -2,6 +2,7 @@
 
 CCK 6.2.dev
 ============
+- #258127 Get rid of content_menu_needs_rebuild() in remaining places and only rebuild the menu when absolutely needed.
 - Alter content_types_install() to make sure it picks up all the regular field and widget values out of the database. Some of the field values were missing, which caused some of the other values to get set incorrectly during updates and when modules are enabled.
 
 CCK 6.2.beta

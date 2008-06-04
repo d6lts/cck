@@ -270,7 +270,11 @@ function content_field_instance_create($field) {
   content_alter_schema(array(), $field);
 
   content_clear_type_cache(TRUE);
-  content_menu_needs_rebuild(TRUE);
+  
+  // We need to rebuild the menu when creating a new field.
+  if (empty($prev_field['widget'])) {
+    menu_rebuild();
+  }
 
   return $field;
 }
@@ -343,6 +347,12 @@ function content_field_instance_update($field) {
   content_alter_schema($prev_field, $field);
 
   content_clear_type_cache(TRUE);
+  
+  // The label is in the menu tree, so we need a menu rebuild
+  // if the label changes.
+  if ($prev_field['widget']['label'] != $field['widget']['label']) {
+   menu_rebuild();
+  }
 
   return $field;
 }
@@ -475,6 +485,8 @@ function content_field_instance_read($param = NULL) {
 function content_field_instance_delete($field_name, $type_name) {
   include_once('./'. drupal_get_path('module', 'content') .'/includes/content.admin.inc');
 
+  $needs_menu_rebuild = FALSE;
+  
   // Get the previous field value.
   $field = array_pop(content_field_instance_read(array('field_name' => $field_name, 'type_name' => $type_name)));
 
@@ -491,7 +503,7 @@ function content_field_instance_delete($field_name, $type_name) {
     db_query("DELETE FROM {". content_field_tablename() ."} WHERE field_name = '%s'", $field['field_name']);
 
     // Deleted fields require a menu rebuild to remove all the field paths.
-    content_menu_needs_rebuild(TRUE);
+    $needs_menu_rebuild = TRUE;
   }
 
   // If only one instance remains, we may need to change the database
@@ -508,6 +520,9 @@ function content_field_instance_delete($field_name, $type_name) {
   }
 
   content_clear_type_cache(TRUE);
+  if ($needs_menu_rebuild) {
+    menu_rebuild();
+  }
   return $field;
 }
 
@@ -572,7 +587,8 @@ function content_type_update($info) {
   }
 
   // Reset all content type info and alter the menu paths.
-  content_menu_needs_rebuild(TRUE);
+  content_clear_type_cache(TRUE);
+  menu_rebuild();
 }
 
 /**
@@ -599,6 +615,6 @@ function content_type_delete($info) {
     db_drop_table($ret, $table);
     watchdog('content', 'The content fields table %name has been deleted.', array('%name' => $table));
   }
-
-  content_menu_needs_rebuild(TRUE);
+  content_clear_type_cache(TRUE);
+  menu_rebuild();
 }
