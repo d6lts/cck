@@ -624,10 +624,10 @@ function nodereference_get_view($field, $string = '', $exact_string = false) {
   if (module_exists('views')
   && !empty($view_name)
   && $view_name != '--'
-  && (!isset($view) || $view->name != $view_name || $prev_string != $string || $prev_exact_string != $exact_string)) {
+  && (!isset($view) || $view->name != $view_name || $prev_string != $string || $prev_exact_string != $exact_string)
+  && $view = views_get_view($view_name)) {
     $prev_string = $string;
     $prev_exact_string = $exact_string;
-    $view = views_get_view($view_name);
     $view->init();
 
     // TODO is this the right way to do this?
