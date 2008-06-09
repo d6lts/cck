@@ -4,5 +4,5 @@
  * Implementation of hook_install().
  */
 function content_permissions_install() {
-  drupal_set_message(t('Please <a href="!url">configure your field permissions</a> immediately. All fields are inaccessible by default.', array('!url' => url('admin/user/access', array('fragment' => 'content_permissions')))));
+  drupal_set_message(t('Please <a href="!url">configure your field permissions</a> immediately. All fields are inaccessible by default.', array('!url' => url('admin/user/permissions', array('fragment' => 'content_permissions')))));
 }
