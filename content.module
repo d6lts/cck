@@ -106,7 +106,7 @@ function content_menu() {
   if (!defined('MAINTENANCE_MODE')) {
     foreach (node_get_types() as $type) {
       $type_name = $type->type;
-      $content_type = content_types($type_name);  
+      $content_type = content_types($type_name);
       $type_url_str = $content_type['url_str'];
       $items['admin/content/node-type/'. $type_url_str .'/fields'] = array(
         'title' => 'Manage fields',
@@ -179,7 +179,7 @@ function content_menu() {
  */
 function content_theme() {
   $path = drupal_get_path('module', 'content') .'/theme';
-    
+
   return array(
     'content_field_view' => array(
       'template' => 'field',
@@ -325,7 +325,7 @@ function content_view(&$node, $teaser = FALSE, $page = FALSE) {
 
   // Adjust weights for non-CCK fields.
   $type = content_types($node->type);
-  
+
   // Could be unset in the unusual situation where you have created
   // CCK content and then delete the content type without deleting
   // the node, since core does not delete the nodes in that case.
@@ -478,12 +478,6 @@ function theme_content_multiple_values($element) {
     $output .= drupal_render($element[$element['#field_name'] .'_add_more']);
 
     drupal_add_tabledrag($table_id, 'order', 'sibling', $order_class);
-
-    // Change the button title to reflect the behavior when using JavaScript.
-    // TODO : this should be made a behavior, so it can be reattached when the
-    // form is AHAH-updated
-    $field_name_css = str_replace('_', '-', $field_name);
-    drupal_add_js('if (Drupal.jsEnabled) { $(document).ready(function() { $("#edit-'. $field_name_css .'-'. $field_name_css .'-add-more").val("'. t('Add another item') .'"); }); }', 'inline');
   }
   else {
     foreach (element_children($element) as $key) {
@@ -632,7 +626,7 @@ function content_field($op, &$node, $field, &$items, $teaser, $page) {
         include_once('./'. drupal_get_path('module', 'content') .'/includes/content.devel.inc');
         content_generate_fields($node);
       }
-      
+
       // Manual node_save calls might not have all fields filled in.
       // On node insert, we need to make sure all tables get at least an empty
       // record, or subsequent edits, using drupal_write_record() in update mode,
@@ -827,7 +821,7 @@ function _content_sort_items_helper($a, $b) {
 function content_storage($op, $node) {
   $type_name = $node->type;
   $type = content_types($type_name);
-  
+
   switch ($op) {
     case 'load':
       // OPTIMIZE : load all non multiple fields in a single JOIN query ?
@@ -1144,7 +1138,7 @@ function _content_field_invoke_default($op, &$node, $teaser = NULL, $page = NULL
  *
  * @param $content_type_name
  *   If set, return information on just this type.
- * 
+ *
  * Do some type checking and set up empty arrays for missing
  * info to avoid foreach errors elsewhere in the code.
  */
@@ -1178,7 +1172,7 @@ function content_types($type_name = NULL) {
  * @param $content_type_name
  *   If not empty, return information of the field within the context of this content
  *   type.
- * 
+ *
  * Be sure to check empty() instead of isset() on field_name and
  * content_type_name to avoid bad results when the value is set
  * but empty, as sometimes happens in the formatter.

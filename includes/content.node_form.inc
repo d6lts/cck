@@ -171,9 +171,8 @@ function content_multiple_value_form(&$form, &$form_state, $field, $items) {
         // We name the element '_weight' to avoid clashing with column names
         // defined by field modules.
         $element['_weight'] = array(
-          // When JS is disabled, a weight selector will be more convenient (?),
-          // but won't work well with more than 10 values.
-          '#type' => ($max < 10) ? 'weight' : 'textfield',
+          '#type' => 'weight',
+          '#delta' => $max, // this 'delta' is the 'weight' element's property
           '#default_value' => $delta,
           '#weight' => 100,
         );
@@ -192,8 +191,7 @@ function content_multiple_value_form(&$form, &$form_state, $field, $items) {
 
     $form_element[$field_name .'_add_more'] = array(
       '#type' => 'submit',
-      '#value' => t('Add another !field value', array('!field' => t($field['widget']['label']))),
-      '#description' => t("If the amount of boxes above isn't enough, click here to add more items."),
+      '#value' => t('Add another item'),
       '#weight' => $field['widget']['weight'] + $max + 1,
       '#submit' => array('content_add_more_submit'), // If no JavaScript action.
       '#ahah' => array(
@@ -248,7 +246,7 @@ function content_add_more_js($type_name_url, $field_name) {
     drupal_json(array('status' => 0));
   }
 
-  // Reorder values to account for drag-n-drop reordering
+  // Reorder values to account for drag-n-drop reordering.
   $_POST[$field_name] = _content_sort_items($field, $_POST[$field_name]);
   $delta = max(array_keys($_POST[$field_name])) + 1;
   // Retrieve the cached form.
@@ -280,12 +278,9 @@ function content_add_more_js($type_name_url, $field_name) {
   );
   $form = form_builder($_POST['form_id'], $form, $form_state);
 
-  // TODO : bug - the new element gets an empty delta value
-
   // Render the new output.
   $field_form = (!empty($group_name)) ? $form[$group_name][$field_name] : $form[$field_name];
   // We add a div around the new content to receive the ahah effect.
-
   $field_form[$delta]['#prefix'] = '<div class="ahah-new-content">'. (isset($field_form[$delta]['#prefix']) ? $field_form[$delta]['#prefix'] : '');
   $field_form[$delta]['#suffix'] = (isset($field_form[$delta]['#suffix']) ? $field_form[$delta]['#suffix'] : '') .'</div>';
   $output = theme('status_messages') . drupal_render($field_form);

@@ -2,6 +2,8 @@
 
 CCK 6.2.dev
 ============
+- #235063 Fix jumbled multiple values when hitting the 'add-more' button with more than 10 values.
+          Keep 'add more' button text consistent.
 - Avoid E_All error when prefixes and suffixes are not defined in number module.
 - Avoid E_All error, don't try to return $item[0] if there are no items.
 - #266590 Make sure a view is valid before trying to use it in the nodereference module to fix upgrade errors when the view has not been updated to Views 2.
@@ -26,7 +28,7 @@ Update processing
 - #237585 Try to avoid foreach errors on missing content type information by creating empty arrays in content_info.
 
 Optionwidgets
-- #224391 Get default values working again for optionwidgets. 
+- #224391 Get default values working again for optionwidgets.
 - #251157 Make sure optionwidgets selections are not lost when previewing node.
 - #253038 Make sure empty optionwidget values are always arrays.
 
