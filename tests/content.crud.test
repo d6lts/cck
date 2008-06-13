@@ -363,7 +363,7 @@ class ContentCrudSingleToMultipleTest extends ContentCrudTestCase {
   function get_info() {
     return array(
       'name' => t('CCK CRUD API - Single to multiple'),
-      'desc' => t('Tests the CRUD (create, read, update, delete) API for content types by creating a single value field and chaning it to a multivalue field, sharing it between several content types.'),
+      'desc' => t('Tests the CRUD (create, read, update, delete) API for content types by creating a single value field and chaning it to a multivalue field, sharing it between several content types. <b>Requires !schema_link.</b>', array('!schema_link' => l('Shema module', 'http://www.drupal.org/projects/schema'))),
       'group' => t('CCK'),
     );
   }
@@ -435,7 +435,7 @@ class ContentCrudMultipleToSingleTest extends ContentCrudTestCase {
   function get_info() {
     return array(
       'name' => t('CCK CRUD API - Multiple to single'),
-      'desc' => t('Tests the CRUD (create, read, update, delete) API for content types by creating a multivalue field and chaning it to a single value field, sharing it between several content types.'),
+      'desc' => t('Tests the CRUD (create, read, update, delete) API for content types by creating a multivalue field and chaning it to a single value field, sharing it between several content types. <b>Requires !schema_link.</b>', array('!schema_link' => l('Shema module', 'http://www.drupal.org/projects/schema'))),
       'group' => t('CCK'),
     );
   }

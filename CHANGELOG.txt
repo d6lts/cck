@@ -11,6 +11,7 @@ CCK 6.2.dev
           Keep 'add more' button text consistent.
 - #270014 by yang_yi_cn : form for multiple values didn't call the right hook_widget
 - fix 'Undefined index: #access' notice when content_permissions.module is disabled
+- #270315 Mention dependency on schema.module in the desciptions of the CRUD tests.
 
 CCK 6.2.beta
 ============
