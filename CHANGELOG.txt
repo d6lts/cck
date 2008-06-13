@@ -2,13 +2,14 @@
 
 CCK 6.2.dev
 ============
-- #235063 Fix jumbled multiple values when hitting the 'add-more' button with more than 10 values.
-          Keep 'add more' button text consistent.
 - Avoid E_All error when prefixes and suffixes are not defined in number module.
 - Avoid E_All error, don't try to return $item[0] if there are no items.
 - #266590 Make sure a view is valid before trying to use it in the nodereference module to fix upgrade errors when the view has not been updated to Views 2.
 - #258127 Get rid of content_menu_needs_rebuild() in remaining places and only rebuild the menu when absolutely needed.
 - Alter content_types_install() to make sure it picks up all the regular field and widget values out of the database. Some of the field values were missing, which caused some of the other values to get set incorrectly during updates and when modules are enabled.
+- #235063 Fix jumbled multiple values when hitting the 'add-more' button with more than 10 values.
+          Keep 'add more' button text consistent.
+- #270014 by yang_yi_cn : form for multiple values didn't call the right hook_widget
 
 CCK 6.2.beta
 ============
