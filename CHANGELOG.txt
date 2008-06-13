@@ -1,5 +1,7 @@
 // $Id$
 
+- #187599 Backport content_generate so Devel module can create data for CCK fields when creating nodes.
+
 5--1.x
 ======
 Features

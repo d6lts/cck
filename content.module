@@ -315,6 +315,10 @@ function content_nodeapi(&$node, $op, $teaser, $page) {
       break;
 
     case 'insert':
+      if ($node->devel_generate) {
+        include_once('./'. drupal_get_path('module', 'content') .'/content.devel.inc');
+        content_generate_fields($node);
+      }
       content_insert($node);
       break;
 
