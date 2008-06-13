@@ -10,6 +10,7 @@ CCK 6.2.dev
 - #235063 Fix jumbled multiple values when hitting the 'add-more' button with more than 10 values.
           Keep 'add more' button text consistent.
 - #270014 by yang_yi_cn : form for multiple values didn't call the right hook_widget
+- fix 'Undefined index: #access' notice when content_permissions.module is disabled
 
 CCK 6.2.beta
 ============

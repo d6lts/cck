@@ -23,7 +23,7 @@ function fieldgroup_menu() {
   if (!defined('MAINTENANCE_MODE')) {
     foreach (node_get_types() as $type) {
       $type_name = $type->type;
-      $content_type = content_types($type_name);  
+      $content_type = content_types($type_name);
       $type_url_str = $content_type['url_str'];
       $items['admin/content/node-type/'. $type_url_str .'/add_group'] = array(
         'title' => 'Add group',
@@ -318,7 +318,7 @@ function fieldgroup_form_alter(&$form, $form_state, $form_id) {
         if (isset($form[$field_name])) {
           $form[$group_name][$field_name] = $form[$field_name];
           // Track whether this group has any accessible fields within it.
-          if ($form[$field_name]['#access'] !== FALSE) {
+          if (!isset($form[$field_name]['#access']) || $form[$field_name]['#access'] !== FALSE) {
             $has_accessible_field = TRUE;
           }
           unset($form[$field_name]);
