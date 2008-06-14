@@ -81,6 +81,13 @@ function content_init() {
 }
 
 /**
+ * Implementation of hook_perm().
+ */
+function content_perm() {
+  return array('Use PHP input for default and allowed values (dangerous - grant with care)');
+}
+
+/**
  * Implementation of hook_menu().
  */
 function content_menu() {

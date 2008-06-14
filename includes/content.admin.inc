@@ -880,29 +880,41 @@ function _content_admin_field(&$form_state, $type_name, $field_name) {
       '#collapsible' => TRUE,
       '#collapsed' => empty($field['widget']['default_value_php']),
     );
-    $db_info = content_database_info($field);
-    $columns = array_keys($db_info['columns']);
-    foreach ($columns as $key => $column) {
-      $columns[$key] = "'$column' => value for $column";
+
+    if (user_access('Use PHP input for default and allowed values (dangerous - grant with care)')) {
+      $db_info = content_database_info($field);
+      $columns = array_keys($db_info['columns']);
+      foreach ($columns as $key => $column) {
+        $columns[$key] = "'$column' => value for $column";
+      }
+      $sample = 'array(
+    0 => array('. implode(', ', $columns) .'),
+    // You\'ll usually want to stop here. Provide more values
+    // if you want your \'default value\' to be multi-valued :
+    1 => array('. implode(', ', $columns) .'),
+    2 => ...
+  );';
+
+      $form['widget']['default_value_fieldset']['advanced_options']['default_value_php'] = array(
+        '#type' => 'textarea',
+        '#title' => t('Code'),
+        '#default_value' => isset($field['widget']['default_value_php']) ? $field['widget']['default_value_php'] : '',
+        '#rows' => 6,
+        '#tree' => TRUE,
+        '#description' => t("Advanced usage only: PHP code that returns a default value. Should not include &lt;?php ?&gt; delimiters. If this field is filled out, the value returned by this code will override any value specified above. Expected format :<pre>!sample</pre>Using !link_devel's 'devel load' tab on a %type content page might help you figure out the expected format.", array(
+          '!sample' => $sample,
+          '!link_devel' => l('devel.module', 'http://www.drupal.org/project/devel'),
+          '%type' => $type_name)),
+      );
     }
-    $sample = 'array(
-  0 => array('. implode(', ', $columns) .'),
-  // You\'ll usually want to stop here. Provide more values
-  // if you want your \'default value\' to be multi-valued :
-  1 => array('. implode(', ', $columns) .'),
-  2 => ...
-);';
-    $form['widget']['default_value_fieldset']['advanced_options']['default_value_php'] = array(
-      '#type' => 'textarea',
-      '#title' => t('Code'),
-      '#default_value' => isset($field['widget']['default_value_php']) ? $field['widget']['default_value_php'] : '',
-      '#rows' => 6,
-      '#tree' => TRUE,
-      '#description' => t("Advanced usage only: PHP code that returns a default value. Should not include &lt;?php ?&gt; delimiters. If this field is filled out, the value returned by this code will override any value specified above. Expected format :<pre>!sample</pre>Using !link_devel's 'devel load' tab on a %type content page might help you figure out the expected format.", array(
-        '!sample' => $sample,
-        '!link_devel' => l('devel.module', 'http://www.drupal.org/project/devel'),
-        '%type' => $type_name)),
-    );
+    else {
+      $form['widget']['default_value_fieldset']['advanced_options']['markup_default_value_php'] = array(
+        '#type' => 'item',
+        '#title' => t('Code'),
+        '#value' => !empty($field['widget']['default_value_php']) ? '<code>'. check_plain($field['widget']['default_value_php']) .'</code>' : t('&lt;none&gt;'),
+        '#description' => empty($field['widget']['default_value_php']) ? t("You're not allowed to input PHP code.") : t('This PHP code was set by an administrator and will override any value specified above.'),
+      );
+    }
   }
 
   $form['field'] = array(

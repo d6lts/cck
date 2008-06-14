@@ -138,13 +138,23 @@ function number_field_settings($op, $field) {
         '#collapsible' => TRUE,
         '#collapsed' => empty($field['allowed_values_php']),
       );
-      $form['allowed_values_fieldset']['advanced_options']['allowed_values_php'] = array(
-        '#type' => 'textarea',
-        '#title' => t('Code'),
-        '#default_value' => !empty($field['allowed_values_php']) ? $field['allowed_values_php'] : '',
-        '#rows' => 6,
-        '#description' => t('Advanced usage only: PHP code that returns a keyed array of allowed values. Should not include &lt;?php ?&gt; delimiters. If this field is filled out, the array returned by this code will override the allowed values list above.'),
-      );
+      if (user_access('Use PHP input for default and allowed values (dangerous - grant with care)')) {
+        $form['allowed_values_fieldset']['advanced_options']['allowed_values_php'] = array(
+          '#type' => 'textarea',
+          '#title' => t('Code'),
+          '#default_value' => !empty($field['allowed_values_php']) ? $field['allowed_values_php'] : '',
+          '#rows' => 6,
+          '#description' => t('Advanced usage only: PHP code that returns a keyed array of allowed values. Should not include &lt;?php ?&gt; delimiters. If this field is filled out, the array returned by this code will override the allowed values list above.'),
+        );
+      }
+      else {
+        $form['allowed_values_fieldset']['advanced_options']['markup_allowed_values_php'] = array(
+          '#type' => 'item',
+          '#title' => t('Code'),
+          '#value' => !empty($field['allowed_values_php']) ? '<code>'. check_plain($field['allowed_values_php']) .'</code>' : t('&lt;none&gt;'),
+          '#description' => empty($field['allowed_values_php']) ? t("You're not allowed to input PHP code.") : t('This PHP code was set by an administrator and will override the allowed values list above.'),
+        );
+      }
       return $form;
 
     case 'validate':
