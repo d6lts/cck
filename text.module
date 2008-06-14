@@ -39,7 +39,7 @@ function text_field_settings($op, $field) {
       $form['allowed_values'] = array(
         '#type' => 'textarea',
         '#title' => t('Allowed values list'),
-        '#default_value' => isset($field['allowed_values']) ? $field['allowed_values'] : '',
+        '#default_value' => !empty($field['allowed_values']) ? $field['allowed_values'] : '',
         '#required' => FALSE,
         '#rows' => 10,
         '#description' => t('The possible values this field can contain. Enter one value per line, in the format key|label. The key is the value that will be stored in the database and it must match the field storage type, %type. The label is optional and the key will be used as the label if no label is specified.', array('%type' => $field['type'])),
@@ -48,15 +48,25 @@ function text_field_settings($op, $field) {
         '#type' => 'fieldset',
         '#title' => t('PHP code'),
         '#collapsible' => TRUE,
-        '#collapsed' => TRUE,
+        '#collapsed' => empty($field['allowed_values_php']),
       );
-      $form['advanced_options']['allowed_values_php'] = array(
-        '#type' => 'textarea',
-        '#title' => t('Code'),
-        '#default_value' => $field['allowed_values_php'],
-        '#rows' => 6,
-        '#description' => t('Advanced Usage Only: PHP code that returns a keyed array of allowed values. Should not include &lt;?php ?&gt; delimiters. If this field is filled out, the array returned by this code will override the allowed values list above.'),
-      );
+      if (user_access('Use PHP input for field settings (dangerous - grant with care)')) {
+        $form['advanced_options']['allowed_values_php'] = array(
+          '#type' => 'textarea',
+          '#title' => t('Code'),
+          '#default_value' => !empty($field['allowed_values_php']) ? $field['allowed_values_php'] : '',
+          '#rows' => 6,
+          '#description' => t('Advanced usage only: PHP code that returns a keyed array of allowed values. Should not include &lt;?php ?&gt; delimiters. If this field is filled out, the array returned by this code will override the allowed values list above.'),
+        );
+      }
+      else {
+        $form['advanced_options']['markup_allowed_values_php'] = array(
+          '#type' => 'item',
+          '#title' => t('Code'),
+          '#value' => !empty($field['allowed_values_php']) ? '<code>'. check_plain($field['allowed_values_php']) .'</code>' : t('&lt;none&gt;'),
+          '#description' => empty($field['allowed_values_php']) ? t("You're not allowed to input PHP code.") : t('This PHP code was set by an administrator and will override the allowed values list above.'),
+        );
+      }
       return $form;
 
     case 'save':
