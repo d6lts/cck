@@ -56,7 +56,7 @@ function text_field_settings($op, $field) {
           '#title' => t('Code'),
           '#default_value' => !empty($field['allowed_values_php']) ? $field['allowed_values_php'] : '',
           '#rows' => 6,
-          '#description' => t('Advanced usage only: PHP code that returns a keyed array of allowed values. Should not include &lt;?php ?&gt; delimiters. If this field is filled out, the array returned by this code will override the allowed values list above.'),
+          '#description' => t('Advanced Usage Only: PHP code that returns a keyed array of allowed values. Should not include &lt;?php ?&gt; delimiters. If this field is filled out, the array returned by this code will override the allowed values list above.'),
         );
       }
       else {
