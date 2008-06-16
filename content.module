@@ -946,6 +946,10 @@ function content_storage($op, $node) {
  * Directly copied from core's drupal_write_record, which can't update a
  * column to NULL. See http://drupal.org/node/227677 and 
  * http://drupal.org/node/226264 for more details about that problem.
+ * 
+ * TODO - get rid of this function and change references back to 
+ * drupal_write_record() if the patch gets into core. Will need a method
+ * of protecting people on older versions, though.
  *
  * Default values are filled in for missing items, and 'serial' (auto increment)
  * types are filled in with IDs.

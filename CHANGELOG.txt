@@ -2,6 +2,7 @@
 
 CCK 6.2.dev
 ============
+- #271294 Add TODO to get rid of content_write_record() once drupal_write_record() is patched.
 - #271294 Add documentation for the reason for having a custom version of drupal_write_record.
 - Avoid E_All error when prefixes and suffixes are not defined in number module.
 - Avoid E_All error, don't try to return $item[0] if there are no items.
