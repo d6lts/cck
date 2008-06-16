@@ -944,7 +944,8 @@ function content_storage($op, $node) {
  * Save a record to the database based upon the schema.
  *
  * Directly copied from core's drupal_write_record, which can't update a
- * column to NULL.
+ * column to NULL. See http://drupal.org/node/227677 and 
+ * http://drupal.org/node/226264 for more details about that problem.
  *
  * Default values are filled in for missing items, and 'serial' (auto increment)
  * types are filled in with IDs.

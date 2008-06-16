@@ -2,6 +2,7 @@
 
 CCK 6.2.dev
 ============
+- #271294 Add documentation for the reason for having a custom version of drupal_write_record.
 - Avoid E_All error when prefixes and suffixes are not defined in number module.
 - Avoid E_All error, don't try to return $item[0] if there are no items.
 - #266590 Make sure a view is valid before trying to use it in the nodereference module to fix upgrade errors when the view has not been updated to Views 2.
