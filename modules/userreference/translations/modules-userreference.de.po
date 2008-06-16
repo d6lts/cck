@@ -16,8 +16,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: CCK\n"
-"POT-Creation-Date: 2008-04-24 19:53+0200\n"
-"PO-Revision-Date: 2008-04-26 15:05+0100\n"
+"POT-Creation-Date: 2008-06-16 20:05+0200\n"
+"PO-Revision-Date: 2008-06-16 20:19+0100\n"
 "Last-Translator: Alexander Hass\n"
 "Language-Team: German <lukas.gangoly@univie.ac.at>\n"
 "MIME-Version: 1.0\n"
@@ -72,7 +72,7 @@ msgstr "Ja"
 msgid "If selected, a reverse link back to the referencing node will displayed on the referenced user record."
 msgstr "Sobald ausgewählt, wird auf dem verwiesenen Benutzerdatensatz ein ‚Zurück‘-Verweis zu dem verweisenden Beitrag angezeigt."
 
-#: modules/userreference/userreference.module:567
+#: modules/userreference/userreference.module:586
 msgid "Related content"
 msgstr "Ähnlicher Inhalt"
 

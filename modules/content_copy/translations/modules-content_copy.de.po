@@ -16,8 +16,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: CCK\n"
-"POT-Creation-Date: 2008-04-24 19:53+0200\n"
-"PO-Revision-Date: 2008-04-26 13:59+0100\n"
+"POT-Creation-Date: 2008-06-16 20:05+0200\n"
+"PO-Revision-Date: 2008-06-16 20:12+0100\n"
 "Last-Translator: Alexander Hass\n"
 "Language-Team: German <lukas.gangoly@univie.ac.at>\n"
 "MIME-Version: 1.0\n"
@@ -116,15 +116,15 @@ msgstr "Abbruch. Kein Import durchgeführt."
 msgid "An error has occurred adding the content type %type.<br/>Please check the errors displayed for more details."
 msgstr "Beim Hinzufügen des Inhaltstyps %type trat ein Fehler auf.<br/>Bitte überprüfen Sie die angezeigten Fehler für weitere Details."
 
-#: modules/content_copy/content_copy.module:385
+#: modules/content_copy/content_copy.module:380
 msgid "The imported field %field_label (%field_name) was not added to %type because that field already exists in %type."
 msgstr "Das importierte Feld %field_label (%field_name) wurde nicht zu %type hinzugefügt, weil dieses Feld bereits in %type existiert."
 
-#: modules/content_copy/content_copy.module:394
+#: modules/content_copy/content_copy.module:389
 msgid "The field %field_label (%field_name) was added to the content type %type."
 msgstr "Das Feld %field_label (%field_name) wurde zu dem Inhaltstyp %type hinzugefügt."
 
-#: modules/content_copy/content_copy.module:505
+#: modules/content_copy/content_copy.module:503
 msgid "An error occurred when exporting the 'display settings' data for the field %field_name.<br/>The db error is: '%db_err'."
 msgstr "Beim Exportieren der ‚Anzeige-Einstellungs‘-Daten für das Feld %field_name ist ein Fehler aufgetreten.<br />Der DB-Fehler ist: ‚%db_err‘."
 

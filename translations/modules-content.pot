@@ -3,8 +3,9 @@
 # LANGUAGE translation of Drupal (root)
 # Copyright YEAR NAME <EMAIL@ADDRESS>
 # Generated from files:
-#  content.module,v 1.289 2008/04/23 22:32:59 karens
+#  content.module,v 1.301.2.3 2008/06/14 02:24:00 yched
 #  content.info,v 1.6 2007/07/04 23:46:29 yched
+#  content.views.inc,v 1.68.2.1 2008/06/04 13:50:03 karens
 #  content_copy.info,v 1.6 2008/04/23 18:01:48 dww
 #  content_permissions.info,v 1.2 2008/04/23 18:01:52 dww
 #  fieldgroup.info,v 1.6 2008/04/23 18:01:58 dww
@@ -15,13 +16,13 @@
 #  userreference.info,v 1.8 2008/04/23 18:02:38 dww
 #  example_field.php,v 1.5 2008/04/23 08:24:06 karens
 #  simple_field.php,v 1.5 2008/04/23 08:24:06 karens
-#  text.module,v 1.91 2008/04/23 18:02:36 dww
+#  text.module,v 1.95.2.2 2008/06/14 02:50:08 yched
 #
 #, fuzzy
 msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
-"POT-Creation-Date: 2008-04-24 19:53+0200\n"
+"POT-Creation-Date: 2008-06-16 20:05+0200\n"
 "PO-Revision-Date: YYYY-mm-DD HH:MM+ZZZZ\n"
 "Last-Translator: NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <EMAIL@ADDRESS>\n"
@@ -78,75 +79,75 @@ msgstr ""
 msgid "Control the order of fields in the input form."
 msgstr ""
 
-#: content.module:469
+#: content.module:456
 msgid "This field is required."
 msgstr ""
 
-#: content.module:473
+#: content.module:460
 msgid "!title: !required"
 msgstr ""
 
-#: content.module:476
+#: content.module:463
 msgid "Order"
 msgstr ""
 
-#: content.module:506
-msgid "Add another item"
-msgstr ""
-
-#: content.module:1581
+#: content.module:1587
 msgid "RSS Item"
 msgstr ""
 
-#: content.module:1583
+#: content.module:1589
 msgid "Search Index"
 msgstr ""
 
-#: content.module:1584
+#: content.module:1590
 msgid "Search Result"
 msgstr ""
 
-#: content.module:1922
+#: content.module:1928
 msgid "Language"
 msgstr ""
 
-#: content.module:1925
+#: content.module:1931
 msgid "Taxonomy"
 msgstr ""
 
-#: content.module:1928
+#: content.module:1934
 msgid "File attachments"
 msgstr ""
 
-#: content.module:558
+#: content.module:539
 msgid "Updating field type %type with module %module."
 msgstr ""
 
-#: content.module:565
+#: content.module:546
 msgid "Updating widget type %type with module %module."
 msgstr ""
 
-#: content.module:140
+#: content.module:87
+msgid "Use PHP input for default and allowed values (dangerous - grant with care)"
+msgstr ""
+
+#: content.module:119
 msgid "Manage fields"
 msgstr ""
 
-#: content.module:149
+#: content.module:128
 msgid "Display fields"
 msgstr ""
 
-#: content.module:158
+#: content.module:137
 msgid "General"
 msgstr ""
 
-#: content.module:164
+#: content.module:143
 msgid "Advanced"
 msgstr ""
 
-#: content.module:190
+#: content.module:171
 msgid "Remove field"
 msgstr ""
 
-#: content.info:0
+#: content.info:0 includes/content.views.inc:57;94
 msgid "Content"
 msgstr ""
 

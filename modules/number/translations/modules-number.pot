@@ -3,14 +3,14 @@
 # LANGUAGE translation of Drupal (modules-number)
 # Copyright YEAR NAME <EMAIL@ADDRESS>
 # Generated from files:
-#  number.module,v 1.90 2008/04/23 18:02:22 dww
+#  number.module,v 1.91.2.3 2008/06/14 02:50:08 yched
 #  number.info,v 1.7 2008/04/23 18:02:16 dww
 #
 #, fuzzy
 msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
-"POT-Creation-Date: 2008-04-24 19:53+0200\n"
+"POT-Creation-Date: 2008-06-16 20:05+0200\n"
 "PO-Revision-Date: YYYY-mm-DD HH:MM+ZZZZ\n"
 "Last-Translator: NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <EMAIL@ADDRESS>\n"
@@ -91,35 +91,35 @@ msgstr ""
 msgid "Define a string that should suffixed to the value, like m², m/s², kb/s. Leave blank for none. Separate singular and plural values with a pipe (pound|pounds)."
 msgstr ""
 
-#: modules/number/number.module:152
+#: modules/number/number.module:162
 msgid "\"Minimum\" must be a number."
 msgstr ""
 
-#: modules/number/number.module:155
+#: modules/number/number.module:165
 msgid "\"Maximum\" must be a number."
 msgstr ""
 
-#: modules/number/number.module:212
+#: modules/number/number.module:222
 msgid "The value of %name may be no smaller than %min."
 msgstr ""
 
-#: modules/number/number.module:215
+#: modules/number/number.module:225
 msgid "The value of %name may be no larger than %max."
 msgstr ""
 
-#: modules/number/number.module:253
+#: modules/number/number.module:263
 msgid "unformatted"
 msgstr ""
 
-#: modules/number/number.module:466
+#: modules/number/number.module:476
 msgid "Only numbers and decimals are allowed in %field. %start was changed to %value."
 msgstr ""
 
-#: modules/number/number.module:484
+#: modules/number/number.module:494
 msgid "Only numbers are allowed in %field. %start was changed to %value."
 msgstr ""
 
-#: modules/number/number.module:503
+#: modules/number/number.module:513
 msgid "Only numbers and the decimal character (%decimal) are allowed in %field. %start was changed to %value."
 msgstr ""
 

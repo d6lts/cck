@@ -3,14 +3,14 @@
 # LANGUAGE translation of Drupal (modules-text)
 # Copyright YEAR NAME <EMAIL@ADDRESS>
 # Generated from files:
-#  text.module,v 1.91 2008/04/23 18:02:36 dww
+#  text.module,v 1.95.2.2 2008/06/14 02:50:08 yched
 #  text.info,v 1.9 2008/04/23 18:02:31 dww
 #
 #, fuzzy
 msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
-"POT-Creation-Date: 2008-04-24 19:53+0200\n"
+"POT-Creation-Date: 2008-06-16 20:05+0200\n"
 "PO-Revision-Date: YYYY-mm-DD HH:MM+ZZZZ\n"
 "Last-Translator: NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <EMAIL@ADDRESS>\n"
@@ -23,7 +23,7 @@ msgstr ""
 msgid "Store text in the database."
 msgstr ""
 
-#: modules/text/text.module:262
+#: modules/text/text.module:272
 msgid "Text area (multiple rows)"
 msgstr ""
 

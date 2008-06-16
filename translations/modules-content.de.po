@@ -16,8 +16,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: CCK\n"
-"POT-Creation-Date: 2008-04-24 19:53+0200\n"
-"PO-Revision-Date: 2008-04-26 13:53+0100\n"
+"POT-Creation-Date: 2008-06-16 20:05+0200\n"
+"PO-Revision-Date: 2008-06-16 20:11+0100\n"
 "Last-Translator: Alexander Hass\n"
 "Language-Team: German <lukas.gangoly@univie.ac.at>\n"
 "MIME-Version: 1.0\n"
@@ -76,75 +76,76 @@ msgstr "Die Anzeige von Feldern dieses Inhaltstyps konfigurieren, wenn dieser im
 msgid "Control the order of fields in the input form."
 msgstr "Die Reihenfolge der Felder im Eingabeformular steuern."
 
-#: content.module:469
+#: content.module:456
 msgid "This field is required."
 msgstr "Dieses Feld wird benötigt."
 
-#: content.module:473
+#: content.module:460
 msgid "!title: !required"
 msgstr "!title: !required"
 
-#: content.module:476
+#: content.module:463
 msgid "Order"
 msgstr "Reihenfolge"
 
-#: content.module:506
-msgid "Add another item"
-msgstr "Einen weiteren Eintrag hinzufügen"
-
-#: content.module:1581
+#: content.module:1587
 msgid "RSS Item"
 msgstr "RSS-Eintrag"
 
-#: content.module:1583
+#: content.module:1589
 msgid "Search Index"
 msgstr "Sucheindex"
 
-#: content.module:1584
+#: content.module:1590
 msgid "Search Result"
 msgstr "Suchergebnis"
 
-#: content.module:1922
+#: content.module:1928
 msgid "Language"
 msgstr "Sprache"
 
-#: content.module:1925
+#: content.module:1931
 msgid "Taxonomy"
 msgstr "Taxonomie"
 
-#: content.module:1928
+#: content.module:1934
 msgid "File attachments"
 msgstr "Dateianhänge"
 
-#: content.module:558
+#: content.module:539
 msgid "Updating field type %type with module %module."
 msgstr "Feldtyp %type wird mit Modul %module aktualisiert."
 
-#: content.module:565
+#: content.module:546
 msgid "Updating widget type %type with module %module."
 msgstr "Widget %type wird mit Modul %module aktualisiert."
 
-#: content.module:140
+#: content.module:87
+msgid "Use PHP input for default and allowed values (dangerous - grant with care)"
+msgstr ""
+
+#: content.module:119
 msgid "Manage fields"
 msgstr "Felder verwalten"
 
-#: content.module:149
+#: content.module:128
 msgid "Display fields"
 msgstr "Felder anzeigen"
 
-#: content.module:158
+#: content.module:137
 msgid "General"
 msgstr "Allgemein"
 
-#: content.module:164
+#: content.module:143
 msgid "Advanced"
 msgstr "Erweitert"
 
-#: content.module:190
+#: content.module:171
 msgid "Remove field"
 msgstr "Feld löschen"
 
 #: content.info:0
+#: includes/content.views.inc:57;94
 msgid "Content"
 msgstr "Inhalt"
 
@@ -170,4 +171,7 @@ msgstr "CCK"
 #: modules/text/text.info:0
 msgid "Text"
 msgstr "Text"
+
+#~ msgid "Add another item"
+#~ msgstr "Einen weiteren Eintrag hinzufügen"
 

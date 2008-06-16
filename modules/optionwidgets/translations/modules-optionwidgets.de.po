@@ -16,8 +16,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: CCK\n"
-"POT-Creation-Date: 2008-04-24 19:53+0200\n"
-"PO-Revision-Date: 2008-04-24 20:34+0100\n"
+"POT-Creation-Date: 2008-06-16 20:05+0200\n"
+"PO-Revision-Date: 2008-06-16 20:19+0100\n"
 "Last-Translator: Alexander Hass\n"
 "Language-Team: German <lukas.gangoly@univie.ac.at>\n"
 "MIME-Version: 1.0\n"
@@ -48,7 +48,7 @@ msgstr "Checkboxen/Auswahl-Knöpfe"
 msgid "Single on/off checkbox"
 msgstr "Einzelne an/aus Checkbox"
 
-#: modules/optionwidgets/optionwidgets.module:357
+#: modules/optionwidgets/optionwidgets.module:364
 msgid "N/A"
 msgstr "k.A."
 

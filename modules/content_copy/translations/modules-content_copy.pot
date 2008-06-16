@@ -3,14 +3,14 @@
 # LANGUAGE translation of Drupal (modules-content_copy)
 # Copyright YEAR NAME <EMAIL@ADDRESS>
 # Generated from files:
-#  content_copy.module,v 1.25 2008/04/23 19:00:13 karens
+#  content_copy.module,v 1.27 2008/05/29 22:27:04 karens
 #  content_copy.info,v 1.6 2008/04/23 18:01:48 dww
 #
 #, fuzzy
 msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
-"POT-Creation-Date: 2008-04-24 19:53+0200\n"
+"POT-Creation-Date: 2008-06-16 20:05+0200\n"
 "PO-Revision-Date: YYYY-mm-DD HH:MM+ZZZZ\n"
 "Last-Translator: NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <EMAIL@ADDRESS>\n"
@@ -107,15 +107,15 @@ msgstr ""
 msgid "An error has occurred adding the content type %type.<br/>Please check the errors displayed for more details."
 msgstr ""
 
-#: modules/content_copy/content_copy.module:385
+#: modules/content_copy/content_copy.module:380
 msgid "The imported field %field_label (%field_name) was not added to %type because that field already exists in %type."
 msgstr ""
 
-#: modules/content_copy/content_copy.module:394
+#: modules/content_copy/content_copy.module:389
 msgid "The field %field_label (%field_name) was added to the content type %type."
 msgstr ""
 
-#: modules/content_copy/content_copy.module:505
+#: modules/content_copy/content_copy.module:503
 msgid "An error occurred when exporting the 'display settings' data for the field %field_name.<br/>The db error is: '%db_err'."
 msgstr ""
 
