@@ -138,7 +138,7 @@ function number_field_settings($op, $field) {
         '#collapsible' => TRUE,
         '#collapsed' => empty($field['allowed_values_php']),
       );
-      if (user_access('Use PHP input for default and allowed values (dangerous - grant with care)')) {
+      if (user_access('Use PHP input for field settings (dangerous - grant with care)')) {
         $form['allowed_values_fieldset']['advanced_options']['allowed_values_php'] = array(
           '#type' => 'textarea',
           '#title' => t('Code'),

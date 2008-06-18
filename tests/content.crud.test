@@ -5,12 +5,19 @@
  * Base class for CCK CRUD tests.
  * Defines many helper functions useful for writing CCK CRUD tests.
  */
-class ContentCrudTestCase extends DrupalTestCase {
+class ContentCrudTestCase extends DrupalWebTestCase {
   var $enabled_schema = FALSE;
   var $content_types  = array();
   var $nodes          = array();
   var $last_field     = NULL;
   var $next_field_n   = 1;
+    
+  /**
+   * Enable CCK, Text, and Schema modules.
+   */
+  function setUp() {
+    parent::setUp('content', 'schema', 'text');
+  }
 
   // Database schema related helper functions
 
@@ -110,12 +117,12 @@ class ContentCrudTestCase extends DrupalTestCase {
       array('!table' => $table, '!details' => implode($mismatches, ', '))));
 
     if (!$this->enabled_schema) {
-      $this->enabled_schema = $this->drupalModuleEnable('schema');
+      $this->enabled_schema = module_exists('schema');
     }
     if ($this->enabled_schema) {
       // Clunky workaround for http://drupal.org/node/215198
-      $table = db_prefix_tables('{'. $table .'}');
-      $inspect = schema_invoke('inspect', $table);
+      $prefixed_table = db_prefix_tables('{'. $table .'}');
+      $inspect = schema_invoke('inspect', $prefixed_table);
       $inspect = isset($inspect[$table]) ? $inspect[$table] : NULL;
       $compare = schema_compare_table($schema, $inspect);
       if ($compare['status'] == 'missing') {
@@ -222,8 +229,8 @@ class ContentCrudTestCase extends DrupalTestCase {
         'administer filters',
       );
     }
-    $user = $this->drupalCreateUserRolePerm($permissions);
-    $this->drupalLoginUser($user);
+    $user = $this->drupalCreateUser($permissions);
+    $this->drupalLogin($user);
   }
 
   // Creation helper functions
@@ -289,7 +296,6 @@ class ContentCrudTestCase extends DrupalTestCase {
    * @sa createField()
    */
   function createFieldText($settings, $content_type = 0) {
-    $this->drupalModuleEnable('text');
     $defaults = array(
       'type' => 'text',
       'widget_type' => 'text_textfield',
@@ -360,10 +366,10 @@ class ContentCrudTestCase extends DrupalTestCase {
 }
 
 class ContentCrudSingleToMultipleTest extends ContentCrudTestCase {
-  function get_info() {
+  function getInfo() {
     return array(
       'name' => t('CCK CRUD API - Single to multiple'),
-      'desc' => t('Tests the CRUD (create, read, update, delete) API for content types by creating a single value field and chaning it to a multivalue field, sharing it between several content types. <b>Requires !schema_link.</b>', array('!schema_link' => l('Shema module', 'http://www.drupal.org/projects/schema'))),
+      'description' => t('Tests the CRUD (create, read, update, delete) API for content types by creating a single value field and chaning it to a multivalue field, sharing it between several content types. <b>Requires !schema_link.</b>', array('!schema_link' => l('Schema module', 'http://www.drupal.org/projects/schema'))),
       'group' => t('CCK'),
     );
   }
@@ -432,10 +438,10 @@ class ContentCrudSingleToMultipleTest extends ContentCrudTestCase {
 }
 
 class ContentCrudMultipleToSingleTest extends ContentCrudTestCase {
-  function get_info() {
+  function getInfo() {
     return array(
       'name' => t('CCK CRUD API - Multiple to single'),
-      'desc' => t('Tests the CRUD (create, read, update, delete) API for content types by creating a multivalue field and chaning it to a single value field, sharing it between several content types. <b>Requires !schema_link.</b>', array('!schema_link' => l('Shema module', 'http://www.drupal.org/projects/schema'))),
+      'description' => t('Tests the CRUD (create, read, update, delete) API for content types by creating a multivalue field and chaning it to a single value field, sharing it between several content types. <b>Requires !schema_link.</b>', array('!schema_link' => l('Schema module', 'http://www.drupal.org/projects/schema'))),
       'group' => t('CCK'),
     );
   }

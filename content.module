@@ -84,7 +84,7 @@ function content_init() {
  * Implementation of hook_perm().
  */
 function content_perm() {
-  return array('Use PHP input for default and allowed values (dangerous - grant with care)');
+  return array('Use PHP input for field settings (dangerous - grant with care)');
 }
 
 /**
@@ -944,7 +944,12 @@ function content_storage($op, $node) {
  * Save a record to the database based upon the schema.
  *
  * Directly copied from core's drupal_write_record, which can't update a
- * column to NULL.
+ * column to NULL. See http://drupal.org/node/227677 and 
+ * http://drupal.org/node/226264 for more details about that problem.
+ * 
+ * TODO - get rid of this function and change references back to 
+ * drupal_write_record() if the patch gets into core. Will need a method
+ * of protecting people on older versions, though.
  *
  * Default values are filled in for missing items, and 'serial' (auto increment)
  * types are filled in with IDs.
@@ -1531,8 +1536,8 @@ function content_format($field, $item, $formatter = 'default', $node = NULL) {
   $formatter = $formatters[$formatter_name];
   $theme = $formatter['module'] .'_formatter_'. $formatter_name;
 
-  // A real node will have the type name at node->type, a Views
-  // node will have the type name at node->node_type.
+  // A real node will have the type name in $node->type, 
+  // a Views pseudo-node will have the type name in $node->node_type.
   $element = array(
     '#theme' => $theme,
     '#field_name' => $field['field_name'],
