@@ -944,10 +944,10 @@ function content_storage($op, $node) {
  * Save a record to the database based upon the schema.
  *
  * Directly copied from core's drupal_write_record, which can't update a
- * column to NULL. See http://drupal.org/node/227677 and 
+ * column to NULL. See http://drupal.org/node/227677 and
  * http://drupal.org/node/226264 for more details about that problem.
- * 
- * TODO - get rid of this function and change references back to 
+ *
+ * TODO - get rid of this function and change references back to
  * drupal_write_record() if the patch gets into core. Will need a method
  * of protecting people on older versions, though.
  *
@@ -1536,8 +1536,8 @@ function content_format($field, $item, $formatter = 'default', $node = NULL) {
   $formatter = $formatters[$formatter_name];
   $theme = $formatter['module'] .'_formatter_'. $formatter_name;
 
-  // A real node will have the type name at node->type, a Views
-  // node will have the type name at node->node_type.
+  // A real node will have the type name in $node->type,
+  // a Views pseudo-node will have the type name in $node->node_type.
   $element = array(
     '#theme' => $theme,
     '#field_name' => $field['field_name'],
@@ -1877,7 +1877,7 @@ function template_preprocess_content_field_view(&$variables) {
   $field_empty = TRUE;
 
   foreach ($variables['items'] as $delta => $item) {
-    if (!isset($item['view']) || (empty($item['view']) && $item['view'] !== 0)) {
+    if (!isset($item['view']) || (empty($item['view']) && (string)$item['view'] !== '0')) {
       $variables['items'][$delta]['empty'] = TRUE;
     }
     else {

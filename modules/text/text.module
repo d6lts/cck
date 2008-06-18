@@ -189,7 +189,7 @@ function text_field($op, &$node, $field, &$items, $teaser, $page) {
  * Implementation of hook_content_is_empty().
  */
 function text_content_is_empty($item, $field) {
-  if (empty($item['value'])) {
+  if (empty($item['value']) && (string)$item['value'] !== '0') {
     return TRUE;
   }
   return FALSE;
