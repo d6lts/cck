@@ -2,9 +2,6 @@
 
 CCK 6.2.dev
 ============
-- #271682 by pwolanin : Make simpletests easier by not duplicating field name in same form.
-- #270315 by pwolanin : Update simpletest to use DrupalWebTestCase.
-- #227951 by pwolanin : Add permission for ability to use php code for default values and allowed values.
 - #271294 Add TODO to get rid of content_write_record() once drupal_write_record() is patched.
 - #271294 Add documentation for the reason for having a custom version of drupal_write_record.
 - Avoid E_All error when prefixes and suffixes are not defined in number module.
@@ -18,6 +15,10 @@ CCK 6.2.dev
 - fix 'Undefined index: #access' notice when content_permissions.module is disabled
 - #270315 Mention dependency on schema.module in the desciptions of the CRUD tests.
 - #227951 by pwolanin : Add a permission for PHP 'default values' and 'allowed values'
+- #271682 by pwolanin : Make simpletests easier by not duplicating field name in same form.
+- #270315 by pwolanin : Update simpletest to use DrupalWebTestCase.
+- #227951 by pwolanin : Add permission for ability to use php code for default values and allowed values.
+- #270827 by pwolanin : Validity checks for the AHAH-'add more' request.
 
 CCK 6.2.beta
 ============

@@ -241,17 +241,24 @@ function content_add_more_submit($form, &$form_state) {
 function content_add_more_js($type_name_url, $field_name) {
   $type = content_types($type_name_url);
   $field = content_fields($field_name, $type['type']);
-  if ($field['multiple'] != 1) {
-    // TODO : is that correct ?
-    drupal_json(array('status' => 0));
+  if (($field['multiple'] != 1) || empty($_POST['form_build_id'])) {
+    // Invalid request.
+    drupal_json(array('data' => ''));
+    exit;
   }
 
   // Reorder values to account for drag-n-drop reordering.
   $_POST[$field_name] = _content_sort_items($field, $_POST[$field_name]);
   $delta = max(array_keys($_POST[$field_name])) + 1;
   // Retrieve the cached form.
-  $form_state = array('values' => $_POST);
-  $form = form_get_cache($_POST['form_build_id'], $form_state);
+  $form_state = array('submitted' => FALSE, 'values' => $_POST);
+  $form_build_id = $_POST['form_build_id'];
+  $form = form_get_cache($form_build_id, $form_state);
+  if (!$form) {
+    // Invalid form_build_id.
+    drupal_json(array('data' => ''));
+    exit;
+  }
 
   // Build our new form element for the whole field,
   // and let other modules alter it.
@@ -267,7 +274,8 @@ function content_add_more_js($type_name_url, $field_name) {
   }
 
   // Save the new definition of the form.
-  form_set_cache($_POST['form_build_id'], $form, $form_state);
+  $form_state['values'] = array();
+  form_set_cache($form_build_id, $form, $form_state);
 
   // Build the new form so that we can render the new element.
   $_POST[$field_name][$delta]['_weight'] = $delta;   // TODO : Hack !!
@@ -285,4 +293,5 @@ function content_add_more_js($type_name_url, $field_name) {
   $field_form[$delta]['#suffix'] = (isset($field_form[$delta]['#suffix']) ? $field_form[$delta]['#suffix'] : '') .'</div>';
   $output = theme('status_messages') . drupal_render($field_form);
   drupal_json(array('status' => TRUE, 'data' => $output));
+  exit;
 }
