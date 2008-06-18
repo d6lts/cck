@@ -96,7 +96,7 @@ function content_views_field_views_data($field) {
       'help' =>  t($field_types[$field['type']]['label']) .' - '. t('Appears in : @types', array('@types' => implode(', ', $types))),
       'field' => array(
         'field' => $columns[0],
-        'tablename' => $db_info['table'],
+        'table' => $db_info['table'],
         'handler' => 'views_handler_field_content_multiple',
         'click sortable' => $sorts[0],
         'additional fields' => $columns,
@@ -108,7 +108,7 @@ function content_views_field_views_data($field) {
       ),
       'argument' => array(
         'field' => $columns[0],
-        'tablename' => $db_info['table'],
+        'table' => $db_info['table'],
         'handler' => $arguments[0],
         'click sortable' => $sorts[0], // TODO used in once place in node.views.inc, should we use it here?
         'name field' => '', // TODO
@@ -119,7 +119,7 @@ function content_views_field_views_data($field) {
       'filter' => array(
         'field' => $columns[0],
         'title' => t($field['widget']['label']),
-        'tablename' => $db_info['table'],
+        'table' => $db_info['table'],
         'handler' => $filters[0],
         'additional fields' => $columns,
         'content_field_name' => $field['field_name'],
@@ -131,7 +131,7 @@ function content_views_field_views_data($field) {
     if (!empty($sorts[0])) {
       $data[$columns[0]]['sort'] = array(
         'field' => $columns[0],
-        'tablename' => $db_info['table'],
+        'table' => $db_info['table'],
         'handler' => 'views_handler_sort_content',
         'additional fields' => $columns,
         'content_field_name' => $field['field_name'],
