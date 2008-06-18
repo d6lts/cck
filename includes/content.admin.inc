@@ -469,7 +469,7 @@ function _content_admin_field_add_existing(&$form_state, $type_name) {
       '#type' => 'fieldset',
       '#title' => t('Add existing field'),
     );
-    $form['existing']['field_name'] = array(
+    $form['existing']['existing_field_name'] = array(
       '#type' => 'select',
       '#required' => TRUE,
       '#options' => $options,
@@ -492,6 +492,7 @@ function _content_admin_field_add_existing(&$form_state, $type_name) {
 function _content_admin_field_add_existing_submit($form, &$form_state) {
   module_load_include('inc', 'content', 'includes/content.crud');
   $form_values = $form_state['values'];
+  $form_values['field_name'] = $form_values['existing_field_name'];
 
   if (content_field_instance_create($form_values)) {
     drupal_set_message(t('Added field %label.', array(
