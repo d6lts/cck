@@ -19,7 +19,8 @@ CCK 6.2.dev
 - #270315 by pwolanin : Update simpletest to use DrupalWebTestCase.
 - #227951 by pwolanin : Add permission for ability to use php code for default values and allowed values.
 - #270827 by pwolanin : Validity checks for the AHAH-'add more' request.
-- #271087 properly handle values '0' for text and number fields
+- #271087 Properly handle values '0' for text and number fields.
+- #258407 Fix field template name to allow for easy overridability.
 
 CCK 6.2.beta
 ============
