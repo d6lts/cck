@@ -188,8 +188,8 @@ function content_theme() {
   $path = drupal_get_path('module', 'content') .'/theme';
 
   return array(
-    'content_field_view' => array(
-      'template' => 'field',
+    'content_field' => array(
+      'template' => 'content-field',
       'arguments' => array('element' => NULL),
       'path' => $path,
     ),
@@ -588,7 +588,7 @@ function content_associate_fields($module) {
  *
  * The node array will look like:
  *   $node->content['field_foo'] = array(
- *     '#type' => 'content_field_view',
+ *     '#type' => 'content_field',
  *     '#title' => 'label'
  *     '#field_name' => 'field_name',
  *     '#node' => $node,
@@ -689,7 +689,7 @@ function content_field($op, &$node, $field, &$items, $teaser, $page) {
         $single = (content_handle('formatter', 'multiple values', $formatter) == CONTENT_HANDLE_CORE);
 
         $element = array(
-          '#type' => 'content_field_view',
+          '#type' => 'content_field',
           '#title' => $field['widget']['label'],
           '#weight' => $field['widget']['weight'],
           '#field_name' => $field['field_name'],
@@ -1828,7 +1828,7 @@ function content_default_value(&$form, &$form_state, $field, $delta) {
 function content_elements() {
   return array(
     'content_multiple_values' => array(),
-    'content_field_view' => array(),
+    'content_field' => array(),
   );
 }
 
@@ -1844,7 +1844,7 @@ function content_elements() {
  *
  * @see field.tpl.php
  */
-function template_preprocess_content_field_view(&$variables) {
+function template_preprocess_content_field(&$variables) {
   $element = $variables['element'];
   $field = content_fields($element['#field_name'], $element['#node']->type);
 

@@ -280,7 +280,7 @@ function text_content_is_empty($item, $field) {
  *
  *  'Single value' formatter :
  *   $node->content['field_foo'] = array(
- *     '#type' => 'content_field_view',
+ *     '#type' => 'content_field',
  *     '#title' => 'label'
  *     '#field_name' => 'field_name',
  *     '#node' => $node,
@@ -303,7 +303,7 @@ function text_content_is_empty($item, $field) {
  *   );
  *  'Multiple value' formatter :
  *   $node->content['field_foo'] = array(
- *     '#type' => 'content_field_view',
+ *     '#type' => 'content_field',
  *     '#title' => 'label'
  *     '#field_name' => 'field_name',
  *     '#node' => $node,
