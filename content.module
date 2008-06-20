@@ -716,6 +716,7 @@ function content_field($op, &$node, $field, &$items, $teaser, $page) {
           '#field_name' => $field['field_name'],
           '#type_name' => $node->type,
           '#formatter' => $formatter_name,
+          '#node' => $node,
         );
         if ($single) {
           foreach ($items as $delta => $item) {
