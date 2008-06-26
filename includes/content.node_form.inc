@@ -308,6 +308,18 @@ function content_add_more_js($type_name_url, $field_name) {
   $field_form[$delta]['#prefix'] = '<div class="ahah-new-content">'. (isset($field_form[$delta]['#prefix']) ? $field_form[$delta]['#prefix'] : '');
   $field_form[$delta]['#suffix'] = (isset($field_form[$delta]['#suffix']) ? $field_form[$delta]['#suffix'] : '') .'</div>';
   $output = theme('status_messages') . drupal_render($field_form);
+
+  // If a newly inserted widget contains AHAH behaviors, they normally won't
+  // work because AHAH doesn't know about those - it just attaches to the exact
+  // form elements that were initially specified in the Drupal.settings object.
+  // The new ones didn't exist then, so we need to update Drupal.settings
+  // by ourselves in order to let AHAH know about those new form elements.
+  $javascript = drupal_add_js(NULL, NULL);
+  if (isset($javascript['setting'])) {
+    $output .= '<script type="text/javascript">jQuery.extend(Drupal.settings, '. drupal_to_js(call_user_func_array('array_merge_recursive', $javascript['setting'])) .');</script>';
+  }
+
+
   drupal_json(array('status' => TRUE, 'data' => $output));
   exit;
 }
