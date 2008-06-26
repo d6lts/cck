@@ -11,7 +11,7 @@ class ContentCrudTestCase extends DrupalWebTestCase {
   var $nodes          = array();
   var $last_field     = NULL;
   var $next_field_n   = 1;
-    
+
   /**
    * Enable CCK, Text, and Schema modules.
    */
@@ -552,3 +552,116 @@ class ContentCrudMultipleToSingleTest extends ContentCrudTestCase {
     $this->assertNodeMissingFields(0, array('simpletest_f1'));
   }
 }
+
+class ContentUICrud extends ContentCrudTestCase {
+  function getInfo() {
+    return array(
+      'name' => t('Create and Tests Fields via the UI'),
+      'description' => t('Tests the CRUD (create, read, update, delete) operations for content fields via the UI. <b>Requires !schema_link.</b>', array('!schema_link' => l('Schema module', 'http://www.drupal.org/projects/schema'))),
+      'group' => t('CCK'),
+    );
+  }
+
+  function testAddFieldUI() {
+    $admin_user = $this->drupalCreateUser(array('administer site configuration', 'access administration pages', 'administer nodes', 'administer content types'));
+    $this->drupalLogin($admin_user);
+    // Add a content type with a random name (to avoid schema module problems).
+    $edit = array();
+    $type1 = 'simpletest'. mt_rand();
+    $admin_type1_url = 'admin/content/node-type/'. $type1;
+    $edit['name']  = $this->randomName(10);
+    $edit['type']  = $type1;
+    $this->drupalPost('admin/content/types/add', $edit, 'Save content type');
+    // Create a text field via the UI.
+    $edit = array();
+    $edit['field_name']  = strtolower($this->randomName(10));
+    $edit['label']       = $this->randomName(20);
+    $edit['type']        = 'text';
+    $this->drupalPost($admin_type1_url .'/add_field', $edit, 'Continue');
+    $field_url = 'field_'. $edit['field_name'];
+    $field_label = $edit['label'];
+    $edit = array();
+    $edit["widget_type"] = 'text_textfield';
+    // POST to the page without reloading.
+    $this->drupalPost(NULL, $edit, 'Continue');
+    $this->assertRaw('Created field <em>'. $field_label, 'Success message displayed');
+    $this->drupalPost($admin_type1_url .'/fields/'. $field_url, array(), 'Save field settings');
+    // Check the schema - the vlaues should be in the per-type table.
+    $this->assertSchemaMatchesTables(array(
+      'per_type' => array(
+        $type1 => array($field_url => array('value')),
+      ),
+    ));
+    // Add a second content type.
+    $edit = array();
+    $type2 = 'simpletest'. mt_rand();
+    $admin_type2_url = 'admin/content/node-type/'. $type2;
+    $edit['name']  = $this->randomName(10);
+    $edit['type']  = $type2;
+    $this->drupalPost('admin/content/types/add', $edit, 'Save content type');
+    // Add the same field to a second content type.
+    $edit = array();
+    $edit['existing_field_name'] = $field_url;
+    $this->drupalPost($admin_type2_url .'/add_field', $edit, 'Add field');
+    // Check that a separate table is created for the shared field, and
+    // that it's values are no longer in the per-type tables.
+    $this->assertSchemaMatchesTables(array(
+      'per_field' => array(
+        $field_url => array($field_url => array('value')),
+      ),
+      'per_type' => array(
+        $type1 => array(),
+        $type2 => array(),
+      ),
+    ));
+  }
+
+  function testFieldContentUI() {
+    $admin_user = $this->drupalCreateUser(array('administer site configuration', 'access administration pages', 'administer nodes', 'administer content types'));
+    $this->drupalLogin($admin_user);
+    // Create a content type with a field
+    $type1 = 'simpletest'. mt_rand();
+    $type1_obj = $this->drupalCreateContentType(array('type' => $type1));
+    $admin_type1_url = 'admin/content/node-type/'. $type1;
+    $field_name  = strtolower($this->randomName(10));
+    $field_url = 'field_'. $field_name;
+    $field = $this->createFieldText(array('text_processing' => 1, 'multiple' => 0, 'field_name' => $field_url), $type1_obj);
+
+    // Save a node with content in the text field
+    $edit = array();
+    $edit['title'] = $this->randomName(20);
+    $edit['body'] = $this->randomName(20);
+    $value = $this->randomName(20);
+    $edit[$field_url.'[0][value]'] = $value;
+    $this->drupalPost('node/add/'. $type1, $edit, 'Save');
+    $node = node_load(array('title' => $edit['title']));
+    $this->drupalGet('node/'. $node->nid);
+    $this->assertText($value, 'Textfield value saved and displayed');
+
+    // Alter the field to have unlimited values
+    $edit = array();
+    $edit['multiple']  = '1';
+    $this->drupalPost($admin_type1_url .'/fields/'. $field_url .'/edit', $edit, 'Save field settings');
+
+    // Save a node with content in multiple text fields
+    $edit = array();
+    $edit['title'] = $this->randomName(20);
+    $edit['body'] = $this->randomName(20);
+    // Add more textfields (non-JS).
+    $this->drupalPost('node/add/'. $type1, $edit, "Add another item");
+    $this->drupalPost(NULL, $edit, "Add another item");
+    $value1 = $this->randomName(20);
+    $value2 = $this->randomName(20);
+    $value3 = $this->randomName(20);
+    $edit[$field_url.'[0][value]'] = $value1;
+    $edit[$field_url.'[1][value]'] = $value2;
+    $edit[$field_url.'[2][value]'] = $value3;
+
+    // This will fail if we don't have at least 3 textfields.
+    $this->drupalPost(NULL, $edit, 'Save');
+    $node = node_load(array('title' => $edit['title']));
+    $this->drupalGet('node/'. $node->nid);
+    $this->assertText($value3, '3rd textfield value saved and displayed');
+  }
+}
+

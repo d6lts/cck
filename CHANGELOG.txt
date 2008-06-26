@@ -22,8 +22,9 @@ CCK 6.2.dev
 - #270827 by pwolanin : Validity checks for the AHAH-'add more' request.
 - #271087 Properly handle values '0' for text and number fields.
 - #258407 Fix field template name to allow for easy overridability.
-- #274038 by jpetso : Fix non-JS mode for 'add more' button
-- #275192 by jpetso : Attach AHAH behaviors to newly inserted widgets on JS 'add more'
+- #274038 by jpetso : Fix non-JS mode for 'add more' button.
+- #275192 by jpetso : Attach AHAH behaviors to newly inserted widgets on JS 'add more'.
+- #271710 by pwolanin : tests for UI field CRUD, and node form generation.
 
 CCK 6.2.beta
 ============
