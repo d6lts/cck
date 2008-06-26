@@ -22,6 +22,7 @@ CCK 6.2.dev
 - #270827 by pwolanin : Validity checks for the AHAH-'add more' request.
 - #271087 Properly handle values '0' for text and number fields.
 - #258407 Fix field template name to allow for easy overridability.
+- #274038 by jpetso : Fix non-JS mode for 'add more' button
 
 CCK 6.2.beta
 ============

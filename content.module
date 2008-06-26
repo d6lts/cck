@@ -441,6 +441,15 @@ function content_form_alter(&$form, $form_state, $form_id) {
 }
 
 /**
+ * Proxy function to call content_add_more_submit(), because it might not be
+ * included yet when the form is processed and invokes the callback.
+ */
+function content_add_more_submit_proxy($form, &$form_state) {
+  module_load_include('inc', 'content', 'includes/content.node_form');
+  content_add_more_submit($form, $form_state);
+}
+
+/**
  * Theme an individual form element.
  *
  * Combine multiple values into a table with drag-n-drop reordering.

@@ -53,6 +53,8 @@ function content_field_form(&$form, &$form_state, $field, $get_delta = NULL) {
     $items = array();
     if (!empty($form_state['values'][$field['field_name']])) {
       $items = $form_state['values'][$field['field_name']];
+      // If there was an AHAH add more button in this field, don't save it.
+      unset($items[$field['field_name'] .'_add_more']);
     }
     elseif (!empty($node->$field['field_name'])) {
       $items = $node->$field['field_name'];
@@ -135,7 +137,15 @@ function content_multiple_value_form(&$form, &$form_state, $field, $items) {
       $max = 0;
       break;
     case 1:
-      $max = (isset($form_state['item_count'][$field_name]) ? $form_state['item_count'][$field_name] : count($items));
+      $filled_items = content_set_empty($field, $items);
+      $current_item_count = isset($form_state['item_count'][$field_name])
+                            ? $form_state['item_count'][$field_name]
+                            : count($items);
+      // We always want at least one empty icon for the user to fill in.
+      $max = ($current_item_count > count($filled_items))
+              ? $current_item_count - 1
+              : $current_item_count;
+
       break;
     default:
       $max = $field['multiple'] - 1;
@@ -191,9 +201,13 @@ function content_multiple_value_form(&$form, &$form_state, $field, $items) {
 
     $form_element[$field_name .'_add_more'] = array(
       '#type' => 'submit',
+      '#name' => $field_name .'_add_more',
       '#value' => t('Add another item'),
       '#weight' => $field['widget']['weight'] + $max + 1,
-      '#submit' => array('content_add_more_submit'), // If no JavaScript action.
+      // Submit callback for disabled JavaScript. drupal_get_form() might get
+      // the form from the cache, so we can't rely on content_form_alter()
+      // including this file. Therefore, call a proxy function to do this.
+      '#submit' => array('content_add_more_submit_proxy'),
       '#ahah' => array(
         'path' => 'content/js_add_more/'. $content_type['url_str'] .'/'. $field_name,
         'wrapper' => $field_name_css .'-items',
@@ -202,8 +216,8 @@ function content_multiple_value_form(&$form, &$form_state, $field, $items) {
       ),
       // When JS is disabled, the content_add_more_submit handler will find
       // the relevant field using these entries.
-      //'#field_name' => $field_name,
-      //'#type_name' => $content_type['type'],
+      '#field_name' => $field_name,
+      '#type_name' => $content_type['type'],
     );
 
     // Add wrappers for the fields and 'more' button.
@@ -226,11 +240,9 @@ function content_add_more_submit($form, &$form_state) {
   $field_name = $form_state['clicked_button']['#field_name'];
   $type_name = $form_state['clicked_button']['#type_name'];
 
-  foreach ($form['#field_info'] as $field_name => $field) {
-    // Make the changes we want to the form state.
-    if ($form_state['values'][$field_name][$field_name .'_add_more']) {
-      $form_state['item_count'][$field_name] = count($form_state['node'][$field_name]) + 1;
-    }
+  // Make the changes we want to the form state.
+  if ($form_state['values'][$field_name][$field_name .'_add_more']) {
+    $form_state['item_count'][$field_name] = count($form_state['values'][$field_name]);
   }
 }
 
@@ -251,7 +263,11 @@ function content_add_more_js($type_name_url, $field_name) {
   $_POST[$field_name] = _content_sort_items($field, $_POST[$field_name]);
   $delta = max(array_keys($_POST[$field_name])) + 1;
   // Retrieve the cached form.
-  $form_state = array('submitted' => FALSE, 'values' => $_POST);
+  $form_state = array(
+    'submitted' => FALSE,
+    'values' => $_POST,
+    'item_count' => array($field_name => count($_POST[$field_name]) + 1),
+  );
   $form_build_id = $_POST['form_build_id'];
   $form = form_get_cache($form_build_id, $form_state);
   if (!$form) {
