@@ -1115,7 +1115,7 @@ function _content_admin_field_submit($form, &$form_state) {
  *
  */
 function content_alter_schema($previous_field, $new_field) {
- content_alter_db($previous_field, $new_field);
+  content_alter_db($previous_field, $new_field);
 }
 
 /**
@@ -1198,7 +1198,8 @@ function content_alter_db($previous_field, $new_field) {
     $new_db_info = content_database_info($new_field);
     $new_table = $new_db_info['table'];
   }
-  // Deleting this field entirely is a simple case.
+
+  // Deletion of a field instance : drop relevant columns and tables and return.
   if (empty($new_field)) {
     if ($previous_field['db_storage'] == CONTENT_DB_STORAGE_PER_FIELD) {
       db_drop_table($ret, $previous_table);
@@ -1210,10 +1211,11 @@ function content_alter_db($previous_field, $new_field) {
         }
       }
     }
-    return content_alter_db_cleanup($ret);
+    content_alter_db_cleanup();
+    return $ret;
   }
 
-  // All content types that have fields need a content type table.
+  // Check that content types that have fields do have a per-type table.
   if (!empty($new_field)) {
     $base_tablename = _content_tablename($new_field['type_name'], CONTENT_DB_STORAGE_PER_CONTENT_TYPE);
     if (!db_table_exists($base_tablename)) {
@@ -1236,14 +1238,16 @@ function content_alter_db($previous_field, $new_field) {
 
   // If this is a new field, we're done.
   if (empty($previous_field)) {
-    return content_alter_db_cleanup($ret);
+    content_alter_db_cleanup();
+    return $ret;
   }
 
   // If the previous table doesn't exist, we're done.
   // Could happen if someone tries to run a schema update from an
   // content.install update function more than once.
   if (!db_table_exists($previous_table)) {
-    return content_alter_db_cleanup($ret);
+    content_alter_db_cleanup();
+    return $ret;
   }
 
   // If changing data from one schema to another, see if changes require that
@@ -1302,7 +1306,7 @@ function content_alter_db($previous_field, $new_field) {
   $new_field['db_storage'] == CONTENT_DB_STORAGE_PER_CONTENT_TYPE) {
     // In order to be able to use drupal_write_record, we need to
     // rebuild the schema now.
-    content_alter_db_cleanup($ret);
+    content_alter_db_cleanup();
     if ($previous_field['multiple']) {
       $result = db_query("SELECT * FROM {". $previous_table ."} c JOIN {node} n ON c.nid = n.nid WHERE delta = 0 AND n.type = '%s'", $new_field['type_name']);
     }
@@ -1362,19 +1366,12 @@ function content_alter_db($previous_field, $new_field) {
 /**
  * Helper function for handling cleanup operations when schema changes are made.
  */
-function content_alter_db_cleanup($ret) {
+function content_alter_db_cleanup() {
   // Rebuild the whole database schema.
   // TODO : this could be optimized. We don't need to rebuild in *every case*...
   // Or do we? This affects the schema and menu and may have unfortunate
   // delayed effects if we don't clear everything out at this point.
   content_clear_type_cache(TRUE);
-
-  // TODO : debugging stuff - should be removed
-  if (module_exists('devel')) {
-    //dsm($ret);
-  }
-  return $ret;
-
 }
 
 /**

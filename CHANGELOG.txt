@@ -26,6 +26,7 @@ CCK 6.2.dev
 - #275192 by jpetso : Attach AHAH behaviors to newly inserted widgets on JS 'add more'.
 - #271710 by pwolanin : tests for UI field CRUD, and node form generation.
 - #266696 by pwolanin : Unable to change the label or widget type for a field.
+- #201329 by pwolanin and yched : Fix content_field_instance_delete() not cleaning tables.
 
 CCK 6.2.beta
 ============

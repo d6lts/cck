@@ -382,11 +382,13 @@ class ContentCrudSingleToMultipleTest extends ContentCrudTestCase {
 
     // Create a simple text field
     $this->createFieldText(array('text_processing' => 1));
-    $this->assertSchemaMatchesTables(array(
+    $target_schema = array(
       'per_type' => array(
-        'simpletest_t1' => array('simpletest_f1' => array('value', 'format')),
+        'simpletest_t1' => array('simpletest_f1' => array('value', 'format'))
       ),
-    ));
+      'per_field' => array(),
+    );
+    $this->assertSchemaMatchesTables($target_schema);
     $node0values = $this->assertNodeSaveValues(0, array(
       'simpletest_f1' => array(
         0 => $this->createRandomTextFieldData(),
@@ -395,24 +397,23 @@ class ContentCrudSingleToMultipleTest extends ContentCrudTestCase {
 
     // Change the text field to allow multiple values
     $this->updateField(array('multiple' => 1));
-    $this->assertSchemaMatchesTables(array(
+    $target_schema = array(
       'per_type' => array(
         'simpletest_t1' => array(),
       ),
       'per_field' => array(
         'simpletest_f1' => array('delta', 'simpletest_f1' => array('value', 'format')),
       ),
-    ));
+    );
+    $this->assertSchemaMatchesTables($target_schema);
     $this->assertNodeValues(0, $node0values);
 
-    // Share the text field with other content types
+    // Share the text field with 2 additional types t2 and t3.
     for ($share_with_content_type = 1; $share_with_content_type <= 2; $share_with_content_type++) {
       $this->shareField($share_with_content_type);
-      $this->assertSchemaMatchesTables(array(
-        'per_type' => array(
-          'simpletest_t'. ($share_with_content_type + 1) => array(),
-        ),
-      ));
+      // There should be a new 'empty' per-type table for each content type that has fields.
+      $target_schema['per_type']['simpletest_t'. ($share_with_content_type + 1)] = array();
+      $this->assertSchemaMatchesTables($target_schema);
       // The acquired node index will match the content type index as exactly one node is acquired per content type
       $this->assertNodeSaveValues($share_with_content_type, array(
         'simpletest_f1' => array(
@@ -424,16 +425,16 @@ class ContentCrudSingleToMultipleTest extends ContentCrudTestCase {
     // Delete the text field from all content types
     for ($delete_from_content_type = 2; $delete_from_content_type >= 0; $delete_from_content_type--) {
       $this->deleteField($delete_from_content_type);
+      // Content types that don't have fields any more shouldn't have any per-type table.
+      $target_schema['per_type']['simpletest_t'. ($delete_from_content_type + 1)] = NULL;
+      // After removing the last instance, there should be no table for the field either.
+      if ($delete_from_content_type == 0) {
+        $target_schema['per_field']['simpletest_f1'] = NULL;
+      }
+      $this->assertSchemaMatchesTables($target_schema);
       // The acquired node index will match the content type index as exactly one node is acquired per content type
       $this->assertNodeMissingFields($this->nodes[$delete_from_content_type], array('simpletest_f1'));
     }
-    $this->assertSchemaMatchesTables(array(
-      'per_type' => array(
-        'simpletest_t1' => NULL,
-        'simpletest_t2' => NULL,
-        'simpletest_t3' => NULL,
-      ),
-    ));
   }
 }
 
@@ -508,8 +509,13 @@ class ContentCrudMultipleToSingleTest extends ContentCrudTestCase {
     $this->shareField(2);
     $this->assertSchemaMatchesTables(array(
       'per_type' => array(
+        'simpletest_t1' => array(),
+        'simpletest_t2' => array(),
         'simpletest_t3' => array(),
-      )
+      ),
+      'per_field' => array(
+        'simpletest_f1' => array('simpletest_f1' => array('value', 'format')),
+      ),
     ));
     $this->assertNodeSaveValues(2, array(
       'simpletest_f1' => array(
@@ -523,17 +529,23 @@ class ContentCrudMultipleToSingleTest extends ContentCrudTestCase {
     $this->deleteField(2);
     $this->assertSchemaMatchesTables(array(
       'per_type' => array(
+        'simpletest_t1' => array(),
+        'simpletest_t2' => array(),
         'simpletest_t3' => NULL,
-      )
+      ),
+      'per_field' => array(
+        'simpletest_f1' => array('simpletest_f1' => array('value', 'format')),
+      ),
     ));
     $this->assertNodeMissingFields($this->nodes[2], array('simpletest_f1'));
 
-    // Remove text field from other type
+    // Remove text field from 2nd type (field isn't shared anymore)
     $this->deleteField(1);
     $this->assertSchemaMatchesTables(array(
       'per_type' => array(
         'simpletest_t1' => array('simpletest_f1' => array('value', 'format')),
         'simpletest_t2' => NULL,
+        'simpletest_t3' => NULL,
       ),
       'per_field' => array(
         'simpletest_f1' => NULL,
@@ -547,7 +559,12 @@ class ContentCrudMultipleToSingleTest extends ContentCrudTestCase {
     $this->assertSchemaMatchesTables(array(
       'per_type' => array(
         'simpletest_t1' => NULL,
-      )
+        'simpletest_t2' => NULL,
+        'simpletest_t3' => NULL,
+      ),
+      'per_field' => array(
+        'simpletest_f1' => NULL,
+      ),
     ));
     $this->assertNodeMissingFields(0, array('simpletest_f1'));
   }

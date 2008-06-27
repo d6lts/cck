@@ -270,7 +270,7 @@ function content_field_instance_create($field) {
   content_alter_schema(array(), $field);
 
   content_clear_type_cache(TRUE);
-  
+
   // We need to rebuild the menu when creating a new field.
   if (empty($prev_field['widget'])) {
     menu_rebuild();
@@ -347,7 +347,7 @@ function content_field_instance_update($field) {
   content_alter_schema($prev_field, $field);
 
   content_clear_type_cache(TRUE);
-  
+
   // The label is in the menu tree, so we need a menu rebuild
   // if the label changes.
   if ($prev_field['widget']['label'] != $field['widget']['label']) {
@@ -486,7 +486,7 @@ function content_field_instance_delete($field_name, $type_name) {
   include_once('./'. drupal_get_path('module', 'content') .'/includes/content.admin.inc');
 
   $needs_menu_rebuild = FALSE;
-  
+
   // Get the previous field value.
   $field = array_pop(content_field_instance_read(array('field_name' => $field_name, 'type_name' => $type_name)));
 
@@ -499,17 +499,16 @@ function content_field_instance_delete($field_name, $type_name) {
   // If no instances remain, delete the field entirely.
   $instances = content_field_instance_read(array('field_name' => $field_name));
   if (sizeof($instances) < 1) {
-
     db_query("DELETE FROM {". content_field_tablename() ."} WHERE field_name = '%s'", $field['field_name']);
+
+    content_alter_schema($field, array());
 
     // Deleted fields require a menu rebuild to remove all the field paths.
     $needs_menu_rebuild = TRUE;
   }
-
   // If only one instance remains, we may need to change the database
   // representation for this field.
-  if (sizeof($instances) == 1 && !($field['multiple'])) {
-
+  elseif (sizeof($instances) == 1 && !($field['multiple'])) {
     // Multiple-valued fields are always stored per-field-type.
     $instance = $instances[0];
     $new_instance = $instance;
@@ -520,6 +519,16 @@ function content_field_instance_delete($field_name, $type_name) {
   }
 
   content_clear_type_cache(TRUE);
+
+  // If the deleted instance was the last field for the content type,
+  // we drop the per-type table.
+  if (!content_field_instance_read(array('type_name' => $field['type_name']))) {
+    $base_tablename = _content_tablename($field['type_name'], CONTENT_DB_STORAGE_PER_CONTENT_TYPE);
+    if (db_table_exists($base_tablename)) {
+      db_drop_table($ret, $base_tablename);
+    }
+  }
+
   if ($needs_menu_rebuild) {
     menu_rebuild();
   }
@@ -596,11 +605,11 @@ function content_type_update($info) {
  *
  * @param $info
  *   value supplied by hook_node_type()
- * 
+ *
  * TODO should we skip doing this entirely since core leaves the
- * nodes in the database as orphans and wait until the nodes are 
+ * nodes in the database as orphans and wait until the nodes are
  * deleted to respond?
- * 
+ *
  */
 function content_type_delete($info) {
   // This isn't right either, since content_field_instance_read()
