@@ -619,6 +619,8 @@ function content_admin_field_main(&$form_state, $form_values) {
     '#type' => 'submit',
     '#value' => t('Continue'),
   );
+  $form['#validate'] = array('content_admin_field_main_validate');
+  $form['#submit'] = array('content_admin_field_main_submit');
   return $form;
 }
 
@@ -778,15 +780,9 @@ function _content_admin_field(&$form_state, $type_name, $field_name) {
 
   // See if we need to change the widget type or label.
 
-  // TODO: $form_state['post']['op'] is deprecated, so this isn't the right
-  // way to do this, need to find better method.
-  if (isset($form_state['post']['op']) && $form_state['post']['op'] == t('Change basic information')) {
-    module_load_include('inc', 'content', 'includes/content.crud');
-    $form_values = content_field_instance_collapse($field);
-    $form['markup'] = array('#value' => drupal_get_form('content_admin_field_main', $form_values));
-    // Add a flag to use so we don't try to process the rest of this form.
-    $form_state['change_basic'] = TRUE;
-    return $form;
+  if (isset($form_state['change_basic'])) {
+    $field_values = content_field_instance_collapse($field);
+    return content_admin_field_main($form_state, $field_values);
   }
 
   $form = array();
@@ -823,8 +819,7 @@ function _content_admin_field(&$form_state, $type_name, $field_name) {
   $form['main']['change'] = array(
     '#type' => 'submit',
     '#value' => t('Change basic information'),
-    '#validate' => array('content_admin_field_main_validate'),
-    '#submit' => array('content_admin_field_main_submit'),
+    '#submit' => array('_content_admin_field_update_basic_submit'),
   );
 
   $form['widget'] = array(
@@ -1090,12 +1085,17 @@ function _content_admin_field_validate($form, &$form_state) {
 }
 
 /**
+ * Button submit handler.
+ */
+function _content_admin_field_update_basic_submit($form, &$form_state) {
+  $form_state['change_basic'] = TRUE;
+  $form_state['rebuild'] = TRUE;
+}
+
+/**
  * Save a field's settings after editing.
  */
 function _content_admin_field_submit($form, &$form_state) {
-  if (isset($form_state['change_basic'])) {
-    return;
-  }
   module_load_include('inc', 'content', 'includes/content.crud');
   $form_values = $form_state['values'];
   content_field_instance_update($form_values);
