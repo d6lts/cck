@@ -102,7 +102,6 @@ function content_menu() {
   // Callback for AHAH add more buttons.
   $items['content/js_add_more'] = array(
     'page callback' => 'content_add_more_js',
-    // TODO : access rule ?
     'access arguments' => array('access content'),
     'file' => 'includes/content.node_form.inc',
     'type' => MENU_CALLBACK,
@@ -813,7 +812,9 @@ function _content_sort_items($field, $items) {
   if ($field['multiple'] >= 1 && isset($items[0]['_weight'])) {
     usort($items, '_content_sort_items_helper');
     foreach ($items as $delta => $item) {
-      unset($items[$delta]['_weight']);
+      if (is_array($items[$delta])) {
+        unset($items[$delta]['_weight']);
+      }
     }
   }
   return $items;

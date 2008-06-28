@@ -157,9 +157,6 @@ function content_multiple_value_form(&$form, &$form_state, $field, $items) {
   $description = content_filter_xss(t($field['widget']['description']));
 
   $form_element = array(
-    // TODO : Not sure about that one - when theming through '#type',
-    // children are already rendered, and we can't do the table layout.
-    //'#type' => 'content_multiple_values',
     '#theme' => 'content_multiple_values',
     '#title' => $title,
     '#required' => $field['required'],
@@ -257,21 +254,15 @@ function content_add_more_submit($form, &$form_state) {
 function content_add_more_js($type_name_url, $field_name) {
   $type = content_types($type_name_url);
   $field = content_fields($field_name, $type['type']);
+
   if (($field['multiple'] != 1) || empty($_POST['form_build_id'])) {
     // Invalid request.
     drupal_json(array('data' => ''));
     exit;
   }
 
-  // Reorder values to account for drag-n-drop reordering.
-  $_POST[$field_name] = _content_sort_items($field, $_POST[$field_name]);
-  $delta = max(array_keys($_POST[$field_name])) + 1;
   // Retrieve the cached form.
-  $form_state = array(
-    'submitted' => FALSE,
-    'values' => $_POST,
-    'item_count' => array($field_name => count($_POST[$field_name]) + 1),
-  );
+  $form_state = array('submitted' => FALSE);
   $form_build_id = $_POST['form_build_id'];
   $form = form_get_cache($form_build_id, $form_state);
   if (!$form) {
@@ -280,12 +271,42 @@ function content_add_more_js($type_name_url, $field_name) {
     exit;
   }
 
-  // Build our new form element for the whole field,
-  // and let other modules alter it.
+  // We don't simply return a new empty widget to append to existing ones, because
+  // - ahah.js won't simply let us add a new row to a table
+  // - attaching the 'draggable' behavior won't be easy
+  // So we resort to rebuilding the whole table of widgets including the existing ones,
+  // which makes us jump through a few hoops.
+
+  // The form that we get from the cache is unbuilt. We need to build it so that
+  // _value callbacks can be executed and $form_state['values'] populated.
+  // We only want to affect $form_state['values'], not the $form itself
+  // (built forms aren't supposed to enter the cache) nor the rest of $form_data,
+  // so we use copies of $form and $form_data.
+  $form_copy = $form;
+  $form_state_copy = $form_state;
+  $form_copy['#post'] = array();
+  form_builder($_POST['form_id'], $form_copy, $form_state_copy);
+  // Just grab the data we need.
+  $form_state['values'] = $form_state_copy['values'];
+  // Reset cached ids, so that they don't affect the actual form we output.
+  form_clean_id(NULL, TRUE);
+
+  // Sort the $form_state['values'] we just built *and* the incoming $_POST data
+  // according to d-n-d reordering.
+  unset($form_state['values'][$field_name][$field['field_name'] .'_add_more']);
+  foreach ($_POST[$field_name] as $delta => $item) {
+    $form_state['values'][$field_name][$delta]['_weight'] = $item['_weight'];
+  }
+  $form_state['values'][$field_name] = _content_sort_items($field, $form_state['values'][$field_name]);
+  $_POST[$field_name] = _content_sort_items($field, $_POST[$field_name]);
+
+  // Build our new form element for the whole field, asking for one more element.
+  $form_state['item_count'] = array($field_name => count($_POST[$field_name]) + 1);
   $form_element = content_field_form($form, $form_state, $field);
+  // Let other modules alter it.
   drupal_alter('form', $form_element, array(), 'content_add_more_js');
 
-  // Add the new element at the right place in the form.
+  // Add the new element at the right place in the (original, unbuilt) form.
   if (module_exists('fieldgroup') && ($group_name = _fieldgroup_field_get_group($type['type'], $field_name))) {
     $form[$group_name][$field_name] = $form_element[$field_name];
   }
@@ -297,8 +318,10 @@ function content_add_more_js($type_name_url, $field_name) {
   $form_state['values'] = array();
   form_set_cache($form_build_id, $form, $form_state);
 
-  // Build the new form so that we can render the new element.
-  $_POST[$field_name][$delta]['_weight'] = $delta;   // TODO : Hack !!
+  // Build the new form against the incoming $_POST values so that we can
+  // render the new element.
+  $delta = max(array_keys($_POST[$field_name])) + 1;
+  $_POST[$field_name][$delta]['_weight'] = $delta;
   $form_state = array('submitted' => FALSE);
   $form += array(
     '#post' => $_POST,
