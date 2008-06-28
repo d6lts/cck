@@ -296,7 +296,7 @@ function content_delete(&$node) {
   if (db_table_exists($table)) {
     db_query('DELETE FROM {'. $table .'} WHERE nid = %d', $node->nid);
   }
-  cache_clear_all('content:'. $node->nid, content_cache_tablename(), TRUE);
+  cache_clear_all('content:'. $node->nid .':', content_cache_tablename(), TRUE);
 }
 
 /**
