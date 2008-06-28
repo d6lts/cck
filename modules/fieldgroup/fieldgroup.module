@@ -297,7 +297,7 @@ function _fieldgroup_field_get_group($content_type, $field_name) {
   return db_result(db_query("SELECT group_name FROM {". fieldgroup_fields_tablename() ."} WHERE type_name = '%s' AND field_name = '%s'", $content_type, $field_name));
 }
 
-/*
+/**
  * Implementation of hook_form_alter()
  */
 function fieldgroup_form_alter(&$form, $form_state, $form_id) {
@@ -305,11 +305,11 @@ function fieldgroup_form_alter(&$form, $form_state, $form_id) {
     foreach (fieldgroup_groups($form['type']['#value']) as $group_name => $group) {
       $form[$group_name] = array(
         '#type' => 'fieldset',
-        '#title' => t($group['label']),
+        '#title' => check_plain(t($group['label'])),
         '#collapsed' => $group['settings']['form']['style'] == 'fieldset_collapsed',
         '#collapsible' => in_array($group['settings']['form']['style'], array('fieldset_collapsed', 'fieldset_collapsible')),
         '#weight' => $group['weight'],
-        '#description' => t($group['settings']['form']['description']),
+        '#description' => content_filter_xss(t($group['settings']['form']['description'])),
         '#attributes' => array('class' => strtr($group['group_name'], '_', '-')),
       );
 
@@ -420,8 +420,8 @@ function fieldgroup_nodeapi(&$node, $op, $teaser, $page) {
       foreach (fieldgroup_groups($node->type) as $group_name => $group) {
         $label = $group['settings']['display']['label'] == 'above';
         $element = array(
-          '#title' => $label ? t($group['label']) : '',
-          '#description' => $label ? t($group['settings']['display']['description']) : '',
+          '#title' => $label ? check_plain(t($group['label'])) : '',
+          '#description' => $label ? content_filter_xss(t($group['settings']['display']['description'])) : '',
           '#weight' => $group['weight'],
         );
         switch ($group['settings']['display'][$context]['format']) {

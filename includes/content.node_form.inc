@@ -88,8 +88,9 @@ function content_field_form(&$form, &$form_state, $field, $get_delta = NULL) {
           '#required' => $get_delta > 0 ? FALSE : $field['required'],
           // TODO : should we add some logic for title and description too ?
           '#columns'  => array_keys($field['columns']),
-          '#title' => t($field['widget']['label']),
-          '#description' => t($field['widget']['description']),
+          '#title' => check_plain(t($field['widget']['label'])),
+          // The widget description contains user input.
+          '#description' => content_filter_xss(t($field['widget']['description'])),
           '#delta' => $delta,
         );
         // If we're processing a specific delta value for a field where the
@@ -152,14 +153,17 @@ function content_multiple_value_form(&$form, &$form_state, $field, $items) {
       break;
   }
 
+  $title = check_plain(t($field['widget']['label']));
+  $description = content_filter_xss(t($field['widget']['description']));
+
   $form_element = array(
     // TODO : Not sure about that one - when theming through '#type',
     // children are already rendered, and we can't do the table layout.
     //'#type' => 'content_multiple_values',
     '#theme' => 'content_multiple_values',
-    '#title' => t($field['widget']['label']),
+    '#title' => $title,
     '#required' => $field['required'],
-    '#description' => t($field['widget']['description']),
+    '#description' => $description,
   );
   $function = $field['widget']['module'] .'_widget';
 
@@ -167,8 +171,8 @@ function content_multiple_value_form(&$form, &$form_state, $field, $items) {
     if ($element = $function($form, $form_state, $field, $items, $delta)) {
       $defaults = array(
         '#field_name' => $field_name,
-        '#title' => ($field['multiple'] >= 1) ? '' : t($field['widget']['label']),
-        '#description' => ($field['multiple'] >= 1) ? '' : t($field['widget']['description']),
+        '#title' => ($field['multiple'] >= 1) ? '' : $title,
+        '#description' => ($field['multiple'] >= 1) ? '' : $description,
         '#required' => $delta == 0 && $field['required'],
         '#weight' => $delta,
         '#delta' => $delta,

@@ -466,7 +466,7 @@ function theme_content_multiple_values($element) {
 
     $header = array(
       array(
-        'data' => t('!title: !required', array('!title' => filter_xss_admin($element['#title']), '!required' => $required)),
+        'data' => t('!title: !required', array('!title' => $element['#title'], '!required' => $required)),
         'colspan' => 2
       ),
       t('Order'),
@@ -699,7 +699,7 @@ function content_field($op, &$node, $field, &$items, $teaser, $page) {
 
         $element = array(
           '#type' => 'content_field',
-          '#title' => $field['widget']['label'],
+          '#title' => check_plain(t($field['widget']['label'])),
           '#weight' => $field['widget']['weight'],
           '#field_name' => $field['field_name'],
           '#access' => $formatter_name != 'hidden',
@@ -1496,6 +1496,8 @@ function content_allowed_values($field) {
     $list = array_map('trim', $list);
     $list = array_filter($list, 'strlen');
     foreach ($list as $opt) {
+      // Sanitize the user input with a permissive filter.
+      $opt = content_filter_xss($opt);
       if (strpos($opt, '|') !== FALSE) {
         list($key, $value) = explode('|', $opt);
         $allowed_values[$field['field_name']][$key] = $value ? $value : $key;
@@ -1506,6 +1508,31 @@ function content_allowed_values($field) {
     }
   }
   return $allowed_values[$field['field_name']];
+}
+
+/**
+ * Like filter_xss_admin(), but with a shorter list of allowed tags.
+ *
+ * Used for items entered by administrators, like field descriptions,
+ * allowed values, where some (mainly inline) mark-up may be desired
+ * (so check_plain() is not acceptable).
+ */
+function content_filter_xss($string) {
+  return filter_xss($string, _content_filter_xss_allowed_tags());
+}
+
+/**
+ * List of tags allowed by content_filter_xss().
+ */
+function _content_filter_xss_allowed_tags() {
+  return array('a', 'b', 'big',  'code', 'del', 'em', 'i', 'img', 'ins',  'pre', 'q', 'small', 'span', 'strong', 'sub', 'sup', 'tt');
+}
+
+/**
+ * Human-readable list of allowed tags, for display in help texts.
+ */
+function _content_filter_xss_display_allowed_tags() {
+  return '<'. implode('> <', _content_filter_xss_allowed_tags()) .'>';
 }
 
 /**
@@ -1901,7 +1928,7 @@ function template_preprocess_content_field(&$variables) {
     'field_name' => $field['field_name'],
     'field_type_css' => strtr($field['type'], '_', '-'),
     'field_name_css' => strtr($field['field_name'], '_', '-'),
-    'label' => $field['widget']['label'],
+    'label' => check_plain(t($field['widget']['label'])),
     'label_display' => isset($field['display_settings']['label']['format']) ? $field['display_settings']['label']['format'] : 'above',
     'field_empty' => $field_empty,
   );

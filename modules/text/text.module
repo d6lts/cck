@@ -89,7 +89,7 @@ function text_field_settings($op, $field) {
         '#default_value' => !empty($field['allowed_values']) ? $field['allowed_values'] : '',
         '#required' => FALSE,
         '#rows' => 10,
-        '#description' => t('The possible values this field can contain. Enter one value per line, in the format key|label. The key is the value that will be stored in the database and it must match the field storage type, %type. The label is optional and the key will be used as the label if no label is specified.', array('%type' => $field['type'])),
+        '#description' => t('The possible values this field can contain. Enter one value per line, in the format key|label. The key is the value that will be stored in the database and it must match the field storage type, %type. The label is optional and the key will be used as the label if no label is specified.<br />Allowed HTML tags: @tags', array('%type' => $field['type'], '@tags' => _content_filter_xss_display_allowed_tags())),
       );
       $form['allowed_values_fieldset']['advanced_options'] = array(
         '#type' => 'fieldset',

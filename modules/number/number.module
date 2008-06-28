@@ -130,7 +130,7 @@ function number_field_settings($op, $field) {
         '#default_value' => !empty($field['allowed_values']) ? $field['allowed_values'] : '',
         '#required' => FALSE,
         '#rows' => 10,
-        '#description' => t('The possible values this field can contain. Enter one value per line, in the format key|label. The key is the value that will be stored in the database and it must match the field storage type, %type. The label is optional and the key will be used as the label if no label is specified.', array('%type' => $field['type'])),
+        '#description' => t('The possible values this field can contain. Enter one value per line, in the format key|label. The key is the value that will be stored in the database and it must match the field storage type, %type. The label is optional and the key will be used as the label if no label is specified.<br />Allowed HTML tags: @tags', array('%type' => $field['type'], '@tags' => _content_filter_xss_display_allowed_tags())),
       );
       $form['allowed_values_fieldset']['advanced_options'] = array(
         '#type' => 'fieldset',
@@ -317,8 +317,8 @@ function theme_number_formatter_generic($element) {
       break;
   }
 
-  $prefixes = isset($field['prefix']) ? explode('|', $field['prefix']) : array(0 => '');
-  $suffixes = isset($field['suffix']) ? explode('|', $field['suffix']) : array(0 => '');
+  $prefixes = isset($field['prefix']) ? explode('|', check_plain($field['prefix'])) : array(0 => '');
+  $suffixes = isset($field['suffix']) ? explode('|', check_plain($field['suffix'])) : array(0 => '');
   $prefix = (count($prefixes) > 1) ? format_plural($value, $prefixes[0], $prefixes[1]) : $prefixes[0];
   $suffix = (count($suffixes) > 1) ? format_plural($value, $suffixes[0], $suffixes[1]) : $suffixes[0];
 

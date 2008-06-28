@@ -92,7 +92,7 @@ function content_admin_field_overview_form(&$form_state, $type_name) {
   foreach ($fields as $name => $field) {
     $weight = $field['widget']['weight'];
     $form[$name] = array(
-      'human_name' => array('#value' => $field['widget']['label']),
+      'human_name' => array('#value' => check_plain($field['widget']['label'])),
       'name' => array('#value' => $field['field_name']),
       'type' => array('#value' => $field['type']),
       'configure' => array('#value' => l(t('Configure'), 'admin/content/node-type/'. $type['url_str'] .'/fields/'. $field['field_name'] .'/edit')),
@@ -108,7 +108,7 @@ function content_admin_field_overview_form(&$form_state, $type_name) {
   foreach ($groups as $name => $group) {
     $weight = $group['weight'];
     $form[$name] = array(
-      'human_name' => array('#value' => $group['label']),
+      'human_name' => array('#value' => check_plain($group['label'])),
       'name' => array('#value' => $group['group_name']),
       'type' => array(),
       'configure' => array('#value' => l(t('Configure'), 'admin/content/node-type/'. $type['url_str'] .'/groups/'. $group['group_name'] .'/edit')),
@@ -277,7 +277,7 @@ function content_admin_display_overview_form(&$form_state, $type_name, $contexts
     $weight = $field['widget']['weight'];
 
     $form[$name] = array(
-      'human_name' => array('#value' => $field['widget']['label']), // OK
+      'human_name' => array('#value' => check_plain($field['widget']['label'])), // OK
     );
 
     // Label
@@ -324,7 +324,7 @@ function content_admin_display_overview_form(&$form_state, $type_name, $contexts
     $weight = $group['weight'];
 
     $form[$name] = array(
-      'human_name' => array('#value' => $group['label']),
+      'human_name' => array('#value' => check_plain($group['label'])),
     );
     $form[$name]['label'] = array(
       '#type' => 'select',
@@ -776,7 +776,8 @@ function _content_admin_field(&$form_state, $type_name, $field_name) {
   $widget_types = _content_widget_types();
   $widget_type = $widget_types[$field['widget']['type']];
 
-  drupal_set_title(isset($field['widget']['label']) ? $field['widget']['label'] : $field['field_name']);
+  $title = isset($field['widget']['label']) ? $field['widget']['label'] : $field['field_name'];
+  drupal_set_title(check_plain($title));
 
   // See if we need to change the widget type or label.
 
@@ -842,7 +843,7 @@ function _content_admin_field(&$form_state, $type_name, $field_name) {
     '#title' => t('Help text'),
     '#default_value' => $field['widget']['description'],
     '#rows' => 5,
-    '#description' => t('Instructions to present to the user below this field on the editing form.'),
+    '#description' => t('Instructions to present to the user below this field on the editing form.<br />Allowed HTML tags: @tags', array('@tags' => _content_filter_xss_display_allowed_tags())),
     '#required' => FALSE,
   );
 
