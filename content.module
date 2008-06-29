@@ -88,6 +88,16 @@ function content_perm() {
 }
 
 /**
+ * Implementation of hook_menu_alter().
+ */
+function content_menu_alter(&$items) {
+  // Customize the content types page with our own callback
+  $items['admin/content/types']['page callback'] = 'content_admin_types_overview';
+  $items['admin/content/types']['file'] = 'content.admin.inc';
+  $items['admin/content/types']['file path'] = drupal_get_path('module', 'content') .'/includes';
+}
+
+/**
  * Implementation of hook_menu().
  */
 function content_menu() {
@@ -191,6 +201,9 @@ function content_theme() {
       'template' => 'content-field',
       'arguments' => array('element' => NULL),
       'path' => $path,
+    ),
+    'content_overview_links' => array(
+      'arguments' => array(),
     ),
     'content_admin_field_overview_form' => array(
       'arguments' => array('form' => NULL),

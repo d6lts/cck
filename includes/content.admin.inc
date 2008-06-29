@@ -6,6 +6,56 @@
  * Administrative interface for content type creation.
  */
 
+
+/**
+ * Menu callback; replacement for node_overview_types().
+ */
+function content_admin_types_overview() {
+  $types = node_get_types();
+  $names = node_get_types('names');
+  $header = array(t('Name'), t('Type'), array('data' => t('Operations'), 'colspan' => '4'), t('Description'),);
+  $rows = array();
+
+  foreach ($names as $key => $name) {
+    $type = $types[$key];
+    if (node_hook($type, 'form')) {
+      $type_url_str = str_replace('_', '-', $type->type);
+      $row = array(
+        check_plain($name),
+        check_plain($type->type),
+      );
+      // Set the edit column.
+      $row[] = array('data' => l(t('edit'), 'admin/content/node-type/'. $type_url_str));
+
+      // Set links for managing fields.
+      $row[] = array('data' => l(t('add field'), 'admin/content/node-type/'. $type_url_str .'/add_field'));
+      $row[] = array('data' => l(t('manage fields'), 'admin/content/node-type/'. $type_url_str .'/fields'));
+      // TODO: a hook to allow other content modules to add more stuff?
+
+      // Set the delete column.
+      if ($type->custom) {
+        $row[] = array('data' => l(t('delete'), 'admin/content/node-type/'. $type_url_str .'/delete'));
+      }
+      else {
+        $row[] = array('data' => '');
+      }
+      // Make the description smaller and last.
+      $row[] = array('data' => filter_xss_admin($type->description), 'class' => 'description');
+      $rows[] = $row;
+    }
+  }
+
+  if (empty($rows)) {
+    $rows[] = array(array('data' => t('No content types available.'), 'colspan' => '7', 'class' => 'message'));
+  }
+
+  return theme('table', $header, $rows) .theme('content_overview_links');
+}
+
+function theme_content_overview_links() {
+  return '<div class="contnet-overview-links">'. l(t('» Add a new content type'), 'admin/content/types/add') .'</div>';
+}
+
 /**
  * Menu callback; lists all defined fields for quick reference.
  */

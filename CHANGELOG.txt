@@ -29,6 +29,7 @@ CCK 6.2.dev
 - #201329 by pwolanin and yched : Fix content_field_instance_delete() not cleaning tables.
 - #271577 by pwolanin : Fix unsanitized text (optionwidgets, number, text, field labels, field descriptions)
 - #273539 by jpetso : Fix JS-'add more' for complex widgets (e.g. filefield)
+- #227435 by pwolanin : Usability - Put fields links on content type overview page
 
 CCK 6.2.beta
 ============
