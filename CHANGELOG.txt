@@ -30,6 +30,7 @@ CCK 6.2.dev
 - #271577 by pwolanin : Fix unsanitized text (optionwidgets, number, text, field labels, field descriptions)
 - #273539 by jpetso : Fix JS-'add more' for complex widgets (e.g. filefield)
 - #227435 by pwolanin : Usability - Put fields links on content type overview page
+- #277101 : Hide fieldset-based fieldgroups when all fields empty
 
 CCK 6.2.beta
 ============

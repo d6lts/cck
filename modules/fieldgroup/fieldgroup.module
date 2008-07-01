@@ -61,6 +61,9 @@ function fieldgroup_theme() {
       'template' => 'fieldgroup',
       'arguments' => array('element' => NULL),
     ),
+    'fieldgroup_fieldset' => array(
+      'arguments' => array('element' => NULL),
+    ),
     'fieldgroup_display_overview_form' => array(
       'arguments' => array('form' => NULL),
     ),
@@ -73,6 +76,7 @@ function fieldgroup_theme() {
 function fieldgroup_elements() {
   return array(
     'fieldgroup_simple' => array(),
+    'fieldgroup_fieldset' => array('#collapsible' => FALSE, '#collapsed' => FALSE, '#value' => NULL,),
   );
 }
 
@@ -438,7 +442,7 @@ function fieldgroup_nodeapi(&$node, $op, $teaser, $page) {
           case 'fieldset_collapsible':
             $element['#collapsible'] = TRUE;
           case 'fieldset':
-            $element['#type'] = 'fieldset';
+            $element['#type'] = 'fieldgroup_fieldset';
             $element['#attributes'] = array('class' => 'fieldgroup '. strtr($group['group_name'], '_', '-'));
             break;
         }
@@ -619,4 +623,30 @@ function fieldgroup_delete($content_type, $group_name) {
   db_query("DELETE FROM {". fieldgroup_tablename() ."} WHERE  type_name = '%s' AND group_name = '%s'", $content_type, $group_name);
   db_query("DELETE FROM {". fieldgroup_fields_tablename() ."} WHERE  type_name = '%s' AND group_name = '%s'", $content_type, $group_name);
   cache_clear_all('fieldgroup_data', content_cache_tablename());
+}
+
+/**
+ * Format a fieldgroup using a 'fieldset'.
+ *
+ * Derived from core's theme_fieldset, with no output if the content is empty.
+ */
+function theme_fieldgroup_fieldset($element) {
+  if (empty($element['#children']) && empty($element['#value'])) {
+    return '';
+  }
+
+  if ($element['#collapsible']) {
+    drupal_add_js('misc/collapse.js');
+
+    if (!isset($element['#attributes']['class'])) {
+      $element['#attributes']['class'] = '';
+    }
+
+    $element['#attributes']['class'] .= ' collapsible';
+    if ($element['#collapsed']) {
+      $element['#attributes']['class'] .= ' collapsed';
+    }
+  }
+
+  return '<fieldset'. drupal_attributes($element['#attributes']) .'>'. ($element['#title'] ? '<legend>'. $element['#title'] .'</legend>' : '') . (isset($element['#description']) && $element['#description'] ? '<div class="description">'. $element['#description'] .'</div>' : '') . (!empty($element['#children']) ? $element['#children'] : '') . (isset($element['#value']) ? $element['#value'] : '') ."</fieldset>\n";
 }
