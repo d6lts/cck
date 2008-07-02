@@ -5,9 +5,6 @@
  * @file
  * Interface between content.module and views.module.
  */
-
-views_include_handlers();
-
 /**
  * Helper function so it is possible to change the Views tablename
  * in the future without re-writing code.
