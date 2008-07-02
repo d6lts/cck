@@ -101,7 +101,7 @@ function content_views_field_views_data($field) {
         'click sortable' => $sorts[0],
         'additional fields' => $columns,
         'content_field_name' => $field['field_name'],
-        'allow_empty' => TRUE,
+        'allow empty' => TRUE,
         // Access control modules should implement content_views_access_callback().
         'access callback' => 'content_views_access_callback',
         'access arguments' => array($field),        
@@ -114,7 +114,7 @@ function content_views_field_views_data($field) {
         'name field' => '', // TODO
         'additional fields' => $columns,
         'content_field_name' => $field['field_name'],
-        'allow_empty' => TRUE,
+        'allow empty' => TRUE,
       ),
       'filter' => array(
         'field' => $columns[0],
@@ -123,7 +123,7 @@ function content_views_field_views_data($field) {
         'handler' => $filters[0],
         'additional fields' => $columns,
         'content_field_name' => $field['field_name'],
-        'allow_empty' => TRUE,
+        'allow empty' => TRUE,
       ),
     );
     // TODO do we need different handling for sorts with Views 2,
@@ -135,7 +135,7 @@ function content_views_field_views_data($field) {
         'handler' => 'views_handler_sort_content',
         'additional fields' => $columns,
         'content_field_name' => $field['field_name'],
-        'allow_empty' => TRUE,
+        'allow empty' => TRUE,
       );
     }
 
