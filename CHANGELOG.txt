@@ -1,6 +1,6 @@
 //$Id$
 
-CCK 6.2.dev
+CCK 6.2.rc1
 ============
 - #276994 Remove views_include_handlers() from content.views.inc, no longer needed.
 - Change 'allow_empty' to 'allow empty' so that Views filters work correctly.
