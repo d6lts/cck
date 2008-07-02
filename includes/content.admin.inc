@@ -13,7 +13,7 @@
 function content_admin_types_overview() {
   $types = node_get_types();
   $names = node_get_types('names');
-  $header = array(t('Name'), t('Type'), array('data' => t('Operations'), 'colspan' => '4'), t('Description'),);
+  $header = array(t('Name'), t('Type'), t('Description'), array('data' => t('Operations'), 'colspan' => '4'),);
   $rows = array();
 
   foreach ($names as $key => $name) {
@@ -24,14 +24,14 @@ function content_admin_types_overview() {
         check_plain($name),
         check_plain($type->type),
       );
+      // Make the description smaller
+      $row[] = array('data' => filter_xss_admin($type->description), 'class' => 'description');
       // Set the edit column.
       $row[] = array('data' => l(t('edit'), 'admin/content/node-type/'. $type_url_str));
-
       // Set links for managing fields.
+      // TODO: a hook to allow other content modules to add more stuff?
       $row[] = array('data' => l(t('add field'), 'admin/content/node-type/'. $type_url_str .'/add_field'));
       $row[] = array('data' => l(t('manage fields'), 'admin/content/node-type/'. $type_url_str .'/fields'));
-      // TODO: a hook to allow other content modules to add more stuff?
-
       // Set the delete column.
       if ($type->custom) {
         $row[] = array('data' => l(t('delete'), 'admin/content/node-type/'. $type_url_str .'/delete'));
@@ -39,8 +39,7 @@ function content_admin_types_overview() {
       else {
         $row[] = array('data' => '');
       }
-      // Make the description smaller and last.
-      $row[] = array('data' => filter_xss_admin($type->description), 'class' => 'description');
+
       $rows[] = $row;
     }
   }
