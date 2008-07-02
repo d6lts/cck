@@ -33,7 +33,7 @@ function content_types_install() {
   while ($row = db_fetch_array($db_result)) {
     $field = array_merge($row, unserialize($row['global_settings']));
     unset($field['global_settings']);
-    
+
     // There may be module data available for currently disabled modules,
     // or missing module data for currently enabled modules, so start over
     // to get only field info for enabled modules.
@@ -293,7 +293,7 @@ function content_update_6002() {
 
 /**
  * 'db_columns' column 1st got introduced as 'columns', which is forbidden in MySQL 4.
- * This update function will only be useful for early testers...
+ * This update function will only be useful for early D6 testers...
  */
 function content_update_6003() {
   $ret = array();

@@ -31,6 +31,7 @@ CCK 6.2.dev
 - #273539 by jpetso : Fix JS-'add more' for complex widgets (e.g. filefield)
 - #227435 by pwolanin : Usability - Put fields links on content type overview page
 - #277101 : Hide fieldset-based fieldgroups when all fields empty
+- #198508 : Prevent data loss for disabled fields.
 
 CCK 6.2.beta
 ============

@@ -286,7 +286,7 @@ function content_admin_field_overview_form_submit($form, &$form_state) {
 function content_admin_display_overview_form(&$form_state, $type_name, $contexts_selector = CONTENT_CONTEXTS_SIMPLE) {
   // Gather type information.
   $type = content_types($type_name);
-  $field_types = _content_field_types(); // TODO : needed ?
+  $field_types = _content_field_types();
   $fields = $type['fields'];
   if (empty($fields)) {
     drupal_set_message(t('There are no fields configured for this content type. You can !link.', array(
@@ -690,16 +690,21 @@ function content_admin_field_main_validate($form, &$form_state) {
   // Testing for a valid name only needs to be done the first time through.
   if (isset($form_values['new_field_name']) && $form_values['new_field_name']) {
     if (!preg_match('!^field_[a-z0-9_]+$!', $field_name)) {
-      form_set_error('field_name', t('The field name %field_name is invalid. The name must include only lowercase unaccentuated letters, numbers, and underscores.', array(
-        '%field_name' => $field_name)));
+      form_set_error('field_name', t('The field name %field_name is invalid. The name must include only lowercase unaccentuated letters, numbers, and underscores.', array('%field_name' => $field_name)));
     }
     if (strlen($field_name) > 32) {
-      form_set_error('field_name', t('The field name %field_name is too long. The name is limited to 32 characters, including the \'field_\' prefix.', array(
-        '%field_name' => $field_name)));
+      form_set_error('field_name', t('The field name %field_name is too long. The name is limited to 32 characters, including the \'field_\' prefix.', array('%field_name' => $field_name)));
     }
-    if (array_key_exists($field_name, content_fields())) {
-      form_set_error('field_name', t('The field name %field_name already exists.', array(
-        '%field_name' => $field_name)));
+    // Check the name is not used by another field.
+    // We need to check inactive fields as well, so we can't use content_fields().
+    module_load_include('inc', 'content', 'includes/content.crud');
+    $fields = content_field_instance_read(array(), TRUE);
+    $used = FALSE;
+    foreach ($fields as $field) {
+      $used |= ($field['field_name'] == $field_name);
+    }
+    if ($used) {
+      form_set_error('field_name', t('The field name %field_name already exists.', array('%field_name' => $field_name)));
     }
     elseif ($field_name == 'field_instance') {
       form_set_error('field_name', t("The name 'field_instance' is a reserved name."));

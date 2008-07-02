@@ -115,7 +115,7 @@ function content_field_instance_expand($field) {
   if (!empty($field['widget_type'])) {
     $field['widget']['type'] = $field['widget_type'];
     $widget_types = _content_widget_types();
-    $field['widget']['module'] = $widget_types[$field['widget_type']]['module'];
+    $field['widget']['module'] = isset($widget_types[$field['widget_type']]['module']) ? $widget_types[$field['widget_type']]['module'] : $field['widget_module'];
   }
   elseif (!empty($field['widget_module'])) {
     $field['widget']['module'] = $field['widget_module'];
@@ -426,10 +426,15 @@ function _content_field_instance_write($field, $op = 'update') {
  *   - 'type_name' - The name of the content type in which the instance exists.
  *   - 'field_name' - The name of the field whose instance is to be loaded.
  *   if NULL, all instances will be returned.
+ * @param $include_inactive
+ *   TRUE will return field instances that are 'inactive', because their field
+ *   module or widget module is currently disabled.
  * @return
  *   The field arrays.
  */
-function content_field_instance_read($param = NULL) {
+function content_field_instance_read($param = NULL, $include_inactive = FALSE) {
+  $cond = array();
+  $args = array();
   if (is_array($param)) {
     // Turn the conditions into a query.
     foreach ($param as $key => $value) {
@@ -438,12 +443,11 @@ function content_field_instance_read($param = NULL) {
     }
   }
 
-  if (count($cond)) {
-    $cond = " AND ". implode(' AND ', $cond);
-  }
+  $condition = $cond ? " AND ". implode(' AND ', $cond) : '';
   $db_result = db_query("SELECT * FROM {". content_instance_tablename() ."} nfi ".
     " JOIN {". content_field_tablename() ."} nf ON nfi.field_name = nf.field_name ".
-    " WHERE nf.active = 1 AND nfi.widget_active = 1 ". $cond ." ORDER BY nfi.weight ASC, nfi.label ASC", $args);
+    ($include_inactive ? ' ' : ' WHERE nf.active = 1 AND nfi.widget_active = 1 ').
+    $condition ." ORDER BY nfi.weight ASC, nfi.label ASC", $args);
 
   $fields = array();
   while ($instance = db_fetch_array($db_result)) {
@@ -521,8 +525,8 @@ function content_field_instance_delete($field_name, $type_name) {
   content_clear_type_cache(TRUE);
 
   // If the deleted instance was the last field for the content type,
-  // we drop the per-type table.
-  if (!content_field_instance_read(array('type_name' => $field['type_name']))) {
+  // we drop the per-type table. We also consider possibly inactive fields.
+  if (!content_field_instance_read(array('type_name' => $field['type_name']), TRUE)) {
     $base_tablename = _content_tablename($field['type_name'], CONTENT_DB_STORAGE_PER_CONTENT_TYPE);
     if (db_table_exists($base_tablename)) {
       db_drop_table($ret, $base_tablename);
