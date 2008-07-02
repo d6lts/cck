@@ -2,6 +2,7 @@
 
 CCK 6.2.rc1
 ============
+- #276994 Follow up, remove conditional loading for content.views.inc, Views handles it.
 - #276994 Remove views_include_handlers() from content.views.inc, no longer needed.
 - Change 'allow_empty' to 'allow empty' so that Views filters work correctly.
 - #272871 Pass #node to formatters to be consistent with the values that were available in the D5 version.
