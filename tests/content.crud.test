@@ -89,11 +89,12 @@ class ContentCrudTestCase extends DrupalWebTestCase {
 
   /**
    * Helper function for assertSchemaMatchesTables
-   * Checks that the database and schema for the given table contain only the correct fields
+   * Checks that the database and schema for the given table contain only the expected fields.
    * @param $table Name of the table to check
    * @param $columns Array of column names
    */
   function _assertSchemaMatches($table, $columns) {
+    // First test: check the expected structure matches the stored schema.
     $schema = drupal_get_schema($table, TRUE);
     $mismatches = array();
     if ($schema === FALSE) {
@@ -116,6 +117,8 @@ class ContentCrudTestCase extends DrupalWebTestCase {
     $this->assertEqual(count($mismatches), 0, t('Table !table matches schema: !details',
       array('!table' => $table, '!details' => implode($mismatches, ', '))));
 
+    // Second test: check the schema matches the actual db structure.
+    // This is the part that relies on schema.module.
     if (!$this->enabled_schema) {
       $this->enabled_schema = module_exists('schema');
     }
