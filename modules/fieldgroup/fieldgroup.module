@@ -125,7 +125,7 @@ function fieldgroup_edit_group_form(&$form_state, $content_type, $group_name, $a
   $form['settings']['#tree'] = TRUE;
   $form['settings']['form'] = array(
     '#type' => 'fieldset',
-    '#title' => 'Form settings',
+    '#title' => t('Form settings'),
     '#description' => t('These settings apply to the group in the node editing form.'),
   );
   $form['settings']['form']['style'] = array(
@@ -148,7 +148,7 @@ function fieldgroup_edit_group_form(&$form_state, $content_type, $group_name, $a
   );
   $form['settings']['display'] = array(
     '#type' => 'fieldset',
-    '#title' => 'Display settings',
+    '#title' => t('Display settings'),
     '#description' => t('These settings apply to the group on node display.'),
   );
   $form['settings']['display']['description'] = array(
