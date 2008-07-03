@@ -517,6 +517,12 @@ function nodereference_autocomplete_validate($element, &$form_state) {
       if (!empty($title) && ($n = node_load($nid)) && $title != $n->title) {
         form_error($element[$field_key], t('%name: Title mismatch. Please check your selection.', array('%name' => t($element[$field_key]['#title']))));
       }
+      else {
+        $valid_nodes = _nodereference_potential_references($field);
+        if (!isset($valid_nodes[$nid])) {
+          form_error($element[$field_key], t("%name: This post can't be referenced.", array('%name' => t($element[$field_key]['#title']))));
+        }
+      }
     }
     else {
       // no explicit nid

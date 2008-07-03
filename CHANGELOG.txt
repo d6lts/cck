@@ -2,6 +2,7 @@
 
 CCK 6.2.dev
 ===========
+- #278325 Nodereference: autocomplete widget does not check nodes are 'referenceable'
 
 CCK 6.2.rc3
 ===========
