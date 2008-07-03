@@ -5,6 +5,13 @@
  * @file
  * Interface between content.module and views.module.
  */
+
+// Include the files defining the classes we extend.
+// This is needed in case the /cck folder lives in the main
+// /modules folder (views_module_include() will then load
+// content.views.inc before node.views.inc)
+module_load_include('inc', 'views', 'modules/node.views');
+
 /**
  * Helper function so it is possible to change the Views tablename
  * in the future without re-writing code.
