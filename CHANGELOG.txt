@@ -1,5 +1,8 @@
 //$Id$
 
+CCK 6.2.dev
+===========
+
 CCK 6.2.rc3
 ===========
 - #278116 by Damien Tournoud: Make some strings easier to translate in views intergration forms.
