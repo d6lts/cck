@@ -101,7 +101,7 @@ function content_views_field_views_data($field) {
         'allow empty' => TRUE,
         // Access control modules should implement content_views_access_callback().
         'access callback' => 'content_views_access_callback',
-        'access arguments' => array($field),        
+        'access arguments' => array($field),
       ),
       'argument' => array(
         'field' => $columns[0],
@@ -320,7 +320,7 @@ class views_handler_field_content extends views_handler_field_node {
     // TODO : we can stick any value in there -
     // what would make most sense ?  row_style ?
     $values->build_mode = 'views';
-    
+
     $item = array();
     foreach ($db_info['columns'] as $column => $attributes) {
       $item[$column] = $values->{$this->table_alias .'_'. $attributes['column']};
@@ -373,22 +373,27 @@ class views_handler_field_content_multiple extends views_handler_field_content {
       '#type' => 'checkbox',
       '#default_value' => $options['multiple']['group'],
     );
+    // Make the string translatable by keeping it as a whole rather than
+    // translating prefix and suffix separately.
+    list($prefix, $suffix) = explode('@count', t('Show @count value(s)'));
     $form['multiple']['multiple_number'] = array(
       '#type' => 'textfield',
       '#size' => 5,
-      '#field_prefix' => t('Show') .' ',
-      '#field_suffix' => t(' values,'),
+      '#field_prefix' => $prefix,
+      '#field_suffix' => $suffix,
       '#default_value' => $options['multiple']['multiple_number'],
       '#prefix' => '<div class="container-inline">',
     );
+    list($prefix, $suffix) = explode('@count', t('starting from @count'));
     $form['multiple']['multiple_from'] = array(
       '#type' => 'textfield',
       '#size' => 5,
-      '#field_prefix' => t('Starting from') .' ',
+      '#field_prefix' => $prefix,
+      '#field_suffix' => $suffix,
       '#default_value' => $options['multiple']['multiple_from'],
     );
     $form['multiple']['multiple_reversed'] = array(
-      '#title' => t('Start from last values'),
+      '#title' => t('Reversed (start from last values)'),
       '#type' => 'checkbox',
       '#default_value' => $options['multiple']['multiple_reversed'],
       '#suffix' => '</div>',
@@ -449,7 +454,7 @@ class views_handler_field_content_multiple extends views_handler_field_content {
       $query_columns[] = "$table_alias.$attributes[column] AS $column";
     }
 
-    // Make sure node.nid is aliased so it isn't confused with 
+    // Make sure node.nid is aliased so it isn't confused with
     // nodereference's nid column.
     $query = "SELECT node.nid AS parent_nid, ". implode(', ', $query_columns) .
              " FROM {node} node".
@@ -478,12 +483,12 @@ class views_handler_field_content_multiple extends views_handler_field_content {
     // TODO : we can stick any value in there -
     // what would make most sense ?  row_style ?
     $values->build_mode = 'views';
-    
+
     // This needs to be set for the $this->render_link() to work. It would
     // have been set in the query, if we hadn't bypassed the normal query.
     // TODO there may be a better way to do this.
     $this->aliases['nid'] = 'nid';
-    
+
     $items = array();
     foreach ($this->field_values[$values->{$this->additional_fields['nid']}] as $item) {
       $value = content_format($field, $item, $options['format'], $values);
