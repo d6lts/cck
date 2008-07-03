@@ -5,7 +5,7 @@ CCK 6.2.dev
 - #278116 by Damien Tournoud: Make some strings easier to translate in views intergration forms.
 - #278135 fix some translation quirks + fix french typography for ':' :-)
 - Nodereference: 'Title mismatch. Please check your selection' error should break validation (+ fix typo).
-- #277968 Ensure order of loading for *.views.inc files in case cck lives in the main /modules folder.
+- #277968 by jpetso:Ensure order of loading for *.views.inc files in case cck lives in the main /modules folder.
 
 CCK 6.2.rc2
 ============
