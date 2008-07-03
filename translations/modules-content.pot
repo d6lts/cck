@@ -3,9 +3,9 @@
 # LANGUAGE translation of Drupal (root)
 # Copyright YEAR NAME <EMAIL@ADDRESS>
 # Generated from files:
-#  content.module,v 1.301.2.3 2008/06/14 02:24:00 yched
+#  content.module,v 1.301.2.17 2008/07/03 12:44:50 yched
 #  content.info,v 1.6 2007/07/04 23:46:29 yched
-#  content.views.inc,v 1.68.2.1 2008/06/04 13:50:03 karens
+#  content.views.inc,v 1.68.2.6 2008/07/03 12:44:51 yched
 #  content_copy.info,v 1.6 2008/04/23 18:01:48 dww
 #  content_permissions.info,v 1.2 2008/04/23 18:01:52 dww
 #  fieldgroup.info,v 1.6 2008/04/23 18:01:58 dww
@@ -14,15 +14,15 @@
 #  optionwidgets.info,v 1.7 2008/04/23 18:02:24 dww
 #  text.info,v 1.9 2008/04/23 18:02:31 dww
 #  userreference.info,v 1.8 2008/04/23 18:02:38 dww
-#  example_field.php,v 1.5 2008/04/23 08:24:06 karens
-#  simple_field.php,v 1.5 2008/04/23 08:24:06 karens
-#  text.module,v 1.95.2.2 2008/06/14 02:50:08 yched
+#  example_field.php,v 1.5.2.2 2008/07/03 12:44:51 yched
+#  simple_field.php,v 1.5.2.2 2008/07/03 12:44:51 yched
+#  text.module,v 1.95.2.4 2008/06/28 15:42:41 yched
 #
 #, fuzzy
 msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
-"POT-Creation-Date: 2008-06-16 20:05+0200\n"
+"POT-Creation-Date: 2008-07-03 07:41+0200\n"
 "PO-Revision-Date: YYYY-mm-DD HH:MM+ZZZZ\n"
 "Last-Translator: NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <EMAIL@ADDRESS>\n"
@@ -79,75 +79,75 @@ msgstr ""
 msgid "Control the order of fields in the input form."
 msgstr ""
 
-#: content.module:456
+#: content.module:474
 msgid "This field is required."
 msgstr ""
 
-#: content.module:460
+#: content.module:478
 msgid "!title: !required"
 msgstr ""
 
-#: content.module:463
+#: content.module:481
 msgid "Order"
 msgstr ""
 
-#: content.module:1587
+#: content.module:1640
 msgid "RSS Item"
 msgstr ""
 
-#: content.module:1589
+#: content.module:1642
 msgid "Search Index"
 msgstr ""
 
-#: content.module:1590
+#: content.module:1643
 msgid "Search Result"
 msgstr ""
 
-#: content.module:1928
+#: content.module:1981
 msgid "Language"
 msgstr ""
 
-#: content.module:1931
+#: content.module:1984
 msgid "Taxonomy"
 msgstr ""
 
-#: content.module:1934
+#: content.module:1987
 msgid "File attachments"
 msgstr ""
 
-#: content.module:539
+#: content.module:557
 msgid "Updating field type %type with module %module."
 msgstr ""
 
-#: content.module:546
+#: content.module:564
 msgid "Updating widget type %type with module %module."
 msgstr ""
 
-#: content.module:87
-msgid "Use PHP input for default and allowed values (dangerous - grant with care)"
+#: content.module:84
+msgid "Use PHP input for field settings (dangerous - grant with care)"
 msgstr ""
 
-#: content.module:119
+#: content.module:125
 msgid "Manage fields"
 msgstr ""
 
-#: content.module:128
+#: content.module:134
 msgid "Display fields"
 msgstr ""
 
-#: content.module:137
+#: content.module:143
 msgid "General"
 msgstr ""
 
-#: content.module:143
+#: content.module:149
 msgid "Advanced"
 msgstr ""
 
-#: content.module:171
+#: content.module:177
 msgid "Remove field"
 msgstr ""
 
-#: content.info:0 includes/content.views.inc:57;94
+#: content.info:0 includes/content.views.inc:54;91
 msgid "Content"
 msgstr ""
 

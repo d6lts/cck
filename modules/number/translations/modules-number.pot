@@ -3,14 +3,14 @@
 # LANGUAGE translation of Drupal (modules-number)
 # Copyright YEAR NAME <EMAIL@ADDRESS>
 # Generated from files:
-#  number.module,v 1.91.2.3 2008/06/14 02:50:08 yched
+#  number.module,v 1.91.2.5 2008/06/28 15:42:41 yched
 #  number.info,v 1.7 2008/04/23 18:02:16 dww
 #
 #, fuzzy
 msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
-"POT-Creation-Date: 2008-06-16 20:05+0200\n"
+"POT-Creation-Date: 2008-07-03 07:41+0200\n"
 "PO-Revision-Date: YYYY-mm-DD HH:MM+ZZZZ\n"
 "Last-Translator: NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <EMAIL@ADDRESS>\n"

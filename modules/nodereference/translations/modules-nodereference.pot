@@ -3,14 +3,14 @@
 # LANGUAGE translation of Drupal (modules-nodereference)
 # Copyright YEAR NAME <EMAIL@ADDRESS>
 # Generated from files:
-#  nodereference.module,v 1.138.2.1 2008/06/04 12:56:58 karens
+#  nodereference.module,v 1.138.2.4 2008/07/03 14:25:02 yched
 #  nodereference.info,v 1.8 2008/04/23 18:02:07 dww
 #
 #, fuzzy
 msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
-"POT-Creation-Date: 2008-06-16 20:05+0200\n"
+"POT-Creation-Date: 2008-07-03 07:41+0200\n"
 "PO-Revision-Date: YYYY-mm-DD HH:MM+ZZZZ\n"
 "Last-Translator: NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <EMAIL@ADDRESS>\n"
@@ -40,11 +40,11 @@ msgid "Advanced - Nodes that can be referenced (View)"
 msgstr ""
 
 #: modules/nodereference/nodereference.module:114
-msgid "View"
+msgid "View used to select the nodes"
 msgstr ""
 
 #: modules/nodereference/nodereference.module:117
-msgid "Choose the \"Views module\" view that selects the nodes that can be referenced.<br />Note :<ul><li>Only views that have fields will work for this purpose.</li><li>This will discard the \"Content types\" settings above. Use the view's \"filters\" section instead.</li><li>Use the view's \"fields\" section to display additional informations about candidate nodes on node creation/edition form.</li><li>Use the view's \"sort criteria\" section to determine the order in which candidate nodes will be displayed.</li></ul>"
+msgid "Choose the \"Views module\" view that selects the nodes that can be referenced.<br />Note:<ul><li>Only views that have fields will work for this purpose.</li><li>This will discard the \"Content types\" settings above. Use the view's \"filters\" section instead.</li><li>Use the view's \"fields\" section to display additional informations about candidate nodes on node creation/edition form.</li><li>Use the view's \"sort criteria\" section to determine the order in which candidate nodes will be displayed.</li></ul>"
 msgstr ""
 
 #: modules/nodereference/nodereference.module:121
@@ -56,7 +56,7 @@ msgid "Provide a comma separated list of arguments to pass to the view."
 msgstr ""
 
 #: modules/nodereference/nodereference.module:175
-msgid "%name : This post can't be referenced."
+msgid "%name: This post can't be referenced."
 msgstr ""
 
 #: modules/nodereference/nodereference.module:200
