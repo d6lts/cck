@@ -19,7 +19,7 @@ function content_form(&$form, &$form_state) {
 /**
  * Create a separate form element for each field.
  *
- * // TODO : $count param ? not used anymore ?
+ * // TODO: $count param ? not used anymore ?
  * Hook_widget() picks up two new values, $count and $delta, to help
  * widgets know what information to return since multiple values are
  * sometimes controlled by the content module.
@@ -39,13 +39,13 @@ function content_field_form(&$form, &$form_state, $field, $get_delta = NULL) {
   $node = $form['#node'];
   $addition = array();
   $form_element = array();
-  // TODO : is the "if (function_exists($function)) {" needed ?
+  // TODO: is the "if (function_exists($function)) {" needed ?
   // defining the $function here makes it unclear where it is actually called
   $function = $field['widget']['module'] .'_widget';
   $field_name = $field['field_name'];
   if (function_exists($function)) {
     // Prepare the values to be filled in the widget.
-    // We look in the following places :
+    // We look in the following places:
     // - Form submitted values
     // - Node values (when editing an existing node), or pre-filled values (when
     //   creating a new node translation)
@@ -86,7 +86,7 @@ function content_field_form(&$form, &$form_state, $field, $get_delta = NULL) {
         $defaults = array(
           '#field_name' => $field['field_name'],
           '#required' => $get_delta > 0 ? FALSE : $field['required'],
-          // TODO : should we add some logic for title and description too ?
+          // TODO: should we add some logic for title and description too ?
           '#columns'  => array_keys($field['columns']),
           '#title' => check_plain(t($field['widget']['label'])),
           // The widget description contains user input.
@@ -113,7 +113,7 @@ function content_field_form(&$form, &$form_state, $field, $get_delta = NULL) {
         '#field_name' => $field['field_name'],
         '#tree' => TRUE,
         '#weight' => $field['widget']['weight'],
-        // TODO : what's the need for #count ? does not seem to be used anywhere ?
+        // TODO: what's the need for #count ? does not seem to be used anywhere ?
         '#count' => count($form_element),
       );
       $addition[$field['field_name']] = array_merge($form_element, $defaults);
@@ -125,7 +125,7 @@ function content_field_form(&$form, &$form_state, $field, $get_delta = NULL) {
 /**
  * Special handling to create form elements for multiple values.
  *
- * Handles generic features for multiple fields :
+ * Handles generic features for multiple fields:
  * - number of widgets
  * - AHAH-'add more' button
  * - drag-n-drop value reordering
@@ -222,7 +222,7 @@ function content_multiple_value_form(&$form, &$form_state, $field, $items) {
     );
 
     // Add wrappers for the fields and 'more' button.
-    // TODO : could be simplified ?
+    // TODO: could be simplified ?
     $form_element['#prefix'] = '<div class="clear-block" id="'. $field_name_css .'-add-more-wrapper"><div id="'. $field_name_css .'-items">';
     $form_element[$field_name .'_add_more']['#prefix'] = '<div class="content-add-more">';
     $form_element[$field_name .'_add_more']['#suffix'] =  '</div></div></div>';

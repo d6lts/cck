@@ -607,7 +607,7 @@ function content_admin_field_main(&$form_state, $form_values) {
     '#required' => TRUE,
     );
   if (!empty($field_name)) {
-    $form['new']['field_name']['#description'] .= t(" This name cannot be changed.");
+    $form['new']['field_name']['#description'] .= ' '. t("This name cannot be changed.");
     $form['new']['field_name']['#disabled'] = TRUE;
     $form['new']['field_name']['#required'] = FALSE;
     $form['new']['field_name']['#value'] = $field_name;
@@ -615,7 +615,7 @@ function content_admin_field_main(&$form_state, $form_values) {
     $form['new_field_name'] = array('#type' => 'hidden', '#value' => FALSE);
   }
   else {
-    $form['new']['field_name']['#description'] .= t(" This name cannot be changed later! The name will be prefixed with 'field_' and can include lowercase unaccented letters, numbers, and underscores. The length of the name, including the prefix, is limited to no more than 32 letters.");
+    $form['new']['field_name']['#description'] .= ' '. t("This name cannot be changed later! The name will be prefixed with 'field_' and can include lowercase unaccented letters, numbers, and underscores. The length of the name, including the prefix, is limited to no more than 32 letters.");
     $form['new_field_name'] = array('#type' => 'hidden', '#value' => TRUE);
   }
   $form['new']['label'] = array(
@@ -924,7 +924,7 @@ function _content_admin_field(&$form_state, $type_name, $field_name) {
     // Set up form info that the default value widget will need to find in the form.
     $form['#field_info'] = array($widget_field['field_name'] => $widget_field);
 
-    // Advanced : PHP code.
+    // Advanced: PHP code.
     $form['widget']['default_value_fieldset']['advanced_options'] = array(
       '#type' => 'fieldset',
       '#title' => t('PHP code'),
@@ -952,7 +952,7 @@ function _content_admin_field(&$form_state, $type_name, $field_name) {
         '#default_value' => isset($field['widget']['default_value_php']) ? $field['widget']['default_value_php'] : '',
         '#rows' => 6,
         '#tree' => TRUE,
-        '#description' => t("Advanced usage only: PHP code that returns a default value. Should not include &lt;?php ?&gt; delimiters. If this field is filled out, the value returned by this code will override any value specified above. Expected format :<pre>!sample</pre>Using !link_devel's 'devel load' tab on a %type content page might help you figure out the expected format.", array(
+        '#description' => t("Advanced usage only: PHP code that returns a default value. Should not include &lt;?php ?&gt; delimiters. If this field is filled out, the value returned by this code will override any value specified above. Expected format: <pre>!sample</pre>Using !link_devel's 'devel load' tab on a %type content page might help you figure out the expected format.", array(
           '!sample' => $sample,
           '!link_devel' => l('devel.module', 'http://www.drupal.org/project/devel'),
           '%type' => $type_name)),
@@ -1087,7 +1087,7 @@ function _content_admin_field_validate($form, &$form_state) {
         $sample = 'array(
   0 => array('. implode(', ', $columns) .'),
   // You\'ll usually want to stop here. Provide more values
-  // if you want your \'default value\' to be multi-valued :
+  // if you want your \'default value\' to be multi-valued:
   1 => array('. implode(', ', $columns) .'),
   2 => ...
 );';
@@ -1254,7 +1254,7 @@ function content_alter_db($previous_field, $new_field) {
     $new_table = $new_db_info['table'];
   }
 
-  // Deletion of a field instance : drop relevant columns and tables and return.
+  // Deletion of a field instance: drop relevant columns and tables and return.
   if (empty($new_field)) {
     if ($previous_field['db_storage'] == CONTENT_DB_STORAGE_PER_FIELD) {
       db_drop_table($ret, $previous_table);
@@ -1411,7 +1411,7 @@ function content_alter_db($previous_field, $new_field) {
     }
   }
 
-  // TODO : debugging stuff - should be removed
+  // TODO: debugging stuff - should be removed
   if (module_exists('devel')) {
     //dsm($ret);
   }
@@ -1423,7 +1423,7 @@ function content_alter_db($previous_field, $new_field) {
  */
 function content_alter_db_cleanup() {
   // Rebuild the whole database schema.
-  // TODO : this could be optimized. We don't need to rebuild in *every case*...
+  // TODO: this could be optimized. We don't need to rebuild in *every case*...
   // Or do we? This affects the schema and menu and may have unfortunate
   // delayed effects if we don't clear everything out at this point.
   content_clear_type_cache(TRUE);

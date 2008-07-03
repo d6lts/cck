@@ -87,13 +87,13 @@ function text_update_6001() {
             $attributes['not null'] = FALSE;
             $column = $attributes['column'];
             db_change_field($ret, $table, $column, $column, $attributes);
-            // TODO : errors on text/blob columns : no default value allowed (!)
+            // TODO: errors on text/blob columns: no default value allowed (!)
             db_field_set_no_default($ret, $table, $column);
             if ($attributes['type'] == 'varchar' || $attributes['type'] == 'text') {
               $ret[] = update_sql("UPDATE {". $table ."} SET ". $column ." = NULL WHERE ". $column ." = ''");
             }
             else {
-              // TODO : replace format = 0 with format = NULL ?? Is this right ?
+              // TODO: replace format = 0 with format = NULL ?? Is this right ?
               $ret[] = update_sql("UPDATE {". $table ."} SET ". $column ." = NULL WHERE ". $column ." = 0");
             }
           }

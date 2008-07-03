@@ -143,7 +143,7 @@ function text_field_info() {
  *     information as values. This column information must include "type", the
  *     MySQL data type of the column, and may also include a "sortable" parameter
  *     to indicate to views.module that the column contains ordered information.
- *     TODO : Details of other information that can be passed to the database layer can
+ *     TODO: Details of other information that can be passed to the database layer can
  *     be found in the API for the Schema API.
  *   - "filters": an array of 'filters' definitions as expected by views.module
  *     (see Views Documentation).
@@ -334,7 +334,7 @@ function text_content_is_empty($item, $field) {
  *
  * The node array will look like:
  *
- *  'Single value' formatter :
+ *  'Single value' formatter:
  *   $node->content['field_foo'] = array(
  *     '#type' => 'content_field',
  *     '#title' => 'label'
@@ -357,7 +357,7 @@ function text_content_is_empty($item, $field) {
  *       ),
  *     ),
  *   );
- *  'Multiple value' formatter :
+ *  'Multiple value' formatter:
  *   $node->content['field_foo'] = array(
  *     '#type' => 'content_field',
  *     '#title' => 'label'
@@ -410,7 +410,7 @@ function text_field_formatter_info() {
  *   The name of the formatter being used to display the field.
  * @param $node
  *   The node object, for context. Will be NULL in some cases.
- *   Warning : when displaying field retrieved by Views, $node will not
+ *   Warning: when displaying field retrieved by Views, $node will not
  *   be a "full-fledged" node object, but an object containg the data returned
  *   by the Views query (at least nid, vid, changed)
  * @return
@@ -446,7 +446,7 @@ function text_field_formatter($field, $item, $formatter, $node) {
       $text = $item['value'];
   }
 
-  // TODO : undefined index text_processing / format on node preview
+  // TODO: undefined index text_processing / format on node preview
   if ($field['text_processing']) {
     return check_markup($text, $item['format'], is_null($node) || $node->build_mode == NODE_BUILD_PREVIEW);
   }

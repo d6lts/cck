@@ -2,7 +2,8 @@
 
 CCK 6.2.dev
 ===========
-- #278116 by Damien Tournoud : Make some strings easier to translate in views intergration forms.
+- #278116 by Damien Tournoud: Make some strings easier to translate in views intergration forms.
+- #278135 : fix some translation quirks + fix french typography for ':' :-)
 
 CCK 6.2.rc2
 ============
@@ -22,26 +23,26 @@ CCK 6.2.rc1
 - Alter content_types_install() to make sure it picks up all the regular field and widget values out of the database. Some of the field values were missing, which caused some of the other values to get set incorrectly during updates and when modules are enabled.
 - #235063 Fix jumbled multiple values when hitting the 'add-more' button with more than 10 values.
           Keep 'add more' button text consistent.
-- #270014 by yang_yi_cn : form for multiple values didn't call the right hook_widget
+- #270014 by yang_yi_cn: form for multiple values didn't call the right hook_widget
 - fix 'Undefined index: #access' notice when content_permissions.module is disabled
 - #270315 Mention dependency on schema.module in the desciptions of the CRUD tests.
-- #227951 by pwolanin : Add a permission for PHP 'default values' and 'allowed values'
-- #271682 by pwolanin : Make simpletests easier by not duplicating field name in same form.
-- #270315 by pwolanin : Update simpletest to use DrupalWebTestCase.
-- #227951 by pwolanin : Add permission for ability to use php code for default values and allowed values.
-- #270827 by pwolanin : Validity checks for the AHAH-'add more' request.
+- #227951 by pwolanin: Add a permission for PHP 'default values' and 'allowed values'
+- #271682 by pwolanin: Make simpletests easier by not duplicating field name in same form.
+- #270315 by pwolanin: Update simpletest to use DrupalWebTestCase.
+- #227951 by pwolanin: Add permission for ability to use php code for default values and allowed values.
+- #270827 by pwolanin: Validity checks for the AHAH-'add more' request.
 - #271087 Properly handle values '0' for text and number fields.
 - #258407 Fix field template name to allow for easy overridability.
-- #274038 by jpetso : Fix non-JS mode for 'add more' button.
-- #275192 by jpetso : Attach AHAH behaviors to newly inserted widgets on JS 'add more'.
-- #271710 by pwolanin : tests for UI field CRUD, and node form generation.
-- #266696 by pwolanin : Unable to change the label or widget type for a field.
-- #201329 by pwolanin and yched : Fix content_field_instance_delete() not cleaning tables.
-- #271577 by pwolanin : Fix unsanitized text (optionwidgets, number, text, field labels, field descriptions)
-- #273539 by jpetso : Fix JS-'add more' for complex widgets (e.g. filefield)
-- #227435 by pwolanin : Usability - Put fields links on content type overview page
-- #277101 : Hide fieldset-based fieldgroups when all fields empty
-- #198508 : Prevent data loss for disabled fields.
+- #274038 by jpetso: Fix non-JS mode for 'add more' button.
+- #275192 by jpetso: Attach AHAH behaviors to newly inserted widgets on JS 'add more'.
+- #271710 by pwolanin: tests for UI field CRUD, and node form generation.
+- #266696 by pwolanin: Unable to change the label or widget type for a field.
+- #201329 by pwolanin and yched: Fix content_field_instance_delete() not cleaning tables.
+- #271577 by pwolanin: Fix unsanitized text (optionwidgets, number, text, field labels, field descriptions)
+- #273539 by jpetso: Fix JS-'add more' for complex widgets (e.g. filefield)
+- #227435 by pwolanin: Usability - Put fields links on content type overview page
+- #277101: Hide fieldset-based fieldgroups when all fields empty
+- #198508: Prevent data loss for disabled fields.
 
 CCK 6.2.beta
 ============

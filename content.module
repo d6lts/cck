@@ -439,7 +439,7 @@ function content_form_alter(&$form, $form_state, $form_id) {
     foreach ($type['extra'] as $key => $value) {
       if (isset($form[$key])) {
         $form[$key]['#weight'] = $value['weight'];
-        // Special case for the 'menu path' fieldset : we keep it
+        // Special case for the 'menu path' fieldset: we keep it
         // just below the title.
         if ($key == 'title' && isset($form['menu'])) {
           $form['menu']['#weight'] = $value['weight'] + .1;
@@ -638,7 +638,7 @@ function content_associate_fields($module) {
 function content_field($op, &$node, $field, &$items, $teaser, $page) {
   switch ($op) {
     case 'validate':
-      // TODO : here we could validate that the number of multiple data is correct ?
+      // TODO: here we could validate that the number of multiple data is correct ?
       // We're controlling the number of fields to fill out and saving empty
       // ones if a specified number is requested, so no reason to do any validation
       // here right now, but if later create a method to indicate whether
@@ -665,7 +665,7 @@ function content_field($op, &$node, $field, &$items, $teaser, $page) {
       }
 
       // If there was an AHAH add more button in this field, don't save it.
-      // TODO : is it still needed ?
+      // TODO: is it still needed ?
       unset($items[$field['field_name'] .'_add_more']);
 
       // If content module is handling multiple values, don't save empty items.
@@ -844,7 +844,7 @@ function _content_sort_items_helper($a, $b) {
 }
 
 /**
- * TODO : PHPdoc
+ * TODO: PHPdoc
  */
 function content_storage($op, $node) {
   $type_name = $node->type;
@@ -852,8 +852,8 @@ function content_storage($op, $node) {
 
   switch ($op) {
     case 'load':
-      // OPTIMIZE : load all non multiple fields in a single JOIN query ?
-      // warning : 61-join limit in MySQL ?
+      // OPTIMIZE: load all non multiple fields in a single JOIN query ?
+      // warning: 61-join limit in MySQL ?
       $additions = array();
       // For each table used by this content type,
       foreach ($type['tables'] as $table) {
@@ -1398,7 +1398,7 @@ function content_clear_type_cache($rebuild_schema = FALSE) {
 /**
  * Retrieve the database storage location(s) for a field.
  *
- * TODO : add a word about why it's not included in the global _content_type_info array.
+ * TODO: add a word about why it's not included in the global _content_type_info array.
  *
  * @param $field
  *   The field whose database information is requested.
@@ -1807,9 +1807,9 @@ function content_callback($entity, $op, $field) {
  *  @param $op
  *    the name of the operation ('default values'...)
  *  @param $object
- *    - if $entity is 'field' or 'widget' : the field array,
+ *    - if $entity is 'field' or 'widget': the field array,
  *      including widget info.
- *    - if $entity is 'formater' : the formatter array.
+ *    - if $entity is 'formater': the formatter array.
  *  @return
  *    CONTENT_HANDLE_CORE    - the content module handles this operation.
  *    CONTENT_HANDLE_MODULE  - the implementing module handles this operation.

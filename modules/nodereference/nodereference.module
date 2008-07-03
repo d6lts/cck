@@ -111,10 +111,10 @@ function nodereference_field_settings($op, $field) {
            );
           $form['advanced']['advanced_view'] = array(
             '#type' => 'select',
-            '#title' => t('View'),
+            '#title' => t('View used to select the nodes'),
             '#options' => $views,
             '#default_value' => isset($field['advanced_view']) ? $field['advanced_view'] : '--',
-            '#description' => t('Choose the "Views module" view that selects the nodes that can be referenced.<br />Note :<ul><li>Only views that have fields will work for this purpose.</li><li>This will discard the "Content types" settings above. Use the view\'s "filters" section instead.</li><li>Use the view\'s "fields" section to display additional informations about candidate nodes on node creation/edition form.</li><li>Use the view\'s "sort criteria" section to determine the order in which candidate nodes will be displayed.</li></ul>'),
+            '#description' => t('Choose the "Views module" view that selects the nodes that can be referenced.<br />Note:<ul><li>Only views that have fields will work for this purpose.</li><li>This will discard the "Content types" settings above. Use the view\'s "filters" section instead.</li><li>Use the view\'s "fields" section to display additional informations about candidate nodes on node creation/edition form.</li><li>Use the view\'s "sort criteria" section to determine the order in which candidate nodes will be displayed.</li></ul>'),
           );
           $form['advanced']['advanced_view_args'] = array(
             '#type' => 'textfield',
@@ -172,7 +172,7 @@ function nodereference_field($op, &$node, $field, &$items, $teaser, $page) {
           unset($item['error_field']);
           if (!empty($item['nid'])) {
             if (!in_array($item['nid'], array_keys($refs))) {
-              form_set_error($error_field, t("%name : This post can't be referenced.", array('%name' => t($field['widget']['label']))));
+              form_set_error($error_field, t("%name: This post can't be referenced.", array('%name' => t($field['widget']['label']))));
             }
           }
         }
@@ -254,7 +254,7 @@ function theme_nodereference_formatter_full_teaser($element) {
     }
     $recursion_queue[] = $node->nid;
     if (in_array($element['#item']['nid'], $recursion_queue)) {
-      // Prevent infinite recursion caused by reference cycles :
+      // Prevent infinite recursion caused by reference cycles:
       // if the node has already been rendered earlier in this 'thread',
       // we fall back to 'default' (node title) formatter.
       return theme('nodereference_formatter_default', $element);
@@ -490,7 +490,7 @@ function nodereference_select_validate($element, &$form_state) {
     $value = $value[$parent];
     if ($parent == $field_key) {
       $element['#parents'] = $new_parents;
-      form_set_value($element, $value, $form_state);    
+      form_set_value($element, $value, $form_state);
       break;
     }
     $new_parents[] = $parent;
@@ -520,7 +520,7 @@ function nodereference_autocomplete_validate($element, &$form_state) {
     }
     else {
       // no explicit nid
-      // TODO :
+      // TODO:
       // the best thing would be to present the user with an additional form,
       // allowing the user to choose between valid candidates with the same title
       // ATM, we pick the first matching candidate...
@@ -555,7 +555,7 @@ function _nodereference_potential_references($field, $return_full_nodes = FALSE,
   && !empty($field['advanced_view'])
   && $field['advanced_view'] != '--'
   && ($view = nodereference_get_view($field, $string, $exact_string))) {
-    // advanced field : referenceable nodes defined by a view
+    // advanced field: referenceable nodes defined by a view
     // let views.module build the query
     $options = array();
     foreach ($view->result as $item) {
@@ -564,7 +564,7 @@ function _nodereference_potential_references($field, $return_full_nodes = FALSE,
     return $options;
   }
   else {
-    // standard field : referenceable nodes defined by content types
+    // standard field: referenceable nodes defined by content types
     // build the appropriate query
     $related_types = array();
     $args = array();
@@ -614,7 +614,7 @@ function _nodereference_potential_references($field, $return_full_nodes = FALSE,
  * re-rendered more than one in a session, as when getting
  * a list of potential references and then running each of
  * them through the theme.
- * 
+ *
  * If $string or $exact_string change, we'll need a new query,
  * so in that case we need to refresh the view.
  */
@@ -642,7 +642,7 @@ function nodereference_get_view($field, $string = '', $exact_string = false) {
     $view->display[$display]->row_plugin = 'fields';
     $view->display_handler->set_option('use_pager', FALSE);
     $view->display_handler->set_option('items_per_page', 0);
-        
+
     // Get arguments for the view.
     if (isset($field['advanced_view_args'])) {
       // TODO: Support Tokens using token.module ?
@@ -672,7 +672,7 @@ function nodereference_get_view($field, $string = '', $exact_string = false) {
     $view->execute_display($display, $view_args);
   }
   return $view;
-  
+
 }
 
 /**
@@ -682,7 +682,7 @@ function nodereference_autocomplete($field_name, $string = '') {
   $fields = content_fields();
   $field = $fields[$field_name];
   $matches = array();
-  
+
   $references = _nodereference_potential_references($field, TRUE, $string);
   foreach ($references as $row) {
     $matches[$row->node_title .' [nid:'. $row->nid .']'] = _nodereference_item($field, $row);
@@ -714,7 +714,7 @@ function theme_nodereference_item_advanced($item, $field_names, $view) {
   $item_fields = array();
   $item = (array) $item;
   foreach ($item as $delta => $value) {
-    // remove link tags (ex : for node titles)
+    // remove link tags (ex: for node titles)
     $value = preg_replace('/<a[^>]*>(.*)<\/a>/iU', '$1', $value);
     if (!empty($value)) {
       $item_fields[] = "<span class='view-field view-data-$field_names[$delta]'>$value</span>";;

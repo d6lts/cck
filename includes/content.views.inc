@@ -38,7 +38,7 @@ function content_views_field_views_data($field) {
   $field_types = _content_field_types();
 
   // Check the field module is available.
-  // TODO : is this really how we should do it ?
+  // TODO: is this really how we should do it ?
   if (isset($field_types[$field['type']])) {
     $db_info = content_database_info($field);
     $table_alias = content_views_tablename($field);
@@ -90,7 +90,7 @@ function content_views_field_views_data($field) {
     $data[$columns[0]] = array(
       'group' => t('Content'),
       'title' => t($field_types[$field['type']]['label']) .': '. t($field['widget']['label']) . ' ('. $field['field_name'] .')',
-      'help' =>  t($field_types[$field['type']]['label']) .' - '. t('Appears in : @types', array('@types' => implode(', ', $types))),
+      'help' =>  t($field_types[$field['type']]['label']) .' - '. t('Appears in: @types', array('@types' => implode(', ', $types))),
       'field' => array(
         'field' => $columns[0],
         'table' => $db_info['table'],
@@ -136,7 +136,7 @@ function content_views_field_views_data($field) {
       );
     }
 
-    // TODO : provide automatic filters, sorts, and arguments for each column, not just the first?
+    // TODO: provide automatic filters, sorts, and arguments for each column, not just the first?
     return array($table_alias => $data);
   }
 }
@@ -274,7 +274,7 @@ class views_handler_field_content extends views_handler_field_node {
    */
   function options_form(&$form, &$form_state) {
     parent::options_form($form, $form_state);
-    // TODO : do we want the 'link to node' checkbox ?
+    // TODO: do we want the 'link to node' checkbox ?
     // That's usually formatters business...
 
     $field = $this->content_field;
@@ -317,7 +317,7 @@ class views_handler_field_content extends views_handler_field_node {
 
     // $values will be used as a fake $node object;
     // we provide a build_mode for rendering.
-    // TODO : we can stick any value in there -
+    // TODO: we can stick any value in there -
     // what would make most sense ?  row_style ?
     $values->build_mode = 'views';
 
@@ -405,7 +405,7 @@ class views_handler_field_content_multiple extends views_handler_field_content {
     $options = $this->options;
 
     //  if (in_array($field['handler'], array('content_views_field_handler_group', 'content_views_field_handler_first', 'content_views_field_handler_last'))) {
-    // TODO : multiple_number / multiple_from
+    // TODO: multiple_number / multiple_from
     // We can also optimize the query when only one value should be retrieved
     $this->defer_query = $options['multiple']['group'] && $field['multiple'];
 
@@ -441,7 +441,7 @@ class views_handler_field_content_multiple extends views_handler_field_content {
 
     $this->field_values = array();
     // Build the list of nids to retrieve.
-    // TODO : try fetching from cache_content first ??
+    // TODO: try fetching from cache_content first ??
     $nids = array();
     foreach ($values as $value) {
       $nids[] = $value->nid;
@@ -461,7 +461,7 @@ class views_handler_field_content_multiple extends views_handler_field_content {
              " LEFT JOIN {". $db_info['table'] ."} $table_alias ON node.vid = $table_alias.vid".
              " WHERE node.nid IN (". implode(',', $nids) .")".
              " ORDER BY node.nid ASC, $table_alias.delta ". ($options['multiple']['multiple_reversed'] ? 'DESC' : 'ASC');
-    // TODO : Select all deltas or only a subset.
+    // TODO: Select all deltas or only a subset.
     $result = $options['multiple']['multiple_number'] ? db_query_range($query, $options['multiple']['multiple_from'], $options['multiple']['multiple_number']) : db_query($query);
 
     while ($item = db_fetch_array($result)) {
@@ -480,7 +480,7 @@ class views_handler_field_content_multiple extends views_handler_field_content {
 
     // $values will be used as a fake $node object;
     // we provide a build_mode for rendering.
-    // TODO : we can stick any value in there -
+    // TODO: we can stick any value in there -
     // what would make most sense ?  row_style ?
     $values->build_mode = 'views';
 
@@ -498,7 +498,7 @@ class views_handler_field_content_multiple extends views_handler_field_content {
     }
 
     if (count($items) > 1) {
-      // TODO : could we use generic field display ?
+      // TODO: could we use generic field display ?
       return theme('content_view_multiple_field', $items, $field, $values);
     }
     elseif (count($items) == 1) {

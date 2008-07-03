@@ -184,13 +184,13 @@ function content_schema() {
 
     $base_schema = content_table_schema($field);
     if ($field['db_storage'] == CONTENT_DB_STORAGE_PER_FIELD) {
-      // Per-field storage : add the 'per field' table if needed.
+      // Per-field storage: add the 'per field' table if needed.
       if (!isset($schema[$field_table])) {
         $schema[$field_table] = $base_schema;
       }
     }
     else {
-      // Per-type storage : merge the information for the field
+      // Per-type storage: merge the information for the field
       // in the existing table.
       $schema[$content_table]['fields'] = array_merge($schema[$content_table]['fields'], $base_schema['fields']);
       $schema[$content_table]['content fields'] = array_merge($schema[$content_table]['content fields'], $base_schema['content fields']);
