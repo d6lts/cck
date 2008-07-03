@@ -249,11 +249,9 @@ function userreference_widget_settings($op, $field) {
     case 'form':
       $form = array();
       $form['reverse_link'] = array(
-        '#type' => 'radios',
+        '#type' => 'checkbox',
         '#title' => t('Reverse link'),
-        '#default_value' => isset($field['reverse_link']) ? $field['reverse_link'] : 0,
-        '#options' => array(0 => t('No'), 1 => t('Yes')),
-        '#required' => TRUE,
+        '#default_value' => isset($field['reverse_link']) ? $field['reverse_link'] : t('No'),
         '#description' => t('If selected, a reverse link back to the referencing node will displayed on the referenced user record.'),
       );
       return $form;
@@ -408,7 +406,7 @@ function userreference_select_validate($element, &$form_state) {
     $value = $value[$parent];
     if ($parent == $field_key) {
       $element['#parents'] = $new_parents;
-      form_set_value($element, $value, $form_state);    
+      form_set_value($element, $value, $form_state);
       break;
     }
     $new_parents[] = $parent;
@@ -470,7 +468,7 @@ function _userreference_potential_references($field, $string = '', $uid = NULL) 
     $args[] = $string;
   }
   elseif (!empty($uid) && is_numeric($uid)) {
-    $where[] = "u.uid = $uid";    
+    $where[] = "u.uid = $uid";
   }
   else {
     $where[] = "u.uid > 0";
@@ -523,7 +521,7 @@ function _userreference_filter_handler($op, $filterinfo) {
 function userreference_user($type, &$edit, &$account) {
   switch ($type) {
     case 'load':
-      // Only add links if we are on the user 'view' page.      
+      // Only add links if we are on the user 'view' page.
       if (arg(0) != 'user' || arg(2)) {
         return;
       }
