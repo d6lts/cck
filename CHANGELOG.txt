@@ -4,7 +4,7 @@ CCK 6.2.dev
 ===========
 - #278116 by Damien Tournoud: Make some strings easier to translate in views intergration forms.
 - #278135 : fix some translation quirks + fix french typography for ':' :-)
-- Nodereference : Fix typo in 'Title mismatch. Please check your selection' error message.
+- Nodereference : 'Title mismatch. Please check your selection' error should break validation (+ fix typo).
 
 CCK 6.2.rc2
 ============
