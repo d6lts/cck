@@ -115,9 +115,9 @@ function userreference_field($op, &$node, $field, &$items, $teaser, $page) {
   switch ($op) {
     case 'validate':
       foreach ($items as $delta => $item) {
-        if (is_array($item) && !empty($item['error_field'])) {
-          $error_field = $item['error_field'];
-          unset($item['error_field']);
+        if (is_array($item)) {
+          $error_field = isset($item['_error_field']) ? $item['_error_field'] : '';
+          unset($item['_error_field']);
           if (!empty($item['uid']) && !array_key_exists($item['uid'], _userreference_potential_references($field, '', $item['uid']))) {
             form_set_error($error_field, t('%name: Invalid user.', array('%name' => t($field['widget']['label']))));
           }
@@ -345,7 +345,6 @@ function userreference_select_process($element, $edit, $form_state, $form) {
     '#type' => 'optionwidgets_select',
     '#default_value' => isset($element['#value']) ? $element['#value'] : '',
     '#element_validate' => array('optionwidgets_validate', 'userreference_select_validate'),
-
     // The following values were set by the content module and need
     // to be passed down to the nested element.
     '#field_name' => $element['#field_name'],
@@ -387,6 +386,13 @@ function userreference_autocomplete_process($element, $edit, $form_state, $form)
     '#title' => $element['#title'],
     '#required' => $element['#required'],
     '#description' => $element['#description'],
+  );
+
+  // Used so that hook_field('validate') knows where to flag an error.
+  $element['_error_field'] = array(
+    '#type' => 'value',
+    // TODO: why do we need to repeat $field_key twice ?
+    '#value' => implode('][', array_merge($element['#parents'], array($field_key, $field_key))),
   );
   return $element;
 }

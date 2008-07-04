@@ -2,7 +2,7 @@
 
 CCK 6.2.dev
 ===========
-- #278325 Nodereference: autocomplete widget does not check nodes are 'referenceable'
+- #278325 Nodereference/Userreference: autocomplete widget does not check nodes/users are 'referenceable'.
 - Userreference : Turn the 'Reverse link' radios into a checkbox in the field settings.
 
 CCK 6.2.rc3

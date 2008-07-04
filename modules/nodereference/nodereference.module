@@ -168,8 +168,8 @@ function nodereference_field($op, &$node, $field, &$items, $teaser, $page) {
       $refs = _nodereference_potential_references($field, TRUE);
       foreach ($items as $delta => $item) {
         if (is_array($item)) {
-          $error_field = $item['error_field'];
-          unset($item['error_field']);
+          $error_field = isset($item['_error_field']) ? $item['_error_field'] : '';
+          unset($item['_error_field']);
           if (!empty($item['nid'])) {
             if (!isset($refs[$item['nid']])) {
               form_set_error($error_field, t("%name: This post can't be referenced.", array('%name' => t($field['widget']['label']))));
@@ -462,7 +462,6 @@ function nodereference_autocomplete_process($element, $edit, $form_state, $form)
     '#default_value' => isset($element['#value']) ? $element['#value'] : '',
     '#autocomplete_path' => 'nodereference/autocomplete/'. $element['#field_name'],
     '#element_validate' => array('nodereference_autocomplete_validate'),
-
     // The following values were set by the content module and need
     // to be passed down to the nested element.
     '#field_name' => $element['#field_name'],
@@ -474,7 +473,7 @@ function nodereference_autocomplete_process($element, $edit, $form_state, $form)
   );
 
   // Used so that hook_field('validate') knows where to flag an error.
-  $element['error_field'] = array(
+  $element['_error_field'] = array(
     '#type' => 'value',
     // TODO: why do we need to repeat $field_key twice ?
     '#value' => implode('][', array_merge($element['#parents'], array($field_key, $field_key))),
