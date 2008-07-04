@@ -96,9 +96,14 @@ function nodereference_field_settings($op, $field) {
         $views = array('--' => '--');
         $all_views = views_get_all_views();
         foreach ($all_views as $view) {
-          // Only views that have fields will work for our purpose.
-          if (!empty($view->display['default']->display_options['fields'])) {
-            $views[t('Existing Views')][$view->name] = $view->name;
+          // Only 'node' views that have fields will work for our purpose.
+          if ($view->base_table == 'node' && !empty($view->display['default']->display_options['fields'])) {
+            if ($view->type == 'Default') {
+              $views[t('Default Views')][$view->name] = $view->name;
+            }
+            else {
+              $views[t('Existing Views')][$view->name] = $view->name;
+            }
           }
         }
 
@@ -648,7 +653,7 @@ function nodereference_get_view($field, $string = '', $exact_string = false) {
     $view->display_handler->set_option('items_per_page', 0);
 
     // Get arguments for the view.
-    if (isset($field['advanced_view_args'])) {
+    if (!empty($field['advanced_view_args'])) {
       // TODO: Support Tokens using token.module ?
       $view_args = array();
       $view_args = array_map('trim', explode(',', $field['advanced_view_args']));
@@ -658,12 +663,12 @@ function nodereference_get_view($field, $string = '', $exact_string = false) {
     }
 
     //We do need title field, so add it if not present (unlikely, but...)
-    if (!array_key_exists('title', $view->display[$display]->display_options['fields'])) {
+    if (!isset($view->display[$display]->display_options['fields']['title'])) {
       $view->add_item($display, 'field', 'node', 'title');
     }
     if (!empty($string)) {
       // We use the title filter in the view, so make sure it's there.
-      if (!array_key_exists('title', $view->display[$display]->display_options['filters'])) {
+      if (!isset($view->display[$display]->display_options['filters']['title'])) {
         $view->add_item($display, 'filter', 'node', 'title');
       }
       // TODO Is this the best way to set values?
