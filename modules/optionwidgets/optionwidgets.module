@@ -258,7 +258,7 @@ function optionwidgets_onoff_process($element, $edit, &$form_state, $form) {
   }
   $options = optionwidgets_options($field);
   $keys = array_keys($options);
-  $on_value = !empty($keys) ? $keys[1] : NULL;
+  $on_value = (!empty($keys) && isset($keys[1])) ? $keys[1] : NULL;
   $element[$field_key] = array(
     '#type' => 'checkbox',
     '#title' => isset($options[$on_value]) ? $options[$on_value] : '',

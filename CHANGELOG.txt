@@ -6,6 +6,7 @@ CCK 6.2.dev
 - Userreference: Turn the 'Reverse link' radios into a checkbox in the field settings.
 - Nodereference: Only list 'node' Views in the 'advanced mode', and differnciate default views as in D5.
 - Optionwidgets: fix PHP warning when creating a new 'on/off checkbox' and no allowed values could be set yet.
+- Optionwidgets: fix PHP warning on 'on/off checkbox' only one 'allowed value'.
 - Optionwidgets: add a 'warning' message to remind the admins they need to set allowed values.
 
 CCK 6.2.rc3
