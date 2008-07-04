@@ -17,7 +17,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: CCK\n"
 "POT-Creation-Date: 2008-07-03 07:41+0200\n"
-"PO-Revision-Date: 2008-07-04 22:58+0100\n"
+"PO-Revision-Date: 2008-07-04 23:09+0100\n"
 "Last-Translator: Alexander Hass\n"
 "Language-Team: German <lukas.gangoly@univie.ac.at>\n"
 "MIME-Version: 1.0\n"
@@ -38,7 +38,7 @@ msgstr "Formulareinstellungen"
 
 #: modules/fieldgroup/fieldgroup.module:129
 msgid "These settings apply to the group in the node editing form."
-msgstr "Diese Einstellungen werden auf die Gruppe im Bearbeitungsformular des Beitrages angewendet."
+msgstr "Diese Einstellungen gelten im Bearbeitungsformular des Beitrages für die Gruppe."
 
 #: modules/fieldgroup/fieldgroup.module:133
 msgid "Style"
@@ -66,7 +66,7 @@ msgstr "Anzeigeeinstellungen"
 
 #: modules/fieldgroup/fieldgroup.module:152
 msgid "These settings apply to the group on node display."
-msgstr "Diese Einstellungen werden auf die Gruppe in der Beitragsanzeige angewendet."
+msgstr "Diese Einstellungen gelten in der Beitragsanzeige für die Gruppe."
 
 #: modules/fieldgroup/fieldgroup.module:159
 msgid "A description of the group."
