@@ -20,7 +20,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: German translation of CCK\n"
 "POT-Creation-Date: 2008-06-16 20:05+0200\n"
-"PO-Revision-Date: 2008-07-04 00:26+0100\n"
+"PO-Revision-Date: 2008-07-04 23:14+0100\n"
 "Last-Translator: Alexander Hass\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -88,7 +88,7 @@ msgstr "Die maximale Zeichenlänge des Feldes. Für eine unbegrenzte Länge frei
 #: modules/number/number.module:129
 #: modules/text/text.module:88
 msgid "Allowed values list"
-msgstr "Gültige Werteliste"
+msgstr "Zulässige Werteliste"
 
 #: examples/example_field.php:178
 #: modules/number/number.module:133
