@@ -17,7 +17,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: CCK\n"
 "POT-Creation-Date: 2008-07-03 07:41+0200\n"
-"PO-Revision-Date: 2008-07-04 20:02+0100\n"
+"PO-Revision-Date: 2008-07-04 23:53+0100\n"
 "Last-Translator: Alexander Hass\n"
 "Language-Team: German <lukas.gangoly@univie.ac.at>\n"
 "MIME-Version: 1.0\n"
@@ -94,7 +94,7 @@ msgstr "RSS-Eintrag"
 
 #: content.module:1642
 msgid "Search Index"
-msgstr "Sucheindex"
+msgstr "Suchindex"
 
 #: content.module:1643
 msgid "Search Result"
