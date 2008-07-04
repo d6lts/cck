@@ -17,7 +17,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: CCK\n"
 "POT-Creation-Date: 2008-07-03 07:41+0200\n"
-"PO-Revision-Date: 2008-07-04 20:03+0100\n"
+"PO-Revision-Date: 2008-07-04 23:42+0100\n"
 "Last-Translator: Alexander Hass\n"
 "Language-Team: German <lukas.gangoly@univie.ac.at>\n"
 "MIME-Version: 1.0\n"
@@ -290,7 +290,7 @@ msgstr "Globale Einstellungen"
 
 #: includes/content.admin.inc:974
 msgid "These settings apply to the %field field in every content type in which it appears."
-msgstr "Diese Einstellungen werden auf das Feld %field in jedem Inhaltstyp angewandt, in welchem es vorkommt."
+msgstr "Diese Einstellungen gelten für das Feld %field in jedem Inhaltstyp, indem das Feld erscheint."
 
 #: includes/content.admin.inc:978
 msgid "Required"
