@@ -16,8 +16,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: CCK\n"
-"POT-Creation-Date: 2008-06-16 20:05+0200\n"
-"PO-Revision-Date: 2008-06-16 20:12+0100\n"
+"POT-Creation-Date: 2008-07-03 07:41+0200\n"
+"PO-Revision-Date: 2008-07-04 01:05+0100\n"
 "Last-Translator: Alexander Hass\n"
 "Language-Team: German <lukas.gangoly@univie.ac.at>\n"
 "MIME-Version: 1.0\n"
@@ -28,71 +28,75 @@ msgstr ""
 "X-Poedit-Country: GERMANY\n"
 "X-Poedit-SourceCharset: utf-8\n"
 
-#: modules/fieldgroup/fieldgroup.module:99
+#: modules/fieldgroup/fieldgroup.module:103
 msgid "Add"
 msgstr "Hinzufügen"
 
-#: modules/fieldgroup/fieldgroup.module:125
+#: modules/fieldgroup/fieldgroup.module:128
+msgid "Form settings"
+msgstr "Formulareinstellungen"
+
+#: modules/fieldgroup/fieldgroup.module:129
 msgid "These settings apply to the group in the node editing form."
 msgstr "Diese Einstellungen werden auf die Gruppe im Bearbeitungsformular des Beitrages angewendet."
 
-#: modules/fieldgroup/fieldgroup.module:129
+#: modules/fieldgroup/fieldgroup.module:133
 msgid "Style"
 msgstr "Darstellung"
 
-#: modules/fieldgroup/fieldgroup.module:132
+#: modules/fieldgroup/fieldgroup.module:136
 msgid "always open"
 msgstr "Immer geöffnet"
 
-#: modules/fieldgroup/fieldgroup.module:133
+#: modules/fieldgroup/fieldgroup.module:137
 msgid "collapsible"
 msgstr "Zusammenklappbar"
 
-#: modules/fieldgroup/fieldgroup.module:134
+#: modules/fieldgroup/fieldgroup.module:138
 msgid "collapsed"
 msgstr "Zusammengeklappt"
 
-#: modules/fieldgroup/fieldgroup.module:142
+#: modules/fieldgroup/fieldgroup.module:146
 msgid "Instructions to present to the user on the editing form."
 msgstr "Eine Hilfestellung, die dem Benutzer im Bearbeitungsformular angezeigt wird."
 
-#: modules/fieldgroup/fieldgroup.module:148
+#: modules/fieldgroup/fieldgroup.module:151
+msgid "Display settings"
+msgstr "Anzeigeeinstellungen"
+
+#: modules/fieldgroup/fieldgroup.module:152
 msgid "These settings apply to the group on node display."
 msgstr "Diese Einstellungen werden auf die Gruppe in der Beitragsanzeige angewendet."
 
-#: modules/fieldgroup/fieldgroup.module:152
-msgid "Description"
-msgstr "Beschreibung"
-
-#: modules/fieldgroup/fieldgroup.module:155
+#: modules/fieldgroup/fieldgroup.module:159
 msgid "A description of the group."
 msgstr "Eine Beschreibung der Gruppe."
 
-#: modules/fieldgroup/fieldgroup.module:190
+#: modules/fieldgroup/fieldgroup.module:194
 msgid "The group name %name already exists."
 msgstr "Der Gruppenname %name ist bereits vorhanden."
 
-#: modules/fieldgroup/fieldgroup.module:194
+#: modules/fieldgroup/fieldgroup.module:198
 msgid "The group name %name is invalid."
 msgstr "Der Gruppenname %name ist ungültig."
 
-#: modules/fieldgroup/fieldgroup.module:229
+#: modules/fieldgroup/fieldgroup.module:233
 msgid "Are you sure you want to remove the group %label?"
 msgstr "Soll die Gruppe %label wirklich gelöscht werden?"
 
-#: modules/fieldgroup/fieldgroup.module:231
+#: modules/fieldgroup/fieldgroup.module:235
 msgid "This action cannot be undone."
 msgstr "Dieser Vorgang kann nicht rückgängig gemacht werden."
 
-#: modules/fieldgroup/fieldgroup.module:240
+#: modules/fieldgroup/fieldgroup.module:244
 msgid "The group %group_name has been removed."
 msgstr "Die Gruppe %group_name wurde gelöscht."
 
-#: modules/fieldgroup/fieldgroup.module:343
+#: modules/fieldgroup/fieldgroup.module:347
 msgid "Display in group"
 msgstr "Zeige in Gruppe"
 
-#: modules/fieldgroup/fieldgroup.module:346
+#: modules/fieldgroup/fieldgroup.module:350
 msgid "Select a group, in which the field will be displayed on the editing form."
 msgstr "Wählen Sie eine Gruppe aus, in der das Feld im Bearbeitungsformular angezeigt wird."
 
