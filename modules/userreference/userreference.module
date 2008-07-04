@@ -251,7 +251,7 @@ function userreference_widget_settings($op, $field) {
       $form['reverse_link'] = array(
         '#type' => 'checkbox',
         '#title' => t('Reverse link'),
-        '#default_value' => isset($field['reverse_link']) ? $field['reverse_link'] : t('No'),
+        '#default_value' => isset($field['reverse_link']) ? $field['reverse_link'] : 0,
         '#description' => t('If selected, a reverse link back to the referencing node will displayed on the referenced user record.'),
       );
       return $form;
