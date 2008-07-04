@@ -202,13 +202,13 @@ function optionwidgets_select_process($element, $edit, &$form_state, $form) {
   $field_name = $element['#field_name'];
   $field = $form['#field_info'][$field_name];
   $field_key  = $element['#columns'][0];
-  
+
   // See if this element is in the database format or the transformed format,
   // and transform it if necessary.
   if (is_array($element['#value']) && !array_key_exists($field_key, $element['#value'])) {
     $element['#value'] = optionwidgets_data2form($element, $element['#default_value'], $field);
   }
-  
+
   $options = optionwidgets_options($field);
   $element[$field_key] = array(
     '#type' => 'select',
@@ -219,7 +219,7 @@ function optionwidgets_select_process($element, $edit, &$form_state, $form) {
     '#options' => $options,
     '#default_value' => isset($element['#value'][$field_key]) ? $element['#value'][$field_key] : NULL,
   );
-  
+
   // Make sure field info will be available to the validator which
   // does not get the values in $form.
 
@@ -255,7 +255,7 @@ function optionwidgets_onoff_process($element, $edit, &$form_state, $form) {
   $on_value = !empty($keys) ? $keys[1] : NULL;
   $element[$field_key] = array(
     '#type' => 'checkbox',
-    '#title' => $options[$on_value],
+    '#title' => isset($options[$on_value]) ? $options[$on_value] : '',
     '#description' => $element['#description'],
     '#default_value' => isset($element['#value'][$field_key][0]) ? $element['#value'][$field_key][0] == $on_value : FALSE,
     '#return_value' => $on_value,
