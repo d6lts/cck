@@ -17,7 +17,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: CCK\n"
 "POT-Creation-Date: 2008-07-03 07:41+0200\n"
-"PO-Revision-Date: 2008-07-04 01:05+0100\n"
+"PO-Revision-Date: 2008-07-04 22:58+0100\n"
 "Last-Translator: Alexander Hass\n"
 "Language-Team: German <lukas.gangoly@univie.ac.at>\n"
 "MIME-Version: 1.0\n"
@@ -94,7 +94,7 @@ msgstr "Die Gruppe %group_name wurde gelöscht."
 
 #: modules/fieldgroup/fieldgroup.module:347
 msgid "Display in group"
-msgstr "Zeige in Gruppe"
+msgstr "Anzeigen in Gruppe"
 
 #: modules/fieldgroup/fieldgroup.module:350
 msgid "Select a group, in which the field will be displayed on the editing form."
