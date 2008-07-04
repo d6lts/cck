@@ -18,6 +18,12 @@ function optionwidgets_form_alter(&$form, $form_state, $form_id) {
     && in_array($form['main']['widget_type']['#default_value'], array('optionwidgets_onoff', 'optionwidgets_buttons', 'optionwidgets_select'))) {
       $form['field']['allowed_values_fieldset']['#collapsed'] = FALSE;
       $form['field']['allowed_values_fieldset']['#description'] = $output;
+      // If no 'allowed values' were set yet, add a remainder in the messages area.
+      if (empty($form_state['post'])
+      && empty($form['field']['allowed_values_fieldset']['allowed_values']['#default_value'])
+      && empty($form['field']['allowed_values_fieldset']['advanced_options']['allowed_values_php']['#default_value'])) {
+        drupal_set_message(t("You need to specify the 'allowed values' for this field."), 'warning');
+      }
     }
   }
 }
