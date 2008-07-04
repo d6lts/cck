@@ -17,7 +17,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: CCK\n"
 "POT-Creation-Date: 2008-06-16 20:05+0200\n"
-"PO-Revision-Date: 2008-06-16 20:19+0100\n"
+"PO-Revision-Date: 2008-07-04 22:44+0100\n"
 "Last-Translator: Alexander Hass\n"
 "Language-Team: German <lukas.gangoly@univie.ac.at>\n"
 "MIME-Version: 1.0\n"
@@ -90,7 +90,7 @@ msgstr "Präfix"
 
 #: modules/number/number.module:112
 msgid "Define a string that should be prefixed to the value, like $ or €. Leave blank for none. Separate singular and plural values with a pipe (pound|pounds)."
-msgstr "Eine Zeichenkette angeben, welche dem Wert vorrangestellt werden soll, z.b. $ oder €. Ansonsten freilassen. Werte für Einzahl und Mehrzahl mit einer Pipe trennen (pound|pounds)."
+msgstr "Eine Zeichenkette angeben, welche dem Wert vorrangestellt werden soll, z.b. $ oder €. Ansonsten freilassen. Werte für Einzahl und Mehrzahl mit einer Pipe trennen (Pfund|Pfunde)."
 
 #: modules/number/number.module:116
 msgid "Suffix"
@@ -98,7 +98,7 @@ msgstr "Suffix"
 
 #: modules/number/number.module:119
 msgid "Define a string that should suffixed to the value, like m², m/s², kb/s. Leave blank for none. Separate singular and plural values with a pipe (pound|pounds)."
-msgstr "Eine Zeichenkette angeben, welche dem Wert angehängt werden soll, z.b. m², m/s², kb/s. Ansonsten freilassen. Werte für Einzahl und Mehrzahl mit einer Pipe trennen (pound|pounds)."
+msgstr "Eine Zeichenkette angeben, welche dem Wert angehängt werden soll, z.b. m², m/s², kb/s. Ansonsten freilassen. Werte für Einzahl und Mehrzahl mit einer Pipe trennen (Pfund|Pfunde)."
 
 #: modules/number/number.module:162
 msgid "\"Minimum\" must be a number."
