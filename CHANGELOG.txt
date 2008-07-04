@@ -8,6 +8,7 @@ CCK 6.2.dev
 - Optionwidgets: fix PHP warning when creating a new 'on/off checkbox' and no allowed values could be set yet.
 - Optionwidgets: fix PHP warning on 'on/off checkbox' only one 'allowed value'.
 - Optionwidgets: add a 'warning' message to remind the admins they need to set allowed values.
+- #278676 by hass: fix untranslated field and widget type names.
 
 CCK 6.2.rc3
 ===========

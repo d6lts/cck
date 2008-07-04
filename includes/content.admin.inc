@@ -490,8 +490,8 @@ function content_field_type_options($type = NULL) {
   foreach ($field_types as $field_type_name => $field_type) {
     foreach ($widget_types as $widget_type_name => $widget_type) {
       if (in_array($field_type_name, $widget_type['field types'])) {
-        $field_type_options[$field_type_name] = $field_type['label'];
-        $widget_type_options[$field_type_name][$widget_type_name] = $widget_type['label'];
+        $field_type_options[$field_type_name] = t($field_type['label']);
+        $widget_type_options[$field_type_name][$widget_type_name] = t($widget_type['label']);
       }
     }
   }
