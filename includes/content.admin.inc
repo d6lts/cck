@@ -621,7 +621,7 @@ function content_admin_field_main(&$form_state, $form_values) {
     $form['new_field_name'] = array('#type' => 'hidden', '#value' => FALSE);
   }
   else {
-    $form['new']['field_name']['#description'] .= ' '. t("This name cannot be changed later! The name will be prefixed with 'field_' and can include lowercase unaccented letters, numbers, and underscores. The length of the name, including the prefix, is limited to no more than 32 letters.");
+    $form['new']['field_name']['#description'] .= ' '. t("This name cannot be changed later! The name will be prefixed with 'field_' and can include lowercase unaccented letters, numbers, and underscores. The length of the name, including the prefix, is limited to no more than 32 characters.");
     $form['new_field_name'] = array('#type' => 'hidden', '#value' => TRUE);
   }
   $form['new']['label'] = array(
