@@ -20,7 +20,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: German translation of CCK\n"
 "POT-Creation-Date: 2008-07-05 11:21+0200\n"
-"PO-Revision-Date: 2008-07-05 11:33+0100\n"
+"PO-Revision-Date: 2008-07-05 16:08+0100\n"
 "Last-Translator: Alexander Hass\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -220,7 +220,4 @@ msgstr "Die möglichen Werte, die dieses Feld enthalten kann. Geben Sie pro Zeil
 #: modules/text/text.module:114
 msgid "This PHP code was set by an administrator and will override the allowed values list above."
 msgstr "Dieser PHP-Code wurde von einem Administrator festgelegt und wird die obige zulässige Werteliste übersteuern."
-
-#~ msgid "%label is longer than %max characters."
-#~ msgstr "%label ist länger als %max Zeichen."
 
