@@ -143,7 +143,7 @@ function content_admin_field_overview_form(&$form_state, $type_name) {
     $form[$name] = array(
       'human_name' => array('#value' => check_plain($field['widget']['label'])),
       'name' => array('#value' => $field['field_name']),
-      'type' => array('#value' => $field['type']),
+      'type' => array('#value' => t($field['type'])),
       'configure' => array('#value' => l(t('Configure'), 'admin/content/node-type/'. $type['url_str'] .'/fields/'. $field['field_name'] .'/edit')),
       'remove' => array('#value' => l(t('Remove'), 'admin/content/node-type/'. $type['url_str'] .'/fields/'. $field['field_name'] .'/remove')),
       'weight' => array('#type' => 'textfield', '#default_value' => $weight),
@@ -180,8 +180,8 @@ function content_admin_field_overview_form(&$form_state, $type_name) {
   foreach ($extra as $name => $label) {
     $weight = $extra[$name]['weight'];
     $form[$name] = array(
-      'human_name' => array('#value' => $extra[$name]['label']),
-      'name' => array(),
+      'human_name' => array('#value' => t($extra[$name]['label'])),
+      'name' => array('#value' => isset($extra[$name]['description']) ? $extra[$name]['description'] : ''),
       'type' => array(),
       'configure' => array(),
       'remove' => array(),
@@ -190,7 +190,7 @@ function content_admin_field_overview_form(&$form_state, $type_name) {
       'hidden_name' => array('#type' => 'hidden', '#default_value' => $name),
       '#leaf' => TRUE,
       '#root' => TRUE,
-      '#disabled' => TRUE,
+      '#extra_field' => TRUE,
     );
     $dummy[$name] = array('#weight' => $weight, '#value' => $name .' ');
   }
@@ -209,7 +209,7 @@ function theme_content_admin_field_overview_form($form) {
   if (empty($form['#order'])) {
     return;
   }
-  $header = array(t('Label'), t('Name'), t('Type'), t('Weight'), array('data' => t('Operations'), 'colspan' => 2));
+  $header = array(t('Label'), t('Weight'), t('Name'), t('Type'), t('Operations'));
   $rows = array();
 
   foreach ($form['#order'] as $key) {
@@ -223,13 +223,19 @@ function theme_content_admin_field_overview_form($form) {
       $element['human_name']['#suffix'] = '</strong>';
     }
     $row[] = theme('indentation', isset($element['#depth']) ? $element['#depth'] : 0) . drupal_render($element['human_name']);
-    $row[] = drupal_render($element['name']);
-    $row[] = drupal_render($element['type']);
+    // tabledrag.js cell hiding doesn't work well with colspans in table rows,
+    // so we add the cell to hide *before* the ones with colspans.
     $row[] = drupal_render($element['weight']) . drupal_render($element['parent']) . drupal_render($element['hidden_name']);
-    $row[] = drupal_render($element['configure']);
-    $row[] = drupal_render($element['remove']);
+    if (isset($element['#extra_field'])) {
+      $row[] = array('data' => drupal_render($element['name']), 'colspan' => 3);
+    }
+    else {
+      $row[] = drupal_render($element['name']);
+      $row[] = drupal_render($element['type']);
+      $row[] = drupal_render($element['configure']) .'&nbsp;&nbsp;'. drupal_render($element['remove']);
+    }
     $class = 'draggable';
-    $class .= isset($element['#disabled']) ? ' menu-disabled' : '';
+    $class .= isset($element['#extra_field']) ? ' menu-disabled' : '';
     $class .= isset($element['#leaf']) ? ' tabledrag-leaf' : '';
     $class .= isset($element['#root']) ? ' tabledrag-root' : '';
     $rows[] = array('data' => $row, 'class' => $class);

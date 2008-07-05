@@ -12,6 +12,7 @@ CCK 6.2.dev
 - #278676 by hass: fix untranslated field and widget type names.
 - Do not validate the fields settings form when the 'change label / widget' submits the form.
 - #273502 Let the 'menu settings' node-form fieldset on node forms be repositioned.
+- #273502 followup: add a description for non-CCK 'fields' on 'Manage fields' tab.
 - #278793 by hass: fix untranslated PHP code example.
 
 CCK 6.2.rc3
