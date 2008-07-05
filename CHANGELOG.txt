@@ -15,6 +15,7 @@ CCK 6.2.dev
 - #273502 followup: add a description for non-CCK 'fields' on 'Manage fields' tab.
 - #278793 by hass: fix untranslated PHP code example.
 - Nodereference/Userreference: There were two 'no selection' choices on 'select list' widget for non-required fields.
+- #277486 Nodereference/Userreference : no selection with 'select list' widget stores 0 instead of NULL.
 
 CCK 6.2.rc3
 ===========
