@@ -190,6 +190,14 @@ function optionwidgets_buttons_process($element, $edit, &$form_state, $form) {
     '#default_value' => isset($element['#value'][$field_key]) ? $element['#value'][$field_key] : NULL,
   );
 
+  // Used so that hook_field('validate') knows where to flag an error.
+  // NOTE : doesn't really work, because errors don't 'stick' on the container
+  // of expanded radios / checkboxes.
+  $element['_error_element'] = array(
+    '#type' => 'value',
+    '#value' => implode('][', array_merge($element['#parents'], array($field_key))),
+  );
+
   // Make sure field info will be available to the validator which
   // does not get the values in $form.
   $form_state['#field_info'][$field['field_name']] = $field;
@@ -224,6 +232,12 @@ function optionwidgets_select_process($element, $edit, &$form_state, $form) {
     '#multiple' => $field['multiple'],
     '#options' => $options,
     '#default_value' => isset($element['#value'][$field_key]) ? $element['#value'][$field_key] : NULL,
+  );
+
+  // Used so that hook_field('validate') knows where to flag an error.
+  $element['_error_element'] = array(
+    '#type' => 'value',
+    '#value' => implode('][', array_merge($element['#parents'], array($field_key))),
   );
 
   // Make sure field info will be available to the validator which
@@ -267,6 +281,12 @@ function optionwidgets_onoff_process($element, $edit, &$form_state, $form) {
     '#return_value' => $on_value,
   );
 
+  // Used so that hook_field('validate') knows where to flag an error.
+  $element['_error_element'] = array(
+    '#type' => 'value',
+    '#value' => implode('][', array_merge($element['#parents'], array($field_key))),
+  );
+
   // Make sure field info will be available to the validator which
   // does not get the values in $form.
   $form_state['#field_info'][$field['field_name']] = $field;
@@ -283,7 +303,7 @@ function optionwidgets_onoff_process($element, $edit, &$form_state, $form) {
  */
 function optionwidgets_validate($element, &$form_state) {
   $field = $form_state['#field_info'][$element['#field_name']];
-  $updated = optionwidgets_form2data($element, $element['#value'], $field);
+  $updated = optionwidgets_form2data($element, $field);
   form_set_value($element, $updated, $form_state);
 }
 
@@ -318,7 +338,8 @@ function optionwidgets_data2form($element, $items, $field) {
  * to the format to be stored in the field. Can be called anywhere this
  * transformation is needed.
  */
-function optionwidgets_form2data($element, $items, $field) {
+function optionwidgets_form2data($element, $field) {
+  $items = $element['#value'];
   $field_key = $element['#columns'][0];
   $options = optionwidgets_options($field);
 
@@ -341,7 +362,17 @@ function optionwidgets_form2data($element, $items, $field) {
       $values[] = NULL;
     }
   }
-  return content_transpose_array_rows_cols(array($field_key => $values));
+  $result = content_transpose_array_rows_cols(array($field_key => $values));
+
+  // Reinject the '_error_element' so that hook_field('validate') knows
+  // where to flag an error.
+  if (isset($element['_error_element'])) {
+    foreach ($result as $key => $value) {
+      $result[$key]['_error_element'] = $element['_error_element']['#value'];
+    }
+  }
+
+  return $result;
 }
 
 /**

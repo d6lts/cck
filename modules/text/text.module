@@ -154,19 +154,15 @@ function text_field($op, &$node, $field, &$items, $teaser, $page) {
       $allowed_values = content_allowed_values($field);
       if (is_array($items)) {
         foreach ($items as $delta => $item) {
-          $error_field = $field['field_name'] .']['. $delta .'][value';
+          $error_element = isset($item['_error_element']) ? $item['_error_element'] : '';
+          unset($item['_error_element']);
           if (!empty($item['value'])) {
             if (count($allowed_values) && !array_key_exists($item['value'], $allowed_values)) {
-              form_set_error($error_field, t('Illegal value for %name.', array('%name' => t($field['widget']['label']))));
+              form_set_error($error_element, t('Illegal value for %name.', array('%name' => t($field['widget']['label']))));
             }
-          }
-        }
-      }
-      if (!empty($field['max_length'])) {
-        foreach ($items as $delta => $data) {
-          $error_field = $field['field_name'] .']['. $delta .'][value';
-          if (strlen($data['value']) > $field['max_length']) {
-            form_set_error($error_field, t('%label is longer than %max characters.', array('%label' => $field['widget']['label'], '%max' => $field['max_length'])));
+            if (!empty($field['max_length']) && strlen($item['value']) > $field['max_length']) {
+              form_set_error($error_element, t('%name is longer than %max characters.', array('%name' => $field['widget']['label'], '%max' => $field['max_length'])));
+            }
           }
         }
       }
@@ -408,6 +404,13 @@ function text_textfield_process($element, $edit, $form_state, $form) {
     $parents = array_merge($element['#parents'] , array($filter_key));
     $element[$filter_key] = filter_form($format, 1, $parents);
   }
+
+  // Used so that hook_field('validate') knows where to flag an error.
+  $element['_error_element'] = array(
+    '#type' => 'value',
+    '#value' => implode('][', array_merge($element['#parents'], array($field_key))),
+  );
+
   return $element;
 }
 
@@ -438,6 +441,12 @@ function text_textarea_process($element, $edit, $form_state, $form) {
     $parents = array_merge($element['#parents'] , array($filter_key));
     $element[$filter_key] = filter_form($format, 1, $parents);
   }
+
+  // Used so that hook_field('validate') knows where to flag an error.
+  $element['_error_element'] = array(
+    '#type' => 'value',
+    '#value' => implode('][', array_merge($element['#parents'], array($field_key))),
+  );
 
   return $element;
 }
