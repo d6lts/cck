@@ -17,7 +17,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: CCK\n"
 "POT-Creation-Date: 2008-07-05 11:21+0200\n"
-"PO-Revision-Date: 2008-07-05 13:12+0100\n"
+"PO-Revision-Date: 2008-07-05 13:59+0100\n"
 "Last-Translator: Alexander Hass\n"
 "Language-Team: German <lukas.gangoly@univie.ac.at>\n"
 "MIME-Version: 1.0\n"
@@ -90,7 +90,7 @@ msgstr "Neues Feld hinzufügen"
 
 #: includes/content.admin.inc:137
 msgid "To change the order of a field, grab a drag-and-drop handle under the Label column and drag the field to a new location in the list. (Grab a handle by clicking and holding the mouse while hovering over a handle icon.) Remember that your changes will not be saved until you click the Save button at the bottom of the page."
-msgstr ""
+msgstr "Um die Reihenfolge von einem Feld zu ändern, das Drag-and-Drop-Kreuz in der Beschreibungsspalte anfassen und das Feld an einen neuen Ort in der Liste ziehen. (Ein Drag-and-Drop-Kreuz wird angefasst, indem das Kreuz-Icon angeklickt und festgehalten wird.) Die Änderungen werden nicht gespeichert bis am Ende der Seite der Speichern-Knopf gedrückt wird."
 
 #: includes/content.admin.inc:147;163
 msgid "Configure"
@@ -331,7 +331,7 @@ msgstr "Das Feld %label wurde gespeichert."
 
 #: includes/content.admin.inc:1464
 msgid "Processing"
-msgstr ""
+msgstr "Verarbeitung läuft"
 
 #: includes/content.admin.inc:1465
 msgid "The update has encountered an error."
