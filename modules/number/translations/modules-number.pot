@@ -3,14 +3,14 @@
 # LANGUAGE translation of Drupal (modules-number)
 # Copyright YEAR NAME <EMAIL@ADDRESS>
 # Generated from files:
-#  number.module,v 1.91.2.5 2008/06/28 15:42:41 yched
+#  number.module,v 1.91.2.6 2008/07/05 01:13:26 yched
 #  number.info,v 1.7 2008/04/23 18:02:16 dww
 #
 #, fuzzy
 msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
-"POT-Creation-Date: 2008-07-05 10:58+0200\n"
+"POT-Creation-Date: 2008-07-05 11:21+0200\n"
 "PO-Revision-Date: YYYY-mm-DD HH:MM+ZZZZ\n"
 "Last-Translator: NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <EMAIL@ADDRESS>\n"
@@ -111,15 +111,15 @@ msgstr ""
 msgid "unformatted"
 msgstr ""
 
-#: modules/number/number.module:476
+#: modules/number/number.module:483
 msgid "Only numbers and decimals are allowed in %field. %start was changed to %value."
 msgstr ""
 
-#: modules/number/number.module:494
+#: modules/number/number.module:501
 msgid "Only numbers are allowed in %field. %start was changed to %value."
 msgstr ""
 
-#: modules/number/number.module:513
+#: modules/number/number.module:520
 msgid "Only numbers and the decimal character (%decimal) are allowed in %field. %start was changed to %value."
 msgstr ""
 

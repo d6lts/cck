@@ -2,13 +2,15 @@
 #
 # LANGUAGE translation of Drupal (examples)
 # Copyright YEAR NAME <EMAIL@ADDRESS>
-# Generated from file: example_field.php,v 1.5.2.2 2008/07/03 12:44:51 yched
+# Generated from files:
+#  example_field.php,v 1.5.2.2 2008/07/03 12:44:51 yched
+#  simple_field.php,v 1.5.2.2 2008/07/03 12:44:51 yched
 #
 #, fuzzy
 msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
-"POT-Creation-Date: 2008-07-05 10:58+0200\n"
+"POT-Creation-Date: 2008-07-05 11:21+0200\n"
 "PO-Revision-Date: YYYY-mm-DD HH:MM+ZZZZ\n"
 "Last-Translator: NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <EMAIL@ADDRESS>\n"
@@ -19,6 +21,10 @@ msgstr ""
 
 #: examples/example_field.php:178
 msgid "The possible values this field can contain. Enter one value per line, in the format key|label. The key is the value that will be stored in the database and it must match the field storage type, %type. The label is optional and the key will be used as the label if no label is specified."
+msgstr ""
+
+#: examples/example_field.php:287 examples/simple_field.php:231
+msgid "%label is longer than %max characters."
 msgstr ""
 
 #: examples/example_field.php:484

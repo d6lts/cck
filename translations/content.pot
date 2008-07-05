@@ -3,7 +3,7 @@
 # LANGUAGE translation of Drupal (root)
 # Copyright YEAR NAME <EMAIL@ADDRESS>
 # Generated from files:
-#  content.module,v 1.301.2.17 2008/07/03 12:44:50 yched
+#  content.module,v 1.301.2.18 2008/07/05 01:09:06 yched
 #  content.info,v 1.6 2007/07/04 23:46:29 yched
 #  content.views.inc,v 1.68.2.7 2008/07/03 20:06:56 yched
 #  content_copy.info,v 1.6 2008/04/23 18:01:48 dww
@@ -16,13 +16,13 @@
 #  userreference.info,v 1.8 2008/04/23 18:02:38 dww
 #  example_field.php,v 1.5.2.2 2008/07/03 12:44:51 yched
 #  simple_field.php,v 1.5.2.2 2008/07/03 12:44:51 yched
-#  text.module,v 1.95.2.4 2008/06/28 15:42:41 yched
+#  text.module,v 1.95.2.5 2008/07/05 00:26:54 yched
 #
 #, fuzzy
 msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
-"POT-Creation-Date: 2008-07-05 10:58+0200\n"
+"POT-Creation-Date: 2008-07-05 11:21+0200\n"
 "PO-Revision-Date: YYYY-mm-DD HH:MM+ZZZZ\n"
 "Last-Translator: NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <EMAIL@ADDRESS>\n"
@@ -108,10 +108,14 @@ msgid "Language"
 msgstr ""
 
 #: content.module:1984
-msgid "Taxonomy"
+msgid "Menu settings (admin)"
 msgstr ""
 
 #: content.module:1987
+msgid "Taxonomy"
+msgstr ""
+
+#: content.module:1990
 msgid "File attachments"
 msgstr ""
 

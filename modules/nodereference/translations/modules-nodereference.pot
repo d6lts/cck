@@ -3,14 +3,14 @@
 # LANGUAGE translation of Drupal (modules-nodereference)
 # Copyright YEAR NAME <EMAIL@ADDRESS>
 # Generated from files:
-#  nodereference.module,v 1.138.2.8 2008/07/04 00:24:34 yched
+#  nodereference.module,v 1.138.2.9 2008/07/05 00:26:54 yched
 #  nodereference.info,v 1.8 2008/04/23 18:02:07 dww
 #
 #, fuzzy
 msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
-"POT-Creation-Date: 2008-07-05 10:58+0200\n"
+"POT-Creation-Date: 2008-07-05 11:21+0200\n"
 "PO-Revision-Date: YYYY-mm-DD HH:MM+ZZZZ\n"
 "Last-Translator: NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <EMAIL@ADDRESS>\n"
