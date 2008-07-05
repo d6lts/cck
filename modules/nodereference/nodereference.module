@@ -551,9 +551,6 @@ function nodereference_allowed_values($field) {
   foreach ($options as $key => $value) {
     $options[$key] = _nodereference_item($field, $value);
   }
-  if (!$field['required']) {
-    $options = array(0 => '<'. t('none') .'>') + $options;
-  }
   return $options;
 }
 
