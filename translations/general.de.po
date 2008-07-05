@@ -20,7 +20,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: German translation of CCK\n"
 "POT-Creation-Date: 2008-06-16 20:05+0200\n"
-"PO-Revision-Date: 2008-07-04 23:14+0100\n"
+"PO-Revision-Date: 2008-07-05 10:35+0100\n"
 "Last-Translator: Alexander Hass\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -114,7 +114,7 @@ msgstr "Kürzel"
 #: modules/number/number.module:147
 #: modules/text/text.module:106
 msgid "Advanced usage only: PHP code that returns a keyed array of allowed values. Should not include &lt;?php ?&gt; delimiters. If this field is filled out, the array returned by this code will override the allowed values list above."
-msgstr ""
+msgstr "Nur erweiterte Verwendung: PHP-Code der ein Array mit Schlüsseln der zulässigen Werte zurückliefert. Dieser sollte keine &lt;?php ?&gt; Trennzeichen enthalten. Sollte dieses Feld ausgefüllt werden, wird das von diesem Code zurückgegebene Array die zulässige Werteliste oberhalb übersteuern."
 
 #: examples/example_field.php:278
 #: modules/number/number.module:228
