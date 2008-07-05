@@ -942,15 +942,9 @@ function _content_admin_field(&$form_state, $type_name, $field_name) {
       $db_info = content_database_info($field);
       $columns = array_keys($db_info['columns']);
       foreach ($columns as $key => $column) {
-        $columns[$key] = "'$column' => value for $column";
+        $columns[$key] = t("'@column' => value for @column", array('@column' => $column));
       }
-      $sample = 'array(
-    0 => array('. implode(', ', $columns) .'),
-    // You\'ll usually want to stop here. Provide more values
-    // if you want your \'default value\' to be multi-valued :
-    1 => array('. implode(', ', $columns) .'),
-    2 => ...
-  );';
+      $sample = t("array(\n  0 => array(@columns),\n  // You'll usually want to stop here. Provide more values\n  // if you want your 'default value' to be multi-valued:\n  1 => array(@columns),\n  2 => ...\n);", array('@columns' => implode(', ', $columns)));
 
       $form['widget']['default_value_fieldset']['advanced_options']['default_value_php'] = array(
         '#type' => 'textarea',
