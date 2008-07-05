@@ -3,17 +3,17 @@
 # LANGUAGE translation of Drupal (includes)
 # Copyright YEAR NAME <EMAIL@ADDRESS>
 # Generated from files:
-#  content.admin.inc,v 1.181.2.10 2008/07/03 12:44:51 yched
+#  content.admin.inc,v 1.181.2.11 2008/07/04 22:12:53 yched
 #  content.crud.inc,v 1.76.2.3 2008/07/02 02:58:27 yched
 #  content.node_form.inc,v 1.7.2.9 2008/07/03 12:44:51 yched
 #  content.token.inc,v 1.5 2008/04/25 01:24:40 karens
-#  content.views.inc,v 1.68.2.6 2008/07/03 12:44:51 yched
+#  content.views.inc,v 1.68.2.7 2008/07/03 20:06:56 yched
 #
 #, fuzzy
 msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
-"POT-Creation-Date: 2008-07-03 07:41+0200\n"
+"POT-Creation-Date: 2008-07-05 10:58+0200\n"
 "PO-Revision-Date: YYYY-mm-DD HH:MM+ZZZZ\n"
 "Last-Translator: NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <EMAIL@ADDRESS>\n"
@@ -400,27 +400,27 @@ msgstr ""
 msgid "Formatted HTML link to referenced user"
 msgstr ""
 
-#: includes/content.views.inc:93
+#: includes/content.views.inc:100
 msgid "Appears in: @types"
 msgstr ""
 
-#: includes/content.views.inc:291
+#: includes/content.views.inc:298
 msgid "Format"
 msgstr ""
 
-#: includes/content.views.inc:372
+#: includes/content.views.inc:379
 msgid "Group multiple values"
 msgstr ""
 
-#: includes/content.views.inc:378
+#: includes/content.views.inc:385
 msgid "Show @count value(s)"
 msgstr ""
 
-#: includes/content.views.inc:387
+#: includes/content.views.inc:394
 msgid "starting from @count"
 msgstr ""
 
-#: includes/content.views.inc:396
+#: includes/content.views.inc:403
 msgid "Reversed (start from last values)"
 msgstr ""
 

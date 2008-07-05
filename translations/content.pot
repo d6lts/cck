@@ -5,7 +5,7 @@
 # Generated from files:
 #  content.module,v 1.301.2.17 2008/07/03 12:44:50 yched
 #  content.info,v 1.6 2007/07/04 23:46:29 yched
-#  content.views.inc,v 1.68.2.6 2008/07/03 12:44:51 yched
+#  content.views.inc,v 1.68.2.7 2008/07/03 20:06:56 yched
 #  content_copy.info,v 1.6 2008/04/23 18:01:48 dww
 #  content_permissions.info,v 1.2 2008/04/23 18:01:52 dww
 #  fieldgroup.info,v 1.6 2008/04/23 18:01:58 dww
@@ -22,7 +22,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
-"POT-Creation-Date: 2008-07-03 07:41+0200\n"
+"POT-Creation-Date: 2008-07-05 10:58+0200\n"
 "PO-Revision-Date: YYYY-mm-DD HH:MM+ZZZZ\n"
 "Last-Translator: NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <EMAIL@ADDRESS>\n"
@@ -147,7 +147,7 @@ msgstr ""
 msgid "Remove field"
 msgstr ""
 
-#: content.info:0 includes/content.views.inc:54;91
+#: content.info:0 includes/content.views.inc:61;98
 msgid "Content"
 msgstr ""
 

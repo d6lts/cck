@@ -3,14 +3,14 @@
 # LANGUAGE translation of Drupal (modules-nodereference)
 # Copyright YEAR NAME <EMAIL@ADDRESS>
 # Generated from files:
-#  nodereference.module,v 1.138.2.4 2008/07/03 14:25:02 yched
+#  nodereference.module,v 1.138.2.8 2008/07/04 00:24:34 yched
 #  nodereference.info,v 1.8 2008/04/23 18:02:07 dww
 #
 #, fuzzy
 msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
-"POT-Creation-Date: 2008-07-03 07:41+0200\n"
+"POT-Creation-Date: 2008-07-05 10:58+0200\n"
 "PO-Revision-Date: YYYY-mm-DD HH:MM+ZZZZ\n"
 "Last-Translator: NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <EMAIL@ADDRESS>\n"
@@ -31,43 +31,47 @@ msgstr ""
 msgid "Content types that can be referenced"
 msgstr ""
 
-#: modules/nodereference/nodereference.module:101
+#: modules/nodereference/nodereference.module:102
+msgid "Default Views"
+msgstr ""
+
+#: modules/nodereference/nodereference.module:105
 msgid "Existing Views"
 msgstr ""
 
-#: modules/nodereference/nodereference.module:108
+#: modules/nodereference/nodereference.module:113
 msgid "Advanced - Nodes that can be referenced (View)"
 msgstr ""
 
-#: modules/nodereference/nodereference.module:114
+#: modules/nodereference/nodereference.module:119
 msgid "View used to select the nodes"
 msgstr ""
 
-#: modules/nodereference/nodereference.module:117
+#: modules/nodereference/nodereference.module:122
 msgid "Choose the \"Views module\" view that selects the nodes that can be referenced.<br />Note:<ul><li>Only views that have fields will work for this purpose.</li><li>This will discard the \"Content types\" settings above. Use the view's \"filters\" section instead.</li><li>Use the view's \"fields\" section to display additional informations about candidate nodes on node creation/edition form.</li><li>Use the view's \"sort criteria\" section to determine the order in which candidate nodes will be displayed.</li></ul>"
 msgstr ""
 
-#: modules/nodereference/nodereference.module:121
+#: modules/nodereference/nodereference.module:126
 msgid "View arguments"
 msgstr ""
 
-#: modules/nodereference/nodereference.module:124
+#: modules/nodereference/nodereference.module:129
 msgid "Provide a comma separated list of arguments to pass to the view."
 msgstr ""
 
-#: modules/nodereference/nodereference.module:175
+#: modules/nodereference/nodereference.module:180
 msgid "%name: This post can't be referenced."
 msgstr ""
 
-#: modules/nodereference/nodereference.module:200
+#: modules/nodereference/nodereference.module:205
 msgid "Title (link)"
 msgstr ""
 
-#: modules/nodereference/nodereference.module:205
+#: modules/nodereference/nodereference.module:210
 msgid "Title (no link)"
 msgstr ""
 
-#: modules/nodereference/nodereference.module:518
+#: modules/nodereference/nodereference.module:529
 msgid "%name: Title mismatch. Please check your selection."
 msgstr ""
 
