@@ -16,8 +16,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: German translation of CCK\n"
-"POT-Creation-Date: 2008-07-05 11:21+0200\n"
-"PO-Revision-Date: 2008-07-05 16:09+0100\n"
+"POT-Creation-Date: 2008-07-05 16:18+0200\n"
+"PO-Revision-Date: 2008-07-05 16:43+0100\n"
 "Last-Translator: Alexander Hass\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -312,43 +312,65 @@ msgstr "Warnung! Die Änderung dieser Einstellung kann nach Erstellung von Daten
 msgid "Save field settings"
 msgstr "Feldeinstellungen speichern"
 
-#: includes/content.admin.inc:1095
+#: includes/content.admin.inc:1086
+msgid "'@column' => value for @column"
+msgstr "'@column' => Wert für @column"
+
+#: includes/content.admin.inc:1088
+msgid ""
+"array(\n"
+"  0 => array(@columns),\n"
+"  // You'll usually want to stop here. Provide more values\n"
+"  // if you want your 'default value' to be multi-valued:\n"
+"  1 => array(@columns),\n"
+"  2 => ...\n"
+");"
+msgstr ""
+"array(\n"
+"  0 => array(@columns),\n"
+"  // Normalerweise würde man hier aufhören. Weitere Werte können zu Verfügung\n"
+"  // gestellt werden, wenn der ‚Standardwert‘ mehrwertig sein soll:\n"
+"  1 => array(@columns),\n"
+"  2 => ...\n"
+");"
+
+#: includes/content.admin.inc:1090
 msgid "The default value PHP code returned an incorrect value.<br/>Expected format: <pre>!sample</pre> Returned value: @value"
 msgstr "Der Standardwert den PHP-Code bei ungültigen Werten zurückliefert<br/>Erwartetes Format: <pre>!sample</pre>zurückgegebener Wert : @value"
 
-#: includes/content.admin.inc:1132
+#: includes/content.admin.inc:1128
 msgid "The default value PHP code created @value which is invalid."
 msgstr "Der vom PHP-Code erstellte Standardwert @value ist ungültig."
 
-#: includes/content.admin.inc:1136
+#: includes/content.admin.inc:1132
 msgid "The default value is invalid."
 msgstr "Der Standardwert ist ungültig."
 
-#: includes/content.admin.inc:1159
+#: includes/content.admin.inc:1155
 msgid "Saved field %label."
 msgstr "Das Feld %label wurde gespeichert."
 
-#: includes/content.admin.inc:1464
+#: includes/content.admin.inc:1460
 msgid "Processing"
 msgstr "Verarbeitung läuft"
 
-#: includes/content.admin.inc:1465
+#: includes/content.admin.inc:1461
 msgid "The update has encountered an error."
 msgstr "Die Aktualisierung ist auf einen Fehler gestoßen."
 
-#: includes/content.admin.inc:1479
+#: includes/content.admin.inc:1475
 msgid "The database has been altered and data has been migrated or deleted."
 msgstr "Die Datenbank wurde geändert und die Daten wurden migriert oder gelöscht."
 
-#: includes/content.admin.inc:1482
+#: includes/content.admin.inc:1478
 msgid "An error occurred and database alteration did not complete."
 msgstr "Ein Fehler ist aufgetreten und die Datenbankänderung konnte nicht abgeschlossen werden."
 
-#: includes/content.admin.inc:1585
+#: includes/content.admin.inc:1581
 msgid "Processing %title"
 msgstr "%title wird verarbeitet"
 
-#: includes/content.admin.inc:1483
+#: includes/content.admin.inc:1479
 msgid "1 item successfully processed:"
 msgid_plural "@count items successfully processed:"
 msgstr[0] "1 Eintrag wurde erfolgreich verarbeitet:"

@@ -3,7 +3,7 @@
 # LANGUAGE translation of Drupal (includes)
 # Copyright YEAR NAME <EMAIL@ADDRESS>
 # Generated from files:
-#  content.admin.inc,v 1.181.2.12 2008/07/05 00:22:18 yched
+#  content.admin.inc,v 1.181.2.13 2008/07/05 12:51:39 yched
 #  content.crud.inc,v 1.76.2.3 2008/07/02 02:58:27 yched
 #  content.node_form.inc,v 1.7.2.9 2008/07/03 12:44:51 yched
 #  content.token.inc,v 1.5 2008/04/25 01:24:40 karens
@@ -13,7 +13,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
-"POT-Creation-Date: 2008-07-05 11:21+0200\n"
+"POT-Creation-Date: 2008-07-05 16:18+0200\n"
 "PO-Revision-Date: YYYY-mm-DD HH:MM+ZZZZ\n"
 "Last-Translator: NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <EMAIL@ADDRESS>\n"
@@ -306,43 +306,51 @@ msgstr ""
 msgid "Save field settings"
 msgstr ""
 
-#: includes/content.admin.inc:1095
+#: includes/content.admin.inc:1086
+msgid "'@column' => value for @column"
+msgstr ""
+
+#: includes/content.admin.inc:1088
+msgid "array(\n  0 => array(@columns),\n  // You'll usually want to stop here. Provide more values\n  // if you want your 'default value' to be multi-valued:\n  1 => array(@columns),\n  2 => ...\n);"
+msgstr ""
+
+#: includes/content.admin.inc:1090
 msgid "The default value PHP code returned an incorrect value.<br/>Expected format: <pre>!sample</pre> Returned value: @value"
 msgstr ""
 
-#: includes/content.admin.inc:1132
+#: includes/content.admin.inc:1128
 msgid "The default value PHP code created @value which is invalid."
 msgstr ""
 
-#: includes/content.admin.inc:1136
+#: includes/content.admin.inc:1132
 msgid "The default value is invalid."
 msgstr ""
 
-#: includes/content.admin.inc:1159
+#: includes/content.admin.inc:1155
 msgid "Saved field %label."
 msgstr ""
 
-#: includes/content.admin.inc:1464
+#: includes/content.admin.inc:1460
 msgid "Processing"
 msgstr ""
 
-#: includes/content.admin.inc:1465
+#: includes/content.admin.inc:1461
 msgid "The update has encountered an error."
 msgstr ""
 
-#: includes/content.admin.inc:1479
+#: includes/content.admin.inc:1475
 msgid "The database has been altered and data has been migrated or deleted."
 msgstr ""
 
-#: includes/content.admin.inc:1482
+#: includes/content.admin.inc:1478
 msgid "An error occurred and database alteration did not complete."
 msgstr ""
 
-#: includes/content.admin.inc:1585
+#: includes/content.admin.inc:1581
 msgid "Processing %title"
 msgstr ""
 
-#: includes/content.admin.inc:1483
+#: includes/content.admin.inc:1479
 msgid "1 item successfully processed:"
 msgid_plural "@count items successfully processed:"
 msgstr[0] ""
