@@ -1083,15 +1083,10 @@ function _content_admin_field_validate($form, &$form_state) {
         $db_info = content_database_info($field);
         $columns = array_keys($db_info['columns']);
         foreach ($columns as $key => $column) {
-          $columns[$key] = "'$column' => value for $column";
+          $columns[$key] = t("'@column' => value for @column", array('@column' => $column));
         }
-        $sample = 'array(
-  0 => array('. implode(', ', $columns) .'),
-  // You\'ll usually want to stop here. Provide more values
-  // if you want your \'default value\' to be multi-valued:
-  1 => array('. implode(', ', $columns) .'),
-  2 => ...
-);';
+        $sample = t("array(\n  0 => array(@columns),\n  // You'll usually want to stop here. Provide more values\n  // if you want your 'default value' to be multi-valued:\n  1 => array(@columns),\n  2 => ...\n);", array('@columns' => implode(', ', $columns)));
+
         form_set_error('default_value_php', t('The default value PHP code returned an incorrect value.<br/>Expected format: <pre>!sample</pre> Returned value: @value', array(
           '!sample' => $sample,
           '@value' => print_r($return, true))));
@@ -1113,6 +1108,7 @@ function _content_admin_field_validate($form, &$form_state) {
       form_set_value(array('#parents' => array('default_value_php')), '', $form_state);
       form_set_value(array('#parents' => array('default_value')), $default_value, $form_state);
     }
+
     if (isset($default_value)) {
       $node = array();
       $node[$form_values['field_name']] = $default_value;
