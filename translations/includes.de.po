@@ -17,7 +17,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: CCK\n"
 "POT-Creation-Date: 2008-07-05 11:21+0200\n"
-"PO-Revision-Date: 2008-07-05 12:56+0100\n"
+"PO-Revision-Date: 2008-07-05 13:12+0100\n"
 "Last-Translator: Alexander Hass\n"
 "Language-Team: German <lukas.gangoly@univie.ac.at>\n"
 "MIME-Version: 1.0\n"
@@ -275,7 +275,7 @@ msgstr "Standardwert"
 
 #: includes/content.admin.inc:955
 msgid "Advanced usage only: PHP code that returns a default value. Should not include &lt;?php ?&gt; delimiters. If this field is filled out, the value returned by this code will override any value specified above. Expected format: <pre>!sample</pre>Using !link_devel's 'devel load' tab on a %type content page might help you figure out the expected format."
-msgstr "Nur erweiterte Verwendung: PHP-Code der ein Array mit Schlüsseln der zulässigen Werte zurückliefert. Dieser sollte keine &lt;?php ?&gt; Trennzeichen enthalten. Sollte dieses Feld ausgefüllt werden, wird das von diesem Code zurückgegebene Array die zulässige Werteliste oberhalb übersteuern. Erwartetes Format: <pre>!sample</pre>Die Verwendung des !link_devel-Tabulators ‚devel load‘ auf einer %type-Inhaltsseite könnte dabei helfen das erwartete Format herauszufinden."
+msgstr "Nur erweiterte Verwendung: PHP-Code der ein Array mit Schlüsseln der zulässigen Werte zurückliefert. Dieser sollte keine &lt;?php ?&gt; Trennzeichen enthalten. Sollte dieses Feld ausgefüllt werden, wird das von diesem Code zurückgegebene Array die zulässige Werteliste oberhalb übersteuern. Erwartetes Format: <pre>!sample</pre>Auf einer %type-Inhaltsseite könnte der Aufruf des !link_devel-Tabulators ‚Devel laden‘ dabei helfen das erwartete Formats herauszufinden."
 
 #: includes/content.admin.inc:966
 msgid "This PHP code was set by an administrator and will override any value specified above."
@@ -307,7 +307,7 @@ msgstr "Eine festgelegte Anzahl von Werten für dieses Feld oder „Unbegrenzt�
 
 #: includes/content.admin.inc:986
 msgid "Warning! Changing this setting after data has been created could result in the loss of data!"
-msgstr "Warnung! Diese Einstellung nach der Erstellung von Daten zu ändern, kann zu Datenverlust führen!"
+msgstr "Warnung! Die Änderung dieser Einstellung kann nach Erstellung von Daten zu Datenverlust führen!"
 
 #: includes/content.admin.inc:1001
 msgid "Save field settings"
