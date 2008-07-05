@@ -19,8 +19,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: German translation of CCK\n"
-"POT-Creation-Date: 2008-06-16 20:05+0200\n"
-"PO-Revision-Date: 2008-07-05 10:35+0100\n"
+"POT-Creation-Date: 2008-07-05 11:21+0200\n"
+"PO-Revision-Date: 2008-07-05 11:33+0100\n"
 "Last-Translator: Alexander Hass\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -30,34 +30,34 @@ msgstr ""
 "X-Poedit-Language: German\n"
 "X-Poedit-Country: GERMANY\n"
 
-#: content.module:1582
-#: modules/nodereference/nodereference.module:215
+#: content.module:1635
+#: modules/nodereference/nodereference.module:220
 msgid "Teaser"
 msgstr "Anrisstext"
 
-#: content.module:1583
-#: modules/nodereference/nodereference.module:210
+#: content.module:1636
+#: modules/nodereference/nodereference.module:215
 msgid "Full node"
 msgstr "Vollständiger Beitrag"
 
-#: content.module:539;546;0
-#: includes/content.crud.inc:578;616
+#: content.module:557;564;0
+#: includes/content.crud.inc:591;629
 msgid "content"
 msgstr "Inhalt"
 
-#: content.module:96
+#: content.module:103
 #: modules/content_copy/content_copy.module:125
 msgid "Fields"
 msgstr "Felder"
 
-#: content.module:150
-#: includes/content.admin.inc:479
+#: content.module:156
+#: includes/content.admin.inc:528
 msgid "Add field"
 msgstr "Feld hinzufügen"
 
 #: examples/example_field.php:158;388
 #: examples/simple_field.php:332
-#: modules/text/text.module:66;209
+#: modules/text/text.module:66;205
 #: modules/userreference/userreference.module:151
 msgid "Plain text"
 msgstr "Einfacher Text"
@@ -90,21 +90,15 @@ msgstr "Die maximale Zeichenlänge des Feldes. Für eine unbegrenzte Länge frei
 msgid "Allowed values list"
 msgstr "Zulässige Werteliste"
 
-#: examples/example_field.php:178
-#: modules/number/number.module:133
-#: modules/text/text.module:92
-msgid "The possible values this field can contain. Enter one value per line, in the format key|label. The key is the value that will be stored in the database and it must match the field storage type, %type. The label is optional and the key will be used as the label if no label is specified."
-msgstr "Die möglichen Werte, die dieses Feld enthalten kann. Geben Sie pro Zeile einen Wert im Format „Schlüssel|Bezeichnung“ ein. Der Schüssel ist der Wert, welcher in der Datenbank gespeichert wird und muss dem Datentyp %type des Feldes entsprechen. Der Schlüssel wird als Bezeichnung verwendet, wenn die optionale Bezeichnung nicht angegeben wird."
-
 #: examples/example_field.php:182
-#: includes/content.admin.inc:879
+#: includes/content.admin.inc:930
 #: modules/number/number.module:137
 #: modules/text/text.module:96
 msgid "PHP code"
 msgstr "PHP-Code"
 
 #: examples/example_field.php:188
-#: includes/content.admin.inc:900;913
+#: includes/content.admin.inc:951;964
 #: modules/number/number.module:144;153
 #: modules/text/text.module:103;112
 msgid "Code"
@@ -118,97 +112,96 @@ msgstr "Nur erweiterte Verwendung: PHP-Code der ein Array mit Schlüsseln der zu
 
 #: examples/example_field.php:278
 #: modules/number/number.module:228
-#: modules/text/text.module:160
+#: modules/text/text.module:161
 msgid "Illegal value for %name."
 msgstr "Ungültiger Wert für %name."
 
-#: examples/example_field.php:287
-#: examples/simple_field.php:231
-#: modules/text/text.module:169
-msgid "%label is longer than %max characters."
-msgstr "%label ist länger als %max Zeichen."
-
 #: examples/example_field.php:383
 #: examples/simple_field.php:327
-#: modules/text/text.module:204
+#: modules/text/text.module:200
 #: modules/userreference/userreference.module:146
 msgid "Default"
 msgstr "Standard"
 
 #: examples/example_field.php:393
-#: modules/text/text.module:214
+#: modules/text/text.module:210
 msgid "Trimmed"
 msgstr "Getrimmt"
 
 #: examples/example_field.php:476
 #: examples/simple_field.php:400
 #: modules/number/number.module:342
-#: modules/text/text.module:264
+#: modules/text/text.module:260
 msgid "Text field"
 msgstr "Textfeld"
 
 #: examples/example_field.php:551
 #: examples/simple_field.php:430
-#: modules/text/text.module:324
+#: modules/text/text.module:320
 msgid "Rows"
 msgstr "Zeilen"
 
 #: examples/example_field.php:560
 #: examples/simple_field.php:438
-#: modules/text/text.module:333
+#: modules/text/text.module:329
 msgid "\"Rows\" must be a positive integer."
 msgstr "„Zeilen“ müssen eine positive Zahl sein."
 
-#: includes/content.admin.inc:99;115;733
-#: modules/fieldgroup/fieldgroup.module:232
+#: includes/content.admin.inc:16
+#: modules/fieldgroup/fieldgroup.module:156
+msgid "Description"
+msgstr "Beschreibung"
+
+#: includes/content.admin.inc:148;164;790
+#: modules/fieldgroup/fieldgroup.module:236
 msgid "Remove"
 msgstr "Entfernen"
 
-#: includes/content.admin.inc:152;353
-#: modules/fieldgroup/fieldgroup.module:106;359
+#: includes/content.admin.inc:201;402
+#: modules/fieldgroup/fieldgroup.module:110;363
 msgid "Save"
 msgstr "Speichern"
 
-#: includes/content.admin.inc:163;364;573;798
-#: modules/fieldgroup/fieldgroup.module:117
+#: includes/content.admin.inc:212;413;623;850
+#: modules/fieldgroup/fieldgroup.module:121
 msgid "Label"
 msgstr "Bezeichnung"
 
-#: includes/content.admin.inc:733
-#: modules/fieldgroup/fieldgroup.module:232
+#: includes/content.admin.inc:790
+#: modules/fieldgroup/fieldgroup.module:236
 msgid "Cancel"
 msgstr "Abbrechen"
 
-#: includes/content.admin.inc:846
-#: modules/fieldgroup/fieldgroup.module:139
+#: includes/content.admin.inc:897
+#: modules/fieldgroup/fieldgroup.module:143
 msgid "Help text"
 msgstr "Hilfetext"
 
-#: includes/content.admin.inc:914
+#: includes/content.admin.inc:965
 #: modules/number/number.module:154
 #: modules/text/text.module:113
 msgid "&lt;none&gt;"
 msgstr "&lt;Keine&gt;"
 
-#: includes/content.admin.inc:915
+#: includes/content.admin.inc:966
 #: modules/number/number.module:155
 #: modules/text/text.module:114
 msgid "You're not allowed to input PHP code."
 msgstr "Keine Berechtigung zur Eingabe von PHP-Code vorhanden."
 
-#: modules/fieldgroup/fieldgroup.module:289
-#: modules/nodereference/nodereference.module:544
-#: modules/userreference/userreference.module:439
+#: modules/fieldgroup/fieldgroup.module:293
+#: modules/nodereference/nodereference.module:555
+#: modules/userreference/userreference.module:443
 msgid "none"
 msgstr "Keine"
 
-#: modules/nodereference/nodereference.module:303
-#: modules/optionwidgets/optionwidgets.module:62
+#: modules/nodereference/nodereference.module:308
+#: modules/optionwidgets/optionwidgets.module:68
 #: modules/userreference/userreference.module:198
 msgid "Select list"
 msgstr "Auswahlliste"
 
-#: modules/nodereference/nodereference.module:311
+#: modules/nodereference/nodereference.module:316
 #: modules/userreference/userreference.module:206
 msgid "Autocomplete text field"
 msgstr "Textfeld mit Autovervollständigung"
@@ -218,8 +211,16 @@ msgstr "Textfeld mit Autovervollständigung"
 msgid "Allowed values"
 msgstr "Zulässige Werte"
 
+#: modules/number/number.module:133
+#: modules/text/text.module:92
+msgid "The possible values this field can contain. Enter one value per line, in the format key|label. The key is the value that will be stored in the database and it must match the field storage type, %type. The label is optional and the key will be used as the label if no label is specified.<br />Allowed HTML tags: @tags"
+msgstr "Die möglichen Werte, die dieses Feld enthalten kann. Geben Sie pro Zeile einen Wert im Format „Schlüssel|Bezeichnung“ ein. Der Schüssel ist der Wert, welcher in der Datenbank gespeichert wird und muss dem Datentyp %type des Feldes entsprechen. Der Schlüssel wird als Bezeichnung verwendet, wenn die optionale Bezeichnung nicht angegeben wird.<br />Zulässige HTML-Tags: @tags"
+
 #: modules/number/number.module:155
 #: modules/text/text.module:114
 msgid "This PHP code was set by an administrator and will override the allowed values list above."
 msgstr "Dieser PHP-Code wurde von einem Administrator festgelegt und wird die obige zulässige Werteliste übersteuern."
+
+#~ msgid "%label is longer than %max characters."
+#~ msgstr "%label ist länger als %max Zeichen."
 

@@ -16,8 +16,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: CCK\n"
-"POT-Creation-Date: 2008-07-03 07:41+0200\n"
-"PO-Revision-Date: 2008-07-04 23:42+0100\n"
+"POT-Creation-Date: 2008-07-05 11:21+0200\n"
+"PO-Revision-Date: 2008-07-05 12:56+0100\n"
 "Last-Translator: Alexander Hass\n"
 "Language-Team: German <lukas.gangoly@univie.ac.at>\n"
 "MIME-Version: 1.0\n"
@@ -81,9 +81,8 @@ msgid "No fields have been defined for any content type yet."
 msgstr "Es wurden noch keine Felder für einen Inhaltstypen festgelegt."
 
 #: includes/content.admin.inc:112;291
-#, fuzzy
 msgid "There are no fields configured for this content type. You can !link."
-msgstr "Für diesen Inhaltstyp sind keine Felder konfiguriert. Hier ein !link."
+msgstr "Für diesen Inhaltstyp sind keine Felder konfiguriert. !link."
 
 #: includes/content.admin.inc:113;292
 msgid "Add a new field"
@@ -174,21 +173,20 @@ msgid "This name cannot be changed."
 msgstr "Der Name kann nicht geändert werden."
 
 #: includes/content.admin.inc:618
-#, fuzzy
 msgid "This name cannot be changed later! The name will be prefixed with 'field_' and can include lowercase unaccented letters, numbers, and underscores. The length of the name, including the prefix, is limited to no more than 32 letters."
-msgstr " Dieser Name kann später nicht mehr geändert werden. Der Name wird einen Präfix ‚field_‘ erhalten und kann nicht-akzentuierte Buchstaben, Zahlen und Unterstriche enthalten. Die Länge des Namen, inclusive Präfix ist auf 32 Zeichen begrenzt."
+msgstr "Dieser Name kann später nicht mehr geändert werden. Der Name wird einen Präfix ‚field_‘ erhalten und kann nicht-akzentuierte Buchstaben, Zahlen und Unterstriche enthalten. Die Länge des Namen, inclusive Präfix ist auf 32 Zeichen begrenzt."
 
 #: includes/content.admin.inc:626
 msgid "A human-readable name to be used as the label for this field in the %type content type."
-msgstr ""
+msgstr "Ein Name der im Inhaltstyp %type als Beschriftung für dieses Feld verwendet werden soll."
 
 #: includes/content.admin.inc:636
 msgid "The type of data you would like to store in the database with this field."
-msgstr ""
+msgstr "Der Typ von Daten der mit diesem Feld in der Datenbank gespeichert werden soll."
 
 #: includes/content.admin.inc:646
 msgid "The type of data you would like to store in the database with this field. This option cannot be changed."
-msgstr ""
+msgstr "Der Typ von Daten der mit diesem Feld in der Datenbank gespeichert werden soll. Diese Option kann nicht geändert werden."
 
 #: includes/content.admin.inc:651;869
 #, fuzzy
@@ -197,7 +195,7 @@ msgstr "Steuerelement"
 
 #: includes/content.admin.inc:655
 msgid "The type of form element you would like to present to the user when creating this field in the %type content type."
-msgstr ""
+msgstr "Der Typ von Formularelement der dem Benutzer angezeigt wird, wenn dieses Feld im Inhaltstyp %type erstellt wird."
 
 #: includes/content.admin.inc:669
 msgid "Continue"
@@ -205,11 +203,11 @@ msgstr "Fortfahren"
 
 #: includes/content.admin.inc:692
 msgid "The field name %field_name is invalid. The name must include only lowercase unaccentuated letters, numbers, and underscores."
-msgstr ""
+msgstr "Der Feldname %field ist ungültig. Der Name darf nur nicht-akzentuierte Kleinbuchstaben, Zahlen und Unterstriche enthalten."
 
 #: includes/content.admin.inc:695
 msgid "The field name %field_name is too long. The name is limited to 32 characters, including the 'field_' prefix."
-msgstr ""
+msgstr "Der Feldname %field_name ist zu lang. Der Name ist inklusive dem Präfix ‚field_‘ auf 32 Zeichen begrenzt."
 
 #: includes/content.admin.inc:706
 msgid "The field name %field_name already exists."
@@ -255,7 +253,7 @@ msgstr "Beim Löschen von %field in %type ist ein Fehler aufgetreten."
 msgid "%type basic information"
 msgstr "Basisinformation für %type"
 
-#: includes/content.admin.inc:876
+#: includes/content.admin.inc:876;1039
 msgid "Change basic information"
 msgstr "Basisinformation ändern"
 
@@ -268,7 +266,6 @@ msgid "These settings apply only to the %field field as it appears in the %type 
 msgstr "Diese Einstellungen gelten nur für das Feld %field, wie es im Inhaltstyp %type vorkommt."
 
 #: includes/content.admin.inc:900
-#, fuzzy
 msgid "Instructions to present to the user below this field on the editing form.<br />Allowed HTML tags: @tags"
 msgstr "Eine Hilfestellung, die dem Benutzer unter diesem Feld im Eingabeformular angezeigt wird.<br />Zulässige HTML-Tags: @tags"
 
@@ -278,11 +275,11 @@ msgstr "Standardwert"
 
 #: includes/content.admin.inc:955
 msgid "Advanced usage only: PHP code that returns a default value. Should not include &lt;?php ?&gt; delimiters. If this field is filled out, the value returned by this code will override any value specified above. Expected format: <pre>!sample</pre>Using !link_devel's 'devel load' tab on a %type content page might help you figure out the expected format."
-msgstr ""
+msgstr "Nur erweiterte Verwendung: PHP-Code der ein Array mit Schlüsseln der zulässigen Werte zurückliefert. Dieser sollte keine &lt;?php ?&gt; Trennzeichen enthalten. Sollte dieses Feld ausgefüllt werden, wird das von diesem Code zurückgegebene Array die zulässige Werteliste oberhalb übersteuern. Erwartetes Format: <pre>!sample</pre>Die Verwendung des !link_devel-Tabulators ‚devel load‘ auf einer %type-Inhaltsseite könnte dabei helfen das erwartete Format herauszufinden."
 
 #: includes/content.admin.inc:966
 msgid "This PHP code was set by an administrator and will override any value specified above."
-msgstr ""
+msgstr "Dieser PHP-Code wurde vom Administrator eingestellt und wird jeden oben angegeben Wert übersteuern."
 
 #: includes/content.admin.inc:973
 msgid "Global settings"
@@ -306,53 +303,53 @@ msgstr "Unbegrenzt"
 
 #: includes/content.admin.inc:986
 msgid "Select a specific number of values for this field, or 'Unlimited' to provide an 'Add more' button so the users can add as many values as they like."
-msgstr ""
+msgstr "Eine festgelegte Anzahl von Werten für dieses Feld oder „Unbegrenzt“ auswählen, um Benutzern einen „Weitere hinzufügen“-Schaltknopf zu Verfügung zu stellen, damit diese so viele Werte hinzufügen können wie sie möchten."
 
 #: includes/content.admin.inc:986
 msgid "Warning! Changing this setting after data has been created could result in the loss of data!"
-msgstr ""
+msgstr "Warnung! Diese Einstellung nach der Erstellung von Daten zu ändern, kann zu Datenverlust führen!"
 
 #: includes/content.admin.inc:1001
 msgid "Save field settings"
 msgstr "Feldeinstellungen speichern"
 
-#: includes/content.admin.inc:1094
+#: includes/content.admin.inc:1095
 msgid "The default value PHP code returned an incorrect value.<br/>Expected format: <pre>!sample</pre> Returned value: @value"
 msgstr "Der Standardwert den PHP-Code bei ungültigen Werten zurückliefert<br/>Erwartetes Format: <pre>!sample</pre>zurückgegebener Wert : @value"
 
-#: includes/content.admin.inc:1131
+#: includes/content.admin.inc:1132
 msgid "The default value PHP code created @value which is invalid."
-msgstr ""
+msgstr "Der vom PHP-Code erstellte Standardwert @value ist ungültig."
 
-#: includes/content.admin.inc:1135
+#: includes/content.admin.inc:1136
 msgid "The default value is invalid."
 msgstr "Der Standardwert ist ungültig."
 
-#: includes/content.admin.inc:1158
+#: includes/content.admin.inc:1159
 msgid "Saved field %label."
 msgstr "Das Feld %label wurde gespeichert."
 
-#: includes/content.admin.inc:1463
+#: includes/content.admin.inc:1464
 msgid "Processing"
 msgstr ""
 
-#: includes/content.admin.inc:1464
+#: includes/content.admin.inc:1465
 msgid "The update has encountered an error."
 msgstr "Die Aktualisierung ist auf einen Fehler gestoßen."
 
-#: includes/content.admin.inc:1478
+#: includes/content.admin.inc:1479
 msgid "The database has been altered and data has been migrated or deleted."
-msgstr ""
+msgstr "Die Datenbank wurde geändert und die Daten wurden migriert oder gelöscht."
 
-#: includes/content.admin.inc:1481
+#: includes/content.admin.inc:1482
 msgid "An error occurred and database alteration did not complete."
-msgstr ""
+msgstr "Ein Fehler ist aufgetreten und die Datenbankänderung konnte nicht abgeschlossen werden."
 
-#: includes/content.admin.inc:1584
+#: includes/content.admin.inc:1585
 msgid "Processing %title"
 msgstr "%title wird verarbeitet"
 
-#: includes/content.admin.inc:1482
+#: includes/content.admin.inc:1483
 msgid "1 item successfully processed:"
 msgid_plural "@count items successfully processed:"
 msgstr[0] "1 Eintrag wurde erfolgreich verarbeitet:"
@@ -411,31 +408,29 @@ msgstr "Verwiesener Benutzername"
 msgid "Formatted HTML link to referenced user"
 msgstr "Formatierter HTML-Verweis zu dem Benutzer"
 
-#: includes/content.views.inc:93
-#, fuzzy
+#: includes/content.views.inc:100
 msgid "Appears in: @types"
 msgstr "Erscheint in: @types"
 
-#: includes/content.views.inc:291
+#: includes/content.views.inc:298
 msgid "Format"
 msgstr "Format"
 
-#: includes/content.views.inc:372
+#: includes/content.views.inc:379
 msgid "Group multiple values"
 msgstr "Mehrfachwerte gruppieren"
 
-#: includes/content.views.inc:378
+#: includes/content.views.inc:385
 msgid "Show @count value(s)"
 msgstr "@count Werte anzeigen"
 
-#: includes/content.views.inc:387
-#, fuzzy
+#: includes/content.views.inc:394
 msgid "starting from @count"
 msgstr "Beginnt bei @count"
 
-#: includes/content.views.inc:396
+#: includes/content.views.inc:403
 msgid "Reversed (start from last values)"
-msgstr ""
+msgstr "Umgedreht (Beginnt bei den letzten Werten)"
 
 #~ msgid "Show"
 #~ msgstr "Anzeigen"

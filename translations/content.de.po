@@ -16,8 +16,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: CCK\n"
-"POT-Creation-Date: 2008-07-03 07:41+0200\n"
-"PO-Revision-Date: 2008-07-04 23:53+0100\n"
+"POT-Creation-Date: 2008-07-05 11:21+0200\n"
+"PO-Revision-Date: 2008-07-05 11:32+0100\n"
 "Last-Translator: Alexander Hass\n"
 "Language-Team: German <lukas.gangoly@univie.ac.at>\n"
 "MIME-Version: 1.0\n"
@@ -105,10 +105,14 @@ msgid "Language"
 msgstr "Sprache"
 
 #: content.module:1984
+msgid "Menu settings (admin)"
+msgstr "Menüeinstellungen (Admin)"
+
+#: content.module:1987
 msgid "Taxonomy"
 msgstr "Taxonomie"
 
-#: content.module:1987
+#: content.module:1990
 msgid "File attachments"
 msgstr "Dateianhänge"
 
@@ -145,7 +149,7 @@ msgid "Remove field"
 msgstr "Feld löschen"
 
 #: content.info:0
-#: includes/content.views.inc:54;91
+#: includes/content.views.inc:61;98
 msgid "Content"
 msgstr "Inhalt"
 

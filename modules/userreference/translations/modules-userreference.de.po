@@ -16,8 +16,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: CCK\n"
-"POT-Creation-Date: 2008-06-16 20:05+0200\n"
-"PO-Revision-Date: 2008-06-16 20:19+0100\n"
+"POT-Creation-Date: 2008-07-05 11:21+0200\n"
+"PO-Revision-Date: 2008-07-05 11:54+0100\n"
 "Last-Translator: Alexander Hass\n"
 "Language-Team: German <lukas.gangoly@univie.ac.at>\n"
 "MIME-Version: 1.0\n"
@@ -61,18 +61,10 @@ msgid "Reverse link"
 msgstr "‚Zurück‘-Verweis"
 
 #: modules/userreference/userreference.module:255
-msgid "No"
-msgstr "Nein"
-
-#: modules/userreference/userreference.module:255
-msgid "Yes"
-msgstr "Ja"
-
-#: modules/userreference/userreference.module:257
 msgid "If selected, a reverse link back to the referencing node will displayed on the referenced user record."
 msgstr "Sobald ausgewählt, wird auf dem verwiesenen Benutzerdatensatz ein ‚Zurück‘-Verweis zu dem verweisenden Beitrag angezeigt."
 
-#: modules/userreference/userreference.module:586
+#: modules/userreference/userreference.module:590
 msgid "Related content"
 msgstr "Ähnlicher Inhalt"
 
@@ -91,4 +83,9 @@ msgstr "Benutzerverweis"
 #: modules/userreference/userreference.info:0
 msgid "Defines a field type for referencing a user from a node."
 msgstr "Definiert einen Feldtyp mit dem von einem Beitrag auf einen Benutzer verwiesen werden kann."
+
+#~ msgid "No"
+#~ msgstr "Nein"
+#~ msgid "Yes"
+#~ msgstr "Ja"
 

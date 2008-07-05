@@ -16,8 +16,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: CCK\n"
-"POT-Creation-Date: 2008-07-03 07:41+0200\n"
-"PO-Revision-Date: 2008-07-04 01:06+0100\n"
+"POT-Creation-Date: 2008-07-05 11:21+0200\n"
+"PO-Revision-Date: 2008-07-05 11:54+0100\n"
 "Last-Translator: Alexander Hass\n"
 "Language-Team: German <lukas.gangoly@univie.ac.at>\n"
 "MIME-Version: 1.0\n"
@@ -40,44 +40,48 @@ msgstr "Speichert die ID des ählichen Beitrages als ganzzahligen Wert."
 msgid "Content types that can be referenced"
 msgstr "Inhaltstypen, auf die verwiesen werden kann."
 
-#: modules/nodereference/nodereference.module:101
+#: modules/nodereference/nodereference.module:102
+msgid "Default Views"
+msgstr "Standardansichten"
+
+#: modules/nodereference/nodereference.module:105
 msgid "Existing Views"
 msgstr "Vorhandene Ansichten"
 
-#: modules/nodereference/nodereference.module:108
+#: modules/nodereference/nodereference.module:113
 msgid "Advanced - Nodes that can be referenced (View)"
 msgstr "Erweitert - Beiträge, auf die verwiesen werden kann (Ansicht)"
 
-#: modules/nodereference/nodereference.module:114
+#: modules/nodereference/nodereference.module:119
 msgid "View used to select the nodes"
-msgstr ""
+msgstr "Die zur Auswahl von Beiträgen zu verwendende Ansicht"
 
-#: modules/nodereference/nodereference.module:117
+#: modules/nodereference/nodereference.module:122
 #, fuzzy
 msgid "Choose the \"Views module\" view that selects the nodes that can be referenced.<br />Note:<ul><li>Only views that have fields will work for this purpose.</li><li>This will discard the \"Content types\" settings above. Use the view's \"filters\" section instead.</li><li>Use the view's \"fields\" section to display additional informations about candidate nodes on node creation/edition form.</li><li>Use the view's \"sort criteria\" section to determine the order in which candidate nodes will be displayed.</li></ul>"
 msgstr "Wähle die „Views-Modul“-Ansicht das die Beiträge auswählt, die Referenziert werden können.<br />Hinweis:<ul><li>Nur Ansichten mit Feldern werden für diesen Zweck nutzbar sein.</li><li>Dies wird die Einstellungen der obigen „Inhaltsttypen“ verwerfen. Stattdessen sollte hierfür der „Filter“-Bereich der Ansicht verwendet werden.</li><li>Um weitere Informationen über Beitragskandidaten für das Erstellungs-/Bearbeitungsformular anzuzeigen, kann das Ansichten Feld verwendet werden.</li><li>Um die Reihenfolge der Beitragskandidaten anzuzeigen sollte „Sortierkriterium“ von Ansichten verwendet werden.</li></ul>"
 
-#: modules/nodereference/nodereference.module:121
+#: modules/nodereference/nodereference.module:126
 msgid "View arguments"
 msgstr "Argumente anzeigen"
 
-#: modules/nodereference/nodereference.module:124
+#: modules/nodereference/nodereference.module:129
 msgid "Provide a comma separated list of arguments to pass to the view."
 msgstr "Eine kommagetrennte Liste von Argumenten angeben, welche an die Ansicht übergeben werden."
 
-#: modules/nodereference/nodereference.module:175
+#: modules/nodereference/nodereference.module:180
 msgid "%name: This post can't be referenced."
 msgstr "%name: Auf diesen Beitrag kann nicht verwiesen werden."
 
-#: modules/nodereference/nodereference.module:200
+#: modules/nodereference/nodereference.module:205
 msgid "Title (link)"
 msgstr "Titel (Verweis)"
 
-#: modules/nodereference/nodereference.module:205
+#: modules/nodereference/nodereference.module:210
 msgid "Title (no link)"
 msgstr "Titel (kein Verweis)"
 
-#: modules/nodereference/nodereference.module:518
+#: modules/nodereference/nodereference.module:529
 msgid "%name: Title mismatch. Please check your selection."
 msgstr "%name: Titel falsch. Bitte die Auswahl überprüfen."
 
@@ -96,7 +100,4 @@ msgstr "Beitragsverweis"
 #: modules/nodereference/nodereference.info:0
 msgid "Defines a field type for referencing one node from another."
 msgstr "Definiert einen Feldtyp für den Verweis von einem Beitrag zu einem anderen."
-
-#~ msgid "View"
-#~ msgstr "Anzeigen"
 

@@ -16,8 +16,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: CCK\n"
-"POT-Creation-Date: 2008-06-16 20:05+0200\n"
-"PO-Revision-Date: 2008-06-16 20:19+0100\n"
+"POT-Creation-Date: 2008-07-05 11:21+0200\n"
+"PO-Revision-Date: 2008-07-05 11:53+0100\n"
 "Last-Translator: Alexander Hass\n"
 "Language-Team: German <lukas.gangoly@univie.ac.at>\n"
 "MIME-Version: 1.0\n"
@@ -32,7 +32,11 @@ msgstr ""
 msgid "Store text in the database."
 msgstr "Text in der Datenbank speichern."
 
-#: modules/text/text.module:272
+#: modules/text/text.module:164
+msgid "%name is longer than %max characters."
+msgstr "%name ist länger als %max Zeichen."
+
+#: modules/text/text.module:268
 msgid "Text area (multiple rows)"
 msgstr "Textfeld (mehrere Zeilen)"
 
