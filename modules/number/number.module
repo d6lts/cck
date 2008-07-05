@@ -216,16 +216,16 @@ function number_field($op, &$node, $field, &$items, $teaser, $page) {
       $allowed_values = content_allowed_values($field);
       if (is_array($items)) {
         foreach ($items as $delta => $item) {
-          $error_field = $field['field_name'] .']['. $delta .'][value';
+          $error_element = isset($item['_error_element']) ? $item['_error_element'] : '';
           if ($item['value'] != '') {
             if (is_numeric($field['min']) && $item['value'] < $field['min']) {
-              form_set_error($error_field, t('The value of %name may be no smaller than %min.', array('%name' => t($field['widget']['label']), '%min' => $field['min'])));
+              form_set_error($error_element, t('The value of %name may be no smaller than %min.', array('%name' => t($field['widget']['label']), '%min' => $field['min'])));
             }
             if (is_numeric($field['max']) && $item['value'] > $field['max']) {
-              form_set_error($error_field, t('The value of %name may be no larger than %max.', array('%name' => t($field['widget']['label']), '%max' => $field['max'])));
+              form_set_error($error_element, t('The value of %name may be no larger than %max.', array('%name' => t($field['widget']['label']), '%max' => $field['max'])));
             }
             if (count($allowed_values) && !array_key_exists($item['value'], $allowed_values)) {
-              form_set_error($error_field, t('Illegal value for %name.', array('%name' => t($field['widget']['label']))));
+              form_set_error($error_element, t('Illegal value for %name.', array('%name' => t($field['widget']['label']))));
             }
           }
         }
@@ -459,6 +459,13 @@ function number_process($element, $edit, $form_state, $form) {
       $element['#scale'] = isset($field['scale']) ? $field['scale'] : 2;
       break;
   }
+
+  // Used so that hook_field('validate') knows where to flag an error.
+  $element['_error_element'] = array(
+    '#type' => 'value',
+    '#value' => implode('][', array_merge($element['#parents'], array($field_key))),
+  );
+
   return $element;
 }
 
