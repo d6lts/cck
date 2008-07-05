@@ -834,8 +834,8 @@ function _content_admin_field(&$form_state, $type_name, $field_name) {
   drupal_set_title(check_plain($title));
 
   // See if we need to change the widget type or label.
-
   if (isset($form_state['change_basic'])) {
+    module_load_include('inc', 'content', 'includes/content.crud');
     $field_values = content_field_instance_collapse($field);
     return content_admin_field_main($form_state, $field_values);
   }
@@ -1035,11 +1035,12 @@ function _content_admin_field(&$form_state, $type_name, $field_name) {
  * Validate a field's settings.
  */
 function _content_admin_field_validate($form, &$form_state) {
-  if (isset($form_state['change_basic'])) {
+  $form_values = $form_state['values'];
+  if (isset($form_state['change_basic']) || $form_values['op'] == t('Change basic information')) {
     return;
   }
-  include_once('./'. drupal_get_path('module', 'content') .'/includes/content.crud.inc');
-  $form_values = $form_state['values'];
+
+  module_load_include('inc', 'content', 'includes/content.crud');
   $previous_field = unserialize($form_values['previous_field']);
   $field = content_field_instance_expand($form_values);
   $field['db_storage'] = content_storage_type($field);
