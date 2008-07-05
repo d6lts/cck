@@ -17,7 +17,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: CCK\n"
 "POT-Creation-Date: 2008-07-05 11:21+0200\n"
-"PO-Revision-Date: 2008-07-05 14:03+0100\n"
+"PO-Revision-Date: 2008-07-05 16:05+0100\n"
 "Last-Translator: Alexander Hass\n"
 "Language-Team: German <lukas.gangoly@univie.ac.at>\n"
 "MIME-Version: 1.0\n"
@@ -189,7 +189,6 @@ msgid "The type of data you would like to store in the database with this field.
 msgstr "Der Typ von Daten der mit diesem Feld in der Datenbank gespeichert werden soll. Diese Option kann nicht geändert werden."
 
 #: includes/content.admin.inc:651;869
-#, fuzzy
 msgid "Widget type"
 msgstr "Steuerelement"
 
