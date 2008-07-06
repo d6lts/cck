@@ -272,7 +272,8 @@ class views_handler_field_content extends views_handler_field_node {
     $field = $this->content_field;
 
     // Override views_handler_field_node's default label
-    $options['label'] = $field['widget']['label'];
+    $options['label'] = '';
+    $options['label_type'] = 'widget';
     $options['format'] = 'default';
   }
 
@@ -300,7 +301,40 @@ class views_handler_field_content extends views_handler_field_node {
       '#options' => $formatters,
       '#required' => TRUE,
       '#default_value' => $options['format'],
+      '#weight' => 0,
     );
+
+    $form['label_type'] = array(
+      '#title' => t('Label'),
+      '#type' => 'radios',
+      '#options' => array(
+        'none' => t('None'),
+        'widget' => t('Widget label (@label)', array('@label' => $field['widget']['label'])),
+        'custom' => t('Custom'),
+      ),
+      '#default_value' => $options['label_type'],
+      '#weight' => 1,
+    );
+    $form['label'] = array(
+      '#title' => t('Custom label'),
+      '#type' => 'textfield',
+      '#default_value' => $options['label'],
+      '#process' => array('views_process_dependency'),
+      '#dependency' => array('radio:options[label_type]' => array('custom')),
+      '#weight' => 2,
+     );
+  }
+
+  function label() {
+    $field = $this->content_field;
+    switch ($this->options['label_type']) {
+      case 'none':
+        return '';
+      case 'widget':
+        return t($field['widget']['label']);
+      default:
+        return $this->options['label'];
+    }
   }
 
   function options_validate($form, &$form_state) { }
