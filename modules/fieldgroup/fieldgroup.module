@@ -33,7 +33,7 @@ function fieldgroup_menu() {
         'type' => MENU_LOCAL_TASK,
         'weight' => 3,
       );
-      $items['admin/content/node-type/'. $type_url_str .'/groups/%/edit'] = array(
+      $items['admin/content/node-type/'. $type_url_str .'/groups/%'] = array(
         'title' => 'Edit group',
         'page callback' => 'drupal_get_form',
         'page arguments' => array('fieldgroup_edit_group_form', $content_type, 5, 'edit'),
