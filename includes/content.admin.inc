@@ -1125,7 +1125,7 @@ function _content_admin_field_validate($form, &$form_state) {
       // so set it here.
       if (form_get_errors()) {
         if (trim($form_values['default_value_php'])) {
-          form_set_error('default_value_php', t('The default value PHP code created @value which is invalid.', array(
+          form_set_error('default_value_php', t("The PHP code for 'default value' returned @value, which is invalid.", array(
             '@value' => print_r($default_value, true))));
         }
         else {
