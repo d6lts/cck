@@ -531,12 +531,17 @@ function nodereference_autocomplete_validate($element, &$form_state) {
     }
     else {
       // no explicit nid
-      // TODO:
-      // the best thing would be to present the user with an additional form,
-      // allowing the user to choose between valid candidates with the same title
-      // ATM, we pick the first matching candidate...
       $nids = _nodereference_potential_references($field, FALSE, $value, TRUE);
-      $nid = (!empty($nids)) ? array_shift(array_keys($nids)) : 0;
+      if (empty($nids)) {
+        form_error($element[$field_key], t('%name: Found no valid post with that title.', array('%name' => t($element[$field_key]['#title']))));
+      }
+      else {
+        // TODO:
+        // the best thing would be to present the user with an additional form,
+        // allowing the user to choose between valid candidates with the same title
+        // ATM, we pick the first matching candidate...
+        $nid = array_shift(array_keys($nids));
+      }
     }
   }
   form_set_value($element, $nid, $form_state);

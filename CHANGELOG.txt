@@ -19,6 +19,7 @@ CCK 6.2.dev
 - #278789 better wording for the 'PHP default value invalid' error message.
 - #267771 orignal patch by quicksketch: Richer label settings for views fields.
 - #279204 by eMPee584: fix edit paths inconsistency.
+- #276990 Nodereference: error message when no valid node with that title (autocomplete widget).
 
 CCK 6.2.rc3
 ===========
