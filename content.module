@@ -1942,6 +1942,12 @@ function template_preprocess_content_field(&$variables) {
     'label' => check_plain(t($field['widget']['label'])),
     'label_display' => isset($field['display_settings']['label']['format']) ? $field['display_settings']['label']['format'] : 'above',
     'field_empty' => $field_empty,
+    'template_files' => array(
+      'content-field',
+      'content-field-'. $element['#field_name'],
+      'content-field-'. $element['#node']->type,
+      'content-field-'. $element['#field_name'] .'-'. $element['#node']->type,
+    ),
   );
   $variables = array_merge($variables, $additions);
 
