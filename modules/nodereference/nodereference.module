@@ -177,7 +177,7 @@ function nodereference_field($op, &$node, $field, &$items, $teaser, $page) {
           unset($item['_error_element']);
           if (!empty($item['nid'])) {
             if (!isset($refs[$item['nid']])) {
-              form_set_error($error_element, t("%name: This post can't be referenced.", array('%name' => t($field['widget']['label']))));
+              form_set_error($error_element, t("%name: this post can't be referenced.", array('%name' => t($field['widget']['label']))));
             }
           }
         }
@@ -528,14 +528,14 @@ function nodereference_autocomplete_validate($element, &$form_state) {
       // explicit nid
       list(, $title, $nid) = $matches;
       if (!empty($title) && ($n = node_load($nid)) && $title != $n->title) {
-        form_error($element[$field_key], t('%name: Title mismatch. Please check your selection.', array('%name' => t($field['widget']['label']))));
+        form_error($element[$field_key], t('%name: title mismatch. Please check your selection.', array('%name' => t($field['widget']['label']))));
       }
     }
     else {
       // no explicit nid
       $nids = _nodereference_potential_references($field, FALSE, $value, TRUE);
       if (empty($nids)) {
-        form_error($element[$field_key], t('%name: Found no valid post with that title.', array('%name' => t($field['widget']['label']))));
+        form_error($element[$field_key], t('%name: found no valid post with that title.', array('%name' => t($field['widget']['label']))));
       }
       else {
         // TODO:

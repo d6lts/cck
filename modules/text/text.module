@@ -158,10 +158,10 @@ function text_field($op, &$node, $field, &$items, $teaser, $page) {
           unset($item['_error_element']);
           if (!empty($item['value'])) {
             if (count($allowed_values) && !array_key_exists($item['value'], $allowed_values)) {
-              form_set_error($error_element, t('Illegal value for %name.', array('%name' => t($field['widget']['label']))));
+              form_set_error($error_element, t('%name: illegal value.', array('%name' => t($field['widget']['label']))));
             }
             if (!empty($field['max_length']) && strlen($item['value']) > $field['max_length']) {
-              form_set_error($error_element, t('%name is longer than %max characters.', array('%name' => $field['widget']['label'], '%max' => $field['max_length'])));
+              form_set_error($error_element, t('%name: the value may not be longer than %max characters.', array('%name' => $field['widget']['label'], '%max' => $field['max_length'])));
             }
           }
         }
