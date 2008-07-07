@@ -82,16 +82,18 @@ function content_field_form(&$form, &$form_state, $field, $get_delta = NULL) {
     // element and make it the $delta value.
     else {
       $delta = isset($get_delta) ? $get_delta : 0;
+      $title = check_plain(t($field['widget']['label']));
       if ($element = $function($form, $form_state, $field, $items, $delta)) {
         $defaults = array(
-          '#field_name' => $field['field_name'],
           '#required' => $get_delta > 0 ? FALSE : $field['required'],
           // TODO: should we add some logic for title and description too ?
           '#columns'  => array_keys($field['columns']),
-          '#title' => check_plain(t($field['widget']['label'])),
+          '#title' => $title,
           // The widget description contains user input.
           '#description' => content_filter_xss(t($field['widget']['description'])),
           '#delta' => $delta,
+          '#field_name' => $field['field_name'],
+          '#type_name' => $field['type_name'],
         );
         // If we're processing a specific delta value for a field where the
         // content module handles multiples, set the delta in the result.
@@ -167,13 +169,14 @@ function content_multiple_value_form(&$form, &$form_state, $field, $items) {
   for ($delta = 0; $delta <= $max; $delta++) {
     if ($element = $function($form, $form_state, $field, $items, $delta)) {
       $defaults = array(
-        '#field_name' => $field_name,
         '#title' => ($field['multiple'] >= 1) ? '' : $title,
         '#description' => ($field['multiple'] >= 1) ? '' : $description,
         '#required' => $delta == 0 && $field['required'],
         '#weight' => $delta,
         '#delta' => $delta,
         '#columns' => array_keys($field['columns']),
+        '#field_name' => $field_name,
+        '#type_name' => $field['type_name'],
       );
 
       // Add an input field for the delta (drag-n-drop reordering), which will
@@ -197,7 +200,7 @@ function content_multiple_value_form(&$form, &$form_state, $field, $items) {
   if ($field['multiple'] == 1 && empty($form['#programmed'])) {
     // Make sure the form is cached so ahah can work.
     $form['#cache'] = TRUE;
-    $content_type = content_types($form['type']['#value']);
+    $content_type = content_types($field['type_name']);
     $field_name_css = str_replace('_', '-', $field_name);
 
     $form_element[$field_name .'_add_more'] = array(
@@ -218,7 +221,7 @@ function content_multiple_value_form(&$form, &$form_state, $field, $items) {
       // When JS is disabled, the content_add_more_submit handler will find
       // the relevant field using these entries.
       '#field_name' => $field_name,
-      '#type_name' => $content_type['type'],
+      '#type_name' => $field['type_name'],
     );
 
     // Add wrappers for the fields and 'more' button.

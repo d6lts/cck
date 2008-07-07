@@ -347,12 +347,13 @@ function userreference_select_process($element, $edit, $form_state, $form) {
     '#element_validate' => array('optionwidgets_validate', 'userreference_select_validate'),
     // The following values were set by the content module and need
     // to be passed down to the nested element.
-    '#field_name' => $element['#field_name'],
-    '#delta' => $element['#delta'],
-    '#columns' => $element['#columns'],
     '#title' => $element['#title'],
     '#required' => $element['#required'],
     '#description' => $element['#description'],
+    '#field_name' => $element['#field_name'],
+    '#type_name' => $element['#type_name'],
+    '#delta' => $element['#delta'],
+    '#columns' => $element['#columns'],
   );
   return $element;
 }
@@ -377,15 +378,15 @@ function userreference_autocomplete_process($element, $edit, $form_state, $form)
     '#default_value' => isset($element['#value']) ? $element['#value'] : '',
     '#autocomplete_path' => 'userreference/autocomplete/'. $element['#field_name'],
     '#element_validate' => array('userreference_autocomplete_validate'),
-
     // The following values were set by the content module and need
     // to be passed down to the nested element.
-    '#field_name' => $element['#field_name'],
-    '#delta' => $element['#delta'],
-    '#columns' => $element['#columns'],
     '#title' => $element['#title'],
     '#required' => $element['#required'],
     '#description' => $element['#description'],
+    '#field_name' => $element['#field_name'],
+    '#type_name' => $element['#type_name'],
+    '#delta' => $element['#delta'],
+    '#columns' => $element['#columns'],
   );
 
   // Used so that hook_field('validate') knows where to flag an error.

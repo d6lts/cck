@@ -435,15 +435,15 @@ function nodereference_select_process($element, $edit, $form_state, $form) {
     '#type' => 'optionwidgets_select',
     '#default_value' => isset($element['#value']) ? $element['#value'] : '',
     '#element_validate' => array('optionwidgets_validate', 'nodereference_select_validate'),
-
     // The following values were set by the content module and need
     // to be passed down to the nested element.
-    '#field_name' => $element['#field_name'],
-    '#delta' => $element['#delta'],
-    '#columns' => $element['#columns'],
     '#title' => $element['#title'],
     '#required' => $element['#required'],
     '#description' => $element['#description'],
+    '#field_name' => $element['#field_name'],
+    '#type_name' => $element['#type_name'],
+    '#delta' => $element['#delta'],
+    '#columns' => $element['#columns'],
   );
   return $element;
 }
@@ -469,12 +469,13 @@ function nodereference_autocomplete_process($element, $edit, $form_state, $form)
     '#element_validate' => array('nodereference_autocomplete_validate'),
     // The following values were set by the content module and need
     // to be passed down to the nested element.
-    '#field_name' => $element['#field_name'],
-    '#delta' => $element['#delta'],
-    '#columns' => $element['#columns'],
     '#title' => $element['#title'],
     '#required' => $element['#required'],
     '#description' => $element['#description'],
+    '#field_name' => $element['#field_name'],
+    '#type_name' => $element['#type_name'],
+    '#delta' => $element['#delta'],
+    '#columns' => $element['#columns'],
   );
 
   // Used so that hook_field('validate') knows where to flag an error.
@@ -515,7 +516,8 @@ function nodereference_select_validate($element, &$form_state) {
  */
 function nodereference_autocomplete_validate($element, &$form_state) {
   $field_name = $element['#field_name'];
-  $field = content_fields($field_name);
+  $type_name = $element['#type_name'];
+  $field = content_fields($field_name, $type_name);
   $field_key  = $element['#columns'][0];
   $delta = $element['#delta'];
   $value = $element['#value'][$field_key];
@@ -526,14 +528,14 @@ function nodereference_autocomplete_validate($element, &$form_state) {
       // explicit nid
       list(, $title, $nid) = $matches;
       if (!empty($title) && ($n = node_load($nid)) && $title != $n->title) {
-        form_error($element[$field_key], t('%name: Title mismatch. Please check your selection.', array('%name' => t($element[$field_key]['#title']))));
+        form_error($element[$field_key], t('%name: Title mismatch. Please check your selection.', array('%name' => t($field['widget']['label']))));
       }
     }
     else {
       // no explicit nid
       $nids = _nodereference_potential_references($field, FALSE, $value, TRUE);
       if (empty($nids)) {
-        form_error($element[$field_key], t('%name: Found no valid post with that title.', array('%name' => t($element[$field_key]['#title']))));
+        form_error($element[$field_key], t('%name: Found no valid post with that title.', array('%name' => t($field['widget']['label']))));
       }
       else {
         // TODO:

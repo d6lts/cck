@@ -20,6 +20,7 @@ CCK 6.2.dev
 - #267771 orignal patch by quicksketch: Richer label settings for views fields.
 - #279204 by eMPee584: fix edit paths inconsistency.
 - #276990 Nodereference: error message when no valid node with that title (autocomplete widget).
+- Widget (FAPI-)validation messages do not display the field 'label' when the error is on a nth value (n > 1).
 
 CCK 6.2.rc3
 ===========

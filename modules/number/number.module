@@ -424,15 +424,21 @@ function number_process($element, $edit, $form_state, $form) {
   $value = isset($field['decimal']) ? str_replace('.', $field['decimal'], $value) : $value;
   $element[$field_key] = array(
     '#type' => 'textfield',
-    '#title' => $element['#title'],
-    '#description' => $element['#description'],
-    '#required' => $element['#required'],
     '#default_value' => $value,
     // Need to allow a slightly larger size that the field length to allow
     // for some configurations where all characters won't fit in input field.
     '#size' => isset($field['precision']) ? $field['precision'] + 2 : 12,
     '#maxlength' => isset($field['precision']) ? $field['precision'] : 10,
     '#attributes' => array('class' => 'number'),
+    // The following values were set by the content module and need
+    // to be passed down to the nested element.
+    '#title' => $element['#title'],
+    '#description' => $element['#description'],
+    '#required' => $element['#required'],
+    '#field_name' => $element['#field_name'],
+    '#type_name' => $element['#type_name'],
+    '#delta' => $element['#delta'],
+    '#columns' => $element['#columns'],
   );
 
   $prefixes = array();
@@ -473,15 +479,19 @@ function number_process($element, $edit, $form_state, $form) {
  * FAPI validation of an individual float element.
  */
 function number_float_validate($element, &$form_state) {
+  $field_name = $element['#field_name'];
+  $type_name = $element['#type_name'];
+  $field = content_fields($field_name, $type_name);
   $field_key = $element['#columns'][0];
   $value = $element['#value'][$field_key];
+
   if (($element[$field_key]['#required'] || !empty($value))) {
     $start = $value;
     $value = preg_replace('@[^-0-9\.]@', '', $value);
     if ($start != $value) {
       // No reason to make this an error, just need to inform user what has changed.
       drupal_set_message(t('Only numbers and decimals are allowed in %field. %start was changed to %value.', array(
-      '%field' => t($element[$field_key]['#title']), '%start' => $start, '%value' => $value)));
+      '%field' => t($field['widget']['label']), '%start' => $start, '%value' => $value)));
     }
     form_set_value($element[$field_key], $value, $form_state);
   }
@@ -491,15 +501,19 @@ function number_float_validate($element, &$form_state) {
  * FAPI validation of an individual integer element.
  */
 function number_integer_validate($element, &$form_state) {
+  $field_name = $element['#field_name'];
+  $type_name = $element['#type_name'];
+  $field = content_fields($field_name, $type_name);
   $field_key = $element['#columns'][0];
   $value = $element['#value'][$field_key];
+
   if (($element[$field_key]['#required'] || !empty($value))) {
     $start = $value;
     $value = preg_replace('@[^-0-9]@', '', $value);
     if ($start != $value) {
       // No reason to make this an error, just need to inform user what has changed.
       drupal_set_message(t('Only numbers are allowed in %field. %start was changed to %value.', array(
-      '%field' => t($element[$field_key]['#title']), '%start' => $start, '%value' => $value)));
+      '%field' => t($field['widget']['label']), '%start' => $start, '%value' => $value)));
     }
     form_set_value($element[$field_key], $value, $form_state);
   }
@@ -509,8 +523,12 @@ function number_integer_validate($element, &$form_state) {
  * FAPI validation of an individual decimal element.
  */
 function number_decimal_validate($element, &$form_state) {
+  $field_name = $element['#field_name'];
+  $type_name = $element['#type_name'];
+  $field = content_fields($field_name, $type_name);
   $field_key = $element['#columns'][0];
   $value = $element['#value'][$field_key];
+
   if (($element[$field_key]['#required'] || !empty($value))) {
     $start = $value;
     $value = str_replace($element['#decimal'], '.', $value);
@@ -518,7 +536,7 @@ function number_decimal_validate($element, &$form_state) {
     if ($start != $value) {
       // No reason to make this an error, just need to inform user what has changed.
       drupal_set_message( t('Only numbers and the decimal character (%decimal) are allowed in %field. %start was changed to %value.', array(
-      '%decimal' => $element['#decimal'], '%field' => t($element[$field_key]['#title']), '%start' => $start, '%value' => $value)));
+      '%decimal' => $element['#decimal'], '%field' => t($field['widget']['label']), '%start' => $start, '%value' => $value)));
     }
     $value = round($value, $element['#scale']);
     form_set_value($element[$field_key], $value, $form_state);

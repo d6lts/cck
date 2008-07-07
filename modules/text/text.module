@@ -388,11 +388,17 @@ function text_textfield_process($element, $edit, $form_state, $form) {
   $delta = $element['#delta'];
   $element[$field_key] = array(
     '#type' => 'textfield',
+    '#default_value' => isset($element['#value'][$field_key]) ? $element['#value'][$field_key] : NULL,
+    '#autocomplete_path' => $element['#autocomplete_path'],
+    // The following values were set by the content module and need
+    // to be passed down to the nested element.
     '#title' => $element['#title'],
     '#description' => $element['#description'],
     '#required' => $element['#required'],
-    '#default_value' => isset($element['#value'][$field_key]) ? $element['#value'][$field_key] : NULL,
-    '#autocomplete_path' => $element['#autocomplete_path'],
+    '#field_name' => $element['#field_name'],
+    '#type_name' => $element['#type_name'],
+    '#delta' => $element['#delta'],
+    '#columns' => $element['#columns'],
   );
 
   if (!empty($field['max_length'])) {
@@ -427,12 +433,18 @@ function text_textarea_process($element, $edit, $form_state, $form) {
   $field_key   = $element['#columns'][0];
   $element[$field_key] = array(
     '#type' => 'textarea',
-    '#title' => $element['#title'],
-    '#description' => $element['#description'],
-    '#required' => $element['#required'],
     '#default_value' => isset($element['#value'][$field_key]) ? $element['#value'][$field_key] : NULL,
     '#rows' => !empty($field['widget']['rows']) ? $field['widget']['rows'] : 10,
     '#weight' => 0,
+    // The following values were set by the content module and need
+    // to be passed down to the nested element.
+    '#title' => $element['#title'],
+    '#description' => $element['#description'],
+    '#required' => $element['#required'],
+    '#field_name' => $element['#field_name'],
+    '#type_name' => $element['#type_name'],
+    '#delta' => $element['#delta'],
+    '#columns' => $element['#columns'],
   );
 
   if (!empty($field['text_processing'])) {
