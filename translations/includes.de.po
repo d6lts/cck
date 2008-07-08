@@ -17,7 +17,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: German translation of CCK\n"
 "POT-Creation-Date: 2008-07-05 16:18+0200\n"
-"PO-Revision-Date: 2008-07-05 16:43+0100\n"
+"PO-Revision-Date: 2008-07-09 00:11+0100\n"
 "Last-Translator: Alexander Hass\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -230,7 +230,7 @@ msgstr "Das Feld %label wurde aktualisiert."
 
 #: includes/content.admin.inc:758
 msgid "There was a problem updating field %label."
-msgstr "Beim aktualisieren des Feldes %label trat ein Fehler auf."
+msgstr "Beim Aktualisieren des Feldes %label trat ein Fehler auf."
 
 #: includes/content.admin.inc:786
 msgid "Are you sure you want to remove the field %field?"
