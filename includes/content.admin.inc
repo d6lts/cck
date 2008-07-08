@@ -757,7 +757,7 @@ function content_admin_field_main_submit($form, &$form_state) {
       // only over-write changed values.
       $field = array_merge(content_field_instance_collapse($instances[0]), $form_values);
       if (content_field_instance_update($field)) {
-        drupal_set_message(t('Update field %label.', array(
+        drupal_set_message(t('Updated field %label.', array(
           '%label' => $label)));
       }
       else {
