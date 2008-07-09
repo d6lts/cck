@@ -3,7 +3,8 @@
 5--1.x
 ======
 - #187599 Backport content_generate so Devel module can create data for CCK fields when creating nodes.
-- #227951 by pwolanin : Add a permission for PHP 'default values' and 'allowed values'
+- #227951 by pwolanin: Add a permission for PHP 'default values' and 'allowed values'
+- #179419 by smk-ka: Content Copy - Import fails when language not English.
 
 5--1.7
 ======
