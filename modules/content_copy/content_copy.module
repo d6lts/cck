@@ -321,7 +321,7 @@ function content_copy_import_form_submit($form, &$form_state) {
   }
 
   // Make sure the imported content type doesn't already exist in the database.
-  if ($form_values['type_name'] == t('<create>')) {
+  if ($form_values['type_name'] == '<create>') {
     if (in_array($imported_type_name, array_keys($content_info['content types']))) {
       form_set_error('macro', t('The content type %type already exists in this database.', array(
             '%type' => $imported_type_name
@@ -335,7 +335,7 @@ function content_copy_import_form_submit($form, &$form_state) {
   }
 
   // Create the content type, if requested.
-  if ($form_values['type_name'] == t('<create>')) {
+  if ($form_values['type_name'] == '<create>') {
 
     $node = (object) $imported_type;
     $values = $imported_type;

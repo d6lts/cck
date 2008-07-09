@@ -23,6 +23,7 @@ CCK 6.2.dev
 - Widget (FAPI-)validation messages do not display the field 'label' when the error is on a nth value (n > 1).
 - Unify field validation error messages.
 - #269319 Reintroduce field template variants; add theme instructions text file.
+- #179419 by smk-ka: Content Copy - Import fails when language not English.
 
 CCK 6.2.rc3
 ===========
