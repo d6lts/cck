@@ -25,12 +25,6 @@ function nodereference_menu() {
  */
 function nodereference_theme() {
   return array(
-    'nodereference_item_simple' => array(
-      'arguments' => array('item' => NULL),
-    ),
-    'nodereference_item_advanced' => array(
-      'arguments' => array('item' => NULL, 'view' => NULL),
-    ),
     'nodereference_select' => array(
       'arguments' => array('element' => NULL),
     ),
@@ -170,7 +164,7 @@ function nodereference_field_settings($op, $field) {
 function nodereference_field($op, &$node, $field, &$items, $teaser, $page) {
   switch ($op) {
     case 'validate':
-      $refs = _nodereference_potential_references($field, TRUE);
+      $refs = _nodereference_potential_references($field);
       foreach ($items as $delta => $item) {
         if (is_array($item)) {
           $error_element = isset($item['_error_element']) ? $item['_error_element'] : '';
@@ -456,6 +450,9 @@ function nodereference_select_process($element, $edit, $form_state, $form) {
  *
  */
 function nodereference_autocomplete_process($element, $edit, $form_state, $form) {
+  // Add a few CSS overrides required for autocomplete results returned by Views.
+  drupal_add_css(drupal_get_path('module', 'nodereference') .'/nodereference.css');
+
   // The nodereference autocomplete widget doesn't need to create its own
   // element, it can wrap around the text_textfield element and add an autocomplete
   // path and some extra processing to it.
@@ -525,15 +522,15 @@ function nodereference_autocomplete_validate($element, &$form_state) {
   if (!empty($value)) {
     preg_match('/^(?:\s*|(.*) )?\[\s*nid\s*:\s*(\d+)\s*\]$/', $value, $matches);
     if (!empty($matches)) {
-      // explicit nid
+      // Explicit [nid:n].
       list(, $title, $nid) = $matches;
       if (!empty($title) && ($n = node_load($nid)) && $title != $n->title) {
         form_error($element[$field_key], t('%name: title mismatch. Please check your selection.', array('%name' => t($field['widget']['label']))));
       }
     }
     else {
-      // no explicit nid
-      $nids = _nodereference_potential_references($field, FALSE, $value, TRUE);
+      // No explicit nid.
+      $nids = _nodereference_potential_references($field, $value, TRUE);
       if (empty($nids)) {
         form_error($element[$field_key], t('%name: found no valid post with that title.', array('%name' => t($field['widget']['label']))));
       }
@@ -554,138 +551,169 @@ function nodereference_autocomplete_validate($element, &$form_state) {
  * Implementation of hook_allowed_values().
  */
 function nodereference_allowed_values($field) {
-  $options = _nodereference_potential_references($field, TRUE);
-  foreach ($options as $key => $value) {
-    $options[$key] = _nodereference_item($field, $value);
+  $references = _nodereference_potential_references($field);
+
+  $options = array();
+  foreach ($references as $key => $value) {
+    // Views theming runs check_plain (htmlentities) on the values.
+    // We reverse that with html_entity_decode.
+    $options[$key] = html_entity_decode(strip_tags($value['rendered']));
   }
   return $options;
 }
 
 /**
- * Fetch an array of all candidate referenced nodes,
- * for use in presenting the selection form to the user.
+ * Fetch an array of all candidate referenced nodes.
+ *
+ * This info is used in various places (aloowed values, autocomplete results,
+ * input validation...). Some of them only need the nids, others nid + titles,
+ * others yet nid + titles + rendered row (for display in widgets).
+ * The array we return contains all the potentially needed information, and lets
+ * consumers use the parts they actually need.
+ *
+ * @param $field
+ *   The field description.
+ * @param $string
+ *   Optional string to filter titles on (used by autocomplete)
+ * @param $exact_string
+ *   Optional: should the title filter be an exact match.
+ *
+ * @return
+ *   An array of valid nodes in the form:
+ *   array(
+ *     nid => array(
+ *       'title' => The node title,
+ *       'rendered' => The text to display in widgets (can be HTML)
+ *     ),
+ *     ...
+ *   )
  */
-function _nodereference_potential_references($field, $return_full_nodes = FALSE, $string = '', $exact_string = false) {
-  if (module_exists('views')
-  && !empty($field['advanced_view'])
-  && $field['advanced_view'] != '--'
-  && ($view = nodereference_get_view($field, $string, $exact_string))) {
-    // advanced field: referenceable nodes defined by a view
-    // let views.module build the query
-    $options = array();
-    foreach ($view->result as $item) {
-      $options[$item->nid] = _nodereference_item($field, $item);
-    }
-    return $options;
-  }
-  else {
-    // standard field: referenceable nodes defined by content types
-    // build the appropriate query
-    $related_types = array();
-    $args = array();
+function _nodereference_potential_references($field, $string = '', $exact_string = FALSE) {
+  static $results = array();
 
-    if (is_array($field['referenceable_types'])) {
-      foreach (array_filter($field['referenceable_types']) as $related_type) {
-        $related_types[] = " n.type = '%s'";
-        $args[] = $related_type;
-      }
+  if (!isset($results[$field['field_name']][$string][$exact_string])) {
+    $references = FALSE;
+    if (module_exists('views') && !empty($field['advanced_view']) && $field['advanced_view'] != '--') {
+      $references = _nodereference_potential_references_views($field, $string, $exact_string);
+    }
+    // If the view doesn't exist, we got FALSE, and fallback to the regular 'standard mode'.
+
+    if ($references === FALSE) {
+      $references = _nodereference_potential_references_standard($field, $string, $exact_string);
     }
 
-    $related_clause = implode(' OR ', $related_types);
-
-    if (!count($related_types)) {
-      return array();
-    }
-
-    if (isset($string)) {
-      $string_clause = $exact_string ? " AND n.title = '%s'" : " AND n.title LIKE '%%%s%'";
-      $related_clause = "(". $related_clause .")". $string_clause;
-      $args[] = $string;
-    }
-
-    $result = db_query(db_rewrite_sql("SELECT n.nid, n.title AS node_title, n.type AS node_type FROM {node} n WHERE ". $related_clause ." ORDER BY n.title, n.type"), $args);
+    // Store the results.
+    $results[$field['field_name']][$string][$exact_string] = $references;
   }
 
-  $rows = array();
-
-  while ($node = db_fetch_object($result)) {
-    if ($return_full_nodes) {
-      $rows[$node->nid] = $node;
-    }
-    else {
-      $rows[$node->nid] = $node->node_title;
-    }
-  }
-
-  return $rows;
+  return $results[$field['field_name']][$string][$exact_string];
 }
 
 /**
- * Build a nodereference view.
- *
- * Keep the rendered view in a static variable so it isn't
- * re-rendered more than one in a session, as when getting
- * a list of potential references and then running each of
- * them through the theme.
- *
- * If $string or $exact_string change, we'll need a new query,
- * so in that case we need to refresh the view.
+ * Helper function for _nodereference_potential_references():
+ * case of Views-defined referenceable nodes.
  */
-function nodereference_get_view($field, $string = '', $exact_string = false) {
-  static $view = NULL, $prev_string, $prev_exact_string;
+function _nodereference_potential_references_views($field, $string = '', $exact_string = FALSE) {
   $view_name = $field['advanced_view'];
-  if (module_exists('views')
-  && !empty($view_name)
-  && $view_name != '--'
-  && (!isset($view) || $view->name != $view_name || $prev_string != $string || $prev_exact_string != $exact_string)
-  && $view = views_get_view($view_name)) {
-    $prev_string = $string;
-    $prev_exact_string = $exact_string;
-    $view->init();
 
-    // TODO is this the right way to do this?
-    // make sure the fields get included in the query.
-
-    // TODO Which display should we use here?
-    // In our Views 1 to Views 2 updates we are
-    // putting fields in the 'default' display.
+  if ($view = views_get_view($view_name)) {
+    // TODO: We should let the user pick the display in the fields settings,
+    // but this would require some AHAH-magic, and FAPI work for non-JS.
+    // In our Views 1 to Views 2 updates we are putting fields in
+    //the 'default' display, so we use that one for now.
     $display = 'default';
-    $view->init_display($display);
-    $view->display[$display]->style_plugin = 'list';
-    $view->display[$display]->row_plugin = 'fields';
-    $view->display_handler->set_option('use_pager', FALSE);
-    $view->display_handler->set_option('items_per_page', 0);
+
+    $view->display[$display]->display_plugin = 'nodereference_simple';
+    $view->init_display();
+    $view->set_display($display);
+
+    // Prevent warnings if the view has no arguments, sorts or relationships.
+    // TODO: see with merlinofchaos, this probably shouldn't be needed, I must be
+    // missing one step...
+    $types = views_object_types();
+    foreach (view::display_objects() as $key) {
+      $plural = $types[$key]['plural'];
+      if ($view->display_handler->get_option($plural) === NULL) {
+        $view->display_handler->set_option($plural, array());
+      }
+    }
+
+    // TODO from merlinofchaos on IRC : arguments using summary view can defeat the style setting.
+    // We might also need to check if there's an argument, and set *its* style_plugin as well.
+    $view->display_handler->set_option('style_plugin', 'nodereference_php_array');
+    $view->display_handler->set_option('row_plugin', 'fields');
 
     // Get arguments for the view.
     if (!empty($field['advanced_view_args'])) {
       // TODO: Support Tokens using token.module ?
-      $view_args = array();
       $view_args = array_map('trim', explode(',', $field['advanced_view_args']));
     }
     else {
       $view_args = array();
     }
 
-    //We do need title field, so add it if not present (unlikely, but...)
+    // We do need title field, so add it if not present (unlikely, but...)
     if (!isset($view->display[$display]->display_options['fields']['title'])) {
       $view->add_item($display, 'field', 'node', 'title');
     }
-    if (!empty($string)) {
-      // We use the title filter in the view, so make sure it's there.
-      if (!isset($view->display[$display]->display_options['filters']['title'])) {
-        $view->add_item($display, 'filter', 'node', 'title');
-      }
-      // TODO Is this the best way to set values?
-      $view->display[$display]->display_options['filters']['title']['value'] = $string;
-      $view->display[$display]->display_options['filters']['title']['operator'] = $exact_string ? '=' : 'contains';
+    if ($string !== '') {
+      // Add an instance of the 'title' filter.
+      $options = array('value' => $string, 'operator' => $exact_string ? '=' : 'contains');
+      $id = $view->add_item($display, 'filter', 'node', 'title', $options);
     }
+
+    // TODO : set 'separator' if not present. Force 'inline' ?
 
     // Make sure the query is not cached
     $view->is_cacheable = FALSE;
-    $view->execute_display($display, $view_args);
-  }
-  return $view;
 
+    // Get the results.
+    $result = $view->execute_display($display, $view_args);
+  }
+  else {
+    $result = FALSE;
+  }
+
+  return $result;
+}
+
+/**
+ * Helper function for _nodereference_potential_references():
+ * referenceable nodes defined by content types.
+ */
+function _nodereference_potential_references_standard($field, $string = '', $exact_string = FALSE) {
+  $related_types = array();
+  $args = array();
+
+  if (is_array($field['referenceable_types'])) {
+    foreach (array_filter($field['referenceable_types']) as $related_type) {
+      $related_types[] = " n.type = '%s'";
+      $args[] = $related_type;
+    }
+  }
+
+  $related_clause = implode(' OR ', $related_types);
+
+  if (!count($related_types)) {
+    return array();
+  }
+
+  if (isset($string)) {
+    $string_clause = $exact_string ? " AND n.title = '%s'" : " AND n.title LIKE '%%%s%'";
+    $related_clause = "(". $related_clause .")". $string_clause;
+    $args[] = $string;
+  }
+
+  $result = db_query(db_rewrite_sql("SELECT n.nid, n.title AS node_title, n.type AS node_type FROM {node} n WHERE ". $related_clause ." ORDER BY n.title, n.type"), $args);
+  $references = array();
+  while ($node = db_fetch_object($result)) {
+    $references[$node->nid] = array(
+      'title' => $node->node_title,
+      'rendered' => $node->node_title,
+    );
+  }
+
+  return $references;
 }
 
 /**
@@ -696,50 +724,12 @@ function nodereference_autocomplete($field_name, $string = '') {
   $field = $fields[$field_name];
   $matches = array();
 
-  $references = _nodereference_potential_references($field, TRUE, $string);
-  foreach ($references as $row) {
-    $matches[$row->node_title .' [nid:'. $row->nid .']'] = _nodereference_item($field, $row);
+  $references = _nodereference_potential_references($field, $string);
+  foreach ($references as $id => $row) {
+    // Add a class wrapper for a few required CSS overrides.
+    $matches[$row['title'] ." [nid:$id]"] = '<div class="nodereference-autocomplete">'. $row['rendered'] . '</div>';
   }
   drupal_json($matches);
-}
-
-function _nodereference_item($field, $item, $html = FALSE) {
-  if (module_exists('views') && isset($field['advanced_view']) && $field['advanced_view'] != '--' && ($view = nodereference_get_view($field))) {
-    $field_names = array();
-    foreach ($view->field as $name => $viewfield) {
-      $field_names[] = isset($viewfield->definition['content_field_name']) ? $viewfield->definition['content_field_name'] : $name;
-    }
-    $output = theme('nodereference_item_advanced', $item, $field_names, $view);
-    if (!$html) {
-      // Views theming runs check_plain (htmlentities) on the values.
-      // We reverse that with html_entity_decode.
-      $output = html_entity_decode(strip_tags($output), ENT_QUOTES);
-    }
-  }
-  else {
-    $output = theme('nodereference_item_simple', $item);
-    $output = $html ? check_plain($output) : $output;
-  }
-  return $output;
-}
-
-function theme_nodereference_item_advanced($item, $field_names, $view) {
-  $item_fields = array();
-  $item = (array) $item;
-  foreach ($item as $delta => $value) {
-    // remove link tags (ex: for node titles)
-    $value = preg_replace('/<a[^>]*>(.*)<\/a>/iU', '$1', $value);
-    if (!empty($value)) {
-      $item_fields[] = "<span class='view-field view-data-$field_names[$delta]'>$value</span>";;
-    }
-  }
-  $output = implode(' - ', $item_fields);
-  $output = "<span class='view-item view-item-$view->name'>$output</span>";
-  return $output;
-}
-
-function theme_nodereference_item_simple($item) {
-  return $item->node_title;
 }
 
 /**

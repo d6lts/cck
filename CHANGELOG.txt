@@ -2,28 +2,29 @@
 
 CCK 6.2.dev
 ===========
-- #278325 Nodereference/Userreference: autocomplete widget does not check nodes/users are 'referenceable'.
+- #278325 Nodereference/Userreference - autocomplete widget does not check nodes/users are 'referenceable'.
 - #278325 followup: Unify the mechanism used to assign hook_field('validate') errors to form elements across fields and widgets.
-- Userreference: Turn the 'Reverse link' radios into a checkbox in the field settings.
-- Nodereference: Only list 'node' Views in the 'advanced mode', and differnciate default views as in D5.
-- Optionwidgets: fix PHP warning when creating a new 'on/off checkbox' and no allowed values could be set yet.
-- Optionwidgets: fix PHP warning on 'on/off checkbox' only one 'allowed value'.
-- Optionwidgets: add a 'warning' message to remind the admins they need to set allowed values.
+- Userreference - Turn the 'Reverse link' radios into a checkbox in the field settings.
+- Nodereference - Only list 'node' Views in the 'advanced mode', and differnciate default views as in D5.
+- Optionwidgets - fix PHP warning when creating a new 'on/off checkbox' and no allowed values could be set yet.
+- Optionwidgets - fix PHP warning on 'on/off checkbox' only one 'allowed value'.
+- Optionwidgets - add a 'warning' message to remind the admins they need to set allowed values.
 - #278676 by hass: fix untranslated field and widget type names.
 - Do not validate the fields settings form when the 'change label / widget' submits the form.
 - #273502 Let the 'menu settings' node-form fieldset on node forms be repositioned.
 - #273502 followup: add a description for non-CCK 'fields' on 'Manage fields' tab.
 - #278793 by hass: fix untranslated PHP code example.
-- Nodereference/Userreference: There were two 'no selection' choices on 'select list' widget for non-required fields.
-- #277486 Nodereference/Userreference: no selection with 'select list' widget stores 0 instead of NULL.
+- Nodereference/Userreference - There were two 'no selection' choices on 'select list' widget for non-required fields.
+- #277486 Nodereference/Userreference - no selection with 'select list' widget stores 0 instead of NULL.
 - #278789 better wording for the 'PHP default value invalid' error message.
 - #267771 orignal patch by quicksketch: Richer label settings for views fields.
 - #279204 by eMPee584: fix edit paths inconsistency.
-- #276990 Nodereference: error message when no valid node with that title (autocomplete widget).
+- #276990 Nodereference - error message when no valid node with that title (autocomplete widget).
 - Widget (FAPI-)validation messages do not display the field 'label' when the error is on a nth value (n > 1).
 - Unify field validation error messages.
 - #269319 Reintroduce field template variants; add theme instructions text file.
 - #179419 by smk-ka: Content Copy - Import fails when language not English.
+- #278899 Nodereference - Refactor 'advanced (Views-defined referenceable nodes)' to use views rendering.
 
 CCK 6.2.rc3
 ===========
