@@ -17,6 +17,7 @@ class ContentCrudTestCase extends DrupalWebTestCase {
    */
   function setUp() {
     parent::setUp('content', 'schema', 'text');
+    module_load_include('inc', 'content', 'includes/content.crud');
   }
 
   // Database schema related helper functions
@@ -368,11 +369,67 @@ class ContentCrudTestCase extends DrupalWebTestCase {
   }
 }
 
+class ContentCrudBasicTest extends ContentCrudTestCase {
+  function getInfo() {
+    return array(
+      'name' => t('CCK CRUD API - Basic API tests'),
+      'description' => t('Tests the field CRUD (create, read, update, delete) API. <b>Requires !schema_link.</b>', array('!schema_link' => l('Schema module', 'http://www.drupal.org/projects/schema'))),
+      'group' => t('CCK'),
+    );
+  }
+
+  function setUp() {
+    parent::setUp();
+    $this->acquireContentTypes(1);
+  }
+
+  function testBasic() {
+    // Create a field with both field and instance settings.
+    $field = $this->createFieldText(array('widget_type' => 'text_textarea', 'text_processing' => 1, 'rows' => 5), 0);
+
+
+    // Check that collapse and expand are inverse.
+    $fields = content_field_instance_read(array('field_name' => $field['field_name'], 'type_name' => $this->content_types[0]->type));
+    $field1 = array_pop($fields);
+
+    $field2 = content_field_instance_collapse($field1);
+    $field3 = content_field_instance_expand($field2);
+    $field4 = content_field_instance_collapse($field3);
+
+    $this->assertIdentical($field1, $field3, 'collapse then expand is identity');
+    $this->assertIdentical($field2, $field4, 'expand then collapse is identity');
+
+
+    // Check that collapse and expand are both final
+    // (e.g. do not further alter the data when called multiple times).
+    $fields = content_field_instance_read(array('field_name' => $field['field_name'], 'type_name' => $this->content_types[0]->type));
+    $field1 = array_pop($fields);
+
+    $field2 = content_field_instance_collapse($field1);
+    $field3 = content_field_instance_collapse($field2);
+    $this->assertIdentical($field2, $field3, 'collapse is final');
+
+    $field2 = content_field_instance_expand($field1);
+    $field3 = content_field_instance_expand($field2);
+    $this->assertIdentical($field2, $field3, 'expand is final');
+
+
+    // Check that updating a field as is leaves it unchanged.
+    $fields = content_field_instance_read(array('field_name' => $field['field_name'], 'type_name' => $this->content_types[0]->type));
+    $field1 = array_pop($fields);
+    $field2 = content_field_instance_update($field1);
+    $fields = content_field_instance_read(array('field_name' => $field['field_name'], 'type_name' => $this->content_types[0]->type));
+    $field3 = array_pop($fields);
+
+    $this->assertIdentical($field1, $field3, 'read, update, read is identity');
+  }
+}
+
 class ContentCrudSingleToMultipleTest extends ContentCrudTestCase {
   function getInfo() {
     return array(
       'name' => t('CCK CRUD API - Single to multiple'),
-      'description' => t('Tests the CRUD (create, read, update, delete) API for content types by creating a single value field and chaning it to a multivalue field, sharing it between several content types. <b>Requires !schema_link.</b>', array('!schema_link' => l('Schema module', 'http://www.drupal.org/projects/schema'))),
+      'description' => t('Tests the field CRUD (create, read, update, delete) API by creating a single value field and changing it to a multivalue field, sharing it between several content types. <b>Requires !schema_link.</b>', array('!schema_link' => l('Schema module', 'http://www.drupal.org/projects/schema'))),
       'group' => t('CCK'),
     );
   }
@@ -445,7 +502,7 @@ class ContentCrudMultipleToSingleTest extends ContentCrudTestCase {
   function getInfo() {
     return array(
       'name' => t('CCK CRUD API - Multiple to single'),
-      'description' => t('Tests the CRUD (create, read, update, delete) API for content types by creating a multivalue field and chaning it to a single value field, sharing it between several content types. <b>Requires !schema_link.</b>', array('!schema_link' => l('Schema module', 'http://www.drupal.org/projects/schema'))),
+      'description' => t('Tests the field CRUD (create, read, update, delete) API by creating a multivalue field and changing it to a single value field, sharing it between several content types. <b>Requires !schema_link.</b>', array('!schema_link' => l('Schema module', 'http://www.drupal.org/projects/schema'))),
       'group' => t('CCK'),
     );
   }

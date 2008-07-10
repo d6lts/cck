@@ -290,11 +290,12 @@ function content_field_instance_create($field) {
 function content_field_instance_update($field) {
   include_once('./'. drupal_get_path('module', 'content') .'/includes/content.admin.inc');
 
+  // Ensure the field description is in the 'expanded' form.
+  $field = content_field_instance_expand($field);
+
   // Get the previous value from the table.
   $previous = content_field_instance_read(array('field_name' => $field['field_name'], 'type_name' => $field['type_name']));
   $prev_field = array_pop($previous);
-
-  $field = content_field_instance_expand($field);
 
   // Create a complete field array by merging the previous and current values,
   // letting the current values overwrite the previous ones.
@@ -319,7 +320,6 @@ function content_field_instance_update($field) {
   $prior_instances = content_field_instance_read(array('field_name' => $field['field_name']));
 
   if ($prev_field['db_storage'] == CONTENT_DB_STORAGE_PER_CONTENT_TYPE && count($prior_instances) > 1) {
-
     // Update the field's data storage.
     $field['db_storage'] = CONTENT_DB_STORAGE_PER_FIELD;
 
@@ -369,6 +369,8 @@ function _content_field_write($field, $op = 'update') {
   $setting_names = module_invoke($field['module'], 'field_settings', 'save', $field);
   if (is_array($setting_names)) {
     foreach ($setting_names as $setting) {
+      // Unlike _content_field_instance_write() and 'widget_settings', 'global_settings'
+      // is never preexisting, so we take no particular precautions here.
       $field['global_settings'][$setting] = isset($field[$setting]) ? $field[$setting] : '';
       unset($field[$setting]);
     }
@@ -395,15 +397,21 @@ function _content_field_write($field, $op = 'update') {
  *   The field array to process.
  */
 function _content_field_instance_write($field, $op = 'update') {
-  // Collapse the field => widget format.
+  // Collapse the field => widget format, so that the values to be saved by
+  // drupal_write_record are on top-level.
   $field = content_field_instance_collapse($field);
 
   // Rearrange the data to create the widget_settings array.
   $setting_names = module_invoke($field['widget_module'], 'widget_settings', 'save', $field);
   if (is_array($setting_names)) {
     foreach ($setting_names as $setting) {
-      $field['widget_settings'][$setting] = isset($field[$setting]) ? $field[$setting] : '';
-      unset($field[$setting]);
+      // In some cases (when the updated $field was originally read from
+      // the db, as opposed to gathered from the values of a form), the values
+      // are already in the right place, we take care to not wipe them.
+      if (isset($field[$setting])) {
+        $field['widget_settings'][$setting] = $field[$setting];
+        unset($field[$setting]);
+      }
     }
   }
 
@@ -451,29 +459,22 @@ function content_field_instance_read($param = NULL, $include_inactive = FALSE) {
 
   $fields = array();
   while ($instance = db_fetch_array($db_result)) {
+    // Unserialize arrays.
+    foreach (array('widget_settings', 'display_settings', 'global_settings', 'db_columns') as $key) {
+      $instance[$key] = (!empty($instance[$key])) ? (array) unserialize($instance[$key]) : array();
+    }
     // 'columns' is a reserved word in MySQL4, so our column is named 'db_columns'.
-    $instance['columns'] = (array) (!empty($instance['db_columns']) ? unserialize($instance['db_columns']) : array());
+    $instance['columns'] = $instance['db_columns'];
     unset($instance['db_columns']);
-    $instance['global_settings'] = (array) (!empty($instance['global_settings']) ? unserialize($instance['global_settings']) : array());
 
+    // Unfold 'global_settings'.
     foreach ($instance['global_settings'] as $key => $value) {
       $instance[$key] = $value;
     }
     unset($instance['global_settings']);
 
-    if (!empty($instance['widget_settings'])) {
-      $instance['widget_settings'] = (array) unserialize($instance['widget_settings']);
-    }
-    else {
-       $instance['widget_settings'] = array();
-    }
-    if (!empty($instance['display_settings'])) {
-      $instance['display_settings'] = (array) unserialize($instance['display_settings']);
-    }
-    else {
-      $instance['display_settings'] = array();
-    }
-
+    // Put the field in the $field => 'widget' structure that is used
+    // all around content.module.
     $field = content_field_instance_expand($instance);
 
     // Invoke hook_content_fieldapi().

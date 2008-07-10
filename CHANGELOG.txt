@@ -1,7 +1,11 @@
 //$Id$
 
-CCK 6.2.dev
+CCK 6.2.rc4
 ===========
+
+This RC Mainly fixes a critical bug :
+http://www.drupal.org/node/277968 - Saving 'Display Fields' wipes widget settings.
+
 - #278325 Nodereference/Userreference - autocomplete widget does not check nodes/users are 'referenceable'.
 - #278325 followup: Unify the mechanism used to assign hook_field('validate') errors to form elements across fields and widgets.
 - Userreference - Turn the 'Reverse link' radios into a checkbox in the field settings.
@@ -25,6 +29,8 @@ CCK 6.2.dev
 - #269319 Reintroduce field template variants; add theme instructions text file.
 - #179419 by smk-ka: Content Copy - Import fails when language not English.
 - #278899 Nodereference - Refactor 'advanced (Views-defined referenceable nodes)' to use views rendering.
+- #279190 content_crud_instance_update wiped existing widget settings in some cases.
+  Also added a tests for a few basic properties of the CRUD API.
 
 CCK 6.2.rc3
 ===========

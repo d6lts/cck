@@ -398,7 +398,7 @@ function fieldgroup_display_overview_form_submit($form, &$form_state) {
   foreach ($form_values as $key => $values) {
     if (in_array($key, $form['#groups'])) {
       $group = $groups[$key];
-      // We have numeric keys here, so we can't use array_merge.
+      // We have some numeric keys here, so we can't use array_merge.
       $group['settings']['display'] = $values + $group['settings']['display'];
       fieldgroup_save_group($form['#type_name'], $group);
     }

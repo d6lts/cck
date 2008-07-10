@@ -450,14 +450,12 @@ function theme_content_admin_display_overview_form($form) {
 function content_admin_display_overview_form_submit($form, &$form_state) {
   module_load_include('inc', 'content', 'includes/content.crud');
   $form_values = $form_state['values'];
-  $fields = content_fields();
   foreach ($form_values as $key => $values) {
     // Groups are handled in fieldgroup_display_overview_form_submit().
     if (in_array($key, $form['#fields'])) {
       $field = content_fields($key, $form['#type_name']);
-      // We have numeric keys here, so we can't use array_merge.
+      // We have some numeric keys here, so we can't use array_merge.
       $field['display_settings'] = $values + $field['display_settings'];
-      $field = content_field_instance_collapse($field);
       content_field_instance_update($field);
     }
     content_clear_type_cache();
@@ -669,7 +667,7 @@ function content_admin_field_main(&$form_state, $form_values) {
   $form['needs_update'] = array(
     '#type' => 'hidden',
     '#value' => !empty($form_values['needs_update']),
-    );
+  );
   $form['submit'] = array(
     '#type' => 'submit',
     '#value' => t('Continue'),

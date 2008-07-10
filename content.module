@@ -1329,6 +1329,8 @@ function _content_type_info($reset = FALSE) {
           $type['fields'][$field['field_name']] = $field;
           $db_info = content_database_info($field);
           $type['tables'][$db_info['table']] = $db_info['table'];
+          // This means that content_fields($field_name) (no type name)
+          // returns the last instance loaded.
           $info['fields'][$field['field_name']] = $field;
         }
 
