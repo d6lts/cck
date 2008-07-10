@@ -617,26 +617,10 @@ function _nodereference_potential_references_views($field, $string = '', $exact_
   $view_name = $field['advanced_view'];
 
   if ($view = views_get_view($view_name)) {
-    // TODO: We should let the user pick the display in the fields settings,
-    // but this would require some AHAH-magic, and FAPI work for non-JS.
-    // In our Views 1 to Views 2 updates we are putting fields in
-    //the 'default' display, so we use that one for now.
-    $display = 'default';
-
-    $view->display[$display]->display_plugin = 'nodereference_simple';
-    $view->init_display();
+    // We add a display, and let it derive from the 'default' display.
+    // TODO: We should let the user pick a display in the fields settings - sort of requires AHAH...
+    $display = $view->add_display('nodereference_simple');
     $view->set_display($display);
-
-    // Prevent warnings if the view has no arguments, sorts or relationships.
-    // TODO: see with merlinofchaos, this probably shouldn't be needed, I must be
-    // missing one step...
-    $types = views_object_types();
-    foreach (view::display_objects() as $key) {
-      $plural = $types[$key]['plural'];
-      if ($view->display_handler->get_option($plural) === NULL) {
-        $view->display_handler->set_option($plural, array());
-      }
-    }
 
     // TODO from merlinofchaos on IRC : arguments using summary view can defeat the style setting.
     // We might also need to check if there's an argument, and set *its* style_plugin as well.
@@ -653,7 +637,8 @@ function _nodereference_potential_references_views($field, $string = '', $exact_
     }
 
     // We do need title field, so add it if not present (unlikely, but...)
-    if (!isset($view->display[$display]->display_options['fields']['title'])) {
+    $fields = $view->get_items('field', $display);
+    if (!isset($fields['title'])) {
       $view->add_item($display, 'field', 'node', 'title');
     }
     if ($string !== '') {
@@ -662,7 +647,15 @@ function _nodereference_potential_references_views($field, $string = '', $exact_
       $id = $view->add_item($display, 'filter', 'node', 'title', $options);
     }
 
-    // TODO : set 'separator' if not present. Force 'inline' ?
+    // If not set, make all fields inline and define a separator.
+    $options = $view->display_handler->get_option('row_options');
+    if (empty($options['inline'])) {
+      $options['inline'] = drupal_map_assoc(array_keys($view->get_items('field', $display)));
+    }
+    if (empty($options['separator'])) {
+      $options['separator'] = '-';
+    }
+    $view->display_handler->set_option('row_options', $options);
 
     // Make sure the query is not cached
     $view->is_cacheable = FALSE;
