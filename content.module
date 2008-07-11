@@ -678,7 +678,7 @@ function content_field($op, &$node, $field, &$items, $teaser, $page) {
       break;
 
     case 'view':
-      $element = array();
+      $addition = array();
 
       if ($node->build_mode == NODE_BUILD_NORMAL) {
         $context = $teaser ? 'teaser' : 'full';
@@ -745,8 +745,9 @@ function content_field($op, &$node, $field, &$items, $teaser, $page) {
           $element['items'] += $format_info;
         }
 
+        $addition = array($field['field_name'] => $element);
       }
-      return array($field['field_name'] => $element);
+      return $addition;
 
     case 'alter':
       // Add back the formatted values in the 'view' element,

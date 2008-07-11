@@ -1,5 +1,10 @@
 //$Id$
 
+CCK 6.2-dev
+===========
+
+- fix PHP warnings when field display is set to 'hidden' and field is in a fieldgroup.
+
 CCK 6.2.rc4
 ===========
 
