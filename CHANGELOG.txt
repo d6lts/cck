@@ -3,7 +3,8 @@
 CCK 6.2-dev
 ===========
 
-- fix PHP warnings when field display is set to 'hidden' and field is in a fieldgroup.
+- Fix PHP warnings when field display is set to 'hidden' and field is in a fieldgroup.
+- Re-introduce '<none>' choice for multiselect widgets (optionwidgets, noderef/userref select)
 
 CCK 6.2.rc4
 ===========

@@ -384,8 +384,11 @@ function optionwidgets_form2data($element, $field) {
 function optionwidgets_options($field) {
   $function = $field['module'] .'_allowed_values';
   $options = function_exists($function) ? $function($field) : (array) content_allowed_values($field);
-  // Add an empty choice for non required radios and single-selects.
-  if ($field['widget']['type'] != 'optionwidgets_onoff' && !$field['required'] && !$field['multiple']) {
+  // Add an empty choice for :
+  // - non required radios
+  // - non required selects
+  if (($field['widget']['type'] == 'optionwidgets_buttons' && !$field['required'] && !$field['multiple'])
+    || (in_array($field['widget']['type'], array('optionwidgets_select', 'nodereference_select', 'userreference_select')) && !$field['required'])) {
     $options = array('' => theme('optionwidgets_none', $field)) + $options;
   }
   return $options;
@@ -397,10 +400,14 @@ function optionwidgets_options($field) {
  */
 function theme_optionwidgets_none($field) {
   switch ($field['widget']['type']) {
-  case 'optionwidgets_buttons':
-    return t('N/A');
-  default :
-    return '';
+    case 'optionwidgets_buttons':
+      return t('N/A');
+    case 'optionwidgets_select':
+    case 'nodereference_select':
+    case 'userreference_select':
+      return t('<none>');
+    default :
+      return '';
   }
 }
 
