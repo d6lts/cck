@@ -401,9 +401,8 @@ function text_textfield_process($element, $edit, $form_state, $form) {
     '#columns' => $element['#columns'],
   );
 
-  if (!empty($field['max_length'])) {
-    $element[$field_key]['#maxlength'] = $field['max_length'];
-  }
+  $element[$field_key]['#maxlength'] = !empty($field['max_length']) ? $field['max_length'] : NULL;
+
   if (!empty($field['text_processing'])) {
     $filter_key = $element['#columns'][1];
     $format = isset($element['#value'][$filter_key]) ? $element['#value'][$filter_key] : FILTER_FORMAT_DEFAULT;
