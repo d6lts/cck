@@ -344,6 +344,20 @@ function nodereference_widget($op, &$node, $field, &$items) {
                 form_set_error($error_field, t('%name : Title mismatch. Please check your selection.'), array('%name' => t($field['widget']['label'])));
               }
             }
+            else {
+              // no explicit nid
+              $nids = _nodereference_potential_references($field, FALSE, $item['node_name'], TRUE);
+              if (empty($nids)) {
+                form_set_error($error_field, t('%name: Found no valid post with that title.', array('%name' => t($field['widget']['label']))));
+              }
+              else {
+                // TODO:
+                // the best thing would be to present the user with an additional form,
+                // allowing the user to choose between valid candidates with the same title
+                // ATM, we pick the first matching candidate...
+                $nid = array_shift(array_keys($nids));
+              }
+            }
           }
         }
         return;
