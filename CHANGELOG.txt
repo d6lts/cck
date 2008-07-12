@@ -6,6 +6,7 @@ CCK 6.2-dev
 - Fix PHP warnings when field display is set to 'hidden' and field is in a fieldgroup.
 - Re-introduce '<none>' choice for multiselect widgets (optionwidgets, noderef/userref select).
 - #281449 Text: maxlength on textfield widget is 128 even when the field has do maximum length.
+- Add tests for optionwidgets.
 
 CCK 6.2.rc4
 ===========

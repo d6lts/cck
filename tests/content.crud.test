@@ -434,12 +434,14 @@ class ContentCrudSingleToMultipleTest extends ContentCrudTestCase {
     );
   }
 
-  function testSingleToMultiple() {
-    // Acquire the context
+  function setUp() {
+    parent::setUp();
     $this->loginWithPermissions();
     $this->acquireContentTypes(3);
     $this->acquireNodes();
+  }
 
+  function testSingleToMultiple() {
     // Create a simple text field
     $this->createFieldText(array('text_processing' => 1));
     $target_schema = array(
@@ -507,12 +509,14 @@ class ContentCrudMultipleToSingleTest extends ContentCrudTestCase {
     );
   }
 
-  function testMultipleToSingle() {
-    // Acquire the context
+  function setUp() {
+    parent::setUp();
     $this->loginWithPermissions();
     $this->acquireContentTypes(3);
     $this->acquireNodes();
+  }
 
+  function testMultipleToSingle() {
     // Create a multivalue text field
     $this->createFieldText(array('text_processing' => 1, 'multiple' => 1));
     $this->assertSchemaMatchesTables(array(
@@ -639,9 +643,12 @@ class ContentUICrud extends ContentCrudTestCase {
     );
   }
 
+  function setUp() {
+    parent::setUp();
+    $this->loginWithPermissions();
+  }
+
   function testAddFieldUI() {
-    $admin_user = $this->drupalCreateUser(array('administer site configuration', 'access administration pages', 'administer nodes', 'administer content types'));
-    $this->drupalLogin($admin_user);
     // Add a content type with a random name (to avoid schema module problems).
     $edit = array();
     $type1 = 'simpletest'. mt_rand();
@@ -694,8 +701,6 @@ class ContentUICrud extends ContentCrudTestCase {
   }
 
   function testFieldContentUI() {
-    $admin_user = $this->drupalCreateUser(array('administer site configuration', 'access administration pages', 'administer nodes', 'administer content types'));
-    $this->drupalLogin($admin_user);
     // Create a content type with a field
     $type1 = 'simpletest'. mt_rand();
     $type1_obj = $this->drupalCreateContentType(array('type' => $type1));
@@ -742,3 +747,315 @@ class ContentUICrud extends ContentCrudTestCase {
   }
 }
 
+class ContentOptionWidgetTest extends ContentCrudTestCase {
+  function getInfo() {
+    return array(
+      'name' => t('Option widgets'),
+      'description' => t('Tests the optionwidgets.'),
+      'group' => t('CCK'),
+    );
+  }
+
+  function setUp() {
+    parent::setUp();
+    $this->drupalModuleEnable('optionwidgets');
+    $this->loginWithPermissions();
+    $this->acquireContentTypes(1);
+  }
+
+  // TODO: test a number field with optionwidgets stores 0 correctly ?
+  // TODO: test the case where aliases and values overlap ? (http://drupal.org/node/281749)
+  // TODO: test noderef select widget...
+
+  /**
+   * On/Off Checkbox, not required:
+   * - Create a node with the value checked.
+   * - FAILS: Edit the node and uncheck the value.
+   *
+   * On/Off Checkbox, required:
+   * - TODO: what behavior do we want ?
+   */
+  function testOnOffCheckbox() {
+    $type = $this->content_types[0];
+    $type_url = str_replace('_', '-', $type->type);
+
+    // Create the field.
+    $on_text = $this->randomName(5);
+    $on_value = $this->randomName(5);
+    $off_text = $on_text. '_off';
+    $off_value = $on_value. '_off';
+
+    $settings = array(
+      'type' => 'text',
+      'widget_type' => 'optionwidgets_onoff',
+      'allowed_values' => "$off_value|$off_text\r\n$on_value|$on_text",
+    );
+    $field = $this->createField($settings, 0);
+    $field_name = $field['field_name'];
+
+    // Create a node with the checkbox on.
+    $edit = array();
+    $edit['title'] = $this->randomName(20);
+    $edit['body'] = $this->randomName(20);
+    $edit[$field_name.'[value]'] = $on_value;
+    $this->drupalPost('node/add/'. $type_url, $edit, 'Save');
+    $node = node_load(array('title' => $edit['title']));
+    $this->assertEqual($node->{$field_name}[0]['value'], $on_value, 'Checkbox: checked (saved)');
+    $this->drupalGet('node/'. $node->nid);
+    $this->assertText($on_text, 'Checkbox: checked (displayed)');
+
+    // Edit the node and uncheck the box.
+    // FAILS.
+    $edit = array();
+    $edit[$field_name.'[value]'] = 0;
+    $this->drupalPost('node/'. $node->nid .'/edit', $edit, 'Save');
+    $node = node_load($node->nid, NULL, TRUE);
+    $this->assertIdentical($node->{$field_name}[0]['value'], NULL, 'Checkbox: unchecked (saved)');
+    $this->drupalGet('node/'. $node->nid);
+    $this->assertNoText($on_text, 'Checkbox: unchecked (displayed)');
+  }
+
+  /**
+   * Single select, not required:
+   * - TODO: check there's a 'none' choice in the form.
+   * - Create a node with one value selected.
+   * - Edit the node and unselect the value (selecting '- None -').
+   *
+   * Single select, required:
+   * - TODO: check there's no 'none' choice in the form.
+   *
+   * Multiple select, not required:
+   * - TODO: check there's a 'none' choice in the form.
+   * - Edit the node and select multiple values.
+   * - Edit the node and unselect the values (selecting '- None -').
+   * - FAILS: Edit the node and unselect the values (selecting nothing).
+   *
+   * Multiple select, required:
+   * - TODO: check there's no 'none' choice in the form.
+   * - Check the form doesn't submit when nothing is selected.
+   */
+  function testSelect() {
+    $type = $this->content_types[0];
+    $type_url = str_replace('_', '-', $type->type);
+
+    // Create the field - start with 'single'.
+    $value1 = $this->randomName(5);
+    $value1_alias = $value1 .'_alias';
+    $value2 = $this->randomName(5);
+    $value2_alias = $value2 .'_alias';
+
+    $settings = array(
+      'type' => 'text',
+      'widget_type' => 'optionwidgets_select',
+      'allowed_values' => "$value1|$value1_alias\r\n$value2|$value2_alias",
+    );
+    $field = $this->createField($settings, 0);
+    $field_name = $field['field_name'];
+
+    // Create a node with one value selected
+    $edit = array();
+    $edit['title'] = $this->randomName(20);
+    $edit['body'] = $this->randomName(20);
+    $edit[$field_name.'[value]'] = $value1;
+    $this->drupalPost('node/add/'. $type_url, $edit, 'Save');
+    $node = node_load(array('title' => $edit['title']));
+    $this->assertEqual($node->{$field_name}[0]['value'], $value1, 'Select: selected (saved)');
+    $this->drupalGet('node/'. $node->nid);
+    $this->assertText($value1_alias, 'Select: selected (displayed)');
+
+    // Edit the node and unselect the value (selecting '- None -').
+    $edit = array();
+    $edit[$field_name.'[value]'] = '';
+    $this->drupalPost('node/'. $node->nid .'/edit', $edit, 'Save');
+    $node = node_load($node->nid, NULL, TRUE);
+    $this->assertIdentical($node->{$field_name}[0]['value'], NULL, 'Select: unselected (saved)');
+    $this->drupalGet('node/'. $node->nid);
+    $this->assertNoText($value1_alias, 'Select: unselected (displayed)');
+
+    // Change to a multiple field
+    $field = $this->updateField(array('multiple' => '1', 'required' => '0'));
+
+    // Edit the node and select multiple values.
+    $edit = array();
+    $edit[$field_name.'[value][]'] = array($value1, $value2);
+    $this->drupalPost('node/'. $node->nid .'/edit', $edit, 'Save');
+    $node = node_load($node->nid, NULL, TRUE);
+    $this->assertEqual($node->{$field_name}[0]['value'], $value1, 'Multiple Select: selected 1 (saved)');
+    $this->assertEqual($node->{$field_name}[1]['value'], $value2, 'Multiple Select: selected 2 (saved)');
+    $this->drupalGet('node/'. $node->nid);
+    $this->assertText($value1_alias, 'Multiple Select: selected 1 (displayed)');
+    $this->assertText($value2_alias, 'Multiple Select: selected 2 (displayed)');
+
+    // Edit the node and unselect the values (selecting '- None -').
+    $edit = array();
+    $edit[$field_name.'[value][]'] = array('');
+    $this->drupalPost('node/'. $node->nid .'/edit', $edit, 'Save');
+    $node = node_load($node->nid, NULL, TRUE);
+    $this->assertIdentical($node->{$field_name}[0]['value'], NULL, 'Multiple Select: unselected 1 ("-none-" selected) (saved)');
+    $this->assertTrue(!isset($node->{$field_name}[1]), 'Multiple Select: unselected 2 ("-none-" selected) (saved)');
+    $this->drupalGet('node/'. $node->nid);
+    $this->assertNoText($value1_alias, 'Multiple Select: unselected 1 ("-none-" selected) (displayed)');
+    $this->assertNoText($value2_alias, 'Multiple Select: unselected 2 ("-none-" selected) (displayed)');
+
+    // Edit the node and unselect the values (selecting nothing).
+    // We first need to put values back in (no test needed).
+    $edit = array();
+    $edit[$field_name.'[value][]'] = array($value1, $value2);
+    $this->drupalPost('node/'. $node->nid .'/edit', $edit, 'Save');
+    $edit = array();
+    $this->drupalPost('node/'. $node->nid .'/edit', $edit, 'Save');
+    $node = node_load($node->nid, NULL, TRUE);
+    $this->assertIdentical($node->{$field_name}[0]['value'], NULL, 'Multiple Select: unselected 1 (no selection) (saved)');
+    $this->assertTrue(!isset($node->{$field_name}[1]), 'Multiple Select: unselected 2 (no selection) (saved)');
+    $this->drupalGet('node/'. $node->nid);
+    $this->assertNoText($value1_alias, 'Multiple Select: unselected 1 (no selection) (displayed)');
+    $this->assertNoText($value2_alias, 'Multiple Select: unselected 2 (no selection) (displayed)');
+
+    // Change the field to 'required'.
+    $field = $this->updateField(array('required' => '1'));
+
+    // Check the form doesn't submit when nothing is selected.
+    // Doing this on the pre-filled node doesn't take, so we test that on a new node.
+    // TODO : come back to this when the above fails are solved.
+//    $edit = array();
+//    $this->drupalPost('node/'. $node->nid .'/edit', $edit, 'Save');
+//    $this->assertRaw(t('!name field is required.', array('!name' => t($field['widget']['label']))), 'Multiple Select: "required" property is respected');
+    $edit = array();
+    $edit['title'] = $this->randomName(20);
+    $edit['body'] = $this->randomName(20);
+    $this->drupalPost('node/add/'. $type_url, $edit, 'Save');
+    $this->assertRaw(t('!name field is required.', array('!name' => t($field['widget']['label']))), 'Multiple Select: "required" property is respected');
+
+  }
+
+  /**
+   * Single (radios), not required:
+   * - TODO: check there's a 'none' choice in the form.
+   * - Create a node with one value selected.
+   * - Edit the node and unselect the value (selecting '- None -').
+   * - FAILS: Edit the node and unselect the value (selecting nothing).
+   *
+   * Single (radios), required:
+   * - TODO: check there's no 'none' choice in the form.
+   * - Check the form doesn't submit when nothing is selected.
+   *
+   * Multiple (checkboxes), not required:
+   * - TODO: check there's no 'none' choice in the form.
+   * - Edit the node and select multiple values.
+   * - FAILS: Edit the node and unselect the values (selecting nothing).
+   *
+   * Multiple (checkboxes), required:
+   * - TODO: check there's no 'none' choice in the form.
+   * - Check the form doesn't submit when nothing is selected.
+   */
+  function testButtons() {
+    $type = $this->content_types[0];
+    $type_url = str_replace('_', '-', $type->type);
+
+    // Create the field - start with 'single' (radios).
+    $value1 = $this->randomName(5);
+    $value1_alias = $value1 .'_alias';
+    $value2 = $this->randomName(5);
+    $value2_alias = $value2 .'_alias';
+
+    $settings = array(
+      'type' => 'text',
+      'widget_type' => 'optionwidgets_buttons',
+      'allowed_values' => "$value1|$value1_alias\r\n$value2|$value2_alias",
+    );
+    $field = $this->createField($settings, 0);
+    $field_name = $field['field_name'];
+
+    // Create a node with one value selected
+    $edit = array();
+    $edit['title'] = $this->randomName(20);
+    $edit['body'] = $this->randomName(20);
+    $edit[$field_name.'[value]'] = $value1;
+    $this->drupalPost('node/add/'. $type_url, $edit, 'Save');
+    $node = node_load(array('title' => $edit['title']));
+    $this->assertEqual($node->{$field_name}[0]['value'], $value1, 'Radios: checked (saved)');
+    $this->drupalGet('node/'. $node->nid);
+    $this->assertText($value1_alias, 'Radios: checked (displayed)');
+
+    // Edit the node and unselect the value (selecting '- None -').
+    $edit = array();
+    $edit[$field_name.'[value]'] = '';
+    $this->drupalPost('node/'. $node->nid .'/edit', $edit, 'Save');
+    $node = node_load($node->nid, NULL, TRUE);
+    $this->assertIdentical($node->{$field_name}[0]['value'], NULL, 'Radios: unchecked (saved)');
+    $this->drupalGet('node/'. $node->nid);
+    $this->assertNoText($value1_alias, 'Radios: unchecked (displayed)');
+
+    // Edit the node and unselect the value (selecting nothing).
+    // We first need to put the value back in (no test needed).
+    // FAILS.
+    $edit = array();
+    $edit[$field_name.'[value]'] = $value1;
+    $this->drupalPost('node/'. $node->nid .'/edit', $edit, 'Save');
+    $edit = array();
+    $this->drupalPost('node/'. $node->nid .'/edit', $edit, 'Save');
+    $node = node_load($node->nid, NULL, TRUE);
+    $this->assertIdentical($node->{$field_name}[0]['value'], NULL, 'Radios: unchecked (no selection) (saved)');
+    $this->drupalGet('node/'. $node->nid);
+    $this->assertNoText($value1_alias, 'Radios: unselected (no selection) (displayed)');
+
+    // Change field to required.
+    $field = $this->updateField(array('required' => '1'));
+
+    // Check the form doesn't submit when nothing is selected.
+    // Doing this on the pre-filled node doesn't take, so we test that on a new node.
+    // TODO : come back to this when the above fails are solved.
+//    $edit = array();
+//    $this->drupalPost('node/'. $node->nid .'/edit', $edit, 'Save');
+//    $this->assertRaw(t('!name field is required.', array('!name' => t($field['widget']['label']))), 'Radios: "required" property is respected');
+    $edit = array();
+    $edit['title'] = $this->randomName(20);
+    $edit['body'] = $this->randomName(20);
+// TODO : those thests are OK but mess the subsequent form submissions ??
+//    $this->drupalPost('node/add/'. $type_url, $edit, 'Save');
+//    $this->assertRaw(t('!name field is required.', array('!name' => t($field['widget']['label']))), 'Radios: "required" property is respected');
+
+    // Change field to 'multiple' (checkboxes), not required.
+    $field = $this->updateField(array('multiple' => '1', 'required' => '0'));
+
+    // Edit the node and select multiple values.
+    $edit = array();
+    $edit[$field_name.'[value]['. $value1 .']'] = $value1;
+    $edit[$field_name.'[value]['. $value2 .']'] = $value2;
+    $this->drupalPost('node/'. $node->nid .'/edit', $edit, 'Save');
+    $node = node_load($node->nid, NULL, TRUE);
+    $this->assertEqual($node->{$field_name}[0]['value'], $value1, 'Checkboxes: selected 1 (saved)');
+    $this->assertEqual($node->{$field_name}[1]['value'], $value2, 'Checkboxes: selected 2 (saved)');
+    $this->drupalGet('node/'. $node->nid);
+    $this->assertText($value1_alias, 'Checkboxes: selected 1 (displayed)');
+    $this->assertText($value2_alias, 'Checkboxes: selected 2 (displayed)');
+
+    // Edit the node and unselect the values (selecting nothing).
+    // (there is no 'none' choice for checkboxes).
+    // FAILS
+    $edit = array();
+    $this->drupalPost('node/'. $node->nid .'/edit', $edit, 'Save');
+    $node = node_load($node->nid, NULL, TRUE);
+    $this->assertIdentical($node->{$field_name}[0]['value'], NULL, 'Checkboxes: unselected 1 (no selection) (saved)');
+    $this->assertTrue(!isset($node->{$field_name}[1]), 'Checkboxes: unselected 2 (no selection) (saved)');
+    $this->drupalGet('node/'. $node->nid);
+    $this->assertNoText($value1_alias, 'Checkboxes: unselected 1 (no selection) (displayed)');
+    $this->assertNoText($value2_alias, 'Checkboxes: unselected 2 (no selection) (displayed)');
+
+    // Change field to required.
+    $field = $this->updateField(array('required' => '1'));
+
+    // Check the form doesn't submit when nothing is selected.
+    // Doing this on the pre-filled node doesn't take, so we test that on a new node.
+    // TODO : come back to this when the above fails are solved.
+//    $edit = array();
+//    $this->drupalPost('node/'. $node->nid .'/edit', $edit, 'Save');
+//    $this->assertRaw(t('!name field is required.', array('!name' => t($field['widget']['label']))), 'Checkboxes: "required" property is respected');
+    $edit = array();
+    $edit['title'] = $this->randomName(20);
+    $edit['body'] = $this->randomName(20);
+    $this->drupalPost('node/add/'. $type_url, $edit, 'Save');
+    $this->assertRaw(t('!name field is required.', array('!name' => t($field['widget']['label']))), 'Checkboxes: "required" property is respected');
+  }
+
+}
