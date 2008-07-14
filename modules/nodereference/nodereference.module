@@ -28,6 +28,9 @@ function nodereference_theme() {
     'nodereference_select' => array(
       'arguments' => array('element' => NULL),
     ),
+    'nodereference_buttons' => array(
+      'arguments' => array('element' => NULL),
+    ),
     'nodereference_autocomplete' => array(
       'arguments' => array('element' => NULL),
     ),
@@ -306,6 +309,14 @@ function nodereference_widget_info() {
         'default value' => CONTENT_CALLBACK_DEFAULT,
       ),
     ),
+    'nodereference_buttons' => array(
+      'label' => t('Check boxes/radio buttons'),
+      'field types' => array('nodereference'),
+      'multiple values' => CONTENT_HANDLE_MODULE,
+      'callbacks' => array(
+        'default value' => CONTENT_CALLBACK_DEFAULT,
+      ),
+    ),
     'nodereference_autocomplete' => array(
       'label' => t('Autocomplete text field'),
       'field types' => array('nodereference'),
@@ -335,6 +346,11 @@ function nodereference_elements() {
       '#input' => TRUE,
       '#columns' => array('uid'), '#delta' => 0,
       '#process' => array('nodereference_select_process'),
+      ),
+    'nodereference_buttons' => array(
+      '#input' => TRUE,
+      '#columns' => array('uid'), '#delta' => 0,
+      '#process' => array('nodereference_buttons_process'),
       ),
     'nodereference_autocomplete' => array(
       '#input' => TRUE,
@@ -385,6 +401,13 @@ function nodereference_widget(&$form, &$form_state, $field, $items, $delta = 0) 
       );
       break;
 
+    case 'nodereference_buttons':
+      $element = array(
+        '#type' => 'nodereference_buttons',
+        '#default_value' => $items,
+      );
+      break;
+
     case 'nodereference_autocomplete':
       $element = array(
         '#type' => 'nodereference_autocomplete',
@@ -427,6 +450,36 @@ function nodereference_select_process($element, $edit, $form_state, $form) {
   $field_key  = $element['#columns'][0];
   $element[$field_key] = array(
     '#type' => 'optionwidgets_select',
+    '#default_value' => isset($element['#value']) ? $element['#value'] : '',
+    '#element_validate' => array('optionwidgets_validate', 'nodereference_select_validate'),
+    // The following values were set by the content module and need
+    // to be passed down to the nested element.
+    '#title' => $element['#title'],
+    '#required' => $element['#required'],
+    '#description' => $element['#description'],
+    '#field_name' => $element['#field_name'],
+    '#type_name' => $element['#type_name'],
+    '#delta' => $element['#delta'],
+    '#columns' => $element['#columns'],
+  );
+  return $element;
+}
+
+/**
+ * Process an individual element.
+ *
+ * Build the form element. When creating a form using FAPI #process,
+ * note that $element['#value'] is already set.
+ *
+ * The $fields array is in $form['#field_info'][$element['#field_name']].
+ */
+function nodereference_buttons_process($element, $edit, $form_state, $form) {
+  // The nodereference_select widget doesn't need to create its own
+  // element, it can wrap around the optionwidgets_select element.
+  // Add a validation step where the value can be unwrapped.
+  $field_key  = $element['#columns'][0];
+  $element[$field_key] = array(
+    '#type' => 'optionwidgets_buttons',
     '#default_value' => isset($element['#value']) ? $element['#value'] : '',
     '#element_validate' => array('optionwidgets_validate', 'nodereference_select_validate'),
     // The following values were set by the content module and need
@@ -739,6 +792,11 @@ function nodereference_autocomplete($field_name, $string = '') {
 function theme_nodereference_select($element) {
   return $element['#children'];
 }
+
+function theme_nodereference_buttons($element) {
+  return $element['#children'];
+}
+
 
 function theme_nodereference_autocomplete($element) {
   return $element['#children'];

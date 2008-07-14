@@ -8,6 +8,7 @@ CCK 6.2-dev
 - #281449 Text: maxlength on textfield widget is 128 even when the field has no maximum length.
 - Add tests for optionwidgets.
 - #282175: Don't mention 'add more' button when the widget opts out of it.
+- #282183 by chx: 'Checkboxes/radios' widget for nodereference.
 
 CCK 6.2.rc4
 ===========
@@ -18,7 +19,7 @@ http://www.drupal.org/node/277968 - Saving 'Display Fields' wipes widget setting
 - #278325 Nodereference/Userreference - autocomplete widget does not check nodes/users are 'referenceable'.
 - #278325 followup: Unify the mechanism used to assign hook_field('validate') errors to form elements across fields and widgets.
 - Userreference - Turn the 'Reverse link' radios into a checkbox in the field settings.
-- Nodereference - Only list 'node' Views in the 'advanced mode', and differnciate default views as in D5.
+- Nodereference - Only list 'node' Views in the 'advanced mode', and differenciate default views as in D5.
 - Optionwidgets - fix PHP warning when creating a new 'on/off checkbox' and no allowed values could be set yet.
 - Optionwidgets - fix PHP warning on 'on/off checkbox' only one 'allowed value'.
 - Optionwidgets - add a 'warning' message to remind the admins they need to set allowed values.
