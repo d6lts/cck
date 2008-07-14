@@ -339,20 +339,11 @@ function optionwidgets_data2form($element, $items, $field) {
  * transformation is needed.
  */
 function optionwidgets_form2data($element, $field) {
-  $items = $element['#value'];
   $field_key = $element['#columns'][0];
+  $items = (array) $element[$field_key]['#value'];
   $options = optionwidgets_options($field);
 
-  $keys = isset($items[$field_key]) ? $items[$field_key] : array();
-  if (!is_array($keys)) {
-    $keys = array($keys);
-  }
-  $values = array();
-  foreach ($keys as $key => $value) {
-    if (array_key_exists($value, $options)) {
-      $values[] = $value;
-    }
-  }
+  $values = array_values($items);
   if (empty($values)) {
     if ($element['#type'] == 'optionwidgets_onoff') {
       $keys = array_keys($options);

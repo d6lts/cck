@@ -8,7 +8,8 @@ CCK 6.2-dev
 - #281449 Text: maxlength on textfield widget is 128 even when the field has no maximum length.
 - Add tests for optionwidgets.
 - #282175: Don't mention 'add more' button when the widget opts out of it.
-- #282183 by chx: 'Checkboxes/radios' widget for nodereference.
+- #282183 by chx: Nodereference - 'Checkboxes/radios' widget.
+- #281388 Optionwidgets: Unselect values doesn't take.
 
 CCK 6.2.rc4
 ===========
