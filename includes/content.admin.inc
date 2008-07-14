@@ -976,7 +976,7 @@ function _content_admin_field(&$form_state, $type_name, $field_name) {
     '#title' => t('Required'),
     '#default_value' => $field['required'],
   );
-  $description = t("Maximum number of values users can enter for this field.");
+  $description = t('Maximum number of values users can enter for this field.');
   if (content_handle('widget', 'multiple values', $field) == CONTENT_HANDLE_CORE) {
     $description .= '<br/>'. t("'Unlimited' will provide an 'Add more' button so the users can add as many values as they like.");
   }
@@ -985,8 +985,8 @@ function _content_admin_field(&$form_state, $type_name, $field_name) {
     '#type' => 'select',
     '#title' => t('Number of values'),
     '#options' => array(1 => t('Unlimited'), 0 => 1) + drupal_map_assoc(range(2, 10)),
-    '#default_value' => $description,
-    '#description' => t("Maximum number of values") .'<br/><strong>'. t('Warning! Changing this setting after data has been created could result in the loss of data!') .'</strong>',
+    '#default_value' => $field['multiple'],
+    '#description' => $description,
   );
 
   $form['field']['previous_field'] = array(
