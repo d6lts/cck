@@ -407,7 +407,7 @@ function theme_optionwidgets_none($field) {
     case 'optionwidgets_select':
     case 'nodereference_select':
     case 'userreference_select':
-      return t('<none>');
+      return t('- None -');
     default :
       return '';
   }

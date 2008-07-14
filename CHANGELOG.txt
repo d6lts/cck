@@ -10,6 +10,7 @@ CCK 6.2-dev
 - #282175: Don't mention 'add more' button when the widget opts out of it.
 - #282183 by chx: Nodereference - 'Checkboxes/radios' widget.
 - #281388 Optionwidgets: Unselect values doesn't take.
+- Optionwidgets: use '- None -' for 'no selection' option (like core's taxonomy.module).
 
 CCK 6.2.rc4
 ===========
