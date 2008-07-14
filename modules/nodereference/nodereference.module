@@ -451,7 +451,7 @@ function nodereference_select_process($element, $edit, $form_state, $form) {
   $element[$field_key] = array(
     '#type' => 'optionwidgets_select',
     '#default_value' => isset($element['#value']) ? $element['#value'] : '',
-    '#element_validate' => array('optionwidgets_validate', 'nodereference_select_validate'),
+    '#element_validate' => array('optionwidgets_validate', 'nodereference_optionwidgets_validate'),
     // The following values were set by the content module and need
     // to be passed down to the nested element.
     '#title' => $element['#title'],
@@ -481,7 +481,7 @@ function nodereference_buttons_process($element, $edit, $form_state, $form) {
   $element[$field_key] = array(
     '#type' => 'optionwidgets_buttons',
     '#default_value' => isset($element['#value']) ? $element['#value'] : '',
-    '#element_validate' => array('optionwidgets_validate', 'nodereference_select_validate'),
+    '#element_validate' => array('optionwidgets_validate', 'nodereference_optionwidgets_validate'),
     // The following values were set by the content module and need
     // to be passed down to the nested element.
     '#title' => $element['#title'],
@@ -544,7 +544,7 @@ function nodereference_autocomplete_process($element, $edit, $form_state, $form)
  * We don't know exactly where this element is, so we drill down
  * through the element until we get to our key.
  */
-function nodereference_select_validate($element, &$form_state) {
+function nodereference_optionwidgets_validate($element, &$form_state) {
   $field_key  = $element['#columns'][0];
   $new_parents = array();
   $value = $form_state['values'];
