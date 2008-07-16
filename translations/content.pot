@@ -3,9 +3,9 @@
 # LANGUAGE translation of Drupal (root)
 # Copyright YEAR NAME <EMAIL@ADDRESS>
 # Generated from files:
-#  content.module,v 1.301.2.18 2008/07/05 01:09:06 yched
+#  content.module,v 1.301.2.23 2008/07/11 00:16:31 yched
 #  content.info,v 1.6 2007/07/04 23:46:29 yched
-#  content.views.inc,v 1.68.2.7 2008/07/03 20:06:56 yched
+#  content.views.inc,v 1.68.2.8 2008/07/06 16:04:02 yched
 #  content_copy.info,v 1.6 2008/04/23 18:01:48 dww
 #  content_permissions.info,v 1.2 2008/04/23 18:01:52 dww
 #  fieldgroup.info,v 1.6 2008/04/23 18:01:58 dww
@@ -16,13 +16,13 @@
 #  userreference.info,v 1.8 2008/04/23 18:02:38 dww
 #  example_field.php,v 1.5.2.2 2008/07/03 12:44:51 yched
 #  simple_field.php,v 1.5.2.2 2008/07/03 12:44:51 yched
-#  text.module,v 1.95.2.5 2008/07/05 00:26:54 yched
+#  text.module,v 1.95.2.8 2008/07/11 16:08:48 yched
 #
 #, fuzzy
 msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
-"POT-Creation-Date: 2008-07-05 11:21+0200\n"
+"POT-Creation-Date: 2008-07-16 19:25+0200\n"
 "PO-Revision-Date: YYYY-mm-DD HH:MM+ZZZZ\n"
 "Last-Translator: NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <EMAIL@ADDRESS>\n"
@@ -91,31 +91,31 @@ msgstr ""
 msgid "Order"
 msgstr ""
 
-#: content.module:1640
+#: content.module:1643
 msgid "RSS Item"
 msgstr ""
 
-#: content.module:1642
+#: content.module:1645
 msgid "Search Index"
 msgstr ""
 
-#: content.module:1643
+#: content.module:1646
 msgid "Search Result"
 msgstr ""
 
-#: content.module:1981
+#: content.module:2000
 msgid "Language"
 msgstr ""
 
-#: content.module:1984
+#: content.module:2007
 msgid "Menu settings (admin)"
 msgstr ""
 
-#: content.module:1987
+#: content.module:2014
 msgid "Taxonomy"
 msgstr ""
 
-#: content.module:1990
+#: content.module:2021
 msgid "File attachments"
 msgstr ""
 

@@ -19,8 +19,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: German translation of CCK\n"
-"POT-Creation-Date: 2008-07-05 11:21+0200\n"
-"PO-Revision-Date: 2008-07-05 16:08+0100\n"
+"POT-Creation-Date: 2008-07-16 19:25+0200\n"
+"PO-Revision-Date: 2008-07-16 19:50+0100\n"
 "Last-Translator: Alexander Hass\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -30,18 +30,18 @@ msgstr ""
 "X-Poedit-Language: German\n"
 "X-Poedit-Country: GERMANY\n"
 
-#: content.module:1635
-#: modules/nodereference/nodereference.module:220
+#: content.module:1638
+#: modules/nodereference/nodereference.module:217
 msgid "Teaser"
 msgstr "Anrisstext"
 
-#: content.module:1636
-#: modules/nodereference/nodereference.module:215
+#: content.module:1639
+#: modules/nodereference/nodereference.module:212
 msgid "Full node"
 msgstr "Vollständiger Beitrag"
 
 #: content.module:557;564;0
-#: includes/content.crud.inc:591;629
+#: includes/content.crud.inc:592;630
 msgid "content"
 msgstr "Inhalt"
 
@@ -51,7 +51,7 @@ msgid "Fields"
 msgstr "Felder"
 
 #: content.module:156
-#: includes/content.admin.inc:528
+#: includes/content.admin.inc:532
 msgid "Add field"
 msgstr "Feld hinzufügen"
 
@@ -91,14 +91,14 @@ msgid "Allowed values list"
 msgstr "Zulässige Werteliste"
 
 #: examples/example_field.php:182
-#: includes/content.admin.inc:930
+#: includes/content.admin.inc:934
 #: modules/number/number.module:137
 #: modules/text/text.module:96
 msgid "PHP code"
 msgstr "PHP-Code"
 
 #: examples/example_field.php:188
-#: includes/content.admin.inc:951;964
+#: includes/content.admin.inc:949;962
 #: modules/number/number.module:144;153
 #: modules/text/text.module:103;112
 msgid "Code"
@@ -109,12 +109,6 @@ msgstr "Kürzel"
 #: modules/text/text.module:106
 msgid "Advanced usage only: PHP code that returns a keyed array of allowed values. Should not include &lt;?php ?&gt; delimiters. If this field is filled out, the array returned by this code will override the allowed values list above."
 msgstr "Nur erweiterte Verwendung: PHP-Code der ein Array mit Schlüsseln der zulässigen Werte zurückliefert. Dieser sollte keine &lt;?php ?&gt; Trennzeichen enthalten. Sollte dieses Feld ausgefüllt werden, wird das von diesem Code zurückgegebene Array die zulässige Werteliste oberhalb übersteuern."
-
-#: examples/example_field.php:278
-#: modules/number/number.module:228
-#: modules/text/text.module:161
-msgid "Illegal value for %name."
-msgstr "Ungültiger Wert für %name."
 
 #: examples/example_field.php:383
 #: examples/simple_field.php:327
@@ -152,56 +146,56 @@ msgstr "„Zeilen“ müssen eine positive Zahl sein."
 msgid "Description"
 msgstr "Beschreibung"
 
-#: includes/content.admin.inc:148;164;790
+#: includes/content.admin.inc:148;164;794
 #: modules/fieldgroup/fieldgroup.module:236
 msgid "Remove"
 msgstr "Entfernen"
 
-#: includes/content.admin.inc:201;402
+#: includes/content.admin.inc:201;408
 #: modules/fieldgroup/fieldgroup.module:110;363
 msgid "Save"
 msgstr "Speichern"
 
-#: includes/content.admin.inc:212;413;623;850
+#: includes/content.admin.inc:212;419;627;854
+#: includes/content.views.inc:308
 #: modules/fieldgroup/fieldgroup.module:121
 msgid "Label"
 msgstr "Bezeichnung"
 
-#: includes/content.admin.inc:790
+#: includes/content.admin.inc:794
 #: modules/fieldgroup/fieldgroup.module:236
 msgid "Cancel"
 msgstr "Abbrechen"
 
-#: includes/content.admin.inc:897
+#: includes/content.admin.inc:901
 #: modules/fieldgroup/fieldgroup.module:143
 msgid "Help text"
 msgstr "Hilfetext"
 
-#: includes/content.admin.inc:965
+#: includes/content.admin.inc:963
 #: modules/number/number.module:154
 #: modules/text/text.module:113
 msgid "&lt;none&gt;"
 msgstr "&lt;Keine&gt;"
 
-#: includes/content.admin.inc:966
+#: includes/content.admin.inc:964
 #: modules/number/number.module:155
 #: modules/text/text.module:114
 msgid "You're not allowed to input PHP code."
 msgstr "Keine Berechtigung zur Eingabe von PHP-Code vorhanden."
 
-#: modules/fieldgroup/fieldgroup.module:293
-#: modules/nodereference/nodereference.module:555
-#: modules/userreference/userreference.module:443
-msgid "none"
-msgstr "Keine"
-
-#: modules/nodereference/nodereference.module:308
-#: modules/optionwidgets/optionwidgets.module:68
+#: modules/nodereference/nodereference.module:305
+#: modules/optionwidgets/optionwidgets.module:79
 #: modules/userreference/userreference.module:198
 msgid "Select list"
 msgstr "Auswahlliste"
 
-#: modules/nodereference/nodereference.module:316
+#: modules/nodereference/nodereference.module:313
+#: modules/optionwidgets/optionwidgets.module:87
+msgid "Check boxes/radio buttons"
+msgstr "Ankreuzfelder/Auswahlknöpfe"
+
+#: modules/nodereference/nodereference.module:321
 #: modules/userreference/userreference.module:206
 msgid "Autocomplete text field"
 msgstr "Textfeld mit Autovervollständigung"
@@ -220,4 +214,14 @@ msgstr "Die möglichen Werte, die dieses Feld enthalten kann. Geben Sie pro Zeil
 #: modules/text/text.module:114
 msgid "This PHP code was set by an administrator and will override the allowed values list above."
 msgstr "Dieser PHP-Code wurde von einem Administrator festgelegt und wird die obige zulässige Werteliste übersteuern."
+
+#: modules/number/number.module:228
+#: modules/text/text.module:161
+msgid "%name: illegal value."
+msgstr "%name: ungültiger Wert."
+
+#~ msgid "Illegal value for %name."
+#~ msgstr "Ungültiger Wert für %name."
+#~ msgid "none"
+#~ msgstr "Keine"
 

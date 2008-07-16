@@ -16,8 +16,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: German translation of CCK\n"
-"POT-Creation-Date: 2008-07-05 11:21+0200\n"
-"PO-Revision-Date: 2008-07-05 16:13+0100\n"
+"POT-Creation-Date: 2008-07-16 19:25+0200\n"
+"PO-Revision-Date: 2008-07-16 20:15+0100\n"
 "Last-Translator: Alexander Hass\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -28,33 +28,33 @@ msgstr ""
 "X-Poedit-Country: GERMANY\n"
 "X-Poedit-SourceCharset: utf-8\n"
 
-#: modules/optionwidgets/optionwidgets.module:10
+#: modules/optionwidgets/optionwidgets.module:18
 msgid "Create a list of options as a list in <strong>Allowed values list</strong> or as an array in PHP code. These values will be the same for %field in all content types."
 msgstr "Eine Liste von Optionen als Liste in der <strong>zulässigen Werteliste</strong> oder als ein Array in PHP-Code erstellen. Diese Werte werden für %field in allen Inhaltsstypen gleich sein."
 
-#: modules/optionwidgets/optionwidgets.module:12
+#: modules/optionwidgets/optionwidgets.module:21
 msgid "For a 'single on/off checkbox' widget, define the 'off' value first, then the 'on' value in the <strong>Allowed values</strong> section. Note that the checkbox will be labeled with the label of the 'on' value."
 msgstr "Für ein einzelnes „an/aus“ Checkbox-Steuerelement sollte zuerst der ‚aus‘ Wert und dann der ‚an‘ Wert im Bereich der <strong>gültigen Werte</strong> angegeben werden. Die Checkbox wird mit der Beschriftung des ‚an‘ Wertes beschriftet."
 
-#: modules/optionwidgets/optionwidgets.module:15
+#: modules/optionwidgets/optionwidgets.module:24
 msgid "The 'checkboxes/radio buttons' widget will display checkboxes if the multiple values option is selected for this field, otherwise radios will be displayed."
 msgstr "Das ‚Checkboxen/Auswahl-Knöpfe‘-Steuerelement wird Checkboxen anzeigen, wenn die Option für mehrere Werte bei diesem Feld ausgewählt wurde, ansonsten werden Auswahl-Knöpfe anzeigt."
 
-#: modules/optionwidgets/optionwidgets.module:25
+#: modules/optionwidgets/optionwidgets.module:36
 msgid "You need to specify the 'allowed values' for this field."
 msgstr "Für dieses Feld müssen die „zulässigen Werte“ angegeben werden."
 
-#: modules/optionwidgets/optionwidgets.module:76
-msgid "Check boxes/radio buttons"
-msgstr "Checkboxen/Auswahl-Knöpfe"
-
-#: modules/optionwidgets/optionwidgets.module:84
+#: modules/optionwidgets/optionwidgets.module:95
 msgid "Single on/off checkbox"
 msgstr "Einzelne an/aus Checkbox"
 
-#: modules/optionwidgets/optionwidgets.module:401
+#: modules/optionwidgets/optionwidgets.module:406
 msgid "N/A"
 msgstr "k.A."
+
+#: modules/optionwidgets/optionwidgets.module:410
+msgid "- None -"
+msgstr "- Keine -"
 
 #: modules/optionwidgets/optionwidgets.module:0
 msgid "optionwidgets"
@@ -67,4 +67,7 @@ msgstr "Options-Steuerelemente"
 #: modules/optionwidgets/optionwidgets.info:0
 msgid "Defines selection, check box and radio button widgets for text and numeric fields."
 msgstr "Definiert Auswahl-, Checkbox- und Radiobutton-Steuerelemente für Texte und numerische Felder."
+
+#~ msgid "Check boxes/radio buttons"
+#~ msgstr "Checkboxen/Auswahl-Knöpfe"
 

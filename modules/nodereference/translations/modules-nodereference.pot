@@ -3,14 +3,15 @@
 # LANGUAGE translation of Drupal (modules-nodereference)
 # Copyright YEAR NAME <EMAIL@ADDRESS>
 # Generated from files:
-#  nodereference.module,v 1.138.2.9 2008/07/05 00:26:54 yched
+#  nodereference.views.inc,v 1.1.2.2 2008/07/10 00:41:30 yched
+#  nodereference.module,v 1.138.2.17 2008/07/14 14:09:42 yched
 #  nodereference.info,v 1.8 2008/04/23 18:02:07 dww
 #
 #, fuzzy
 msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
-"POT-Creation-Date: 2008-07-05 11:21+0200\n"
+"POT-Creation-Date: 2008-07-16 19:25+0200\n"
 "PO-Revision-Date: YYYY-mm-DD HH:MM+ZZZZ\n"
 "Last-Translator: NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <EMAIL@ADDRESS>\n"
@@ -19,60 +20,80 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=INTEGER; plural=EXPRESSION;\n"
 
-#: modules/nodereference/nodereference.module:71
+#: modules/nodereference/nodereference.views.inc:14
+msgid "Simple"
+msgstr ""
+
+#: modules/nodereference/nodereference.views.inc:15
+msgid "Destination-agnostic display. Mostly useful for programmatic views."
+msgstr ""
+
+#: modules/nodereference/nodereference.views.inc:26
+msgid "Results array"
+msgstr ""
+
+#: modules/nodereference/nodereference.views.inc:27
+msgid "Returns the view as a PHP array of titles + renderd rows."
+msgstr ""
+
+#: modules/nodereference/nodereference.module:68
 msgid "Node reference"
 msgstr ""
 
-#: modules/nodereference/nodereference.module:72
+#: modules/nodereference/nodereference.module:69
 msgid "Store the ID of a related node as an integer value."
 msgstr ""
 
-#: modules/nodereference/nodereference.module:90
+#: modules/nodereference/nodereference.module:87
 msgid "Content types that can be referenced"
 msgstr ""
 
-#: modules/nodereference/nodereference.module:102
+#: modules/nodereference/nodereference.module:99
 msgid "Default Views"
 msgstr ""
 
-#: modules/nodereference/nodereference.module:105
+#: modules/nodereference/nodereference.module:102
 msgid "Existing Views"
 msgstr ""
 
-#: modules/nodereference/nodereference.module:113
+#: modules/nodereference/nodereference.module:110
 msgid "Advanced - Nodes that can be referenced (View)"
 msgstr ""
 
-#: modules/nodereference/nodereference.module:119
+#: modules/nodereference/nodereference.module:116
 msgid "View used to select the nodes"
 msgstr ""
 
-#: modules/nodereference/nodereference.module:122
+#: modules/nodereference/nodereference.module:119
 msgid "Choose the \"Views module\" view that selects the nodes that can be referenced.<br />Note:<ul><li>Only views that have fields will work for this purpose.</li><li>This will discard the \"Content types\" settings above. Use the view's \"filters\" section instead.</li><li>Use the view's \"fields\" section to display additional informations about candidate nodes on node creation/edition form.</li><li>Use the view's \"sort criteria\" section to determine the order in which candidate nodes will be displayed.</li></ul>"
 msgstr ""
 
-#: modules/nodereference/nodereference.module:126
+#: modules/nodereference/nodereference.module:123
 msgid "View arguments"
 msgstr ""
 
-#: modules/nodereference/nodereference.module:129
+#: modules/nodereference/nodereference.module:126
 msgid "Provide a comma separated list of arguments to pass to the view."
 msgstr ""
 
-#: modules/nodereference/nodereference.module:180
-msgid "%name: This post can't be referenced."
+#: modules/nodereference/nodereference.module:177
+msgid "%name: this post can't be referenced."
 msgstr ""
 
-#: modules/nodereference/nodereference.module:205
+#: modules/nodereference/nodereference.module:202
 msgid "Title (link)"
 msgstr ""
 
-#: modules/nodereference/nodereference.module:210
+#: modules/nodereference/nodereference.module:207
 msgid "Title (no link)"
 msgstr ""
 
-#: modules/nodereference/nodereference.module:529
-msgid "%name: Title mismatch. Please check your selection."
+#: modules/nodereference/nodereference.module:581
+msgid "%name: title mismatch. Please check your selection."
+msgstr ""
+
+#: modules/nodereference/nodereference.module:588
+msgid "%name: found no valid post with that title."
 msgstr ""
 
 #: modules/nodereference/nodereference.module:15

@@ -16,8 +16,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: German translation of CCK\n"
-"POT-Creation-Date: 2008-07-05 11:21+0200\n"
-"PO-Revision-Date: 2008-07-05 16:08+0100\n"
+"POT-Creation-Date: 2008-07-16 19:25+0200\n"
+"PO-Revision-Date: 2008-07-16 19:34+0100\n"
 "Last-Translator: Alexander Hass\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -88,31 +88,31 @@ msgstr "!title: !required"
 msgid "Order"
 msgstr "Reihenfolge"
 
-#: content.module:1640
+#: content.module:1643
 msgid "RSS Item"
 msgstr "RSS-Eintrag"
 
-#: content.module:1642
+#: content.module:1645
 msgid "Search Index"
 msgstr "Suchindex"
 
-#: content.module:1643
+#: content.module:1646
 msgid "Search Result"
 msgstr "Suchergebnis"
 
-#: content.module:1981
+#: content.module:2000
 msgid "Language"
 msgstr "Sprache"
 
-#: content.module:1984
+#: content.module:2007
 msgid "Menu settings (admin)"
 msgstr "Menüeinstellungen (Admin)"
 
-#: content.module:1987
+#: content.module:2014
 msgid "Taxonomy"
 msgstr "Taxonomie"
 
-#: content.module:1990
+#: content.module:2021
 msgid "File attachments"
 msgstr "Dateianhänge"
 

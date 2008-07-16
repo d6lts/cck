@@ -16,8 +16,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: German translation of CCK\n"
-"POT-Creation-Date: 2008-07-03 07:41+0200\n"
-"PO-Revision-Date: 2008-07-05 16:12+0100\n"
+"POT-Creation-Date: 2008-07-16 19:25+0200\n"
+"PO-Revision-Date: 2008-07-16 19:52+0100\n"
 "Last-Translator: Alexander Hass\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -91,6 +91,10 @@ msgstr "Dieser Vorgang kann nicht rückgängig gemacht werden."
 #: modules/fieldgroup/fieldgroup.module:244
 msgid "The group %group_name has been removed."
 msgstr "Die Gruppe %group_name wurde gelöscht."
+
+#: modules/fieldgroup/fieldgroup.module:293
+msgid "none"
+msgstr "Keine"
 
 #: modules/fieldgroup/fieldgroup.module:347
 msgid "Display in group"

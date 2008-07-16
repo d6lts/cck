@@ -16,8 +16,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: German translation of CCK\n"
-"POT-Creation-Date: 2008-07-05 16:18+0200\n"
-"PO-Revision-Date: 2008-07-09 00:11+0100\n"
+"POT-Creation-Date: 2008-07-16 19:25+0200\n"
+"PO-Revision-Date: 2008-07-16 19:50+0100\n"
 "Last-Translator: Alexander Hass\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -64,11 +64,11 @@ msgstr "Keine Inhaltstypen vorhanden."
 msgid "» Add a new content type"
 msgstr "» Neuen Inhaltstyp hinzufügen"
 
-#: includes/content.admin.inc:64;602;856
+#: includes/content.admin.inc:64;606;860
 msgid "Field name"
 msgstr "Feldname"
 
-#: includes/content.admin.inc:64;632;643;862
+#: includes/content.admin.inc:64;636;647;866
 msgid "Field type"
 msgstr "Feldtyp"
 
@@ -80,11 +80,11 @@ msgstr "Verwendet in"
 msgid "No fields have been defined for any content type yet."
 msgstr "Es wurden noch keine Felder für einen Inhaltstypen festgelegt."
 
-#: includes/content.admin.inc:112;291
+#: includes/content.admin.inc:112;297
 msgid "There are no fields configured for this content type. You can !link."
 msgstr "Für diesen Inhaltstyp sind keine Felder konfiguriert. !link."
 
-#: includes/content.admin.inc:113;292
+#: includes/content.admin.inc:113;298
 msgid "Add a new field"
 msgstr "Neues Feld hinzufügen"
 
@@ -100,223 +100,183 @@ msgstr "Konfigurieren"
 msgid "Weight"
 msgstr "Reihenfolge"
 
-#: includes/content.admin.inc:319;360
+#: includes/content.admin.inc:325;366
 msgid "Above"
 msgstr "Oberhalb"
 
-#: includes/content.admin.inc:320
+#: includes/content.admin.inc:326
 msgid "Inline"
 msgstr "Inline"
 
-#: includes/content.admin.inc:321;346;361;369
+#: includes/content.admin.inc:327;352;367;375
 msgid "<Hidden>"
 msgstr "<Versteckt>"
 
-#: includes/content.admin.inc:364
+#: includes/content.admin.inc:370
 msgid "no styling"
 msgstr "kein Design"
 
-#: includes/content.admin.inc:365
+#: includes/content.admin.inc:371
 msgid "simple"
 msgstr "einfach"
 
-#: includes/content.admin.inc:366
+#: includes/content.admin.inc:372
 msgid "fieldset"
 msgstr "Felder"
 
-#: includes/content.admin.inc:367
+#: includes/content.admin.inc:373
 msgid "fieldset - collapsible"
 msgstr "Felder - Zusammenklappbar"
 
-#: includes/content.admin.inc:368
+#: includes/content.admin.inc:374
 msgid "fieldset - collapsed"
 msgstr "Felder - Zusammengeklappt"
 
-#: includes/content.admin.inc:413
+#: includes/content.admin.inc:419
 msgid "Field"
 msgstr "Feld"
 
-#: includes/content.admin.inc:460
+#: includes/content.admin.inc:464
 msgid "Your settings have been saved."
 msgstr "Die Einstellungen wurden gespeichert."
 
-#: includes/content.admin.inc:477
+#: includes/content.admin.inc:481
 msgid "No field modules are enabled. You need to <a href=\"!modules_url\">enable one</a>, such as text.module, before you can add new fields."
 msgstr "Es sind keine Feldmodule aktiviert. Zumindest eines, z.B. text.module, muss <a href=\"!modules_url\">aktiviert sein</a>, bevor neue Felder hinzugefügt werden können."
 
-#: includes/content.admin.inc:519
+#: includes/content.admin.inc:523
 msgid "Add existing field"
 msgstr "Vorhandenes Feld hinzufügen"
 
-#: includes/content.admin.inc:547
+#: includes/content.admin.inc:551
 msgid "Added field %label."
 msgstr "Das Feld %label wurde hinzugefügt."
 
-#: includes/content.admin.inc:550
+#: includes/content.admin.inc:554
 msgid "There was a problem adding field %label."
 msgstr "Beim Hinzufügen des Feldes %label ist ein Fehler aufgetreten."
 
-#: includes/content.admin.inc:590
+#: includes/content.admin.inc:594
 msgid "Create new field"
 msgstr "Neues Feld erstellen"
 
-#: includes/content.admin.inc:597
+#: includes/content.admin.inc:601
 msgid "Edit basic information"
 msgstr "Basisinformation bearbeiten"
 
-#: includes/content.admin.inc:606
+#: includes/content.admin.inc:610
 msgid "The machine-readable name of the field."
 msgstr "Der maschinenlesbare Name des Feldes."
 
-#: includes/content.admin.inc:610
+#: includes/content.admin.inc:614
 msgid "This name cannot be changed."
 msgstr "Der Name kann nicht geändert werden."
 
-#: includes/content.admin.inc:618
-msgid "This name cannot be changed later! The name will be prefixed with 'field_' and can include lowercase unaccented letters, numbers, and underscores. The length of the name, including the prefix, is limited to no more than 32 letters."
+#: includes/content.admin.inc:622
+msgid "This name cannot be changed later! The name will be prefixed with 'field_' and can include lowercase unaccented letters, numbers, and underscores. The length of the name, including the prefix, is limited to no more than 32 characters."
 msgstr "Dieser Name kann später nicht mehr geändert werden. Der Name wird einen Präfix ‚field_‘ erhalten und kann nicht-akzentuierte Buchstaben, Zahlen und Unterstriche enthalten. Die Länge des Namen, inclusive Präfix ist auf 32 Zeichen begrenzt."
 
-#: includes/content.admin.inc:626
+#: includes/content.admin.inc:630
 msgid "A human-readable name to be used as the label for this field in the %type content type."
 msgstr "Ein Name der im Inhaltstyp %type als Beschriftung für dieses Feld verwendet werden soll."
 
-#: includes/content.admin.inc:636
+#: includes/content.admin.inc:640
 msgid "The type of data you would like to store in the database with this field."
 msgstr "Der Typ von Daten der mit diesem Feld in der Datenbank gespeichert werden soll."
 
-#: includes/content.admin.inc:646
+#: includes/content.admin.inc:650
 msgid "The type of data you would like to store in the database with this field. This option cannot be changed."
 msgstr "Der Typ von Daten der mit diesem Feld in der Datenbank gespeichert werden soll. Diese Option kann nicht geändert werden."
 
-#: includes/content.admin.inc:651;869
+#: includes/content.admin.inc:655;873
 msgid "Widget type"
 msgstr "Steuerelement"
 
-#: includes/content.admin.inc:655
+#: includes/content.admin.inc:659
 msgid "The type of form element you would like to present to the user when creating this field in the %type content type."
 msgstr "Der Typ von Formularelement der dem Benutzer angezeigt wird, wenn dieses Feld im Inhaltstyp %type erstellt wird."
 
-#: includes/content.admin.inc:669
+#: includes/content.admin.inc:673
 msgid "Continue"
 msgstr "Fortfahren"
 
-#: includes/content.admin.inc:692
+#: includes/content.admin.inc:696
 msgid "The field name %field_name is invalid. The name must include only lowercase unaccentuated letters, numbers, and underscores."
 msgstr "Der Feldname %field ist ungültig. Der Name darf nur nicht-akzentuierte Kleinbuchstaben, Zahlen und Unterstriche enthalten."
 
-#: includes/content.admin.inc:695
+#: includes/content.admin.inc:699
 msgid "The field name %field_name is too long. The name is limited to 32 characters, including the 'field_' prefix."
 msgstr "Der Feldname %field_name ist zu lang. Der Name ist inklusive dem Präfix ‚field_‘ auf 32 Zeichen begrenzt."
 
-#: includes/content.admin.inc:706
+#: includes/content.admin.inc:710
 msgid "The field name %field_name already exists."
 msgstr "Der Feldname %field_name ist bereits vorhanden."
 
-#: includes/content.admin.inc:709
+#: includes/content.admin.inc:713
 msgid "The name 'field_instance' is a reserved name."
 msgstr "Der Name ‚field_instance‘ ist ein reservierter Name."
 
-#: includes/content.admin.inc:741
+#: includes/content.admin.inc:745
 msgid "Created field %label."
 msgstr "Das Feld %label wurde erstellt."
 
-#: includes/content.admin.inc:745
+#: includes/content.admin.inc:749
 msgid "There was a problem creating field %label."
 msgstr "Beim Erstellen des Feldes %label ist ein Fehler aufgetreten."
 
-#: includes/content.admin.inc:754
-msgid "Update field %label."
+#: includes/content.admin.inc:758
+msgid "Updated field %label."
 msgstr "Das Feld %label wurde aktualisiert."
 
-#: includes/content.admin.inc:758
+#: includes/content.admin.inc:762
 msgid "There was a problem updating field %label."
 msgstr "Beim Aktualisieren des Feldes %label trat ein Fehler auf."
 
-#: includes/content.admin.inc:786
+#: includes/content.admin.inc:790
 msgid "Are you sure you want to remove the field %field?"
 msgstr "Soll das Feld %field wirklich gelöscht werden?"
 
-#: includes/content.admin.inc:789
+#: includes/content.admin.inc:793
 msgid "If you have any content left in this field, it will be lost. This action cannot be undone."
 msgstr "Falls sich Daten in diesem Feld befinden, gehen diese verloren. Diese Aktion kann nicht rückgängig gemacht werden."
 
-#: includes/content.admin.inc:808
+#: includes/content.admin.inc:812
 msgid "Removed field %field from %type."
 msgstr "Das Feld %field von %type wurde gelöscht."
 
-#: includes/content.admin.inc:813
+#: includes/content.admin.inc:817
 msgid "There was a problem deleting %field from %type."
 msgstr "Beim Löschen von %field in %type ist ein Fehler aufgetreten."
 
-#: includes/content.admin.inc:846
+#: includes/content.admin.inc:850
 msgid "%type basic information"
 msgstr "Basisinformation für %type"
 
-#: includes/content.admin.inc:876;1039
+#: includes/content.admin.inc:880;1042
 msgid "Change basic information"
 msgstr "Basisinformation ändern"
 
-#: includes/content.admin.inc:882
+#: includes/content.admin.inc:886
 msgid "%type settings"
 msgstr "Einstellungen für %type"
 
-#: includes/content.admin.inc:883
+#: includes/content.admin.inc:887
 msgid "These settings apply only to the %field field as it appears in the %type content type."
 msgstr "Diese Einstellungen gelten nur für das Feld %field, wie es im Inhaltstyp %type vorkommt."
 
-#: includes/content.admin.inc:900
+#: includes/content.admin.inc:904
 msgid "Instructions to present to the user below this field on the editing form.<br />Allowed HTML tags: @tags"
 msgstr "Eine Hilfestellung, die dem Benutzer unter diesem Feld im Eingabeformular angezeigt wird.<br />Zulässige HTML-Tags: @tags"
 
-#: includes/content.admin.inc:908
+#: includes/content.admin.inc:912
 msgid "Default value"
 msgstr "Standardwert"
 
-#: includes/content.admin.inc:955
-msgid "Advanced usage only: PHP code that returns a default value. Should not include &lt;?php ?&gt; delimiters. If this field is filled out, the value returned by this code will override any value specified above. Expected format: <pre>!sample</pre>Using !link_devel's 'devel load' tab on a %type content page might help you figure out the expected format."
-msgstr "Nur erweiterte Verwendung: PHP-Code der ein Array mit Schlüsseln der zulässigen Werte zurückliefert. Dieser sollte keine &lt;?php ?&gt; Trennzeichen enthalten. Sollte dieses Feld ausgefüllt werden, wird das von diesem Code zurückgegebene Array die zulässige Werteliste oberhalb übersteuern. Erwartetes Format: <pre>!sample</pre>Auf einer %type-Inhaltsseite könnte der Aufruf des !link_devel-Tabulators ‚Devel laden‘ dabei helfen das erwartete Formats herauszufinden."
-
-#: includes/content.admin.inc:966
-msgid "This PHP code was set by an administrator and will override any value specified above."
-msgstr "Dieser PHP-Code wurde vom Administrator eingestellt und wird jeden oben angegeben Wert übersteuern."
-
-#: includes/content.admin.inc:973
-msgid "Global settings"
-msgstr "Globale Einstellungen"
-
-#: includes/content.admin.inc:974
-msgid "These settings apply to the %field field in every content type in which it appears."
-msgstr "Diese Einstellungen gelten für das Feld %field in jedem Inhaltstyp, indem das Feld erscheint."
-
-#: includes/content.admin.inc:978
-msgid "Required"
-msgstr "Erforderlich"
-
-#: includes/content.admin.inc:983
-msgid "Number of values"
-msgstr "Anzahl von Werten"
-
-#: includes/content.admin.inc:984
-msgid "Unlimited"
-msgstr "Unbegrenzt"
-
-#: includes/content.admin.inc:986
-msgid "Select a specific number of values for this field, or 'Unlimited' to provide an 'Add more' button so the users can add as many values as they like."
-msgstr "Eine festgelegte Anzahl von Werten für dieses Feld oder „Unbegrenzt“ auswählen, um Benutzern einen „Weitere hinzufügen“-Schaltknopf zu Verfügung zu stellen, damit diese so viele Werte hinzufügen können wie sie möchten."
-
-#: includes/content.admin.inc:986
-msgid "Warning! Changing this setting after data has been created could result in the loss of data!"
-msgstr "Warnung! Die Änderung dieser Einstellung kann nach Erstellung von Daten zu Datenverlust führen!"
-
-#: includes/content.admin.inc:1001
-msgid "Save field settings"
-msgstr "Feldeinstellungen speichern"
-
-#: includes/content.admin.inc:1086
+#: includes/content.admin.inc:943;1089
 msgid "'@column' => value for @column"
 msgstr "'@column' => Wert für @column"
 
-#: includes/content.admin.inc:1088
+#: includes/content.admin.inc:945;1091
 msgid ""
 "array(\n"
 "  0 => array(@columns),\n"
@@ -334,57 +294,101 @@ msgstr ""
 "  2 => ...\n"
 ");"
 
-#: includes/content.admin.inc:1090
+#: includes/content.admin.inc:953
+msgid "Advanced usage only: PHP code that returns a default value. Should not include &lt;?php ?&gt; delimiters. If this field is filled out, the value returned by this code will override any value specified above. Expected format: <pre>!sample</pre>Using !link_devel's 'devel load' tab on a %type content page might help you figure out the expected format."
+msgstr "Nur erweiterte Verwendung: PHP-Code der ein Array mit Schlüsseln der zulässigen Werte zurückliefert. Dieser sollte keine &lt;?php ?&gt; Trennzeichen enthalten. Sollte dieses Feld ausgefüllt werden, wird das von diesem Code zurückgegebene Array die zulässige Werteliste oberhalb übersteuern. Erwartetes Format: <pre>!sample</pre>Auf einer %type-Inhaltsseite könnte der Aufruf des !link_devel-Tabulators ‚Devel laden‘ dabei helfen das erwartete Formats herauszufinden."
+
+#: includes/content.admin.inc:964
+msgid "This PHP code was set by an administrator and will override any value specified above."
+msgstr "Dieser PHP-Code wurde vom Administrator eingestellt und wird jeden oben angegeben Wert übersteuern."
+
+#: includes/content.admin.inc:971
+msgid "Global settings"
+msgstr "Globale Einstellungen"
+
+#: includes/content.admin.inc:972
+msgid "These settings apply to the %field field in every content type in which it appears."
+msgstr "Diese Einstellungen gelten für das Feld %field in jedem Inhaltstyp, indem das Feld erscheint."
+
+#: includes/content.admin.inc:976
+msgid "Required"
+msgstr "Erforderlich"
+
+#: includes/content.admin.inc:979
+msgid "Maximum number of values users can enter for this field."
+msgstr "Die maximale Anzahl an Werten, die Benutzer für dieses Feld eingeben können."
+
+#: includes/content.admin.inc:981
+msgid "'Unlimited' will provide an 'Add more' button so the users can add as many values as they like."
+msgstr "„Unbegrenzt“ stellt Benutzern einen „Weitere hinzufügen“-Schaltknopf zu Verfügung, damit diese so viele Werte hinzufügen können wie sie möchten."
+
+#: includes/content.admin.inc:983
+msgid "Warning! Changing this setting after data has been created could result in the loss of data!"
+msgstr "Warnung! Die Änderung dieser Einstellung kann nach Erstellung von Daten zu Datenverlust führen!"
+
+#: includes/content.admin.inc:986
+msgid "Number of values"
+msgstr "Anzahl von Werten"
+
+#: includes/content.admin.inc:987
+msgid "Unlimited"
+msgstr "Unbegrenzt"
+
+#: includes/content.admin.inc:1004
+msgid "Save field settings"
+msgstr "Feldeinstellungen speichern"
+
+#: includes/content.admin.inc:1093
 msgid "The default value PHP code returned an incorrect value.<br/>Expected format: <pre>!sample</pre> Returned value: @value"
 msgstr "Der Standardwert den PHP-Code bei ungültigen Werten zurückliefert<br/>Erwartetes Format: <pre>!sample</pre>zurückgegebener Wert : @value"
 
-#: includes/content.admin.inc:1128
-msgid "The default value PHP code created @value which is invalid."
-msgstr "Der vom PHP-Code erstellte Standardwert @value ist ungültig."
+#: includes/content.admin.inc:1131
+msgid "The PHP code for 'default value' returned @value, which is invalid."
+msgstr "Der PHP-Code für den „Standardwert“ lieferte den ungültigen Wert „@value“ zurück."
 
-#: includes/content.admin.inc:1132
+#: includes/content.admin.inc:1135
 msgid "The default value is invalid."
 msgstr "Der Standardwert ist ungültig."
 
-#: includes/content.admin.inc:1155
+#: includes/content.admin.inc:1158
 msgid "Saved field %label."
 msgstr "Das Feld %label wurde gespeichert."
 
-#: includes/content.admin.inc:1460
+#: includes/content.admin.inc:1463
 msgid "Processing"
 msgstr "Verarbeitung läuft"
 
-#: includes/content.admin.inc:1461
+#: includes/content.admin.inc:1464
 msgid "The update has encountered an error."
 msgstr "Die Aktualisierung ist auf einen Fehler gestoßen."
 
-#: includes/content.admin.inc:1475
+#: includes/content.admin.inc:1478
 msgid "The database has been altered and data has been migrated or deleted."
 msgstr "Die Datenbank wurde geändert und die Daten wurden migriert oder gelöscht."
 
-#: includes/content.admin.inc:1478
+#: includes/content.admin.inc:1481
 msgid "An error occurred and database alteration did not complete."
 msgstr "Ein Fehler ist aufgetreten und die Datenbankänderung konnte nicht abgeschlossen werden."
 
-#: includes/content.admin.inc:1581
+#: includes/content.admin.inc:1584
 msgid "Processing %title"
 msgstr "%title wird verarbeitet"
 
-#: includes/content.admin.inc:1479
+#: includes/content.admin.inc:1482
 msgid "1 item successfully processed:"
 msgid_plural "@count items successfully processed:"
 msgstr[0] "1 Eintrag wurde erfolgreich verarbeitet:"
 msgstr[1] "@count Einträge wurden erfolgreich verarbeitet:"
 
-#: includes/content.crud.inc:591
+#: includes/content.crud.inc:592
 msgid "Content fields table %old_name has been renamed to %new_name and field instances have been updated."
 msgstr "Die Inhaltsfeldtabelle %old_name wurde in %new_name umbenannt und die Feldinstanzen wurden aktualisiert."
 
-#: includes/content.crud.inc:629
+#: includes/content.crud.inc:630
 msgid "The content fields table %name has been deleted."
 msgstr "Die Inhaltsfeldtabelle %name wurde gelöscht."
 
-#: includes/content.node_form.inc:206
+#: includes/content.node_form.inc:209
 msgid "Add another item"
 msgstr "Weiteren Eintrag hinzufügen"
 
@@ -433,23 +437,39 @@ msgstr "Formatierter HTML-Verweis zu dem Benutzer"
 msgid "Appears in: @types"
 msgstr "Erscheint in: @types"
 
-#: includes/content.views.inc:298
+#: includes/content.views.inc:299
 msgid "Format"
 msgstr "Format"
 
-#: includes/content.views.inc:379
+#: includes/content.views.inc:311
+msgid "None"
+msgstr "Keines"
+
+#: includes/content.views.inc:312
+msgid "Widget label (@label)"
+msgstr "Steuerelement (@label)"
+
+#: includes/content.views.inc:313
+msgid "Custom"
+msgstr "Benutzerdefiniert"
+
+#: includes/content.views.inc:319
+msgid "Custom label"
+msgstr "Benutzerdefinierte Bezeichnung"
+
+#: includes/content.views.inc:413
 msgid "Group multiple values"
 msgstr "Mehrfachwerte gruppieren"
 
-#: includes/content.views.inc:385
+#: includes/content.views.inc:419
 msgid "Show @count value(s)"
 msgstr "@count Werte anzeigen"
 
-#: includes/content.views.inc:394
+#: includes/content.views.inc:428
 msgid "starting from @count"
 msgstr "Beginnt bei @count"
 
-#: includes/content.views.inc:403
+#: includes/content.views.inc:437
 msgid "Reversed (start from last values)"
 msgstr "Umgedreht (Beginnt bei den letzten Werten)"
 

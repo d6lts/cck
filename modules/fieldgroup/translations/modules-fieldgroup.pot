@@ -3,14 +3,14 @@
 # LANGUAGE translation of Drupal (modules-fieldgroup)
 # Copyright YEAR NAME <EMAIL@ADDRESS>
 # Generated from files:
-#  fieldgroup.module,v 1.79.2.5 2008/07/03 13:30:26 yched
+#  fieldgroup.module,v 1.79.2.7 2008/07/10 12:49:09 yched
 #  fieldgroup.info,v 1.6 2008/04/23 18:01:58 dww
 #
 #, fuzzy
 msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
-"POT-Creation-Date: 2008-07-05 11:21+0200\n"
+"POT-Creation-Date: 2008-07-16 19:25+0200\n"
 "PO-Revision-Date: YYYY-mm-DD HH:MM+ZZZZ\n"
 "Last-Translator: NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <EMAIL@ADDRESS>\n"
@@ -81,6 +81,10 @@ msgstr ""
 
 #: modules/fieldgroup/fieldgroup.module:244
 msgid "The group %group_name has been removed."
+msgstr ""
+
+#: modules/fieldgroup/fieldgroup.module:293
+msgid "none"
 msgstr ""
 
 #: modules/fieldgroup/fieldgroup.module:347

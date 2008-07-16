@@ -16,8 +16,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: German translation of CCK\n"
-"POT-Creation-Date: 2008-07-03 07:41+0200\n"
-"PO-Revision-Date: 2008-07-05 16:09+0100\n"
+"POT-Creation-Date: 2008-07-16 19:25+0200\n"
+"PO-Revision-Date: 2008-07-16 19:51+0100\n"
 "Last-Translator: Alexander Hass\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -99,10 +99,6 @@ msgstr "Die importierten Daten sind kein gültiger Importtext."
 #: modules/content_copy/content_copy.module:318
 msgid "The following modules must be enabled for this import to work: %modules."
 msgstr "Die folgenden Module müssen eingeschaltet sein, damit dieser Import erfolgreich durchgeführt werden kann: %modules."
-
-#: modules/content_copy/content_copy.module:324;338
-msgid "<create>"
-msgstr "<erstellen>"
 
 #: modules/content_copy/content_copy.module:326
 msgid "The content type %type already exists in this database."

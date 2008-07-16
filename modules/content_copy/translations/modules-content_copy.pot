@@ -3,14 +3,14 @@
 # LANGUAGE translation of Drupal (modules-content_copy)
 # Copyright YEAR NAME <EMAIL@ADDRESS>
 # Generated from files:
-#  content_copy.module,v 1.27 2008/05/29 22:27:04 karens
+#  content_copy.module,v 1.27.2.1 2008/07/09 13:43:15 yched
 #  content_copy.info,v 1.6 2008/04/23 18:01:48 dww
 #
 #, fuzzy
 msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
-"POT-Creation-Date: 2008-07-05 11:21+0200\n"
+"POT-Creation-Date: 2008-07-16 19:25+0200\n"
 "PO-Revision-Date: YYYY-mm-DD HH:MM+ZZZZ\n"
 "Last-Translator: NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <EMAIL@ADDRESS>\n"
@@ -89,10 +89,6 @@ msgstr ""
 
 #: modules/content_copy/content_copy.module:318
 msgid "The following modules must be enabled for this import to work: %modules."
-msgstr ""
-
-#: modules/content_copy/content_copy.module:324;338
-msgid "<create>"
 msgstr ""
 
 #: modules/content_copy/content_copy.module:326
