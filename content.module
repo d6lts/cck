@@ -711,25 +711,23 @@ function content_types($type_name = NULL) {
  */
 function content_fields($field_name = NULL, $content_type_name = NULL) {
   $info = _content_type_info();
-  if (isset($field_name)) {
-    if (isset($info['fields'][$field_name])) {
-      if (isset($content_type_name)) {
-        if (isset($info['content types'][$content_type_name]['fields'][$field_name])) {
-          return $info['content types'][$content_type_name]['fields'][$field_name];
-        }
-        else {
-          return NULL;
-        }
-      }
-      else {
-        return $info['fields'][$field_name];
-      }
-    }
-    else {
-      return NULL;
-    }
+  
+  // If there is no field name specified, return the entire fields array.
+  if (!isset($field_name)) {
+    return $info['fields'];
   }
-  return $info['fields'];
+  elseif (!isset($info['fields'][$field_name])) {
+    return NULL;
+  }
+  elseif (!isset($content_type_name)) {
+    return $info['fields'][$field_name];
+  }
+  elseif (isset($info['content types'][$content_type_name]['fields'][$field_name])) {
+    return $info['content types'][$content_type_name]['fields'][$field_name];
+  }
+
+  // If all else fails, return NULL.
+  return NULL;
 }
 
 /**
