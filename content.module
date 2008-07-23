@@ -172,10 +172,14 @@ function content_menu($may_cache) {
  * its own loading. This can make for a number of queries in some cases, so we
  * cache the loaded object structure and invalidate it during the update process.
  */
-function content_load($node) {
+function content_load(&$node) {
   $cid = 'content:'. $node->nid .':'. $node->vid;
   if ($cached = cache_get($cid, 'cache_content')) {
-    return unserialize($cached->data);
+    $extra = unserialize($cached->data);
+    foreach ($extra as $key => $value) {
+      $node->$key = $value;
+    }
+    return $extra;
   }
   else {
     $default_additions = _content_field_invoke_default('load', $node);
