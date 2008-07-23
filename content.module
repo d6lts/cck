@@ -213,6 +213,7 @@ function content_theme() {
 
 /**
  * Load data for a node type's fields.
+ * Implementation of hook_nodeapi 'load' op.
  *
  * When loading one of the content.module nodes, we need to let each field handle
  * its own loading. This can make for a number of queries in some cases, so we
@@ -246,16 +247,16 @@ function content_load(&$node) {
 }
 
 /**
- * Nodeapi 'validate' op.
+ * Implementation of hook_nodeapi 'validate' op.
  *
  */
-function content_validate(&$node) {
-  _content_field_invoke('validate', $node);
-  _content_field_invoke_default('validate', $node);
+function content_validate(&$node, $form = NULL) {
+  _content_field_invoke('validate', $node, $form);
+  _content_field_invoke_default('validate', $node, $form);
 }
 
 /**
- * Nodeapi 'presave' op.
+ * Implementation of hook_nodeapi 'presave' op.
  *
  */
 function content_presave(&$node) {
@@ -264,7 +265,7 @@ function content_presave(&$node) {
 }
 
 /**
- * Nodeapi 'insert' op.
+ * Implementation of hook_nodeapi 'insert' op.
  *
  * Insert node type fields.
  */
@@ -274,7 +275,7 @@ function content_insert(&$node) {
 }
 
 /**
- * Nodeapi 'update' op.
+ * Implementation of hook_nodeapi 'update' op.
  *
  * Update node type fields.
  */
@@ -285,7 +286,7 @@ function content_update(&$node) {
 }
 
 /**
- * Nodeapi 'delete' op.
+ * Implementation of hook_nodeapi 'delete' op.
  *
  * Delete node type fields.
  */
@@ -303,7 +304,7 @@ function content_delete(&$node) {
 }
 
 /**
- * Nodeapi 'delete_revision' op.
+ * Implementation of hook_nodeapi 'delete_revision' op.
  *
  * Delete node type fields for a revision.
  */
@@ -321,7 +322,7 @@ function content_delete_revision(&$node) {
 }
 
 /**
- * Nodeapi 'view' op.
+ * Implementataion of hook_nodeapi 'view' op.
  *
  * Generate field render arrays.
  */
@@ -354,7 +355,7 @@ function content_view(&$node, $teaser = FALSE, $page = FALSE) {
 }
 
 /**
- * Nodeapi 'alter' op.
+ * Implementation of hook_nodeapi 'alter' op.
  *
  * Add back the formatted values in the 'view' element for all fields,
  * so that node templates can use it.
@@ -364,7 +365,7 @@ function content_alter(&$node, $teaser = FALSE, $page = FALSE) {
 }
 
 /**
- * Nodeapi 'prepare translation' op.
+ * Implementation of hook_nodeapi 'prepare translation' op.
  *
  * Generate field render arrays.
  */
@@ -376,47 +377,10 @@ function content_prepare_translation(&$node) {
 /**
  * Implementation of hook_nodeapi().
  */
-function content_nodeapi(&$node, $op, $teaser, $page) {
-  switch ($op) {
-    case 'load':
-      return content_load($node);
-
-    case 'validate':
-      content_validate($node);
-      break;
-
-    case 'presave':
-      content_presave($node);
-      break;
-
-    case 'insert':
-      content_insert($node);
-      break;
-
-    case 'update':
-      content_update($node);
-      break;
-
-    case 'delete':
-      content_delete($node);
-      break;
-
-    case 'delete revision':
-      content_delete_revision($node);
-      break;
-
-    case 'view':
-      content_view($node, $teaser, $page);
-      break;
-
-    case 'alter':
-      content_alter($node, $teaser, $page);
-      break;
-
-    case 'prepare translation':
-      content_prepare_translation($node);
-      break;
-
+function content_nodeapi(&$node, $op, $a3 = NULL, $a4 = NULL) {
+  $callback = 'content_'. str_replace(' ', '_', $op);
+  if (function_exists($callback)) {
+    $callback($node, $a3, $a4);
   }
 }
 
