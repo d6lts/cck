@@ -11,6 +11,10 @@ CCK 6.2-dev
 - #282183 by chx: Nodereference - 'Checkboxes/radios' widget.
 - #281388 Optionwidgets: Unselect values doesn't take.
 - Optionwidgets: use '- None -' for 'no selection' option (like core's taxonomy.module).
+- #286457 Fix menu not being always rebuilt when needed.
+- #286637 by poiu: clearer example for default value with php-code.
+- #93436 Add $form parameter to content_validate.
+- #277310 by fractile81: update node object by reference in content_load().
 
 CCK 6.2.rc4
 ===========
