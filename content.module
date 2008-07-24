@@ -234,7 +234,6 @@ function content_load(&$node) {
     foreach ($cached->data as $key => $value) {
       $node->$key = $value;
     }
-    return $cached->data;
   }
   else {
     $default_additions = _content_field_invoke_default('load', $node);
@@ -251,7 +250,6 @@ function content_load(&$node) {
       }
     }
     cache_set($cid, $default_additions, content_cache_tablename());
-    return $default_additions;
   }
 }
 
