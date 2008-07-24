@@ -271,10 +271,7 @@ function content_field_instance_create($field) {
 
   content_clear_type_cache(TRUE);
 
-  // We need to rebuild the menu when creating a new field.
-  if (empty($prev_field['widget'])) {
-    menu_rebuild();
-  }
+  menu_rebuild();
 
   return $field;
 }
