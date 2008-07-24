@@ -888,7 +888,7 @@ function _content_admin_field(&$form_state, $type_name, $field_name) {
       foreach ($columns as $key => $column) {
         $columns[$key] = "'$column' => value for $column";
       }
-      $sample = 'array(
+      $sample = 'return array(
     0 => array('. implode(', ', $columns) .'),
     // You\'ll usually want to stop here. Provide more values
     // if you want your \'default value\' to be multi-valued :
@@ -902,9 +902,9 @@ function _content_admin_field(&$form_state, $type_name, $field_name) {
         '#default_value' => isset($field['widget']['default_value_php']) ? $field['widget']['default_value_php'] : '',
         '#rows' => 6,
         '#tree' => TRUE,
-        '#description' => t("Advanced usage only: PHP code that returns a default value. Should not include &lt;?php ?&gt; delimiters. If this field is filled out, the value returned by this code will override any value specified above. Expected format :<pre>!sample</pre>Using !link_devel's 'devel load' tab on a %type content page might help you figure out the expected format.", array(
+        '#description' => t("Advanced usage only: PHP code that returns a default value. Should not include &lt;?php ?&gt; delimiters. If this field is filled out, the value returned by this code will override any value specified above. Expected format :<pre>!sample</pre>Using !link_devel 'devel load' tab on a %type content page might help you figure out the expected format.", array(
           '!sample' => $sample,
-          '!link_devel' => l('devel.module', 'http://www.drupal.org/project/devel'),
+          '!link_devel' => l("devel.module's", 'http://www.drupal.org/project/devel'),
           '%type' => $type_name)),
       );
     }
@@ -1034,7 +1034,7 @@ function _content_admin_field_validate($form, &$form_state) {
         foreach ($columns as $key => $column) {
           $columns[$key] = "'$column' => value for $column";
         }
-        $sample = 'array(
+        $sample = 'return array(
   0 => array('. implode(', ', $columns) .'),
   // You\'ll usually want to stop here. Provide more values
   // if you want your \'default value\' to be multi-valued :
