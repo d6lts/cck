@@ -487,8 +487,6 @@ function content_field_instance_read($param = NULL, $include_inactive = FALSE) {
 function content_field_instance_delete($field_name, $type_name) {
   include_once('./'. drupal_get_path('module', 'content') .'/includes/content.admin.inc');
 
-  $needs_menu_rebuild = FALSE;
-
   // Get the previous field value.
   $field = array_pop(content_field_instance_read(array('field_name' => $field_name, 'type_name' => $type_name)));
 
@@ -502,11 +500,7 @@ function content_field_instance_delete($field_name, $type_name) {
   $instances = content_field_instance_read(array('field_name' => $field_name));
   if (sizeof($instances) < 1) {
     db_query("DELETE FROM {". content_field_tablename() ."} WHERE field_name = '%s'", $field['field_name']);
-
     content_alter_schema($field, array());
-
-    // Deleted fields require a menu rebuild to remove all the field paths.
-    $needs_menu_rebuild = TRUE;
   }
   // If only one instance remains, we may need to change the database
   // representation for this field.
@@ -531,9 +525,8 @@ function content_field_instance_delete($field_name, $type_name) {
     }
   }
 
-  if ($needs_menu_rebuild) {
-    menu_rebuild();
-  }
+  menu_rebuild();
+
   return $field;
 }
 
