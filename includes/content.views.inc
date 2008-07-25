@@ -74,16 +74,20 @@ function content_views_field_views_data($field) {
 
       // Identify likely filters and arguments for each column based on field type.
       switch ($attributes['type']) {
-        case 'numeric':
         case 'int':
         case 'mediumint':
         case 'tinyint':
         case 'bigint':
         case 'serial':
-        case 'float':
           $filters[] = 'views_handler_filter_numeric_content';
           $arguments[] = 'views_handler_argument_content';
           break;
+        case 'numeric':
+        case 'float':
+          $filters[] = 'views_handler_filter_float_content';
+          $arguments[] = 'views_handler_argument_content';
+          break;
+
         case 'text':
         case 'blob':
           // TODO add markup handlers for these types
@@ -167,6 +171,20 @@ class views_handler_filter_string_content extends views_handler_filter_string {
  * for field-specific subclasses to use if they need to.
  */
 class views_handler_filter_numeric_content extends views_handler_filter_numeric {
+  var $content_field;
+
+  function construct() {
+    parent::construct();
+    $this->content_field = content_fields($this->definition['content_field_name']);
+    $this->additional_fields = $this->definition['additional fields'];
+  }
+}
+
+/**
+ * The subclass simply adds properties,
+ * for field-specific subclasses to use if they need to.
+ */
+class views_handler_filter_float_content extends views_handler_filter_float {
   var $content_field;
 
   function construct() {
@@ -511,7 +529,7 @@ class views_handler_field_content_multiple extends views_handler_field_content {
   }
 
   function render($values) {
-    // If this is not a grouped field, use the parent render().
+    // If this is not a grouped field, use views_handler_field_content's render().
     if (!$this->defer_query || empty($this->field_values)) {
       return parent::render($values);
     }

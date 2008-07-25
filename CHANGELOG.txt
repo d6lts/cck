@@ -15,6 +15,7 @@ CCK 6.2-dev
 - #286637 by poiu: clearer example for default value with php-code.
 - #93436 Add $form parameter to content_validate.
 - #277310 by fractile81: update node object by reference in content_load().
+- #285771 Views integration: use the new 'float' filter handler where applicable.
 
 CCK 6.2.rc4
 ===========
