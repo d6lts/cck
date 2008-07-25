@@ -590,9 +590,10 @@ function content_type_update($info) {
     }
   }
 
-  // Reset all content type info and alter the menu paths.
+  // Reset all content type info.
+  // Menu needs to be rebuilt as well, but node types need to be rebuilt first.
+  // node_type_form_submit() takes care of this.
   content_clear_type_cache(TRUE);
-  menu_rebuild();
 }
 
 /**
@@ -607,8 +608,8 @@ function content_type_update($info) {
  *
  */
 function content_type_delete($info) {
-  // This isn't right either, since content_field_instance_read()
-  // only picks up active fields, so inactive ones won't get deleted.
+  // TODO : What about inactive fields ?
+  // Currently, content_field_instance_delete doesn't work on those...
   $fields = content_field_instance_read(array('type_name' => $info->type));
   foreach ($fields as $field) {
     content_field_instance_delete($field['field_name'], $info->type);
@@ -619,6 +620,7 @@ function content_type_delete($info) {
     db_drop_table($ret, $table);
     watchdog('content', 'The content fields table %name has been deleted.', array('%name' => $table));
   }
+  // Menu needs to be rebuilt as well, but node types need to be rebuilt first.
+  // node_type_form_submit() takes care of this.
   content_clear_type_cache(TRUE);
-  menu_rebuild();
 }
