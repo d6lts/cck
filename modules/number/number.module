@@ -284,6 +284,10 @@ function theme_number_formatter_generic($element) {
     }
   }
 
+  if (empty($value) && $value !== '0') {
+    return '';
+  }
+
   switch ($element['#formatter']) {
     case 'us_0':
       $output = number_format($value, 0, '.', ',');
