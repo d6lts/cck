@@ -559,3 +559,45 @@ function content_update_1008() {
   }
   return array();
 }
+
+/**
+ * Index the 'nid' column on data tables to optimize node deletion.
+ * Large tables might deserve a multipass update.
+ */
+function content_update_1009() {
+  $ret = array();
+
+  // Gather list of tables.
+  if (!isset($_SESSION['content_update_1009_tables'])) {
+    $_SESSION['content_update_1009']['tables'] = array();
+    // Get per-field tables.
+    $result = db_query('SELECT * FROM {node_field_instance} nfi '.
+      ' LEFT JOIN {node_field} nf ON nf.field_name = nfi.field_name WHERE db_storage = %d', CONTENT_DB_STORAGE_PER_FIELD);
+    while ($field = db_fetch_array($result)) {
+      $table = _content_tablename($field['field_name'], CONTENT_DB_STORAGE_PER_FIELD);
+      $_SESSION['content_update_1009_tables'][$table] = $table;
+    }
+    // Additionally, get all per-type tables.
+    foreach (node_get_types() as $type) {
+      $table = _content_tablename($type->type, CONTENT_DB_STORAGE_PER_CONTENT_TYPE);
+      $_SESSION['content_update_1009_tables'][$table] = $table;
+    }
+    $_SESSION['content_update_1009_count'] = count($_SESSION['content_update_1009_tables']);
+  }
+
+  // One pass : add index on one table.
+  $table = array_shift($_SESSION['content_update_1009_tables']);
+  if (db_table_exists($table)) {
+    switch ($GLOBALS['db_type']) {
+      case 'mysql':
+      case 'mysqli':
+        $ret[] = update_sql("ALTER TABLE {". $table ."} ADD INDEX (nid)");
+        break;
+      case 'pgsql':
+        $ret[] = update_sql("CREATE INDEX {". $table ."}_nid_idx ON {". $table ."}(nid)");
+        break;
+    }
+  }
+  $ret['#finished'] = 1 - count($_SESSION['content_update_1009_tables']) / $_SESSION['content_update_1009_count'];
+  return $ret;
+}

@@ -1093,7 +1093,8 @@ function content_alter_db_field($previous_field, $previous_columns, $new_field, 
                 vid int unsigned NOT NULL default '0',
                 delta int unsigned NOT NULL default '0',
                 nid int unsigned NOT NULL default '0',
-                PRIMARY KEY (vid,delta)
+                PRIMARY KEY (vid,delta),
+                KEY nid (nid)
               ) /*!40100 DEFAULT CHARACTER SET utf8 */");
             break;
 
@@ -1104,6 +1105,7 @@ function content_alter_db_field($previous_field, $previous_columns, $new_field, 
                 nid int_unsigned NOT NULL default '0',
                 PRIMARY KEY (vid,delta)
               )");
+            db_query("CREATE INDEX {". $new_db_info['table'] ."}_nid_idx ON {". $new_db_info['table'] ."}(nid)");
             break;
         }
       }
@@ -1114,7 +1116,8 @@ function content_alter_db_field($previous_field, $previous_columns, $new_field, 
             db_query("CREATE TABLE {". $new_db_info['table'] ."} (
                 vid int unsigned NOT NULL default '0',
                 nid int unsigned NOT NULL default '0',
-                PRIMARY KEY (vid)
+                PRIMARY KEY (vid),
+                KEY nid (nid)
               ) /*!40100 DEFAULT CHARACTER SET utf8 */");
             break;
 
@@ -1124,6 +1127,7 @@ function content_alter_db_field($previous_field, $previous_columns, $new_field, 
                 nid int_unsigned NOT NULL default '0',
                 PRIMARY KEY (vid)
               )");
+            db_query("CREATE INDEX {". $new_db_info['table'] ."}_nid_idx ON {". $new_db_info['table'] ."}(nid)");
             break;
         }
       }
@@ -1177,7 +1181,8 @@ function content_alter_db_field($previous_field, $previous_columns, $new_field, 
                   vid int unsigned NOT NULL default '0',
                   delta int unsigned NOT NULL default '0',
                   nid int unsigned NOT NULL default '0',
-                  PRIMARY KEY (vid,delta)
+                  PRIMARY KEY (vid,delta),
+                  KEY nid (nid),
                 ) /*!40100 DEFAULT CHARACTER SET utf8 */");
                 break;
 
@@ -1188,6 +1193,7 @@ function content_alter_db_field($previous_field, $previous_columns, $new_field, 
                   nid int_unsigned NOT NULL default '0',
                   PRIMARY KEY (vid,delta)
                 )");
+                db_query("CREATE INDEX {". $new_db_info['table'] ."}_nid_idx ON {". $new_db_info['table'] ."}(nid)");
                 break;
             }
 
@@ -1199,7 +1205,8 @@ function content_alter_db_field($previous_field, $previous_columns, $new_field, 
                 db_query("CREATE TABLE {". $new_db_info['table'] ."} (
                   vid int unsigned NOT NULL default '0',
                   nid int unsigned NOT NULL default '0',
-                  PRIMARY KEY (vid)
+                  PRIMARY KEY (vid),
+                  KEY nid (nid),
                 ) /*!40100 DEFAULT CHARACTER SET utf8 */");
                 break;
 
@@ -1207,8 +1214,9 @@ function content_alter_db_field($previous_field, $previous_columns, $new_field, 
                   db_query("CREATE TABLE {". $new_db_info['table'] ."} (
                     vid int_unsigned NOT NULL default '0',
                     nid int_unsigned NOT NULL default '0',
-                    PRIMARY KEY (vid)
+                    PRIMARY KEY (vid),
                   )");
+                  db_query("CREATE INDEX {". $new_db_info['table'] ."}_nid_idx ON {". $new_db_info['table'] ."}(nid)");
                   break;
             }
           }  // end: if ($new_field['multiple'])

@@ -44,7 +44,8 @@ function content_type_create($info) {
         db_query("CREATE TABLE {". $table ."} (
           vid int unsigned NOT NULL default '0',
           nid int unsigned NOT NULL default '0',
-          PRIMARY KEY (vid)
+          PRIMARY KEY (vid),
+          KEY nid (nid)
         ) /*!40100 DEFAULT CHARACTER SET utf8 */");
       break;
 
@@ -54,6 +55,7 @@ function content_type_create($info) {
           nid int_unsigned NOT NULL default '0',
           PRIMARY KEY (vid)
         )");
+        db_query("CREATE INDEX {". $table ."}_nid_idx ON {". $table ."}(nid)");
       break;
     }
     drupal_set_message(t('The content fields table %name has been created.', array('%name' => $table)));

@@ -2,10 +2,12 @@
 
 5--1.x
 ======
+
 - #187599 Backport content_generate so Devel module can create data for CCK fields when creating nodes.
 - #227951 by pwolanin: Add a permission for PHP 'default values' and 'allowed values'
 - #179419 by smk-ka: Content Copy - Import fails when language not English.
 - #157211 Nodereference - error message when no valid node with that title (autocomplete widget).
+- #287540 Add index on nid in data tables, to optimize node deletion (requires update.php)
 
 5--1.7
 ======
