@@ -848,7 +848,7 @@ function _content_admin_field(&$form_state, $type_name, $field_name) {
   $form['main'] = array(
     '#type' => 'fieldset',
     '#title' => t('%type basic information', array('%type' => $type['name'])),
-    );
+  );
   $form['main']['label'] = array(
     '#type' => 'textfield',
     '#title' => t('Label'),
@@ -992,7 +992,7 @@ function _content_admin_field(&$form_state, $type_name, $field_name) {
   $form['field']['previous_field'] = array(
     '#type' => 'hidden',
     '#value' => serialize($field),
-    );
+  );
 
   $additions = module_invoke($field_type['module'], 'field_settings', 'form', $field);
   if (is_array($additions)) {

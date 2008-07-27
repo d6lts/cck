@@ -537,13 +537,16 @@ function content_field_instance_delete($field_name, $type_name) {
  */
 function content_module_delete($module) {
   // Delete the field data.
-  $results = db_query("SELECT field_name, type_name FROM {". content_instance_tablename() ."} WHERE widget_module = '%s'", $module);
-  while ($field = db_fetch_array($results)) {
-    content_field_instance_delete($field['field_name'], $field['type_name']);
+  // If content module has been uninstalled first, all tables
+  // have already been dropped, and running that code will raise errors.
+  if (db_table_exists(content_instance_tablename())) {
+    $results = db_query("SELECT field_name, type_name FROM {". content_instance_tablename() ."} WHERE widget_module = '%s'", $module);
+    while ($field = db_fetch_array($results)) {
+      content_field_instance_delete($field['field_name'], $field['type_name']);
+    }
+    // Force the caches and static arrays to update to the new info.
+    content_clear_type_cache(TRUE);
   }
-  // Force the caches and static arrays to update to the new info.
-  _content_type_info(TRUE, TRUE);
-
 }
 
 /**

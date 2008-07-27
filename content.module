@@ -497,7 +497,6 @@ function content_notify($op, $module) {
     case 'uninstall':
       module_load_include('inc', 'content', 'includes/content.crud');
       content_module_delete($module);
-      content_clear_type_cache(TRUE);
       break;
     case 'enable':
       content_associate_fields($module);

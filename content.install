@@ -81,8 +81,10 @@ function content_install() {
  * Implementation of hook_uninstall().
  */
 function content_uninstall() {
-  variable_del('content_schema_version');
   drupal_uninstall_schema('content');
+  // The variable is used during the uninstall process,
+  // so we removed it at the very end.
+  variable_del('content_schema_version');
 }
 
 /**

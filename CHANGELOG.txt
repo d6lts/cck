@@ -18,6 +18,7 @@ CCK 6.2-dev
 - #285771 Views integration: use the new 'float' filter handler where applicable.
 - Fix PHP warnings when renaming a content type.
 - #280410 Number: Fix prefix / suffix displayed when field is empty.
+- #282937 Fix warnings on uninstall.
 
 CCK 6.2.rc4
 ===========
