@@ -3,6 +3,8 @@
 CCK 6.2-dev
 ===========
 
+This release requires a visit to update.php to update the database.
+
 - Fix PHP warnings when field display is set to 'hidden' and field is in a fieldgroup.
 - Re-introduce '<none>' choice for multiselect widgets (optionwidgets, noderef/userref select).
 - #281449 Text: maxlength on textfield widget is 128 even when the field has no maximum length.
@@ -19,6 +21,7 @@ CCK 6.2-dev
 - Fix PHP warnings when renaming a content type.
 - #280410 Number: Fix prefix / suffix displayed when field is empty.
 - #282937 Fix warnings on uninstall.
+- #287540 Add index on nid in data tables, to optimize node deletion (requires update.php)
 
 CCK 6.2.rc4
 ===========

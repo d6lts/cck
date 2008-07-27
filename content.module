@@ -1708,6 +1708,9 @@ function content_table_schema($field = NULL) {
       'nid' => array('type' => 'int', 'unsigned' => TRUE, 'not null' => TRUE, 'default' => 0)
     ),
     'primary key' => array('vid'),
+    'indexes' => array(
+      'nid'    => array('nid'),
+    ),
   );
 
   // Add delta column if needed.

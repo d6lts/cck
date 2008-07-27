@@ -304,3 +304,36 @@ function content_update_6003() {
   }
   return $ret;
 }
+
+/**
+ * Index the 'nid' column on data tables to optimize node deletion.
+ * Large tables might deserve a multipass update.
+ */
+function content_update_6004(&$sandbox) {
+  $ret = array();
+
+  // Gather list of tables.
+  if (!isset($sandbox['tables'])) {
+    $sandbox['tables'] = array();
+    $result = db_query('SELECT * FROM {'. content_instance_tablename() .'} nfi '.
+      ' LEFT JOIN {'. content_field_tablename() .'} nf ON nf.field_name = nfi.field_name');
+    while ($field = db_fetch_array($result)) {
+      if ($field['db_storage'] == CONTENT_DB_STORAGE_PER_FIELD) {
+        $table = _content_tablename($field['field_name'], CONTENT_DB_STORAGE_PER_FIELD);
+      }
+      else {
+        $table = _content_tablename($field['type_name'], CONTENT_DB_STORAGE_PER_CONTENT_TYPE);
+      }
+      $sandbox['tables'][$table] = $table;
+    }
+    $sandbox['count'] = count($sandbox['tables']);
+  }
+
+  // One pass : add index on one table.
+  $table = array_shift($sandbox['tables']);
+  // TODO : what's the best way to test if the index already exists from a D5 upgrade ?
+  db_add_index($ret, $table, 'nid', array('nid'));
+
+  $ret['#finished'] = 1 - count($sandbox['tables']) / $sandbox['count'];
+  return $ret;
+}
