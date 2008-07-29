@@ -160,7 +160,7 @@ function text_field($op, &$node, $field, &$items, $teaser, $page) {
             if (count($allowed_values) && !array_key_exists($item['value'], $allowed_values)) {
               form_set_error($error_element, t('%name: illegal value.', array('%name' => t($field['widget']['label']))));
             }
-            if (!empty($field['max_length']) && strlen($item['value']) > $field['max_length']) {
+            if (!empty($field['max_length']) && drupal_strlen($item['value']) > $field['max_length']) {
               form_set_error($error_element, t('%name: the value may not be longer than %max characters.', array('%name' => $field['widget']['label'], '%max' => $field['max_length'])));
             }
           }

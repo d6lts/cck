@@ -22,6 +22,7 @@ This release requires a visit to update.php to update the database.
 - #280410 Number: Fix prefix / suffix displayed when field is empty.
 - #282937 Fix warnings on uninstall.
 - #287540 Add index on nid in data tables, to optimize node deletion (requires update.php)
+- #288578 Text: Fix max length to use utf8 length.
 
 CCK 6.2.rc4
 ===========
