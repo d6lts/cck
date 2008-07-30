@@ -484,26 +484,43 @@ function _content_admin_field_add($type_name) {
 }
 
 /**
- * Arrays of field type and widget type options.
+ * Return an array of field_type options.
+ *
  */
-function content_field_type_options($type = NULL) {
-  $field_types = _content_field_types();
-  $widget_types = _content_widget_types();
-  $field_type_options = array();
-  $widget_type_options = array();
-  foreach ($field_types as $field_type_name => $field_type) {
+function content_field_type_options() {
+  static $options;
+
+  if (!isset($options)) {
+    $options = array();
+    $field_types = _content_field_types();
+    $field_type_options = array();
+    foreach ($field_types as $field_type_name => $field_type) {
+      // skip field types which have no widget types.
+      if (!content_widget_type_options($field_type_name)) continue;
+      $options[$field_type_name] = t($field_type['label']);
+    }
+    asort($options);
+  }
+  return $options;
+}
+
+/**
+ * Return an array of widget type options for a field type.
+ */
+function content_widget_type_options($field_type) {
+  static $options;
+
+  if (!isset($options)) {
+    $widget_types = _content_widget_types();
+    $options = array();
     foreach ($widget_types as $widget_type_name => $widget_type) {
-      if (in_array($field_type_name, $widget_type['field types'])) {
-        $field_type_options[$field_type_name] = t($field_type['label']);
-        $widget_type_options[$field_type_name][$widget_type_name] = t($widget_type['label']);
+      foreach($widget_type['field types'] as $widget_field_type) {
+        $options[$widget_field_type][$widget_type_name] = t($widget_type['label']);
       }
     }
   }
-  asort($field_type_options);
-  if (!empty($type)) {
-    return $widget_type_options[$type];
-  }
-  return $field_type_options;
+  
+  return !empty($options[$field_type]) ? $options[$field_type] : array();
 }
 
 function _content_admin_field_add_existing(&$form_state, $type_name) {
@@ -654,7 +671,7 @@ function content_admin_field_main(&$form_state, $form_values) {
       '#type' => 'select',
       '#title' => t('Widget type'),
       '#required' => TRUE,
-      '#options' => content_field_type_options($field_type),
+      '#options' => content_widget_type_options($field_type),
       '#default_value' => $form_values['widget_type'],
       '#description' => t('The type of form element you would like to present to the user when creating this field in the %type content type.', array('%type' => $type['name'])),
     );
@@ -871,7 +888,7 @@ function _content_admin_field(&$form_state, $type_name, $field_name) {
   $form['main']['widget_type'] = array(
     '#type' => 'select',
     '#title' => t('Widget type'),
-    '#options' => content_field_type_options($field['type']),
+    '#options' => content_widget_type_options($field['type']),
     '#default_value' => $field['widget']['type'] ? $field['widget']['type'] : $default_widget,
     '#disabled' => TRUE,
   );
@@ -942,7 +959,7 @@ function _content_admin_field(&$form_state, $type_name, $field_name) {
       foreach ($columns as $key => $column) {
         $columns[$key] = t("'@column' => value for @column", array('@column' => $column));
       }
-      $sample = t("array(\n  0 => array(@columns),\n  // You'll usually want to stop here. Provide more values\n  // if you want your 'default value' to be multi-valued:\n  1 => array(@columns),\n  2 => ...\n);", array('@columns' => implode(', ', $columns)));
+      $sample = t("return array(\n  0 => array(@columns),\n  // You'll usually want to stop here. Provide more values\n  // if you want your 'default value' to be multi-valued:\n  1 => array(@columns),\n  2 => ...\n);", array('@columns' => implode(', ', $columns)));
 
       $form['widget']['default_value_fieldset']['advanced_options']['default_value_php'] = array(
         '#type' => 'textarea',
@@ -950,9 +967,9 @@ function _content_admin_field(&$form_state, $type_name, $field_name) {
         '#default_value' => isset($field['widget']['default_value_php']) ? $field['widget']['default_value_php'] : '',
         '#rows' => 6,
         '#tree' => TRUE,
-        '#description' => t("Advanced usage only: PHP code that returns a default value. Should not include &lt;?php ?&gt; delimiters. If this field is filled out, the value returned by this code will override any value specified above. Expected format: <pre>!sample</pre>Using !link_devel's 'devel load' tab on a %type content page might help you figure out the expected format.", array(
+        '#description' => t("Advanced usage only: PHP code that returns a default value. Should not include &lt;?php ?&gt; delimiters. If this field is filled out, the value returned by this code will override any value specified above. Expected format: <pre>!sample</pre>Using !link_devel 'devel load' tab on a %type content page might help you figure out the expected format.", array(
           '!sample' => $sample,
-          '!link_devel' => l('devel.module', 'http://www.drupal.org/project/devel'),
+          '!link_devel' => l("devel.module's", 'http://www.drupal.org/project/devel'),
           '%type' => $type_name)),
       );
     }
@@ -1088,7 +1105,7 @@ function _content_admin_field_validate($form, &$form_state) {
         foreach ($columns as $key => $column) {
           $columns[$key] = t("'@column' => value for @column", array('@column' => $column));
         }
-        $sample = t("array(\n  0 => array(@columns),\n  // You'll usually want to stop here. Provide more values\n  // if you want your 'default value' to be multi-valued:\n  1 => array(@columns),\n  2 => ...\n);", array('@columns' => implode(', ', $columns)));
+        $sample = t("return array(\n  0 => array(@columns),\n  // You'll usually want to stop here. Provide more values\n  // if you want your 'default value' to be multi-valued:\n  1 => array(@columns),\n  2 => ...\n);", array('@columns' => implode(', ', $columns)));
 
         form_set_error('default_value_php', t('The default value PHP code returned an incorrect value.<br/>Expected format: <pre>!sample</pre> Returned value: @value', array(
           '!sample' => $sample,
