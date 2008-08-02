@@ -1952,14 +1952,14 @@ function content_content_extra_fields($type_name) {
   if ($type->has_title) {
     $extra['title'] = array(
       'label' => $type->title_label,
-//      'description' => t('TODO: DESCRIPTION PENDING'),
+      'description' => t('Node module form.'),
       'weight' => -5
     );
   }
   if ($type->has_body) {
     $extra['body_field'] = array(
       'label' => $type->body_label,
-//      'description' => t('TODO: DESCRIPTION PENDING'),
+      'description' => t('Node module form.'),
       'weight' => 0,
       'view' => 'body'
     );
@@ -1967,28 +1967,28 @@ function content_content_extra_fields($type_name) {
   if (module_exists('locale') && variable_get("language_$type_name", 0)) {
     $extra['language'] = array(
       'label' => t('Language'),
-//      'description' => t('TODO: DESCRIPTION PENDING'),
+      'description' => t('Locale module form.'),
       'weight' => 0
     );
   }
   if (module_exists('menu')) {
     $extra['menu'] = array(
-      'label' => t('Menu settings (admin)'),
-//      'description' => t('TODO: DESCRIPTION PENDING'),
+      'label' => t('Menu settings'),
+      'description' => t('Menu module form.'),
       'weight' => -2
     );
   }
   if (module_exists('taxonomy') && taxonomy_get_vocabularies($type_name)) {
     $extra['taxonomy'] = array(
       'label' => t('Taxonomy'),
-//      'description' => t('TODO: DESCRIPTION PENDING'),
+      'description' => t('Taxonomy module form.'),
       'weight' => -3
     );
   }
   if (module_exists('upload') && variable_get("upload_$type_name", TRUE)) {
     $extra['attachments'] = array(
       'label' => t('File attachments'),
-//      'description' => t('TODO: DESCRIPTION PENDING'),
+      'description' => t('Upload module form.'),
       'weight' => 30,
       'view' => 'files'
     );
