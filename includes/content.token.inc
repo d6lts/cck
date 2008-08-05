@@ -59,7 +59,9 @@ if (module_exists('nodereference')) {
 
       $tokens['node reference']['nid']   = t('Referenced node ID');
       $tokens['node reference']['title'] = t('Referenced node title');
-      $tokens['node reference']['link']  = t('Formatted HTML link to the node');
+      $tokens['node reference']['link']  = t("Formatted html link to the referenced node.");
+      $tokens['node reference']['path']  = t("Relative path alias to the referenced node.");
+      $tokens['node reference']['url']  = t("Absolute path alias to the referenced node.");
 
       return $tokens;
     }
@@ -72,6 +74,8 @@ if (module_exists('nodereference')) {
       $tokens['nid']   = $item['nid'];
       $tokens['title'] = strip_tags($item['view']);
       $tokens['link']  = $item['view'];
+      $tokens['path'] = url('node/' . $item['nid']);
+      $tokens['url'] = url('node/' . $item['nid'], array('absolute' => TRUE));
 
       return $tokens;
     }
@@ -133,6 +137,8 @@ if (module_exists('userreference')) {
       $tokens['user reference']['uid']   = t('Referenced user ID');
       $tokens['user reference']['name']  = t('Referenced user name');
       $tokens['user reference']['link']  = t('Formatted HTML link to referenced user');
+      $tokens['user reference']['path']  = t("Relative path alias to the referenced user.");
+      $tokens['user reference']['url']  = t("Absolute path alias to the referenced user.");
 
       return $tokens;
     }
@@ -145,6 +151,8 @@ if (module_exists('userreference')) {
       $tokens['uid']   = $item['uid'];
       $tokens['name']  = strip_tags($item['view']);
       $tokens['link']  = $item['view'];
+      $tokens['path'] = url('user/' . $item['uid']);
+      $tokens['url'] = url('user/' . $item['uid'], array('absolute' => TRUE));
 
       return $tokens;
     }
