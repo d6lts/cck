@@ -601,3 +601,13 @@ function content_update_1009() {
   $ret['#finished'] = 1 - count($_SESSION['content_update_1009_tables']) / $_SESSION['content_update_1009_count'];
   return $ret;
 }
+
+/**
+ * Prepare smooth D6 upgrade : set a variable showing that indexes for 'nid'
+ * were already created in content_update_1009, so that content_update_6004
+ * doesn't attempt to recreate them.
+ */
+function content_update_1010() {
+  $ret = array();
+  variable_set('content_update_1009', TRUE);
+}
