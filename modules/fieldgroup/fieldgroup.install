@@ -186,7 +186,7 @@ function fieldgroup_update_6000() {
   $ret = array();
   db_rename_table($ret, 'node_group', 'content_group');
   db_rename_table($ret, 'node_group_fields', 'content_group_fields');
-  variable_set('content_schema_version', 6000);
+  variable_set('fieldgroup_schema_version', 6000);
   return $ret;
 }
 
@@ -212,7 +212,7 @@ function fieldgroup_update_6002() {
   if (db_table_exists('node_group')) {
     db_rename_table($ret, 'node_group', 'content_group');
     db_rename_table($ret, 'node_group_fields', 'content_group_fields');
-    variable_set('content_schema_version', 6000);
+    variable_set('fieldgroup_schema_version', 6000);
   }
   return $ret;
 }
