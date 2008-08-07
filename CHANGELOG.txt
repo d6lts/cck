@@ -27,6 +27,7 @@ This release requires a visit to update.php to update the database.
 - #222214 by aaron, deviantintegral : support tokens for nodererf / userref paths aliases
 - #211306 by asimmonds : Fix error in D5 update with SQL strict mode.
 - #292338 by mh89 : Set fieldgroup.module's weight to 9 (missing for new D6 installs).
+- #292463 Fieldgroup : missing update for fieldgroup table names (didn't actually break anything).
 
 CCK 6.2.rc4
 ===========

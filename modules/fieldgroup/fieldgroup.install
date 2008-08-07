@@ -174,11 +174,19 @@ function fieldgroup_update_4() {
   return $ret;
 }
 
+
 /**
- * Placeholder update to set newly installed versions to the latest update number.
+ * Start D6 upgrades
+ */
+
+/**
+ * Move fieldgroup tables to the content_* namespace.
  */
 function fieldgroup_update_6000() {
   $ret = array();
+  db_rename_table($ret, 'node_group', 'content_group');
+  db_rename_table($ret, 'node_group_fields', 'content_group_fields');
+  variable_set('content_schema_version', 6000);
   return $ret;
 }
 
@@ -192,5 +200,19 @@ function fieldgroup_update_6000() {
 function fieldgroup_update_6001() {
   $ret = array();
   $ret[] = update_sql("UPDATE {system} SET weight = 9 WHERE name = 'fieldgroup'");
+  return $ret;
+}
+
+/**
+ * Same as 6000 : Move fieldgroup tables to the content_* namespace.
+ * This was missing in D6 releases earlier than RC5. Ensure we don't run this twice.
+ */
+function fieldgroup_update_6002() {
+  $ret = array();
+  if (db_table_exists('node_group')) {
+    db_rename_table($ret, 'node_group', 'content_group');
+    db_rename_table($ret, 'node_group_fields', 'content_group_fields');
+    variable_set('content_schema_version', 6000);
+  }
   return $ret;
 }
