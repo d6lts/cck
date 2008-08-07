@@ -1150,12 +1150,6 @@ function content_types($type_name = NULL) {
       return $info['content types'];
     }
     if (isset($info['content types'][$type_name])) {
-      if (!isset($info['content_types']['tables'])) {
-        $info['content_types']['tables'] = array();
-      }
-      if (!isset($info['content_types']['fields'])) {
-        $info['content_types']['fields'] = array();
-      }
       return $info['content types'][$type_name];
     }
   }
