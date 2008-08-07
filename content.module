@@ -303,10 +303,6 @@ function content_delete(&$node) {
     _content_field_invoke('delete', $node);
     _content_field_invoke_default('delete', $node);
   }
-  $table = _content_tablename($type['type'], CONTENT_DB_STORAGE_PER_CONTENT_TYPE);
-  if (db_table_exists($table)) {
-    db_query('DELETE FROM {'. $table .'} WHERE nid = %d', $node->nid);
-  }
   cache_clear_all('content:'. $node->nid .':', content_cache_tablename(), TRUE);
 }
 
@@ -320,10 +316,6 @@ function content_delete_revision(&$node) {
   if (!empty($type['fields'])) {
     _content_field_invoke('delete revision', $node);
     _content_field_invoke_default('delete revision', $node);
-  }
-  $table = _content_tablename($type['type'], CONTENT_DB_STORAGE_PER_CONTENT_TYPE);
-  if (db_table_exists($table)) {
-    db_query('DELETE FROM {'. $table .'} WHERE vid = %d', $node->vid);
   }
   cache_clear_all('content:'. $node->nid .':'. $node->vid, content_cache_tablename());
 }
@@ -809,7 +801,7 @@ function _content_sort_items_helper($a, $b) {
 }
 
 /**
- * TODO: PHPdoc
+ * Handle storage ops for _content_field_invoke_default().
  */
 function content_storage($op, $node) {
   $type_name = $node->type;
@@ -823,6 +815,10 @@ function content_storage($op, $node) {
       // For each table used by this content type,
       foreach ($type['tables'] as $table) {
         $schema = drupal_get_schema($table);
+        // The per-type table might not have any fields actually stored in it.
+        if (!$schema['content fields']) {
+          continue;
+        }
         $query = 'SELECT * FROM {'. $table .'} WHERE vid = %d';
 
         // If we're loading a table for a multiple field,
@@ -870,7 +866,12 @@ function content_storage($op, $node) {
             }
           }
         }
-        if (count($record)) {
+        // $record might be empty because
+        // - the table stores a multiple field :
+        //   we do nothing, this is handled later on
+        // - this is the per-type table and no field is actually stored in it :
+        //   we still store the nid and vid
+        if (count($record) || empty($schema['content fields'])) {
           $record['nid'] = $node->nid;
           $record['vid'] = $node->vid;
           // Can't rely on the insert/update op of the node to decide if this
@@ -1285,14 +1286,19 @@ function _content_type_info($reset = FALSE) {
         $type['url_str'] = str_replace('_', '-', $type['type']);
         $type['fields'] = array();
         $type['tables'] = array();
-        $fields = content_field_instance_read(array('type_name' => $type_name));
-        foreach ($fields as $field) {
-          $type['fields'][$field['field_name']] = $field;
-          $db_info = content_database_info($field);
-          $type['tables'][$db_info['table']] = $db_info['table'];
-          // This means that content_fields($field_name) (no type name)
-          // returns the last instance loaded.
-          $info['fields'][$field['field_name']] = $field;
+        if ($fields = content_field_instance_read(array('type_name' => $type_name))) {
+          foreach ($fields as $field) {
+            $type['fields'][$field['field_name']] = $field;
+            $db_info = content_database_info($field);
+            $type['tables'][$db_info['table']] = $db_info['table'];
+            // This means that content_fields($field_name) (no type name)
+            // returns the last instance loaded.
+            $info['fields'][$field['field_name']] = $field;
+          }
+          // Make sure the per-type table is added, even if no field is actually
+          // stored in it.
+          $table = _content_tablename($type['type'], CONTENT_DB_STORAGE_PER_CONTENT_TYPE);
+          $type['tables'][$table] = $table;
         }
 
         // Gather information about non-CCK 'fields'.
