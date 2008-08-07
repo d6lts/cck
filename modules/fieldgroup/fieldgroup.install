@@ -10,6 +10,7 @@ include_once('./'. drupal_get_path('module', 'content') .'/content.module');
  */
 function fieldgroup_install() {
   drupal_install_schema('fieldgroup');
+  db_query("UPDATE {system} SET weight = 9 WHERE name = 'fieldgroup'");
   content_notify('install', 'fieldgroup');
   variable_set('fieldgroup_schema_version', 6000);
 }
@@ -178,5 +179,18 @@ function fieldgroup_update_4() {
  */
 function fieldgroup_update_6000() {
   $ret = array();
+  return $ret;
+}
+
+/*
+ * Increases module weight, so that other modules can form_alter() cck forms before the fields
+ * are moved in groups.
+ *
+ * Sites upgraded from D5 should have this already set.
+ * New D6 installs earlier than RC5 need this, as it was missing in fieldgroup_install.
+ */
+function fieldgroup_update_6001() {
+  $ret = array();
+  $ret[] = update_sql("UPDATE {system} SET weight = 9 WHERE name = 'fieldgroup'");
   return $ret;
 }

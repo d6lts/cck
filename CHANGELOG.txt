@@ -26,6 +26,7 @@ This release requires a visit to update.php to update the database.
 - #288578 Text: Fix max length to use utf8 length.
 - #222214 by aaron, deviantintegral : support tokens for nodererf / userref paths aliases
 - #211306 by asimmonds : Fix error in D5 update with SQL strict mode.
+- #292338 by mh89 : Set fieldgroup.module's weight to 9 (missing for new D6 installs).
 
 CCK 6.2.rc4
 ===========
