@@ -11,8 +11,10 @@ function nodereference_views_plugins() {
     'module' => 'nodereference', // This just tells our themes are elsewhere.
     'display' => array(
       'nodereference_simple' => array(
-        'title' => t('Simple'), // TODO: better name ? (currently not displayed anyway)
-        'help' => t('Destination-agnostic display. Mostly useful for programmatic views.'),
+        // Those strings are not translated for now.
+        // We'll need to change that if / when we remove 'no ui'
+        'title' => 'Simple', // TODO: better name ? (currently not displayed anyway)
+        'help' => 'Destination-agnostic display. Mostly useful for programmatic views.',
         'no ui' => TRUE, // Programmatic use only.
         'handler' => 'nodereference_plugin_display_simple',
         'uses hook menu' => FALSE,
@@ -23,8 +25,10 @@ function nodereference_views_plugins() {
     ),
     'style' => array(
       'nodereference_php_array' => array(
-        'title' => t('Results array'),
-        'help' => t('Returns the view as a PHP array of titles + renderd rows.'),
+        // Those strings are not translated for now.
+        // We'll need to change that if / when we remove 'no ui'
+        'title' => 'Results array (with title)',
+        'help' => 'Returns the view as a PHP array of titles + rendered rows.',
         'handler' => 'nodereference_plugin_style_php_array',
         'no ui' => TRUE, // Programmatic use only.
         'uses row plugin' => TRUE,
