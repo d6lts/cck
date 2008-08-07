@@ -312,6 +312,11 @@ function content_update_6003() {
 function content_update_6004(&$sandbox) {
   $ret = array();
 
+  // Do nothing if the indexes were already created by D5's content_update_1009.
+  if (variable_get('content_update_1009', FALSE)) {
+    return $ret;
+  }
+
   // Gather list of tables.
   if (!isset($sandbox['tables'])) {
     $sandbox['tables'] = array();
