@@ -108,10 +108,10 @@ function content_admin_field_overview_form(&$form_state, $type_name) {
   // Gather type information.
   $type = content_types($type_name);
   $fields = $type['fields'];
-  if (empty($fields)) {
+
+  if (empty($fields) && empty($form_state['post'])) {
     drupal_set_message(t('There are no fields configured for this content type. You can !link.', array(
       '!link' => l(t('Add a new field'), str_replace('/fields', '/add_field', $_GET['q'])))), 'warning');
-    return array();
   }
 
   $extra = $type['extra'];
@@ -519,7 +519,7 @@ function content_widget_type_options($field_type) {
       }
     }
   }
-  
+
   return !empty($options[$field_type]) ? $options[$field_type] : array();
 }
 
@@ -626,7 +626,7 @@ function content_admin_field_main(&$form_state, $form_values) {
     '#field_prefix' => 'field_',
     '#description' => t("The machine-readable name of the field."),
     '#required' => TRUE,
-    );
+  );
   if (!empty($field_name)) {
     $form['new']['field_name']['#description'] .= ' '. t("This name cannot be changed.");
     $form['new']['field_name']['#disabled'] = TRUE;

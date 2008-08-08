@@ -30,6 +30,7 @@ This release requires a visit to update.php to update the database.
 - #292463 Fieldgroup : missing update for fieldgroup table names (didn't actually break anything).
 - #292855 by Tgr - Fieldgroup : missing } in query on field instance deletion.
 - #292925 by greggles - Text : Fix PHP notice under some circumstances with textarea widget.
+- #292675 Support d-n-d reordering of non-cck "fields" for types that have no cck fields.
 
 CCK 6.2.rc4
 ===========
