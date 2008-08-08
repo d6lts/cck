@@ -29,6 +29,7 @@ This release requires a visit to update.php to update the database.
 - #292338 by mh89 : Set fieldgroup.module's weight to 9 (missing for new D6 installs).
 - #292463 Fieldgroup : missing update for fieldgroup table names (didn't actually break anything).
 - #292855 by Tgr - Fieldgroup : missing } in query on field instance deletion.
+- #292925 by greggles - Text : Fix PHP notice under some circumstances with textarea widget.
 
 CCK 6.2.rc4
 ===========
