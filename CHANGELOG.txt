@@ -25,12 +25,13 @@ This release requires a visit to update.php to update the database.
 - #287540 Add index on nid in data tables, to optimize node deletion (requires update.php)
 - #288578 Text: Fix max length to use utf8 length.
 - #222214 by aaron, deviantintegral : support tokens for nodererf / userref paths aliases
-- #211306 by asimmonds : Fix error in D5 update with SQL strict mode.
-- #292338 by mh89 : Set fieldgroup.module's weight to 9 (missing for new D6 installs).
-- #292463 Fieldgroup : missing update for fieldgroup table names (didn't actually break anything).
-- #292855 by Tgr - Fieldgroup : missing } in query on field instance deletion.
-- #292925 by greggles - Text : Fix PHP notice under some circumstances with textarea widget.
+- #211306 by asimmonds: Fix error in D5 update with SQL strict mode.
+- #292338 by mh89: Set fieldgroup.module's weight to 9 (missing for new D6 installs).
+- #292463 Fieldgroup: missing update for fieldgroup table names (didn't actually break anything).
+- #292855 by Tgr - Fieldgroup: missing } in query on field instance deletion.
+- #292925 by greggles - Text: Fix PHP notice under some circumstances with textarea widget.
 - #292675 Support d-n-d reordering of non-cck "fields" for types that have no cck fields.
+- #289888 Nodereference: Fix 'full node' and 'teaser' formatters.
 
 CCK 6.2.rc4
 ===========

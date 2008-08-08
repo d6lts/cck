@@ -250,6 +250,8 @@ function theme_nodereference_formatter_full_teaser($element) {
   static $recursion_queue = array();
   $output = '';
   if (!empty($element['#item']['nid']) && is_numeric($element['#item']['nid'])) {
+    $node = $element['#node'];
+    $field = content_fields($element['#field_name'], $element['#type_name']);
     // If no 'referencing node' is set, we are starting a new 'reference thread'
     if (!isset($node->referencing_node)) {
       $recursion_queue = array();
