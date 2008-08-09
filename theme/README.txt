@@ -14,10 +14,10 @@ In order to customize field themeing :
 - edit that copy to your liking.
 
 
-Template variants
------------------
-In addition, the theme layer will also look for field-specific variants in the
-following order of precedence :
+Template suggestions
+--------------------
+In addition, the theme layer will also look for field-specific variants (suggestions),
+in the following order of precedence :
 
 - content-field-<FIELD_NAME>-<CONTENT_TYPE_NAME>.tpl.php
   (ex : content-field-field_myfield-story.tpl.php)
@@ -34,11 +34,12 @@ following order of precedence :
   types it appears in.
 
 - content-field.tpl.php
-  If none of the above is present, the generic template will be used.
+  If none of the above is present, the base template will be used.
 
-Those template variants should be placed in your theme's root folder.
-Please note that your theme's content-field-xxxxxx.tpl.php variants will not
-get called if the generic content-field.tpl.php template is not present as well.
+IMPORTANT :
+Suggestions work only if the theme also has the base template.
+If your theme has content-field-*.tpl.php files, it must also have a
+content-field.tpl.php file.
 
 
 Formatters theme function
