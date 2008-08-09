@@ -65,7 +65,7 @@ function _content_admin_type_fields() {
   $rows = array();
   foreach ($fields as $field) {
     $row = array();
-    $row[] = $field['field_name'];
+    $row[] = $field['field_name'] . ($field['locked'] ? ' (' . t('Locked') .')' : '');
     $row[] = $field['type'];
 
     $types = array();
@@ -81,7 +81,7 @@ function _content_admin_type_fields() {
     }
     $row[] = implode(', ', $types);
 
-    $rows[] = $row;
+    $rows[] = array('data' => $row, 'class' => $field['locked'] ? 'menu-disabled' : '');
   }
   if (empty($rows)) {
     $output = t('No fields have been defined for any content type yet.');
@@ -121,7 +121,6 @@ function content_admin_field_overview_form(&$form_state, $type_name) {
     $group_options = _fieldgroup_groups_label($type['type']);
   }
 
-
   // Rows in this table are essentially nested, but for the simplicity of
   // theme and submit functions, we keep them in a flat array, and use a
   // $dummy render structure to figure the right display order.
@@ -152,7 +151,13 @@ function content_admin_field_overview_form(&$form_state, $type_name) {
       '#leaf' => TRUE,
     );
     $dummy[$name] = array('#weight' => $weight, '#value' => $name .' ');
+    if ($field['locked']) {
+      $form[$name]['configure'] = array('#value' => t('Locked'));
+      $form[$name]['remove'] = array();
+      $form[$name]['#disabled_row'] = true;
+    }
   }
+
   // Groups.
   foreach ($groups as $name => $group) {
     $weight = $group['weight'];
@@ -176,6 +181,7 @@ function content_admin_field_overview_form(&$form_state, $type_name) {
       unset($dummy[$field_name]);
     }
   }
+
   // Non-CCK 'fields'.
   foreach ($extra as $name => $label) {
     $weight = $extra[$name]['weight'];
@@ -190,6 +196,7 @@ function content_admin_field_overview_form(&$form_state, $type_name) {
       'hidden_name' => array('#type' => 'hidden', '#default_value' => $name),
       '#leaf' => TRUE,
       '#root' => TRUE,
+      '#disabled_row' => TRUE,
       '#extra_field' => TRUE,
     );
     $dummy[$name] = array('#weight' => $weight, '#value' => $name .' ');
@@ -234,8 +241,9 @@ function theme_content_admin_field_overview_form($form) {
       $row[] = drupal_render($element['type']);
       $row[] = drupal_render($element['configure']) .'&nbsp;&nbsp;'. drupal_render($element['remove']);
     }
+
     $class = 'draggable';
-    $class .= isset($element['#extra_field']) ? ' menu-disabled' : '';
+    $class .= isset($element['#disabled_row']) ? ' menu-disabled' : '';
     $class .= isset($element['#leaf']) ? ' tabledrag-leaf' : '';
     $class .= isset($element['#root']) ? ' tabledrag-root' : '';
     $rows[] = array('data' => $row, 'class' => $class);
@@ -485,7 +493,6 @@ function _content_admin_field_add($type_name) {
 
 /**
  * Return an array of field_type options.
- *
  */
 function content_field_type_options() {
   static $options;
@@ -496,8 +503,9 @@ function content_field_type_options() {
     $field_type_options = array();
     foreach ($field_types as $field_type_name => $field_type) {
       // skip field types which have no widget types.
-      if (!content_widget_type_options($field_type_name)) continue;
-      $options[$field_type_name] = t($field_type['label']);
+      if (content_widget_type_options($field_type_name)) {
+        $options[$field_type_name] = t($field_type['label']);
+      }
     }
     asort($options);
   }
@@ -531,8 +539,9 @@ function _content_admin_field_add_existing(&$form_state, $type_name) {
 
   $options = array();
   foreach ($fields as $field) {
-    if (!isset($type['fields'][$field['field_name']]))
-    $options[$field['field_name']] = t($field['widget']['label']) .' ('. $field['field_name'] .')';
+    if (!isset($type['fields'][$field['field_name']]) && !$field['locked']) {
+      $options[$field['field_name']] = t($field['widget']['label']) .' ('. $field['field_name'] .')';
+    }
   }
   if ($options) {
     $form['existing'] = array(
@@ -563,6 +572,13 @@ function _content_admin_field_add_existing_submit($form, &$form_state) {
   module_load_include('inc', 'content', 'includes/content.crud');
   $form_values = $form_state['values'];
   $form_values['field_name'] = $form_values['existing_field_name'];
+  $field = content_fields($form_values['field_name']);
+
+  if ($field['locked']) {
+    drupal_set_message(t('The field %label cannot be added to a content type because it is locked.',
+                       array('%label' => $form_values['field_name'])));
+    return;
+  }
 
   if (content_field_instance_create($form_values)) {
     drupal_set_message(t('Added field %label.', array(
@@ -812,6 +828,11 @@ function _content_admin_field_remove(&$form_state, $type_name, $field_name) {
     'confirm'
   );
 
+  if ($field['locked']) {
+    unset($output['actions']['submit']);
+    $output['description']['#value'] = t('This field is <strong>locked</strong> and cannot be removed.');
+  }
+
   return $output;
 }
 
@@ -824,6 +845,10 @@ function _content_admin_field_remove_submit($form, &$form_state) {
 
   $type = content_types($form_values['type_name']);
   $field = $type['fields'][$form_values['field_name']];
+  if ($field['locked']) {
+    return;
+  }
+
   if ($type && $field && $form_values['confirm']) {
     if (content_field_instance_delete($form_values['field_name'], $form_values['type_name'])) {
       drupal_set_message(t('Removed field %field from %type.', array(
@@ -846,6 +871,15 @@ function _content_admin_field(&$form_state, $type_name, $field_name) {
   $output = '';
   $type = content_types($type_name);
   $field = $type['fields'][$field_name];
+
+  if ($field['locked']) {
+    $output = array();
+    $output['locked'] = array(
+       '#value' => t('The field %field is locked and cannot be edited.', array('%field' => $field['widget']['label'])),
+    );
+    return $output;
+  }
+
   $field_types = _content_field_types();
   $field_type = $field_types[$field['type']];
   $widget_types = _content_widget_types();

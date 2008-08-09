@@ -127,6 +127,7 @@ function content_schema() {
       'module'          => array('type' => 'varchar', 'length' => 127, 'not null' => TRUE, 'default' => ''),
       'db_columns'      => array('type' => 'text', 'size' => 'medium', 'not null' => TRUE, 'serialize' => TRUE),
       'active'          => array('type' => 'int', 'size' => 'tiny', 'not null' => TRUE, 'default' => 0),
+      'locked'          => array('type' => 'int', 'size' => 'tiny', 'not null' => TRUE, 'default' => 0),
     ),
     'primary key' => array('field_name'),
   );
@@ -340,5 +341,14 @@ function content_update_6004(&$sandbox) {
   db_add_index($ret, $table, 'nid', array('nid'));
 
   $ret['#finished'] = 1 - count($sandbox['tables']) / $sandbox['count'];
+  return $ret;
+}
+
+/**
+ * Add 'locked' property for fields.
+ */
+function content_update_6005() {
+  $ret = array();
+  db_add_field($ret, content_field_tablename(), 'locked', array('type' => 'int', 'size' => 'tiny', 'default' => 0));
   return $ret;
 }

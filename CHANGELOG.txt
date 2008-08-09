@@ -32,6 +32,7 @@ This release requires a visit to update.php to update the database.
 - #292925 by greggles - Text: Fix PHP notice under some circumstances with textarea widget.
 - #292675 Support d-n-d reordering of non-cck "fields" for types that have no cck fields.
 - #289888 Nodereference: Fix 'full node' and 'teaser' formatters.
+- #289138 by dopry: Add support for 'locked' fields (for module-defined fields).
 
 CCK 6.2.rc4
 ===========
