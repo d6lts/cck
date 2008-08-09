@@ -52,7 +52,7 @@ function content_admin_types_overview() {
 }
 
 function theme_content_overview_links() {
-  return '<div class="contnet-overview-links">'. l(t('» Add a new content type'), 'admin/content/types/add') .'</div>';
+  return '<div class="content-overview-links">'. l(t('» Add a new content type'), 'admin/content/types/add') .'</div>';
 }
 
 /**
