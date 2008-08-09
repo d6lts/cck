@@ -60,13 +60,14 @@ function theme_content_overview_links() {
  */
 function _content_admin_type_fields() {
   $fields = content_fields();
+  $field_types = _content_field_types();
 
   $header = array(t('Field name'), t('Field type'), t('Used in'));
   $rows = array();
   foreach ($fields as $field) {
     $row = array();
     $row[] = $field['field_name'] . ($field['locked'] ? ' (' . t('Locked') .')' : '');
-    $row[] = $field['type'];
+    $row[] = t($field_types[$field['type']]['label']);
 
     $types = array();
     $result = db_query("SELECT nt.name, nt.type FROM {". content_instance_tablename() ."} nfi ".
@@ -108,6 +109,7 @@ function content_admin_field_overview_form(&$form_state, $type_name) {
   // Gather type information.
   $type = content_types($type_name);
   $fields = $type['fields'];
+  $field_types = _content_field_types();
 
   if (empty($fields) && empty($form_state['post'])) {
     drupal_set_message(t('There are no fields configured for this content type. You can !link.', array(
@@ -142,7 +144,7 @@ function content_admin_field_overview_form(&$form_state, $type_name) {
     $form[$name] = array(
       'human_name' => array('#value' => check_plain($field['widget']['label'])),
       'name' => array('#value' => $field['field_name']),
-      'type' => array('#value' => t($field['type'])),
+      'type' => array('#value' => t($field_types[$field['type']]['label'])),
       'configure' => array('#value' => l(t('Configure'), 'admin/content/node-type/'. $type['url_str'] .'/fields/'. $field['field_name'])),
       'remove' => array('#value' => l(t('Remove'), 'admin/content/node-type/'. $type['url_str'] .'/fields/'. $field['field_name'] .'/remove')),
       'weight' => array('#type' => 'textfield', '#default_value' => $weight),
