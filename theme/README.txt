@@ -41,6 +41,7 @@ Suggestions work only if the theme also has the base template.
 If your theme has content-field-*.tpl.php files, it must also have a
 content-field.tpl.php file.
 
+See http://drupal.org/node/223440 for more informations about template suggestions.
 
 Formatters theme function
 -------------------------
