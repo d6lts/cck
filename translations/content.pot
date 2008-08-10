@@ -3,9 +3,9 @@
 # LANGUAGE translation of Drupal (root)
 # Copyright YEAR NAME <EMAIL@ADDRESS>
 # Generated from files:
-#  content.module,v 1.301.2.23 2008/07/11 00:16:31 yched
+#  content.module,v 1.301.2.32 2008/08/07 23:07:38 yched
 #  content.info,v 1.6 2007/07/04 23:46:29 yched
-#  content.views.inc,v 1.68.2.8 2008/07/06 16:04:02 yched
+#  content.views.inc,v 1.68.2.9 2008/07/25 00:51:53 yched
 #  content_copy.info,v 1.6 2008/04/23 18:01:48 dww
 #  content_permissions.info,v 1.2 2008/04/23 18:01:52 dww
 #  fieldgroup.info,v 1.6 2008/04/23 18:01:58 dww
@@ -14,15 +14,15 @@
 #  optionwidgets.info,v 1.7 2008/04/23 18:02:24 dww
 #  text.info,v 1.9 2008/04/23 18:02:31 dww
 #  userreference.info,v 1.8 2008/04/23 18:02:38 dww
-#  example_field.php,v 1.5.2.2 2008/07/03 12:44:51 yched
+#  example_field.php,v 1.5.2.3 2008/07/25 00:17:21 yched
 #  simple_field.php,v 1.5.2.2 2008/07/03 12:44:51 yched
-#  text.module,v 1.95.2.8 2008/07/11 16:08:48 yched
+#  text.module,v 1.95.2.11 2008/08/08 16:55:43 yched
 #
 #, fuzzy
 msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
-"POT-Creation-Date: 2008-07-16 19:25+0200\n"
+"POT-Creation-Date: 2008-08-10 10:22+0200\n"
 "PO-Revision-Date: YYYY-mm-DD HH:MM+ZZZZ\n"
 "Last-Translator: NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <EMAIL@ADDRESS>\n"
@@ -79,51 +79,71 @@ msgstr ""
 msgid "Control the order of fields in the input form."
 msgstr ""
 
-#: content.module:474
+#: content.module:431
 msgid "This field is required."
 msgstr ""
 
-#: content.module:478
+#: content.module:435
 msgid "!title: !required"
 msgstr ""
 
-#: content.module:481
+#: content.module:438
 msgid "Order"
 msgstr ""
 
-#: content.module:1643
+#: content.module:1609
 msgid "RSS Item"
 msgstr ""
 
-#: content.module:1645
+#: content.module:1611
 msgid "Search Index"
 msgstr ""
 
-#: content.module:1646
+#: content.module:1612
 msgid "Search Result"
 msgstr ""
 
-#: content.module:2000
+#: content.module:1955;1962
+msgid "Node module form."
+msgstr ""
+
+#: content.module:1969
 msgid "Language"
 msgstr ""
 
-#: content.module:2007
-msgid "Menu settings (admin)"
+#: content.module:1970
+msgid "Locale module form."
 msgstr ""
 
-#: content.module:2014
+#: content.module:1976
+msgid "Menu settings"
+msgstr ""
+
+#: content.module:1977
+msgid "Menu module form."
+msgstr ""
+
+#: content.module:1983
 msgid "Taxonomy"
 msgstr ""
 
-#: content.module:2021
+#: content.module:1984
+msgid "Taxonomy module form."
+msgstr ""
+
+#: content.module:1990
 msgid "File attachments"
 msgstr ""
 
-#: content.module:557
+#: content.module:1991
+msgid "Upload module form."
+msgstr ""
+
+#: content.module:513
 msgid "Updating field type %type with module %module."
 msgstr ""
 
-#: content.module:564
+#: content.module:520
 msgid "Updating widget type %type with module %module."
 msgstr ""
 
@@ -151,7 +171,7 @@ msgstr ""
 msgid "Remove field"
 msgstr ""
 
-#: content.info:0 includes/content.views.inc:61;98
+#: content.info:0 includes/content.views.inc:61;102
 msgid "Content"
 msgstr ""
 

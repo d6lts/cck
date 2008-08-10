@@ -3,25 +3,25 @@
 # LANGUAGE translation of Drupal (general)
 # Copyright YEAR NAME <EMAIL@ADDRESS>
 # Generated from files:
-#  content.module,v 1.301.2.23 2008/07/11 00:16:31 yched
-#  nodereference.module,v 1.138.2.17 2008/07/14 14:09:42 yched
-#  content.crud.inc,v 1.76.2.4 2008/07/10 12:49:09 yched
+#  content.module,v 1.301.2.32 2008/08/07 23:07:38 yched
+#  nodereference.module,v 1.138.2.18 2008/08/08 18:01:06 yched
+#  content.crud.inc,v 1.76.2.8 2008/07/27 04:04:14 yched
 #  content_copy.module,v 1.27.2.1 2008/07/09 13:43:15 yched
-#  content.admin.inc,v 1.181.2.22 2008/07/14 14:00:59 yched
-#  example_field.php,v 1.5.2.2 2008/07/03 12:44:51 yched
+#  content.admin.inc,v 1.181.2.28 2008/08/09 17:49:49 yched
+#  example_field.php,v 1.5.2.3 2008/07/25 00:17:21 yched
 #  simple_field.php,v 1.5.2.2 2008/07/03 12:44:51 yched
-#  text.module,v 1.95.2.8 2008/07/11 16:08:48 yched
+#  text.module,v 1.95.2.11 2008/08/08 16:55:43 yched
 #  userreference.module,v 1.106.2.7 2008/07/07 13:15:31 yched
-#  number.module,v 1.91.2.8 2008/07/07 13:15:30 yched
-#  fieldgroup.module,v 1.79.2.7 2008/07/10 12:49:09 yched
-#  content.views.inc,v 1.68.2.8 2008/07/06 16:04:02 yched
+#  number.module,v 1.91.2.10 2008/07/26 15:00:28 yched
+#  fieldgroup.module,v 1.79.2.8 2008/08/08 14:11:10 yched
+#  content.views.inc,v 1.68.2.9 2008/07/25 00:51:53 yched
 #  optionwidgets.module,v 1.69.2.9 2008/07/14 15:02:16 yched
 #
 #, fuzzy
 msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
-"POT-Creation-Date: 2008-07-16 19:25+0200\n"
+"POT-Creation-Date: 2008-08-10 10:22+0200\n"
 "PO-Revision-Date: YYYY-mm-DD HH:MM+ZZZZ\n"
 "Last-Translator: NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <EMAIL@ADDRESS>\n"
@@ -30,15 +30,15 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=INTEGER; plural=EXPRESSION;\n"
 
-#: content.module:1638 modules/nodereference/nodereference.module:217
+#: content.module:1604 modules/nodereference/nodereference.module:217
 msgid "Teaser"
 msgstr ""
 
-#: content.module:1639 modules/nodereference/nodereference.module:212
+#: content.module:1605 modules/nodereference/nodereference.module:212
 msgid "Full node"
 msgstr ""
 
-#: content.module:557;564;0 includes/content.crud.inc:592;630
+#: content.module:513;520;0 includes/content.crud.inc:585;624
 msgid "content"
 msgstr ""
 
@@ -46,7 +46,7 @@ msgstr ""
 msgid "Fields"
 msgstr ""
 
-#: content.module:156 includes/content.admin.inc:532
+#: content.module:156 includes/content.admin.inc:560
 msgid "Add field"
 msgstr ""
 
@@ -74,11 +74,15 @@ msgstr ""
 msgid "Allowed values list"
 msgstr ""
 
-#: examples/example_field.php:182 includes/content.admin.inc:934 modules/number/number.module:137 modules/text/text.module:96
+#: examples/example_field.php:178 modules/number/number.module:133 modules/text/text.module:92
+msgid "The possible values this field can contain. Enter one value per line, in the format key|label. The key is the value that will be stored in the database, and it must match the field storage type (%type). The label is optional, and the key will be used as the label if no label is specified.<br />Allowed HTML tags: @tags"
+msgstr ""
+
+#: examples/example_field.php:182 includes/content.admin.inc:987 modules/number/number.module:137 modules/text/text.module:96
 msgid "PHP code"
 msgstr ""
 
-#: examples/example_field.php:188 includes/content.admin.inc:949;962 modules/number/number.module:144;153 modules/text/text.module:103;112
+#: examples/example_field.php:188 includes/content.admin.inc:1002;1015 modules/number/number.module:144;153 modules/text/text.module:103;112
 msgid "Code"
 msgstr ""
 
@@ -94,7 +98,7 @@ msgstr ""
 msgid "Trimmed"
 msgstr ""
 
-#: examples/example_field.php:476 examples/simple_field.php:400 modules/number/number.module:342 modules/text/text.module:260
+#: examples/example_field.php:476 examples/simple_field.php:400 modules/number/number.module:346 modules/text/text.module:260
 msgid "Text field"
 msgstr ""
 
@@ -110,52 +114,48 @@ msgstr ""
 msgid "Description"
 msgstr ""
 
-#: includes/content.admin.inc:148;164;794 modules/fieldgroup/fieldgroup.module:236
+#: includes/content.admin.inc:149;171;829 modules/fieldgroup/fieldgroup.module:236
 msgid "Remove"
 msgstr ""
 
-#: includes/content.admin.inc:201;408 modules/fieldgroup/fieldgroup.module:110;363
+#: includes/content.admin.inc:210;418 modules/fieldgroup/fieldgroup.module:110;363
 msgid "Save"
 msgstr ""
 
-#: includes/content.admin.inc:212;419;627;854 includes/content.views.inc:308 modules/fieldgroup/fieldgroup.module:121
+#: includes/content.admin.inc:221;429;662;907 includes/content.views.inc:326 modules/fieldgroup/fieldgroup.module:121
 msgid "Label"
 msgstr ""
 
-#: includes/content.admin.inc:794 modules/fieldgroup/fieldgroup.module:236
+#: includes/content.admin.inc:829 modules/fieldgroup/fieldgroup.module:236
 msgid "Cancel"
 msgstr ""
 
-#: includes/content.admin.inc:901 modules/fieldgroup/fieldgroup.module:143
+#: includes/content.admin.inc:954 modules/fieldgroup/fieldgroup.module:143
 msgid "Help text"
 msgstr ""
 
-#: includes/content.admin.inc:963 modules/number/number.module:154 modules/text/text.module:113
+#: includes/content.admin.inc:1016 modules/number/number.module:154 modules/text/text.module:113
 msgid "&lt;none&gt;"
 msgstr ""
 
-#: includes/content.admin.inc:964 modules/number/number.module:155 modules/text/text.module:114
+#: includes/content.admin.inc:1017 modules/number/number.module:155 modules/text/text.module:114
 msgid "You're not allowed to input PHP code."
 msgstr ""
 
-#: modules/nodereference/nodereference.module:305 modules/optionwidgets/optionwidgets.module:79 modules/userreference/userreference.module:198
+#: modules/nodereference/nodereference.module:307 modules/optionwidgets/optionwidgets.module:79 modules/userreference/userreference.module:198
 msgid "Select list"
 msgstr ""
 
-#: modules/nodereference/nodereference.module:313 modules/optionwidgets/optionwidgets.module:87
+#: modules/nodereference/nodereference.module:315 modules/optionwidgets/optionwidgets.module:87
 msgid "Check boxes/radio buttons"
 msgstr ""
 
-#: modules/nodereference/nodereference.module:321 modules/userreference/userreference.module:206
+#: modules/nodereference/nodereference.module:323 modules/userreference/userreference.module:206
 msgid "Autocomplete text field"
 msgstr ""
 
 #: modules/number/number.module:123 modules/text/text.module:82
 msgid "Allowed values"
-msgstr ""
-
-#: modules/number/number.module:133 modules/text/text.module:92
-msgid "The possible values this field can contain. Enter one value per line, in the format key|label. The key is the value that will be stored in the database and it must match the field storage type, %type. The label is optional and the key will be used as the label if no label is specified.<br />Allowed HTML tags: @tags"
 msgstr ""
 
 #: modules/number/number.module:155 modules/text/text.module:114
