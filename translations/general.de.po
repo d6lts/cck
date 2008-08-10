@@ -19,8 +19,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: German translation of CCK\n"
-"POT-Creation-Date: 2008-07-16 19:25+0200\n"
-"PO-Revision-Date: 2008-07-16 19:50+0100\n"
+"POT-Creation-Date: 2008-08-10 10:22+0200\n"
+"PO-Revision-Date: 2008-08-10 10:32+0100\n"
 "Last-Translator: Alexander Hass\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -30,18 +30,18 @@ msgstr ""
 "X-Poedit-Language: German\n"
 "X-Poedit-Country: GERMANY\n"
 
-#: content.module:1638
+#: content.module:1604
 #: modules/nodereference/nodereference.module:217
 msgid "Teaser"
 msgstr "Anrisstext"
 
-#: content.module:1639
+#: content.module:1605
 #: modules/nodereference/nodereference.module:212
 msgid "Full node"
 msgstr "Vollständiger Beitrag"
 
-#: content.module:557;564;0
-#: includes/content.crud.inc:592;630
+#: content.module:513;520;0
+#: includes/content.crud.inc:585;624
 msgid "content"
 msgstr "Inhalt"
 
@@ -51,7 +51,7 @@ msgid "Fields"
 msgstr "Felder"
 
 #: content.module:156
-#: includes/content.admin.inc:532
+#: includes/content.admin.inc:560
 msgid "Add field"
 msgstr "Feld hinzufügen"
 
@@ -90,15 +90,21 @@ msgstr "Die maximale Zeichenlänge des Feldes. Für eine unbegrenzte Länge frei
 msgid "Allowed values list"
 msgstr "Zulässige Werteliste"
 
+#: examples/example_field.php:178
+#: modules/number/number.module:133
+#: modules/text/text.module:92
+msgid "The possible values this field can contain. Enter one value per line, in the format key|label. The key is the value that will be stored in the database, and it must match the field storage type (%type). The label is optional, and the key will be used as the label if no label is specified.<br />Allowed HTML tags: @tags"
+msgstr "Die möglichen Werte, die dieses Feld enthalten kann. Geben Sie pro Zeile einen Wert im Format „Schlüssel|Bezeichnung“ ein. Der Schüssel ist der Wert, welcher in der Datenbank gespeichert wird und muss dem Datentyp (%type) des Feldes entsprechen. Der Schlüssel wird als Bezeichnung verwendet, wenn die optionale Bezeichnung nicht angegeben wird.<br />Zulässige HTML-Tags: @tags"
+
 #: examples/example_field.php:182
-#: includes/content.admin.inc:934
+#: includes/content.admin.inc:987
 #: modules/number/number.module:137
 #: modules/text/text.module:96
 msgid "PHP code"
 msgstr "PHP-Code"
 
 #: examples/example_field.php:188
-#: includes/content.admin.inc:949;962
+#: includes/content.admin.inc:1002;1015
 #: modules/number/number.module:144;153
 #: modules/text/text.module:103;112
 msgid "Code"
@@ -124,7 +130,7 @@ msgstr "Getrimmt"
 
 #: examples/example_field.php:476
 #: examples/simple_field.php:400
-#: modules/number/number.module:342
+#: modules/number/number.module:346
 #: modules/text/text.module:260
 msgid "Text field"
 msgstr "Textfeld"
@@ -146,56 +152,56 @@ msgstr "„Zeilen“ müssen eine positive Zahl sein."
 msgid "Description"
 msgstr "Beschreibung"
 
-#: includes/content.admin.inc:148;164;794
+#: includes/content.admin.inc:149;171;829
 #: modules/fieldgroup/fieldgroup.module:236
 msgid "Remove"
 msgstr "Entfernen"
 
-#: includes/content.admin.inc:201;408
+#: includes/content.admin.inc:210;418
 #: modules/fieldgroup/fieldgroup.module:110;363
 msgid "Save"
 msgstr "Speichern"
 
-#: includes/content.admin.inc:212;419;627;854
-#: includes/content.views.inc:308
+#: includes/content.admin.inc:221;429;662;907
+#: includes/content.views.inc:326
 #: modules/fieldgroup/fieldgroup.module:121
 msgid "Label"
 msgstr "Bezeichnung"
 
-#: includes/content.admin.inc:794
+#: includes/content.admin.inc:829
 #: modules/fieldgroup/fieldgroup.module:236
 msgid "Cancel"
 msgstr "Abbrechen"
 
-#: includes/content.admin.inc:901
+#: includes/content.admin.inc:954
 #: modules/fieldgroup/fieldgroup.module:143
 msgid "Help text"
 msgstr "Hilfetext"
 
-#: includes/content.admin.inc:963
+#: includes/content.admin.inc:1016
 #: modules/number/number.module:154
 #: modules/text/text.module:113
 msgid "&lt;none&gt;"
 msgstr "&lt;Keine&gt;"
 
-#: includes/content.admin.inc:964
+#: includes/content.admin.inc:1017
 #: modules/number/number.module:155
 #: modules/text/text.module:114
 msgid "You're not allowed to input PHP code."
 msgstr "Keine Berechtigung zur Eingabe von PHP-Code vorhanden."
 
-#: modules/nodereference/nodereference.module:305
+#: modules/nodereference/nodereference.module:307
 #: modules/optionwidgets/optionwidgets.module:79
 #: modules/userreference/userreference.module:198
 msgid "Select list"
 msgstr "Auswahlliste"
 
-#: modules/nodereference/nodereference.module:313
+#: modules/nodereference/nodereference.module:315
 #: modules/optionwidgets/optionwidgets.module:87
 msgid "Check boxes/radio buttons"
 msgstr "Ankreuzfelder/Auswahlknöpfe"
 
-#: modules/nodereference/nodereference.module:321
+#: modules/nodereference/nodereference.module:323
 #: modules/userreference/userreference.module:206
 msgid "Autocomplete text field"
 msgstr "Textfeld mit Autovervollständigung"
@@ -204,11 +210,6 @@ msgstr "Textfeld mit Autovervollständigung"
 #: modules/text/text.module:82
 msgid "Allowed values"
 msgstr "Zulässige Werte"
-
-#: modules/number/number.module:133
-#: modules/text/text.module:92
-msgid "The possible values this field can contain. Enter one value per line, in the format key|label. The key is the value that will be stored in the database and it must match the field storage type, %type. The label is optional and the key will be used as the label if no label is specified.<br />Allowed HTML tags: @tags"
-msgstr "Die möglichen Werte, die dieses Feld enthalten kann. Geben Sie pro Zeile einen Wert im Format „Schlüssel|Bezeichnung“ ein. Der Schüssel ist der Wert, welcher in der Datenbank gespeichert wird und muss dem Datentyp %type des Feldes entsprechen. Der Schlüssel wird als Bezeichnung verwendet, wenn die optionale Bezeichnung nicht angegeben wird.<br />Zulässige HTML-Tags: @tags"
 
 #: modules/number/number.module:155
 #: modules/text/text.module:114
@@ -219,9 +220,4 @@ msgstr "Dieser PHP-Code wurde von einem Administrator festgelegt und wird die ob
 #: modules/text/text.module:161
 msgid "%name: illegal value."
 msgstr "%name: ungültiger Wert."
-
-#~ msgid "Illegal value for %name."
-#~ msgstr "Ungültiger Wert für %name."
-#~ msgid "none"
-#~ msgstr "Keine"
 

@@ -16,8 +16,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: German translation of CCK\n"
-"POT-Creation-Date: 2008-07-16 19:25+0200\n"
-"PO-Revision-Date: 2008-07-16 19:35+0100\n"
+"POT-Creation-Date: 2008-08-10 10:22+0200\n"
+"PO-Revision-Date: 2008-08-10 10:28+0100\n"
 "Last-Translator: Alexander Hass\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -27,10 +27,6 @@ msgstr ""
 "X-Poedit-Language: German\n"
 "X-Poedit-Country: GERMANY\n"
 "X-Poedit-SourceCharset: utf-8\n"
-
-#: examples/example_field.php:178
-msgid "The possible values this field can contain. Enter one value per line, in the format key|label. The key is the value that will be stored in the database and it must match the field storage type, %type. The label is optional and the key will be used as the label if no label is specified."
-msgstr "Die möglichen Werte, welche dieses Feld enthalten kann. Einen Wert pro Zeile im Format Schlüssel|Beschriftung eingeben. Der Schlüssel ist der in der Datenbank gespeicherte Wert und muss dem Feldspeichertyp %type entsprechen. Der Schlüssel wird als Beschriftung verwendet, wenn die optionale Beschriftung nicht angegeben wurde."
 
 #: examples/example_field.php:278
 msgid "Illegal value for %name."

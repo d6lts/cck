@@ -16,8 +16,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: German translation of CCK\n"
-"POT-Creation-Date: 2008-07-16 19:25+0200\n"
-"PO-Revision-Date: 2008-07-16 20:15+0100\n"
+"POT-Creation-Date: 2008-08-10 10:22+0200\n"
+"PO-Revision-Date: 2008-08-10 11:17+0100\n"
 "Last-Translator: Alexander Hass\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -120,15 +120,15 @@ msgstr "%name: Der Wert darf nicht grösser als %max sein."
 msgid "unformatted"
 msgstr "unformatiert"
 
-#: modules/number/number.module:493
+#: modules/number/number.module:497
 msgid "Only numbers and decimals are allowed in %field. %start was changed to %value."
 msgstr "In %field sind nur Dezimalzahlen zulässig. %start wurde auf %value geändert."
 
-#: modules/number/number.module:515
+#: modules/number/number.module:519
 msgid "Only numbers are allowed in %field. %start was changed to %value."
 msgstr "In %field sind nur Zahlen zulässig. %start wurde auf %value geändert."
 
-#: modules/number/number.module:538
+#: modules/number/number.module:542
 msgid "Only numbers and the decimal character (%decimal) are allowed in %field. %start was changed to %value."
 msgstr "In %field sind nur Zahlen und das Dezimaltrennzeichen (%decimal) zulässig. %start wurde auf %value geändert."
 

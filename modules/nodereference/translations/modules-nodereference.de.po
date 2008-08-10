@@ -16,8 +16,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: German translation of CCK\n"
-"POT-Creation-Date: 2008-07-16 19:25+0200\n"
-"PO-Revision-Date: 2008-07-16 20:12+0100\n"
+"POT-Creation-Date: 2008-08-10 10:22+0200\n"
+"PO-Revision-Date: 2008-08-10 11:16+0100\n"
 "Last-Translator: Alexander Hass\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -27,22 +27,6 @@ msgstr ""
 "X-Poedit-Language: German\n"
 "X-Poedit-Country: GERMANY\n"
 "X-Poedit-SourceCharset: utf-8\n"
-
-#: modules/nodereference/nodereference.views.inc:14
-msgid "Simple"
-msgstr "Einfach"
-
-#: modules/nodereference/nodereference.views.inc:15
-msgid "Destination-agnostic display. Mostly useful for programmatic views."
-msgstr ""
-
-#: modules/nodereference/nodereference.views.inc:26
-msgid "Results array"
-msgstr "Ergebnisarray"
-
-#: modules/nodereference/nodereference.views.inc:27
-msgid "Returns the view as a PHP array of titles + renderd rows."
-msgstr "Gibt die Ansicht als PHP-Array von Titeln + gerenderten Zeilen zurück."
 
 #: modules/nodereference/nodereference.module:68
 msgid "Node reference"
@@ -97,11 +81,11 @@ msgstr "Titel (Verweis)"
 msgid "Title (no link)"
 msgstr "Titel (kein Verweis)"
 
-#: modules/nodereference/nodereference.module:581
+#: modules/nodereference/nodereference.module:583
 msgid "%name: title mismatch. Please check your selection."
 msgstr "%name: Titel falsch. Bitte die Auswahl überprüfen."
 
-#: modules/nodereference/nodereference.module:588
+#: modules/nodereference/nodereference.module:590
 msgid "%name: found no valid post with that title."
 msgstr "%name: Kein gültiger Beitrag mit diesem Titel gefunden."
 
@@ -120,4 +104,12 @@ msgstr "Beitragsverweis"
 #: modules/nodereference/nodereference.info:0
 msgid "Defines a field type for referencing one node from another."
 msgstr "Definiert einen Feldtyp für den Verweis von einem Beitrag zu einem anderen."
+
+#~ msgid "Simple"
+#~ msgstr "Einfach"
+#~ msgid "Results array"
+#~ msgstr "Ergebnisarray"
+#~ msgid "Returns the view as a PHP array of titles + renderd rows."
+#~ msgstr ""
+#~ "Gibt die Ansicht als PHP-Array von Titeln + gerenderten Zeilen zurück."
 
