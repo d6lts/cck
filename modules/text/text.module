@@ -311,22 +311,32 @@ function text_widget_settings($op, $widget) {
   switch ($op) {
     case 'form':
       $form = array();
+      $rows = (isset($widget['rows']) && is_numeric($widget['rows'])) ? $widget['rows'] : 5;
+      $size = (isset($widget['size']) && is_numeric($widget['size'])) ? $widget['size'] : 60;
       if ($widget['type'] == 'text_textfield') {
-        $form['rows'] = array('#type' => 'hidden', '#value' => 1);
+        $form['rows'] = array('#type' => 'hidden', '#value' => $rows);
+        $form['size'] = array(
+          '#type' => 'textfield',
+          '#title' => t('Size of textfield'),
+          '#default_value' => $size,
+          '#element_validate' => array('_text_widget_settings_size_validate'),
+          '#required' => TRUE,
+        );
       }
       else {
         $form['rows'] = array(
           '#type' => 'textfield',
           '#title' => t('Rows'),
-          '#default_value' => is_numeric($widget['rows']) ? $widget['rows'] : 5,
+          '#default_value' => $rows,
           '#element_validate' => array('_text_widget_settings_row_validate'),
           '#required' => TRUE,
         );
+        $form['size'] = array('#type' => 'hidden', '#value' => $size);
       }
       return $form;
 
     case 'save':
-      return array('rows');
+      return array('rows', 'size');
   }
 }
 
@@ -334,6 +344,13 @@ function _text_widget_settings_row_validate($element, &$form_state) {
   $value = $form_state['values']['rows'];
   if (!is_numeric($value) || intval($value) != $value || $value <= 0) {
     form_error($element, t('"Rows" must be a positive integer.'));
+  }
+}
+
+function _text_widget_settings_size_validate($element, &$form_state) {
+  $value = $form_state['values']['size'];
+  if (!is_numeric($value) || intval($value) != $value || $value <= 0) {
+    form_error($element, t('"Size" must be a positive integer.'));
   }
 }
 
@@ -392,6 +409,8 @@ function text_textfield_process($element, $edit, $form_state, $form) {
     '#type' => 'textfield',
     '#default_value' => isset($element['#value'][$field_key]) ? $element['#value'][$field_key] : NULL,
     '#autocomplete_path' => $element['#autocomplete_path'],
+    '#size' => !empty($field['widget']['size']) ? $field['widget']['size'] : 60,
+    '#attributes' => array('class' => 'text'),
     // The following values were set by the content module and need
     // to be passed down to the nested element.
     '#title' => $element['#title'],
