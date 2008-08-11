@@ -122,6 +122,9 @@ function text_field_info() {
  *   The operation to be performed. Possible values:
  *   - "form": Display the field settings form.
  *   - "validate": Check the field settings form for errors.
+ *     Note : That operation is currently still supported, but will be
+ *     deprecated at some point.
+ *     It is recommended to use Forms API validation instead.
  *   - "save": Declare which fields to save back to the database.
  *   - "database columns": Declare the columns that content.module should create
  *     and manage on behalf of the field. If the field module wishes to handle
@@ -529,6 +532,9 @@ function text_elements() {
  *   The operation to be performed. Possible values:
  *   - "form": Display the widget settings form.
  *   - "validate": Check the widget settings form for errors.
+ *     Note : That operation is currently still supported, but will be
+ *     deprecated at some point.
+ *     It is recommended to use Forms API validation instead.
  *   - "save": Declare which pieces of information to save back to the database.
  * @param $widget
  *   The widget on which the operation is to be performed.
@@ -550,19 +556,34 @@ function text_widget_settings($op, $widget) {
           '#type' => 'textfield',
           '#title' => t('Rows'),
           '#default_value' => is_numeric($widget['rows']) ? $widget['rows'] : 5,
+          '#element_validate' => array('_text_widget_settings_row_validate'),
           '#required' => TRUE,
         );
       }
       return $form;
 
+    // It is advised to use FAPI-level validation instead
+    // (see '#element_validate' on op 'form' above).
+    /*
     case 'validate':
       if (!is_numeric($widget['rows']) || intval($widget['rows']) != $widget['rows'] || $widget['rows'] <= 0) {
         form_set_error('rows', t('"Rows" must be a positive integer.'));
       }
       break;
+    */
 
     case 'save':
       return array('rows');
+  }
+}
+
+/**
+ * FAPI validator for the 'rows' widget-setting.
+ */
+function _text_widget_settings_row_validate($element, &$form_state) {
+  $value = $form_state['values']['rows'];
+  if (!is_numeric($value) || intval($value) != $value || $value <= 0) {
+    form_error($element, t('"Rows" must be a positive integer.'));
   }
 }
 

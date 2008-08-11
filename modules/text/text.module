@@ -319,19 +319,21 @@ function text_widget_settings($op, $widget) {
           '#type' => 'textfield',
           '#title' => t('Rows'),
           '#default_value' => is_numeric($widget['rows']) ? $widget['rows'] : 5,
+          '#element_validate' => array('_text_widget_settings_row_validate'),
           '#required' => TRUE,
         );
       }
       return $form;
 
-    case 'validate':
-      if (!is_numeric($widget['rows']) || intval($widget['rows']) != $widget['rows'] || $widget['rows'] <= 0) {
-        form_set_error('rows', t('"Rows" must be a positive integer.'));
-      }
-      break;
-
     case 'save':
       return array('rows');
+  }
+}
+
+function _text_widget_settings_row_validate($element, &$form_state) {
+  $value = $form_state['values']['rows'];
+  if (!is_numeric($value) || intval($value) != $value || $value <= 0) {
+    form_error($element, t('"Rows" must be a positive integer.'));
   }
 }
 

@@ -198,6 +198,9 @@ function text_field_settings($op, $field) {
  *   - "validate": The user has just finished editing the node and is
  *     trying to preview or submit it. This hook can be used to check or
  *     even modify the node. Errors should be set with form_set_error().
+ *     Note : That operation is currently still supported, but will be
+ *     deprecated at some point.
+ *     It is recommended to use Forms API validation instead.
  *   - "presave": The user has just finished editing the node and the node has
  *     passed validation. This hook can be used to modify the node.
  *   - "insert": The node is being created (inserted in the database).
@@ -412,6 +415,9 @@ function text_widget_info() {
  *   The operation to be performed. Possible values:
  *   - "form": Display the widget settings form.
  *   - "validate": Check the widget settings form for errors.
+ *     Note : That operation is currently still supported, but will be
+ *     deprecated at some point.
+ *     It is recommended to use Forms API validation instead.
  *   - "save": Declare which pieces of information to save back to the database.
  * @param $widget
  *   The widget on which the operation is to be performed.
@@ -433,14 +439,28 @@ function text_widget_settings($op, $widget) {
       );
       return $form;
 
+    // It is advised to use FAPI-level validation instead
+    // (see '#element_validate' on op 'form' above).
+    /*
     case 'validate':
       if (!is_numeric($widget['rows']) || intval($widget['rows']) != $widget['rows'] || $widget['rows'] <= 0) {
         form_set_error('rows', t('"Rows" must be a positive integer.'));
       }
       break;
+    */
 
     case 'save':
       return array('rows');
+  }
+}
+
+/**
+ * FAPI validator for the 'rows' widget-setting.
+ */
+function _text_widget_settings_row_validate($element, &$form_state) {
+  $value = $form_state['values']['rows'];
+  if (!is_numeric($value) || intval($value) != $value || $value <= 0) {
+    form_error($element, t('"Rows" must be a positive integer.'));
   }
 }
 

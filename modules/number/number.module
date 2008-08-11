@@ -74,11 +74,13 @@ function number_field_settings($op, $field) {
       $form['min'] = array(
         '#type' => 'textfield',
         '#title' => t('Minimum'),
+        '#element_validate' => array('_number_widget_settings_min_validate'),
         '#default_value' => is_numeric($field['min']) ? $field['min'] : '',
       );
       $form['max'] = array(
         '#type' => 'textfield',
         '#title' => t('Maximum'),
+        '#element_validate' => array('_number_widget_settings_max_validate'),
         '#default_value' => is_numeric($field['max']) ? $field['max'] : '',
       );
       if ($field['type'] == 'number_decimal') {
@@ -157,15 +159,6 @@ function number_field_settings($op, $field) {
       }
       return $form;
 
-    case 'validate':
-      if ($field['min'] && !is_numeric($field['min'])) {
-        form_set_error('min', t('"Minimum" must be a number.'));
-      }
-      if ($field['max'] && !is_numeric($field['max'])) {
-        form_set_error('max', t('"Maximum" must be a number.'));
-      }
-      break;
-
     case 'save':
       $values = array('prefix', 'suffix', 'min', 'max', 'allowed_values', 'allowed_values_php');
       if ($field['type'] == 'number_decimal') {
@@ -204,6 +197,20 @@ function number_field_settings($op, $field) {
         return $data;
       }
       break;
+  }
+}
+
+function _number_widget_settings_min_validate($element, &$form_state) {
+  $value = $form_state['values']['min'];
+  if ($value && !is_numeric($value)) {
+    form_set_error('min', t('"Minimum" must be a number.'));
+  }
+}
+
+function _number_widget_settings_max_validate($element, &$form_state) {
+  $value = $form_state['values']['max'];
+  if ($value && !is_numeric($value)) {
+    form_set_error('max', t('"Maximum" must be a number.'));
   }
 }
 

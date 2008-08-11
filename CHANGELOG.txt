@@ -35,6 +35,8 @@ This release requires a visit to update.php to update the database.
 - #289138 by dopry: Add support for 'locked' fields (for module-defined fields).
 - Display field type human names instead of machine names on 'Manage Fields' and 'Fields' overview pages.
 - #292884 Better help text for field template suggestions.
+- #293163 Use FAPI validation instead of field|widget_settings($op 'validate').
+          (the 'validate' op is still supported, though)
 
 CCK 6.2.rc4
 ===========
