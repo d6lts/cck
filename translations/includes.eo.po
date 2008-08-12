@@ -1,0 +1,404 @@
+# $Id$
+# 
+# Esperanto translation of Drupal (includes)
+# Copyright 2008 Chuck Smith <chuck@chucksmith.de>
+# Generated from files:
+# content.admin.inc,v 1.172 2008/04/23 22:26:09 karens
+# content.crud.inc,v 1.73 2008/04/23 19:00:12 karens
+# content.node_form.inc,v 1.6 2008/04/23 18:01:39 dww
+# content.token.inc,v 1.4 2008/04/23 18:01:41 dww
+# content.views.inc,v 1.63 2008/04/23 18:01:44 dww
+# 
+msgid ""
+""
+msgstr "Project-Id-Version: PROJECT VERSION\n"
+"POT-Creation-Date: 2008-04-24 19:53+0200\n"
+"PO-Revision-Date: 2008-08-12 HH:MM+ZZZZ\n"
+"Last-Translator: Chuck Smith <chuck@chucksmith.de>\n"
+"Language-Team: Esperanto <chuck@chucksmith.de>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=INTEGER; plural=EXPRESSION;\n"
+
+#: includes/content.admin.inc:15
+msgid "Field name"
+msgstr "Nomo de kampo"
+
+#: includes/content.admin.inc:15
+msgid "Field type"
+msgstr "Speco de kampo"
+
+#: includes/content.admin.inc:15
+msgid "Used in"
+msgstr "Uzata en"
+
+#: includes/content.admin.inc:38
+msgid "No fields have been defined for any content type yet."
+msgstr "Neniuj kampoj estis jam difinitaj por ajna enhavspeco."
+
+#: includes/content.admin.inc:63
+msgid "There are no fields configured for this content type. You can !link."
+msgstr "Neniuj kampoj estas agorditaj por ĉi tiu enhavspeco. Vi povas !link."
+
+#: includes/content.admin.inc:64
+msgid "Add a new field"
+msgstr "Aldoni novan kampon"
+
+#: includes/content.admin.inc:88
+msgid "To change the order of a field, grab a drag-and-drop handle under the Label column and drag the field to a new location in the list. (Grab a handle by clicking and holding the mouse while hovering over a handle icon.) Remember that your changes will not be saved until you click the Save button at the bottom of the page."
+msgstr "Por ŝanĝi la sinsekvon de kampo, prenu la tenilon sub la Enketa kolumno kaj trenu la kampon al nova loko en la listo. (Prenu la tenilon per klakado kaj tenado de la muso dum ĝi superas la tenilan ikonon.) Memoru ke viaj ŝanĝoj ne konserviĝos ĝis kiam vi klakos la butonon de Konservu sube de la paĝo. "
+
+#: includes/content.admin.inc:98
+msgid "Configure"
+msgstr "Agordi"
+
+#: includes/content.admin.inc:163
+msgid "Name"
+msgstr "Nomo"
+
+#: includes/content.admin.inc:163
+msgid "Type"
+msgstr "Speco"
+
+#: includes/content.admin.inc:163
+msgid "Weight"
+msgstr "Pezo"
+
+#: includes/content.admin.inc:163
+msgid "Operations"
+msgstr "Operacioj"
+
+#: includes/content.admin.inc:270
+msgid "Above"
+msgstr "Super"
+
+#: includes/content.admin.inc:271
+msgid "Inline"
+msgstr "Enteksta"
+
+#: includes/content.admin.inc:272
+msgid "<Hidden>"
+msgstr "<Hidden>"
+
+#: includes/content.admin.inc:315
+msgid "no styling"
+msgstr "neniu stilado"
+
+#: includes/content.admin.inc:316
+msgid "simple"
+msgstr "simpla"
+
+#: includes/content.admin.inc:317
+msgid "fieldset"
+msgstr "kamparo"
+
+#: includes/content.admin.inc:318
+msgid "fieldset - collapsible"
+msgstr "kamparo - maletendebla"
+
+#: includes/content.admin.inc:319
+msgid "fieldset - collapsed"
+msgstr "kamparo - maletendita"
+
+#: includes/content.admin.inc:364
+msgid "Field"
+msgstr "Kampo"
+
+#: includes/content.admin.inc:411
+msgid "Your settings have been saved."
+msgstr "Viaj agordoj estas konservitaj."
+
+#: includes/content.admin.inc:441
+msgid "Add existing field"
+msgstr "Aldoni ekzistantan kampon"
+
+#: includes/content.admin.inc:475
+msgid "Create new field"
+msgstr "Krei novan kampon"
+
+#: includes/content.admin.inc:482
+msgid "The machine-readable name of the field. This name cannot be changed later! The name will be prefixed with 'field_' and can include lowercase unaccented letters, numbers, and underscores. You'll be able to choose a human-readable label for the field on next page."
+msgstr "La maŝin-legebla nomo de la kampo. Ĉi tiu nomo ne povas esti poste ŝanĝita! La nomo estas prefiksita kun 'field_' kaj povas inkluzivi minusklajn nesupersignajn literojn, ciferojn kaj substrekoj. Vi povos elekti hom-legeblan etikedon por la kampo en la venonta paĝo. "
+
+#: includes/content.admin.inc:496
+msgid "Continue"
+msgstr "Daŭrigi"
+
+#: includes/content.admin.inc:504
+msgid "No field modules are enabled. You need to <a href=\"!modules_url\">enable one</a>, such as text.module, before you can add new fields."
+msgstr "Neniuj kampaj moduloj estas ŝaltitaj. Vi devas <a href=\"modules_url\">ŝalti ion</a>, kiel text.module, antaŭ ol vi povas aldoni novajn kampojn."
+
+#: includes/content.admin.inc:514
+msgid "Choose the type of value to store and an input method from the list below."
+msgstr "Elektu la specon de valoro por konservi kaj enmetan metodon de la listo sube."
+
+#: includes/content.admin.inc:538
+msgid "Added field %label."
+msgstr "Aldonita etikedo %label."
+
+#: includes/content.admin.inc:541
+msgid "There was a problem adding field %label."
+msgstr "Estis problemo aldonante la kampon %label."
+
+#: includes/content.admin.inc:557
+msgid "The field name %field_name is invalid. The name must include only lowercase unaccentuated letters, numbers, and underscores."
+msgstr "La kampa nomo %field_name ne validas. La nomo rajtas inkluzivi nur minusklajn nesupersignajn literojn, ciferojn kaj substrekojn."
+
+#: includes/content.admin.inc:561
+msgid "The field name %field_name already exists."
+msgstr "La kampa nomo %field_name jam ekzistas."
+
+#: includes/content.admin.inc:565
+msgid "The name 'field_instance' is a reserved name."
+msgstr "La nomo 'field_instance' estas rezervita nomo."
+
+#: includes/content.admin.inc:582
+msgid "Created field %label."
+msgstr "Kreis kampo %label."
+
+#: includes/content.admin.inc:586
+msgid "There was a problem creating field %label."
+msgstr "Estis problemo krei kampon %label."
+
+#: includes/content.admin.inc:612
+msgid "Are you sure you want to remove the field %field?"
+msgstr "Ĉu vi certas ke vi volas forigi la kampon %field?"
+
+#: includes/content.admin.inc:615
+msgid "If you have any content left in this field, it will be lost. This action cannot be undone."
+msgstr "Se vi havas enhavon maldesktre de ĉi tiu kampo, ĝi estos perdita. Tiu ago ne povas esti malfarata."
+
+#: includes/content.admin.inc:634
+msgid "Removed field %field from %type."
+msgstr "Forigis kampon %field de %type."
+
+#: includes/content.admin.inc:639
+msgid "There was a problem deleting %field from %type."
+msgstr "Estis problemo forigi %field de %type."
+
+#: includes/content.admin.inc:664
+msgid "%type settings"
+msgstr "%type agordoj"
+
+#: includes/content.admin.inc:665
+msgid "These settings apply only to the %field field as it appears in the %type content type."
+msgstr "Ĉi tiuj agordoj aplikiĝas nur al la kampo de %field kiel ĝi aperas en la enhavspeco %type."
+
+#: includes/content.admin.inc:681
+msgid "Widget"
+msgstr "Fenestraĵo"
+
+#: includes/content.admin.inc:705
+msgid "Instructions to present to the user below this field on the editing form."
+msgstr "Instrukcioj por prezenti al la uzanto sube de ĉi tiu kampo en la redakta formularo."
+
+#: includes/content.admin.inc:713
+msgid "Default value"
+msgstr "Defaŭlta valoro"
+
+#: includes/content.admin.inc:757
+msgid "Advanced usage only: PHP code that returns a default value. Should not include &lt;?php ?&gt; delimiters. If this field is filled out, the value returned by this code will override any value specified above. Expected format :<pre>!sample</pre>Using !link_devel's 'devel load' tab on a %type content page might help you figure out the expected format."
+msgstr "Nur por spertuloj: PHP-kodo kiu revenigas defaŭltan valoron. Devas ne inkluzivi $lt;?php ?&gt; disigilojn. Se ĉi tiu kampo estas plenumita, la voloro revenita de la kodo anstataŭigos valoron jam specifita. Atendita formato: <pre>!sample</pre> Uzante la 'devel load' langeto de !link_devel ĉe enhava paĝo de %type devas helpi al vi ekkompreni la atenditan formaton."
+
+#: includes/content.admin.inc:766
+msgid "Global settings"
+msgstr "Ĝeneralaj agordoj"
+
+#: includes/content.admin.inc:767
+msgid "These settings apply to the %field field in every content type in which it appears."
+msgstr "Ĉi tiuj agordoj aplikiĝas al la kampo %field en ĉiu enhavspeco en kiu ĝi aperas."
+
+#: includes/content.admin.inc:771
+msgid "Required"
+msgstr "Bezonata"
+
+#: includes/content.admin.inc:776
+msgid "Number of values"
+msgstr "Nombro da valoroj"
+
+#: includes/content.admin.inc:777
+msgid "Unlimited"
+msgstr "Senlima"
+
+#: includes/content.admin.inc:779
+msgid "Select a specific number of values for this field, or 'Unlimited' to provide an 'Add more' button so the users can add as many values as they like."
+msgstr "Elektu specifan nombron da valoroj por ĉi tiu kampo, aŭ 'Senlima' por provizi butonon de 'Aldoni pli' por ke uzantoj povas aldoni tiel multe da valoroj kiel ili volas."
+
+#: includes/content.admin.inc:779
+msgid "Warning! Changing this setting after data has been created could result in the loss of data!"
+msgstr "Averto! Ŝanĝi ĉi tiun agordon post kiam datumoj kreiĝis, povas rezulti en la perdo de datumoj!"
+
+#: includes/content.admin.inc:794
+msgid "Save field settings"
+msgstr "Konservi kamp-agordojn"
+
+#: includes/content.admin.inc:880
+msgid "The default value PHP code returned an incorrect value.<br/>Expected format: <pre>!sample</pre> Returned value: @value"
+msgstr "La defaŭlta valoro de PHP-kodo revenigis neĝustan valoron.<br />Atendita formato: <pre>!sample</pre> Revenigis valoron: @value"
+
+#: includes/content.admin.inc:917
+msgid "The default value PHP code created @value which is invalid."
+msgstr "La defaŭlta valoro kiun PHP-kodo kreis @value kiu ne validas."
+
+#: includes/content.admin.inc:921
+msgid "The default value is invalid."
+msgstr "La defaŭlta valoro ne validas."
+
+#: includes/content.admin.inc:942
+msgid "Saved field %label."
+msgstr "Konservis kampon %label."
+
+#: includes/content.admin.inc:1250
+msgid "Processing"
+msgstr "Traktante"
+
+#: includes/content.admin.inc:1251
+msgid "The update has encountered an error."
+msgstr "Okazis eraro dum ĝisdatigo."
+
+#: includes/content.admin.inc:1265
+msgid "The database has been altered and data has been migrated or deleted."
+msgstr "La datumbazo estis ŝanĝita kaj datumoj estis movitaj aŭ forigitaj."
+
+#: includes/content.admin.inc:1268
+msgid "An error occurred and database alteration did not complete."
+msgstr "Eraro okazis kaj datumbaza ŝanĝiĝo ne finiĝis."
+
+#: includes/content.admin.inc:1371
+msgid "Processing %title"
+msgstr "Traktante %title"
+
+#: includes/content.admin.inc:1269
+msgid "1 item successfully processed:"
+msgid_plural "@count items successfully processed:"
+msgstr[0] "1 ero sukcese traktita:"
+msgstr[1] "@count eroj sukcese traktitaj:"
+
+#: includes/content.crud.inc:562
+msgid "Content fields table %old_name has been renamed to %new_name and field instances have been updated."
+msgstr "Tabelo de enhavkampoj %old_name estis renomita al %new_name kaj kampaj aperoj ĝisdatiĝis."
+
+#: includes/content.crud.inc:592
+msgid "The content fields table %name has been deleted."
+msgstr "La tabelo de enhavkampoj %name estis forigita."
+
+#: includes/content.node_form.inc:194
+msgid "Add another !field value"
+msgstr "Aldoni alian valoron de !field"
+
+#: includes/content.node_form.inc:195
+msgid "If the amount of boxes above isn't enough, click here to add more items."
+msgstr "Se la kvanto da skatoloj supre ne sufiĉas, klaku ĉi tie por aldoni pli da eroj."
+
+#: includes/content.token.inc:60
+msgid "Referenced node ID"
+msgstr "Referenca noda ID"
+
+#: includes/content.token.inc:61
+msgid "Referenced node title"
+msgstr "Referenca noda titolo"
+
+#: includes/content.token.inc:62
+msgid "Formatted HTML link to the node"
+msgstr "Formatita HTML-ligilo al la nodo"
+
+#: includes/content.token.inc:86
+msgid "Raw number value"
+msgstr "Neformatita numera valoro"
+
+#: includes/content.token.inc:87
+msgid "Formatted number value"
+msgstr "Formatita numera valoro"
+
+#: includes/content.token.inc:110
+msgid "Raw, unfiltered text"
+msgstr "Neformatita, nefiltrita teksto"
+
+#: includes/content.token.inc:111
+msgid "Formatted and filtered text"
+msgstr "Formatita kaj filtrita teksto"
+
+#: includes/content.token.inc:133
+msgid "Referenced user ID"
+msgstr "ID de uzanto"
+
+#: includes/content.token.inc:134
+msgid "Referenced user name"
+msgstr "Referenca uzantnomo"
+
+#: includes/content.token.inc:135
+msgid "Formatted HTML link to referenced user"
+msgstr "Formatita HTML-ligilo al referenca uzanto"
+
+#: includes/content.token.inc:162
+msgid "Link URL"
+msgstr "Ligila URL"
+
+#: includes/content.token.inc:163
+msgid "Link title"
+msgstr "Ligila titolo"
+
+#: includes/content.token.inc:164
+msgid "Formatted HTML link"
+msgstr "Formatita HTML-ligilo"
+
+#: includes/content.token.inc:188
+msgid "Image file ID"
+msgstr "Bilda dosiera ID"
+
+#: includes/content.token.inc:189
+msgid "Image title"
+msgstr "Bilda titolo"
+
+#: includes/content.token.inc:190
+msgid "Image alt text"
+msgstr "Bilda alt-teksto"
+
+#: includes/content.token.inc:191
+msgid "Image file name"
+msgstr "Bilda dosiera nomo"
+
+#: includes/content.token.inc:192
+msgid "Image path"
+msgstr "Bilda vojo"
+
+#: includes/content.token.inc:193
+msgid "Image MIME type"
+msgstr "Bilda MIME-speco"
+
+#: includes/content.token.inc:194
+msgid "Image file size"
+msgstr "Bilda dosiera grandeco"
+
+#: includes/content.token.inc:195
+msgid "Fully formatted HTML image tag"
+msgstr "Plene formatita HTML bilda enketo"
+
+#: includes/content.views.inc:96
+msgid "Appears in : @types"
+msgstr "Aperis en : @types"
+
+#: includes/content.views.inc:306
+msgid "Format"
+msgstr "Formato"
+
+#: includes/content.views.inc:379
+msgid "Group multiple values"
+msgstr "Grupigi multajn valorojn"
+
+#: includes/content.views.inc:386
+msgid "Show"
+msgstr "Montri"
+
+#: includes/content.views.inc:387
+msgid " values,"
+msgstr "valorojn,"
+
+#: includes/content.views.inc:394
+msgid "Starting from"
+msgstr "Komencante de"
+
+#: includes/content.views.inc:398
+msgid "Start from last values"
+msgstr "Komencu de lastaj valoroj"

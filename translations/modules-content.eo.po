@@ -1,0 +1,173 @@
+# $Id$
+# 
+# Esperanto translation of Drupal (root)
+# Copyright 2008 Chuck Smith <chuck@chucksmith.de>
+# Generated from files:
+# content.module,v 1.289 2008/04/23 22:32:59 karens
+# content.info,v 1.6 2007/07/04 23:46:29 yched
+# content_copy.info,v 1.6 2008/04/23 18:01:48 dww
+# content_permissions.info,v 1.2 2008/04/23 18:01:52 dww
+# fieldgroup.info,v 1.6 2008/04/23 18:01:58 dww
+# nodereference.info,v 1.8 2008/04/23 18:02:07 dww
+# number.info,v 1.7 2008/04/23 18:02:16 dww
+# optionwidgets.info,v 1.7 2008/04/23 18:02:24 dww
+# text.info,v 1.9 2008/04/23 18:02:31 dww
+# userreference.info,v 1.8 2008/04/23 18:02:38 dww
+# example_field.php,v 1.5 2008/04/23 08:24:06 karens
+# simple_field.php,v 1.5 2008/04/23 08:24:06 karens
+# text.module,v 1.91 2008/04/23 18:02:36 dww
+# 
+msgid ""
+""
+msgstr "Project-Id-Version: PROJECT VERSION\n"
+"POT-Creation-Date: 2008-04-24 19:53+0200\n"
+"PO-Revision-Date: 2008-08-12 HH:MM+ZZZZ\n"
+"Last-Translator: Chuck Smith <chuck@chucksmith.de>\n"
+"Language-Team: Esperanto <chuck@chucksmith.de>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=INTEGER; plural=EXPRESSION;\n"
+
+#: content.module:25
+msgid "The content module, a required component of the Content Construction Kit (CCK), allows administrators to associate custom fields with content types. In Drupal, content types are used to define the characteristics of a post, including the title and description of the fields displayed on its add and edit pages. Using the content module (and the other helper modules included in CCK), custom fields beyond the default \"Title\" and \"Body\" may be added. CCK features are accessible through tabs on the <a href=\"@content-types\">content types administration page</a>. (See the <a href=\"@node-help\">node module help page</a> for more information about content types.)"
+msgstr "La enhava modulo, bezonata komponanto de la Ilaro por Konstruado de Enhavo (CCK), ebligas al administrantoj asociigi proprajn kampojn kun enhavspecoj. En Drupalo, enhavspecoj estas uzataj por difini la ecojn de afiŝo, inkluzivante la titolon kaj priskribon de la kampoj montrataj sur ĝiaj paĝoj de aldonado kaj redaktado. Uzante la enhava modulo (kaj la aliaj helpaj moduloj inkluzivante en CCK), propraj kampoj krom la defaŭltaj \"Titolo\" kaj \"Korpo\" povas esti aldonitaj. Oni povas aliri CCK-funkciojn per langetoj sur la <a href=\"@content-types\">administra paĝo de enhavspecoj</a>. (Vidu la <a href=\"@node-help\">helpa paĝo de noda modulo</a> por pliaj informoj pri enhavspecoj.) "
+
+#: content.module:26
+msgid "When adding a custom field to a content type, you determine its type (whether it will contain text, numbers, or references to other objects) and how it will be displayed (either as a text field or area, a select box, checkbox, radio button, or autocompleting field). A field may have multiple values (i.e., a \"person\" may have multiple e-mail addresses) or a single value (i.e., an \"employee\" has a single employee identification number). As you add and edit fields, CCK automatically adjusts the structure of the database as necessary. CCK also provides a number of other features, including intelligent caching for your custom data, an import and export facility for content type definitions, and integration with other contributed modules."
+msgstr "Aldonante propran kampon al enhavspeco, vi determinas ĝian specon (ĉu ĝi enhavos tekston, numerojn, aŭ referencoj al aliaj objektoj) kaj kiel ĝi montriĝos (ĉu kiel teksta kampo aŭ areo, elektilo, markobutono, radiobutono, aŭ aŭtomata kompletiga kampo). Kampo povas havi multajn valorojn (ekz. \"persono\" povas havi multajn retpoŝtadresojn) aŭ unu valoro (ekz. \"laboranto\" havas unu identiga numero). Dum oni aldonas kaj redaktas kampojn, CCK aŭtomate ŝanĝas la strukturon de la datumbazo kiel bezonata. CCK ankaŭ provizas multe da aliaj funkcioj, inkluzivante inteligentan kaŝmemoron por viaj propraj datumoj, ilon por importi kaj eksporti enhavspecajn difinojn, kaj integriĝon kun aliaj kontribuitaj moduloj."
+
+#: content.module:27
+msgid "Custom field types are provided by a set of optional modules included with CCK (each module provides a different type). The <a href=\"@modules\">modules page</a> allows you to enable or disable CCK components. A default installation of CCK includes:"
+msgstr "Propraj kampaj specoj estas provizitaj de aro de nedevigaj moduloj inkluzivante kun CCK (ĉiu modulo provizas malsaman specon). La <a href=\"@modules\">paĝo de moduloj</a> ebligas al vi ŝalti kaj malŝalti CCK-komponantojn. Defaŭlta instalo de CCK inkluzivas:"
+
+#: content.module:29
+msgid "<em>number</em>, which adds numeric field types, in integer, decimal or floating point form. You may define a set of allowed inputs, or specify an allowable range of values. A variety of common formats for displaying numeric data are available."
+msgstr "<em>numeron</em>, kiu aldonas numerajn specojn al kampo, en entjero, dekuma, aŭ glitkoma formo. Oni povas difini aron de permesataj enmetoj, aŭ elekti permesatan intervalon de valoroj. Ankaŭ ekzistas multe da kutimaj formatoj por montri numerajn datumojn."
+
+#: content.module:30
+msgid "<em>text</em>, which adds text field types. A text field may contain plain text only, or optionally, may use Drupal's input format filters to securely manage rich text input. Text input fields may be either a single line (text field), multiple lines (text area), or for greater input control, a select box, checkbox, or radio buttons. If desired, CCK can validate the input to a set of allowed values."
+msgstr "<em>tekston</em>, kiu aldonas tekstkampajn specojn. Teksta kampo povas enhavi nur platan tekston, aŭ nedevige, povas uzi la enmetajn filtrilojn de Drupalo por sekure administri enmeton de riĉa teksto. Tekstaj enmetaj kampoj povas esti aŭ unulinia (teksta kampo), multajn liniojn (teksta areo), aŭ por pli granda enmeta regado, elektilo, markobutono, aŭ radiobutonojn. Se dezirata, CCK povas validigi la enmeton al aro de permesataj valoroj."
+
+#: content.module:31
+msgid "<em>nodereference</em>, which creates custom references between Drupal nodes. By adding a <em>nodereference</em> field and two different content types, for instance, you can easily create complex parent/child relationships between data (multiple \"employee\" nodes may contain a <em>nodereference</em> field linking to an \"employer\" node)."
+msgstr "<em>nodan referencon</em>, kiu kreas proprajn referencojn inter nodoj de Drupalo. Aldonante <em>nodan referencan</em> kampon kaj du malsamaj enhavspecoj, ekzemple, oni povas facile krei kompleksajn patraj/filaj rilatoj inter datumoj (multaj nodoj de \"laboranto\" povas enhavi <em>nodan referencan</em> kampon ligante al nodo de \"laboranto\")."
+
+#: content.module:32
+msgid "<em>userreference</em>, which creates custom references to your sites' user accounts. By adding a <em>userreference</em> field, you can create complex relationships between your site's users and posts. To track user involvement in a post beyond Drupal's standard <em>Authored by</em> field, for instance, add a <em>userreference</em> field named \"Edited by\" to a content type to store a link to an editor's user account page."
+msgstr "<em>uzantreferencon</em>, kiu kreas proprajn referencojn al la kontoj de viaj uzantoj. Aldonante kampon de <em>uzantreferenco</em>, vi povas krei kompleksajn rilatojn inter la uzantoj de via retejo kaj afiŝoj. Por atentadi aktivadon de uzantoj en afiŝo pli ol la norma Drupala kampo<em>Verkita de</em>, ekzemple, aldoni kampon de <em>uzantreferenco</em> nomata \"Redaktita de\" al enhavspeco por konservi ligilon al uzanta paĝo de la redaktinto."
+
+#: content.module:33
+msgid "<em>fieldgroup</em>, which creates collapsible fieldsets to hold a group of related fields. A fieldset may either be open or closed by default. The order of your fieldsets, and the order of fields within a fieldset, is managed via a drag-and-drop interface provided by content module."
+msgstr "<em>kampgrupon</em>, kiu kreas maletendeblajn kamparojn por teni grupon de rilataj kampoj. Kamparo povas esti ŝaltita aŭ malŝaltita defaŭlte. La sinsekvo de viaj kamparoj, kaj la sinsekvo de kampoj ene de kamparo, estas administrataj per interfaco de ŝovi kaj demeti provizite de enhava modulo."
+
+#: content.module:35
+msgid "For more information, see the online handbook entry for <a href=\"@handbook-cck\">CCK</a> or the <a href=\"@project-cck\">CCK project page</a>."
+msgstr "Por pliaj informoj, vidu la retan manlibron por <a href=\"@handbook-cck\">CCK</a> aŭ la <a href=\"@project-cck\">paĝo de CCK-projekto</a>."
+
+#: content.module:41
+msgid "Configure how this content type's fields and field labels should be displayed when it's viewed in teaser and full-page mode."
+msgstr "Agordu kiel la kampoj kaj kampaj etikedoj de ĉi tiu enhavspeco aspektos kiam oni vidas ĝin en la resuma kaj plen-paĝa reĝimoj."
+
+#: content.module:44
+msgid "Configure how this content type's fields should be displayed when it's rendered in the following contexts."
+msgstr "Agordu kiel la kampoj de ĉi tiu enhavspeco devas aspekti kiam vidata en la jenaj kontekstoj."
+
+#: content.module:48
+msgid "Control the order of fields in the input form."
+msgstr "Regu la sinsekvon de kampoj en la enmeta formularo."
+
+#: content.module:469
+msgid "This field is required."
+msgstr "Ĉi tiu kampo estas deviga."
+
+#: content.module:473
+msgid "!title: !required"
+msgstr "!title: !required"
+
+#: content.module:476
+msgid "Order"
+msgstr "Sinsekvo"
+
+#: content.module:506
+msgid "Add another item"
+msgstr "Aldoni alian eron"
+
+#: content.module:1581
+msgid "RSS Item"
+msgstr "RSS-ero"
+
+#: content.module:1583
+msgid "Search Index"
+msgstr "Serĉa indekso"
+
+#: content.module:1584
+msgid "Search Result"
+msgstr "Serĉa rezulto"
+
+#: content.module:1922
+msgid "Language"
+msgstr "Lingvo"
+
+#: content.module:1925
+msgid "Taxonomy"
+msgstr "Taksonomio"
+
+#: content.module:1928
+msgid "File attachments"
+msgstr "Dosieraj alkroĉaĵoj"
+
+#: content.module:558
+msgid "Updating field type %type with module %module."
+msgstr "Ĝisdatigante kampospecon %type kun modulo %module."
+
+#: content.module:565
+msgid "Updating widget type %type with module %module."
+msgstr "Ĝisdatigante fenestraĵan specon kun modulo %module."
+
+#: content.module:140
+msgid "Manage fields"
+msgstr "Administri kampojn"
+
+#: content.module:149
+msgid "Display fields"
+msgstr "Montri kampojn"
+
+#: content.module:158
+msgid "General"
+msgstr "Ĝenerale"
+
+#: content.module:164
+msgid "Advanced"
+msgstr "Por spertuloj"
+
+#: content.module:190
+msgid "Remove field"
+msgstr "Forigi kampon"
+
+#: content.info:0
+msgid "Content"
+msgstr "Enhavo"
+
+#: content.info:0
+msgid "Allows administrators to define new content types."
+msgstr "Ebligas ke administrantoj povu difini novajn enhavspecojn."
+
+#: content.info:0
+#: modules/content_copy/content_copy.info:0
+#: modules/content_permissions/content_permissions.info:0
+#: modules/fieldgroup/fieldgroup.info:0
+#: modules/nodereference/nodereference.info:0
+#: modules/number/number.info:0
+#: modules/optionwidgets/optionwidgets.info:0
+#: modules/text/text.info:0
+#: modules/userreference/userreference.info:0
+msgid "CCK"
+msgstr "CCK"
+
+#: examples/example_field.php:107
+#: examples/simple_field.php:115
+#: modules/text/text.module:49
+#: modules/text/text.info:0
+msgid "Text"
+msgstr "Teksto"
