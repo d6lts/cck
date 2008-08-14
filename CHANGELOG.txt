@@ -1,20 +1,27 @@
 //$Id$
 
-CCK 6.2-dev
+CCK 6.2.rc5
 ===========
 
 This release requires a visit to update.php to update the database.
 
+Main bugs fixed :
+- #281388 Optionwidgets: Unselect values doesn't take.
+- #286457 Fix menu not being always rebuilt when needed.
+- #285138 by quicksketch and yched: Allow CCK to be installed in install profiles.
+
+Main new features :
+- #282183 by chx: Nodereference - 'Checkboxes/radios' widget.
+- #289138 by dopry: Add support for 'locked' fields (for module-defined fields).
+
+Other changes :
 - #273502 Add descriptions to the non-CCK form elements on the Manage fields screen.
 - Fix PHP warnings when field display is set to 'hidden' and field is in a fieldgroup.
 - Re-introduce '<none>' choice for multiselect widgets (optionwidgets, noderef/userref select).
 - #281449 Text: maxlength on textfield widget is 128 even when the field has no maximum length.
 - Add tests for optionwidgets.
 - #282175: Don't mention 'add more' button when the widget opts out of it.
-- #282183 by chx: Nodereference - 'Checkboxes/radios' widget.
-- #281388 Optionwidgets: Unselect values doesn't take.
 - Optionwidgets: use '- None -' for 'no selection' option (like core's taxonomy.module).
-- #286457 Fix menu not being always rebuilt when needed.
 - #286637 by poiu: clearer example for default value with php-code.
 - #93436 Add $form parameter to content_validate.
 - #277310 by fractile81: update node object by reference in content_load().
@@ -24,7 +31,7 @@ This release requires a visit to update.php to update the database.
 - #282937 Fix warnings on uninstall.
 - #287540 Add index on nid in data tables, to optimize node deletion (requires update.php)
 - #288578 Text: Fix max length to use utf8 length.
-- #222214 by aaron, deviantintegral : support tokens for nodererf / userref paths aliases
+- #222214 by aaron, deviantintegral : support tokens for nodererf / userref paths aliases.
 - #211306 by asimmonds: Fix error in D5 update with SQL strict mode.
 - #292338 by mh89: Set fieldgroup.module's weight to 9 (missing for new D6 installs).
 - #292463 Fieldgroup: missing update for fieldgroup table names (didn't actually break anything).
@@ -32,13 +39,12 @@ This release requires a visit to update.php to update the database.
 - #292925 by greggles - Text: Fix PHP notice under some circumstances with textarea widget.
 - #292675 Support d-n-d reordering of non-cck "fields" for types that have no cck fields.
 - #289888 Nodereference: Fix 'full node' and 'teaser' formatters.
-- #289138 by dopry: Add support for 'locked' fields (for module-defined fields).
 - Display field type human names instead of machine names on 'Manage Fields' and 'Fields' overview pages.
 - #292884 Better help text for field template suggestions.
 - #293163 Use FAPI validation instead of field|widget_settings($op 'validate').
           (the 'validate' op is still supported, though)
 - #75423 by mh89 - Text: 'size' setting for textfield widget.
-- #285138 by quicksketch and yched: Allow CCK to be installed in install profiles.
+
 
 CCK 6.2.rc4
 ===========
