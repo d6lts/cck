@@ -1,14 +1,11 @@
 <?php
 // $Id$
 
-// Updates happen in random order, whether or not the module is enabled,
-// so include critical code here just to be sure.
-include_once('./'. drupal_get_path('module', 'content') .'/content.module');
-
 /**
  * Implementation of hook_install().
  */
 function text_install() {
+  drupal_load('module', 'content');
   content_notify('install', 'text');
 }
 
@@ -16,6 +13,7 @@ function text_install() {
  * Implementation of hook_uninstall().
  */
 function text_uninstall() {
+  drupal_load('module', 'content');
   content_notify('uninstall', 'text');
 }
 
@@ -25,6 +23,7 @@ function text_uninstall() {
  * Notify content module when this module is enabled.
  */
 function text_enable() {
+  drupal_load('module', 'content');
   content_notify('enable', 'text');
 }
 
@@ -34,6 +33,7 @@ function text_enable() {
  * Notify content module when this module is disabled.
  */
 function text_disable() {
+  drupal_load('module', 'content');
   content_notify('disable', 'text');
 }
 
@@ -50,6 +50,7 @@ function text_update_last_removed() {
  */
 function text_update_6000() {
   $ret = array();
+  drupal_load('module', 'content');
   $result = db_query("SELECT * FROM {". content_instance_tablename() ."} WHERE widget_type = 'text'");
   while ($field_instance = db_fetch_array($result)) {
     $widget_settings = unserialize($field_instance['widget_settings']);
@@ -72,6 +73,7 @@ function text_update_6000() {
 function text_update_6001() {
   $ret = array();
 
+  drupal_load('module', 'content');
   // Get the latest cache values and schema.
   content_clear_type_cache(TRUE, TRUE);
 

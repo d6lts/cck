@@ -1,14 +1,11 @@
 <?php
 // $Id$
 
-// Updates happen in random order, whether or not the module is enabled,
-// so include critical code here just to be sure.
-include_once('./'. drupal_get_path('module', 'content') .'/content.module');
-
 /**
  * Implementation of hook_install().
  */
 function number_install() {
+  drupal_load('module', 'content');
   content_notify('install', 'number');
 }
 
@@ -16,6 +13,7 @@ function number_install() {
  * Implementation of hook_uninstall().
  */
 function number_uninstall() {
+  drupal_load('module', 'content');
   content_notify('uninstall', 'number');
 }
 
@@ -25,6 +23,7 @@ function number_uninstall() {
  * Notify content module when this module is enabled.
  */
 function number_enable() {
+  drupal_load('module', 'content');
   content_notify('enable', 'number');
 }
 
@@ -34,6 +33,7 @@ function number_enable() {
  * Notify content module when this module is disabled.
  */
 function number_disable() {
+  drupal_load('module', 'content');
   content_notify('disable', 'number');
 }
 
@@ -46,6 +46,7 @@ function number_update_last_removed() {
  */
 function number_update_6000() {
   $ret = array();
+  drupal_load('module', 'content');
   $ret[] = update_sql("UPDATE {". content_field_tablename() ."} SET type='number_float' WHERE type = 'number_decimal'");
 
   content_clear_type_cache();

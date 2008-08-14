@@ -38,6 +38,7 @@ This release requires a visit to update.php to update the database.
 - #293163 Use FAPI validation instead of field|widget_settings($op 'validate').
           (the 'validate' op is still supported, though)
 - #75423 by mh89 - Text: 'size' setting for textfield widget.
+- #285138 by quicksketch and yched: Allow CCK to be installed in install profiles.
 
 CCK 6.2.rc4
 ===========

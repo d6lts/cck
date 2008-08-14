@@ -1,12 +1,6 @@
 <?php
 // $Id$
 
-// Updates happen in random order, whether or not the module is enabled,
-// so include critical code here just to be sure.
-// We also avoid calling drupal_get_path, for it causes problems when
-// installation happen in an install profile.
-include_once(dirname(__FILE__) .'/content.module');
-
 /**
  * 'Safe' version of content_types() to use in updates and installs.
  *
@@ -17,7 +11,8 @@ include_once(dirname(__FILE__) .'/content.module');
  * currently enabled.
  */
 function content_types_install() {
-  include_once('./'. drupal_get_path('module', 'content') .'/includes/content.crud.inc');
+  drupal_load('module', 'content');
+  module_load_include('inc', 'content', '/includes/content.crud');
   $module_field_types = $module_widgets = array();
   foreach (module_list() as $module) {
     if ($field_type = module_invoke($module, 'field_info')) {
@@ -215,6 +210,8 @@ function content_update_last_removed() {
  */
 function content_update_6000() {
   $ret = array();
+
+  drupal_load('module', 'content');
   if (db_column_exists(content_field_tablename(), 'active')) {
     return $ret;
   }
@@ -256,6 +253,7 @@ function content_update_6000() {
  */
 function content_update_6001() {
   $ret = array();
+  drupal_load('module', 'content');
   if (db_table_exists('content_node_field')) {
     return $ret;
   }
@@ -273,6 +271,7 @@ function content_update_6001() {
 function content_update_6002() {
   $ret = array();
 
+  drupal_load('module', 'content');
   $db_types = content_types_install();
   $field_types = array();
 
@@ -313,6 +312,7 @@ function content_update_6003() {
 function content_update_6004(&$sandbox) {
   $ret = array();
 
+  drupal_load('module', 'content');
   // Do nothing if the indexes were already created by D5's content_update_1009.
   if (variable_get('content_update_1009', FALSE)) {
     return $ret;
@@ -349,6 +349,7 @@ function content_update_6004(&$sandbox) {
  */
 function content_update_6005() {
   $ret = array();
+  drupal_load('module', 'content');
   db_add_field($ret, content_field_tablename(), 'locked', array('type' => 'int', 'size' => 'tiny', 'default' => 0));
   return $ret;
 }

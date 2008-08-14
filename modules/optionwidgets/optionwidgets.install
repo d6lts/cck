@@ -1,14 +1,11 @@
 <?php
 // $Id$
 
-// Updates happen in random order, whether or not the module is enabled,
-// so include critical code here just to be sure.
-include_once('./'. drupal_get_path('module', 'content') .'/content.module');
-
 /**
  * Implementation of hook_install().
  */
 function optionwidgets_install() {
+  drupal_load('module', 'content');
   content_notify('install', 'optionwidgets');
 }
 
@@ -16,6 +13,7 @@ function optionwidgets_install() {
  * Implementation of hook_uninstall().
  */
 function optionwidgets_uninstall() {
+  drupal_load('module', 'content');
   content_notify('uninstall', 'optionwidgets');
 }
 
@@ -25,6 +23,7 @@ function optionwidgets_uninstall() {
  * Notify content module when this module is enabled.
  */
 function optionwidgets_enable() {
+  drupal_load('module', 'content');
   content_notify('enable', 'optionwidgets');
 }
 
@@ -34,6 +33,7 @@ function optionwidgets_enable() {
  * Notify content module when this module is disabled.
  */
 function optionwidgets_disable() {
+  drupal_load('module', 'content');
   content_notify('disable', 'optionwidgets');
 }
 
@@ -50,6 +50,7 @@ function optionwidgets_update_last_removed() {
  */
 function optionwidgets_update_6000() {
   $ret = array();
+  drupal_load('module', 'content');
   $ret[] = update_sql("UPDATE {". content_instance_tablename() ."} SET widget_type = 'optionwidgets_select' WHERE widget_type = 'options_select'");
   $ret[] = update_sql("UPDATE {". content_instance_tablename() ."} SET widget_type = 'optionwidgets_onoff' WHERE widget_type = 'options_onoff'");
   $ret[] = update_sql("UPDATE {". content_instance_tablename() ."} SET widget_type = 'optionwidgets_buttons' WHERE widget_type = 'options_buttons'");
