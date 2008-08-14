@@ -84,7 +84,7 @@ function content_views_field_views_data($field) {
           break;
         case 'numeric':
         case 'float':
-          $filters[] = 'views_handler_filter_float_content';
+          $filters[] = class_exists('views_handler_filter_float') ? 'views_handler_filter_float_content' : 'views_handler_filter_numeric_content';
           $arguments[] = 'views_handler_argument_content';
           break;
 
@@ -184,13 +184,15 @@ class views_handler_filter_numeric_content extends views_handler_filter_numeric 
  * The subclass simply adds properties,
  * for field-specific subclasses to use if they need to.
  */
-class views_handler_filter_float_content extends views_handler_filter_float {
-  var $content_field;
+if (class_exists('views_handler_filter_float')) {
+  class views_handler_filter_float_content extends views_handler_filter_float {
+    var $content_field;
 
-  function construct() {
-    parent::construct();
-    $this->content_field = content_fields($this->definition['content_field_name']);
-    $this->additional_fields = $this->definition['additional fields'];
+    function construct() {
+      parent::construct();
+      $this->content_field = content_fields($this->definition['content_field_name']);
+      $this->additional_fields = $this->definition['additional fields'];
+    }
   }
 }
 
