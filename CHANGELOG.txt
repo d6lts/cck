@@ -1,9 +1,13 @@
 //$Id$
 
-CCK 6.2.rc5
+
+CCK 6.2-dev
 ===========
 
-This release requires a visit to update.php to update the database.
+- #294726 by profix898 adn yched: _content_type_info() does not reset on content type changes.
+
+CCK 6.2.rc5
+===========
 
 Main bugs fixed :
 - #281388 Optionwidgets: Unselect values doesn't take.
