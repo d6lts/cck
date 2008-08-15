@@ -1,5 +1,10 @@
 //$Id$
 
+CCK 6.2-dev
+===========
+
+- #294726 by profix898 and yched: _content_type_info() does not reset on content type changes.
+
 CCK 6.2.rc6
 ===========
 
