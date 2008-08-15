@@ -7,6 +7,7 @@ CCK 6.2-dev
 - #294726 by profix898 and yched: _content_type_info() does not reset on content type changes.
 - #293273 Nodereference: update 'referenceable types' when type name changes.
 - #265795 by smk-ka: formatter labels go through t() twice in Views exposed data.
+- #295537 fix warnings in update 6004 when site has no actual cck fields.
 
 CCK 6.2.rc5
 ===========

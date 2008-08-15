@@ -312,7 +312,6 @@ function content_update_6003() {
 function content_update_6004(&$sandbox) {
   $ret = array();
 
-  drupal_load('module', 'content');
   // Do nothing if the indexes were already created by D5's content_update_1009.
   if (variable_get('content_update_1009', FALSE)) {
     return $ret;
@@ -320,6 +319,7 @@ function content_update_6004(&$sandbox) {
 
   // Gather list of tables.
   if (!isset($sandbox['tables'])) {
+    drupal_load('module', 'content');
     $sandbox['tables'] = array();
     $result = db_query('SELECT * FROM {'. content_instance_tablename() .'} nfi '.
       ' LEFT JOIN {'. content_field_tablename() .'} nf ON nf.field_name = nfi.field_name');
@@ -336,11 +336,14 @@ function content_update_6004(&$sandbox) {
   }
 
   // One pass : add index on one table.
-  $table = array_shift($sandbox['tables']);
-  // TODO : what's the best way to test if the index already exists from a D5 upgrade ?
-  db_add_index($ret, $table, 'nid', array('nid'));
+  if ($table = array_shift($sandbox['tables'])) {
+    db_add_index($ret, $table, 'nid', array('nid'));
+  }
 
-  $ret['#finished'] = 1 - count($sandbox['tables']) / $sandbox['count'];
+  if ($sandbox['count']) {
+    $ret['#finished'] = 1 - count($sandbox['tables']) / $sandbox['count'];
+  }
+
   return $ret;
 }
 
