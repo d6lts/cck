@@ -9,6 +9,7 @@
 - #157211 Nodereference - error message when no valid node with that title (autocomplete widget).
 - #287540 Add index on nid in data tables, to optimize node deletion (requires update.php)
 - #288578 Text: Fix max length to use utf8 length.
+- #265795 by smk-ka: formatter labels go through t() twice in Views exposed data.
 
 5--1.7
 ======

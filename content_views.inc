@@ -50,7 +50,7 @@ function content_views_field_tables($field) {
     $formatters = array();
     if (is_array($field_types[$field['type']]['formatters'])) {
       foreach ($field_types[$field['type']]['formatters'] as $name => $info) {
-        $formatters[$name] = t($info['label']);
+        $formatters[$name] = $info['label'];
       }
     }
 
