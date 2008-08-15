@@ -1221,7 +1221,7 @@ function _content_type_info($reset = FALSE) {
       return array();
     }
 
-    if (!$reset && $cached = cache_get('content_type_info', content_cache_tablename())) {
+    if ($cached = cache_get('content_type_info', content_cache_tablename())) {
       $info = $cached->data;
     }
     else {
@@ -1281,7 +1281,7 @@ function _content_type_info($reset = FALSE) {
 
       // Populate actual field instances.
       module_load_include('inc', 'content', 'includes/content.crud');
-      foreach (node_get_types('types', NULL, TRUE) as $type_name => $data) {
+      foreach (node_get_types() as $type_name => $data) {
         $type = (array) $data;
         $type['url_str'] = str_replace('_', '-', $type['type']);
         $type['fields'] = array();

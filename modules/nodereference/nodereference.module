@@ -274,29 +274,6 @@ function theme_nodereference_formatter_full_teaser($element) {
 }
 
 /**
- * Implementation of hook_node_types.
- */
-function nodereference_node_type($op, $info) {
-  switch ($op) {
-    case 'update':
-      // Reflect type name changes to the 'referenceable types' settings.
-      if (!empty($info->old_type) && $info->old_type != $info->type) {
-        // content.module's implementaion of hook_node_type() has already
-        // refreshed _content_type_info().
-        $fields = content_fields();
-        foreach ($fields as $field_name => $field) {
-          if ($field['type'] == 'nodereference' && isset($field['referenceable_types'][$info->old_type])) {
-            $field['referenceable_types'][$info->type] = empty($field['referenceable_types'][$info->old_type]) ? 0 : $info->type;
-            unset($field['referenceable_types'][$info->old_type]);
-            content_field_instance_update($field);
-          }
-        }
-      }
-      break;
-  }
-}
-
-/**
  * Helper function for formatters.
  *
  * Store node titles collected in the curent request.
