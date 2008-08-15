@@ -312,7 +312,7 @@ class views_handler_field_content extends views_handler_field_node {
     $formatters = array();
     if (is_array($field_types[$field['type']]['formatters'])) {
       foreach ($field_types[$field['type']]['formatters'] as $name => $info) {
-        $formatters[$name] = t($info['label']);
+        $formatters[$name] = $info['label'];
       }
     }
     $form['format'] = array(
