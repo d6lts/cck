@@ -5,6 +5,7 @@ CCK 6.2-dev
 
 - #294726 by profix898 and yched: _content_type_info() does not reset on content type changes.
 - #293273 Nodereference: update 'referenceable types' when type name changes.
+- #295914 Fix additional problems when installing CCK in install profiles.
 
 CCK 6.2.rc6
 ===========

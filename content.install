@@ -155,6 +155,8 @@ function content_schema() {
 
   // Dynamic (data) tables.
 
+  drupal_load('module', 'content');
+
   // We can't use many helper functions here, like content_fields() or
   // content_types() or we risk creating a fatal loop from circular
   // logic when they call other functions that use this schema, so create
