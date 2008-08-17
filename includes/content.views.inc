@@ -444,6 +444,8 @@ class views_handler_field_content_multiple extends views_handler_field_content {
       '#field_suffix' => $suffix,
       '#default_value' => $options['multiple']['multiple_number'],
       '#prefix' => '<div class="container-inline">',
+      '#process' => array('views_process_dependency'),
+      '#dependency' => array('edit-options-multiple-group' => array(TRUE)),
     );
     list($prefix, $suffix) = explode('@count', t('starting from @count'));
     $form['multiple']['multiple_from'] = array(
@@ -452,12 +454,16 @@ class views_handler_field_content_multiple extends views_handler_field_content {
       '#field_prefix' => $prefix,
       '#field_suffix' => $suffix,
       '#default_value' => $options['multiple']['multiple_from'],
+      '#process' => array('views_process_dependency'),
+      '#dependency' => array('edit-options-multiple-group' => array(TRUE)),
     );
     $form['multiple']['multiple_reversed'] = array(
       '#title' => t('Reversed (start from last values)'),
       '#type' => 'checkbox',
       '#default_value' => $options['multiple']['multiple_reversed'],
       '#suffix' => '</div>',
+      '#process' => array('views_process_dependency'),
+      '#dependency' => array('edit-options-multiple-group' => array(TRUE)),
     );
   }
 
@@ -465,9 +471,8 @@ class views_handler_field_content_multiple extends views_handler_field_content {
     $field = $this->content_field;
     $options = $this->options;
 
-    //  if (in_array($field['handler'], array('content_views_field_handler_group', 'content_views_field_handler_first', 'content_views_field_handler_last'))) {
-    // TODO: multiple_number / multiple_from
-    // We can also optimize the query when only one value should be retrieved
+    // 'Group multiple values' : the values for the field will be retrieved
+    // in a separate query (one per field).
     $this->defer_query = $options['multiple']['group'] && $field['multiple'];
 
     // If this is not a grouped field, use the generic field handler query.
@@ -522,8 +527,7 @@ class views_handler_field_content_multiple extends views_handler_field_content {
              " LEFT JOIN {". $db_info['table'] ."} $table_alias ON node.vid = $table_alias.vid".
              " WHERE node.nid IN (". implode(',', $nids) .")".
              " ORDER BY node.nid ASC, $table_alias.delta ". ($options['multiple']['multiple_reversed'] ? 'DESC' : 'ASC');
-    // TODO: Select all deltas or only a subset.
-    $result = $options['multiple']['multiple_number'] ? db_query_range($query, $options['multiple']['multiple_from'], $options['multiple']['multiple_number']) : db_query($query);
+    $result = db_query($query);
 
     while ($item = db_fetch_array($result)) {
       $this->field_values[$item['parent_nid']][$item['delta']] = $item;
@@ -550,12 +554,24 @@ class views_handler_field_content_multiple extends views_handler_field_content {
     // TODO there may be a better way to do this.
     $this->aliases['nid'] = 'nid';
 
+    $count = 0;
     $items = array();
     foreach ($this->field_values[$values->{$this->additional_fields['nid']}] as $item) {
-      $value = content_format($field, $item, $options['format'], $values);
-      if (!empty($value)) {
-        $items[] = $this->render_link($value, $values);
+      // 'Starting from n': Let the first n values pass.
+      if (empty($options['multiple']['multiple_from']) || ($count >= $options['multiple']['multiple_from'])) {
+        // 'Display m values'.
+        if (empty($options['multiple']['multiple_number']) || (count($items) < $options['multiple']['multiple_number'])) {
+          $value = content_format($field, $item, $options['format'], $values);
+          if (!empty($value)) {
+            $items[] = $this->render_link($value, $values);
+          }
+        }
+        else {
+          // We displayed the number of values that were asked, no need to render more.
+          break;
+        }
       }
+      $count++;
     }
 
     if (count($items) > 1) {
