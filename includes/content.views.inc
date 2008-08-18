@@ -300,13 +300,13 @@ class views_handler_argument_many_to_one_content extends views_handler_argument_
     $options = $this->allowed_values();
     $value = $data->{$this->name_alias};
     if (isset($options[$value])) {
-      $value = $options[$value];
+      $value = check_plain($options[$value]);
     }
-    elseif (empty($value) && !empty($this->definition['empty field name'])) {
-      $value = $this->definition['empty field name'];
+    else {
+      $value = parent::summary_name($data);
     }
 
-    return check_plain($value);
+    return $value;
   }
 
   function allowed_values() {
