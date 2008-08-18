@@ -194,6 +194,9 @@ function number_field_settings($op, $field) {
 
         // Swap the filter handler to the 'in' operator.
         $data[$table_alias][$field['field_name'] .'_value']['filter']['handler'] = 'views_handler_filter_many_to_one_content';
+        $data[$table_alias][$field['field_name'] .'_value']['filter']['numeric'] = TRUE;
+        $data[$table_alias][$field['field_name'] .'_value']['argument']['handler'] = 'views_handler_argument_many_to_one_content';
+        $data[$table_alias][$field['field_name'] .'_value']['argument']['numeric'] = TRUE;
         return $data;
       }
       break;

@@ -80,12 +80,12 @@ function content_views_field_views_data($field) {
         case 'bigint':
         case 'serial':
           $filters[] = 'views_handler_filter_numeric_content';
-          $arguments[] = 'views_handler_argument_content';
+          $arguments[] = 'views_handler_argument_numeric_content';
           break;
         case 'numeric':
         case 'float':
           $filters[] = class_exists('views_handler_filter_float') ? 'views_handler_filter_float_content' : 'views_handler_filter_numeric_content';
-          $arguments[] = 'views_handler_argument_content';
+          $arguments[] = 'views_handler_argument_numeric_content';
           break;
 
         case 'text':
@@ -268,6 +268,52 @@ class views_handler_argument_string_content extends views_handler_argument_strin
 
     $this->content_field = content_fields($this->definition['content_field_name']);
     $this->additional_fields = $this->definition['additional fields'];
+  }
+}
+
+/**
+ * The subclass simply adds properties,
+ * for field-specific subclasses to use if they need to.
+ */
+class views_handler_argument_numeric_content extends views_handler_argument_numeric {
+  var $content_field;
+
+  function construct() {
+    parent::construct();
+
+    $this->content_field = content_fields($this->definition['content_field_name']);
+    $this->additional_fields = $this->definition['additional fields'];
+  }
+}
+
+class views_handler_argument_many_to_one_content extends views_handler_argument_many_to_one {
+  var $content_field;
+
+  function construct() {
+    parent::construct();
+
+    $this->content_field = content_fields($this->definition['content_field_name']);
+    $this->additional_fields = $this->definition['additional fields'];
+  }
+
+  function summary_name($data) {
+    $options = $this->allowed_values();
+    $value = $data->{$this->name_alias};
+    if (isset($options[$value])) {
+      $value = $options[$value];
+    }
+    elseif (empty($value) && !empty($this->definition['empty field name'])) {
+      $value = $this->definition['empty field name'];
+    }
+
+    return check_plain($value);
+  }
+
+  function allowed_values() {
+    $field = $this->content_field;
+    $function = $field['module'] .'_allowed_values';
+    $options = function_exists($function) ? $function($field) : content_allowed_values($field);
+    return (array) $options;
   }
 }
 

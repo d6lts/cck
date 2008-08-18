@@ -7,6 +7,7 @@ CCK 6.2-dev
 - #293273 Nodereference: update 'referenceable types' when type name changes.
 - #295914 Fix additional problems when installing CCK in install profiles.
 - #293698 Views integration: make 'show n values starting from m' actually work.
+- #295664 Views integration: let summaries display 'allowed values' aliases if any.
 
 CCK 6.2.rc6
 ===========
