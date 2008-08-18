@@ -122,6 +122,7 @@ function content_views_field_views_data($field) {
         'name field' => '', // TODO
         'additional fields' => $columns,
         'content_field_name' => $field['field_name'],
+        'empty field name' => t('<No value>'),
         'allow empty' => TRUE,
       ),
       'filter' => array(
