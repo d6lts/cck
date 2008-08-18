@@ -2,12 +2,12 @@
 // $Id$
 /**
  * Panels 2 interface for CCK fieldgroups and fields.
- * 
+ *
  * TODO:
- * 
+ *
  * - Adjust the fields and groups that are displayed for context, when that
  *   capability is added to Panels.
- * 
+ *
  */
 
 /**
@@ -99,7 +99,7 @@ function content_panels_render_field($conf, $panel_args, $context) {
   $data = explode(':', $conf['field_formatter']);
   $field_name = $data[0];
   $formatter = $data[1];
-  
+
   $field = $info['fields'][$field_name];
   $field_info = $info['field types'][$field['type']];
 
@@ -123,7 +123,7 @@ function content_panels_render_field($conf, $panel_args, $context) {
   }
   else {
     foreach ($node_field as $delta => $item) {
-      $node_field[$delta]['view'] = content_format($field, $item, $conf['formatter'], $node);
+      $node_field[$delta]['view'] = content_format($field, $item, $formatter, $node);
     }
     $value = theme('field', $node, $field, $node_field, 0, 0);
   }

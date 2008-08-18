@@ -6,10 +6,11 @@
 - #187599 Backport content_generate so Devel module can create data for CCK fields when creating nodes.
 - #227951 by pwolanin: Add a permission for PHP 'default values' and 'allowed values'
 - #179419 by smk-ka: Content Copy - Import fails when language not English.
-- #157211 Nodereference - error message when no valid node with that title (autocomplete widget).
+- #157211 Nodereference: error message when no valid node with that title (autocomplete widget).
 - #287540 Add index on nid in data tables, to optimize node deletion (requires update.php)
 - #288578 Text: Fix max length to use utf8 length.
 - #265795 by smk-ka: formatter labels go through t() twice in Views exposed data.
+- #257250 by bangpound, sun, JohnAlbin - Panels integration: formatter not properly set.
 
 5--1.7
 ======
