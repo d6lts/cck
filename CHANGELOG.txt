@@ -11,6 +11,7 @@
 - #288578 Text: Fix max length to use utf8 length.
 - #265795 by smk-ka: formatter labels go through t() twice in Views exposed data.
 - #257250 by bangpound, sun, JohnAlbin - Panels integration: formatter not properly set.
+- #256178 by douggreen - Text: fix warnings around views argument handler.
 
 5--1.7
 ======

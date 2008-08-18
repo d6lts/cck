@@ -96,7 +96,7 @@ function text_field_settings($op, $field) {
         'option' => 'string',
         'help' => t('Set the option to the number of initial characters to filter by. Leave empty for full term; use 1 for an A/B/C style glossary.'),
       );
-      $arguments[$alias] = array_merge($arguments[$alias], $argument);
+      $arguments[$alias] = isset($arguments[$alias]) ? array_merge($arguments[$alias], $argument) : $argument;
       return $arguments;
 
     case 'filters':
