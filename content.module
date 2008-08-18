@@ -711,7 +711,7 @@ function content_types($type_name = NULL) {
  */
 function content_fields($field_name = NULL, $content_type_name = NULL) {
   $info = _content_type_info();
-  
+
   // If there is no field name specified, return the entire fields array.
   if (!isset($field_name)) {
     return $info['fields'];
@@ -989,7 +989,7 @@ function content_format($field, $item, $formatter = 'default', $node = NULL) {
   $field_types = _content_field_types();
   $formatters = $field_types[$field['type']]['formatters'];
 
-  if (!isset($formatter, $formatters)) {
+  if (!isset($formatter, $formatters, $formatters[$formatter])) {
     $formatter = 'default';
   }
   return module_invoke($formatters[$formatter]['module'], 'field_formatter', $field, $item, $formatter, $node);

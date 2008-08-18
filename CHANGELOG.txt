@@ -12,6 +12,7 @@
 - #265795 by smk-ka: formatter labels go through t() twice in Views exposed data.
 - #257250 by bangpound, sun, JohnAlbin - Panels integration: formatter not properly set.
 - #256178 by douggreen - Text: fix warnings around views argument handler.
+- #165314 by sleepcamel - Views integration: fix blank links in summary view.
 
 5--1.7
 ======
