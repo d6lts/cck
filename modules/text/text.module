@@ -172,7 +172,8 @@ function text_field($op, &$node, $field, &$items, $teaser, $page) {
     case 'sanitize':
       foreach ($items as $delta => $item) {
         if (!empty($field['text_processing'])) {
-          $text = isset($item['value']) ? check_markup($item['value'], $item['format'], is_null($node) || $node->build_mode == NODE_BUILD_PREVIEW) : '';
+          $check = is_null($node) || (isset($node->build_mode) && $node->build_mode == NODE_BUILD_PREVIEW);
+          $text = isset($item['value']) ? check_markup($item['value'], $item['format'], $check) : '';
         }
         else {
           $text = check_plain($item['value']);

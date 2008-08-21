@@ -9,6 +9,7 @@ CCK 6.2-dev
 - #293698 Views integration: make 'show n values starting from m' actually work.
 - #295664 Views integration: let summaries display 'allowed values' aliases if any.
 - Views integration: prevent empty links for the 'no value' items in summaries.
+- #296748 Text: Fix PHP warning when $node->build_mode not set.
 
 CCK 6.2.rc6
 ===========
