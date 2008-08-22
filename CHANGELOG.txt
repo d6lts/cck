@@ -15,6 +15,7 @@ CCK 6.2-dev
 - #293471 Remove fieldgroup selection on field settings form.
 - #295556 by CPyle - Userreference: let referenceable users be defined by a View.
 - Userreference: Add 'Radios / checkboxes' widget.
+- Userref / Noderef : Add a 'none' choice for non-required, single fields with 'Radios / checkboxes' widget.
 
 CCK 6.2.rc6
 ===========

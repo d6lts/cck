@@ -390,7 +390,7 @@ function optionwidgets_options($field) {
   // - non required radios
   // - non required selects
   if (($field['widget']['type'] == 'optionwidgets_buttons' && !$field['required'] && !$field['multiple'])
-    || (in_array($field['widget']['type'], array('optionwidgets_select', 'nodereference_select', 'userreference_select')) && !$field['required'])) {
+    || (in_array($field['widget']['type'], array('optionwidgets_select', 'nodereference_select', 'nodereference_buttons', 'userreference_select', 'userreference_buttons')) && !$field['required'])) {
     $options = array('' => theme('optionwidgets_none', $field)) + $options;
   }
   return $options;
@@ -403,6 +403,8 @@ function optionwidgets_options($field) {
 function theme_optionwidgets_none($field) {
   switch ($field['widget']['type']) {
     case 'optionwidgets_buttons':
+    case 'nodereference_buttons':
+    case 'userreference_buttons':
       return t('N/A');
     case 'optionwidgets_select':
     case 'nodereference_select':
