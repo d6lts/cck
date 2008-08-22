@@ -343,15 +343,9 @@ function fieldgroup_form_alter(&$form, $form_state, $form_id) {
   elseif ($form_id == '_content_admin_field' && isset($form['widget'])) {
     $content_type = content_types($form['type_name']['#value']);
     $form['widget']['group'] = array(
-      '#type' => 'select',
-      '#title' => t('Display in group'),
-      '#options' => _fieldgroup_groups_label($content_type['type']),
+      '#type' => 'hidden',
       '#default_value' => _fieldgroup_field_get_group($content_type['type'], $form['field_name']['#value']),
-      '#description' => t('Select a group, in which the field will be displayed on the editing form.'),
-      '#weight' => 5,
     );
-    $form['widget']['weight']['#weight'] = 5;
-    $form['widget']['description']['#weight'] = 7;
     $form['#submit'][] = 'fieldgroup_content_admin_form_submit';
   }
   elseif ($form_id == 'content_admin_field_overview_form' && !empty($form['#groups'])) {
