@@ -340,14 +340,6 @@ function fieldgroup_form_alter(&$form, $form_state, $form_id) {
     }
 
   }
-  elseif ($form_id == '_content_admin_field' && isset($form['widget'])) {
-    $content_type = content_types($form['type_name']['#value']);
-    $form['widget']['group'] = array(
-      '#type' => 'hidden',
-      '#default_value' => _fieldgroup_field_get_group($content_type['type'], $form['field_name']['#value']),
-    );
-    $form['#submit'][] = 'fieldgroup_content_admin_form_submit';
-  }
   elseif ($form_id == 'content_admin_field_overview_form' && !empty($form['#groups'])) {
     $form['#submit'][] = 'fieldgroup_content_overview_form_submit';
   }
@@ -362,10 +354,6 @@ function fieldgroup_form_alter(&$form, $form_state, $form_id) {
   }
 }
 
-function fieldgroup_content_admin_form_submit($form, &$form_state) {
-  $form_values = $form_state['values'];
-  fieldgroup_update_fields($form_values);
-}
 
 function fieldgroup_content_overview_form_submit($form, &$form_state) {
   $form_values = $form_state['values'];
