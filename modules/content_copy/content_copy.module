@@ -80,7 +80,6 @@ function content_copy_export_form(&$form_state) {
   $form['#prefix'] = t('This form will process a content type and one or more fields from that type and export the settings. The export created by this process can be copied and pasted as an import into the current or any other database. The import will add the fields to into an existing content type or create a new content type that includes the selected fields.');
 
   switch ($step) {
-
     case 1: // Select a content type.
       $form['type_name'] = array(
         '#title' => t('Types'),
@@ -89,23 +88,9 @@ function content_copy_export_form(&$form_state) {
         '#options' => $types,
         '#description' => t('Select the content type to export.'),
       );
-
-      // For some reason using #default_value in step 2 won't initialize
-      // all fields as checked, but setting a hidden value in step 1 will do it.
-      if (module_exists('fieldgroup')) {
-        $form['groups'] = array(
-          '#type' => 'hidden',
-          '#value' => serialize(array_keys(content_copy_groups())),
-        );
-      }
-      $form['fields'] = array(
-        '#type' => 'hidden',
-        '#value' => serialize(array_keys(content_fields())),
-      );
       break;
 
     case 2: // Select groups and fields.
-
       $form['type_name'] = array(
         '#type' => 'hidden',
         '#value' => $type_name,
@@ -133,7 +118,6 @@ function content_copy_export_form(&$form_state) {
       break;
 
     case 3: // Display the export macro.
-
       $GLOBALS['content_copy']['count'] = 0;
       $form['export'] = array(
         '#title' => t('Export data'),
@@ -143,21 +127,21 @@ function content_copy_export_form(&$form_state) {
         '#rows' => max(40, $GLOBALS['content_copy']['count']),
         '#description' => t('Copy the export text and paste it into another content type using the import function.'),
       );
-
       break;
   }
 
   if ($step < 3) {  // Omit submit button on the textarea block to display the export data.
-
     $form['submit'] = array(
       '#type' => 'submit',
       '#value' => t('Export'),
     );
   }
+
   $form['step'] = array(
     '#type' => 'value',
     '#value' => $step,
-    );
+  );
+
   return $form;
 }
 
@@ -180,15 +164,16 @@ function content_copy_export($form_values) {
   module_load_include('inc', 'node', 'content_types');
   drupal_execute('node_type_form', $node_state, node_get_types('type', $form_values['type_name']));
 
+  // TODO : also export "extra" fields weights.
   module_load_include('inc', 'content', 'includes/content.admin');
   module_load_include('inc', 'content', 'includes/content.crud');
 
   // Get an array of groups to export.
   // Record a macro for each group by submitting the group edit form.
   if (!empty($form_values['groups']) && module_exists('fieldgroup')) {
-
     $content_type = content_types($form_values['type_name']);
-    foreach ($form_values['groups'] as $group) {
+    $groups = array_filter($form_values['groups']);
+    foreach ($groups as $group) {
       $group_state = array('values' => array('group_name' => $group));
       drupal_execute('fieldgroup_edit_group_form', $group_state, $content_type, $group, 'edit');
     }
@@ -198,18 +183,19 @@ function content_copy_export($form_values) {
   // Record a macro for each field by submitting the field settings form.
   // Omit fields from the export if their module is not currently installed
   // otherwise the system will generate errors when the macro tries to execute their forms.
-  $type = content_types($form_values['type_name']);
-  foreach ((array) $form_values['fields'] as $field_name) {
-
-    $field = $type['fields'][$field_name];
-    $field_types = _content_field_types();
-    $field_module = $field_types[$field['type']]['module'];
-    $widget_types = _content_widget_types();
-    $widget_module = $widget_types[$field['widget']['type']]['module'];
-
-    if (!empty($field_module) && module_exists($field_module) && !empty($widget_module) && module_exists($widget_module)) {
-      $field_state = array('values' => array('field_name' => $field_name));
-      drupal_execute('_content_admin_field', $field_state, $form_values['type_name'], $field_name);
+  if (!empty($form_values['fields'])) {
+    $type = content_types($form_values['type_name']);
+    $fields = array_filter($form_values['fields']);
+    foreach ($fields as $field_name) {
+      $field = $type['fields'][$field_name];
+      $field_types = _content_field_types();
+      $field_module = $field_types[$field['type']]['module'];
+      $widget_types = _content_widget_types();
+      $widget_module = $widget_types[$field['widget']['type']]['module'];
+      if (!empty($field_module) && module_exists($field_module) && !empty($widget_module) && module_exists($widget_module)) {
+        $field_state = array('values' => array('field_name' => $field_name , 'op' => t('Save field settings')));
+        drupal_execute('_content_admin_field', $field_state, $form_values['type_name'], $field_name);
+      }
     }
   }
 
@@ -339,6 +325,8 @@ function content_copy_import_form_submit($form, &$form_state) {
 
     $node = (object) $imported_type;
     $values = $imported_type;
+    // Prevent a warning in node/content_types.inc
+    $node->has_title = TRUE;
     $node_state = array('values' => array('type_name' => $imported_type_name));
 
     // There's no API for creating node types, we still have to use drupal_execute().
@@ -357,6 +345,7 @@ function content_copy_import_form_submit($form, &$form_state) {
             )));
        return;
     }
+    // TODO : also import "extra" fields weights.
   }
 
   // Create the groups for this type, if they don't already exist.
@@ -423,7 +412,7 @@ function content_copy_fields($type_name) {
     $widget_types = _content_widget_types();
     $widget_module = $widget_types[$field['widget']['type']]['module'];
 
-    if (!empty($field_module) && module_exists($field_module) && !empty($widget_module) && module_exists($widget_module)) {
+    if (!$field['locked'] && !empty($field_module) && module_exists($field_module) && !empty($widget_module) && module_exists($widget_module)) {
       $fields[$field_name] = $field['widget']['label'] .' ('. $field['field_name'] .')';
     }
   }
