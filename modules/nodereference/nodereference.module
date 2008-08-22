@@ -52,29 +52,6 @@ function nodereference_theme() {
 }
 
 /**
- * Implementation of hook_node_types.
- */
-function nodereference_node_type($op, $info) {
-  switch ($op) {
-    case 'update':
-      // Reflect type name changes to the 'referenceable types' settings.
-      if (!empty($info->old_type) && $info->old_type != $info->type) {
-        // content.module's implementaion of hook_node_type() has already
-        // refreshed _content_type_info().
-        $fields = content_fields();
-        foreach ($fields as $field_name => $field) {
-          if ($field['type'] == 'nodereference' && isset($field['referenceable_types'][$info->old_type])) {
-            $field['referenceable_types'][$info->type] = empty($field['referenceable_types'][$info->old_type]) ? 0 : $info->type;
-            unset($field['referenceable_types'][$info->old_type]);
-            content_field_instance_update($field);
-          }
-        }
-      }
-      break;
-  }
-}
-
-/**
  * Implementation of hook_field_info().
  *
  * Here we indicate that the content module will use its default
@@ -371,12 +348,12 @@ function nodereference_elements() {
       '#input' => TRUE,
       '#columns' => array('uid'), '#delta' => 0,
       '#process' => array('nodereference_select_process'),
-      ),
+    ),
     'nodereference_buttons' => array(
       '#input' => TRUE,
       '#columns' => array('uid'), '#delta' => 0,
       '#process' => array('nodereference_buttons_process'),
-      ),
+    ),
     'nodereference_autocomplete' => array(
       '#input' => TRUE,
       '#columns' => array('name'), '#delta' => 0,
@@ -528,8 +505,6 @@ function nodereference_buttons_process($element, $edit, $form_state, $form) {
  *
  */
 function nodereference_autocomplete_process($element, $edit, $form_state, $form) {
-  // Add a few CSS overrides required for autocomplete results returned by Views.
-  drupal_add_css(drupal_get_path('module', 'nodereference') .'/nodereference.css');
 
   // The nodereference autocomplete widget doesn't need to create its own
   // element, it can wrap around the text_textfield element and add an autocomplete
@@ -563,7 +538,7 @@ function nodereference_autocomplete_process($element, $edit, $form_state, $form)
 }
 
 /**
- * Validate an select element.
+ * Validate a select/buttons element.
  *
  * Remove the wrapper layer and set the right element's value.
  * We don't know exactly where this element is, so we drill down
@@ -791,7 +766,7 @@ function _nodereference_potential_references_standard($field, $string = '', $exa
 }
 
 /**
- * Retrieve a pipe delimited string of autocomplete suggestions
+ * Menu callback; Retrieve a pipe delimited string of autocomplete suggestions for existing users
  */
 function nodereference_autocomplete($field_name, $string = '') {
   $fields = content_fields();
@@ -805,6 +780,30 @@ function nodereference_autocomplete($field_name, $string = '') {
   }
   drupal_json($matches);
 }
+
+/**
+ * Implementation of hook_node_types.
+ */
+function nodereference_node_type($op, $info) {
+  switch ($op) {
+    case 'update':
+      // Reflect type name changes to the 'referenceable types' settings.
+      if (!empty($info->old_type) && $info->old_type != $info->type) {
+        // content.module's implementaion of hook_node_type() has already
+        // refreshed _content_type_info().
+        $fields = content_fields();
+        foreach ($fields as $field_name => $field) {
+          if ($field['type'] == 'nodereference' && isset($field['referenceable_types'][$info->old_type])) {
+            $field['referenceable_types'][$info->type] = empty($field['referenceable_types'][$info->old_type]) ? 0 : $info->type;
+            unset($field['referenceable_types'][$info->old_type]);
+            content_field_instance_update($field);
+          }
+        }
+      }
+      break;
+  }
+}
+
 
 /**
  * FAPI theme for an individual elements.

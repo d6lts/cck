@@ -28,6 +28,9 @@ function userreference_theme() {
     'userreference_select' => array(
       'arguments' => array('element' => NULL),
     ),
+    'userreference_buttons' => array(
+      'arguments' => array('element' => NULL),
+    ),
     'userreference_autocomplete' => array(
       'arguments' => array('element' => NULL),
     ),
@@ -45,6 +48,11 @@ function userreference_theme() {
  *
  * Here we indicate that the content module will use its default
  * handling for the view of this field.
+ *
+ * Callbacks can be omitted if default handing is used.
+ * They're included here just so this module can be used
+ * as an example for custom modules that might do things
+ * differently.
  */
 function userreference_field_info() {
   return array(
@@ -224,9 +232,9 @@ function theme_userreference_formatter_plain($element) {
 /**
  * Implementation of hook_widget_info().
  *
- * We need custom handling of multiple values for userreference_select
- * because we need to combine them into a options list rather than
- * display multiple elements.
+ * We need custom handling of multiple values for the userreference_select
+ * widget because we need to combine them into a options list rather
+ * than display multiple elements.
  *
  * We will use the content module's default handling for default value.
  *
@@ -243,7 +251,15 @@ function userreference_widget_info() {
       'multiple values' => CONTENT_HANDLE_MODULE,
       'callbacks' => array(
         'default value' => CONTENT_CALLBACK_DEFAULT,
-        ),
+      ),
+    ),
+    'userreference_buttons' => array(
+      'label' => t('Check boxes/radio buttons'),
+      'field types' => array('userreference'),
+      'multiple values' => CONTENT_HANDLE_MODULE,
+      'callbacks' => array(
+        'default value' => CONTENT_CALLBACK_DEFAULT,
+      ),
     ),
     'userreference_autocomplete' => array(
       'label' => t('Autocomplete text field'),
@@ -251,7 +267,7 @@ function userreference_widget_info() {
       'multiple values' => CONTENT_HANDLE_CORE,
       'callbacks' => array(
         'default value' => CONTENT_CALLBACK_DEFAULT,
-        ),
+      ),
     ),
   );
 }
@@ -274,7 +290,12 @@ function userreference_elements() {
       '#input' => TRUE,
       '#columns' => array('uid'), '#delta' => 0,
       '#process' => array('userreference_select_process'),
-      ),
+    ),
+    'userreference_buttons' => array(
+      '#input' => TRUE,
+      '#columns' => array('uid'), '#delta' => 0,
+      '#process' => array('userreference_buttons_process'),
+    ),
     'userreference_autocomplete' => array(
       '#input' => TRUE,
       '#columns' => array('name'), '#delta' => 0,
@@ -346,6 +367,13 @@ function userreference_widget(&$form, &$form_state, $field, $items, $delta = 0) 
       );
       break;
 
+    case 'userreference_buttons':
+      $element = array(
+        '#type' => 'userreference_buttons',
+        '#default_value' => $items,
+      );
+      break;
+
     case 'userreference_autocomplete':
       $element = array(
         '#type' => 'userreference_autocomplete',
@@ -387,7 +415,7 @@ function userreference_select_process($element, $edit, $form_state, $form) {
   $element[$field_key] = array(
     '#type' => 'optionwidgets_select',
     '#default_value' => isset($element['#value']) ? $element['#value'] : '',
-    '#element_validate' => array('optionwidgets_validate', 'userreference_select_validate'),
+    '#element_validate' => array('optionwidgets_validate', 'userreference_optionwidgets_validate'),
     // The following values were set by the content module and need
     // to be passed down to the nested element.
     '#title' => $element['#title'],
@@ -408,6 +436,35 @@ function userreference_select_process($element, $edit, $form_state, $form) {
  * note that $element['#value'] is already set.
  *
  * The $fields array is in $form['#field_info'][$element['#field_name']].
+ */
+function userreference_buttons_process($element, $edit, $form_state, $form) {
+  // The userreference_select widget doesn't need to create its own
+  // element, it can wrap around the optionwidgets_select element.
+  // Add a validation step where the value can be unwrapped.
+  $field_key  = $element['#columns'][0];
+  $element[$field_key] = array(
+    '#type' => 'optionwidgets_buttons',
+    '#default_value' => isset($element['#value']) ? $element['#value'] : '',
+    '#element_validate' => array('optionwidgets_validate', 'userreference_optionwidgets_validate'),
+    // The following values were set by the content module and need
+    // to be passed down to the nested element.
+    '#title' => $element['#title'],
+    '#required' => $element['#required'],
+    '#description' => $element['#description'],
+    '#field_name' => $element['#field_name'],
+    '#type_name' => $element['#type_name'],
+    '#delta' => $element['#delta'],
+    '#columns' => $element['#columns'],
+  );
+  return $element;
+}
+
+/**
+ * Process an individual element.
+ *
+ * Build the form element. When creating a form using FAPI #process,
+ * note that $element['#value'] is already set.
+ *
  */
 function userreference_autocomplete_process($element, $edit, $form_state, $form) {
   // The userreference autocomplete widget doesn't need to create its own
@@ -442,13 +499,13 @@ function userreference_autocomplete_process($element, $edit, $form_state, $form)
 }
 
 /**
- * Afterbuild adjustment of the element.
+ * Validate a select/buttons element.
  *
  * Remove the wrapper layer and set the right element's value.
  * We don't know exactly where this element is, so we drill down
  * through the element until we get to our key.
  */
-function userreference_select_validate($element, &$form_state) {
+function userreference_optionwidgets_validate($element, &$form_state) {
   $field_key  = $element['#columns'][0];
   $new_parents = array();
   $value = $form_state['values'];
@@ -657,15 +714,6 @@ function _userreference_potential_references_standard($field, $string = '', $uid
 }
 
 /**
- * Provide a list of users to filter on.
- */
-function _userreference_filter_handler($op, $filterinfo) {
-  $options = views_handler_filter_usercurrent();
-  $options = $options + _userreference_potential_references($filterinfo['extra']['field']);
-  return $options;
-}
-
-/**
  * Menu callback; Retrieve a pipe delimited string of autocomplete suggestions for existing users
  */
 function userreference_autocomplete($field_name, $string = '') {
@@ -760,7 +808,7 @@ function userreference_user($type, &$edit, &$account) {
  * FAPI theme for an individual elements.
  *
  * The textfield or select is already rendered by the
- * textfield or select themes and the HTML output
+ * textfield or select themes and the html output
  * lives in $element['#children']. Override this theme to
  * make custom changes to the output.
  *
@@ -768,6 +816,10 @@ function userreference_user($type, &$edit, &$account) {
  * $element['#delta]  is the position of this element in the group
  */
 function theme_userreference_select($element) {
+  return $element['#children'];
+}
+
+function theme_userreference_buttons($element) {
   return $element['#children'];
 }
 

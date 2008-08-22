@@ -13,7 +13,8 @@ CCK 6.2-dev
 - #297915 Fix content_copy.
 - #298674 Content copy doesn't import all type properties.
 - #293471 Remove fieldgroup selection on field settings form.
-- #295556 by CPyle - Userreference : let referenceable users be defined by a View.
+- #295556 by CPyle - Userreference: let referenceable users be defined by a View.
+- Userreference: Add 'Radios / checkboxes' widget.
 
 CCK 6.2.rc6
 ===========
