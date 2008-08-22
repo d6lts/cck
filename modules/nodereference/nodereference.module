@@ -798,7 +798,7 @@ function nodereference_autocomplete($field_name, $string = '') {
   $references = _nodereference_potential_references($field, $string);
   foreach ($references as $id => $row) {
     // Add a class wrapper for a few required CSS overrides.
-    $matches[$row['title'] ." [nid:$id]"] = '<div class="nodereference-autocomplete">'. $row['rendered'] . '</div>';
+    $matches[$row['title'] ." [nid:$id]"] = '<div class="reference-autocomplete">'. $row['rendered'] . '</div>';
   }
   drupal_json($matches);
 }

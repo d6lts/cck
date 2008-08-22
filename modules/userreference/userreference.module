@@ -78,10 +78,53 @@ function userreference_field_settings($op, $field) {
         '#default_value' => isset($field['referenceable_status']) && is_array($field['referenceable_status']) ? array_filter($field['referenceable_status']) : array(1),
         '#options' => array(1 => t('Active'), 0 => t('Blocked')),
       );
+      if (module_exists('views')) {
+        $views = array('--' => '--');
+        $all_views = views_get_all_views();
+        foreach ($all_views as $view) {
+          // Only 'node' views that have fields will work for our purpose.
+          if ($view->base_table == 'users' && !empty($view->display['default']->display_options['fields'])) {
+            if ($view->type == 'Default') {
+              $views[t('Default Views')][$view->name] = $view->name;
+            }
+            else {
+              $views[t('Existing Views')][$view->name] = $view->name;
+            }
+          }
+        }
+
+        if (count($views) > 1) {
+          $form['advanced'] = array(
+             '#type' => 'fieldset',
+             '#title' => t('Advanced - Users that can be referenced (View)'),
+             '#collapsible' => TRUE,
+             '#collapsed' => !isset($field['advanced_view']) || $field['advanced_view'] == '--',
+           );
+          $form['advanced']['advanced_view'] = array(
+            '#type' => 'select',
+            '#title' => t('View used to select the users'),
+            '#options' => $views,
+            '#default_value' => isset($field['advanced_view']) ? $field['advanced_view'] : '--',
+            '#description' => t('Choose the "Views module" view that selects the users that can be referenced.<br />Note:<ul><li>Only views that have fields will work for this purpose.</li><li>This will discard the "Referenceable Roles" and "Referenceable Status" settings above. Use the view\'s "filters" section instead.</li><li>Use the view\'s "fields" section to display additional informations about candidate users on user creation/edition form.</li><li>Use the view\'s "sort criteria" section to determine the order in which candidate users will be displayed.</li></ul>'),
+          );
+          $form['advanced']['advanced_view_args'] = array(
+            '#type' => 'textfield',
+            '#title' => t('View arguments'),
+            '#default_value' => isset($field['advanced_view_args']) ? $field['advanced_view_args'] : '',
+            '#required' => FALSE,
+            '#description' => t('Provide a comma separated list of arguments to pass to the view.'),
+          );
+        }
+      }
       return $form;
 
     case 'save':
-      return array('referenceable_roles', 'referenceable_status');
+      $settings = array('referenceable_roles', 'referenceable_status');
+      if (module_exists('views')) {
+        $settings[] = 'advanced_view';
+        $settings[] = 'advanced_view_args';
+      }
+      return $settings;
 
     case 'database columns':
       $columns = array(
@@ -439,29 +482,130 @@ function userreference_autocomplete_validate($element, &$form_state) {
  * Implementation of hook_allowed_values().
  */
 function userreference_allowed_values($field) {
-  return _userreference_potential_references($field);
-}
+  $references = _userreference_potential_references($field);
 
-/**
- * Menu callback; Retrieve a pipe delimited string of autocomplete suggestions for existing users
- */
-function userreference_autocomplete($field_name, $string = '') {
-  $fields = content_fields();
-  $field = $fields[$field_name];
-
-  $matches = array();
-  if ($string) {
-    foreach (_userreference_potential_references($field, $string) as $uid => $name) {
-      $matches[$name] = check_plain($name);
-    }
+  $options = array();
+  foreach ($references as $key => $value) {
+    // Views theming runs check_plain (htmlentities) on the values.
+    // We reverse that with html_entity_decode.
+    $options[$key] = html_entity_decode(strip_tags($value['rendered']));
   }
-  drupal_json($matches);
+  return $options;
 }
 
 /**
- * Fetch an array of all candidate referenced users, for use in presenting the selection form to the user.
+ * Fetch an array of all candidate referenced users.
+ *
+ * This info is used in various places (aloowed values, autocomplete results,
+ * input validation...). Some of them only need the uids, others nid + names,
+ * others yet uid + names + rendered row (for display in widgets).
+ * The array we return contains all the potentially needed information, and lets
+ * consumers use the parts they actually need.
+ *
+ * @param $field
+ *   The field description.
+ * @param $string
+ *   Optional string to filter titles on (used by autocomplete)
+ * @param $exact_string
+ *   Optional: should the title filter be an exact match.
+ *
+ * @return
+ *   An array of valid nodes in the form:
+ *   array(
+ *     uid => array(
+ *       'title' => The user name,
+ *       'rendered' => The text to display in widgets (can be HTML)
+ *     ),
+ *     ...
+ *   )
  */
 function _userreference_potential_references($field, $string = '', $uid = NULL) {
+  static $results = array();
+
+  if (!isset($results[$field['field_name']][$string][$uid])) {
+    $references = FALSE;
+    if (module_exists('views') && !empty($field['advanced_view']) && $field['advanced_view'] != '--') {
+      $references = _userreference_potential_references_views($field, $string, $uid);
+    }
+    // If the view doesn't exist, we got FALSE, and fallback to the regular 'standard mode'.
+
+    if ($references === FALSE) {
+      $references = _userreference_potential_references_standard($field, $string, $uid);
+    }
+
+    // Store the results.
+    $results[$field['field_name']][$string][$uid] = $references;
+  }
+
+  return $results[$field['field_name']][$string][$uid];
+}
+
+/**
+ * Helper function for _userreference_potential_references():
+ * case of Views-defined referenceable users.
+ */
+function _userreference_potential_references_views($field, $string = '', $uid = NULL) {
+  $view_name = $field['advanced_view'];
+
+  if ($view = views_get_view($view_name)) {
+    // We add a display, and let it derive from the 'default' display.
+    // TODO: We should let the user pick a display in the fields settings - sort of requires AHAH...
+    $display = $view->add_display('userreference_simple');
+    $view->set_display($display);
+
+    // TODO from merlinofchaos on IRC : arguments using summary view can defeat the style setting.
+    // We might also need to check if there's an argument, and set *its* style_plugin as well.
+    $view->display_handler->set_option('style_plugin', 'userreference_php_array');
+    $view->display_handler->set_option('row_plugin', 'fields');
+
+    // Get arguments for the view.
+    if (!empty($field['advanced_view_args'])) {
+      // TODO: Support Tokens using token.module ?
+      $view_args = array_map('trim', explode(',', $field['advanced_view_args']));
+    }
+    else {
+      $view_args = array();
+    }
+
+    // We do need name field, so add it if not present (unlikely, but...)
+    $fields = $view->get_items('field', $display);
+    if (!isset($fields['name'])) {
+      $view->add_item($display, 'field', 'users', 'name');
+    }
+    if ($string !== '') {
+      // Add an instance of the 'name' filter.
+      $options = array('value' => $string, 'operator' => 'starts');
+      $id = $view->add_item($display, 'filter', 'users', 'name', $options);
+    }
+
+    // If not set, make all fields inline and define a separator.
+    $options = $view->display_handler->get_option('row_options');
+    if (empty($options['inline'])) {
+      $options['inline'] = drupal_map_assoc(array_keys($view->get_items('field', $display)));
+    }
+    if (empty($options['separator'])) {
+      $options['separator'] = '-';
+    }
+    $view->display_handler->set_option('row_options', $options);
+
+    // Make sure the query is not cached
+    $view->is_cacheable = FALSE;
+
+    // Get the results.
+    $result = $view->execute_display($display, $view_args);
+  }
+  else {
+    $result = FALSE;
+  }
+
+  return $result;
+}
+
+/**
+ * Helper function for _userreference_potential_references():
+ * referenceable users defined by user role and status
+ */
+function _userreference_potential_references_standard($field, $string = '', $uid = NULL) {
   $where = array();
   $args = array();
   $join = array();
@@ -516,6 +660,22 @@ function _userreference_filter_handler($op, $filterinfo) {
   $options = views_handler_filter_usercurrent();
   $options = $options + _userreference_potential_references($filterinfo['extra']['field']);
   return $options;
+}
+
+/**
+ * Menu callback; Retrieve a pipe delimited string of autocomplete suggestions for existing users
+ */
+function userreference_autocomplete($field_name, $string = '') {
+  $fields = content_fields();
+  $field = $fields[$field_name];
+  $matches = array();
+
+  $references = _userreference_potential_references($field, $string);
+  foreach ($references as $id => $row) {
+    // Add a class wrapper for a few required CSS overrides.
+    $matches[$row['title']] = '<div class="reference-autocomplete">'. $row['rendered'] . '</div>';
+  }
+  drupal_json($matches);
 }
 
 /**

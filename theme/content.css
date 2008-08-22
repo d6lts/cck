@@ -14,6 +14,7 @@
   visibility:hidden;
 }
 
+/* Node form display */
 .node-form .content-multiple-table td.content-multiple-drag {
   width:30px;
   padding-right:0;
@@ -32,6 +33,21 @@
 }
 .node-form .text {
   width:auto;
+}
+
+/* CSS overrides for Views-based autocomplete results.
+  - #autocomplete uses "white-space:pre", which is no good with
+    Views' template-based rendering
+  - Field titles are rendered with <label> in default templates,
+    but we don't want the 'form' styling it gets under .form-item
+*/
+.form-item #autocomplete .reference-autocomplete {
+  white-space:normal;
+}
+
+.form-item #autocomplete .reference-autocomplete label {
+  display:inline;
+  font-weight:normal;
 }
 
 /* 'Manage fields' overview */
