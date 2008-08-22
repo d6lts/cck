@@ -697,13 +697,16 @@ function _nodereference_potential_references_views($field, $string = '', $exact_
   if ($view = views_get_view($view_name)) {
     // We add a display, and let it derive from the 'default' display.
     // TODO: We should let the user pick a display in the fields settings - sort of requires AHAH...
-    $display = $view->add_display('nodereference_simple');
+    $display = $view->add_display('content_simple');
     $view->set_display($display);
 
     // TODO from merlinofchaos on IRC : arguments using summary view can defeat the style setting.
     // We might also need to check if there's an argument, and set *its* style_plugin as well.
-    $view->display_handler->set_option('style_plugin', 'nodereference_php_array');
+    $view->display_handler->set_option('style_plugin', 'content_php_array_autocomplete');
     $view->display_handler->set_option('row_plugin', 'fields');
+    // Used in content_plugin_style_php_array::render(), to get
+    // the 'field' to be used as title.
+    $view->display_handler->set_option('content_title_field', 'title');
 
     // Get arguments for the view.
     if (!empty($field['advanced_view_args'])) {

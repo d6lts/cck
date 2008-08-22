@@ -641,3 +641,85 @@ function theme_content_view_multiple_field($items, $field, $values) {
   }
   return $output;
 }
+
+/**
+ * Implementation of hook_views_plugins.
+ *
+ * Defines some plugins used by the Views modes for
+ * nodereference and userreference.
+ */
+function content_views_plugins() {
+  $plugins = array(
+    'module' => 'content', // This just tells our themes are elsewhere.
+    'display' => array(
+      'content_simple' => array(
+        // Those strings are not translated for now.
+        // We'll need to change that if / when we remove 'no ui'
+        'title' => 'Simple', // TODO: better name ? (currently not displayed anyway)
+        'help' => 'Destination-agnostic display. Mostly useful for programmatic views.',
+        'no ui' => TRUE, // Programmatic use only.
+        'handler' => 'content_plugin_display_simple',
+        'uses hook menu' => FALSE,
+        'use ajax' => FALSE,
+        'use pager' => FALSE,
+        'accept attachments' => FALSE,
+      ),
+    ),
+    'style' => array(
+      'content_php_array_autocomplete' => array(
+        // Those strings are not translated for now.
+        // We'll need to change that if / when we remove 'no ui'
+        'title' => 'Results array (with title)',
+        'help' => 'Returns the view as a PHP array of names + rendered rows.',
+        'handler' => 'content_plugin_style_php_array',
+        'no ui' => TRUE, // Programmatic use only.
+        'uses row plugin' => TRUE,
+        'uses fields' => TRUE,
+        'type' => 'content_simple',
+        'even empty' => TRUE,
+      ),
+    ),
+  );
+  return $plugins;
+}
+
+/**
+ * Handler for 'content_simple' display.
+ */
+class content_plugin_display_simple extends views_plugin_display {
+  function execute() {
+    return $this->view->render($this->display->id);
+  }
+
+  function render() {
+    return !empty($this->view->result) || !empty($this->view->style_plugin->definition['even empty']) ? $this->view->style_plugin->render($this->view->result) : '';
+  }
+}
+
+/**
+ * Handler for 'content_php_array_autocomplete' style.
+ */
+class content_plugin_style_php_array extends views_plugin_style {
+  function render() {
+    $results = array();
+
+    // Group the rows according to the grouping field, if specified.
+    $sets = $this->render_grouping($this->view->result, $this->options['grouping']);
+
+    $base_field = $this->view->base_field;
+    $title_field = $this->display->display_options['content_title_field'];
+    $title_field_alias = $this->view->field[$title_field]->field_alias;
+
+    // TODO : We don't display grouping info for now.
+    // Could be useful for select widget, though.
+    foreach ($sets as $title => $records) {
+      foreach ($records as $label => $row) {
+        $results[$row->{$base_field}] = array(
+          'title' => $row->{$title_field_alias},
+          'rendered' => $this->row_plugin->render($row),
+        );
+      }
+    }
+    return $results;
+  }
+}
