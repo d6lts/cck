@@ -79,26 +79,4 @@ class nodereference_plugin_style_php_array extends views_plugin_style {
     }
     return $results;
   }
-
-//  function render() {
-//    $results = array();
-//    if (empty($this->row_plugin)) {
-//      vpr('nodereference_plugin_style_results_array: Missing row plugin');
-//      return $results;
-//    }
-//
-//    // Group the rows according to the grouping field, if specified.
-//    $sets = $this->render_grouping($this->view->result, $this->options['grouping']);
-//
-//    // Render each group separately.
-//    $base_field = $this->view->base_field;
-//    foreach ($sets as $title => $records) {
-//      $rows = array();
-//      foreach ($records as $label => $row) {
-//        $rows[$row->{$base_field}] = $this->row_plugin->render($row);
-//      }
-//      $results[$title] = $rows;
-//    }
-//    return $results;
-//  }
 }
