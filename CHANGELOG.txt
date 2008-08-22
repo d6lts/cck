@@ -11,6 +11,7 @@ CCK 6.2-dev
 - Views integration: prevent empty links for the 'no value' items in summaries.
 - #296748 Text: Fix PHP warning when $node->build_mode not set.
 - #297915 Fix content_copy.
+- #298674 Content copy doesn't import all type properties.
 - #293471 Remove fieldgroup selection on field settings form.
 
 CCK 6.2.rc6
