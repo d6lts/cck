@@ -139,8 +139,8 @@ function text_field_settings($op, $field) {
         $table_alias = content_views_tablename($field);
 
         // Swap the filter handler to the 'in' operator.
-        $data[$table_alias][$field['field_name'] .'_value']['filter']['handler'] = 'views_handler_filter_many_to_one_content';
-        $data[$table_alias][$field['field_name'] .'_value']['argument']['handler'] = 'views_handler_argument_many_to_one_content';
+        $data[$table_alias][$field['field_name'] .'_value']['filter']['handler'] = 'content_handler_filter_many_to_one';
+        $data[$table_alias][$field['field_name'] .'_value']['argument']['handler'] = 'content_handler_argument_many_to_one';
         return $data;
       }
   }

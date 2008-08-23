@@ -79,21 +79,21 @@ function content_views_field_views_data($field) {
         case 'tinyint':
         case 'bigint':
         case 'serial':
-          $filters[] = 'views_handler_filter_numeric_content';
-          $arguments[] = 'views_handler_argument_numeric_content';
+          $filters[] = 'content_handler_filter_numeric';
+          $arguments[] = 'content_handler_argument_numeric';
           break;
         case 'numeric':
         case 'float':
-          $filters[] = class_exists('views_handler_filter_float') ? 'views_handler_filter_float_content' : 'views_handler_filter_numeric_content';
-          $arguments[] = 'views_handler_argument_numeric_content';
+          $filters[] = class_exists('views_handler_filter_float') ? 'content_handler_filter_float' : 'content_handler_filter_numeric';
+          $arguments[] = 'content_handler_argument_numeric';
           break;
 
         case 'text':
         case 'blob':
           // TODO add markup handlers for these types
         default:
-          $filters[] = 'views_handler_filter_string_content';
-          $arguments[] = 'views_handler_argument_string_content';
+          $filters[] = 'content_handler_filter_string';
+          $arguments[] = 'content_handler_argument_string';
           break;
       }
     }
@@ -105,7 +105,7 @@ function content_views_field_views_data($field) {
       'field' => array(
         'field' => $columns[0],
         'table' => $db_info['table'],
-        'handler' => 'views_handler_field_content_multiple',
+        'handler' => 'content_handler_field_multiple',
         'click sortable' => $sorts[0],
         'additional fields' => $columns,
         'content_field_name' => $field['field_name'],
@@ -141,7 +141,7 @@ function content_views_field_views_data($field) {
       $data[$columns[0]]['sort'] = array(
         'field' => $columns[0],
         'table' => $db_info['table'],
-        'handler' => 'views_handler_sort_content',
+        'handler' => 'content_handler_sort',
         'additional fields' => $columns,
         'content_field_name' => $field['field_name'],
         'allow empty' => TRUE,
@@ -157,7 +157,7 @@ function content_views_field_views_data($field) {
  * The subclass simply adds properties,
  * for field-specific subclasses to use if they need to.
  */
-class views_handler_filter_string_content extends views_handler_filter_string {
+class content_handler_filter_string extends views_handler_filter_string {
   var $content_field;
 
   function construct() {
@@ -171,7 +171,7 @@ class views_handler_filter_string_content extends views_handler_filter_string {
  * The subclass simply adds properties,
  * for field-specific subclasses to use if they need to.
  */
-class views_handler_filter_numeric_content extends views_handler_filter_numeric {
+class content_handler_filter_numeric extends views_handler_filter_numeric {
   var $content_field;
 
   function construct() {
@@ -186,7 +186,7 @@ class views_handler_filter_numeric_content extends views_handler_filter_numeric 
  * for field-specific subclasses to use if they need to.
  */
 if (class_exists('views_handler_filter_float')) {
-  class views_handler_filter_float_content extends views_handler_filter_float {
+  class content_handler_filter_float extends views_handler_filter_float {
     var $content_field;
 
     function construct() {
@@ -201,7 +201,7 @@ if (class_exists('views_handler_filter_float')) {
  * The subclass simply adds properties,
  * for field-specific subclasses to use if they need to.
  */
-class views_handler_filter_many_to_one_content extends views_handler_filter_many_to_one {
+class content_handler_filter_many_to_one extends views_handler_filter_many_to_one {
   var $content_field;
 
   function construct() {
@@ -231,7 +231,7 @@ class views_handler_filter_many_to_one_content extends views_handler_filter_many
  * The subclass simply adds properties,
  * for field-specific subclasses to use if they need to.
  */
-class views_handler_sort_content extends views_handler_sort {
+class content_handler_sort extends views_handler_sort {
   var $content_field;
 
   function construct() {
@@ -246,7 +246,7 @@ class views_handler_sort_content extends views_handler_sort {
  * The subclass simply adds properties,
  * for field-specific subclasses to use if they need to.
  */
-class views_handler_argument_content extends views_handler_argument {
+class content_handler_argument extends views_handler_argument {
   var $content_field;
 
   function construct() {
@@ -261,7 +261,7 @@ class views_handler_argument_content extends views_handler_argument {
  * The subclass simply adds properties,
  * for field-specific subclasses to use if they need to.
  */
-class views_handler_argument_string_content extends views_handler_argument_string {
+class content_handler_argument_string extends views_handler_argument_string {
   var $content_field;
 
   function construct() {
@@ -276,7 +276,7 @@ class views_handler_argument_string_content extends views_handler_argument_strin
  * The subclass simply adds properties,
  * for field-specific subclasses to use if they need to.
  */
-class views_handler_argument_numeric_content extends views_handler_argument_numeric {
+class content_handler_argument_numeric extends views_handler_argument_numeric {
   var $content_field;
 
   function construct() {
@@ -287,7 +287,7 @@ class views_handler_argument_numeric_content extends views_handler_argument_nume
   }
 }
 
-class views_handler_argument_many_to_one_content extends views_handler_argument_many_to_one {
+class content_handler_argument_many_to_one extends views_handler_argument_many_to_one {
   var $content_field;
 
   function construct() {
@@ -324,9 +324,9 @@ class views_handler_argument_many_to_one_content extends views_handler_argument_
  *
  * Fields could extend this class if they want field and formatter handling
  * but don't want the multiple value grouping options created by
- * views_handler_field_content_multiple.
+ * content_handler_field_multiple.
  */
-class views_handler_field_content extends views_handler_field_node {
+class content_handler_field extends views_handler_field_node {
   var $content_field;
 
   function construct() {
@@ -450,7 +450,7 @@ class views_handler_field_content extends views_handler_field_node {
  * Fields that want multiple value grouping options in addition to basic
  * field and formatter handling can extend this class.
  */
-class views_handler_field_content_multiple extends views_handler_field_content {
+class content_handler_field_multiple extends content_handler_field {
   var $defer_query;
 
   function options(&$options) {
@@ -582,7 +582,7 @@ class views_handler_field_content_multiple extends views_handler_field_content {
   }
 
   function render($values) {
-    // If this is not a grouped field, use views_handler_field_content's render().
+    // If this is not a grouped field, use content_handler_field::render().
     if (!$this->defer_query || empty($this->field_values)) {
       return parent::render($values);
     }

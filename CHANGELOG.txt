@@ -16,6 +16,7 @@ CCK 6.2-dev
 - #295556 by CPyle - Userreference: let referenceable users be defined by a View.
 - Userreference: Add 'Radios / checkboxes' widget.
 - Userref / Noderef : Add a 'none' choice for non-required, single fields with 'Radios / checkboxes' widget.
+- #298823 Views integration: do not step into views_* namespace.
 
 CCK 6.2.rc6
 ===========
