@@ -302,7 +302,7 @@ function userreference_autocomplete($field_name, $string = '') {
   $field = $fields[$field_name];
 
   $matches = array();
-  if ($string) {
+  if ($string !== '') {
     foreach (_userreference_potential_references($field, $string) as $uid => $name) {
       $matches[$name] = check_plain($name);
     }
@@ -319,12 +319,12 @@ function _userreference_potential_references($field, $string = '', $uid = NULL) 
   $args = array();
   $join = array();
 
-  if (!empty($string)) {
+  if ($string !== '') {
     $where[] = "LOWER(name) LIKE LOWER('%s%%')";
     $args[] = $string;
   }
   elseif (!empty($uid) && is_numeric($uid)) {
-    $where[] = "u.uid = $uid";    
+    $where[] = "u.uid = $uid";
   }
   else {
     $where[] = "u.uid > 0";
@@ -377,7 +377,7 @@ function _userreference_filter_handler($op, $filterinfo) {
 function userreference_user($op, &$edit, &$account, $category = NULL) {
   switch ($op) {
     case 'load':
-      // Only add links if we are on the user 'view' page.      
+      // Only add links if we are on the user 'view' page.
       if (arg(0) != 'user' || arg(2)) {
         return;
       }

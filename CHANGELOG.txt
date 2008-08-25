@@ -13,6 +13,7 @@
 - #257250 by bangpound, sun, JohnAlbin - Panels integration: formatter not properly set.
 - #256178 by douggreen - Text: fix warnings around views argument handler.
 - #165314 by sleepcamel - Views integration: fix blank links in summary view.
+- #299698 - fix userref autocomplete when typed string is '0'
 
 5--1.7
 ======
