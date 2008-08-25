@@ -3,14 +3,14 @@
 # LANGUAGE translation of Drupal (modules-text)
 # Copyright YEAR NAME <EMAIL@ADDRESS>
 # Generated from files:
-#  text.module,v 1.95.2.11 2008/08/08 16:55:43 yched
+#  text.module,v 1.95.2.16 2008/08/23 00:12:19 yched
 #  text.info,v 1.9 2008/04/23 18:02:31 dww
 #
 #, fuzzy
 msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
-"POT-Creation-Date: 2008-08-10 10:22+0200\n"
+"POT-Creation-Date: 2008-08-25 22:44+0200\n"
 "PO-Revision-Date: YYYY-mm-DD HH:MM+ZZZZ\n"
 "Last-Translator: NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <EMAIL@ADDRESS>\n"
@@ -23,12 +23,48 @@ msgstr ""
 msgid "Store text in the database."
 msgstr ""
 
-#: modules/text/text.module:164
+#: modules/text/text.module:66
+msgid "Filtered text (user selects input format)"
+msgstr ""
+
+#: modules/text/text.module:69
+msgid "Text processing"
+msgstr ""
+
+#: modules/text/text.module:75
+msgid "Maximum length"
+msgstr ""
+
+#: modules/text/text.module:78
+msgid "The maximum length of the field in characters. Leave blank for an unlimited size."
+msgstr ""
+
+#: modules/text/text.module:165
 msgid "%name: the value may not be longer than %max characters."
 msgstr ""
 
-#: modules/text/text.module:268
+#: modules/text/text.module:212
+msgid "Trimmed"
+msgstr ""
+
+#: modules/text/text.module:270
 msgid "Text area (multiple rows)"
+msgstr ""
+
+#: modules/text/text.module:322
+msgid "Size of textfield"
+msgstr ""
+
+#: modules/text/text.module:331
+msgid "Rows"
+msgstr ""
+
+#: modules/text/text.module:348
+msgid "\"Rows\" must be a positive integer."
+msgstr ""
+
+#: modules/text/text.module:355
+msgid "\"Size\" must be a positive integer."
 msgstr ""
 
 #: modules/text/text.module:0

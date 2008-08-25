@@ -3,14 +3,16 @@
 # LANGUAGE translation of Drupal (modules-optionwidgets)
 # Copyright YEAR NAME <EMAIL@ADDRESS>
 # Generated from files:
-#  optionwidgets.module,v 1.69.2.9 2008/07/14 15:02:16 yched
+#  optionwidgets.module,v 1.69.2.10 2008/08/22 23:32:46 yched
 #  optionwidgets.info,v 1.7 2008/04/23 18:02:24 dww
+#  text.module,v 1.95.2.16 2008/08/23 00:12:19 yched
+#  text.info,v 1.9 2008/04/23 18:02:31 dww
 #
 #, fuzzy
 msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
-"POT-Creation-Date: 2008-08-10 10:22+0200\n"
+"POT-Creation-Date: 2008-08-25 22:44+0200\n"
 "PO-Revision-Date: YYYY-mm-DD HH:MM+ZZZZ\n"
 "Last-Translator: NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <EMAIL@ADDRESS>\n"
@@ -39,11 +41,11 @@ msgstr ""
 msgid "Single on/off checkbox"
 msgstr ""
 
-#: modules/optionwidgets/optionwidgets.module:406
+#: modules/optionwidgets/optionwidgets.module:408
 msgid "N/A"
 msgstr ""
 
-#: modules/optionwidgets/optionwidgets.module:410
+#: modules/optionwidgets/optionwidgets.module:412
 msgid "- None -"
 msgstr ""
 
@@ -57,5 +59,9 @@ msgstr ""
 
 #: modules/optionwidgets/optionwidgets.info:0
 msgid "Defines selection, check box and radio button widgets for text and numeric fields."
+msgstr ""
+
+#: modules/text/text.module:49 modules/text/text.info:0
+msgid "Text"
 msgstr ""
 

@@ -7,13 +7,13 @@
 #  content.crud.inc,v 1.76.2.8 2008/07/27 04:04:14 yched
 #  content.node_form.inc,v 1.7.2.10 2008/07/07 13:07:32 yched
 #  content.token.inc,v 1.5.2.1 2008/08/05 18:10:27 yched
-#  content.views.inc,v 1.68.2.9 2008/07/25 00:51:53 yched
+#  content.views.inc,v 1.68.2.17 2008/08/23 00:12:19 yched
 #
 #, fuzzy
 msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
-"POT-Creation-Date: 2008-08-10 10:22+0200\n"
+"POT-Creation-Date: 2008-08-25 22:44+0200\n"
 "PO-Revision-Date: YYYY-mm-DD HH:MM+ZZZZ\n"
 "Last-Translator: NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <EMAIL@ADDRESS>\n"
@@ -330,10 +330,6 @@ msgstr ""
 msgid "Unlimited"
 msgstr ""
 
-#: includes/content.admin.inc:1057
-msgid "Save field settings"
-msgstr ""
-
 #: includes/content.admin.inc:1146
 msgid "The default value PHP code returned an incorrect value.<br/>Expected format: <pre>!sample</pre> Returned value: @value"
 msgstr ""
@@ -448,39 +444,43 @@ msgstr ""
 msgid "Appears in: @types"
 msgstr ""
 
-#: includes/content.views.inc:317
+#: includes/content.views.inc:125
+msgid "<No value>"
+msgstr ""
+
+#: includes/content.views.inc:366
 msgid "Format"
 msgstr ""
 
-#: includes/content.views.inc:329
+#: includes/content.views.inc:378
 msgid "None"
 msgstr ""
 
-#: includes/content.views.inc:330
+#: includes/content.views.inc:379
 msgid "Widget label (@label)"
 msgstr ""
 
-#: includes/content.views.inc:331
+#: includes/content.views.inc:380
 msgid "Custom"
 msgstr ""
 
-#: includes/content.views.inc:337
+#: includes/content.views.inc:386
 msgid "Custom label"
 msgstr ""
 
-#: includes/content.views.inc:431
+#: includes/content.views.inc:480
 msgid "Group multiple values"
 msgstr ""
 
-#: includes/content.views.inc:437
+#: includes/content.views.inc:486
 msgid "Show @count value(s)"
 msgstr ""
 
-#: includes/content.views.inc:446
+#: includes/content.views.inc:497
 msgid "starting from @count"
 msgstr ""
 
-#: includes/content.views.inc:455
+#: includes/content.views.inc:508
 msgid "Reversed (start from last values)"
 msgstr ""
 
