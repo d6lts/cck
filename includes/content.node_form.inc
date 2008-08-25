@@ -39,10 +39,29 @@ function content_field_form(&$form, &$form_state, $field, $get_delta = NULL) {
   $node = $form['#node'];
   $addition = array();
   $form_element = array();
+  $field_name = $field['field_name'];
+  
+  // See if access to this form element is restricted, 
+  // if so, skip widget processing and just set the value.
+  $access = TRUE;
+  $field_access = module_invoke_all('field_access', 'edit', $field);
+  foreach ($field_access as $value) {
+    if (empty($value)) {
+      $access = FALSE;
+    }
+  }
+  if (!$access) {
+    $addition[$field_name] = array(
+      '#access' => $access,
+      '#type' => 'value',
+      '#value' => $node->$field_name,
+      );
+    return $addition;
+  }
+  
   // TODO: is the "if (function_exists($function)) {" needed ?
   // defining the $function here makes it unclear where it is actually called
   $function = $field['widget']['module'] .'_widget';
-  $field_name = $field['field_name'];
   if (function_exists($function)) {
     // Prepare the values to be filled in the widget.
     // We look in the following places:
@@ -115,6 +134,7 @@ function content_field_form(&$form, &$form_state, $field, $get_delta = NULL) {
         '#field_name' => $field['field_name'],
         '#tree' => TRUE,
         '#weight' => $field['widget']['weight'],
+        '#access' => $access,
         // TODO: what's the need for #count ? does not seem to be used anywhere ?
         '#count' => count($form_element),
       );

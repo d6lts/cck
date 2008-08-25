@@ -13,20 +13,6 @@ function content_permissions_perm() {
 }
 
 /**
- *  Implementation of hook_form_alter(). Remove inaccessible fields from node display.
- */
-function content_permissions_form_alter(&$form, $form_state, $form_id) {
-  if (isset($form['type']) && isset($form['#node']) && $form['type']['#value'] .'_node_form' == $form_id) {
-    $type = content_types($form['type']['#value']);
-    foreach ($type['fields'] as $field_name => $field) {
-      if (isset($form[$field_name])) {
-        $form[$field_name]['#access'] = user_access('edit '. $field_name);
-      }
-    }
-  }
-}
-
-/**
  *  Implementation of hook_nodeapi(). Remove inaccessible fields from node display.
  */
 function content_permissions_nodeapi(&$node, $op, $a3 = NULL, $a4 = NULL) {
@@ -38,6 +24,20 @@ function content_permissions_nodeapi(&$node, $op, $a3 = NULL, $a4 = NULL) {
       }
     }
   }
+}
+
+/**
+ *  Remove inaccessible fields from nodes.
+ * 
+ * @see content_field_form(). 
+ */
+function content_permissions_field_access($op, $field) {
+  switch ($op) {
+    case 'view':
+    case 'edit':
+      return user_access($op .' '. $field['field_name']);
+  }
+  return TRUE;
 }
 
 /**
