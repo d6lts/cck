@@ -18,6 +18,7 @@ CCK 6.2-dev
 - Userref / Noderef : Add a 'none' choice for non-required, single fields with 'Radios / checkboxes' widget.
 - #298823 Views integration: do not step into views_* namespace.
 - #294797 New $FIELD_NAME_rendered and $GROUP_NAME_rendered variables for node.tpl.php.
+- #299698 Userreference: autocompletion query when typed string is '0'.
 
 CCK 6.2.rc6
 ===========

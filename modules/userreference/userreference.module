@@ -670,7 +670,7 @@ function _userreference_potential_references_standard($field, $string = '', $uid
   $args = array();
   $join = array();
 
-  if (!empty($string)) {
+  if ($string !== '') {
     $where[] = "LOWER(name) LIKE LOWER('%s%%')";
     $args[] = $string;
   }
