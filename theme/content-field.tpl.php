@@ -32,16 +32,16 @@
   <?php endif;?>
   <div class="field-items">
     <?php foreach ($items as $delta => $item) :
-            if (!$item['empty']) : ?>
-              <div class="field-item">
-                <?php if ($label_display == 'inline') { ?>
-                  <div class="field-label-inline<?php print($delta ? '' : '-first')?>">
-                    <?php print t($label) ?>:&nbsp;</div>
-                <?php } ?>
-                <?php print $item['view'] ?>
-              </div>
+      if (!$item['empty']) : ?>
+        <div class="field-item">
+          <?php if ($label_display == 'inline') { ?>
+            <div class="field-label-inline<?php print($delta ? '' : '-first')?>">
+              <?php print t($label) ?>:&nbsp;</div>
+          <?php } ?>
+          <?php print $item['view'] ?>
+        </div>
       <?php endif;
-          endforeach;?>
+    endforeach;?>
   </div>
 </div>
 <?php endif; ?>
