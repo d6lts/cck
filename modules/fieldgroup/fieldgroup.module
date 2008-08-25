@@ -428,66 +428,25 @@ function fieldgroup_nodeapi(&$node, $op, $teaser, $page) {
             $element['#attributes'] = array('class' => 'fieldgroup '. strtr($group['group_name'], '_', '-'));
             break;
         }
-        $node->content[$group_name] = $element;
 
         foreach ($group['fields'] as $field_name => $field) {
           if (isset($node->content[$field_name])) {
-            $node->content[$group_name][$field_name] = $node->content[$field_name];
+            $element[$field_name] = $node->content[$field_name];
             unset($node->content[$field_name]);
           }
         }
-      }
-      break;
 
-    case 'alter':
-      // Add back the formatted values in the 'view' element,
-      // so that node templates can use it.
-      $context = $teaser ? 'teaser' : 'full';
-      foreach (fieldgroup_groups($node->type) as $group_name => $group) {
-        foreach ($group['fields'] as $field_name => $field) {
-          if (isset($node->content[$group_name][$field['field_name']])) {
-            $element = $node->content[$group_name][$field['field_name']];
-            if ($element['#single']) {
-              // Single value formatter.
-              foreach (element_children($element['items']) as $delta) {
-                // Use isset() to avoid undefined index message on #children when field values are empty.
-                $node->{$field_name}[$delta]['view'] = isset($element['items'][$delta]['#children']) ? $element['items'][$delta]['#children'] : '';
-              }
-            }
-            else  {
-              // Multiple values formatter.
-              $node->{$field_name}[0]['view'] = $element['items']['#children'];
-            }
-          }
-          else {
-            $node->{$field_name}[0]['view'] = '';
-          }
-        }
+        // The wrapper lets us get the themed output for the whole group
+        // once the $node->content has been rendered.
+        // See fieldgroup_preprocess_node().
+        $wrapper = array(
+          'group' => $element,
+        );
+
+        $node->content[$group_name] = $wrapper;
       }
       break;
   }
-}
-
-/**
- * Process variables for fieldgroup.tpl.php.
- *
- * The $variables array contains the following arguments:
- * - $group_name
- * - $group_name_css
- * - $label
- * - $description
- * - $content
- *
- * @see fieldgroup.tpl.php
- */
-function template_preprocess_fieldgroup_simple(&$variables) {
-  $element = $variables['element'];
-
-  $variables['group_name'] = $element['#group_name'];
-  $variables['group_name_css'] = strtr($element['#group_name'], '_', '-');
-  $variables['label'] = isset($element['#title']) ? $element['#title'] : '';;
-  $variables['description'] = isset($element['#description']) ? $element['#description'] : '';;
-  $variables['content'] = isset($element['#children']) ? $element['#children'] : '';
 }
 
 /*
@@ -631,4 +590,41 @@ function theme_fieldgroup_fieldset($element) {
   }
 
   return '<fieldset'. drupal_attributes($element['#attributes']) .'>'. ($element['#title'] ? '<legend>'. $element['#title'] .'</legend>' : '') . (isset($element['#description']) && $element['#description'] ? '<div class="description">'. $element['#description'] .'</div>' : '') . (!empty($element['#children']) ? $element['#children'] : '') . (isset($element['#value']) ? $element['#value'] : '') ."</fieldset>\n";
+}
+
+/**
+ * Process variables for fieldgroup.tpl.php.
+ *
+ * The $variables array contains the following arguments:
+ * - $group_name
+ * - $group_name_css
+ * - $label
+ * - $description
+ * - $content
+ *
+ * @see fieldgroup.tpl.php
+ */
+function fieldgroup_preprocess_fieldgroup_simple(&$vars) {
+  $element = $vars['element'];
+
+  $vars['group_name'] = $element['#group_name'];
+  $vars['group_name_css'] = strtr($element['#group_name'], '_', '-');
+  $vars['label'] = isset($element['#title']) ? $element['#title'] : '';;
+  $vars['description'] = isset($element['#description']) ? $element['#description'] : '';;
+  $vars['content'] = isset($element['#children']) ? $element['#children'] : '';
+}
+
+/**
+ * Theme preprocess function for node.
+ *
+ * Adds $GROUP_NAME_rendered variables,
+ * containing the themed output for the whole group.
+ */
+function fieldgroup_preprocess_node(&$vars) {
+  $node = $vars['node'];
+
+  foreach (fieldgroup_groups($node->type) as $group_name => $group) {
+    // '#chilren' might not be set if the group is empty.
+    $vars[$group_name .'_rendered'] = isset($node->content[$group_name]['#children']) ? $node->content[$group_name]['#children'] : '';
+  }
 }

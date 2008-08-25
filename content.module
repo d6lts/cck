@@ -188,6 +188,24 @@ function content_menu() {
 }
 
 /**
+ * Hook elements().
+ *
+ * Used to add multiple value processing, validation, and themes.
+ *
+ * FAPI callbacks can be declared here, and the element will be
+ * passed to those callbacks.
+ *
+ * Drupal will automatically theme the element using a theme with
+ * the same name as the hook_elements key.
+ */
+function content_elements() {
+  return array(
+    'content_multiple_values' => array(),
+    'content_field' => array(),
+  );
+}
+
+/**
  * Implementation of hook_theme().
  */
 function content_theme() {
@@ -701,35 +719,56 @@ function content_field($op, &$node, $field, &$items, $teaser, $page) {
           $element['items'] += $format_info;
         }
 
-        $addition = array($field['field_name'] => $element);
+        // The wrapper lets us get the themed output for the whole field
+        // once the $node->content has been rendered.
+        // See op 'preprocess_node' below.
+        $wrapper = array(
+          'field' => $element,
+        );
+
+        $addition = array($field['field_name'] => $wrapper);
       }
       return $addition;
 
-    case 'alter':
-      // Add back the formatted values in the 'view' element,
-      // so that node templates can use it.
+    case 'preprocess_node':
+      $addition = array();
+
+      // The location of the field's rendered output depends on whether the
+      // field is in a fieldgroup or not.
       if (isset($node->content[$field['field_name']])) {
-        $element = $node->content[$field['field_name']];
-        if (!isset($element['#single'])) {
-          // If not set at all, this is a hidden or inaccessible field.
-          return;
-        }
-        elseif (!empty($element['#single'])) {
-          // Single value formatter.
-          foreach (element_children($element['items']) as $delta) {
-            // Use isset() to avoid undefined index message on #children when field values are empty.
-            $items[$delta]['view'] = isset($element['items'][$delta]['#children']) ? $element['items'][$delta]['#children'] : '';
+        $wrapper = $node->content[$field['field_name']];
+      }
+      elseif (module_exists('fieldgroup') && $group_name = fieldgroup_get_group($node->type, $field['field_name'])) {
+        $wrapper = $node->content[$group_name]['group'][$field['field_name']];
+      }
+
+      if ($wrapper) {
+        // Add $FIELD_NAME_rendered variables.
+        // '#chilren' is not set if the field is empty.
+        $addition[$field['field_name'] .'_rendered'] = isset($wrapper['#children']) ? $wrapper['#children'] : '';
+
+        // Add the formatted values in the 'view' key of the items.
+        $element = $wrapper['field'];
+        // '#single' is not set if the field is hidden or inaccessible.
+        if (isset($element['#single'])) {
+          if (!empty($element['#single'])) {
+            // Single value formatter.
+            foreach (element_children($element['items']) as $delta) {
+              // '#chilren' is not set if the field is empty.
+              $items[$delta]['view'] = isset($element['items'][$delta]['#children']) ? $element['items'][$delta]['#children'] : '';
+            }
+          }
+          elseif (isset($element['items']['#children']))  {
+            // Multiple values formatter.
+            $items[0]['view'] = $element['items']['#children'];
           }
         }
-        elseif (isset($element['items']['#children']))  {
-          // Multiple values formatter.
-          $items[0]['view'] = $element['items']['#children'];
-        }
+        // Affecting $items ends up into content_preprocess_node()'s
+        // $vars['node'], but we also need to update $FIELD_NAME variables.
+        $addition[$field['field_name']] = $items;
       }
-      else {
-        $items[0]['view'] = '';
-      }
-      break;
+
+      return $addition;
 
     case 'prepare translation':
       $addition = array();
@@ -1835,24 +1874,6 @@ function content_default_value(&$form, &$form_state, $field, $delta) {
 }
 
 /**
- * Hook elements().
- *
- * Used to add multiple value processing, validation, and themes.
- *
- * FAPI callbacks can be declared here, and the element will be
- * passed to those callbacks.
- *
- * Drupal will automatically theme the element using a theme with
- * the same name as the hook_elements key.
- */
-function content_elements() {
-  return array(
-    'content_multiple_values' => array(),
-    'content_field' => array(),
-  );
-}
-
-/**
  * Process variables for field.tpl.php.
  *
  * The $variables array contains the following arguments:
@@ -1864,7 +1885,7 @@ function content_elements() {
  *
  * @see field.tpl.php
  */
-function template_preprocess_content_field(&$variables) {
+function content_preprocess_content_field(&$variables) {
   $element = $variables['element'];
   $field = content_fields($element['#field_name'], $element['#node']->type);
 
@@ -1922,7 +1943,18 @@ function template_preprocess_content_field(&$variables) {
     ),
   );
   $variables = array_merge($variables, $additions);
+}
 
+/**
+ * Theme preprocess function for node.
+ *
+ * - Adds $FIELD_NAME_rendered variables
+ *   containing the themed output for the whole field.
+ * - Adds the formatted values in the 'view' key of the items.
+ */
+function content_preprocess_node(&$vars) {
+  $additions = _content_field_invoke_default('preprocess_node', $vars['node']);
+  $vars = array_merge($vars, $additions);
 }
 
 /**
