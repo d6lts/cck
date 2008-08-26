@@ -3,6 +3,7 @@
 CCK 6.2-dev
 ===========
 
+- #300108 Add group value back to field settings form so it will appear in the Content Copy export.
 - #283985 Force Content Copy export to use current field values to avoid storing mangled data back to field.
 - #298440 by Moonshine and KarenS: move form permission checking to content_field_form() and don't call hook_widget for users w/out permission.
 - #294726 by profix898 and yched: _content_type_info() does not reset on content type changes.
