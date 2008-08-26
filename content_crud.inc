@@ -91,7 +91,7 @@ function content_type_update($info) {
       drupal_set_message(t('Content fields table %old_name has been renamed to %new_name and field instances have been updated.', array('%old_name' => $old_name, '%new_name' => $new_name)));
     }
   }
-  // reset all content type info
+  // reset all content type info.
   content_clear_type_cache();
 }
 
@@ -102,6 +102,11 @@ function content_type_update($info) {
  *   value supplied by hook_node_type()
  */
 function content_type_delete($info) {
+  // Don't delete data for content-type defined by disabled modules.
+  if (!empty($info->disabled)) {
+    return;
+  }
+
   $type = content_types($info->type);
 
   foreach ($type['fields'] as $field) {
@@ -113,7 +118,7 @@ function content_type_delete($info) {
     drupal_set_message(t('The content fields table %name has been deleted.', array('%name' => $table)));
   }
 
-  // reset all content type info
+  // Reset all content type info.
   content_clear_type_cache();
 }
 
