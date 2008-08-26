@@ -16,8 +16,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: German translation of CCK\n"
-"POT-Creation-Date: 2008-08-10 10:22+0200\n"
-"PO-Revision-Date: 2008-08-10 11:16+0100\n"
+"POT-Creation-Date: 2008-08-25 22:44+0200\n"
+"PO-Revision-Date: 2008-08-26 08:33+0100\n"
 "Last-Translator: Alexander Hass\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -40,14 +40,6 @@ msgstr "Speichert die ID des ählichen Beitrages als ganzzahligen Wert."
 msgid "Content types that can be referenced"
 msgstr "Inhaltstypen, auf die verwiesen werden kann."
 
-#: modules/nodereference/nodereference.module:99
-msgid "Default Views"
-msgstr "Standardansichten"
-
-#: modules/nodereference/nodereference.module:102
-msgid "Existing Views"
-msgstr "Vorhandene Ansichten"
-
 #: modules/nodereference/nodereference.module:110
 msgid "Advanced - Nodes that can be referenced (View)"
 msgstr "Erweitert - Beiträge, auf die verwiesen werden kann (Ansicht)"
@@ -59,15 +51,7 @@ msgstr "Die zur Auswahl von Beiträgen zu verwendende Ansicht"
 #: modules/nodereference/nodereference.module:119
 #, fuzzy
 msgid "Choose the \"Views module\" view that selects the nodes that can be referenced.<br />Note:<ul><li>Only views that have fields will work for this purpose.</li><li>This will discard the \"Content types\" settings above. Use the view's \"filters\" section instead.</li><li>Use the view's \"fields\" section to display additional informations about candidate nodes on node creation/edition form.</li><li>Use the view's \"sort criteria\" section to determine the order in which candidate nodes will be displayed.</li></ul>"
-msgstr "Wähle die „Views-Modul“-Ansicht das die Beiträge auswählt, die Referenziert werden können.<br />Hinweis:<ul><li>Nur Ansichten mit Feldern werden für diesen Zweck nutzbar sein.</li><li>Dies wird die Einstellungen der obigen „Inhaltsttypen“ verwerfen. Stattdessen sollte hierfür der „Filter“-Bereich der Ansicht verwendet werden.</li><li>Um weitere Informationen über Beitragskandidaten für das Erstellungs-/Bearbeitungsformular anzuzeigen, kann das Ansichten Feld verwendet werden.</li><li>Um die Reihenfolge der Beitragskandidaten anzuzeigen sollte „Sortierkriterium“ von Ansichten verwendet werden.</li></ul>"
-
-#: modules/nodereference/nodereference.module:123
-msgid "View arguments"
-msgstr "Argumente anzeigen"
-
-#: modules/nodereference/nodereference.module:126
-msgid "Provide a comma separated list of arguments to pass to the view."
-msgstr "Eine kommagetrennte Liste von Argumenten angeben, welche an die Ansicht übergeben werden."
+msgstr "Wähle die „Views-Modul“-Ansicht das die Beiträge auswählt, die Referenziert werden können.<br />Hinweis:<ul><li>Nur Ansichten mit Feldern werden für diesen Zweck nutzbar sein.</li><li>Dies wird die obigen Einstellungen der „Inhaltsttypen“ verwerfen. Stattdessen sollte hierfür der „Filter“-Bereich der Ansicht verwendet werden.</li><li>Um weitere Informationen über Beitragskandidaten für das Erstellungs-/Bearbeitungsformular anzuzeigen, kann das Ansichten-Feld verwendet werden.</li><li>Um die Reihenfolge der Beitragskandidaten festzulegen sollte „Sortierkriterium“ von Ansichten verwendet werden.</li></ul>"
 
 #: modules/nodereference/nodereference.module:177
 msgid "%name: this post can't be referenced."
@@ -81,11 +65,11 @@ msgstr "Titel (Verweis)"
 msgid "Title (no link)"
 msgstr "Titel (kein Verweis)"
 
-#: modules/nodereference/nodereference.module:583
+#: modules/nodereference/nodereference.module:581
 msgid "%name: title mismatch. Please check your selection."
 msgstr "%name: Titel falsch. Bitte die Auswahl überprüfen."
 
-#: modules/nodereference/nodereference.module:590
+#: modules/nodereference/nodereference.module:588
 msgid "%name: found no valid post with that title."
 msgstr "%name: Kein gültiger Beitrag mit diesem Titel gefunden."
 
@@ -104,12 +88,4 @@ msgstr "Beitragsverweis"
 #: modules/nodereference/nodereference.info:0
 msgid "Defines a field type for referencing one node from another."
 msgstr "Definiert einen Feldtyp für den Verweis von einem Beitrag zu einem anderen."
-
-#~ msgid "Simple"
-#~ msgstr "Einfach"
-#~ msgid "Results array"
-#~ msgstr "Ergebnisarray"
-#~ msgid "Returns the view as a PHP array of titles + renderd rows."
-#~ msgstr ""
-#~ "Gibt die Ansicht als PHP-Array von Titeln + gerenderten Zeilen zurück."
 

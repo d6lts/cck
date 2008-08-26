@@ -16,8 +16,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: German translation of CCK\n"
-"POT-Creation-Date: 2008-08-10 10:22+0200\n"
-"PO-Revision-Date: 2008-08-10 11:17+0100\n"
+"POT-Creation-Date: 2008-08-25 22:44+0200\n"
+"PO-Revision-Date: 2008-08-26 08:42+0100\n"
 "Last-Translator: Alexander Hass\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -32,13 +32,49 @@ msgstr ""
 msgid "Store text in the database."
 msgstr "Text in der Datenbank speichern."
 
-#: modules/text/text.module:164
+#: modules/text/text.module:66
+msgid "Filtered text (user selects input format)"
+msgstr "Gefilterter Text (Benutzer wählt Eingabeformat aus)"
+
+#: modules/text/text.module:69
+msgid "Text processing"
+msgstr "Textverarbeitung"
+
+#: modules/text/text.module:75
+msgid "Maximum length"
+msgstr "Maximallänge"
+
+#: modules/text/text.module:78
+msgid "The maximum length of the field in characters. Leave blank for an unlimited size."
+msgstr "Die maximale Zeichenlänge des Feldes. Für eine unbegrenzte Länge freilassen."
+
+#: modules/text/text.module:165
 msgid "%name: the value may not be longer than %max characters."
 msgstr "%name: Der Wert darf nicht länger als %max Zeichen sein."
 
-#: modules/text/text.module:268
+#: modules/text/text.module:212
+msgid "Trimmed"
+msgstr "Getrimmt"
+
+#: modules/text/text.module:270
 msgid "Text area (multiple rows)"
 msgstr "Textfeld (mehrere Zeilen)"
+
+#: modules/text/text.module:322
+msgid "Size of textfield"
+msgstr "Größe des Textfeldes"
+
+#: modules/text/text.module:331
+msgid "Rows"
+msgstr "Zeilen"
+
+#: modules/text/text.module:348
+msgid "\"Rows\" must be a positive integer."
+msgstr "„Zeilen“ muss eine positive Zahl sein."
+
+#: modules/text/text.module:355
+msgid "\"Size\" must be a positive integer."
+msgstr "„Größe“ muss eine positive Zahl sein."
 
 #: modules/text/text.module:0
 msgid "text"

@@ -16,8 +16,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: German translation of CCK\n"
-"POT-Creation-Date: 2008-08-10 10:22+0200\n"
-"PO-Revision-Date: 2008-08-10 11:19+0100\n"
+"POT-Creation-Date: 2008-08-25 22:44+0200\n"
+"PO-Revision-Date: 2008-08-26 08:43+0100\n"
 "Last-Translator: Alexander Hass\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -351,10 +351,6 @@ msgstr "Anzahl von Werten"
 msgid "Unlimited"
 msgstr "Unbegrenzt"
 
-#: includes/content.admin.inc:1057
-msgid "Save field settings"
-msgstr "Feldeinstellungen speichern"
-
 #: includes/content.admin.inc:1146
 msgid "The default value PHP code returned an incorrect value.<br/>Expected format: <pre>!sample</pre> Returned value: @value"
 msgstr "Der Standardwert den PHP-Code bei ungültigen Werten zurückliefert<br/>Erwartetes Format: <pre>!sample</pre>zurückgegebener Wert : @value"
@@ -469,39 +465,43 @@ msgstr "Absoluter Pfadalias zu dem verwiesenen Benutzer."
 msgid "Appears in: @types"
 msgstr "Erscheint in: @types"
 
-#: includes/content.views.inc:317
+#: includes/content.views.inc:125
+msgid "<No value>"
+msgstr "<kein Wert>"
+
+#: includes/content.views.inc:366
 msgid "Format"
 msgstr "Format"
 
-#: includes/content.views.inc:329
+#: includes/content.views.inc:378
 msgid "None"
 msgstr "Keines"
 
-#: includes/content.views.inc:330
+#: includes/content.views.inc:379
 msgid "Widget label (@label)"
 msgstr "Steuerelement (@label)"
 
-#: includes/content.views.inc:331
+#: includes/content.views.inc:380
 msgid "Custom"
 msgstr "Benutzerdefiniert"
 
-#: includes/content.views.inc:337
+#: includes/content.views.inc:386
 msgid "Custom label"
 msgstr "Benutzerdefinierte Bezeichnung"
 
-#: includes/content.views.inc:431
+#: includes/content.views.inc:480
 msgid "Group multiple values"
 msgstr "Mehrfachwerte gruppieren"
 
-#: includes/content.views.inc:437
+#: includes/content.views.inc:486
 msgid "Show @count value(s)"
 msgstr "@count Werte anzeigen"
 
-#: includes/content.views.inc:446
+#: includes/content.views.inc:497
 msgid "starting from @count"
 msgstr "Beginnt bei @count"
 
-#: includes/content.views.inc:455
+#: includes/content.views.inc:508
 msgid "Reversed (start from last values)"
 msgstr "Umgedreht (Beginnt bei den letzten Werten)"
 

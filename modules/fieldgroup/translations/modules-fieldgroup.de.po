@@ -16,8 +16,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: German translation of CCK\n"
-"POT-Creation-Date: 2008-08-10 10:22+0200\n"
-"PO-Revision-Date: 2008-08-10 11:15+0100\n"
+"POT-Creation-Date: 2008-08-25 22:44+0200\n"
+"PO-Revision-Date: 2008-08-26 08:21+0100\n"
 "Last-Translator: Alexander Hass\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -95,14 +95,6 @@ msgstr "Die Gruppe %group_name wurde gelöscht."
 #: modules/fieldgroup/fieldgroup.module:293
 msgid "none"
 msgstr "Keine"
-
-#: modules/fieldgroup/fieldgroup.module:347
-msgid "Display in group"
-msgstr "Anzeigen in Gruppe"
-
-#: modules/fieldgroup/fieldgroup.module:350
-msgid "Select a group, in which the field will be displayed on the editing form."
-msgstr "Wählen Sie eine Gruppe aus, in der das Feld im Bearbeitungsformular angezeigt wird."
 
 #: modules/fieldgroup/fieldgroup.module:29
 msgid "Add group"

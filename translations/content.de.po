@@ -16,8 +16,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: German translation of CCK\n"
-"POT-Creation-Date: 2008-08-10 10:22+0200\n"
-"PO-Revision-Date: 2008-08-10 11:14+0100\n"
+"POT-Creation-Date: 2008-08-25 22:44+0200\n"
+"PO-Revision-Date: 2008-08-26 08:42+0100\n"
 "Last-Translator: Alexander Hass\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -76,71 +76,71 @@ msgstr "Die Anzeige von Feldern dieses Inhaltstyps konfigurieren, wenn dieser im
 msgid "Control the order of fields in the input form."
 msgstr "Die Reihenfolge der Felder im Eingabeformular steuern."
 
-#: content.module:431
+#: content.module:449
 msgid "This field is required."
 msgstr "Dieses Feld wird benötigt."
 
-#: content.module:435
+#: content.module:453
 msgid "!title: !required"
 msgstr "!title: !required"
 
-#: content.module:438
+#: content.module:456
 msgid "Order"
 msgstr "Reihenfolge"
 
-#: content.module:1609
+#: content.module:1648
 msgid "RSS Item"
 msgstr "RSS-Eintrag"
 
-#: content.module:1611
+#: content.module:1650
 msgid "Search Index"
 msgstr "Suchindex"
 
-#: content.module:1612
+#: content.module:1651
 msgid "Search Result"
 msgstr "Suchergebnis"
 
-#: content.module:1955;1962
+#: content.module:1987;1994
 msgid "Node module form."
 msgstr "Formular des Beitrag-Moduls."
 
-#: content.module:1969
+#: content.module:2001
 msgid "Language"
 msgstr "Sprache"
 
-#: content.module:1970
+#: content.module:2002
 msgid "Locale module form."
 msgstr "Formular des Locale-Moduls."
 
-#: content.module:1976
+#: content.module:2008
 msgid "Menu settings"
 msgstr "Menüeinstellungen"
 
-#: content.module:1977
+#: content.module:2009
 msgid "Menu module form."
 msgstr "Formular des Menü-Moduls."
 
-#: content.module:1983
+#: content.module:2015
 msgid "Taxonomy"
 msgstr "Taxonomie"
 
-#: content.module:1984
+#: content.module:2016
 msgid "Taxonomy module form."
 msgstr "Formular des Taxonomie-Moduls."
 
-#: content.module:1990
+#: content.module:2022
 msgid "File attachments"
 msgstr "Dateianhänge"
 
-#: content.module:1991
+#: content.module:2023
 msgid "Upload module form."
 msgstr "Formular des Upload-Moduls."
 
-#: content.module:513
+#: content.module:531
 msgid "Updating field type %type with module %module."
 msgstr "Feldtyp %type wird mit Modul %module aktualisiert."
 
-#: content.module:520
+#: content.module:538
 msgid "Updating widget type %type with module %module."
 msgstr "Widget %type wird mit Modul %module aktualisiert."
 
@@ -188,11 +188,4 @@ msgstr "Erlaubt dem Administrator, neue Inhaltstypen zu definieren."
 #: modules/userreference/userreference.info:0
 msgid "CCK"
 msgstr "CCK"
-
-#: examples/example_field.php:107
-#: examples/simple_field.php:115
-#: modules/text/text.module:49
-#: modules/text/text.info:0
-msgid "Text"
-msgstr "Text"
 

@@ -16,8 +16,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: German translation of CCK\n"
-"POT-Creation-Date: 2008-08-10 10:22+0200\n"
-"PO-Revision-Date: 2008-08-10 11:17+0100\n"
+"POT-Creation-Date: 2008-08-25 22:44+0200\n"
+"PO-Revision-Date: 2008-08-26 08:21+0100\n"
 "Last-Translator: Alexander Hass\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -56,79 +56,79 @@ msgstr "Speichert die Zahl in der Datenbank in einem Fließkommaformat."
 msgid "Minimum"
 msgstr "Minimum"
 
-#: modules/number/number.module:81
+#: modules/number/number.module:82
 msgid "Maximum"
 msgstr "Maximum"
 
-#: modules/number/number.module:88
+#: modules/number/number.module:90
 msgid "Precision"
 msgstr "Präzision"
 
-#: modules/number/number.module:89
+#: modules/number/number.module:91
 msgid "The total number of digits to store in the database, including those to the right of the decimal."
 msgstr "Die gesamte Anzahl der in der Datenbank zu speichernden Stellen, inclusive der rechts vom Dezimaltrennzeichen angegebenen."
 
-#: modules/number/number.module:95
+#: modules/number/number.module:97
 msgid "Scale"
 msgstr "Skalierung"
 
-#: modules/number/number.module:96
+#: modules/number/number.module:98
 msgid "The number of digits to the right of the decimal."
 msgstr "Die Anzahl der rechts vom Dezimaltrennzeichen angegebenen Stellen."
 
-#: modules/number/number.module:102
+#: modules/number/number.module:104
 msgid "Decimal marker"
 msgstr "Dezimalzeichen"
 
-#: modules/number/number.module:103
+#: modules/number/number.module:105
 msgid "The character users will input to mark the decimal point in forms."
 msgstr "Das von Benutzern in Formularen zu verwendende Zeichen zur Trennung von Dezimalenstellen."
 
-#: modules/number/number.module:109
+#: modules/number/number.module:111
 msgid "Prefix"
 msgstr "Präfix"
 
-#: modules/number/number.module:112
+#: modules/number/number.module:114
 msgid "Define a string that should be prefixed to the value, like $ or €. Leave blank for none. Separate singular and plural values with a pipe (pound|pounds)."
 msgstr "Eine Zeichenkette angeben, welche dem Wert vorrangestellt werden soll, z.b. $ oder €. Ansonsten freilassen. Werte für Einzahl und Mehrzahl mit einer Pipe trennen (Pfund|Pfunde)."
 
-#: modules/number/number.module:116
+#: modules/number/number.module:118
 msgid "Suffix"
 msgstr "Suffix"
 
-#: modules/number/number.module:119
+#: modules/number/number.module:121
 msgid "Define a string that should suffixed to the value, like m², m/s², kb/s. Leave blank for none. Separate singular and plural values with a pipe (pound|pounds)."
 msgstr "Eine Zeichenkette angeben, welche dem Wert angehängt werden soll, z.b. m², m/s², kb/s. Ansonsten freilassen. Werte für Einzahl und Mehrzahl mit einer Pipe trennen (Pfund|Pfunde)."
 
-#: modules/number/number.module:162
+#: modules/number/number.module:209
 msgid "\"Minimum\" must be a number."
 msgstr "„Minimum“ muss eine Zahl sein."
 
-#: modules/number/number.module:165
+#: modules/number/number.module:216
 msgid "\"Maximum\" must be a number."
 msgstr "„Maximum“ muss eine Zahl sein."
 
-#: modules/number/number.module:222
+#: modules/number/number.module:232
 msgid "%name: the value may be no smaller than %min."
 msgstr "%name: Der Wert darf nicht kleiner als %min sein."
 
-#: modules/number/number.module:225
+#: modules/number/number.module:235
 msgid "%name: the value may be no larger than %max."
 msgstr "%name: Der Wert darf nicht grösser als %max sein."
 
-#: modules/number/number.module:263
+#: modules/number/number.module:273
 msgid "unformatted"
 msgstr "unformatiert"
 
-#: modules/number/number.module:497
+#: modules/number/number.module:507
 msgid "Only numbers and decimals are allowed in %field. %start was changed to %value."
 msgstr "In %field sind nur Dezimalzahlen zulässig. %start wurde auf %value geändert."
 
-#: modules/number/number.module:519
+#: modules/number/number.module:529
 msgid "Only numbers are allowed in %field. %start was changed to %value."
 msgstr "In %field sind nur Zahlen zulässig. %start wurde auf %value geändert."
 
-#: modules/number/number.module:542
+#: modules/number/number.module:552
 msgid "Only numbers and the decimal character (%decimal) are allowed in %field. %start was changed to %value."
 msgstr "In %field sind nur Zahlen und das Dezimaltrennzeichen (%decimal) zulässig. %start wurde auf %value geändert."
 
