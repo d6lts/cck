@@ -193,7 +193,8 @@ function content_copy_export($form_values) {
       $widget_types = _content_widget_types();
       $widget_module = $widget_types[$field['widget']['type']]['module'];
       if (!empty($field_module) && module_exists($field_module) && !empty($widget_module) && module_exists($widget_module)) {
-        $field_state = array('values' => array('field_name' => $field_name , 'op' => t('Save field settings')));
+        $field_state = array('values' => content_field_instance_collapse($field));
+        $field_state['values']['op'] = t('Save field settings');
         drupal_execute('_content_admin_field', $field_state, $form_values['type_name'], $field_name);
       }
     }
