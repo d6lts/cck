@@ -23,6 +23,7 @@ CCK 6.2-dev
 - #294797 New $FIELD_NAME_rendered and $GROUP_NAME_rendered variables for node.tpl.php.
 - #299698 Userreference: autocompletion query when typed string is '0'.
 - #300236 Fix inconsistent schema for 'locked' column between install and updates.
+- #292872 Do not delete data for content types defined by disabled modules.
 
 CCK 6.2.rc6
 ===========

@@ -611,6 +611,11 @@ function content_type_update($info) {
  *
  */
 function content_type_delete($info) {
+  // Don't delete data for content-types defined by disabled modules.
+  if (!empty($info->disabled)) {
+    return;
+  }
+
   // TODO : What about inactive fields ?
   // Currently, content_field_instance_delete doesn't work on those...
   $fields = content_field_instance_read(array('type_name' => $info->type));
