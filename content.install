@@ -355,6 +355,16 @@ function content_update_6004(&$sandbox) {
 function content_update_6005() {
   $ret = array();
   drupal_load('module', 'content');
-  db_add_field($ret, content_field_tablename(), 'locked', array('type' => 'int', 'size' => 'tiny', 'default' => 0));
+  db_add_field($ret, content_field_tablename(), 'locked', array('type' => 'int', 'size' => 'tiny', 'not null' => TRUE, 'default' => 0));
+  return $ret;
+}
+
+/**
+ * Make sure the 'locked' column is NOT NULL (error in previous content_update_6005().
+ */
+function content_update_6006() {
+  $ret = array();
+  drupal_load('module', 'content');
+  db_change_field($ret, content_field_tablename(), 'locked', 'locked', array('type' => 'int', 'size' => 'tiny', 'not null' => TRUE, 'default' => 0));
   return $ret;
 }
