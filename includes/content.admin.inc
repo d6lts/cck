@@ -968,6 +968,23 @@ function _content_admin_field(&$form_state, $type_name, $field_name) {
 
   // Add handling for default value if not provided by field.
   if (content_callback('widget', 'default value', $field) == CONTENT_CALLBACK_DEFAULT) {
+    
+    // Store the original default value for use in programmed forms.
+    // Set '#default_value' instead of '#value' so programmed values
+    // can override whatever we set here.
+    $default_value = isset($field['widget']['default_value']) ? $field['widget']['default_value'] : array();
+    $form['widget']['default_value'] = array(
+      '#type' => 'value',
+      '#default_value' => $default_value,
+      );
+    $form['widget']['default_value_php'] = array(
+      '#type' => 'value',
+      '#default_value' => $field['widget']['default_value_php'],
+      );
+
+    // We can't tell at the time we build the form if this is a programmed
+    // form or not, so we always end up adding the default value widget
+    // even if we won't use it.
     $form['widget']['default_value_fieldset'] = array(
       '#type' => 'fieldset',
       '#title' => t('Default value'),
@@ -976,7 +993,6 @@ function _content_admin_field(&$form_state, $type_name, $field_name) {
     );
 
     // Default value widget.
-    $default_value = isset($field['widget']['default_value']) ? $field['widget']['default_value'] : array();
     $widget_form = array('#node' => (object) array('type' => $type_name));
     $widget_form_state = array('values' => array($field['field_name'] => $default_value));
     // Make sure the default value is not a required field.
@@ -1127,6 +1143,14 @@ function _content_admin_field_validate($form, &$form_state) {
   // If content.module is handling the default value,
   // validate the result using the field validation.
   if (content_callback('widget', 'default value', $field) == CONTENT_CALLBACK_DEFAULT) {
+
+    // If this is a programmed form, get rid of the default value widget, 
+    // we have the default values already.
+    if ($form['#programmed']) {
+      form_set_value(array('#parents' => array('default_value_widget')), NULL, $form_state);
+      return;
+  }
+
     if (isset($form_values['default_value_php']) &&
     ($php = trim($form_values['default_value_php']))) {
       ob_start();
