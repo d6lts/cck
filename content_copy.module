@@ -63,6 +63,7 @@ function content_copy_menu($may_cache) {
  */
 function content_copy_export_form($form_values = NULL) {
   include_once('./'. drupal_get_path('module', 'content') .'/content_admin.inc');
+  include_once('./'. drupal_get_path('module', 'content') .'/content_crud.inc');
   include_once('./'. drupal_get_path('module', 'node') .'/content_types.inc');
 
   $step = intval($form_values['step'] + 1);
@@ -175,7 +176,10 @@ function content_copy_export_form($form_values = NULL) {
  *   and save the form values as formatted text.
  */
 function content_copy_export($form_id, $form_values) {
-
+  include_once('./'. drupal_get_path('module', 'content') .'/content_admin.inc');
+  include_once('./'. drupal_get_path('module', 'content') .'/content_crud.inc');
+  include_once('./'. drupal_get_path('module', 'node') .'/content_types.inc');
+  
   // Set a global variable to tell when to intervene with form_alter().
   $GLOBALS['content_copy']['status'] = 'export';
 
@@ -206,7 +210,8 @@ function content_copy_export($form_id, $form_values) {
     $widget_module = $widget_types[$field['widget']['type']]['module'];
 
     if (!empty($field_module) && module_exists($field_module) && !empty($widget_module) && module_exists($widget_module)) {
-      drupal_execute('_content_admin_field', array(), $form_values['type_name'], $field_name);
+      $values = content_field_instance_collapse($field);      
+      drupal_execute('_content_admin_field', $values, $form_values['type_name'], $field_name);
     }
   }
 
