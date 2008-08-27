@@ -41,8 +41,8 @@
           <?php } ?>
           <?php print $item['view'] ?>
         </div>
-      <?php endif;
-      $count++;
+      <?php $count++;
+      endif;
     endforeach;?>
   </div>
 </div>
