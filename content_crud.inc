@@ -7,6 +7,80 @@
  */
 
 /**
+ * Expand field info to create field => widget info.
+ */
+function content_field_instance_expand($field) {
+  if (isset($field['widget'])) {
+    return $field;
+  }
+  $field['widget'] = !empty($field['widget_settings']) ? $field['widget_settings'] : array();
+  $field['widget']['label'] = !empty($field['label']) ? $field['label'] : $field['field_name'];
+  $field['widget']['weight'] = !empty($field['weight']) ? $field['weight'] : NULL;
+  $field['widget']['description'] = !empty($field['description']) ? $field['description'] : '';
+
+  if (!empty($field['widget_type'])) {
+    $field['widget']['type'] = $field['widget_type'];
+    $widget_types = _content_widget_types();
+    $field['widget']['module'] = isset($widget_types[$field['widget_type']]['module']) ? $widget_types[$field['widget_type']]['module'] : $field['widget_module'];
+  }
+  elseif (!empty($field['widget_module'])) {
+    $field['widget']['module'] = $field['widget_module'];
+  }
+
+  unset($field['widget_type']);
+  unset($field['weight']);
+  unset($field['label']);
+  unset($field['description']);
+  unset($field['widget_module']);
+  unset($field['widget_settings']);
+
+  // If content.module is handling the default value,
+  // initialize $widget_settings with default values,
+  if (isset($field['default_value']) && isset($field['default_value_php']) &&
+      content_callback('widget', 'default value', $field) == CONTENT_CALLBACK_DEFAULT) {
+    $field['widget']['default_value'] = !empty($field['default_value']) ? $field['default_value']  : NULL;
+    $field['widget']['default_value_php'] = !empty($field['default_value_php']) ? $field['default_value_php'] : NULL;
+    unset($field['default_value']);
+    unset($field['default_value_php']);
+  }
+  return $field;
+}
+
+/**
+ * Collapse field info from field => widget to flattened form values.
+ */
+function content_field_instance_collapse($field) {
+  if (!isset($field['widget'])) {
+    return $field;
+  }
+  $field['widget_settings'] = !empty($field['widget']) ? $field['widget'] : array();
+  $field['widget_type'] = !empty($field['widget']['type']) ? $field['widget']['type'] : '';
+  $field['weight'] = !empty($field['widget']['weight']) ? $field['widget']['weight'] : 0;
+  $field['label'] = !empty($field['widget']['label']) ? $field['widget']['label'] : $field['field_name'];
+  $field['description'] = !empty($field['widget']['description']) ? $field['widget']['description'] : '';
+  $field['type_name'] = !empty($field['type_name']) ? $field['type_name'] : '';
+
+  if (!empty($field['widget']['module'])) {
+    $widget_module = $field['widget']['module'];
+  }
+  elseif (!empty($field['widget']['type'])) {
+    $widget_types = _content_widget_types();
+    $widget_module = $widget_types[$field['widget']['type']]['module'];
+  }
+  else {
+    $widget_module = '';
+  }
+  $field['widget_module'] = $widget_module;
+  unset($field['widget_settings']['type']);
+  unset($field['widget_settings']['weight']);
+  unset($field['widget_settings']['label']);
+  unset($field['widget_settings']['description']);
+  unset($field['widget_settings']['module']);
+  unset($field['widget']);
+  return $field;
+}
+
+/**
  * Rebuild content type information from node tables.
  *
  *  Used to update CCK tables that might have missed changes made when CCK was disabled.
