@@ -24,6 +24,7 @@ CCK 6.2-dev
 - #299698 Userreference: autocompletion query when typed string is '0'.
 - #300236 Fix inconsistent schema for 'locked' column between install and updates.
 - #292872 Do not delete data for content types defined by disabled modules.
+- Do not display 'label' settings on 'advanced' subtab of 'Display fields'.
 
 CCK 6.2.rc6
 ===========

@@ -391,11 +391,13 @@ function content_admin_display_overview_form(&$form_state, $type_name, $contexts
     $form[$name] = array(
       'human_name' => array('#value' => check_plain($group['label'])),
     );
-    $form[$name]['label'] = array(
-      '#type' => 'select',
-      '#options' => $label_options,
-      '#default_value' => isset($defaults['label']) ? $defaults['label'] : 'above',
-    );
+    if ($contexts_selector == CONTENT_CONTEXTS_SIMPLE) {
+      $form[$name]['label'] = array(
+        '#type' => 'select',
+        '#options' => $label_options,
+        '#default_value' => isset($defaults['label']) ? $defaults['label'] : 'above',
+      );
+    }
     foreach ($contexts as $key => $title) {
       $form[$name][$key]['format'] = array(
         '#type' => 'select',
@@ -425,8 +427,12 @@ function content_admin_display_overview_form(&$form_state, $type_name, $contexts
 function theme_content_admin_display_overview_form($form) {
   $output = '';
   if (isset($form['#order'])) {
-    $contexts = _content_admin_display_contexts($form['#contexts']);
-    $header = array(t('Field'), t('Label'));
+    $contexts_selector = $form['#contexts'];
+    $contexts = _content_admin_display_contexts($contexts_selector);
+    $header = array(t('Field'));
+    if ($contexts_selector == CONTENT_CONTEXTS_SIMPLE) {
+      $header[] = t('Label');
+    }
     foreach ($contexts as $key => $title) {
       $header[] = $title;
     }
@@ -440,7 +446,9 @@ function theme_content_admin_display_overview_form($form) {
         $element['human_name']['#suffix'] = '</strong>';
       }
       $row[] = theme('indentation', isset($element['#depth']) ? $element['#depth'] : 0) . drupal_render($element['human_name']);
-      $row[] = drupal_render($element['label']);
+      if ($contexts_selector == CONTENT_CONTEXTS_SIMPLE) {
+        $row[] = drupal_render($element['label']);
+      }
       foreach ($contexts as $context => $title) {
         $row[] = drupal_render($element[$context]['format']);
       }
