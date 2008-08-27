@@ -31,9 +31,10 @@
     <div class="field-label"><?php print t($label) ?>:&nbsp;</div>
   <?php endif;?>
   <div class="field-items">
-    <?php foreach ($items as $delta => $item) :
+    <?php $count = 1;
+    foreach ($items as $delta => $item) :
       if (!$item['empty']) : ?>
-        <div class="field-item">
+        <div class="field-item <?php print ($count % 2 ? 'odd' : 'even') ?>">
           <?php if ($label_display == 'inline') { ?>
             <div class="field-label-inline<?php print($delta ? '' : '-first')?>">
               <?php print t($label) ?>:&nbsp;</div>
@@ -41,6 +42,7 @@
           <?php print $item['view'] ?>
         </div>
       <?php endif;
+      $count++;
     endforeach;?>
   </div>
 </div>

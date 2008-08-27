@@ -27,6 +27,7 @@ CCK 6.2-dev
 - #300236 Fix inconsistent schema for 'locked' column between install and updates.
 - #292872 Do not delete data for content types defined by disabled modules.
 - Do not display 'label' settings on 'advanced' subtab of 'Display fields'.
+- #266205 by sun: add zebra classes for field items.
 
 CCK 6.2.rc6
 ===========
