@@ -60,7 +60,10 @@ function content_views_field_tables($field) {
     foreach ($columns as $column => $attributes) {
       $addlfields[] = $attributes['column'];
     }
-
+    if ($field['multiple']) {
+      $addlfields[] = 'delta';
+    }
+    
     $table['fields'] = array();
     $table['fields'][$main_column['column']] = array(
       'name' => $field_types[$field['type']]['label'] .': '. $field['widget']['label'] .' ('. $field['field_name'] .')',
@@ -150,6 +153,7 @@ function content_views_field_handler_group($field_info, $field_data, $value, $da
     foreach ($field_info['content_db_info']['columns'] as $column => $attributes) {
       $query_columns[] = "$table_alias.$attributes[column] AS $column";
     }
+    $query_columns[] = "$table_alias.delta AS delta";
     // Note : this query doesn't need to run through db_rewrite_sql, since the
     // nids we retrieve have been selected by the views query, which already takes
     // care of this.
@@ -163,6 +167,8 @@ function content_views_field_handler_group($field_info, $field_data, $value, $da
     $result = ($count == 'all') ? db_query($query) : db_query_range($query, $from, $count);
 
     while ($item = db_fetch_array($result)) {
+      $item['#delta'] = $item[delta];
+      unset($item['delta']);
       $items[] = content_format($field, $item, $field_data['options'], $data);
     }
     return theme('content_view_multiple_field', $items, $field, $data);
@@ -187,6 +193,7 @@ function content_views_field_handler_ungroup($field_info, $field_data, $value, $
     $view_column_name = $field_data['tablename'] .'_'. $attributes['column'];
     $item[$column] = $data->$view_column_name;
   }
+  $item['#delta'] = $data->{$field_data['tablename'] .'_delta'};
   return content_format($field, $item, $field_data['options'], $data);
 }
 

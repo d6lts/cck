@@ -618,6 +618,7 @@ function _content_field_view(&$node, $teaser = NULL, $page = NULL) {
         }
         else {
           foreach ($node_field as $delta => $item) {
+            $item['#delta'] = $delta;
             $node_field[$delta]['view'] = content_format($field, $item, $formatter, $node);
           }
           $value = theme('field', $node, $field, $node_field, $teaser, $page);
