@@ -410,7 +410,17 @@ function fieldgroup_content_admin_field_remove_submit($form, &$form_state) {
 function fieldgroup_nodeapi(&$node, $op, $teaser, $page) {
   switch ($op) {
     case 'view':
-      $context = $teaser ? 'teaser' : 'full';
+      if ($node->build_mode == NODE_BUILD_NORMAL) {
+        $context = $teaser ? 'teaser' : 'full';
+      }
+      else {
+        $context = $node->build_mode;
+      }
+      // Do not include group labels when indexing content.
+      if ($context == NODE_BUILD_SEARCH_INDEX) {
+        $group['settings']['display']['label'] = 'hidden';
+      }
+
       foreach (fieldgroup_groups($node->type) as $group_name => $group) {
         $label = $group['settings']['display']['label'] == 'above';
         $element = array(

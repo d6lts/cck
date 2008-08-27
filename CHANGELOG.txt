@@ -30,6 +30,8 @@ CCK 6.2-dev
 - Do not display 'label' settings on 'advanced' subtab of 'Display fields'.
 - #266205 by sun: add zebra classes for field items.
 - #299870 Incorrect handling of custom weight for 'Language' node form element.
+- Fieldgroups: display options were not supported for 'advanced' contexts (RSS, search index...).
+- Fieldgroups: do not display group label when building the search index.
 
 CCK 6.2.rc6
 ===========
