@@ -345,15 +345,6 @@ function optionwidgets_form2data($element, $field) {
     }
   }
   $result = content_transpose_array_rows_cols(array($field_key => $values));
-
-  // Reinject the '_error_element' so that hook_field('validate') knows
-  // where to flag an error.
-  if (isset($element['_error_element'])) {
-    foreach ($result as $key => $value) {
-      $result[$key]['_error_element'] = $element['_error_element']['#value'];
-    }
-  }
-
   return $result;
 }
 
