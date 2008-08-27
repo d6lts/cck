@@ -7,12 +7,12 @@
     <?php $count = 1;
       foreach ($items as $delta => $item) :
         if (!empty($item['view']) || $item['view'] === "0") : ?>
-          <div class="field-item <?php print ($count % 2 ? 'odd' : 'even') ?>">
+          <div class="field-item <?php print ($count % 2 ? 'odd' : 'even'); ?>">
             <?php if ($label_display == 'inline') { ?>
-              <div class="field-label-inline<?php print($delta ? '' : '-first')?>">
+              <div class="field-label-inline<?php print($delta ? '' : '-first'); ?>">
                 <?php print $label ?>:&nbsp;</div>
             <?php } ?>
-            <?php print $item['view'] ?>
+            <?php print $item['view']; ?>
           </div>
         <?php $count++;
         endif;
