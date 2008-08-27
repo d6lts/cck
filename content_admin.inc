@@ -780,6 +780,23 @@ function _content_admin_field($type_name, $field_name) {
 
   // Add handling for default value if not provided by field.
   if (content_handle('widget', 'default value', $field) == CONTENT_CALLBACK_DEFAULT) {
+
+    // Store the original default value for use in programmed forms.
+    // Set '#default_value' instead of '#value' so programmed values
+    // can override whatever we set here.
+    $default_value = isset($field['widget']['default_value']) ? $field['widget']['default_value'] : array();
+    $form['widget']['default_value'] = array(
+      '#type' => 'value',
+      '#default_value' => $default_value,
+      );
+    $form['widget']['default_value_php'] = array(
+      '#type' => 'value',
+      '#default_value' => $field['widget']['default_value_php'],
+      );
+
+    // We can't tell at the time we build the form if this is a programmed
+    // form or not, so we always end up adding the default value widget
+    // even if we won't use it.
     $form['#attributes'] = array("enctype" => "multipart/form-data");
     $form['widget']['default_value_fieldset'] = array(
       '#type' => 'fieldset',
@@ -787,7 +804,6 @@ function _content_admin_field($type_name, $field_name) {
       '#collapsible' => TRUE,
       '#collapsed' => TRUE,
     );
-    $default_value = is_array($field['widget']['default_value']) ? $field['widget']['default_value'] : array();
     $module = $widget_types[$field['widget']['type']]['module'];
     $function = $module .'_widget';
     if (function_exists($function)) {
@@ -908,6 +924,14 @@ function _content_admin_field_validate($form_id, $form_values, $form) {
   // If content.module is handling the default value,
   // validate the result using the field validation.
   if (content_handle('widget', 'default value', $field) == CONTENT_CALLBACK_DEFAULT) {
+
+    // If this is a programmed form, get rid of the default value widget, 
+    // we have the default values already.
+    if ($form['#programmed']) {
+      form_set_value(array('#parents' => array('default_value_widget')), NULL);
+      return;
+    }
+    
     if (isset($form_values['default_value_php']) && ($php = trim($form_values['default_value_php']))) {
       ob_start();
       $return = eval($php);
