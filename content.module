@@ -587,6 +587,8 @@ function content_associate_fields($module) {
  *         '#field_name' => 'field_name',
  *         '#type_name' => $node->type,
  *         '#formatter' => $formatter_name,
+ *         '#node' => $node,
+ *         '#delta' => 0,
  *       ),
  *       1 => array(
  *         '#item' => $items[1],
@@ -595,6 +597,8 @@ function content_associate_fields($module) {
  *         '#field_name' => 'field_name',
  *         '#type_name' => $node->type,
  *         '#formatter' => $formatter_name,
+ *         '#node' => $node,
+ *         '#delta' => 1,
  *       ),
  *       // Only for 'multiple-value' formatters
  *       '#theme' => $theme,
@@ -708,6 +712,7 @@ function content_field($op, &$node, $field, &$items, $teaser, $page) {
         if ($single) {
           foreach ($items as $delta => $item) {
             $element['items'][$delta] += $format_info;
+            $element['items'][$delta]['#delta'] = $delta;
           }
         }
         else {
@@ -1595,8 +1600,9 @@ function content_format($field, $item, $formatter = 'default', $node = NULL) {
     '#type_name' => isset($node->type) ? $node->type : (isset($node->node_type) ? $node->node_type : ''),
     '#formatter' => $formatter_name,
     '#node' => $node,
+    '#delta' => isset($item['#delta']) ? $item['#delta'] : NULL,
   );
-
+  
   if (content_handle('formatter', 'multiple values', $formatter) == CONTENT_HANDLE_CORE) {
     // Single value formatter.
 

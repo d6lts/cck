@@ -98,6 +98,11 @@ function content_views_field_views_data($field) {
       }
     }
 
+    $additional_fields = $columns;
+    if ($field['multiple']) {
+      array_push($additional_fields, 'delta');
+    }
+    
     $data[$columns[0]] = array(
       'group' => t('Content'),
       'title' => t($field_types[$field['type']]['label']) .': '. t($field['widget']['label']) . ' ('. $field['field_name'] .')',
@@ -107,7 +112,7 @@ function content_views_field_views_data($field) {
         'table' => $db_info['table'],
         'handler' => 'content_handler_field_multiple',
         'click sortable' => $sorts[0],
-        'additional fields' => $columns,
+        'additional fields' => $additional_fields,
         'content_field_name' => $field['field_name'],
         'allow empty' => TRUE,
         // Access control modules should implement content_views_access_callback().
@@ -120,7 +125,7 @@ function content_views_field_views_data($field) {
         'handler' => $arguments[0],
         'click sortable' => $sorts[0], // TODO used in once place in node.views.inc, should we use it here?
         'name field' => '', // TODO
-        'additional fields' => $columns,
+        'additional fields' => $additional_fields,
         'content_field_name' => $field['field_name'],
         'empty field name' => t('<No value>'),
         'allow empty' => TRUE,
@@ -130,7 +135,7 @@ function content_views_field_views_data($field) {
         'title' => t($field['widget']['label']),
         'table' => $db_info['table'],
         'handler' => $filters[0],
-        'additional fields' => $columns,
+        'additional fields' => $additional_fields,
         'content_field_name' => $field['field_name'],
         'allow empty' => TRUE,
       ),
@@ -142,7 +147,7 @@ function content_views_field_views_data($field) {
         'field' => $columns[0],
         'table' => $db_info['table'],
         'handler' => 'content_handler_sort',
-        'additional fields' => $columns,
+        'additional fields' => $additional_fields,
         'content_field_name' => $field['field_name'],
         'allow empty' => TRUE,
       );
@@ -432,6 +437,9 @@ class content_handler_field extends views_handler_field_node {
     $item = array();
     foreach ($db_info['columns'] as $column => $attributes) {
       $item[$column] = $values->{$this->table_alias .'_'. $attributes['column']};
+    }
+    if ($field['multiple']) {
+      $item['#delta'] = $values->{$this->table_alias .'_delta'};
     }
     return $this->render_link(content_format($field, $item, $options['format'], $values), $values);
   }
