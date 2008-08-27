@@ -29,6 +29,7 @@ CCK 6.2-dev
 - #292872 Do not delete data for content types defined by disabled modules.
 - Do not display 'label' settings on 'advanced' subtab of 'Display fields'.
 - #266205 by sun: add zebra classes for field items.
+- #299870 Incorrect handling of custom weight for 'Language' node form element.
 
 CCK 6.2.rc6
 ===========
