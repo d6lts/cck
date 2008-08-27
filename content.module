@@ -414,11 +414,6 @@ function content_form_alter(&$form, $form_state, $form_id) {
     foreach ($type['extra'] as $key => $value) {
       if (isset($form[$key])) {
         $form[$key]['#weight'] = $value['weight'];
-        // Special case for the 'menu path' fieldset: we keep it
-        // just below the title.
-        if ($key == 'title' && isset($form['menu'])) {
-          $form['menu']['#weight'] = $value['weight'] + .1;
-        }
       }
     }
   }
