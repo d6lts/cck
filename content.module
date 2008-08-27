@@ -1020,14 +1020,16 @@ function theme_field(&$node, &$field, &$items, $teaser, $page) {
   $label = t($field['widget']['label']);
   $items_output = '';
 
+  $count = 1;
   foreach ($items as $delta => $item) {
     if (!empty($item['view']) || $item['view'] === "0") {
-      $items_output .= '<div class="field-item">';
+      $items_output .= '<div class="field-item '. ($count % 2 ? 'odd' : 'even') .'">';
       if ($label_display == 'inline') {
         $items_output .= '<div class="field-label-inline'. ($delta ? '' : '-first') .'">';
         $items_output .= $label .':&nbsp;</div>' ;
       }
       $items_output .= $item['view'] .'</div>';
+      $count++;
     }
   }
 

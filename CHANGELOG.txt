@@ -18,6 +18,7 @@
 - #165314 by sleepcamel - Views integration: fix blank links in summary view.
 - #299698 Userreference: fix autocompletion query when typed string is '0'.
 - #292872 Do not delete data for content types defined by disabled modules.
+- #266205 by sun: add zebra classes for field items.
 
 5--1.7
 ======
