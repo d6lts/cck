@@ -165,10 +165,12 @@ function userreference_field_settings($op, $field) {
 function userreference_field($op, &$node, $field, &$items, $teaser, $page) {
   switch ($op) {
     case 'validate':
+      $form = $teaser[$field['field_name']];
       foreach ($items as $delta => $item) {
         if (is_array($item)) {
-          $error_element = isset($item['_error_element']) ? $item['_error_element'] : '';
-          unset($item['_error_element']);
+          $error_element = implode('][', array($field['field_name'], $delta, 'value'));
+          $error_element = isset($item['_error_element']) ? $item['_error_element'] : $error_element;
+          if (isset($item['_error_element'])) unset($item['_error_element']);
           if (!empty($item['uid']) && !array_key_exists($item['uid'], _userreference_potential_references($field, '', $item['uid']))) {
             form_set_error($error_element, t('%name: invalid user.', array('%name' => t($field['widget']['label']))));
           }
@@ -489,12 +491,6 @@ function userreference_autocomplete_process($element, $edit, $form_state, $form)
     '#columns' => $element['#columns'],
   );
 
-  // Used so that hook_field('validate') knows where to flag an error.
-  $element['_error_element'] = array(
-    '#type' => 'value',
-    // TODO: why do we need to repeat $field_key twice ?
-    '#value' => implode('][', array_merge($element['#parents'], array($field_key, $field_key))),
-  );
   return $element;
 }
 

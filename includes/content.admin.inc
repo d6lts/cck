@@ -1149,8 +1149,8 @@ function _content_admin_field_validate($form, &$form_state) {
     if ($form['#programmed']) {
       form_set_value(array('#parents' => array('default_value_widget')), NULL, $form_state);
       return;
-  }
-
+    }
+    
     if (isset($form_values['default_value_php']) &&
     ($php = trim($form_values['default_value_php']))) {
       ob_start();
@@ -1196,7 +1196,6 @@ function _content_admin_field_validate($form, &$form_state) {
       form_set_value(array('#parents' => array('default_value_php')), '', $form_state);
       form_set_value(array('#parents' => array('default_value')), $default_value, $form_state);
     }
-
     if (isset($default_value)) {
       $node = array();
       $node[$form_values['field_name']] = $default_value;
@@ -1205,9 +1204,8 @@ function _content_admin_field_validate($form, &$form_state) {
 
       // Widget now does its own validation, should be no need
       // to add anything for widget validation here.
-
       if (function_exists($field_function)) {
-        $field_function('validate', $node, $field, $default_value, NULL, NULL);
+        $field_function('validate', $node, $field, $default_value, $form, NULL);
       }
       // The field validation routine won't set an error on the right field,
       // so set it here.

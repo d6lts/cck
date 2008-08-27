@@ -201,14 +201,6 @@ function optionwidgets_buttons_process($element, $edit, &$form_state, $form) {
     '#default_value' => isset($element['#value'][$field_key]) ? $element['#value'][$field_key] : NULL,
   );
 
-  // Used so that hook_field('validate') knows where to flag an error.
-  // NOTE : doesn't really work, because errors don't 'stick' on the container
-  // of expanded radios / checkboxes.
-  $element['_error_element'] = array(
-    '#type' => 'value',
-    '#value' => implode('][', array_merge($element['#parents'], array($field_key))),
-  );
-
   // Make sure field info will be available to the validator which
   // does not get the values in $form.
   $form_state['#field_info'][$field['field_name']] = $field;
@@ -243,12 +235,6 @@ function optionwidgets_select_process($element, $edit, &$form_state, $form) {
     '#multiple' => $field['multiple'],
     '#options' => $options,
     '#default_value' => isset($element['#value'][$field_key]) ? $element['#value'][$field_key] : NULL,
-  );
-
-  // Used so that hook_field('validate') knows where to flag an error.
-  $element['_error_element'] = array(
-    '#type' => 'value',
-    '#value' => implode('][', array_merge($element['#parents'], array($field_key))),
   );
 
   // Make sure field info will be available to the validator which
@@ -290,12 +276,6 @@ function optionwidgets_onoff_process($element, $edit, &$form_state, $form) {
     '#description' => $element['#description'],
     '#default_value' => isset($element['#value'][$field_key][0]) ? $element['#value'][$field_key][0] == $on_value : FALSE,
     '#return_value' => $on_value,
-  );
-
-  // Used so that hook_field('validate') knows where to flag an error.
-  $element['_error_element'] = array(
-    '#type' => 'value',
-    '#value' => implode('][', array_merge($element['#parents'], array($field_key))),
   );
 
   // Make sure field info will be available to the validator which
