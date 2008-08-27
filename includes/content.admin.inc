@@ -881,7 +881,7 @@ function _content_admin_field(&$form_state, $type_name, $field_name) {
   $output = '';
   $type = content_types($type_name);
   $field = $type['fields'][$field_name];
-
+  
   if ($field['locked']) {
     $output = array();
     $output['locked'] = array(

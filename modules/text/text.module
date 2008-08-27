@@ -153,12 +153,10 @@ function text_field($op, &$node, $field, &$items, $teaser, $page) {
   switch ($op) {
     case 'validate':
       $allowed_values = content_allowed_values($field);
-      $form = $teaser[$field['field_name']];
       if (is_array($items)) {
         foreach ($items as $delta => $item) {
-          $error_element = implode('][', array($field['field_name'], $delta, 'value'));
-          $error_element = isset($item['_error_element']) ? $item['_error_element'] : $error_element;
-          if (isset($item['_error_element'])) unset($item['_error_element']);
+          $error_element = isset($item['_error_element']) ? $item['_error_element'] : '';
+          unset($item['_error_element']);
           if (!empty($item['value'])) {
             if (count($allowed_values) && !array_key_exists($item['value'], $allowed_values)) {
               form_set_error($error_element, t('%name: illegal value.', array('%name' => t($field['widget']['label']))));
@@ -435,6 +433,12 @@ function text_textfield_process($element, $edit, $form_state, $form) {
     $element[$filter_key] = filter_form($format, 1, $parents);
   }
 
+  // Used so that hook_field('validate') knows where to flag an error.
+  $element['_error_element'] = array(
+    '#type' => 'value',
+    '#value' => implode('][', array_merge($element['#parents'], array($field_key))),
+  );
+
   return $element;
 }
 
@@ -471,6 +475,12 @@ function text_textarea_process($element, $edit, $form_state, $form) {
     $parents = array_merge($element['#parents'] , array($filter_key));
     $element[$filter_key] = filter_form($format, 1, $parents);
   }
+
+  // Used so that hook_field('validate') knows where to flag an error.
+  $element['_error_element'] = array(
+    '#type' => 'value',
+    '#value' => implode('][', array_merge($element['#parents'], array($field_key))),
+  );
 
   return $element;
 }
