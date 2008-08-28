@@ -433,14 +433,12 @@ class content_handler_field extends views_handler_field_node {
     // TODO: we can stick any value in there -
     // what would make most sense ?  row_style ?
     $values->build_mode = 'views';
-
+    
     $item = array();
     foreach ($db_info['columns'] as $column => $attributes) {
       $item[$column] = $values->{$this->table_alias .'_'. $attributes['column']};
     }
-    if ($field['multiple']) {
-      $item['#delta'] = $values->{$this->table_alias .'_delta'};
-    }
+    $item['#delta'] = !empty($values->{$this->table_alias . '_delta'}) ? $values->{$this->table_alias . '_delta'} : 0;
     return $this->render_link(content_format($field, $item, $options['format'], $values), $values);
   }
 
@@ -574,7 +572,6 @@ class content_handler_field_multiple extends content_handler_field {
     foreach ($db_info['columns'] as $column => $attributes) {
       $query_columns[] = "$table_alias.$attributes[column] AS $column";
     }
-
     // Make sure node.nid is aliased so it isn't confused with
     // nodereference's nid column.
     $query = "SELECT node.nid AS parent_nid, ". implode(', ', $query_columns) .
@@ -585,7 +582,10 @@ class content_handler_field_multiple extends content_handler_field {
     $result = db_query($query);
 
     while ($item = db_fetch_array($result)) {
-      $this->field_values[$item['parent_nid']][$item['delta']] = $item;
+      $delta = !empty($item['delta']) ? $item['delta'] : 0;
+      $item['#delta'] = $item['delta'];
+      unset($item['delta']);
+      $this->field_values[$item['parent_nid']][$delta] = $item;
     }
   }
 
@@ -628,7 +628,6 @@ class content_handler_field_multiple extends content_handler_field {
       }
       $count++;
     }
-
     if (count($items) > 1) {
       // TODO: could we use generic field display ?
       return theme('content_view_multiple_field', $items, $field, $values);
