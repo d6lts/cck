@@ -881,7 +881,7 @@ function _content_admin_field(&$form_state, $type_name, $field_name) {
   $output = '';
   $type = content_types($type_name);
   $field = $type['fields'][$field_name];
-  
+
   if ($field['locked']) {
     $output = array();
     $output['locked'] = array(
@@ -968,7 +968,7 @@ function _content_admin_field(&$form_state, $type_name, $field_name) {
 
   // Add handling for default value if not provided by field.
   if (content_callback('widget', 'default value', $field) == CONTENT_CALLBACK_DEFAULT) {
-    
+
     // Store the original default value for use in programmed forms.
     // Set '#default_value' instead of '#value' so programmed values
     // can override whatever we set here.
@@ -1150,7 +1150,7 @@ function _content_admin_field_validate($form, &$form_state) {
       form_set_value(array('#parents' => array('default_value_widget')), NULL, $form_state);
       return;
     }
-    
+
     if (isset($form_values['default_value_php']) &&
     ($php = trim($form_values['default_value_php']))) {
       ob_start();

@@ -433,7 +433,7 @@ class content_handler_field extends views_handler_field_node {
     // TODO: we can stick any value in there -
     // what would make most sense ?  row_style ?
     $values->build_mode = 'views';
-    
+
     $item = array();
     foreach ($db_info['columns'] as $column => $attributes) {
       $item[$column] = $values->{$this->table_alias .'_'. $attributes['column']};

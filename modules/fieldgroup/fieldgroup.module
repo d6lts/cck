@@ -341,15 +341,15 @@ function fieldgroup_form_alter(&$form, $form_state, $form_id) {
 
   }
   // The group is only added here so it will appear in the export
-  // when using Content Copy.	 
-	elseif ($form_id == '_content_admin_field' && isset($form['widget'])) { 
-    $content_type = content_types($form['type_name']['#value']); 	 
-	  $form['widget']['group'] = array( 	 
-	    '#type' => 'value', 	 
-	    '#value' => _fieldgroup_field_get_group($content_type['type'], $form['field_name']['#value']), 	 
-	  ); 	 
-	}
-	elseif ($form_id == 'content_admin_field_overview_form' && !empty($form['#groups'])) {
+  // when using Content Copy.
+  elseif ($form_id == '_content_admin_field' && isset($form['widget'])) {
+    $content_type = content_types($form['type_name']['#value']);
+    $form['widget']['group'] = array(
+      '#type' => 'value',
+      '#value' => _fieldgroup_field_get_group($content_type['type'], $form['field_name']['#value']),
+    );
+  }
+  elseif ($form_id == 'content_admin_field_overview_form' && !empty($form['#groups'])) {
     $form['#submit'][] = 'fieldgroup_content_overview_form_submit';
   }
   elseif ($form_id == 'content_admin_display_overview_form' && !empty($form['#groups'])) {
