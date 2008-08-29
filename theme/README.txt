@@ -14,8 +14,8 @@ is displayed in nodes:
 1) Node templates
 =================
 
-Node template suggestions
--------------------------
+1.a Node template suggestions
+-----------------------------
 
 All themes usually come with a default node.tpl.php template.
 Drupal core lets you use the following variant (suggestion):
@@ -24,29 +24,8 @@ Drupal core lets you use the following variant (suggestion):
   ex: node-story.tpl.php
   If present, will be used to theme a 'story' node.
 
-In addition, for nodes that are displayed as values of a nodereference field using
-the 'teaser' or 'full node' formatters, the following suggestions will be looked for
-in priority:
-
-- node-nodereference-<REFERRING_FIELD_NAME>-<TYPE_NAME>.tpl.php
-  ex: node-nodereference-field_noderef-story.tpl.php
-  If present, will be used to theme a 'story' node when refererenced in the
-  'field_noderef' field.
-
-- node-nodereference-<TYPE_NAME>.tpl.php
-  ex: node-nodereference-story.tpl.php
-  If present, will be used to theme a 'story' node when refererenced in any
-  nodereference field.
-
-- node-nodereference-<REFERRING_FIELD_NAME>.tpl.php
-  ex: node-nodereference-field_noderef.tpl.php
-  If present, will be used to a node refererenced in the 'field_noderef' field.
-
-- node-nodereference.tpl.php
-  If present, will be used to theme nodes referenced in nodereference fields.
-
-Node template variables
------------------------
+1.b Node template variables
+---------------------------
 
 CCK makes the following variables available in your theme's node templates:
 
@@ -82,6 +61,37 @@ If you want to use the more fine-grained variables described above, you cannot u
 $content because you'd get duplicate information. Your template then needs to handle
 the display of all the node components itself.
 
+1.c Special case : nodes in nodereference fields
+------------------------------------------------
+
+In addition to the above, the following suggestions will be looked for
+in priority for nodes that are displayed as values of a nodereference field using
+the 'teaser' or 'full node' formatters, :
+
+- node-nodereference-<REFERRING_FIELD_NAME>-<TYPE_NAME>.tpl.php
+  ex: node-nodereference-field_noderef-story.tpl.php
+  If present, will be used to theme a 'story' node when refererenced in the
+  'field_noderef' field.
+
+- node-nodereference-<TYPE_NAME>.tpl.php
+  ex: node-nodereference-story.tpl.php
+  If present, will be used to theme a 'story' node when refererenced in any
+  nodereference field.
+
+- node-nodereference-<REFERRING_FIELD_NAME>.tpl.php
+  ex: node-nodereference-field_noderef.tpl.php
+  If present, will be used to a node refererenced in the 'field_noderef' field.
+
+- node-nodereference.tpl.php
+  If present, will be used to theme nodes referenced in nodereference fields.
+
+The following additional variacles are available in templates for referenced nodes :
+
+- $referring_field
+  The nodereference field that references the current node.
+
+- $referring_node
+  The node referencing the current node.
 
 2) Field templates
 ==================
@@ -90,8 +100,8 @@ Field-level theming determines how the values of a given field displayed.
 The resulting output ends up in the $content and $<FIELD_NAME>_rendered variables
 in the node templates.
 
-Template file
--------------
+2.a Template file
+-----------------
 
 In order to customize field themeing:
 
@@ -102,8 +112,8 @@ reason, it is advised to *copy* the file instead of just moving it).
 - Edit that copy to your liking. See the comments in cck/theme/content/content-field.tpl.php
 for a list of all variables available in this template.
 
-Field template suggestions
---------------------------
+2.b Field template suggestions
+------------------------------
 
 In addition, the theme layer will also look for field-specific variants (suggestions),
 in the following order of precedence:
