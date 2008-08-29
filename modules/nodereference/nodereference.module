@@ -804,6 +804,24 @@ function nodereference_node_type($op, $info) {
   }
 }
 
+/**
+ * Theme preprocess function.
+ *
+ * Allows specific node templates for nodes displayed as values of a
+ * nodereference field with the 'full node' / 'teaser' formatters.
+ */
+function nodereference_preprocess_node(&$vars) {
+  // The 'referencing_field' attribute of the node is added by the 'teaser'
+  // and 'full node' formatters.
+  if (!empty($vars['node']->referencing_field)) {
+    $node = $vars['node'];
+    $field = $node->referencing_field;
+    $vars['template_files'][] = 'node-nodereference';
+    $vars['template_files'][] = 'node-nodereference-'. $field['field_name'];
+    $vars['template_files'][] = 'node-nodereference-'. $node->type;
+    $vars['template_files'][] = 'node-nodereference-'. $field['field_name'] .'-'. $node->type;
+  }
+}
 
 /**
  * FAPI theme for an individual elements.
