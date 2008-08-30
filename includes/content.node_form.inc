@@ -40,8 +40,8 @@ function content_field_form(&$form, &$form_state, $field, $get_delta = NULL) {
   $addition = array();
   $form_element = array();
   $field_name = $field['field_name'];
-  
-  // See if access to this form element is restricted, 
+
+  // See if access to this form element is restricted,
   // if so, skip widget processing and just set the value.
   $access = TRUE;
   $field_access = module_invoke_all('field_access', 'edit', $field);
@@ -58,7 +58,7 @@ function content_field_form(&$form, &$form_state, $field, $get_delta = NULL) {
       );
     return $addition;
   }
-  
+
   // TODO: is the "if (function_exists($function)) {" needed ?
   // defining the $function here makes it unclear where it is actually called
   $function = $field['widget']['module'] .'_widget';
@@ -101,15 +101,14 @@ function content_field_form(&$form, &$form_state, $field, $get_delta = NULL) {
     // element and make it the $delta value.
     else {
       $delta = isset($get_delta) ? $get_delta : 0;
-      $title = check_plain(t($field['widget']['label']));
       if ($element = $function($form, $form_state, $field, $items, $delta)) {
+        $title = check_plain(t($field['widget']['label']));
+        $description = content_filter_xss(t($field['widget']['description']));
         $defaults = array(
           '#required' => $get_delta > 0 ? FALSE : $field['required'],
-          // TODO: should we add some logic for title and description too ?
           '#columns'  => array_keys($field['columns']),
           '#title' => $title,
-          // The widget description contains user input.
-          '#description' => content_filter_xss(t($field['widget']['description'])),
+          '#description' => $description,
           '#delta' => $delta,
           '#field_name' => $field['field_name'],
           '#type_name' => $field['type_name'],
