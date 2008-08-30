@@ -32,6 +32,8 @@ CCK 6.2-dev
 - #299870 Incorrect handling of custom weight for 'Language' node form element.
 - Fieldgroups: display options were not supported for 'advanced' contexts (RSS, search index...).
 - Fieldgroups: do not display group label when building the search index.
+- Nodereference: Allow specific node templates for nodes displayed as values of a noderef field.
+- #301736 by nedjo - Nodereference: Multilingual support; if available, propose translations of referenced nodes when creating a new translation.
 
 CCK 6.2.rc6
 ===========

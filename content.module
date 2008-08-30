@@ -387,8 +387,10 @@ function content_alter(&$node, $teaser = FALSE, $page = FALSE) {
  * Generate field render arrays.
  */
 function content_prepare_translation(&$node) {
-  $additions = _content_field_invoke_default('prepare translation', $node);
-  $node = (object) array_merge((array) $node, $additions);
+  $default_additions = _content_field_invoke_default('prepare translation', $node);
+  $additions = _content_field_invoke('prepare translation', $node);
+  // Merge module additions after the default ones to enable overriding of field values.
+  $node = (object) array_merge((array) $node, $default_additions, $additions);
 }
 
 /**
