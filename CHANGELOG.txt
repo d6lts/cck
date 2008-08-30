@@ -34,6 +34,7 @@ CCK 6.2-dev
 - Fieldgroups: do not display group label when building the search index.
 - Nodereference: Allow specific node templates for nodes displayed as values of a noderef field.
 - #301736 by nedjo - Nodereference: Multilingual support; if available, propose translations of referenced nodes when creating a new translation.
+- Fieldgroups: Remove tinyint (127) limitation on group weights.
 
 CCK 6.2.rc6
 ===========
