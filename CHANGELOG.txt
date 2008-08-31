@@ -35,6 +35,7 @@ CCK 6.2-dev
 - Nodereference: Allow specific node templates for nodes displayed as values of a noderef field.
 - #301736 by nedjo - Nodereference: Multilingual support; if available, propose translations of referenced nodes when creating a new translation.
 - Fieldgroups: Remove tinyint (127) limitation on group weights.
+- #301984 by joetsuihk - Views Integration: do not display empty divs on empty fields.
 
 CCK 6.2.rc6
 ===========

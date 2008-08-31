@@ -102,7 +102,7 @@ function content_views_field_views_data($field) {
     if ($field['multiple']) {
       array_push($additional_fields, 'delta');
     }
-    
+
     $data[$columns[0]] = array(
       'group' => t('Content'),
       'title' => t($field_types[$field['type']]['label']) .': '. t($field['widget']['label']) . ' ('. $field['field_name'] .')',
@@ -644,7 +644,9 @@ class content_handler_field_multiple extends content_handler_field {
 function theme_content_view_multiple_field($items, $field, $values) {
   $output = '';
   foreach ($items as $item) {
-    $output .= '<div class="field-item">'. $item .'</div>';
+    if (!empty($item) || $item == '0') {
+      $output .= '<div class="field-item">'. $item .'</div>';
+    }
   }
   return $output;
 }
