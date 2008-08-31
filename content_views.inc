@@ -199,7 +199,9 @@ function content_views_field_handler_ungroup($field_info, $field_data, $value, $
 
 function theme_content_view_multiple_field($items, $field, $data) {
   foreach ($items as $item) {
-    $output .= '<div class="field-item">'. $item .'</div>';
+    if (!empty($item) || $item == '0') {
+      $output .= '<div class="field-item">'. $item .'</div>';
+    }
   }
   return $output;
 }

@@ -20,6 +20,7 @@
 - #299698 Userreference: fix autocompletion query when typed string is '0'.
 - #292872 Do not delete data for content types defined by disabled modules.
 - #266205 by sun: add zebra classes for field items.
+- #301984 by joetsuihk - Views Integration: do not display empty divs on empty fields.
 
 5--1.7
 ======
