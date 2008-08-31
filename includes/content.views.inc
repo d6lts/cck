@@ -562,8 +562,11 @@ class content_handler_field_multiple extends content_handler_field {
     // Build the list of nids to retrieve.
     // TODO: try fetching from cache_content first ??
     $nids = array();
+    $this->field_values = array();
     foreach ($values as $value) {
-      $nids[] = $value->nid;
+      $nid = $value->{$this->additional_fields['nid']};
+      $nids[] = $nid;
+      $this->field_values[$nid] = array();
     }
 
     // List columns to retrieve.
