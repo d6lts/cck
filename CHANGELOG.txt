@@ -3,6 +3,19 @@
 5--1.x
 ======
 
+The 1.8 release fixes a critical bug :
+- #292872 Do not delete fields and field data for content types defined by disabled modules.
+IMPORTANT : Since disabling all contrib modules is a recommended step prior to upgrading a D5 site to D6,
+it is highly advised that D5 sites using CCK are updated to CCK 5.x-1.8 before starting the D6 upgrade process.
+
+Other notable fix :
+- Content Copy: Fix multiple bugs when importing/exporting content types :
+'this post cannot be referenced' with nodereference fields
+no export of default values
+
+This release requires a visit to update.php
+
+Other changes :
 - #196468 by Nedjo, add method to provide a link to automatically import a file into Content Copy.
 - #296077 Add delta to formatter information.
 - #128038 Alter _content_admin_form() to provide the raw widget default values as well as the default value widget so programmed forms will have those values available. You can't tell when you construct the form if it's a programmed form or not, so we will always have to create the default value widget, but we don't always have to use it. This will also get the default values into the Content Copy export in a way that Content Copy import can pick them up, and alter validation to unset the default value widget and skip the default value widget processing if it's a programmed form. Since we are now provided the actual default value (not just the default value widget) in the export, we can safely pick it up in the import.
@@ -19,7 +32,6 @@
 - #256178 by douggreen - Text: fix warnings around views argument handler.
 - #165314 by sleepcamel - Views integration: fix blank links in summary view.
 - #299698 Userreference: fix autocompletion query when typed string is '0'.
-- #292872 Do not delete data for content types defined by disabled modules.
 - #266205 by sun: add zebra classes for field items.
 - #301984 by joetsuihk - Views Integration: do not display empty divs on empty fields.
 
