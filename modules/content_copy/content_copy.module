@@ -215,6 +215,26 @@ function content_copy_export($form_values) {
 
 /**
  *  A form to import formatted text created with export.
+ * 
+ * The macro can be filled from a file, if provided.
+ * Provide a type_name to force the fields to be added to a specific
+ * type, or leave out type_name to create a new content type.
+ * 
+ * Example:
+ * // If Content Copy is enabled, offer an import link.
+ * if (module_exists('content_copy')) {
+ *   $form['macro'] = array(
+ *     '#type' => 'fieldset',
+ *     '#title' => t('Create a content type'),
+ *     '#description' => t('Follow this link to create automatically a content type and import preconfigured fields.'),
+ *     '#collapsible' => TRUE,
+ *     '#collapsed' => FALSE,
+ *   );
+ *   $form['macro']['link'] = array(
+ *     '#type' => 'markup',
+ *     '#value' => l(t('import'), 'admin/content/types/import', array(), 'type_name=event&macro_file='. drupal_get_path('module', 'my_module') .'/my_content_type.txt'),
+ *   );
+ * }
  */
 function content_copy_import_form(&$form_state, $type_name = '') {
   include_once('./'. drupal_get_path('module', 'content') .'/includes/content.admin.inc');
@@ -239,6 +259,14 @@ function content_copy_import_form(&$form_state, $type_name = '') {
     '#type' => 'submit',
     '#value' => t('Import'),
   );
+  // Read in a file if there is one and set it as the default macro value.
+  if (isset($_REQUEST['macro_file']) && $file = file_get_contents($_REQUEST['macro_file'])) {
+    $form['macro']['#default_value'] = $file;
+    if (isset($_REQUEST['type_name'])) {
+      $form['type_name']['#default_value'] = $_REQUEST['type_name'];
+    }
+    $form['#prefix'] .= '<br /><strong>'. t('A file has been pre-loaded for import.') .'</strong>';
+  }
   return $form;
 }
 
