@@ -422,7 +422,6 @@ function fieldgroup_nodeapi(&$node, $op, $teaser, $page) {
         $element = array(
           '#title' => $label ? check_plain(t($group['label'])) : '',
           '#description' => $label ? content_filter_xss(t($group['settings']['display']['description'])) : '',
-          '#weight' => $group['weight'],
         );
         switch ($group['settings']['display'][$context]['format']) {
           case 'simple':
@@ -455,6 +454,7 @@ function fieldgroup_nodeapi(&$node, $op, $teaser, $page) {
         // See fieldgroup_preprocess_node().
         $wrapper = array(
           'group' => $element,
+          '#weight' => $group['weight'],
         );
 
         $node->content[$group_name] = $wrapper;

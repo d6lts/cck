@@ -565,7 +565,7 @@ function content_associate_fields($module) {
  *
  * The 'view' operation constructs the $node in a way that you can use
  * drupal_render() to display the formatted output for an individual field.
- * i.e. print drupal_render($node->field_foo);
+ * i.e. print drupal_render($node->countent['field_foo']);
  *
  * The code now supports both single value formatters, which theme an
  * individual item value as has been done in previous version of CCK,
@@ -576,7 +576,7 @@ function content_associate_fields($module) {
  * formatters can be designated as such in formatter_info().
  *
  * The node array will look like:
- *   $node->content['field_foo'] = array(
+ *   $node->content['field_foo']['wrapper'] = array(
  *     '#type' => 'content_field',
  *     '#title' => 'label'
  *     '#field_name' => 'field_name',
@@ -684,7 +684,6 @@ function content_field($op, &$node, $field, &$items, $teaser, $page) {
         $element = array(
           '#type' => 'content_field',
           '#title' => check_plain(t($field['widget']['label'])),
-          '#weight' => $field['widget']['weight'],
           '#field_name' => $field['field_name'],
           '#access' => $formatter_name != 'hidden',
           '#node' => $node,
@@ -726,6 +725,7 @@ function content_field($op, &$node, $field, &$items, $teaser, $page) {
         // See op 'preprocess_node' below.
         $wrapper = array(
           'field' => $element,
+          '#weight' => $field['widget']['weight'],
         );
 
         $addition = array($field['field_name'] => $wrapper);
@@ -1604,7 +1604,7 @@ function content_format($field, $item, $formatter = 'default', $node = NULL) {
     '#node' => $node,
     '#delta' => isset($item['#delta']) ? $item['#delta'] : NULL,
   );
-  
+
   if (content_handle('formatter', 'multiple values', $formatter) == CONTENT_HANDLE_CORE) {
     // Single value formatter.
 
