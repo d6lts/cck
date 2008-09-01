@@ -16,7 +16,9 @@ class ContentCrudTestCase extends DrupalWebTestCase {
    * Enable CCK, Text, and Schema modules.
    */
   function setUp() {
-    parent::setUp('content', 'schema', 'text');
+    $args = func_get_args();
+    $modules = array_merge(array('content', 'schema', 'text'), $args);
+    call_user_func_array(array('parent','setUp'), $modules);
     module_load_include('inc', 'content', 'includes/content.crud');
   }
 
@@ -757,8 +759,7 @@ class ContentOptionWidgetTest extends ContentCrudTestCase {
   }
 
   function setUp() {
-    parent::setUp();
-    $this->drupalModuleEnable('optionwidgets');
+    parent::setUp('optionwidgets');
     $this->loginWithPermissions();
     $this->acquireContentTypes(1);
   }

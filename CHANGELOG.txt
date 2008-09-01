@@ -37,6 +37,7 @@ CCK 6.2-dev
 - Fieldgroups: Remove tinyint (127) limitation on group weights.
 - #301984 by joetsuihk - Views Integration: do not display empty divs on empty fields.
 - Views integration : prevent possible 'invalid argument for foreach' warnings with 'group multiple values'.
+- Fix tests to work with simpletest 2.x.
 
 CCK 6.2.rc6
 ===========
