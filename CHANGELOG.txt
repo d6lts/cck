@@ -42,6 +42,7 @@ CCK 6.2-dev
 - Fix tests to work with simpletest 2.x.
 - #296301 by Moonshine - Fieldgroups: fix call_user_func_array() error on add / configure / remove pages.
 - #118364 Number (decimal): fix unneeded information message when using comma as a separator ("150,00 was changed to 150.00").
+- Fieldgroup: New groups are not styled on node view until 'display fields' form is submitted.
 
 CCK 6.2.rc6
 ===========
