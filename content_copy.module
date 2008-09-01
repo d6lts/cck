@@ -280,7 +280,7 @@ function content_copy_import_form($type_name = '') {
     if (isset($_REQUEST['type_name'])) {
       $form['type_name']['#default_value'] = $_REQUEST['type_name'];
     }
-    $form['#prefix'] .= '<br /><strong>'. t('A file has been pre-loaded for import.') .'</strong>';
+    $form['#prefix'] .= '<p class="error">'. t('A file has been pre-loaded for import.') .'</p>';
   }
   return $form;
 }
