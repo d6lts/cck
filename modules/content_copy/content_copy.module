@@ -170,6 +170,7 @@ function content_copy_export($form_values) {
 
   // Get an array of groups to export.
   // Record a macro for each group by submitting the group edit form.
+  $groups = array();
   if (!empty($form_values['groups']) && module_exists('fieldgroup')) {
     $content_type = content_types($form_values['type_name']);
     $groups = array_filter($form_values['groups']);

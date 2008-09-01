@@ -3,6 +3,7 @@
 CCK 6.2-dev
 ===========
 
+- Avoid undefined index error in Content Copy when fieldgroup is enabled but there are no groups.
 - #296077 Add delta to formatter information.
 - #128038 Alter _content_admin_form() to provide the raw widget default values as well as the default value widget so programmed forms will have those values available. You can't tell when you construct the form if it's a programmed form or not, so we will always have to create the default value widget, but we don't always have to use it. This will also get the default values into the Content Copy export in a way that Content Copy import can pick them up, and alter validation to unset the default value widget and skip the default value widget processing if it's a programmed form. Since we are now provided the actual default value (not just the default value widget) in the export, we can safely pick it up in the import.
 - #128038 Use content_field_instance_collapse() to send form values in the Content Copy export to be sure we get the original field values for checkboxes instead of the true/false values we will get otherwise.
