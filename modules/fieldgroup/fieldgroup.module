@@ -28,7 +28,7 @@ function fieldgroup_menu() {
       $items['admin/content/node-type/'. $type_url_str .'/add_group'] = array(
         'title' => 'Add group',
         'page callback' => 'drupal_get_form',
-        'page arguments' => array('fieldgroup_edit_group_form', $content_type, '', 'add'),
+        'page arguments' => array('fieldgroup_edit_group_form', $type_name, '', 'add'),
         'access arguments' => array('administer content types'),
         'type' => MENU_LOCAL_TASK,
         'weight' => 3,
@@ -36,14 +36,14 @@ function fieldgroup_menu() {
       $items['admin/content/node-type/'. $type_url_str .'/groups/%'] = array(
         'title' => 'Edit group',
         'page callback' => 'drupal_get_form',
-        'page arguments' => array('fieldgroup_edit_group_form', $content_type, 5, 'edit'),
+        'page arguments' => array('fieldgroup_edit_group_form', $type_name, 5, 'edit'),
         'access arguments' => array('administer content types'),
         'type' => MENU_CALLBACK,
       );
       $items['admin/content/node-type/'. $type_url_str .'/groups/%/remove'] = array(
         'title' => 'Edit group',
         'page callback' => 'drupal_get_form',
-        'page arguments' => array('fieldgroup_remove_group', $content_type, 5),
+        'page arguments' => array('fieldgroup_remove_group', $type_name, 5),
         'access arguments' => array('administer content types'),
         'type' => MENU_CALLBACK,
       );
@@ -92,7 +92,8 @@ function fieldgroup_content_fieldapi($op, $field) {
   cache_clear_all('fieldgroup_data', content_cache_tablename());
 }
 
-function fieldgroup_edit_group_form(&$form_state, $content_type, $group_name, $action) {
+function fieldgroup_edit_group_form(&$form_state, $type_name, $group_name, $action) {
+  $content_type = content_types($type_name);
   $groups = fieldgroup_groups($content_type['type']);
 
   if ($action == 'add') {
@@ -216,7 +217,8 @@ function fieldgroup_edit_group_submit($form, &$form_state) {
   $form_state['redirect'] = 'admin/content/node-type/'. $content_type['url_str'] .'/fields';
 }
 
-function fieldgroup_remove_group(&$form_state, $content_type, $group_name) {
+function fieldgroup_remove_group(&$form_state, $type_name, $group_name) {
+  $content_type = content_types($type_name);
   $groups = fieldgroup_groups($content_type['type']);
   $group = isset($groups[$group_name]) ? $groups[$group_name] : '';
 
