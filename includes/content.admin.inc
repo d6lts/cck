@@ -973,14 +973,15 @@ function _content_admin_field(&$form_state, $type_name, $field_name) {
     // Set '#default_value' instead of '#value' so programmed values
     // can override whatever we set here.
     $default_value = isset($field['widget']['default_value']) ? $field['widget']['default_value'] : array();
+    $default_value_php = isset($field['widget']['default_value_php']) ? $field['widget']['default_value_php'] : '';
     $form['widget']['default_value'] = array(
       '#type' => 'value',
       '#default_value' => $default_value,
-      );
+    );
     $form['widget']['default_value_php'] = array(
       '#type' => 'value',
-      '#default_value' => $field['widget']['default_value_php'],
-      );
+      '#default_value' => $default_value_php,
+    );
 
     // We can't tell at the time we build the form if this is a programmed
     // form or not, so we always end up adding the default value widget
@@ -1144,7 +1145,7 @@ function _content_admin_field_validate($form, &$form_state) {
   // validate the result using the field validation.
   if (content_callback('widget', 'default value', $field) == CONTENT_CALLBACK_DEFAULT) {
 
-    // If this is a programmed form, get rid of the default value widget, 
+    // If this is a programmed form, get rid of the default value widget,
     // we have the default values already.
     if ($form['#programmed']) {
       form_set_value(array('#parents' => array('default_value_widget')), NULL, $form_state);
