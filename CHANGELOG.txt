@@ -41,6 +41,7 @@ CCK 6.2-dev
 - Views integration : prevent possible 'invalid argument for foreach' warnings with 'group multiple values'.
 - Fix tests to work with simpletest 2.x.
 - #296301 by Moonshine - Fieldgroups: fix call_user_func_array() error on add / configure / remove pages.
+- #118364 Number (decimal): fix unneeded information message when using comma as a separator ("150,00 was changed to 150.00").
 
 CCK 6.2.rc6
 ===========
