@@ -188,6 +188,9 @@ function content_copy_export($form_id, $form_values) {
 
   // Get an array of groups to export.
   // Record a macro for each group by submitting the group edit form.
+  
+  // TODO come back and do this without using drupal_execute().
+  
   if (is_array($form_values['groups']) && module_exists('fieldgroup')) {
 
     $content_type = content_types($form_values['type_name']);
@@ -200,6 +203,9 @@ function content_copy_export($form_id, $form_values) {
   // Record a macro for each field by submitting the field settings form.
   // Omit fields from the export if their module is not currently installed
   // otherwise the system will generate errors when the macro tries to execute their forms.
+  
+  // TODO come back and do this without using drupal_execute().
+  
   $type = content_types($form_values['type_name']);
   foreach ((array) $form_values['fields'] as $field_name) {
 
@@ -221,6 +227,29 @@ function content_copy_export($form_id, $form_values) {
 
 /**
  *  A form to import formatted text created with export.
+ * 
+ * The macro can be filled from a file, if provided.
+ * Example:
+ * 
+ * The macro can be filled from a file, if provided.
+ * Provide a type_name to force the fields to be added to a specific
+ * type, or leave out type_name to create a new content type.
+ * 
+ * Example:
+ * // If Content Copy is enabled, offer an import link.
+ * if (module_exists('content_copy')) {
+ *   $form['macro'] = array(
+ *     '#type' => 'fieldset',
+ *     '#title' => t('Create a content type'),
+ *     '#description' => t('Follow this link to create automatically a content type and import preconfigured fields.'),
+ *     '#collapsible' => TRUE,
+ *     '#collapsed' => FALSE,
+ *   );
+ *   $form['macro']['link'] = array(
+ *     '#type' => 'markup',
+ *     '#value' => l(t('import'), 'admin/content/types/import', array(), 'type_name=event&macro_file='. drupal_get_path('module', 'my_module') .'/my_content_type.txt'),
+ *   );
+ * }
  */
 function content_copy_import_form($type_name = '') {
   include_once('./'. drupal_get_path('module', 'content') .'/content_admin.inc');
@@ -245,6 +274,14 @@ function content_copy_import_form($type_name = '') {
     '#type' => 'submit',
     '#value' => t('Submit'),
   );
+  // Read in a file if there is one and set it as the default macro value.
+  if (isset($_REQUEST['macro_file']) && $file = file_get_contents($_REQUEST['macro_file'])) {
+    $form['macro']['#default_value'] = $file;
+    if (isset($_REQUEST['type_name'])) {
+      $form['type_name']['#default_value'] = $_REQUEST['type_name'];
+    }
+    $form['#prefix'] .= '<br /><strong>'. t('A file has been pre-loaded for import.') .'</strong>';
+  }
   return $form;
 }
 
