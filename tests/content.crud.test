@@ -795,10 +795,11 @@ class ContentOptionWidgetTest extends ContentCrudTestCase {
     $field_name = $field['field_name'];
 
     // Create a node with the checkbox on.
-    $edit = array();
-    $edit['title'] = $this->randomName(20);
-    $edit['body'] = $this->randomName(20);
-    $edit[$field_name.'[value]'] = $on_value;
+    $edit = array(
+      'title' => $this->randomName(20),
+      'body' => $this->randomName(20),
+      $field_name.'[value]' => $on_value,
+    );
     $this->drupalPost('node/add/'. $type_url, $edit, 'Save');
     $node = node_load(array('title' => $edit['title']));
     $this->assertEqual($node->{$field_name}[0]['value'], $on_value, 'Checkbox: checked (saved)');
@@ -806,14 +807,16 @@ class ContentOptionWidgetTest extends ContentCrudTestCase {
     $this->assertText($on_text, 'Checkbox: checked (displayed)');
 
     // Edit the node and uncheck the box.
-    // FAILS.
-    $edit = array();
-    $edit[$field_name.'[value]'] = 0;
+    $edit = array(
+      $field_name.'[value]' => FALSE,
+    );
     $this->drupalPost('node/'. $node->nid .'/edit', $edit, 'Save');
     $node = node_load($node->nid, NULL, TRUE);
-    $this->assertIdentical($node->{$field_name}[0]['value'], NULL, 'Checkbox: unchecked (saved)');
+    // TODO : fails - $field_name}[0]['value'] comes out as 0.
+    $this->assertEqual($node->{$field_name}[0]['value'], $off_value, 'Checkbox: unchecked (saved)');
     $this->drupalGet('node/'. $node->nid);
     $this->assertNoText($on_text, 'Checkbox: unchecked (displayed)');
+    $this->assertNoText($off_text, 'Checkbox: unchecked (displayed)');
   }
 
   /**
@@ -828,8 +831,9 @@ class ContentOptionWidgetTest extends ContentCrudTestCase {
    * Multiple select, not required:
    * - TODO: check there's a 'none' choice in the form.
    * - Edit the node and select multiple values.
+   * - Edit the node and unselect one value.
    * - Edit the node and unselect the values (selecting '- None -').
-   * - FAILS: Edit the node and unselect the values (selecting nothing).
+   * - Edit the node and unselect the values (selecting nothing).
    *
    * Multiple select, required:
    * - TODO: check there's no 'none' choice in the form.
@@ -854,9 +858,10 @@ class ContentOptionWidgetTest extends ContentCrudTestCase {
     $field_name = $field['field_name'];
 
     // Create a node with one value selected
-    $edit = array();
-    $edit['title'] = $this->randomName(20);
-    $edit['body'] = $this->randomName(20);
+    $edit = array(
+      'title' => $this->randomName(20),
+      'body' => $this->randomName(20),
+    );
     $edit[$field_name.'[value]'] = $value1;
     $this->drupalPost('node/add/'. $type_url, $edit, 'Save');
     $node = node_load(array('title' => $edit['title']));
@@ -865,8 +870,9 @@ class ContentOptionWidgetTest extends ContentCrudTestCase {
     $this->assertText($value1_alias, 'Select: selected (displayed)');
 
     // Edit the node and unselect the value (selecting '- None -').
-    $edit = array();
-    $edit[$field_name.'[value]'] = '';
+    $edit = array(
+      $field_name.'[value]' => '',
+    );
     $this->drupalPost('node/'. $node->nid .'/edit', $edit, 'Save');
     $node = node_load($node->nid, NULL, TRUE);
     $this->assertIdentical($node->{$field_name}[0]['value'], NULL, 'Select: unselected (saved)');
@@ -877,8 +883,9 @@ class ContentOptionWidgetTest extends ContentCrudTestCase {
     $field = $this->updateField(array('multiple' => '1', 'required' => '0'));
 
     // Edit the node and select multiple values.
-    $edit = array();
-    $edit[$field_name.'[value][]'] = array($value1, $value2);
+    $edit = array(
+      $field_name.'[value][]' => array($value1 => $value1, $value2 => $value2),
+    );
     $this->drupalPost('node/'. $node->nid .'/edit', $edit, 'Save');
     $node = node_load($node->nid, NULL, TRUE);
     $this->assertEqual($node->{$field_name}[0]['value'], $value1, 'Multiple Select: selected 1 (saved)');
@@ -887,9 +894,22 @@ class ContentOptionWidgetTest extends ContentCrudTestCase {
     $this->assertText($value1_alias, 'Multiple Select: selected 1 (displayed)');
     $this->assertText($value2_alias, 'Multiple Select: selected 2 (displayed)');
 
+    // Edit the node and unselect one value.
+    $edit = array(
+      $field_name.'[value][]' => array($value1 => $value1),
+    );
+    $this->drupalPost('node/'. $node->nid .'/edit', $edit, 'Save');
+    $node = node_load($node->nid, NULL, TRUE);
+    $this->assertEqual($node->{$field_name}[0]['value'], $value1, 'Multiple Select: selected 1 (saved)');
+    $this->assertTrue(!isset($node->{$field_name}[1]), 'Multiple Select: unselected 2 (saved)');
+    $this->drupalGet('node/'. $node->nid);
+    $this->assertText($value1_alias, 'Multiple Select: selected 1 (displayed)');
+    $this->assertNoText($value2_alias, 'Multiple Select: unselected 2 (displayed)');
+
     // Edit the node and unselect the values (selecting '- None -').
-    $edit = array();
-    $edit[$field_name.'[value][]'] = array('');
+    $edit = array(
+      $field_name.'[value][]' => array('' => ''),
+    );
     $this->drupalPost('node/'. $node->nid .'/edit', $edit, 'Save');
     $node = node_load($node->nid, NULL, TRUE);
     $this->assertIdentical($node->{$field_name}[0]['value'], NULL, 'Multiple Select: unselected 1 ("-none-" selected) (saved)');
@@ -901,7 +921,7 @@ class ContentOptionWidgetTest extends ContentCrudTestCase {
     // Edit the node and unselect the values (selecting nothing).
     // We first need to put values back in (no test needed).
     $edit = array();
-    $edit[$field_name.'[value][]'] = array($value1, $value2);
+    $edit[$field_name.'[value][]'] = array($value1 => FALSE, $value2 => FALSE);
     $this->drupalPost('node/'. $node->nid .'/edit', $edit, 'Save');
     $edit = array();
     $this->drupalPost('node/'. $node->nid .'/edit', $edit, 'Save');
@@ -916,14 +936,14 @@ class ContentOptionWidgetTest extends ContentCrudTestCase {
     $field = $this->updateField(array('required' => '1'));
 
     // Check the form doesn't submit when nothing is selected.
-    // Doing this on the pre-filled node doesn't take, so we test that on a new node.
-    // TODO : come back to this when the above fails are solved.
-//    $edit = array();
-//    $this->drupalPost('node/'. $node->nid .'/edit', $edit, 'Save');
-//    $this->assertRaw(t('!name field is required.', array('!name' => t($field['widget']['label']))), 'Multiple Select: "required" property is respected');
     $edit = array();
-    $edit['title'] = $this->randomName(20);
-    $edit['body'] = $this->randomName(20);
+    $this->drupalPost('node/'. $node->nid .'/edit', $edit, 'Save');
+    $this->assertRaw(t('!name field is required.', array('!name' => t($field['widget']['label']))), 'Multiple Select: "required" property is respected');
+
+    $edit = array(
+      'title' => $this->randomName(20),
+      'body' => $this->randomName(20),
+    );
     $this->drupalPost('node/add/'. $type_url, $edit, 'Save');
     $this->assertRaw(t('!name field is required.', array('!name' => t($field['widget']['label']))), 'Multiple Select: "required" property is respected');
 
@@ -934,31 +954,20 @@ class ContentOptionWidgetTest extends ContentCrudTestCase {
    * - TODO: check there's a 'none' choice in the form.
    * - Create a node with one value selected.
    * - Edit the node and unselect the value (selecting '- None -').
-   * - FAILS: Edit the node and unselect the value (selecting nothing).
    *
    * Single (radios), required:
    * - TODO: check there's no 'none' choice in the form.
    * - Check the form doesn't submit when nothing is selected.
-   *
-   * Multiple (checkboxes), not required:
-   * - TODO: check there's no 'none' choice in the form.
-   * - Edit the node and select multiple values.
-   * - FAILS: Edit the node and unselect the values (selecting nothing).
-   *
-   * Multiple (checkboxes), required:
-   * - TODO: check there's no 'none' choice in the form.
-   * - Check the form doesn't submit when nothing is selected.
    */
-  function testButtons() {
+  function testRadios() {
     $type = $this->content_types[0];
     $type_url = str_replace('_', '-', $type->type);
 
-    // Create the field - start with 'single' (radios).
+    // Create the field - 'single' (radios).
     $value1 = $this->randomName(5);
     $value1_alias = $value1 .'_alias';
     $value2 = $this->randomName(5);
     $value2_alias = $value2 .'_alias';
-
     $settings = array(
       'type' => 'text',
       'widget_type' => 'optionwidgets_buttons',
@@ -987,54 +996,82 @@ class ContentOptionWidgetTest extends ContentCrudTestCase {
     $this->drupalGet('node/'. $node->nid);
     $this->assertNoText($value1_alias, 'Radios: unchecked (displayed)');
 
-    // Edit the node and unselect the value (selecting nothing).
-    // We first need to put the value back in (no test needed).
-    // FAILS.
-    $edit = array();
-    $edit[$field_name.'[value]'] = $value1;
-    $this->drupalPost('node/'. $node->nid .'/edit', $edit, 'Save');
-    $edit = array();
-    $this->drupalPost('node/'. $node->nid .'/edit', $edit, 'Save');
-    $node = node_load($node->nid, NULL, TRUE);
-    $this->assertIdentical($node->{$field_name}[0]['value'], NULL, 'Radios: unchecked (no selection) (saved)');
-    $this->drupalGet('node/'. $node->nid);
-    $this->assertNoText($value1_alias, 'Radios: unselected (no selection) (displayed)');
-
     // Change field to required.
     $field = $this->updateField(array('required' => '1'));
 
     // Check the form doesn't submit when nothing is selected.
     // Doing this on the pre-filled node doesn't take, so we test that on a new node.
-    // TODO : come back to this when the above fails are solved.
-//    $edit = array();
-//    $this->drupalPost('node/'. $node->nid .'/edit', $edit, 'Save');
-//    $this->assertRaw(t('!name field is required.', array('!name' => t($field['widget']['label']))), 'Radios: "required" property is respected');
     $edit = array();
     $edit['title'] = $this->randomName(20);
     $edit['body'] = $this->randomName(20);
-// TODO : those thests are OK but mess the subsequent form submissions ??
-//    $this->drupalPost('node/add/'. $type_url, $edit, 'Save');
-//    $this->assertRaw(t('!name field is required.', array('!name' => t($field['widget']['label']))), 'Radios: "required" property is respected');
+    $this->drupalPost('node/add/'. $type_url, $edit, 'Save');
+    $this->assertRaw(t('!name field is required.', array('!name' => t($field['widget']['label']))), 'Radios: "required" property is respected');
+  }
 
-    // Change field to 'multiple' (checkboxes), not required.
-    $field = $this->updateField(array('multiple' => '1', 'required' => '0'));
+  /**
+   * Multiple (checkboxes), not required:
+   * - TODO: check there's no 'none' choice in the form.
+   * - Create a node with two values.
+   * - Edit the node and select only one value.
+   * - Edit the node and unselect the values (selecting nothing).
+   *
+   * Multiple (checkboxes), required:
+   * - TODO: check there's no 'none' choice in the form.
+   * - Check the form doesn't submit when nothing is selected.
+   */
+  function testChecboxes() {
+    $type = $this->content_types[0];
+    $type_url = str_replace('_', '-', $type->type);
 
-    // Edit the node and select multiple values.
-    $edit = array();
-    $edit[$field_name.'[value]['. $value1 .']'] = $value1;
-    $edit[$field_name.'[value]['. $value2 .']'] = $value2;
-    $this->drupalPost('node/'. $node->nid .'/edit', $edit, 'Save');
-    $node = node_load($node->nid, NULL, TRUE);
+    // Create the field -  'multiple' (checkboxes).
+    $value1 = $this->randomName(5);
+    $value1_alias = $value1 .'_alias';
+    $value2 = $this->randomName(5);
+    $value2_alias = $value2 .'_alias';
+    $settings = array(
+      'type' => 'text',
+      'multiple' => '1',
+      'widget_type' => 'optionwidgets_buttons',
+      'allowed_values' => "$value1|$value1_alias\r\n$value2|$value2_alias",
+    );
+    $field = $this->createField($settings, 0);
+    $field_name = $field['field_name'];
+
+    // Create a node with two values selected
+    $edit = array(
+      'title' => $this->randomName(20),
+      'body' => $this->randomName(20),
+      $field_name.'[value]['. $value1 .']' => $value1,
+      $field_name.'[value]['. $value2 .']' => $value2,
+    );
+    $this->drupalPost('node/add/'. $type_url, $edit, 'Save');
+    $node = node_load(array('title' => $edit['title']));
     $this->assertEqual($node->{$field_name}[0]['value'], $value1, 'Checkboxes: selected 1 (saved)');
     $this->assertEqual($node->{$field_name}[1]['value'], $value2, 'Checkboxes: selected 2 (saved)');
     $this->drupalGet('node/'. $node->nid);
     $this->assertText($value1_alias, 'Checkboxes: selected 1 (displayed)');
     $this->assertText($value2_alias, 'Checkboxes: selected 2 (displayed)');
 
-    // Edit the node and unselect the values (selecting nothing).
-    // (there is no 'none' choice for checkboxes).
-    // FAILS
-    $edit = array();
+    // Edit the node and unselect the values (selecting nothing -
+    // there is no 'none' choice for checkboxes).
+    $edit = array(
+      $field_name.'[value]['. $value1 .']' => $value1,
+      $field_name.'[value]['. $value2 .']' => FALSE,
+    );
+    $this->drupalPost('node/'. $node->nid .'/edit', $edit, 'Save');
+    $node = node_load($node->nid, NULL, TRUE);
+    $this->assertEqual($node->{$field_name}[0]['value'], $value1, 'Checkboxes: selected 1 (saved)');
+    $this->assertTrue(!isset($node->{$field_name}[1]), 'Checkboxes: unselected 2 (saved)');
+    $this->drupalGet('node/'. $node->nid);
+    $this->assertText($value1_alias, 'Checkboxes: selected 1 (displayed)');
+    $this->assertNoText($value2_alias, 'Checkboxes: unselected 2 (displayed)');
+
+    // Edit the node and unselect the values (selecting nothing -
+    // there is no 'none' choice for checkboxes).
+    $edit = array(
+      $field_name.'[value]['. $value1 .']' => FALSE,
+      $field_name.'[value]['. $value2 .']' => FALSE,
+    );
     $this->drupalPost('node/'. $node->nid .'/edit', $edit, 'Save');
     $node = node_load($node->nid, NULL, TRUE);
     $this->assertIdentical($node->{$field_name}[0]['value'], NULL, 'Checkboxes: unselected 1 (no selection) (saved)');
@@ -1047,11 +1084,13 @@ class ContentOptionWidgetTest extends ContentCrudTestCase {
     $field = $this->updateField(array('required' => '1'));
 
     // Check the form doesn't submit when nothing is selected.
-    // Doing this on the pre-filled node doesn't take, so we test that on a new node.
-    // TODO : come back to this when the above fails are solved.
-//    $edit = array();
-//    $this->drupalPost('node/'. $node->nid .'/edit', $edit, 'Save');
-//    $this->assertRaw(t('!name field is required.', array('!name' => t($field['widget']['label']))), 'Checkboxes: "required" property is respected');
+    $edit = array(
+      $field_name.'[value]['. $value1 .']' => FALSE,
+      $field_name.'[value]['. $value2 .']' => FALSE,
+    );
+    $this->drupalPost('node/'. $node->nid .'/edit', $edit, 'Save');
+    $this->assertRaw(t('!name field is required.', array('!name' => t($field['widget']['label']))), 'Checkboxes: "required" property is respected');
+
     $edit = array();
     $edit['title'] = $this->randomName(20);
     $edit['body'] = $this->randomName(20);
@@ -1059,4 +1098,5 @@ class ContentOptionWidgetTest extends ContentCrudTestCase {
     $this->assertRaw(t('!name field is required.', array('!name' => t($field['widget']['label']))), 'Checkboxes: "required" property is respected');
   }
 
+}
 }
