@@ -58,7 +58,7 @@ function number_field_settings($op, $field) {
         '#default_value' => isset($field['allowed_values']) ? $field['allowed_values'] : '',
         '#required' => FALSE,
         '#rows' => 10,
-        '#description' => t('The possible values this field can contain. Enter one value per line, in the format key|label. The key is the value that will be stored in the database, and it must match the field storage type (%type). The label is optional, and the key will be used as the label if no label is specified.', array('%type' => $field['type'])),
+        '#description' => t('The possible values this field can contain. Enter one value per line, in the format key|label. The key is the value that will be stored in the database, and it must match the field storage type (%type). The label is optional, and the key will be used as the label if no label is specified.<br />Allowed HTML tags: @tags', array('%type' => $field['type'], '@tags' => _content_filter_xss_display_allowed_tags())),
       );
       $form['advanced_options'] = array(
         '#type' => 'fieldset',
@@ -234,8 +234,8 @@ function number_field_formatter($field, $item, $formatter, $node) {
     $value = ($item['value']);
     break;
   }
-  $prefixes = explode('|', $field['prefix']);
-  $suffixes = explode('|', $field['suffix']);
+  $prefixes = explode('|', check_plain($field['prefix']));
+  $suffixes = explode('|', check_plain($field['suffix']));
   if ($prefixes) {
     if (sizeof($prefixes) > 1) {
       $prefix = format_plural($item['value'], $prefixes[0], $prefixes[1]);
@@ -286,7 +286,7 @@ function number_widget($op, &$node, $field, &$items) {
 
       if ($field['multiple']) {
         $form[$field['field_name']]['#type'] = 'fieldset';
-        $form[$field['field_name']]['#description'] = t($field['widget']['description']);
+        $form[$field['field_name']]['#description'] = content_filter_xss(t($field['widget']['description']));
         $delta = 0;
         foreach ($items as $data) {
           if (isset($data['value'])) {
@@ -324,7 +324,7 @@ function number_widget($op, &$node, $field, &$items) {
           '#title' => t($field['widget']['label']),
           '#default_value' => isset($items[0]['value']) ? $items[0]['value'] : '',
           '#required' => $field['required'],
-          '#description' => t($field['widget']['description']),
+          '#description' => content_filter_xss(t($field['widget']['description'])),
           '#size' => 20,
           '#maxlength' => 11,
           '#attributes' => array('class' => 'number'),
@@ -375,6 +375,8 @@ function number_allowed_values($field) {
     $list = array_map('trim', $list);
     $list = array_filter($list, 'strlen');
     foreach ($list as $opt) {
+      // Sanitize the user input with a permissive filter.
+      $opt = content_filter_xss($opt);
       list($key, $value) = explode('|', $opt);
       $allowed_values[$field['field_name']][$key] = $value ? $value : $key;
     }

@@ -35,6 +35,7 @@ Other changes :
 - #266205 by sun: add zebra classes for field items.
 - #301984 by joetsuihk - Views Integration: do not display empty divs on empty fields.
 
+
 5--1.7
 ======
 Features

@@ -116,7 +116,7 @@ function content_admin_field_overview_form($type_name) {
         foreach ($form['#groups'][$key]['fields'] as $field_name => $field) {
           $row = array();
           $field = $type['fields'][$field_name];
-          $row['label']     = $field['widget']['label'];
+          $row['label']     = check_plain($field['widget']['label']);
           $row['name']      = $field['field_name'];
           $row['type']      = $field_types[$field['type']]['label'];
           $row['weights']   = 'form-field-weights';
@@ -139,7 +139,7 @@ function content_admin_field_overview_form($type_name) {
       elseif (substr($key, 0, 6) == 'field_') {
         $row = array();
         $field = $type['fields'][$key];
-        $row['label']     = $field['widget']['label'];
+        $row['label']     = check_plain($field['widget']['label']);
         $row['name']      = $field['field_name'];
         $row['type']      = $field_types[$field['type']]['label'];
         $row['weights']   = 'form-field-weights';
@@ -427,7 +427,7 @@ function _content_admin_display_overview_row($field, $field_type) {
   );
 
   $row = array();
-  $row['type_label']  = array('#value' => $field['widget']['label']);
+  $row['type_label']  = array('#value' => check_plain($field['widget']['label']));
   $row['type']        = array('#value' => $field_type['label']);
 
   $row['label']['format'] = array(
@@ -774,7 +774,7 @@ function _content_admin_field($type_name, $field_name) {
     '#title' => t('Help text'),
     '#default_value' => $field['widget']['description'],
     '#rows' => 5,
-    '#description' => t('Instructions to present to the user below this field on the editing form.'),
+    '#description' => t('Instructions to present to the user below this field on the editing form.<br />Allowed HTML tags: @tags', array('@tags' => _content_filter_xss_display_allowed_tags())),
     '#required' => FALSE,
   );
 

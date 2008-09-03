@@ -251,7 +251,7 @@ function nodereference_widget($op, &$node, $field, &$items) {
           '#size' =>  $field['multiple'] ? min(count($options), 6) : 0,
           '#options' => $options,
           '#required' => $field['required'],
-          '#description' => t($field['widget']['description']),
+          '#description' => content_filter_xss(t($field['widget']['description'])),
         );
 
         return $form;
@@ -296,7 +296,7 @@ function nodereference_widget($op, &$node, $field, &$items) {
 
         if ($field['multiple']) {
           $form[$field['field_name']]['#type'] = 'fieldset';
-          $form[$field['field_name']]['#description'] = t($field['widget']['description']);
+          $form[$field['field_name']]['#description'] = content_filter_xss(t($field['widget']['description']));
           $delta = 0;
           foreach ($items as $item) {
             if ($item['nid']) {
@@ -327,7 +327,7 @@ function nodereference_widget($op, &$node, $field, &$items) {
             '#autocomplete_path' => 'nodereference/autocomplete/'. $field['field_name'],
             '#default_value' => $items[0]['default node_name'],
             '#required' => $field['required'],
-            '#description' => t($field['widget']['description']),
+            '#description' => content_filter_xsst($field['widget']['description'])),
           );
         }
         return $form;

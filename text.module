@@ -42,7 +42,7 @@ function text_field_settings($op, $field) {
         '#default_value' => !empty($field['allowed_values']) ? $field['allowed_values'] : '',
         '#required' => FALSE,
         '#rows' => 10,
-        '#description' => t('The possible values this field can contain. Enter one value per line, in the format key|label. The key is the value that will be stored in the database, and it must match the field storage type (%type). The label is optional, and the key will be used as the label if no label is specified.', array('%type' => $field['type'])),
+        '#description' => t('The possible values this field can contain. Enter one value per line, in the format key|label. The key is the value that will be stored in the database, and it must match the field storage type (%type). The label is optional, and the key will be used as the label if no label is specified.<br />Allowed HTML tags: @tags', array('%type' => $field['type'], '@tags' => _content_filter_xss_display_allowed_tags())),
       );
       $form['advanced_options'] = array(
         '#type' => 'fieldset',
@@ -183,7 +183,7 @@ function text_field($op, &$node, $field, &$items, $teaser, $page) {
         foreach ($items as $delta => $data) {
           $error_field = $field['field_name'] .']['. $delta .'][value';
           if (drupal_strlen($data['value']) > $field['max_length']) {
-            form_set_error($error_field, t('%label is longer than %max characters.', array('%label' => $field['widget']['label'], '%max' => $field['max_length'])));
+            form_set_error($error_field, t('%label is longer than %max characters.', array('%label' => t($field['widget']['label']), '%max' => $field['max_length'])));
           }
         }
       }
@@ -298,7 +298,7 @@ function text_widget($op, &$node, $field, &$items) {
 
       if ($field['multiple']) {
         $form[$field['field_name']]['#type'] = 'fieldset';
-        $form[$field['field_name']]['#description'] = t($field['widget']['description']);
+        $form[$field['field_name']]['#description'] = content_filter_xss(t($field['widget']['description']));
         $delta = 0;
         foreach ($items as $data) {
           if ($data['value']) {
@@ -361,7 +361,7 @@ function text_widget($op, &$node, $field, &$items) {
             '#title' => t($field['widget']['label']),
             '#default_value' => isset($items[0]['value']) ? $items[0]['value'] : '',
             '#required' => $field['required'],
-            '#description' => t($field['widget']['description']),
+            '#description' => content_filter_xss(t($field['widget']['description'])),
             '#maxlength' => $field['max_length'] ? $field['max_length'] : NULL,
             '#weight' => $field['widget']['weight'],
           );
@@ -373,7 +373,7 @@ function text_widget($op, &$node, $field, &$items) {
             '#default_value' => $items[0]['value'],
             '#required' => $field['required'],
             '#rows' => $field['widget']['rows'],
-            '#description' => t($field['widget']['description']),
+            '#description' => content_filter_xss(t($field['widget']['description'])),
             '#weight' => $field['widget']['weight'],
           );
         }
@@ -419,6 +419,8 @@ function text_allowed_values($field) {
     $list = array_map('trim', $list);
     $list = array_filter($list, 'strlen');
     foreach ($list as $opt) {
+      // Sanitize the user input with a permissive filter.
+      $opt = content_filter_xss($opt);
       list($key, $value) = explode('|', $opt);
       $allowed_values[$field['field_name']][$key] = $value ? $value : $key;
     }

@@ -292,11 +292,11 @@ function fieldgroup_form_alter($form_id, &$form) {
     foreach (fieldgroup_groups($form['type']['#value']) as $group_name => $group) {
       $form[$group_name] = array(
         '#type' => 'fieldset',
-        '#title' => t($group['label']),
+        '#title' => check_plain(t($group['label'])),
         '#collapsed' => $group['settings']['form']['style'] == 'fieldset_collapsed',
         '#collapsible' => in_array($group['settings']['form']['style'], array('fieldset_collapsed', 'fieldset_collapsible')),
         '#weight' => $group['weight'],
-        '#description' => t($group['settings']['form']['description']),
+        '#description' => content_filter_xss(t($group['settings']['form']['description'])),
         '#attributes' => array('class' => strtr($group['group_name'], '_', '-')),
       );
       foreach ($group['fields'] as $field_name => $field) {
@@ -367,8 +367,8 @@ function fieldgroup_nodeapi(&$node, $op, $teaser, $page) {
       foreach (fieldgroup_groups($node->type) as $group_name => $group) {
         $label = $group['settings']['display']['label'] == 'above';
         $element = array(
-          '#title' => $label ? t($group['label']) : '',
-          '#description' => $label ? t($group['settings']['display']['description']) : '',
+          '#title' => $label ? check_plain(t($group['label'])) : '',
+          '#description' => $label ? content_filter_xss(t($group['settings']['display']['description'])) : '',
           '#weight' => $group['weight'],
           '#attributes' => array('class' => 'fieldgroup '. strtr($group['group_name'], '_', '-')),
         );
@@ -487,7 +487,7 @@ function fieldgroup_display_overview_form_row($group) {
   );
 
   $row = array();
-  $row['group_label']  = array('#value' => $group['label']);
+  $row['group_label']  = array('#value' => check_plain($group['label']));
   $row['label'] = array(
     '#type' => 'select',
     '#options' => $label_options,
