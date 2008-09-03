@@ -1,16 +1,29 @@
 // $Id$
 
-5--1.x
+5--1.8
 ======
 
-The 1.8 release fixes a critical bug :
-- #292872 Do not delete fields and field data for content types defined by disabled modules.
-IMPORTANT : Since disabling all contrib modules is a recommended step prior to upgrading a D5 site to D6,
+The 1.8 release fixes two critical bug :
+
+- #292872 Data loss issue : fields and field data deleted for content types defined by disabled modules.
+IMPORTANT: Since disabling all contrib modules is a recommended step prior to upgrading a D5 site to D6,
 it is highly advised that D5 sites using CCK are updated to CCK 5.x-1.8 before starting the D6 upgrade process.
 
+- #271577 Security issue (moderate): unsanitized output for some admin-defined content
+('administer content' permission was required to exploit the security hole)
+IMPORTANT: If your theme uses field templates, you will need to manually change this line in your theme's template.php :
+function phptemplate_field() :  [or possibly THEME_NAME_field()]
+change:
+  'label' => t($field['widget']['label']),
+to:
+  'label' => check_plain(t($field['widget']['label'])),
+
+
 Other notable fix :
+
 - Content Copy: Fix multiple bugs when importing/exporting content types :
-'this post cannot be referenced' with nodereference fields
+exporting field definition can alter the actual field's settings
+'this post cannot be referenced' error when exporting nodereference fields
 no export of default values
 
 This release requires a visit to update.php
