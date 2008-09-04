@@ -239,6 +239,16 @@ function content_theme() {
 }
 
 /**
+ * Implementation of hook_views_api().
+ */
+function content_views_api() {
+  return array(
+    'api' => 2,
+    'path' => drupal_get_path('module', 'content') . '/includes/views',
+  );
+}
+
+/**
  * Load data for a node type's fields.
  * Implementation of hook_nodeapi 'load' op.
  *

@@ -3,6 +3,9 @@
 CCK 6.2-dev
 ===========
 
+Note : there has been a few files moved around since RC6, so be sure to *delete* the previous contents
+of your cck/ folder before uploading the new files, in order to avoid duplicates.
+
 - #196468 by Nedjo, add method to provide a link to automatically import a file into Content Copy.
 - Avoid undefined index error in Content Copy when fieldgroup is enabled but there are no groups.
 - #296077 Add delta to formatter information.
@@ -43,6 +46,7 @@ CCK 6.2-dev
 - #296301 by Moonshine - Fieldgroups: fix call_user_func_array() error on add / configure / remove pages.
 - #118364 Number (decimal): fix unneeded information message when using comma as a separator ("150,00 was changed to 150.00").
 - Fieldgroup: New groups are not styled on node view until 'display fields' form is submitted.
+- #303664 Views integration: update to new Views api for handler / plugins.
 
 CCK 6.2.rc6
 ===========
