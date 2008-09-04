@@ -327,7 +327,7 @@ function nodereference_widget($op, &$node, $field, &$items) {
             '#autocomplete_path' => 'nodereference/autocomplete/'. $field['field_name'],
             '#default_value' => $items[0]['default node_name'],
             '#required' => $field['required'],
-            '#description' => content_filter_xsst($field['widget']['description'])),
+            '#description' => content_filter_xss( t( $field['widget']['description'] )),
           );
         }
         return $form;

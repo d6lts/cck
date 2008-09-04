@@ -610,4 +610,5 @@ function content_update_1009() {
 function content_update_1010() {
   $ret = array();
   variable_set('content_update_1009', TRUE);
+  return $ret;
 }

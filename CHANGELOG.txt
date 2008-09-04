@@ -1,9 +1,16 @@
 // $Id$
 
+5--1.9
+======
+
+Hotfix release.
+- Fix array_merge() warning on upgrade (harmless).
+- Fix parse error in nodereference.module.
+
 5--1.8
 ======
 
-The 1.8 release fixes two critical bug :
+The 1.8 release fixes two critical bugs :
 
 - #292872 Data loss issue : fields and field data deleted for content types defined by disabled modules.
 IMPORTANT: Since disabling all contrib modules is a recommended step prior to upgrading a D5 site to D6,
