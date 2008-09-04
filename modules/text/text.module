@@ -296,13 +296,13 @@ function text_elements() {
       '#columns' => array('value'), '#delta' => 0,
       '#process' => array('text_textfield_process'),
       '#autocomplete_path' => FALSE,
-      ),
+    ),
     'text_textarea' => array(
       '#input' => TRUE,
       '#columns' => array('value', 'format'), '#delta' => 0,
       '#process' => array('text_textarea_process'),
       '#filter_value' => FILTER_FORMAT_DEFAULT,
-      ),
+    ),
   );
 }
 
