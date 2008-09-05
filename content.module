@@ -747,10 +747,11 @@ function content_field($op, &$node, $field, &$items, $teaser, $page) {
 
       // The location of the field's rendered output depends on whether the
       // field is in a fieldgroup or not.
+      $wrapper = NULL;
       if (isset($node->content[$field['field_name']])) {
         $wrapper = $node->content[$field['field_name']];
       }
-      elseif (module_exists('fieldgroup') && $group_name = fieldgroup_get_group($node->type, $field['field_name'])) {
+      elseif (module_exists('fieldgroup') && ($group_name = fieldgroup_get_group($node->type, $field['field_name'])) && isset($node->content[$group_name]['group'][$field['field_name']])) {
         $wrapper = $node->content[$group_name]['group'][$field['field_name']];
       }
 
