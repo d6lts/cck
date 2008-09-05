@@ -44,6 +44,16 @@ function userreference_theme() {
 }
 
 /**
+ * Implementation of hook_views_api().
+ */
+function userreference_views_api() {
+  return array(
+    'api' => 2,
+    'path' => drupal_get_path('module', 'userreference') . '/includes/views',
+  );
+}
+
+/**
  * Implementation of hook_field_info().
  *
  * Here we indicate that the content module will use its default
@@ -708,7 +718,10 @@ function _userreference_potential_references_standard($field, $string = '', $uid
   $users = array();
   $result = db_query('SELECT u.name, u.uid FROM {users} u '. implode(' ', $join) .' WHERE '. implode(' AND ', $where) .' ORDER BY u.name ASC', $args);
   while ($user = db_fetch_object($result)) {
-    $users[$user->uid] = $user->name;
+    $users[$user->uid] = array(
+      'title' => $user->name,
+      'rendered' => $user->name,
+    );
   }
   return $users;
 }

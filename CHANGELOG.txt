@@ -46,8 +46,9 @@ of your cck/ folder before uploading the new files, in order to avoid duplicates
 - #296301 by Moonshine - Fieldgroups: fix call_user_func_array() error on add / configure / remove pages.
 - #118364 Number (decimal): fix unneeded information message when using comma as a separator ("150,00 was changed to 150.00").
 - Fieldgroup: New groups are not styled on node view until 'display fields' form is submitted.
-- #303664 Views integration: update to new Views api for handler / plugins.
+- #303664 Views integration: update to new Views API for handler / plugins.
 - #303475 by wrunt - Optionwidgets : unchecked 'single on/off checkbox' stores 0/'0' instead of the 'off' value.
+- #304450 Userreference - fix broken autocomplete for 'simple' mode / fix broken 'advanced - views' mode after Views API changes.
 
 CCK 6.2.rc6
 ===========
