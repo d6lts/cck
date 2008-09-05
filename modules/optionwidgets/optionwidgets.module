@@ -335,14 +335,14 @@ function optionwidgets_form2data($element, $field) {
   $options = optionwidgets_options($field);
 
   $values = array_values($items);
+
+  if ($element['#type'] == 'optionwidgets_onoff' && ($values[0] === 0)) {
+    $keys = array_keys($options);
+    $values = array(array_key_exists(0, $keys) ? $keys[0] : NULL);
+  }
+
   if (empty($values)) {
-    if ($element['#type'] == 'optionwidgets_onoff') {
-      $keys = array_keys($options);
-      $values[] = array_key_exists(0, $keys) ? $keys[0] : '';
-    }
-    else {
-      $values[] = NULL;
-    }
+    $values[] = NULL;
   }
   $result = content_transpose_array_rows_cols(array($field_key => $values));
   return $result;
