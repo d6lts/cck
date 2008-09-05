@@ -85,12 +85,6 @@ function content_views_plugins() {
         'title' => 'Simple', // TODO: better name ? (currently not displayed anyway)
         'help' => 'Destination-agnostic display. Mostly useful for programmatic views.',
         'handler' => 'content_plugin_display_simple',
-        // "Note that unlike handler registration, where parentage is
-        // referred to by object name, with plugins it is referred to by the
-        // unique plugin identifier"
-        // Ensure that parent class 'views_plugin_display' is loaded
-        // (maybe that is not necessary...)
-//        'parent' => 'parent',
         'no ui' => TRUE, // Programmatic use only.
         'uses hook menu' => FALSE,
         'use ajax' => FALSE,
@@ -106,12 +100,6 @@ function content_views_plugins() {
         'title' => 'Results array (with title)',
         'help' => 'Returns the view as a PHP array of names + rendered rows.',
         'handler' => 'content_plugin_style_php_array_ac',
-        // "Note that unlike handler registration, where parentage is
-        // referred to by object name, with plugins it is referred to by the
-        // unique plugin identifier"
-        // Ensure that parent class 'views_plugin_display' is loaded
-        // (maybe that is not necessary...)
-//        'parent' => 'parent',
         'no ui' => TRUE, // Programmatic use only.
         'uses row plugin' => TRUE,
         'uses fields' => TRUE,
