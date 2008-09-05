@@ -24,6 +24,12 @@ Drupal core lets you use the following variant (suggestion):
   ex: node-story.tpl.php
   If present, will be used to theme a 'story' node.
 
+IMPORTANT : whenever you add new template files in your theme, you need to
+rebuild the theme registry, or the theme engine won't see them.
+You can do that by :
+- visiting the admin/build/modules page
+- or using devel.module's 'clear cache' link.
+
 1.b Node template variables
 ---------------------------
 
@@ -136,11 +142,18 @@ in the following order of precedence:
   If none of the above is present, the base template will be used.
 
 IMPORTANT:
-Suggestions work only if the theme also has the base template.
+- Suggestions work only if the theme also has the base template.
 If your theme has content-field-*.tpl.php files, it must also have a
 content-field.tpl.php file.
 
-See http://drupal.org/node/223440 for more informations about template suggestions.
+- Whenever you add new template files in your theme, you need to
+rebuild the theme registry, or the theme engine won't see them.
+You can do that by :
+- visiting the admin/build/modules page
+- or using devel.module's 'clear cache' link.
+
+See http://drupal.org/node/223440 for more informations about templates
+and template suggestions.
 
 
 3) Formatter theme functions
