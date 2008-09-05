@@ -184,6 +184,13 @@ function fieldgroup_update_4() {
  */
 function fieldgroup_update_6000() {
   $ret = array();
+
+  if (drupal_get_installed_schema_version('content') < 6000) {
+    drupal_set_message("Some updates are still pending. Please return to <a href=\"". url('update.php', array('query' => 'op=selection')). "\">update.php</a> and run the remaining updates.", 'warning');
+    $ret['#abort'] = array('success' => FALSE, 'query' => 'Updates for content.module need to be run first.<br/>Please re-run the update script.');
+    return $ret;
+  }
+
   db_rename_table($ret, 'node_group', 'content_group');
   db_rename_table($ret, 'node_group_fields', 'content_group_fields');
   variable_set('fieldgroup_schema_version', 6000);

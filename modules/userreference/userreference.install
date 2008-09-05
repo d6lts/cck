@@ -46,5 +46,13 @@ function userreference_update_last_removed() {
  */
 function userreference_update_6000() {
   $ret = array();
+
+  // OK, stupid, but this is just for consistency...
+  if (drupal_get_installed_schema_version('content') < 6000) {
+    drupal_set_message("Some updates are still pending. Please return to <a href=\"". url('update.php', array('query' => 'op=selection')). "\">update.php</a> and run the remaining updates.", 'warning');
+    $ret['#abort'] = array('success' => FALSE, 'query' => 'Updates for content.module need to be run first.<br/>Please re-run the update script.');
+    return $ret;
+  }
+
   return $ret;
 }
