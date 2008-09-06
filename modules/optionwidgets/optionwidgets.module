@@ -11,7 +11,7 @@
  */
 function optionwidgets_form_alter(&$form, $form_state, $form_id) {
   // Provide additional help for the field settings form.
-  if ($form_id == '_content_admin_field' && isset($form['widget'])) {
+  if ($form_id == 'content_field_edit_form' && isset($form['widget'])) {
     $widget_type = $form['main']['widget_type']['#default_value'];
     $field_type = $form['main']['type']['#value'];
 

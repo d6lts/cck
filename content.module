@@ -101,7 +101,7 @@ function content_menu() {
   $items = array();
   $items['admin/content/types/fields'] = array(
     'title' => 'Fields',
-    'page callback' => '_content_admin_type_fields',
+    'page callback' => 'content_fields_list',
     'access arguments' => array('administer content types'),
     'file' => 'includes/content.admin.inc',
     'type' => MENU_LOCAL_TASK,
@@ -124,7 +124,7 @@ function content_menu() {
       $items['admin/content/node-type/'. $type_url_str .'/fields'] = array(
         'title' => 'Manage fields',
         'page callback' => 'drupal_get_form',
-        'page arguments' => array('content_admin_field_overview_form', $type_name),
+        'page arguments' => array('content_field_overview_form', $type_name),
         'access arguments' => array('administer content types'),
         'file' => 'includes/content.admin.inc',
         'type' => MENU_LOCAL_TASK,
@@ -133,7 +133,7 @@ function content_menu() {
       $items['admin/content/node-type/'. $type_url_str .'/display'] = array(
         'title' => 'Display fields',
         'page callback' => 'drupal_get_form',
-        'page arguments' => array('content_admin_display_overview_form', $type_name),
+        'page arguments' => array('content_display_overview_form', $type_name),
         'access arguments' => array('administer content types'),
         'file' => 'includes/content.admin.inc',
         'type' => MENU_LOCAL_TASK,
@@ -141,20 +141,20 @@ function content_menu() {
       );
       $items['admin/content/node-type/'. $type_url_str .'/display/general'] = array(
         'title' => 'General',
-        'page arguments' => array('content_admin_display_overview_form', $type_name),
+        'page arguments' => array('content_display_overview_form', $type_name),
         'type' => MENU_DEFAULT_LOCAL_TASK,
         'weight' => 0,
       );
       $items['admin/content/node-type/'. $type_url_str .'/display/advanced'] = array(
         'title' => 'Advanced',
-        'page arguments' => array('content_admin_display_overview_form', $type_name, (string)CONTENT_CONTEXTS_ADVANCED),
+        'page arguments' => array('content_display_overview_form', $type_name, (string)CONTENT_CONTEXTS_ADVANCED),
         'access arguments' => array('administer content types'),
         'type' => MENU_LOCAL_TASK,
         'weight' => 1,
       );
       $items['admin/content/node-type/'. $type_url_str .'/add_field'] = array(
         'title' => 'Add field',
-        'page callback' => '_content_admin_field_add',
+        'page callback' => 'content_field_add',
         'page arguments' => array($type_name),
         'access arguments' => array('administer content types'),
         'file' => 'includes/content.admin.inc',
@@ -168,7 +168,7 @@ function content_menu() {
         $items['admin/content/node-type/'. $type_url_str .'/fields/'. $field_name] = array(
           'title' => $field['widget']['label'],
           'page callback' => 'drupal_get_form',
-          'page arguments' => array('_content_admin_field', $type_name, $field_name),
+          'page arguments' => array('content_field_edit_form', $type_name, $field_name),
           'access arguments' => array('administer content types'),
           'file' => 'includes/content.admin.inc',
           'type' => MENU_LOCAL_TASK,
@@ -176,7 +176,7 @@ function content_menu() {
         $items['admin/content/node-type/'. $type_url_str .'/fields/'. $field_name .'/remove'] = array(
           'title' => 'Remove field',
           'page callback' => 'drupal_get_form',
-          'page arguments' => array('_content_admin_field_remove', $type_name, $field_name),
+          'page arguments' => array('content_field_remove_form', $type_name, $field_name),
           'access arguments' => array('administer content types'),
           'file' => 'includes/content.admin.inc',
           'type' => MENU_CALLBACK,
@@ -220,10 +220,10 @@ function content_theme() {
     'content_overview_links' => array(
       'arguments' => array(),
     ),
-    'content_admin_field_overview_form' => array(
+    'content_field_overview_form' => array(
       'arguments' => array('form' => NULL),
     ),
-    'content_admin_display_overview_form' => array(
+    'content_display_overview_form' => array(
       'arguments' => array('form' => NULL),
     ),
     'content_admin_field_add_new_field_widget_type' => array(

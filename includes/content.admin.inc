@@ -58,7 +58,7 @@ function theme_content_overview_links() {
 /**
  * Menu callback; lists all defined fields for quick reference.
  */
-function _content_admin_type_fields() {
+function content_fields_list() {
   $fields = content_fields();
   $field_types = _content_field_types();
 
@@ -99,7 +99,7 @@ function _content_admin_type_fields() {
  * Allows fields to be reordered and nested in fieldgroups using
  * JS drag-n-drop. Non-CCK form elements can also be moved around.
  */
-function content_admin_field_overview_form(&$form_state, $type_name) {
+function content_field_overview_form(&$form_state, $type_name) {
   // When displaying the form, make sure the list of 'extra' fields
   // is up-to-date.
   if (empty($form_state['post'])) {
@@ -212,9 +212,9 @@ function content_admin_field_overview_form(&$form_state, $type_name) {
 }
 
 /**
- *  Theme the field overview table.
+ * Theme the field overview table.
  */
-function theme_content_admin_field_overview_form($form) {
+function theme_content_field_overview_form($form) {
   if (empty($form['#order'])) {
     return;
   }
@@ -266,7 +266,7 @@ function theme_content_admin_field_overview_form($form) {
   return $output;
 }
 
-function content_admin_field_overview_form_submit($form, &$form_state) {
+function content_field_overview_form_submit($form, &$form_state) {
   $form_values = $form_state['values'];
 
   // Update field weights.
@@ -298,7 +298,7 @@ function content_admin_field_overview_form_submit($form, &$form_state) {
  * Form includes form widgets to select which fields appear for teaser, full node
  * and how the field labels should be rendered.
  */
-function content_admin_display_overview_form(&$form_state, $type_name, $contexts_selector = CONTENT_CONTEXTS_SIMPLE) {
+function content_display_overview_form(&$form_state, $type_name, $contexts_selector = CONTENT_CONTEXTS_SIMPLE) {
   // Gather type information.
   $type = content_types($type_name);
   $field_types = _content_field_types();
@@ -424,7 +424,7 @@ function content_admin_display_overview_form(&$form_state, $type_name, $contexts
 /**
  *  Theme the display overview table.
  */
-function theme_content_admin_display_overview_form($form) {
+function theme_content_display_overview_form($form) {
   $output = '';
   if (isset($form['#order'])) {
     $contexts_selector = $form['#contexts'];
@@ -465,7 +465,7 @@ function theme_content_admin_display_overview_form($form) {
 /**
  * Submit handler for the display overview form.
  */
-function content_admin_display_overview_form_submit($form, &$form_state) {
+function content_display_overview_form_submit($form, &$form_state) {
   module_load_include('inc', 'content', 'includes/content.crud');
   $form_values = $form_state['values'];
   foreach ($form_values as $key => $values) {
@@ -485,7 +485,7 @@ function content_admin_display_overview_form_submit($form, &$form_state) {
 /**
  * Menu callback; presents the form for adding a new field.
  */
-function _content_admin_field_add($type_name) {
+function content_field_add($type_name) {
   // make sure the old field list gets cleared before creating the new one
   if (!isset($_POST['edit'])) {
     content_clear_type_cache();
@@ -493,7 +493,7 @@ function _content_admin_field_add($type_name) {
   $output = '';
   $options = content_field_type_options();
   if (!empty($options)) {
-    $output .= drupal_get_form('content_admin_field_main', array('type_name' => $type_name));
+    $output .= drupal_get_form('content_field_main_form', array('type_name' => $type_name));
   }
   else {
     drupal_set_message(t('No field modules are enabled. You need to <a href="!modules_url">enable one</a>, such as text.module, before you can add new fields.', array('!modules_url' => url('admin/build/modules'))), 'error');
@@ -541,7 +541,7 @@ function content_widget_type_options($field_type) {
   return !empty($options[$field_type]) ? $options[$field_type] : array();
 }
 
-function _content_admin_field_add_existing(&$form_state, $type_name) {
+function content_field_add_existing_form(&$form_state, $type_name) {
   $output = '';
   $type = content_types($type_name);
   $fields = content_fields();
@@ -578,7 +578,7 @@ function _content_admin_field_add_existing(&$form_state, $type_name) {
 /**
  * Add an existing field to a content type.
  */
-function _content_admin_field_add_existing_submit($form, &$form_state) {
+function content_field_add_existing_form_submit($form, &$form_state) {
   module_load_include('inc', 'content', 'includes/content.crud');
   $form_values = $form_state['values'];
   $form_values['field_name'] = $form_values['existing_field_name'];
@@ -604,7 +604,7 @@ function _content_admin_field_add_existing_submit($form, &$form_state) {
 /**
  * A form element for selecting field, widget, and label.
  */
-function content_admin_field_main(&$form_state, $form_values) {
+function content_field_main_form(&$form_state, $form_values) {
   module_load_include('inc', 'content', 'includes/content.crud');
   $form = array();
   if (!empty($form_state['storage'])) {
@@ -626,7 +626,7 @@ function content_admin_field_main(&$form_state, $form_values) {
   // If we haven't chosen a field name yet, include an option to
   // share an existing field instead.
   if (empty($field_name)) {
-    $form['#prefix'] = drupal_get_form('_content_admin_field_add_existing', $type_name);
+    $form['#prefix'] = drupal_get_form('content_field_add_existing_form', $type_name);
   }
 
   // See if we're editing an existing field or a new field.
@@ -715,15 +715,15 @@ function content_admin_field_main(&$form_state, $form_values) {
     '#type' => 'submit',
     '#value' => t('Continue'),
   );
-  $form['#validate'] = array('content_admin_field_main_validate');
-  $form['#submit'] = array('content_admin_field_main_submit');
+  $form['#validate'] = array('content_field_main_form_validate');
+  $form['#submit'] = array('content_field_main_form_submit');
   return $form;
 }
 
 /**
  *  Field name validation.
  */
-function content_admin_field_main_validate($form, &$form_state) {
+function content_field_main_form_validate($form, &$form_state) {
   $form_values = $form_state['values'];
   $field_name = $form_values['field_name'];
 
@@ -761,7 +761,7 @@ function content_admin_field_main_validate($form, &$form_state) {
 /**
  * Create a new field for a content type.
  */
-function content_admin_field_main_submit($form, &$form_state) {
+function content_field_main_form_submit($form, &$form_state) {
   $form_values = $form_state['values'];
   $form_state['storage'] = $form_values;
   if (empty($form_values['type']) || empty($form_values['widget_type'])) {
@@ -815,7 +815,7 @@ function content_admin_field_main_submit($form, &$form_state) {
 /**
  * Menu callback; present a form for removing a field from a content type.
  */
-function _content_admin_field_remove(&$form_state, $type_name, $field_name) {
+function content_field_remove_form(&$form_state, $type_name, $field_name) {
   $type = content_types($type_name);
   $field = $type['fields'][$field_name];
 
@@ -849,7 +849,7 @@ function _content_admin_field_remove(&$form_state, $type_name, $field_name) {
 /**
  * Remove a field from a content type.
  */
-function _content_admin_field_remove_submit($form, &$form_state) {
+function content_field_remove_form_submit($form, &$form_state) {
   module_load_include('inc', 'content', 'includes/content.crud');
   $form_values = $form_state['values'];
 
@@ -877,7 +877,7 @@ function _content_admin_field_remove_submit($form, &$form_state) {
 /**
  * Menu callback; presents the field editing page.
  */
-function _content_admin_field(&$form_state, $type_name, $field_name) {
+function content_field_edit_form(&$form_state, $type_name, $field_name) {
   $output = '';
   $type = content_types($type_name);
   $field = $type['fields'][$field_name];
@@ -902,7 +902,7 @@ function _content_admin_field(&$form_state, $type_name, $field_name) {
   if (isset($form_state['change_basic'])) {
     module_load_include('inc', 'content', 'includes/content.crud');
     $field_values = content_field_instance_collapse($field);
-    return content_admin_field_main($form_state, $field_values);
+    return content_field_main_form($form_state, $field_values);
   }
 
   $form = array();
@@ -939,7 +939,7 @@ function _content_admin_field(&$form_state, $type_name, $field_name) {
   $form['main']['change'] = array(
     '#type' => 'submit',
     '#value' => t('Change basic information'),
-    '#submit' => array('_content_admin_field_update_basic_submit'),
+    '#submit' => array('content_field_edit_form_submit_update_basic'),
   );
 
   $form['widget'] = array(
@@ -1115,7 +1115,7 @@ function _content_admin_field(&$form_state, $type_name, $field_name) {
 /**
  * Validate a field's settings.
  */
-function _content_admin_field_validate($form, &$form_state) {
+function content_field_edit_form_validate($form, &$form_state) {
   $form_values = $form_state['values'];
   if (isset($form_state['change_basic']) || $form_values['op'] == t('Change basic information')) {
     return;
@@ -1226,7 +1226,7 @@ function _content_admin_field_validate($form, &$form_state) {
 /**
  * Button submit handler.
  */
-function _content_admin_field_update_basic_submit($form, &$form_state) {
+function content_field_edit_form_submit_update_basic($form, &$form_state) {
   $form_state['change_basic'] = TRUE;
   $form_state['rebuild'] = TRUE;
 }
@@ -1234,7 +1234,7 @@ function _content_admin_field_update_basic_submit($form, &$form_state) {
 /**
  * Save a field's settings after editing.
  */
-function _content_admin_field_submit($form, &$form_state) {
+function content_field_edit_form_submit($form, &$form_state) {
   module_load_include('inc', 'content', 'includes/content.crud');
   $form_values = $form_state['values'];
   content_field_instance_update($form_values);

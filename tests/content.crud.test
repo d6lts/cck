@@ -658,6 +658,7 @@ class ContentUICrud extends ContentCrudTestCase {
     $edit['name']  = $this->randomName(10);
     $edit['type']  = $type1;
     $this->drupalPost('admin/content/types/add', $edit, 'Save content type');
+
     // Create a text field via the UI.
     $edit = array();
     $edit['field_name']  = strtolower($this->randomName(10));
@@ -672,12 +673,13 @@ class ContentUICrud extends ContentCrudTestCase {
     $this->drupalPost(NULL, $edit, 'Continue');
     $this->assertRaw('Created field <em>'. $field_label, 'Success message displayed');
     $this->drupalPost($admin_type1_url .'/fields/'. $field_url, array(), 'Save field settings');
-    // Check the schema - the vlaues should be in the per-type table.
+    // Check the schema - the values should be in the per-type table.
     $this->assertSchemaMatchesTables(array(
       'per_type' => array(
         $type1 => array($field_url => array('value')),
       ),
     ));
+
     // Add a second content type.
     $edit = array();
     $type2 = 'simpletest'. mt_rand();
@@ -685,6 +687,7 @@ class ContentUICrud extends ContentCrudTestCase {
     $edit['name']  = $this->randomName(10);
     $edit['type']  = $type2;
     $this->drupalPost('admin/content/types/add', $edit, 'Save content type');
+
     // Add the same field to a second content type.
     $edit = array();
     $edit['existing_field_name'] = $field_url;
@@ -1097,4 +1100,4 @@ class ContentOptionWidgetTest extends ContentCrudTestCase {
   }
 
 }
-}
+

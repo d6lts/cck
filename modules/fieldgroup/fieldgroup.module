@@ -28,7 +28,7 @@ function fieldgroup_menu() {
       $items['admin/content/node-type/'. $type_url_str .'/add_group'] = array(
         'title' => 'Add group',
         'page callback' => 'drupal_get_form',
-        'page arguments' => array('fieldgroup_edit_group_form', $type_name, '', 'add'),
+        'page arguments' => array('fieldgroup_group_edit_form', $type_name, '', 'add'),
         'access arguments' => array('administer content types'),
         'type' => MENU_LOCAL_TASK,
         'weight' => 3,
@@ -36,7 +36,7 @@ function fieldgroup_menu() {
       $items['admin/content/node-type/'. $type_url_str .'/groups/%'] = array(
         'title' => 'Edit group',
         'page callback' => 'drupal_get_form',
-        'page arguments' => array('fieldgroup_edit_group_form', $type_name, 5, 'edit'),
+        'page arguments' => array('fieldgroup_group_edit_form', $type_name, 5, 'edit'),
         'access arguments' => array('administer content types'),
         'type' => MENU_CALLBACK,
       );
@@ -92,7 +92,7 @@ function fieldgroup_content_fieldapi($op, $field) {
   cache_clear_all('fieldgroup_data', content_cache_tablename());
 }
 
-function fieldgroup_edit_group_form(&$form_state, $type_name, $group_name, $action) {
+function fieldgroup_group_edit_form(&$form_state, $type_name, $group_name, $action) {
   $content_type = content_types($type_name);
   $groups = fieldgroup_groups($content_type['type']);
 
@@ -170,7 +170,7 @@ function fieldgroup_edit_group_form(&$form_state, $type_name, $group_name, $acti
 
   $form['#content_type'] = $content_type;
   $form['#group_action'] = $action;
-  $form['#submit'][] = 'fieldgroup_edit_group_submit';
+
   return $form;
 }
 
@@ -182,7 +182,7 @@ function fieldgroup_edit_group_form(&$form_state, $type_name, $group_name, $acti
  * present a machine-readable name field as well as a label instead of
  * trying to create a machine-readable name from the label.
  */
-function fieldgroup_edit_group_validate($form, &$form_state) {
+function fieldgroup_group_edit_form_validate($form, &$form_state) {
   $form_values = $form_state['values'];
   $content_type = $form['#content_type'];
   $action = $form['#group_action'];
@@ -203,7 +203,7 @@ function fieldgroup_edit_group_validate($form, &$form_state) {
   }
 }
 
-function fieldgroup_edit_group_submit($form, &$form_state) {
+function fieldgroup_group_edit_form_submit($form, &$form_state) {
   $form_values = $form_state['values'];
   $content_type = $form['#content_type'];
 
@@ -338,28 +338,28 @@ function fieldgroup_form_alter(&$form, $form_state, $form_id) {
   }
   // The group is only added here so it will appear in the export
   // when using Content Copy.
-  elseif ($form_id == '_content_admin_field' && isset($form['widget'])) {
+  elseif ($form_id == 'content_field_edit_form' && isset($form['widget'])) {
     $content_type = content_types($form['type_name']['#value']);
     $form['widget']['group'] = array(
       '#type' => 'value',
       '#value' => _fieldgroup_field_get_group($content_type['type'], $form['field_name']['#value']),
     );
   }
-  elseif ($form_id == 'content_admin_field_overview_form' && !empty($form['#groups'])) {
-    $form['#submit'][] = 'fieldgroup_content_overview_form_submit';
+  elseif ($form_id == 'content_field_overview_form' && !empty($form['#groups'])) {
+    $form['#submit'][] = 'fieldgroup_field_overview_form_submit';
   }
-  elseif ($form_id == 'content_admin_display_overview_form' && !empty($form['#groups'])) {
+  elseif ($form_id == 'content_display_overview_form' && !empty($form['#groups'])) {
     $form['#submit'][] = 'fieldgroup_display_overview_form_submit';
     if (!isset($form['submit'])) {
       $form['submit'] = array('#type' => 'submit', '#value' => t('Save'), '#weight' => 10);
     }
   }
-  elseif ($form_id == '_content_admin_field_remove') {
-    $form['#submit'][] = 'fieldgroup_content_admin_field_remove_submit';
+  elseif ($form_id == 'content_field_remove_form') {
+    $form['#submit'][] = 'fieldgroup_field_remove_form_submit';
   }
 }
 
-function fieldgroup_content_overview_form_submit($form, &$form_state) {
+function fieldgroup_field_overview_form_submit($form, &$form_state) {
   $form_values = $form_state['values'];
   $type_name = $form['#type_name'];
   foreach ($form_values as $key => $values) {
@@ -391,7 +391,7 @@ function fieldgroup_display_overview_form_submit($form, &$form_state) {
   }
 }
 
-function fieldgroup_content_admin_field_remove_submit($form, &$form_state) {
+function fieldgroup_field_remove_form_submit($form, &$form_state) {
   $form_values = $form_state['values'];
   // TODO:
   // - when a (non last) field is removed from a group, a 'ghost row' remains in the fields overview
