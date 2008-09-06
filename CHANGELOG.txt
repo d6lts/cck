@@ -51,7 +51,7 @@ of your cck/ folder before uploading the new files, in order to avoid duplicates
 - #304450 Userreference - fix broken autocomplete for 'simple' mode / fix broken 'advanced - views' mode after Views API changes.
 - Fix PHP warnings on node display for hidden fields inside fieldgroups.
 - #198502 Prevent field module upgrades from running before content.module upgrades.
-
+- Content copy: Fix broken group export as a result of #296301.
 CCK 6.2.rc6
 ===========
 

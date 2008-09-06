@@ -172,11 +172,10 @@ function content_copy_export($form_values) {
   // Record a macro for each group by submitting the group edit form.
   $groups = array();
   if (!empty($form_values['groups']) && module_exists('fieldgroup')) {
-    $content_type = content_types($form_values['type_name']);
     $groups = array_filter($form_values['groups']);
     foreach ($groups as $group) {
       $group_state = array('values' => array('group_name' => $group));
-      drupal_execute('fieldgroup_edit_group_form', $group_state, $content_type, $group, 'edit');
+      drupal_execute('fieldgroup_edit_group_form', $group_state, $form_values['type_name'], $group, 'edit');
     }
   }
 
