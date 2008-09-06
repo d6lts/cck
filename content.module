@@ -89,7 +89,7 @@ function content_perm() {
  */
 function content_menu_alter(&$items) {
   // Customize the content types page with our own callback
-  $items['admin/content/types']['page callback'] = 'content_admin_types_overview';
+  $items['admin/content/types']['page callback'] = 'content_types_overview';
   $items['admin/content/types']['file'] = 'content.admin.inc';
   $items['admin/content/types']['file path'] = drupal_get_path('module', 'content') .'/includes';
 }

@@ -10,7 +10,7 @@
 /**
  * Menu callback; replacement for node_overview_types().
  */
-function content_admin_types_overview() {
+function content_types_overview() {
   $types = node_get_types();
   $names = node_get_types('names');
   $header = array(t('Name'), t('Type'), t('Description'), array('data' => t('Operations'), 'colspan' => '4'),);
