@@ -127,6 +127,9 @@ function content_copy_export_form(&$form_state) {
         '#rows' => max(40, $GLOBALS['content_copy']['count']),
         '#description' => t('Copy the export text and paste it into another content type using the import function.'),
       );
+      // The calls to drupal_execute('content_field_edit_form') in
+      // content_copy_export() affect the page title,
+      drupal_set_title(t('Content types'));
       break;
   }
 

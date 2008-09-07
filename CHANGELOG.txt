@@ -56,10 +56,11 @@ drupal_execute() will need to be updated.
 - #304450 Userreference - fix broken autocomplete for 'simple' mode / fix broken 'advanced - views' mode after Views API changes.
 - Fix PHP warnings on node display for hidden fields inside fieldgroups.
 - #198502 Prevent field module upgrades from running before content.module upgrades.
-- #305048 by asimmonds: fix incorrect link on 'start update' page when updates were aborted. 
+- #305048 by asimmonds: fix incorrect link on 'start update' page when updates were aborted.
 - Content copy: Fix broken group export as a result of #296301.
 - #304828 Clean up function names in content.admin.inc.
 - #285557 Added 'img' to the list of allowed tags in fields descriptions.
+- Content copy: wrong page title after export code has been generated.
 
 CCK 6.2.rc6
 ===========
