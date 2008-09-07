@@ -52,7 +52,7 @@ function text_update_6000() {
   $ret = array();
 
   if (drupal_get_installed_schema_version('content') < 6000) {
-    drupal_set_message("Some updates are still pending. Please return to <a href=\"". url('update.php', array('query' => 'op=selection')). "\">update.php</a> and run the remaining updates.", 'warning');
+    drupal_set_message(t('Some updates are still pending. Please return to <a href="@update-php">update.php</a> and run the remaining updates.', array('@update-php' => base_path() .'update.php?op=selection')), 'warning');
     $ret['#abort'] = array('success' => FALSE, 'query' => 'Updates for content.module need to be run first.<br/>Please re-run the update script.');
     return $ret;
   }
