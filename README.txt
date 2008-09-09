@@ -16,7 +16,7 @@ content type and edit it to add some fields. Then test by creating
 a new node of your new type using the Create content menu link.
 
 The included optionswidget.module provides radio and check box selectors
-for text and numeric types.
+for the various field types.
 
 The included fieldgroup.module allows you to group fields together
 in fieldsets to help organize them.
@@ -24,5 +24,18 @@ in fieldsets to help organize them.
 A comprehensive guide to using CCK is available as a CCK Handbook
 at http://drupal.org/node/101723.
 
-jvandyk [at] iastate.edu
-jchaffer [at] structureinteractive.com
+Custom theming
+--------------
+
+See the /theme/README.txt file.
+
+Maintainers
+-----------
+The Content Construction Kit was originally developped by:
+John Van Dyk
+Jonathan Chaffer
+
+Current maintainers:
+Karen Stevenson
+Yves Chedemois
+
