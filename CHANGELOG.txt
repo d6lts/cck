@@ -1,17 +1,38 @@
 //$Id$
 
-CCK 6.2-dev
+CCK 6.2-rc7
 ===========
 
-Notes :
+Note:
 - There has been a few files moved around since RC6, so be sure to *delete* the previous contents
 of your cck/ folder before uploading the new files, in order to avoid duplicates.
 - The admin forms (field creation, field edition...) have been renamed to comply with usual form
 naming conventions. Modules and custom code that rely on those form ids through hook_form_alter() or
 drupal_execute() will need to be updated.
+- The final 6.x-2.0 release is currently targetted for the second half of September.
 
+Main bugs fixed since RC6:
+- Content Copy: Fix multiple bugs when importing/exporting content types :
+exporting field definition can alter the actual field's settings
+'this post cannot be referenced' error when exporting nodereference fields
+no export of default values
+- #198502 D5 upgrade path: Prevent field module upgrades from running before content.module upgrades.
+- #293698 Views integration: make 'show n values starting from m' actually work.
+- #292872 Data loss issue: fields and field data deleted for content types defined by disabled modules.
+IMPORTANT: Since disabling all contrib modules is a recommended step prior to upgrading a D5 site to D6,
+it is highly advised that D5 sites using CCK are updated to CCK 5.x-1.8 (which contains the same fix)
+before starting the D6 upgrade process.
 
-- #196468 by Nedjo, add method to provide a link to automatically import a file into Content Copy.
+Main new features since RC6:
+- Updated to latest Views 2 API. Views integration requires Views 6.x-2.x-dev newer than Sep 3, 2008.
+- #295556 by CPyle - Userreference: let referenceable users be defined by a View.
+- Userreference: Add 'Radios / checkboxes' widget.
+- #294797 New $FIELD_NAME_rendered and $GROUP_NAME_rendered variables for node.tpl.php.
+- Nodereference: Allow specific node templates for nodes displayed as values of a noderef field.
+- #301736 by nedjo - Nodereference: Multilingual support; if available, propose translations of referenced nodes when creating a new translation.
+- #196468 by Nedjo - Content copy: Provide a link to automatically import a file into Content Copy.
+
+Other changes:
 - Avoid undefined index error in Content Copy when fieldgroup is enabled but there are no groups.
 - #296077 Add delta to formatter information.
 - #128038 Alter _content_admin_form() to provide the raw widget default values as well as the default value widget so programmed forms will have those values available. You can't tell when you construct the form if it's a programmed form or not, so we will always have to create the default value widget, but we don't always have to use it. This will also get the default values into the Content Copy export in a way that Content Copy import can pick them up, and alter validation to unset the default value widget and skip the default value widget processing if it's a programmed form. Since we are now provided the actual default value (not just the default value widget) in the export, we can safely pick it up in the import.
@@ -22,28 +43,21 @@ drupal_execute() will need to be updated.
 - #294726 by profix898 and yched: _content_type_info() does not reset on content type changes.
 - #293273 Nodereference: update 'referenceable types' when type name changes.
 - #295914 Fix additional problems when installing CCK in install profiles.
-- #293698 Views integration: make 'show n values starting from m' actually work.
 - #295664 Views integration: let summaries display 'allowed values' aliases if any.
 - Views integration: prevent empty links for the 'no value' items in summaries.
 - #296748 Text: Fix PHP warning when $node->build_mode not set.
 - #297915 Fix content_copy.
 - #298674 Content copy doesn't import all type properties.
 - #293471 Remove fieldgroup selection on field settings form.
-- #295556 by CPyle - Userreference: let referenceable users be defined by a View.
-- Userreference: Add 'Radios / checkboxes' widget.
 - Userref / Noderef : Add a 'none' choice for non-required, single fields with 'Radios / checkboxes' widget.
 - #298823 Views integration: do not step into views_* namespace.
-- #294797 New $FIELD_NAME_rendered and $GROUP_NAME_rendered variables for node.tpl.php.
 - #299698 Userreference: autocompletion query when typed string is '0'.
 - #300236 Fix inconsistent schema for 'locked' column between install and updates.
-- #292872 Do not delete data for content types defined by disabled modules.
 - Do not display 'label' settings on 'advanced' subtab of 'Display fields'.
 - #266205 by sun: add zebra classes for field items.
 - #299870 Incorrect handling of custom weight for 'Language' node form element.
 - Fieldgroups: display options were not supported for 'advanced' contexts (RSS, search index...).
 - Fieldgroups: do not display group label when building the search index.
-- Nodereference: Allow specific node templates for nodes displayed as values of a noderef field.
-- #301736 by nedjo - Nodereference: Multilingual support; if available, propose translations of referenced nodes when creating a new translation.
 - Fieldgroups: Remove tinyint (127) limitation on group weights.
 - #301984 by joetsuihk - Views Integration: do not display empty divs on empty fields.
 - Views integration : prevent possible 'invalid argument for foreach' warnings with 'group multiple values'.
@@ -55,7 +69,6 @@ drupal_execute() will need to be updated.
 - #303475 by wrunt - Optionwidgets : unchecked 'single on/off checkbox' stores 0/'0' instead of the 'off' value.
 - #304450 Userreference - fix broken autocomplete for 'simple' mode / fix broken 'advanced - views' mode after Views API changes.
 - Fix PHP warnings on node display for hidden fields inside fieldgroups.
-- #198502 Prevent field module upgrades from running before content.module upgrades.
 - #305048 by asimmonds: fix incorrect link on 'start update' page when updates were aborted.
 - Content copy: Fix broken group export as a result of #296301.
 - #304828 Clean up function names in content.admin.inc.
