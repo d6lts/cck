@@ -665,7 +665,7 @@ function content_field($op, &$node, $field, &$items, $teaser, $page) {
     case 'view':
       $addition = array();
 
-      if ($node->build_mode == NODE_BUILD_NORMAL) {
+      if ($node->build_mode == NODE_BUILD_NORMAL || $node->build_mode == NODE_BUILD_PREVIEW) {
         $context = $teaser ? 'teaser' : 'full';
       }
       else {

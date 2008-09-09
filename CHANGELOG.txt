@@ -61,6 +61,7 @@ drupal_execute() will need to be updated.
 - #304828 Clean up function names in content.admin.inc.
 - #285557 Added 'img' to the list of allowed tags in fields descriptions.
 - Content copy: wrong page title after export code has been generated.
+- Fieldgroup: fix broken node preview.
 
 CCK 6.2.rc6
 ===========
