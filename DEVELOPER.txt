@@ -6,6 +6,3 @@ TODO:
   (can we provide a helper function to make this easier ?)
 
 See http://drupal.org/node/191796 for an guide to updating field modules.
-
-Look in the /examples/ folder of this module for example field module
-code.
