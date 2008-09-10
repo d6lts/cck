@@ -680,6 +680,17 @@ function content_field($op, &$node, $field, &$items, $teaser, $page) {
     case 'view':
       $addition = array();
 
+      // Previewed nodes bypass the 'presave' op, so we need to some massaging.
+      if ($node->build_mode == NODE_BUILD_PREVIEW && content_handle('widget', 'multiple values', $field) == CONTENT_HANDLE_CORE) {
+        // Filter out empty values.
+        $items = content_set_empty($field, $items);
+
+        if (content_handle('widget', 'multiple values', $field) == CONTENT_HANDLE_CORE) {
+          // Reorder items to account for drag-n-drop reordering.
+          $items = _content_sort_items($field, $items);
+        }
+      }
+
       if ($node->build_mode == NODE_BUILD_NORMAL || $node->build_mode == NODE_BUILD_PREVIEW) {
         $context = $teaser ? 'teaser' : 'full';
       }
