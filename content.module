@@ -464,20 +464,29 @@ function theme_content_multiple_values($element) {
     );
     $rows = array();
 
+    // Sort items according to '_weight' (needed when the form comes back after
+    // preview or failed validation)
+    $items = array();
     foreach (element_children($element) as $key) {
       if ($key !== $element['#field_name'] .'_add_more') {
-        $element[$key]['_weight']['#attributes']['class'] = $order_class;
-        $delta_element = drupal_render($element[$key]['_weight']);
-        $cells = array(
-          array('data' => '', 'class' => 'content-multiple-drag'),
-          drupal_render($element[$key]),
-          array('data' => $delta_element, 'class' => 'delta-order'),
-        );
-        $rows[] = array(
-          'data' => $cells,
-          'class' => 'draggable',
-        );
+        $items[] = &$element[$key];
       }
+    }
+    usort($items, '_content_sort_items_value_helper');
+
+    // Add the items as table rows.
+    foreach ($items as $key => $item) {
+      $item['_weight']['#attributes']['class'] = $order_class;
+      $delta_element = drupal_render($item['_weight']);
+      $cells = array(
+        array('data' => '', 'class' => 'content-multiple-drag'),
+        drupal_render($item),
+        array('data' => $delta_element, 'class' => 'delta-order'),
+      );
+      $rows[] = array(
+        'data' => $cells,
+        'class' => 'draggable',
+      );
     }
 
     $output .= theme('table', $header, $rows, array('id' => $table_id, 'class' => 'content-multiple-table'));
@@ -849,6 +858,18 @@ function _content_sort_items($field, $items) {
 function _content_sort_items_helper($a, $b) {
   $a_weight = (is_array($a) && isset($a['_weight'])) ? $a['_weight'] : 0;
   $b_weight = (is_array($b) && isset($b['_weight'])) ? $b['_weight'] : 0;
+  if ($a_weight == $b_weight) {
+    return 0;
+  }
+  return ($a_weight < $b_weight) ? -1 : 1;
+}
+
+/**
+ * Same as above, using ['_weight']['#value']
+ */
+function _content_sort_items_value_helper($a, $b) {
+  $a_weight = (is_array($a) && isset($a['_weight']['#value'])) ? $a['_weight']['#value'] : 0;
+  $b_weight = (is_array($b) && isset($b['_weight']['#value'])) ? $b['_weight']['#value'] : 0;
   if ($a_weight == $b_weight) {
     return 0;
   }

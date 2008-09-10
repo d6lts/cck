@@ -206,7 +206,7 @@ function content_multiple_value_form(&$form, &$form_state, $field, $items) {
         $element['_weight'] = array(
           '#type' => 'weight',
           '#delta' => $max, // this 'delta' is the 'weight' element's property
-          '#default_value' => $delta,
+          '#default_value' => isset($items[$delta]['_weight']) ? $items[$delta]['_weight'] : $delta,
           '#weight' => 100,
         );
       }
