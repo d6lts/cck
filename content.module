@@ -701,6 +701,7 @@ function content_field($op, &$node, $field, &$items, $teaser, $page) {
           '#node' => $node,
           '#teaser' => $teaser,
           '#page' => $page,
+          '#context' => $context,
           '#single' => $single,
           'items' => array(),
         );
