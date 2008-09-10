@@ -591,6 +591,12 @@ function content_associate_fields($module) {
  *     '#title' => 'label'
  *     '#field_name' => 'field_name',
  *     '#node' => $node,
+ *     // Value of the $teaser param of hook_nodeapi('view').
+ *     '#teaser' => $teaser,
+ *     // Value of the $page param of hook_nodeapi('view').
+ *     '#page' => $page,
+ *     // The curent rendering context ('teaser', 'full', NODE_BUILD_SEARCH_INDEX...).
+ *     '#context' => $context,
  *     'items' =>
  *       0 => array(
  *         '#item' => $items[0],
@@ -670,10 +676,6 @@ function content_field($op, &$node, $field, &$items, $teaser, $page) {
       }
       else {
         $context = $node->build_mode;
-      }
-      // Do not include field labels when indexing content.
-      if ($context == NODE_BUILD_SEARCH_INDEX) {
-        $field['display_settings']['label']['format'] = 'hidden';
       }
 
       $field_types = _content_field_types();
@@ -1906,6 +1908,11 @@ function content_preprocess_content_field(&$variables) {
   $variables['node'] = $element['#node'];
   $variables['field'] = $field;
   $variables['items'] = array();
+
+  // Do not include field labels when indexing content.
+  if ($element['#context'] == NODE_BUILD_SEARCH_INDEX) {
+    $field['display_settings']['label']['format'] = 'hidden';
+  }
 
   if ($element['#single']) {
     // Single value formatter.

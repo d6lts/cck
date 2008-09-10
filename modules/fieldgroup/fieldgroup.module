@@ -412,12 +412,12 @@ function fieldgroup_nodeapi(&$node, $op, $teaser, $page) {
       else {
         $context = $node->build_mode;
       }
-      // Do not include group labels when indexing content.
-      if ($context == NODE_BUILD_SEARCH_INDEX) {
-        $group['settings']['display']['label'] = 'hidden';
-      }
 
       foreach (fieldgroup_groups($node->type) as $group_name => $group) {
+        // Do not include group labels when indexing content.
+        if ($context == NODE_BUILD_SEARCH_INDEX) {
+          $group['settings']['display']['label'] = 'hidden';
+        }
         $label = $group['settings']['display']['label'] == 'above';
         $element = array(
           '#title' => $label ? check_plain(t($group['label'])) : '',

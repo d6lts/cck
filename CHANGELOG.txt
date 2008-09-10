@@ -4,7 +4,7 @@ CCK 6.2-dev
 ===========
 
 - Fix errors when rendering fieldgroups in 'advanced' contexts (RSS, search...).
-
+- Do not insert field and group labels in search index.
 
 CCK 6.2-rc7
 ===========
