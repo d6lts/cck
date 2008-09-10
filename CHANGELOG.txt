@@ -1,5 +1,11 @@
 //$Id$
 
+CCK 6.2-dev
+===========
+
+- Fix errors when rendering fieldgroups in 'advanced' contexts (RSS, search...).
+
+
 CCK 6.2-rc7
 ===========
 

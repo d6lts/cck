@@ -161,7 +161,7 @@ function fieldgroup_group_edit_form(&$form_state, $type_name, $group_name, $acti
     '#required' => FALSE,
   );
   module_load_include('inc', 'content', 'includes/content.admin');
-  foreach (array_merge(array_keys(_content_admin_display_contexts(CONTENT_CONTEXTS_SIMPLE)), array('label')) as $key) {
+  foreach (array_merge(array_keys(_content_admin_display_contexts()), array('label')) as $key) {
     $default = ($key == 'label') ? 'above' : array('format' => 'fieldset');
     $form['settings']['display'][$key] = array('#type' => 'value', '#value' => isset($group['settings']['display'][$key]) ? $group['settings']['display'][$key] : $default);
   }
@@ -423,7 +423,8 @@ function fieldgroup_nodeapi(&$node, $op, $teaser, $page) {
           '#title' => $label ? check_plain(t($group['label'])) : '',
           '#description' => $label ? content_filter_xss(t($group['settings']['display']['description'])) : '',
         );
-        switch ($group['settings']['display'][$context]['format']) {
+        $format = isset($group['settings']['display'][$context]['format']) ? $group['settings']['display'][$context]['format'] : 'fieldset';
+        switch ($format) {
           case 'simple':
             $element['#type'] = 'fieldgroup_simple';
             $element['#group_name'] = $group_name;
