@@ -234,8 +234,19 @@ function number_field($op, &$node, $field, &$items, $teaser, $page) {
             if (is_numeric($field['max']) && $item['value'] > $field['max']) {
               form_set_error($error_element, t('%name: the value may be no larger than %max.', array('%name' => t($field['widget']['label']), '%max' => $field['max'])));
             }
-            if (count($allowed_values) && !array_key_exists($item['value'], $allowed_values)) {
-              form_set_error($error_element, t('%name: illegal value.', array('%name' => t($field['widget']['label']))));
+            if (count($allowed_values)) {
+              // We cannot use array_key_exists() because allowed values are
+              // stored as strings, and we need to compare numeric equality.
+              $valid = FALSE;
+              foreach ($allowed_values as $kay => $value) {
+                if ((float) $item['value'] == (float) $value) {
+                  $valid = TRUE;
+                  break;
+                }
+              }
+              if (!$valid) {
+                form_set_error($error_element, t('%name: illegal value.', array('%name' => t($field['widget']['label']))));
+              }
             }
           }
         }

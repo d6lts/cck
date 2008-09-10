@@ -3,11 +3,12 @@
 CCK 6.2-dev
 ===========
 
+- Make incompatibility with older Views releases stand out more.
 - Fix errors when rendering fieldgroups in 'advanced' contexts (RSS, search...).
 - Do not insert field and group labels in search index.
-- Make Views incompatibility stand out more.
 - Fix drag-n-drop order lost when node form is redisplayed after node preview or failed validation.
 - Fix drag-n-drop order not accounted for in node previews.
+- #306572 Number: Incorrect validation of allowed values for Float and Decimal fields.
 
 CCK 6.2-rc7
 ===========
