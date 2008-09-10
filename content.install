@@ -8,8 +8,8 @@ function content_requirements($phase) {
   if (module_exists('views') && (!function_exists('views_api_version') || views_api_version() < 2.0)) {
     $requirements['cck_views'] = array(
       'title' => $t('CCK - No Views integration'),
-      'description' => $t("CCK fields integration with Views module is not compatible with the version of Views you are running.<br/>CCK data won't appear in your existing views.<br/> You might want to upgrade to a more recent version of Views module."),
-      'severity' => REQUIREMENT_WARNING,
+      'description' => $t("CCK fields integration with Views module is not compatible with the version of Views you are running.<br/>CCK data won't appear in your existing views.<br/> You need to upgrade to a version of Views newer than Sep 3, 2008."),
+      'severity' => REQUIREMENT_ERROR,
     );
   }
   return $requirements;
