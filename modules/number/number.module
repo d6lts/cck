@@ -18,6 +18,7 @@ function number_theme() {
     'number_formatter_us_2' => array('arguments' => array('element' => NULL), 'function' => 'theme_number_formatter_generic'),
     'number_formatter_be_0' => array('arguments' => array('element' => NULL), 'function' => 'theme_number_formatter_generic'),
     'number_formatter_be_1' => array('arguments' => array('element' => NULL), 'function' => 'theme_number_formatter_generic'),
+    'number_formatter_be_2' => array('arguments' => array('element' => NULL), 'function' => 'theme_number_formatter_generic'),
     'number_formatter_fr_0' => array('arguments' => array('element' => NULL), 'function' => 'theme_number_formatter_generic'),
     'number_formatter_fr_1' => array('arguments' => array('element' => NULL), 'function' => 'theme_number_formatter_generic'),
     'number_formatter_unformatted' => array('arguments' => array('element' => NULL)),
@@ -269,7 +270,6 @@ function number_content_is_empty($item, $field) {
  * Implementation of hook_field_formatter_info().
  */
 function number_field_formatter_info() {
-
   return array(
     'default' => array('label' => '9999',            'multiple values' => CONTENT_HANDLE_CORE, 'field types' => array('number_integer', 'number_decimal', 'number_float')),
     'us_0'    => array('label' => '9,999',           'multiple values' => CONTENT_HANDLE_CORE, 'field types' => array('number_integer', 'number_decimal', 'number_float')),
