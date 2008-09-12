@@ -163,6 +163,7 @@ function userreference_field_settings($op, $field) {
         'base' => 'users',
         'field' => $db_info['columns']['uid']['column'],
         'handler' => 'views_handler_relationship',
+        'label' => t($field['widget']['label']),
       );
       return $data;
 

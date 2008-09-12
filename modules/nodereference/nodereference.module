@@ -156,6 +156,7 @@ function nodereference_field_settings($op, $field) {
         'base' => 'node',
         'field' => $db_info['columns']['nid']['column'],
         'handler' => 'views_handler_relationship',
+        'label' => t($field['widget']['label']),
       );
       return $data;
   }
