@@ -12,10 +12,11 @@
 function optionwidgets_form_alter(&$form, $form_state, $form_id) {
   // Provide additional help for the field settings form.
   if ($form_id == 'content_field_edit_form' && isset($form['widget'])) {
-    $widget_type = $form['main']['widget_type']['#default_value'];
-    $field_type = $form['main']['type']['#value'];
+    $widget_type = $form['#field']['widget']['type'];
+    $field_type = $form['#field']['type'];
+    $label = $form['#field']['widget']['label'];
 
-    $output = '<p>'. t('Create a list of options as a list in <strong>Allowed values list</strong> or as an array in PHP code. These values will be the same for %field in all content types.', array('%field' => $form['main']['label']['#value'])) .'</p>';
+    $output = '<p>'. t('Create a list of options as a list in <strong>Allowed values list</strong> or as an array in PHP code. These values will be the same for %field in all content types.', array('%field' => $label)) .'</p>';
 
     if ($widget_type == 'optionwidgets_onoff') {
       $output .= '<p>'. t("For a 'single on/off checkbox' widget, define the 'off' value first, then the 'on' value in the <strong>Allowed values</strong> section. Note that the checkbox will be labeled with the label of the 'on' value.") .'</p>';

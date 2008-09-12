@@ -51,14 +51,35 @@
 }
 
 /* 'Manage fields' overview */
-table.content-field-overview, table.content-field-overview fieldset table {
-  width:100%;
+#content-field-overview-form .advanced-help-link,
+#content-display-overview-form .advanced-help-link {
+  margin: 4px 4px 0 0;
 }
-table.content-field-overview td {
-  width:14%;
+#content-field-overview-form .label-group,
+#content-display-overview-form .label-group {
+  font-weight: bold;
 }
-.content-field-overview-empty {
-  text-align:center;
+table#content-field-overview .label-add-new-field,
+table#content-field-overview .label-add-existing-field,
+table#content-field-overview .label-add-new-group {
+  float: left;
+}
+table#content-field-overview tr.content-add-new .tabledrag-changed {
+  display: none;
+}
+table#content-field-overview tr.content-add-new .description {
+  margin-bottom: 0;
+}
+table#content-field-overview .content-new {
+  font-weight: bold;
+  padding-bottom: .5em;
 }
 
+/* 'Advanced help' pages */
+.advanced-help-topic dt {
+  font-weight: bold;
+}
+.advanced-help-topic dd {
+  margin-bottom: 1em;
+}
 

@@ -30,7 +30,6 @@ function content_types_overview() {
       $row[] = array('data' => l(t('edit'), 'admin/content/node-type/'. $type_url_str));
       // Set links for managing fields.
       // TODO: a hook to allow other content modules to add more stuff?
-      $row[] = array('data' => l(t('add field'), 'admin/content/node-type/'. $type_url_str .'/add_field'));
       $row[] = array('data' => l(t('manage fields'), 'admin/content/node-type/'. $type_url_str .'/fields'));
       // Set the delete column.
       if ($type->custom) {
@@ -100,7 +99,7 @@ function content_fields_list() {
  * JS drag-n-drop. Non-CCK form elements can also be moved around.
  */
 function content_field_overview_form(&$form_state, $type_name) {
-  // When displaying the form, make sure the list of 'extra' fields
+  // When displaying the form, make sure the list of fields
   // is up-to-date.
   if (empty($form_state['post'])) {
     content_clear_type_cache();
@@ -111,22 +110,18 @@ function content_field_overview_form(&$form_state, $type_name) {
   $fields = $type['fields'];
   $field_types = _content_field_types();
 
-  if (empty($fields) && empty($form_state['post'])) {
-    drupal_set_message(t('There are no fields configured for this content type. You can !link.', array(
-      '!link' => l(t('Add a new field'), str_replace('/fields', '/add_field', $_GET['q'])))), 'warning');
-  }
-
   $extra = $type['extra'];
   $groups = $group_options = array();
   if (module_exists('fieldgroup')) {
     $groups = fieldgroup_groups($type['type']);
     $group_options = _fieldgroup_groups_label($type['type']);
+    // Add the ability to group under the newly created row.
+    $group_options['_add_new_group'] = '_add_new_group';
   }
 
-  // Rows in this table are essentially nested, but for the simplicity of
-  // theme and submit functions, we keep them in a flat array, and use a
-  // $dummy render structure to figure the right display order.
-  $dummy = array();
+  // Store the default weights as we meet them, to be able to put the
+  //'add new' rows after them.
+  $weights = array();
 
   $form = array(
     '#tree' => TRUE,
@@ -134,136 +129,291 @@ function content_field_overview_form(&$form_state, $type_name) {
     '#fields' => array_keys($fields),
     '#groups' => array_keys($groups),
     '#extra' => array_keys($extra),
+    '#field_rows' => array(),
+    '#group_rows' => array(),
     '#order' => array(),
-    '#prefix' => '<p>'. t('To change the order of a field, grab a drag-and-drop handle under the Label column and drag the field to a new location in the list. (Grab a handle by clicking and holding the mouse while hovering over a handle icon.) Remember that your changes will not be saved until you click the Save button at the bottom of the page.') .'</p>',
   );
 
   // Fields.
   foreach ($fields as $name => $field) {
     $weight = $field['widget']['weight'];
     $form[$name] = array(
-      'human_name' => array('#value' => check_plain($field['widget']['label'])),
-      'name' => array('#value' => $field['field_name']),
+      'label' => array('#value' => check_plain($field['widget']['label'])),
+      'field_name' => array('#value' => $field['field_name']),
       'type' => array('#value' => t($field_types[$field['type']]['label'])),
       'configure' => array('#value' => l(t('Configure'), 'admin/content/node-type/'. $type['url_str'] .'/fields/'. $field['field_name'])),
       'remove' => array('#value' => l(t('Remove'), 'admin/content/node-type/'. $type['url_str'] .'/fields/'. $field['field_name'] .'/remove')),
-      'weight' => array('#type' => 'textfield', '#default_value' => $weight),
+      'weight' => array('#type' => 'textfield', '#default_value' => $weight, '#size' => 3),
       'parent' => array('#type' => 'select', '#options' => $group_options, '#default_value' => ''),
       'hidden_name' => array('#type' => 'hidden', '#default_value' => $field['field_name']),
       '#leaf' => TRUE,
+      '#row_type' => 'field',
     );
-    $dummy[$name] = array('#weight' => $weight, '#value' => $name .' ');
     if ($field['locked']) {
       $form[$name]['configure'] = array('#value' => t('Locked'));
       $form[$name]['remove'] = array();
       $form[$name]['#disabled_row'] = true;
     }
+    $form['#field_rows'][] = $name;
+    $weights[] = $weight;
   }
 
   // Groups.
   foreach ($groups as $name => $group) {
     $weight = $group['weight'];
     $form[$name] = array(
-      'human_name' => array('#value' => check_plain($group['label'])),
-      'name' => array('#value' => $group['group_name']),
-      'type' => array(),
+      'label' => array('#value' => check_plain($group['label'])),
+      'group_name' => array('#value' => $group['group_name']),
       'configure' => array('#value' => l(t('Configure'), 'admin/content/node-type/'. $type['url_str'] .'/groups/'. $group['group_name'])),
       'remove' => array('#value' => l(t('Remove'), 'admin/content/node-type/'. $type['url_str'] .'/groups/'. $group['group_name'] .'/remove')),
-      'weight' => array('#type' => 'textfield', '#default_value' => $weight),
+      'weight' => array('#type' => 'textfield', '#default_value' => $weight, '#size' => 3),
       'parent' => array('#type' => 'hidden', '#default_value' => ''),
       'hidden_name' => array('#type' => 'hidden', '#default_value' => $group['group_name']),
       '#root' => TRUE,
+      '#row_type' => 'group',
     );
-    $dummy[$name] = array('#weight' => $weight, '#value' => $name .' ');
     // Adjust child fields rows.
     foreach ($group['fields'] as $field_name => $field) {
-      $form[$field_name]['#depth'] = 1;
       $form[$field_name]['parent']['#default_value'] = $name;
-      $dummy[$name][$field_name] = $dummy[$field_name];
-      unset($dummy[$field_name]);
     }
+    $form['#group_rows'][] = $name;
+    $weights[] = $weight;
   }
 
   // Non-CCK 'fields'.
   foreach ($extra as $name => $label) {
     $weight = $extra[$name]['weight'];
     $form[$name] = array(
-      'human_name' => array('#value' => t($extra[$name]['label'])),
-      'name' => array('#value' => isset($extra[$name]['description']) ? $extra[$name]['description'] : ''),
-      'type' => array(),
-      'configure' => array(),
-      'remove' => array(),
-      'weight' => array('#type' => 'textfield', '#default_value' => $weight),
+      'label' => array('#value' => t($extra[$name]['label'])),
+      'description' => array('#value' => isset($extra[$name]['description']) ? $extra[$name]['description'] : ''),
+      'weight' => array('#type' => 'textfield', '#default_value' => $weight, '#size' => 3),
       'parent' => array('#type' => 'hidden', '#default_value' => ''),
       'hidden_name' => array('#type' => 'hidden', '#default_value' => $name),
       '#leaf' => TRUE,
       '#root' => TRUE,
       '#disabled_row' => TRUE,
-      '#extra_field' => TRUE,
+      '#row_type' => 'extra',
     );
-    $dummy[$name] = array('#weight' => $weight, '#value' => $name .' ');
+    $form['#field_rows'][] = $name;
+    $weights[] = $weight;
   }
 
-  // Let drupal_render figure out the right order for the rows.
-  $form['#order'] = explode(' ', trim(drupal_render($dummy)));
+  // Additional row : add new field.
+  $weight = max($weights) + 1;
+  $field_type_options = content_field_type_options();
+  $widget_type_options = content_widget_type_options(NULL, TRUE);
+  array_unshift($field_type_options, t('- Select a field type -'));
+  array_unshift($widget_type_options, t('- Select a widget -'));
+  if ($field_type_options && $widget_type_options) {
+    $name = '_add_new_field';
+    $form[$name] = array(
+      'label' => array(
+        '#type' => 'textfield',
+        '#size' => 15,
+        '#description' => t('Label'),
+      ),
+      'field_name' => array(
+        '#type' => 'textfield',
+        '#field_prefix' => 'field_',
+        '#size' => 15,
+        '#description' => t('Field name (a-z, 0-9, _)'),
+      ),
+      'type' => array(
+        '#type' => 'select',
+        '#options' => $field_type_options,
+        '#description' => t('Type of data to store.'),
+      ),
+      'widget_type' => array(
+        '#type' => 'select',
+        '#options' => $widget_type_options,
+        '#description' => t('Form element to edit the data.'),
+      ),
+      'weight' => array('#type' => 'textfield', '#default_value' => $weight, '#size' => 3),
+      'parent' => array('#type' => 'select', '#options' => $group_options, '#default_value' => ''),
+      'hidden_name' => array('#type' => 'hidden', '#default_value' => $name),
+      '#leaf' => TRUE,
+      '#add_new' => TRUE,
+      '#row_type' => 'add_new_field',
+    );
+    $form['#field_rows'][] = $name;
+  }
+
+  // Additional row : add existing field.
+  $existing_field_options = content_existing_field_options($type_name);
+  if ($existing_field_options && $widget_type_options) {
+    $weight++;
+    array_unshift($existing_field_options, t('- Select an existing field -'));
+    $name = '_add_existing_field';
+    $form[$name] = array(
+      'label' => array(
+        '#type' => 'textfield',
+        '#size' => 15,
+        '#description' => t('Label'),
+      ),
+      'field_name' => array(
+        '#type' => 'select',
+        '#options' => $existing_field_options,
+        '#description' => t('Field to share'),
+      ),
+      'widget_type' => array(
+        '#type' => 'select',
+        '#options' => $widget_type_options,
+        '#description' => t('Form element to edit the data.'),
+      ),
+      'weight' => array('#type' => 'textfield', '#default_value' => $weight, '#size' => 3),
+      'parent' => array('#type' => 'select', '#options' => $group_options, '#default_value' => ''),
+      'hidden_name' => array('#type' => 'hidden', '#default_value' => $name),
+      '#leaf' => TRUE,
+      '#add_new' => TRUE,
+      '#row_type' => 'add_existing_field',
+    );
+    $form['#field_rows'][] = $name;
+  }
+
+  // Additional row : add new group.
+  if (module_exists('fieldgroup')) {
+    $weight++;
+    $name = '_add_new_group';
+    $form[$name] = array(
+      'label' => array(
+        '#type' => 'textfield',
+        '#size' => 15,
+        '#description' => t('Label'),
+      ),
+      'group_name' => array(
+        '#type' => 'textfield',
+        '#field_prefix' => 'group_',
+        '#size' => 15,
+        '#description' => t('Group name (a-z, 0-9, _)'),
+      ),
+      'weight' => array('#type' => 'textfield', '#default_value' => $weight, '#size' => 3),
+      'parent' => array('#type' => 'hidden', '#default_value' => ''),
+      'hidden_name' => array('#type' => 'hidden', '#default_value' => $name),
+      '#root' => TRUE,
+      '#add_new' => TRUE,
+      '#row_type' => 'add_new_group',
+    );
+    $form['#group_rows'][] = $name;
+  }
 
   $form['submit'] = array('#type' => 'submit', '#value' => t('Save'));
   return $form;
 }
 
+function content_field_overview_form_validate($form, &$form_state) {
+  _content_field_overview_form_validate_add_new($form, &$form_state);
+  _content_field_overview_form_validate_add_existing($form, &$form_state);
+}
+
 /**
- * Theme the field overview table.
+ * Helper function for content_field_overview_form_validate.
+ *
+ * Validate the 'add new field' row.
  */
-function theme_content_field_overview_form($form) {
-  if (empty($form['#order'])) {
-    return;
-  }
-  $header = array(t('Label'), t('Weight'), t('Name'), t('Type'), t('Operations'));
-  $rows = array();
+function _content_field_overview_form_validate_add_new($form, &$form_state) {
+  $field = $form_state['values']['_add_new_field'];
 
-  foreach ($form['#order'] as $key) {
-    $row = array();
-    $element = &$form[$key];
-    $element['weight']['#attributes']['class'] = 'field-weight';
-    $element['parent']['#attributes']['class'] = 'group-parent';
-    $element['hidden_name']['#attributes']['class'] = 'field-name';
-    if (in_array($key, $form['#groups'])) {
-      $element['human_name']['#prefix'] = '<strong>';
-      $element['human_name']['#suffix'] = '</strong>';
+  // Validate if any information was provided in the 'add new field' row.
+  if (array_filter(array($field['label'], $field['field_name'], $field['type'], $field['widget_type']))) {
+    // No label.
+    if (!$field['label']) {
+      form_set_error('_add_new_field][label', t('Add new field: you need to provide a label.'));
     }
-    $row[] = theme('indentation', isset($element['#depth']) ? $element['#depth'] : 0) . drupal_render($element['human_name']);
-    // tabledrag.js cell hiding doesn't work well with colspans in table rows,
-    // so we add the cell to hide *before* the ones with colspans.
-    $row[] = drupal_render($element['weight']) . drupal_render($element['parent']) . drupal_render($element['hidden_name']);
-    if (isset($element['#extra_field'])) {
-      $row[] = array('data' => drupal_render($element['name']), 'colspan' => 3);
+
+    // No field name.
+    if (!$field['field_name']) {
+      form_set_error('_add_new_field][field_name', t('Add new field: you need to provide a field name.'));
     }
+    // Field name validation.
     else {
-      $row[] = drupal_render($element['name']);
-      $row[] = drupal_render($element['type']);
-      $row[] = drupal_render($element['configure']) .'&nbsp;&nbsp;'. drupal_render($element['remove']);
+      $field_name = $field['field_name'];
+
+      // Add the 'field_' prefix.
+      if (substr($field_name, 0, 6) != 'field_') {
+        $field_name = 'field_'. $field_name;
+        form_set_value($form['_add_new_field']['field_name'], $field_name, $form_state);
+      }
+
+      // Invalid field name.
+      if (!preg_match('!^field_[a-z0-9_]+$!', $field_name)) {
+        form_set_error('_add_new_field][field_name', t('Add new field: the field name %field_name is invalid. The name must include only lowercase unaccentuated letters, numbers, and underscores.', array('%field_name' => $field_name)));
+      }
+      if (strlen($field_name) > 32) {
+        form_set_error('_add_new_field][field_name', t('Add new field: the field name %field_name is too long. The name is limited to 32 characters, including the \'field_\' prefix.', array('%field_name' => $field_name)));
+      }
+      // A field named 'field_instance' would cause a tablename clash with {content_field_instance}
+      if ($field_name == 'field_instance') {
+        form_set_error('_add_new_field][field_name', t("Add new field: the name 'field_instance' is a reserved name."));
+      }
+
+      // Field name already exists.
+      // We need to check inactive fields as well, so we can't use content_fields().
+      module_load_include('inc', 'content', 'includes/content.crud');
+      $fields = content_field_instance_read(array(), TRUE);
+      $used = FALSE;
+      foreach ($fields as $existing_field) {
+        $used |= ($existing_field['field_name'] == $field_name);
+      }
+      if ($used) {
+        form_set_error('_add_new_field][field_name', t('Add new field: the field name %field_name already exists.', array('%field_name' => $field_name)));
+      }
     }
 
-    $class = 'draggable';
-    $class .= isset($element['#disabled_row']) ? ' menu-disabled' : '';
-    $class .= isset($element['#leaf']) ? ' tabledrag-leaf' : '';
-    $class .= isset($element['#root']) ? ' tabledrag-root' : '';
-    $rows[] = array('data' => $row, 'class' => $class);
+    // No field type.
+    if (!$field['type']) {
+      form_set_error('_add_new_field][type', t('Add new field: you need to select a field type.'));
+    }
+
+    // No widget type.
+    if (!$field['widget_type']) {
+      form_set_error('_add_new_field][widget_type', t('Add new field: you need to select a widget.'));
+    }
+    // Wrong widget type.
+    elseif ($field['type']) {
+      $widget_types = content_widget_type_options($field['type']);
+      if (!isset($widget_types[$field['widget_type']])) {
+        form_set_error('_add_new_field][widget_type', t('Add new field: invalid widget.'));
+      }
+    }
   }
+}
 
-  $output  = theme('table', $header, $rows, array('id' => 'content-field-overview'));
+/**
+ * Helper function for content_field_overview_form_validate.
+ *
+ * Validate the 'add existing field' row.
+ */
+function _content_field_overview_form_validate_add_existing($form, &$form_state) {
+  // The form element might be absent if no existing fields can be added to
+  // this content type
+  if (isset($form_state['values']['_add_existing_field'])) {
+    $field = $form_state['values']['_add_existing_field'];
 
-  drupal_add_tabledrag('content-field-overview', 'match', 'parent', 'group-parent', 'group-parent', 'field-name', TRUE, 1);
-  drupal_add_tabledrag('content-field-overview', 'order', 'sibling', 'field-weight');
+    // Validate if any information was provided in the 'add existing field' row.
+    if (array_filter(array($field['label'], $field['field_name'], $field['widget_type']))) {
+      // No label.
+      if (!$field['label']) {
+        form_set_error('_add_existing_field][label', t('Add existing field: you need to provide a label.'));
+      }
 
-  // Hide the 'Save' button, show it when fields are swapped.
-  $form['submit']['#attributes']['class'] = 'content-admin-field-overview-submit';
-  drupal_add_js('if (Drupal.jsEnabled) { $(document).ready(function() { $(".content-admin-field-overview-submit").hide(); }); }', 'inline');
-  drupal_add_js(drupal_get_path('module', 'content') .'/content.js');
+      // No existing field.
+      if (!$field['field_name']) {
+        form_set_error('_add_existing_field][field_name', t('Add existing field: you need to select a field.'));
+      }
 
-  $output .= drupal_render($form);
-
-  return $output;
+      // No widget type.
+      if (!$field['widget_type']) {
+        form_set_error('_add_existing_field][widget_type', t('Add existing field: you need to select a widget.'));
+      }
+      // Wrong widget type.
+      elseif ($field['field_name'] && ($existing_field = content_fields($field['field_name']))) {
+        $widget_types = content_widget_type_options($existing_field['type']);
+        if (!isset($widget_types[$field['widget_type']])) {
+          form_set_error('_add_existing_field][widget_type', t('Add existing field: invalid widget.'));
+        }
+      }
+    }
+  }
 }
 
 function content_field_overview_form_submit($form, &$form_state) {
@@ -290,6 +440,54 @@ function content_field_overview_form_submit($form, &$form_state) {
   }
 
   content_clear_type_cache();
+
+  $destinations = array();
+
+  // Create new field.
+  if (!empty($form_values['_add_new_field']['field_name'])) {
+    $field = $form_values['_add_new_field'];
+    $field['type_name'] = $form['#type_name'];
+
+    module_load_include('inc', 'content', 'includes/content.crud');
+    if (content_field_instance_create($field)) {
+      // Store new field information for fieldgroup submit handler.
+      $form_state['fields_added']['_add_new_field'] = $field['field_name'];
+      $destinations[] = 'admin/content/node-type/'. $field['type_name'] .'/fields/'. $field['field_name'];
+    }
+    else {
+      drupal_set_message(t('There was a problem creating field %label.', array(
+        '%label' => $field['label'])));
+    }
+  }
+
+  // Add existing field.
+  if (!empty($form_values['_add_existing_field']['field_name'])) {
+    $field = $form_values['_add_existing_field'];
+    $field['type_name'] = $form['#type_name'];
+    $existing_field = content_fields($field['field_name']);
+
+    if ($existing_field['locked']) {
+      drupal_set_message(t('The field %label cannot be added to a content type because it is locked.', array('%label' => $field['field_name'])));
+    }
+    else {
+      module_load_include('inc', 'content', 'includes/content.crud');
+      if (content_field_instance_create($field)) {
+        // Store new field information for fieldgroup submit handler.
+        $form_state['fields_added']['_add_existing_field'] = $field['field_name'];
+        $destinations[] = 'admin/content/node-type/'. $field['type_name'] .'/fields/'. $field['field_name'];
+      }
+      else {
+        drupal_set_message(t('There was a problem adding field %label.', array('%label' => $field['field_name'])));
+      }
+    }
+  }
+
+  if ($destinations) {
+    $destinations[] = urldecode(substr(drupal_get_destination(), 12));
+    unset($_REQUEST['destination']);
+    $form_state['redirect'] = content_get_destinations($destinations);
+  }
+
 }
 
 /**
@@ -316,11 +514,6 @@ function content_display_overview_form(&$form_state, $type_name, $contexts_selec
   }
   $contexts = _content_admin_display_contexts($contexts_selector);
 
-  // Rows in this table are essentially nested, but for the simplicity of
-  // theme and submit functions, we keep them in a flat array, and use a
-  // $dummy render structure to figure the right display order.
-  $dummy = array();
-
   $form = array(
     '#tree' => TRUE,
     '#type_name' => $type['type'],
@@ -342,7 +535,9 @@ function content_display_overview_form(&$form_state, $type_name, $contexts_selec
     $weight = $field['widget']['weight'];
 
     $form[$name] = array(
-      'human_name' => array('#value' => check_plain($field['widget']['label'])), // OK
+      'human_name' => array('#value' => check_plain($field['widget']['label'])),
+      'weight' => array('#type' => 'value', '#value' => $weight),
+      'parent' => array('#type' => 'value', '#value' => ''),
     );
 
     // Label
@@ -367,8 +562,6 @@ function content_display_overview_form(&$form_state, $type_name, $contexts_selec
         '#default_value' => isset($defaults[$key]['format']) ? $defaults[$key]['format'] : 'default',
       );
     }
-
-    $dummy[$name] = array('#weight' => $weight, '#value' => $name .' ');
   }
 
   // Groups.
@@ -390,6 +583,7 @@ function content_display_overview_form(&$form_state, $type_name, $contexts_selec
 
     $form[$name] = array(
       'human_name' => array('#value' => check_plain($group['label'])),
+      'weight' => array('#type' => 'value', '#value' => $weight),
     );
     if ($contexts_selector == CONTENT_CONTEXTS_SIMPLE) {
       $form[$name]['label'] = array(
@@ -405,61 +599,13 @@ function content_display_overview_form(&$form_state, $type_name, $contexts_selec
         '#default_value' => isset($defaults[$key]) ? $defaults[$key] : 'fieldset',
       );
     }
-    $dummy[$name] = array('#weight' => $weight, '#value' => $name .' ');
-    // Adjust child fields rows.
     foreach ($group['fields'] as $field_name => $field) {
-      $form[$field_name]['#depth'] = 1;
-      $dummy[$name][$field_name] = $dummy[$field_name];
-      unset($dummy[$field_name]);
+      $form[$field_name]['parent']['#value'] = $name;
     }
   }
-
-  // Let drupal_render figure out the right order for the rows.
-  $form['#order'] = explode(' ', trim(drupal_render($dummy)));
 
   $form['submit'] = array('#type' => 'submit', '#value' => t('Save'));
   return $form;
-}
-
-/**
- *  Theme the display overview table.
- */
-function theme_content_display_overview_form($form) {
-  $output = '';
-  if (isset($form['#order'])) {
-    $contexts_selector = $form['#contexts'];
-    $contexts = _content_admin_display_contexts($contexts_selector);
-    $header = array(t('Field'));
-    if ($contexts_selector == CONTENT_CONTEXTS_SIMPLE) {
-      $header[] = t('Label');
-    }
-    foreach ($contexts as $key => $title) {
-      $header[] = $title;
-    }
-    $rows = array();
-
-    foreach ($form['#order'] as $key) {
-      $row = array();
-      $element = &$form[$key];
-      if (in_array($key, $form['#groups'])) {
-        $element['human_name']['#prefix'] = '<strong>';
-        $element['human_name']['#suffix'] = '</strong>';
-      }
-      $row[] = theme('indentation', isset($element['#depth']) ? $element['#depth'] : 0) . drupal_render($element['human_name']);
-      if ($contexts_selector == CONTENT_CONTEXTS_SIMPLE) {
-        $row[] = drupal_render($element['label']);
-      }
-      foreach ($contexts as $context => $title) {
-        $row[] = drupal_render($element[$context]['format']);
-      }
-      $rows[] = $row;
-    }
-
-    $output .= theme('table', $header, $rows);
-  }
-
-  $output .= drupal_render($form);
-  return $output;
 }
 
 /**
@@ -480,25 +626,6 @@ function content_display_overview_form_submit($form, &$form_state) {
   }
 
   drupal_set_message(t('Your settings have been saved.'));
-}
-
-/**
- * Menu callback; presents the form for adding a new field.
- */
-function content_field_add($type_name) {
-  // make sure the old field list gets cleared before creating the new one
-  if (!isset($_POST['edit'])) {
-    content_clear_type_cache();
-  }
-  $output = '';
-  $options = content_field_type_options();
-  if (!empty($options)) {
-    $output .= drupal_get_form('content_field_main_form', array('type_name' => $type_name));
-  }
-  else {
-    drupal_set_message(t('No field modules are enabled. You need to <a href="!modules_url">enable one</a>, such as text.module, before you can add new fields.', array('!modules_url' => url('admin/build/modules'))), 'error');
-  }
-  return $output;
 }
 
 /**
@@ -524,292 +651,155 @@ function content_field_type_options() {
 
 /**
  * Return an array of widget type options for a field type.
+ *
+ * If no field type is provided, returns a nested array of
+ * all widget types, keyed by field type human name
  */
-function content_widget_type_options($field_type) {
+function content_widget_type_options($field_type = NULL, $by_label = FALSE) {
   static $options;
 
   if (!isset($options)) {
-    $widget_types = _content_widget_types();
     $options = array();
-    foreach ($widget_types as $widget_type_name => $widget_type) {
+    foreach (_content_widget_types() as $widget_type_name => $widget_type) {
       foreach($widget_type['field types'] as $widget_field_type) {
         $options[$widget_field_type][$widget_type_name] = t($widget_type['label']);
       }
     }
   }
 
-  return !empty($options[$field_type]) ? $options[$field_type] : array();
+  if ($field_type) {
+    return !empty($options[$field_type]) ? $options[$field_type] : array();
+  }
+  elseif ($by_label) {
+    $field_types = _content_field_types();
+    $options_by_label = array();
+    foreach ($options as $field_type => $widgets) {
+      $options_by_label[t($field_types[$field_type]['label'])] = $widgets;
+    }
+    return $options_by_label;
+  }
+  else {
+    return $options;
+  }
 }
 
-function content_field_add_existing_form(&$form_state, $type_name) {
-  $output = '';
+/**
+ * Return an array of existing field to be added to a node type.
+ */
+function content_existing_field_options($type_name) {
   $type = content_types($type_name);
   $fields = content_fields();
-  $form = array();
+  $field_types = _content_field_types();
 
   $options = array();
   foreach ($fields as $field) {
     if (!isset($type['fields'][$field['field_name']]) && !$field['locked']) {
-      $options[$field['field_name']] = t($field['widget']['label']) .' ('. $field['field_name'] .')';
+      $field_type = $field_types[$field['type']];
+      $text = t('@type: @field (@label)', array('@type' => t($field_type['label']), '@label' => t($field['widget']['label']), '@field' => $field['field_name']));
+      $options[$field['field_name']] = (drupal_strlen($text) > 80) ? truncate_utf8($text, 77) . '...' : $text;
     }
   }
-  if ($options) {
-    $form['existing'] = array(
-      '#type' => 'fieldset',
-      '#title' => t('Add existing field'),
-    );
-    $form['existing']['existing_field_name'] = array(
-      '#type' => 'select',
-      '#required' => TRUE,
-      '#options' => $options,
-    );
-    $form['existing']['submit'] = array(
-      '#type' => 'submit',
-      '#value' => t('Add field'),
-    );
-    $form['existing']['type_name'] = array(
-      '#type' => 'value',
-      '#value' => $type_name,
-    );
-  }
-  return $form;
-}
+  // Sort the list by type, then by field name, then by label.
+  asort($options);
 
-/**
- * Add an existing field to a content type.
- */
-function content_field_add_existing_form_submit($form, &$form_state) {
-  module_load_include('inc', 'content', 'includes/content.crud');
-  $form_values = $form_state['values'];
-  $form_values['field_name'] = $form_values['existing_field_name'];
-  $field = content_fields($form_values['field_name']);
-
-  if ($field['locked']) {
-    drupal_set_message(t('The field %label cannot be added to a content type because it is locked.',
-                       array('%label' => $form_values['field_name'])));
-    return;
-  }
-
-  if (content_field_instance_create($form_values)) {
-    drupal_set_message(t('Added field %label.', array(
-      '%label' => $form_values['field_name'])));  }
-  else {
-    drupal_set_message(t('There was a problem adding field %label.', array(
-      '%label' => $form_values['field_name'])));
-  }
-  $type = content_types($form_values['type_name']);
-  $form_state['redirect'] = 'admin/content/node-type/'. $type['url_str'] .'/fields';
+  return $options;
 }
 
 /**
  * A form element for selecting field, widget, and label.
  */
-function content_field_main_form(&$form_state, $form_values) {
+function content_field_basic_form(&$form_state, $form_values) {
   module_load_include('inc', 'content', 'includes/content.crud');
-  $form = array();
-  if (!empty($form_state['storage'])) {
-    $form_values = $form_state['storage'];
-  }
 
   $type_name = $form_values['type_name'];
-  $type = content_types($type_name);
-  $field_name = isset($form_values['field_name']) ? $form_values['field_name'] : '';
-  $field_type = isset($form_values['type']) ? $form_values['type'] : '';
-  $label = isset($form_values['label']) ? $form_values['label'] : '';
+  $type = content_types($form_values['type_name']);
+  $field_name = $form_values['field_name'];
+  $field_type = $form_values['type'];
+  $label = $form_values['label'];
 
-  // Remove the 'field_' prefix from the field name.
-  $trimmed_field_name = $field_name;
-  if (substr($field_name, 0, 6) == 'field_') {
-    $trimmed_field_name = substr($field_name, 6);
-  }
+  $form = array();
 
-  // If we haven't chosen a field name yet, include an option to
-  // share an existing field instead.
-  if (empty($field_name)) {
-    $form['#prefix'] = drupal_get_form('content_field_add_existing_form', $type_name);
-  }
-
-  // See if we're editing an existing field or a new field.
-  $instances = content_field_instance_read(array('field_name' => $field_name, 'type_name' => $type_name));
-  if (count($instances) < 1) {
-    $form['new'] = array(
-      '#type' => 'fieldset',
-      '#title' => t('Create new field'),
-    );
-    $new = TRUE;
-  }
-  else {
-    $form['new'] = array(
-      '#type' => 'fieldset',
-      '#title' => t('Edit basic information'),
-    );
-    $new = FALSE;
-  }
-  $form['new']['field_name'] = array(
+  $form['basic'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Edit basic information'),
+  );
+  $form['basic']['field_name'] = array(
     '#title' => t('Field name'),
     '#type' => 'textfield',
-    '#default_value' => $trimmed_field_name,
-    '#field_prefix' => 'field_',
-    '#description' => t("The machine-readable name of the field."),
-    '#required' => TRUE,
+    '#value' => $field_name,
+    '#description' => t("The machine-readable name of the field. This name cannot be changed."),
+    '#disabled' => TRUE,
   );
-  if (!empty($field_name)) {
-    $form['new']['field_name']['#description'] .= ' '. t("This name cannot be changed.");
-    $form['new']['field_name']['#disabled'] = TRUE;
-    $form['new']['field_name']['#required'] = FALSE;
-    $form['new']['field_name']['#value'] = $field_name;
-    $form['new']['field_name']['#field_prefix'] = '';
-    $form['new_field_name'] = array('#type' => 'hidden', '#value' => FALSE);
-  }
-  else {
-    $form['new']['field_name']['#description'] .= ' '. t("This name cannot be changed later! The name will be prefixed with 'field_' and can include lowercase unaccented letters, numbers, and underscores. The length of the name, including the prefix, is limited to no more than 32 characters.");
-    $form['new_field_name'] = array('#type' => 'hidden', '#value' => TRUE);
-  }
-  $form['new']['label'] = array(
+  $form['basic']['label'] = array(
     '#type' => 'textfield',
     '#title' => t('Label'),
     '#default_value' => $label,
     '#required' => TRUE,
     '#description' => t('A human-readable name to be used as the label for this field in the %type content type.', array('%type' => $type['name'])),
   );
-
-  if (empty($field_type)) {
-    $form['new']['type'] = array(
-      '#type' => 'select',
-      '#title' => t('Field type'),
-      '#required' => TRUE,
-      '#options' => content_field_type_options(),
-      '#default_value' => NULL,
-      '#description' => t('The type of data you would like to store in the database with this field.'),
-    );
-    $form['widget_type'] = array('#type' => 'hidden', '#value' => '');
-  }
-  else {
-    $form['new']['type'] = array(
-      '#type' => 'select',
-      '#title' => t('Field type'),
-      '#options' => content_field_type_options(),
-      '#default_value' => $field_type,
-      '#description' => t('The type of data you would like to store in the database with this field. This option cannot be changed.'),
-      '#disabled' => TRUE,
-    );
-    $form['new']['widget_type'] = array(
-      '#type' => 'select',
-      '#title' => t('Widget type'),
-      '#required' => TRUE,
-      '#options' => content_widget_type_options($field_type),
-      '#default_value' => $form_values['widget_type'],
-      '#description' => t('The type of form element you would like to present to the user when creating this field in the %type content type.', array('%type' => $type['name'])),
-    );
-  }
+  $form['basic']['type'] = array(
+    '#type' => 'select',
+    '#title' => t('Field type'),
+    '#options' => content_field_type_options(),
+    '#default_value' => $field_type,
+    '#description' => t('The type of data you would like to store in the database with this field. This option cannot be changed.'),
+    '#disabled' => TRUE,
+  );
+  $form['basic']['widget_type'] = array(
+    '#type' => 'select',
+    '#title' => t('Widget type'),
+    '#required' => TRUE,
+    '#options' => content_widget_type_options($field_type),
+    '#default_value' => $form_values['widget_type'],
+    '#description' => t('The type of form element you would like to present to the user when creating this field in the %type content type.', array('%type' => $type['name'])),
+  );
 
   $form['type_name'] = array(
     '#type' => 'value',
     '#value' => $type_name,
   );
-  $form['needs_update'] = array(
-    '#type' => 'hidden',
-    '#value' => !empty($form_values['needs_update']),
-  );
+
   $form['submit'] = array(
     '#type' => 'submit',
     '#value' => t('Continue'),
   );
-  $form['#validate'] = array('content_field_main_form_validate');
-  $form['#submit'] = array('content_field_main_form_submit');
+
+  $form['#validate'] = array();
+  $form['#submit'] = array('content_field_basic_form_submit');
+
   return $form;
-}
-
-/**
- *  Field name validation.
- */
-function content_field_main_form_validate($form, &$form_state) {
-  $form_values = $form_state['values'];
-  $field_name = $form_values['field_name'];
-
-  // Add the 'field_' prefix.
-  if (!empty($field_name) && substr($field_name, 0, 6) != 'field_') {
-    $field_name = 'field_'. $field_name;
-    form_set_value($form['new']['field_name'], $field_name, $form_state);
-  }
-
-  // Testing for a valid name only needs to be done the first time through.
-  if (isset($form_values['new_field_name']) && $form_values['new_field_name']) {
-    if (!preg_match('!^field_[a-z0-9_]+$!', $field_name)) {
-      form_set_error('field_name', t('The field name %field_name is invalid. The name must include only lowercase unaccentuated letters, numbers, and underscores.', array('%field_name' => $field_name)));
-    }
-    if (strlen($field_name) > 32) {
-      form_set_error('field_name', t('The field name %field_name is too long. The name is limited to 32 characters, including the \'field_\' prefix.', array('%field_name' => $field_name)));
-    }
-    // Check the name is not used by another field.
-    // We need to check inactive fields as well, so we can't use content_fields().
-    module_load_include('inc', 'content', 'includes/content.crud');
-    $fields = content_field_instance_read(array(), TRUE);
-    $used = FALSE;
-    foreach ($fields as $field) {
-      $used |= ($field['field_name'] == $field_name);
-    }
-    if ($used) {
-      form_set_error('field_name', t('The field name %field_name already exists.', array('%field_name' => $field_name)));
-    }
-    elseif ($field_name == 'field_instance') {
-      form_set_error('field_name', t("The name 'field_instance' is a reserved name."));
-    }
-  }
 }
 
 /**
  * Create a new field for a content type.
  */
-function content_field_main_form_submit($form, &$form_state) {
+function content_field_basic_form_submit($form, &$form_state) {
   $form_values = $form_state['values'];
-  $form_state['storage'] = $form_values;
-  if (empty($form_values['type']) || empty($form_values['widget_type'])) {
-    $form_state['rebuild'] = TRUE;
+
+  $label = $form_values['label'];
+
+  // Set the right module information
+  $field_types = _content_field_types();
+  $widget_types = _content_widget_types();
+  $form_values['module'] = $field_types[$form_values['type']]['module'];
+  $form_values['widget_module'] = $widget_types[$form_values['widget_type']]['module'];
+
+  // Make sure we retain previous values and only over-write changed values.
+  module_load_include('inc', 'content', 'includes/content.crud');
+  $instances = content_field_instance_read(array('field_name' => $form_values['field_name'], 'type_name' => $form_values['type_name']));
+  $field = array_merge(content_field_instance_collapse($instances[0]), $form_values);
+  if (content_field_instance_update($field)) {
+    drupal_set_message(t('Updated basic settings for field %label.', array(
+      '%label' => $label)));
   }
   else {
-    module_load_include('inc', 'content', 'includes/content.crud');
-    // Unset $form_state['storage'] so FAPI doesn't force
-    // $form_state['rebuild'] to TRUE.
-    unset($form_state['storage']);
-    $form_state['rebuild'] = FALSE;
-
-    $label = $form_values['label'];
-
-    // Set the right module information
-    $field_types = _content_field_types();
-    $widget_types = _content_widget_types();
-    $form_values['module'] = $field_types[$form_values['type']]['module'];
-    $form_values['widget_module'] = $widget_types[$form_values['widget_type']]['module'];
-    // Are we creating or updating this field?
-    $instances = content_field_instance_read(array('field_name' => $form_values['field_name'], 'type_name' => $form_values['type_name']));
-    if (sizeof($instances) < 1) {
-      if (content_field_instance_create($form_values)) {
-        drupal_set_message(t('Created field %label.', array(
-          '%label' => $label)));
-      }
-      else {
-        drupal_set_message(t('There was a problem creating field %label.', array(
-          '%label' => $label)));
-      }
-    }
-    else {
-      // If we're updating, make sure we retain previous values and
-      // only over-write changed values.
-      $field = array_merge(content_field_instance_collapse($instances[0]), $form_values);
-      if (content_field_instance_update($field)) {
-        drupal_set_message(t('Updated field %label.', array(
-          '%label' => $label)));
-      }
-      else {
-        drupal_set_message(t('There was a problem updating field %label.', array(
-          '%label' => $label)));
-      }
-    }
-
-    $type = content_types($form_values['type_name']);
-    $form_state['redirect'] = 'admin/content/node-type/'. $type['url_str'] .'/fields/'. $form_values['field_name'];
+    drupal_set_message(t('There was a problem updating the basic settings for field %label.', array(
+      '%label' => $label)));
   }
+
+  $type = content_types($form_values['type_name']);
+  $form_state['redirect'] = 'admin/content/node-type/'. $type['url_str'] .'/fields/'. $form_values['field_name'];
+  $form_state['rebuild'] = FALSE;
 }
 
 /**
@@ -902,41 +892,53 @@ function content_field_edit_form(&$form_state, $type_name, $field_name) {
   if (isset($form_state['change_basic'])) {
     module_load_include('inc', 'content', 'includes/content.crud');
     $field_values = content_field_instance_collapse($field);
-    return content_field_main_form($form_state, $field_values);
+    return content_field_basic_form($form_state, $field_values);
+  }
+
+  $add_new_sequence = isset($_REQUEST['destinations']);
+
+  // Remove menu tabs when we are in an 'add new' sequence.
+  if ($add_new_sequence) {
+    menu_set_item(NULL, menu_get_item('node'));
   }
 
   $form = array();
-  $form['main'] = array(
+  $form['#field'] = $field;
+  $form['#type'] = $type;
+
+  // Basic iformation : hide when we are in an 'add new' sequence.
+  $form['basic'] = array(
     '#type' => 'fieldset',
     '#title' => t('%type basic information', array('%type' => $type['name'])),
+    '#access' => !$add_new_sequence,
   );
-  $form['main']['label'] = array(
+  $form['basic']['label'] = array(
     '#type' => 'textfield',
     '#title' => t('Label'),
     '#value' => $field['widget']['label'],
     '#disabled' => TRUE,
   );
-  $form['main']['field_name'] = array(
+  $form['basic']['field_name'] = array(
     '#type' => 'hidden',
     '#title' => t('Field name'),
     '#value' => $field['field_name'],
     '#disabled' => TRUE,
   );
-  $form['main']['type'] = array(
+  $form['basic']['type'] = array(
     '#type' => 'hidden',
     '#title' => t('Field type'),
     '#options' => content_field_type_options(),
     '#value' => $field['type'],
     '#disabled' => TRUE,
   );
-  $form['main']['widget_type'] = array(
+  $form['basic']['widget_type'] = array(
     '#type' => 'select',
     '#title' => t('Widget type'),
     '#options' => content_widget_type_options($field['type']),
     '#default_value' => $field['widget']['type'] ? $field['widget']['type'] : $default_widget,
     '#disabled' => TRUE,
   );
-  $form['main']['change'] = array(
+  $form['basic']['change'] = array(
     '#type' => 'submit',
     '#value' => t('Change basic information'),
     '#submit' => array('content_field_edit_form_submit_update_basic'),
@@ -1239,9 +1241,27 @@ function content_field_edit_form_submit($form, &$form_state) {
   $form_values = $form_state['values'];
   content_field_instance_update($form_values);
 
-  drupal_set_message(t('Saved field %label.', array('%label' => $form_values['label'])));
-  $type   = content_types($form_values['type_name']);
-  $form_state['redirect'] = 'admin/content/node-type/'. $type['url_str'] .'/fields';
+  if (isset($_REQUEST['destinations'])) {
+    drupal_set_message(t('Added field %label.', array('%label' => $form_values['label'])));
+    $form_state['redirect'] = content_get_destinations($_REQUEST['destinations']);
+  }
+  else {
+    drupal_set_message(t('Saved field %label.', array('%label' => $form_values['label'])));
+    $type = content_types($form_values['type_name']);
+    $form_state['redirect'] = 'admin/content/node-type/'. $type['url_str'] .'/fields';
+  }
+}
+
+/**
+ * Helper function to handle multipage redirects.
+ */
+function content_get_destinations($destinations) {
+  $query = array();
+  $path = array_shift($destinations);
+  if ($destinations) {
+    $query['destinations'] = $destinations;
+  }
+  return array($path, $query);
 }
 
 /**

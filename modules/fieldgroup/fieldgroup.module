@@ -25,18 +25,10 @@ function fieldgroup_menu() {
       $type_name = $type->type;
       $content_type = content_types($type_name);
       $type_url_str = $content_type['url_str'];
-      $items['admin/content/node-type/'. $type_url_str .'/add_group'] = array(
-        'title' => 'Add group',
-        'page callback' => 'drupal_get_form',
-        'page arguments' => array('fieldgroup_group_edit_form', $type_name, '', 'add'),
-        'access arguments' => array('administer content types'),
-        'type' => MENU_LOCAL_TASK,
-        'weight' => 3,
-      );
       $items['admin/content/node-type/'. $type_url_str .'/groups/%'] = array(
         'title' => 'Edit group',
         'page callback' => 'drupal_get_form',
-        'page arguments' => array('fieldgroup_group_edit_form', $type_name, 5, 'edit'),
+        'page arguments' => array('fieldgroup_group_edit_form', $type_name, 5),
         'access arguments' => array('administer content types'),
         'type' => MENU_CALLBACK,
       );
@@ -92,27 +84,11 @@ function fieldgroup_content_fieldapi($op, $field) {
   cache_clear_all('fieldgroup_data', content_cache_tablename());
 }
 
-function fieldgroup_group_edit_form(&$form_state, $type_name, $group_name, $action) {
+function fieldgroup_group_edit_form(&$form_state, $type_name, $group_name) {
   $content_type = content_types($type_name);
   $groups = fieldgroup_groups($content_type['type']);
 
-  if ($action == 'add') {
-    //adding a new one
-    $group = array();
-    $form['submit'] = array(
-      '#type' => 'submit',
-      '#value' => t('Add'),
-      '#weight' => 10,
-    );
-  }
-  elseif ($group = $groups[$group_name]) {
-    $form['submit'] = array(
-      '#type' => 'submit',
-      '#value' => t('Save'),
-      '#weight' => 10,
-    );
-  }
-  else {
+  if (!$group = $groups[$group_name]) {
     drupal_not_found();
     exit;
   }
@@ -120,7 +96,7 @@ function fieldgroup_group_edit_form(&$form_state, $type_name, $group_name, $acti
   $form['label'] = array(
     '#type' => 'textfield',
     '#title' => t('Label'),
-    '#default_value' => isset($group['label']) ? $group['label'] : '',
+    '#default_value' => $group['label'],
     '#required' => TRUE,
   );
   $form['settings']['#tree'] = TRUE;
@@ -132,7 +108,7 @@ function fieldgroup_group_edit_form(&$form_state, $type_name, $group_name, $acti
   $form['settings']['form']['style'] = array(
     '#type' => 'radios',
     '#title' => t('Style'),
-    '#default_value' => isset($group['settings']['form']['style']) ? $group['settings']['form']['style'] : 'fieldset',
+    '#default_value' => $group['settings']['form']['style'],
     '#options' => array(
       'fieldset' => t('always open'),
       'fieldset_collapsible' => t('collapsible'),
@@ -142,7 +118,7 @@ function fieldgroup_group_edit_form(&$form_state, $type_name, $group_name, $acti
   $form['settings']['form']['description'] = array(
     '#type' => 'textarea',
     '#title' => t('Help text'),
-    '#default_value' => isset($group['settings']['form']['description']) ? $group['settings']['form']['description'] : '',
+    '#default_value' => $group['settings']['form']['description'],
     '#rows' => 5,
     '#description' => t('Instructions to present to the user on the editing form.'),
     '#required' => FALSE,
@@ -155,52 +131,27 @@ function fieldgroup_group_edit_form(&$form_state, $type_name, $group_name, $acti
   $form['settings']['display']['description'] = array(
     '#type' => 'textarea',
     '#title' => t('Description'),
-    '#default_value' => isset($group['settings']['display']['description']) ? $group['settings']['display']['description'] : '',
+    '#default_value' => $group['settings']['display']['description'],
     '#rows' => 5,
     '#description' => t('A description of the group.'),
     '#required' => FALSE,
   );
   module_load_include('inc', 'content', 'includes/content.admin');
   foreach (array_merge(array_keys(_content_admin_display_contexts()), array('label')) as $key) {
-    $default = ($key == 'label') ? 'above' : array('format' => 'fieldset');
-    $form['settings']['display'][$key] = array('#type' => 'value', '#value' => isset($group['settings']['display'][$key]) ? $group['settings']['display'][$key] : $default);
+    $form['settings']['display'][$key] = array('#type' => 'value', '#value' => $group['settings']['display'][$key]);
   }
-  $form['weight'] = array('#type' => 'hidden', '#default_value' => isset($group['weight']) ? $group['weight'] : 0);
+  $form['weight'] = array('#type' => 'hidden', '#default_value' => $group['weight']);
   $form['group_name'] = array('#type' => 'hidden', '#default_value' => $group_name);
 
   $form['#content_type'] = $content_type;
-  $form['#group_action'] = $action;
+
+  $form['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('Save'),
+    '#weight' => 10,
+  );
 
   return $form;
-}
-
-/**
- *  Group name validation for programmatic group addition.
- *
- * @todo
- * Come back here and do the same thing for groups as we've done for fields,
- * present a machine-readable name field as well as a label instead of
- * trying to create a machine-readable name from the label.
- */
-function fieldgroup_group_edit_form_validate($form, &$form_state) {
-  $form_values = $form_state['values'];
-  $content_type = $form['#content_type'];
-  $action = $form['#group_action'];
-
-  if (!empty($form_values['group_name']) && $action == 'add') {
-
-    $groups = fieldgroup_groups($content_type['type']);
-    $group = $groups[$form_values['group_name']];
-
-    if (isset($group[$form_values['group_name']])) {
-      form_set_error('group_name', t('The group name %name already exists.', array(
-        '%group_name' => $form_values['group_name'])));
-    }
-    if (!preg_match('!^[a-z0-9_]+$!', $form_values['group_name'])) {
-      form_set_error('group_name', t('The group name %name is invalid.', array(
-        '%group_name' => $form_values['group_name'])));
-    }
-  }
 }
 
 function fieldgroup_group_edit_form_submit($form, &$form_state) {
@@ -345,7 +296,8 @@ function fieldgroup_form_alter(&$form, $form_state, $form_id) {
       '#value' => _fieldgroup_field_get_group($content_type['type'], $form['field_name']['#value']),
     );
   }
-  elseif ($form_id == 'content_field_overview_form' && !empty($form['#groups'])) {
+  elseif ($form_id == 'content_field_overview_form') {
+    $form['#validate'][] = 'fieldgroup_field_overview_form_validate';
     $form['#submit'][] = 'fieldgroup_field_overview_form_submit';
   }
   elseif ($form_id == 'content_display_overview_form' && !empty($form['#groups'])) {
@@ -359,16 +311,106 @@ function fieldgroup_form_alter(&$form, $form_state, $form_id) {
   }
 }
 
+function fieldgroup_field_overview_form_validate($form, &$form_state) {
+  $form_values = $form_state['values'];
+  $group = $form_values['_add_new_group'];
+
+  if (array_filter(array($group['label'], $group['group_name']))) {
+    // No label.
+    if (!$group['label']) {
+      form_set_error('_add_new_group][label', t('Add new group: you need to provide a label.'));
+    }
+
+    // No group name.
+    if (!$group['group_name']) {
+      form_set_error('_add_new_group][group_name', t('Add new group: you need to provide a group name.'));
+    }
+    // Group name validation.
+    else {
+      $group_name = $group['group_name'];
+
+      // Add the 'group_' prefix.
+      if (substr($group_name, 0, 6) != 'group_') {
+        $group_name = 'group_'. $group_name;
+        form_set_value($form['_add_new_group']['group_name'], $group_name, $form_state);
+      }
+
+      // Invalid field name.
+      if (!preg_match('!^group_[a-z0-9_]+$!', $group_name)) {
+        form_set_error('_add_new_group][group_name', t('Add new group: the group name %group_name is invalid. The name must include only lowercase unaccentuated letters, numbers, and underscores.', array('%group_name' => $group_name)));
+      }
+      if (strlen($group_name) > 32) {
+        form_set_error('_add_new_group][group_name', t('Add new group: the group name %group_name is too long. The name is limited to 32 characters, including the \'group_\' prefix.', array('%group_name' => $group_name)));
+      }
+
+      // Group name already exists.
+      $used = FALSE;
+      $groups = fieldgroup_groups();
+      foreach ($groups as $type => $groups_per_type) {
+        foreach ($groups_per_type as $existing_group) {
+          $used |= ($existing_group['group_name'] == $group_name);
+        }
+      }
+      if ($used) {
+        form_set_error('_add_new_group][group_name', t('Add new group: the group name %group_name already exists.', array('%group_name' => $group_name)));
+      }
+    }
+  }
+  else {
+    // Fail validation if attempt to nest fields under a new group without the
+    // proper information. Not raising an error would cause the nested fields
+    // to get weights the user doesn't expect.
+    foreach ($form_values as $key => $values) {
+      if ($values['parent'] == '_add_new_group') {
+        form_set_error('_add_new_group][label', t('Add new group: you need to provide a label.'));
+        form_set_error('_add_new_group][group_name', t('Add new group: you need to provide a group name.'));
+        break;
+      }
+    }
+  }
+}
+
 function fieldgroup_field_overview_form_submit($form, &$form_state) {
   $form_values = $form_state['values'];
   $type_name = $form['#type_name'];
+
+  // Create new group if needed.
+  if (!empty($form_values['_add_new_group']['label'])) {
+    $group = $form_values['_add_new_group'];
+    $group['settings'] = _field_group_default_settings();
+    fieldgroup_save_group($type_name, $group);
+    $new_group_name = $group['group_name'];
+  }
+
+  // Parse incoming rows.
+  $add_field_rows = array('_add_new_field', '_add_existing_field');
+  $field_rows = array_merge($form['#fields'], $add_field_rows);
   foreach ($form_values as $key => $values) {
-    // Update field parenting.
-    if (in_array($key, $form['#fields'])) {
+    // If 'field' row: update field parenting.
+    if (in_array($key, $field_rows)) {
+      // If newly added fields were added to a group:
+      if (in_array($key, $add_field_rows)) {
+        // We replace the '_add_*_field' key with the actual name of
+        // the field that got added.
+        // content_field_overview_form_submit() placed those
+        // in $form_state['fields_added'] for us.
+        if (isset($form_state['fields_added'][$key])) {
+          $key = $form_state['fields_added'][$key];
+        }
+        else {
+          // No field was actually created : skip to next row.
+          continue;
+        }
+      }
+      // If the field was added to the newly created group, replace the
+      // '_add_new_group' value with the actual name of the group.
+      $parent = ($values['parent'] == '_add_new_group' && isset($new_group_name)) ? $new_group_name : $values['parent'];
       // TODO: check the parent group does exist ?
-      fieldgroup_update_fields(array('field_name' => $key, 'group' => $values['parent'], 'type_name' => $type_name));
+      fieldgroup_update_fields(array('field_name' => $key, 'group' => $parent, 'type_name' => $type_name));
     }
-    // Update groups weights.
+
+    // If 'group' row:  update groups weights
+    // (possible newly created group has already been taken care of).
     elseif (in_array($key, $form['#groups'])) {
       db_query("UPDATE {". fieldgroup_tablename() ."} SET weight = %d WHERE type_name = '%s' AND group_name = '%s'",
         $values['weight'], $type_name, $key);
@@ -376,6 +418,18 @@ function fieldgroup_field_overview_form_submit($form, &$form_state) {
   }
 
   cache_clear_all('fieldgroup_data', content_cache_tablename());
+}
+
+function _field_group_default_settings() {
+  $settings = array(
+    'form' => array('style' => 'fieldset', 'description' => ''),
+    'display' => array('description' => '', 'label' => 'above'),
+  );
+  module_load_include('inc', 'content', 'includes/content.admin');
+  foreach (array_keys(_content_admin_display_contexts()) as $key) {
+    $settings['display'][$key]['format'] = 'fieldset';
+  }
+  return $settings;
 }
 
 function fieldgroup_display_overview_form_submit($form, &$form_state) {
@@ -523,27 +577,8 @@ function fieldgroup_save_group($type_name, $group) {
 
   if (!isset($groups[$group['group_name']])) {
     // Accept group name from programmed submissions if valid.
-    if (!empty($group['group_name'])) {
-      $group_name = $group['group_name'];
-    }
-    else {
-      // Otherwise, find a valid, computer-friendly name.
-      $group_name = trim($group['label']);
-      $group_name = drupal_strtolower($group_name);
-      $group_name = str_replace(array(' ', '-'), '_', $group_name);
-      $group_name = preg_replace('/[^a-z0-9_]/', '', $group_name);
-      $group_name = 'group_'. $group_name;
-      $group_name = substr($group_name, 0, 30);
-      if (isset($groups[$group_name])) {
-        $group_name_base = $group_name;
-        $counter = 0;
-        while (isset($groups[$group_name])) {
-          $group_name = $group_name_base .'_'. $counter++;
-        }
-      }
-    }
     db_query("INSERT INTO {". fieldgroup_tablename() ."} (type_name, group_name, label, settings, weight)
-             VALUES ('%s', '%s', '%s', '%s', %d)", $type_name, $group_name, $group['label'], serialize($group['settings']), $group['weight']);
+             VALUES ('%s', '%s', '%s', '%s', %d)", $type_name, $group['group_name'], $group['label'], serialize($group['settings']), $group['weight']);
     cache_clear_all('fieldgroup_data', content_cache_tablename());
     return SAVED_NEW;
   }

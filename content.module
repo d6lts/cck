@@ -35,18 +35,6 @@ function content_help($path, $arg) {
       $output .= '<p>'. t('For more information, see the online handbook entry for <a href="@handbook-cck">CCK</a> or the <a href="@project-cck">CCK project page</a>.', array('@handbook-cck' => 'http://drupal.org/handbook/modules/cck', '@project-cck' => 'http://drupal.org/project/cck')) .'</p>';
       return $output;
   }
-
-  if (preg_match('!^admin/content/node-type/.*/display!', $path)) {
-    if (preg_match('!^admin/content/node-type/.*/display$!', $path)) {
-      return t("Configure how this content type's fields and field labels should be displayed when it's viewed in teaser and full-page mode.");
-    }
-    else {
-      return t("Configure how this content type's fields should be displayed when it's rendered in the following contexts.");
-    }
-  }
-  if (preg_match('!^admin/content/node-type/.*/fields$!', $path)) {
-    return t('Control the order of fields in the input form.');
-  }
 }
 
 /**
@@ -152,15 +140,6 @@ function content_menu() {
         'type' => MENU_LOCAL_TASK,
         'weight' => 1,
       );
-      $items['admin/content/node-type/'. $type_url_str .'/add_field'] = array(
-        'title' => 'Add field',
-        'page callback' => 'content_field_add',
-        'page arguments' => array($type_name),
-        'access arguments' => array('administer content types'),
-        'file' => 'includes/content.admin.inc',
-        'type' => MENU_LOCAL_TASK,
-        'weight' => 3,
-      );
       // Cast as an array in case this is called before any fields have
       // been added, like when a new content type is created.
       foreach ((array) $content_type['fields'] as $field) {
@@ -210,6 +189,7 @@ function content_elements() {
  */
 function content_theme() {
   $path = drupal_get_path('module', 'content') .'/theme';
+  require_once "./$path/theme.inc";
 
   return array(
     'content_field' => array(
@@ -221,12 +201,15 @@ function content_theme() {
       'arguments' => array(),
     ),
     'content_field_overview_form' => array(
+      'template' => 'content-admin-field-overview-form',
+      'file' => 'theme.inc',
+      'path' => $path,
       'arguments' => array('form' => NULL),
     ),
     'content_display_overview_form' => array(
-      'arguments' => array('form' => NULL),
-    ),
-    'content_admin_field_add_new_field_widget_type' => array(
+      'template' => 'content-admin-display-overview-form',
+      'file' => 'theme.inc',
+      'path' => $path,
       'arguments' => array('form' => NULL),
     ),
     'content_view_multiple_field' => array(
@@ -1923,7 +1906,7 @@ function content_default_value(&$form, &$form_state, $field, $delta) {
 }
 
 /**
- * Process variables for field.tpl.php.
+ * Theme preprocess function for field.tpl.php.
  *
  * The $variables array contains the following arguments:
  * - $node
@@ -1933,6 +1916,9 @@ function content_default_value(&$form, &$form_state, $field, $delta) {
  * - $page
  *
  * @see field.tpl.php
+ *
+ * TODO : this should live in theme/theme.inc, but then the preprocessor
+ * doesn't get called when the theme overrides the template. Bug in theme layer ?
  */
 function content_preprocess_content_field(&$variables) {
   $element = $variables['element'];
