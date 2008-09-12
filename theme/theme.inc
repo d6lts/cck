@@ -25,7 +25,7 @@ function template_preprocess_content_field_overview_form(&$vars) {
       }
     }
   }
-  $order = explode(' ', trim(drupal_render($dummy)));
+  $order = $dummy ? explode(' ', trim(drupal_render($dummy))) : array();
 
   $vars['help'] = theme('advanced_help_topic', 'content', 'manage-fields') . t('Add fields and groups to the content type, and arrange them on content display and input forms.');
 
@@ -126,7 +126,7 @@ function template_preprocess_content_display_overview_form(&$vars) {
       }
     }
   }
-  $order = explode(' ', trim(drupal_render($dummy)));
+  $order = $dummy ? explode(' ', trim(drupal_render($dummy))) : array();
 
   if ($contexts_selector == CONTENT_CONTEXTS_SIMPLE) {
     $help = t("Configure how this content type's fields and field labels should be displayed when it's viewed in teaser and full-page mode.");

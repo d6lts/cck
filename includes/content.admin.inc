@@ -501,11 +501,6 @@ function content_display_overview_form(&$form_state, $type_name, $contexts_selec
   $type = content_types($type_name);
   $field_types = _content_field_types();
   $fields = $type['fields'];
-  if (empty($fields)) {
-    drupal_set_message(t('There are no fields configured for this content type. You can !link.', array(
-      '!link' => l(t('Add a new field'), str_replace('/fields', '/add_field', $_GET['q'])))), 'warning');
-    return array();
-  }
 
   $groups = $group_options = array();
   if (module_exists('fieldgroup')) {
@@ -522,6 +517,12 @@ function content_display_overview_form(&$form_state, $type_name, $contexts_selec
     '#contexts' => $contexts_selector,
     '#order' => array(),
   );
+
+  if (empty($fields)) {
+    drupal_set_message(t("There are no fields configured for this content type. You can add new fields on the !link page.", array(
+      '!link' => l(t('Manage fields'), 'admin/content/node-type/'. $type['url_str'] .'/fields'))), 'warning');
+    return $form;
+  }
 
   // Fields.
   $label_options = array(
@@ -820,8 +821,7 @@ function content_field_remove_form(&$form_state, $type_name, $field_name) {
   );
 
   $output = confirm_form($form,
-    t('Are you sure you want to remove the field %field?', array(
-      '%field' => $field['widget']['label'])),
+    t('Are you sure you want to remove the field %field?', array('%field' => $field['widget']['label'])),
     'admin/content/node-type/'. $type['url_str'] .'/fields',
     t('If you have any content left in this field, it will be lost. This action cannot be undone.'),
     t('Remove'), t('Cancel'),
