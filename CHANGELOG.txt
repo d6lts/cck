@@ -5,6 +5,7 @@ CCK 6.2-dev
 
 Be sure to clear your site's cache after updating to this release.
 
+- #307909 Don't create Views tables for fields that don't create db columns.
 - Make incompatibility with older Views releases stand out more.
 - Fix errors when rendering fieldgroups in 'advanced' contexts (RSS, search...).
 - Do not insert field and group labels in search index.

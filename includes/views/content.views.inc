@@ -139,6 +139,13 @@ function content_views_field_views_data($field) {
   // TODO: is this really how we should do it ?
   if (isset($field_types[$field['type']])) {
     $db_info = content_database_info($field);
+    
+    // Field modules that do not store data in the database
+    // should not create views data tables.
+    if (empty($db_info['columns']) || !count($db_info['columns'])) {
+      return;
+    }
+
     $table_alias = content_views_tablename($field);
 
     $types = array();
