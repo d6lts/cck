@@ -927,7 +927,6 @@ function content_field_edit_form(&$form_state, $type_name, $field_name) {
   $form['basic']['type'] = array(
     '#type' => 'hidden',
     '#title' => t('Field type'),
-    '#options' => content_field_type_options(),
     '#value' => $field['type'],
     '#disabled' => TRUE,
   );
