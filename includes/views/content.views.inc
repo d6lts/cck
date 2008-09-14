@@ -142,7 +142,7 @@ function content_views_field_views_data($field) {
     
     // Field modules that do not store data in the database
     // should not create views data tables.
-    if (empty($db_info['columns']) || !count($db_info['columns'])) {
+    if (!count($db_info['columns'])) {
       return;
     }
 
@@ -250,7 +250,6 @@ function content_views_field_views_data($field) {
         'allow empty' => TRUE,
       );
     }
-
     // TODO: provide automatic filters, sorts, and arguments for each column, not just the first?
     return array($table_alias => $data);
   }
