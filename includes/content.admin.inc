@@ -301,8 +301,8 @@ function content_field_overview_form(&$form_state, $type_name) {
 }
 
 function content_field_overview_form_validate($form, &$form_state) {
-  _content_field_overview_form_validate_add_new($form, &$form_state);
-  _content_field_overview_form_validate_add_existing($form, &$form_state);
+  _content_field_overview_form_validate_add_new($form, $form_state);
+  _content_field_overview_form_validate_add_existing($form, $form_state);
 }
 
 /**
