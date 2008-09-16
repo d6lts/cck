@@ -382,3 +382,11 @@ function content_update_6006() {
   db_change_field($ret, content_field_tablename(), 'locked', 'locked', array('type' => 'int', 'size' => 'tiny', 'not null' => TRUE, 'default' => 0));
   return $ret;
 }
+
+/**
+ * Dummy update function to make sure the theme registry and css / JS aggregated files
+ * are updated.
+ */
+function content_update_6007() {
+  return array();
+}
