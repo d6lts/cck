@@ -154,9 +154,7 @@ class content_handler_field_multiple extends content_handler_field {
 
     // $values will be used as a fake $node object;
     // we provide a build_mode for rendering.
-    // TODO: we can stick any value in there -
-    // what would make most sense ?  row_style ?
-    $values->build_mode = 'views';
+    $values->build_mode = NODE_BUILD_NORMAL;
 
     // This needs to be set for the $this->render_link() to work. It would
     // have been set in the query, if we hadn't bypassed the normal query.

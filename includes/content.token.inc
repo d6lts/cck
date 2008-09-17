@@ -6,7 +6,7 @@ function content_token_values($type, $object = NULL) {
   $tokens = array();
   if ($type == 'node') {
     $node = $object;
-    $node->build_mode = 'token_values';
+    $node->build_mode = NODE_BUILD_NORMAL;
     $node->content = array();
     content_view($node);
     // The formatted values will only be known after the content has been rendered.
@@ -20,10 +20,9 @@ function content_token_values($type, $object = NULL) {
       $function = $field_types[$field['type']]['module'] . '_token_values';
       if (!empty($items) && function_exists($function)) {
         $token_values = $function('field', $items);
-        foreach($token_values as $token => $value) {
+        foreach ($token_values as $token => $value) {
           $tokens[$field['field_name'] .'-'. $token] = $value;
         }
-
       }
     }
   }

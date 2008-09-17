@@ -108,9 +108,7 @@ class content_handler_field extends views_handler_field_node {
 
     // $values will be used as a fake $node object;
     // we provide a build_mode for rendering.
-    // TODO: we can stick any value in there -
-    // what would make most sense ?  row_style ?
-    $values->build_mode = 'views';
+    $values->build_mode = NODE_BUILD_NORMAL;
 
     $item = array();
     foreach ($db_info['columns'] as $column => $attributes) {

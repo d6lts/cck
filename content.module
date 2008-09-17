@@ -677,7 +677,8 @@ function content_field($op, &$node, $field, &$items, $teaser, $page) {
         }
       }
 
-      if ($node->build_mode == NODE_BUILD_NORMAL || $node->build_mode == NODE_BUILD_PREVIEW) {
+      // NODE_BUILD_NORMAL is 0, and ('whatever' == 0) is TRUE, so we need a ===.
+      if ($node->build_mode === NODE_BUILD_NORMAL || $node->build_mode == NODE_BUILD_PREVIEW) {
         $context = $teaser ? 'teaser' : 'full';
       }
       else {
@@ -751,8 +752,10 @@ function content_field($op, &$node, $field, &$items, $teaser, $page) {
       }
       return $addition;
 
-    case 'preprocess_node':
-      $addition = array();
+    case 'alter':
+      // Add back the formatted values in the 'view' element,
+      // so that tokens and node templates can use it.
+      // Note: Doing this in 'preprocess_node' breaks token integration.
 
       // The location of the field's rendered output depends on whether the
       // field is in a fieldgroup or not.
@@ -765,11 +768,6 @@ function content_field($op, &$node, $field, &$items, $teaser, $page) {
       }
 
       if ($wrapper) {
-        // Add $FIELD_NAME_rendered variables.
-        // '#chilren' is not set if the field is empty.
-        $addition[$field['field_name'] .'_rendered'] = isset($wrapper['#children']) ? $wrapper['#children'] : '';
-
-        // Add the formatted values in the 'view' key of the items.
         $element = $wrapper['field'];
         // '#single' is not set if the field is hidden or inaccessible.
         if (isset($element['#single'])) {
@@ -785,9 +783,30 @@ function content_field($op, &$node, $field, &$items, $teaser, $page) {
             $items[0]['view'] = $element['items']['#children'];
           }
         }
-        // Affecting $items ends up into content_preprocess_node()'s
-        // $vars['node'], but we also need to update $FIELD_NAME variables.
-        $addition[$field['field_name']] = $items;
+        else {
+          // Hidden or inaccessible field.
+          $items[0]['view'] = '';
+        }
+      }
+      break;
+
+    case 'preprocess_node':
+      // Add $FIELD_NAME_rendered variables.
+      $addition = array();
+
+      // The location of the field's rendered output depends on whether the
+      // field is in a fieldgroup or not.
+      $wrapper = NULL;
+      if (isset($node->content[$field['field_name']])) {
+        $wrapper = $node->content[$field['field_name']];
+      }
+      elseif (module_exists('fieldgroup') && ($group_name = fieldgroup_get_group($node->type, $field['field_name'])) && isset($node->content[$group_name]['group'][$field['field_name']])) {
+        $wrapper = $node->content[$group_name]['group'][$field['field_name']];
+      }
+
+      if ($wrapper) {
+        // '#chilren' is not set if the field is empty.
+        $addition[$field['field_name'] .'_rendered'] = isset($wrapper['#children']) ? $wrapper['#children'] : '';
       }
 
       return $addition;
