@@ -4,6 +4,7 @@
 ======
 
 - #309558 by mroswell : fix PHP doc typo.
+- #281749 by asimmonds: fix '0' not parsed as an alias for allowed values.
 
 5--1.9
 ======
