@@ -15,6 +15,7 @@ Be sure to visit update.php after uploading this release.
 - #306963 by p.brouwers - Number : fix missing formatter for '9.999,99' (be_2).
 - Views integration : Add default label for userref and noderef relationships.
 - #234774 Nifty new UI to add fields and groups (requires a cache clear) + initial integration with advanced_help module.
+- #281749 by asimmonds: fix '0' not parsed as an alias for allowed values.
 
 CCK 6.2-rc7
 ===========

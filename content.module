@@ -1550,7 +1550,7 @@ function content_allowed_values($field) {
       $opt = content_filter_xss($opt);
       if (strpos($opt, '|') !== FALSE) {
         list($key, $value) = explode('|', $opt);
-        $allowed_values[$field['field_name']][$key] = $value ? $value : $key;
+        $allowed_values[$field['field_name']][$key] = (isset($value) && $value !=='') ? $value : $key
       }
       else {
         $allowed_values[$field['field_name']][$opt] = $opt;
