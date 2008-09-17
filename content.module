@@ -63,6 +63,9 @@ function content_init() {
   if (module_exists('diff') && !function_exists('content_diff')) {
     module_load_include('inc', 'content', 'includes/content.diff');
   }
+  if (module_exists('panels')) {
+    module_load_include('inc', 'content', 'includes/content.panels');
+  }
 }
 
 /**

@@ -10,6 +10,9 @@
  */
 function fieldgroup_init() {
   drupal_add_css(drupal_get_path('module', 'fieldgroup') .'/fieldgroup.css');
+  if (module_exists('panels')) {
+    module_load_include('inc', 'fieldgroup', 'fieldgroup.panels');
+  }
 }
 
 /**
