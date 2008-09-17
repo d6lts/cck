@@ -535,7 +535,7 @@ function theme_nodereference_item_simple($item) {
 }
 
 /**
- * Provide a list of users to filter on.
+ * Provide a list of nodes to filter on.
  */
 function _nodereference_filter_handler($op, $filterinfo) {
   $options = array(0 => t('<empty>'));

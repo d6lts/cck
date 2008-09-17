@@ -1,5 +1,10 @@
 // $Id$
 
+5--dev
+======
+
+- #309558 by mroswell : fix PHP doc typo.
+
 5--1.9
 ======
 
