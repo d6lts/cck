@@ -456,7 +456,7 @@ function _nodereference_potential_references($field, $return_full_nodes = FALSE,
       return array();
     }
 
-    if (isset($string)) {
+    if ($string !== '') {
       $string_clause = $exact_string ? " AND n.title = '%s'" : " AND n.title LIKE '%%%s%'";
       $related_clause = "(". $related_clause .")". $string_clause;
       $args[] = $string;
