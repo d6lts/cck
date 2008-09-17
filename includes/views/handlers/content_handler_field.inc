@@ -123,7 +123,11 @@ class content_handler_field extends views_handler_field_node {
   function query() {
     // Many of our formatters need the node type name, so let's be
     // sure it's in the query.
-    $this->view->query->add_field('node', 'type');
+    // We use the relationship table alias if the field is retrieved
+    // through a relationship.
+    $table_alias = isset($this->options['relationship']) ? $this->view->relationship[$this->options['relationship']]->alias : 'node';
+    $this->view->query->add_field($table_alias, 'type');
+
     parent::query();
   }
 }
