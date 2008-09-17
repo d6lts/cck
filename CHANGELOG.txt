@@ -18,6 +18,7 @@ Be sure to visit update.php after uploading this release.
 - #234774 Nifty new UI to add fields and groups (requires a cache clear) + initial integration with advanced_help module.
 - #281749 by asimmonds: fix '0' not parsed as an alias for allowed values.
 - #309365 by jhuckabee - Views integration: Consider relationships when force-adding the 'Node: Type' field.
+- #308215 by Reg - Nodereference: Do not filter on empty string when querying for referenceable nodes.
 
 CCK 6.2-rc7
 ===========
