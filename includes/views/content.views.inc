@@ -58,7 +58,10 @@ function content_views_handlers() {
         'parent' => 'views_handler_filter_many_to_one',
       ),
 
-      // relationship handlers (we don't have any specific to cck)
+      // relationship handlers
+      'content_handler_relationship' => array(
+        'parent' => 'views_handler_relationship',
+      ),
 
       // sort handlers
       'content_handler_sort' => array(

@@ -162,8 +162,9 @@ function userreference_field_settings($op, $field) {
       $data[$table_alias][$field['field_name'] .'_uid']['relationship'] = array(
         'base' => 'users',
         'field' => $db_info['columns']['uid']['column'],
-        'handler' => 'views_handler_relationship',
+        'handler' => 'content_handler_relationship',
         'label' => t($field['widget']['label']),
+        'multiple' => $field['multiple'],
       );
       return $data;
 

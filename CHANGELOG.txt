@@ -25,6 +25,7 @@ Be sure to visit update.php after uploading this release.
 - #308215 by Reg - Nodereference: Do not filter on empty string when querying for referenceable nodes.
 - #308778 Fix $item['view'] element missing for tokens and contemplate.
 - #310414 Fix broken redirects when adding fields to content types with an underscore in their machine names.
+- #310484 by merlinofchaos - Views integration: Allow relationships to work nicely with multiple values.
 
 CCK 6.2-rc7
 ===========
