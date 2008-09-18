@@ -423,13 +423,16 @@ function _content_field_overview_form_validate_add_existing($form, &$form_state)
 function content_field_overview_form_submit($form, &$form_state) {
   $form_values = $form_state['values'];
 
+  $type_name = $form['#type_name'];
+  $type = content_types($type_name);
+
   // Update field weights.
   $extra = array();
   foreach ($form_values as $key => $values) {
     // Groups are handled in fieldgroup_content_overview_form_submit().
     if (in_array($key, $form['#fields'])) {
       db_query("UPDATE {". content_instance_tablename() ."} SET weight = %d WHERE type_name = '%s' AND field_name = '%s'",
-        $values['weight'], $form['#type_name'], $key);
+        $values['weight'], $type_name, $key);
     }
     elseif (in_array($key, $form['#extra'])) {
       $extra[$key] = $values['weight'];
@@ -437,10 +440,10 @@ function content_field_overview_form_submit($form, &$form_state) {
   }
 
   if ($extra) {
-    variable_set('content_extra_weights_'. $form['#type_name'], $extra);
+    variable_set('content_extra_weights_'. $type_name, $extra);
   }
   else {
-    variable_del('content_extra_weights_'. $form['#type_name']);
+    variable_del('content_extra_weights_'. $type_name);
   }
 
   content_clear_type_cache();
@@ -450,13 +453,13 @@ function content_field_overview_form_submit($form, &$form_state) {
   // Create new field.
   if (!empty($form_values['_add_new_field']['field_name'])) {
     $field = $form_values['_add_new_field'];
-    $field['type_name'] = $form['#type_name'];
+    $field['type_name'] = $type_name;
 
     module_load_include('inc', 'content', 'includes/content.crud');
     if (content_field_instance_create($field)) {
       // Store new field information for fieldgroup submit handler.
       $form_state['fields_added']['_add_new_field'] = $field['field_name'];
-      $destinations[] = 'admin/content/node-type/'. $field['type_name'] .'/fields/'. $field['field_name'];
+      $destinations[] = 'admin/content/node-type/'. $type['url_str'] .'/fields/'. $field['field_name'];
     }
     else {
       drupal_set_message(t('There was a problem creating field %label.', array(
@@ -467,7 +470,7 @@ function content_field_overview_form_submit($form, &$form_state) {
   // Add existing field.
   if (!empty($form_values['_add_existing_field']['field_name'])) {
     $field = $form_values['_add_existing_field'];
-    $field['type_name'] = $form['#type_name'];
+    $field['type_name'] = $type_name;
     $existing_field = content_fields($field['field_name']);
 
     if ($existing_field['locked']) {
@@ -478,7 +481,7 @@ function content_field_overview_form_submit($form, &$form_state) {
       if (content_field_instance_create($field)) {
         // Store new field information for fieldgroup submit handler.
         $form_state['fields_added']['_add_existing_field'] = $field['field_name'];
-        $destinations[] = 'admin/content/node-type/'. $field['type_name'] .'/fields/'. $field['field_name'];
+        $destinations[] = 'admin/content/node-type/'. $type['url_str'] .'/fields/'. $field['field_name'];
       }
       else {
         drupal_set_message(t('There was a problem adding field %label.', array('%label' => $field['field_name'])));

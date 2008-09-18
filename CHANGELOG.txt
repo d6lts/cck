@@ -24,6 +24,7 @@ Be sure to visit update.php after uploading this release.
 - #309365 by jhuckabee - Views integration: Consider relationships when force-adding the 'Node: Type' field.
 - #308215 by Reg - Nodereference: Do not filter on empty string when querying for referenceable nodes.
 - #308778 Fix $item['view'] element missing for tokens and contemplate.
+- #310414 Fix broken redirects when adding fields to content types with an underscore in their machine names.
 
 CCK 6.2-rc7
 ===========
