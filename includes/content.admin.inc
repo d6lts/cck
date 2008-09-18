@@ -145,9 +145,11 @@ function content_field_overview_form(&$form_state, $type_name) {
       'remove' => array('#value' => l(t('Remove'), 'admin/content/node-type/'. $type['url_str'] .'/fields/'. $field['field_name'] .'/remove')),
       'weight' => array('#type' => 'textfield', '#default_value' => $weight, '#size' => 3),
       'parent' => array('#type' => 'select', '#options' => $group_options, '#default_value' => ''),
+      'prev_parent' => array('#type' => 'hidden', '#value' => ''),
       'hidden_name' => array('#type' => 'hidden', '#default_value' => $field['field_name']),
       '#leaf' => TRUE,
       '#row_type' => 'field',
+      'field' =>  array('#type' => 'value', '#value' => $field),
     );
     if ($field['locked']) {
       $form[$name]['configure'] = array('#value' => t('Locked'));
@@ -171,10 +173,12 @@ function content_field_overview_form(&$form_state, $type_name) {
       'hidden_name' => array('#type' => 'hidden', '#default_value' => $group['group_name']),
       '#root' => TRUE,
       '#row_type' => 'group',
+      'group' => array('#type' => 'value', '#value' => $group),
     );
     // Adjust child fields rows.
     foreach ($group['fields'] as $field_name => $field) {
       $form[$field_name]['parent']['#default_value'] = $name;
+      $form[$field_name]['prev_parent']['#value'] = $name;
     }
     $form['#group_rows'][] = $name;
     $weights[] = $weight;

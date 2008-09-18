@@ -5,7 +5,8 @@ CCK 6.2-dev
 
 Be sure to visit update.php after uploading this release.
 
-- #119102 Add a helper function that can determine if a field is in use and the max delta value in use.
+- #119102 Combo field prep, add prev_parent and group info to display fields overview.
+- #119102 Combo field prep, add a helper function that can determine if a field is in use and the max delta value in use.
 - #309667 Add Panels integration in. This is still experimental since Panels for D6 is still experimental.
 - #307909 Don't create Views tables for fields that don't create db columns.
 - Make incompatibility with older Views releases stand out more.
