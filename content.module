@@ -1473,7 +1473,6 @@ function content_clear_type_cache($rebuild_schema = FALSE) {
  */
 function content_database_info($field) {
   $db_info = array();
-
   if ($field['db_storage'] == CONTENT_DB_STORAGE_PER_FIELD) {
     $db_info['table'] = _content_tablename($field['field_name'], CONTENT_DB_STORAGE_PER_FIELD);
   }
@@ -2120,4 +2119,68 @@ function content_extra_field_weight($type_name, $pseudo_field_name) {
   if (isset($type['extra'][$pseudo_field_name])) {
     return $type['extra'][$pseudo_field_name]['weight'];
   }
+}
+
+/**
+ * Find max delta value actually in use for a field.
+ * 
+ * Helper function to do things like tell when we should prevent a 
+ * change in multiple value settings that would result in data loss,
+ * or know if content actually exists for a field.
+ * 
+ * @param $field_name 
+ *   The field name to examine.
+ * @param $type_name 
+ *   If provided, search only for existing data in that type,
+ *   otherwise search for all instances of field data in all types.
+ * @return 
+ *   NULL if field is not in use, or the maximum delta value in use.
+ * 
+ * TODO
+ * Go back to the field settings validation and use this function
+ * to prevent (or confirm) changes in multiple values that 
+ * would destroy data.
+ *  
+ * Fields with only NULL data will show up as being in use.
+ * Do we want to eliminate them from the results?
+ */
+function content_max_delta($field_name, $type_name = NULL) {
+  $fields = content_fields();
+  $field = $fields[$field_name];
+  
+  // Non-multiple value fields don't use the delta column,
+  // but could exist in multiple databases. If any value
+  // exists in any examined table, the max delta will be zero.
+  if (empty($field['multiple'])) {
+    $content_types = content_types();
+    foreach ($content_types as $content_type) {
+      if (empty($type_name) || $content_type['type'] == $type_name) {
+        foreach ($content_type['fields'] as $field) {
+          $db_info = content_database_info($field);
+          $table = $db_info['table'];
+          if (db_result(db_query("SELECT COUNT(*) FROM {$table}")) >= 1) {
+            return 0;
+          }
+        }
+      }
+    }
+  }
+  // Multiple value fields always share the same table and use the delta.
+  // If we want to find delta values for a particular type, we join
+  // in the node table to limit the type.
+  else {
+    $db_info = content_database_info($field);
+    $table = $db_info['table'];
+    if (!empty($type_name)) {
+      $delta = db_result(db_query("SELECT MAX(delta) FROM {$table} f LEFT JOIN {node} n ON f.vid = n.vid WHERE n.type = '%s'", $type_name));
+    }
+    else {
+      $delta = db_result(db_query("SELECT MAX(delta) FROM {$table}"));
+    }
+    if ($delta >= 0) {
+      return $delta;
+    }
+  }
+  // If we got this far, there is no data for this field.
+  return NULL;
 }
