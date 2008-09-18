@@ -196,8 +196,8 @@ function optionwidgets_buttons_process($element, $edit, &$form_state, $form) {
     '#type' => $field['multiple'] ? 'checkboxes' : 'radios',
     '#title' => $element['#title'],
     '#description' => $element['#description'],
-    '#required' => $field['required'],
-    '#multiple' => $field['multiple'],
+    '#required' => isset($element['#required']) ? $element['#required'] : $field['required'],
+    '#multiple' => isset($element['#multiple']) ? $element['#multiple'] : $field['multiple'],
     '#options' => $options,
     '#default_value' => isset($element['#value'][$field_key]) ? $element['#value'][$field_key] : NULL,
   );
@@ -232,8 +232,8 @@ function optionwidgets_select_process($element, $edit, &$form_state, $form) {
     '#type' => 'select',
     '#title' => $element['#title'],
     '#description' => $element['#description'],
-    '#required' => $field['required'],
-    '#multiple' => $field['multiple'],
+    '#required' => isset($element['#required']) ? $element['#required'] : $field['required'],
+    '#multiple' => isset($element['#multiple']) ? $element['#multiple'] : $field['multiple'],
     '#options' => $options,
     '#default_value' => isset($element['#value'][$field_key]) ? $element['#value'][$field_key] : NULL,
   );
@@ -245,7 +245,6 @@ function optionwidgets_select_process($element, $edit, &$form_state, $form) {
   // causes the node's hook_form_alter to be invoked twice, garbling the
   // results. Need to investigate why that is happening (a core bug?), but
   // in the meantime avoid using $form_state['storage'] to store anything.
-
   $form_state['#field_info'][$field['field_name']] = $field;
   return $element;
 }

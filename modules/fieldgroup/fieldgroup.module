@@ -4,6 +4,37 @@
 /**
  * @file
  * Create field groups for CCK fields.
+ *
+ * New combo group treats all included fields as a single combo field,
+ * keeping the related delta values of all included fields synchronized.
+ * 
+ * To use the combo group, create a new group, make it the 'Combo' type,
+ * set the number of multiple values for all the fields in the combo
+ * group, and drag into it the fields that should be included.
+ * 
+ * All fields in the combo group will automatically get the group
+ * setting for multiple values. On the node form, the group is rearranged
+ * to keep the delta values for each field in a single drag 'n drop group,
+ * by transposing the normal array(field_name => delta => value) into
+ * array(delta => field_name => value).
+ * 
+ * During validation and submission, the field values are restored to
+ * their normal positions.
+ * 
+ * The combo group behaves exactly the same as a normal group
+ * in node displays, only the node form is different.
+ * 
+ * TODO
+ * 
+ * May need to limit this to specific fields that are known to work
+ * correctly and add validation and warning if other fields are added.
+ * 
+ * Need to get the AHAH add more button working to create a new delta
+ * collection of all the group's fields.
+ * 
+ * Lots of validation. Dragging fields with data into and out of the
+ * group can cause loss of data since the field's multiple value setting
+ * will be changed.
  */
 /**
  * Implementation of hook_init().
@@ -61,6 +92,9 @@ function fieldgroup_theme() {
     ),
     'fieldgroup_display_overview_form' => array(
       'arguments' => array('form' => NULL),
+    ),
+    'fieldgroup_multiple_values' => array(
+      'arguments' => array('element' => NULL),
     ),
   );
 }
@@ -140,9 +174,32 @@ function fieldgroup_group_edit_form(&$form_state, $type_name, $group_name) {
     '#required' => FALSE,
   );
   module_load_include('inc', 'content', 'includes/content.admin');
+  module_load_include('inc', 'content', 'includes/content.crud');
   foreach (array_merge(array_keys(_content_admin_display_contexts()), array('label')) as $key) {
     $form['settings']['display'][$key] = array('#type' => 'value', '#value' => $group['settings']['display'][$key]);
   }
+  $form['settings']['combo'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Group type settings'),
+    '#description' => t('Choose whether this is a standard or combo group. The fields in a standard group are independent of each other and have separate settings for multiple values. The fields in a combo group are treated as a single combined field with the same number of values.'),
+  );
+  $form['settings']['combo']['is_combo'] = array(
+    '#type' => 'select',
+    '#title' => t('Type of group'),
+    '#options' => fieldgroup_types(),
+    '#default_value' => isset($group['settings']['combo']['is_combo']) ? $group['settings']['combo']['is_combo'] : 0,
+  );
+  $description = t('Maximum number of values users can enter for combo fields. ');
+  $description .= '<br/>'. t("'Unlimited' will provide an 'Add more' button so the users can add as many values as they like.");
+  $description .= '<p class="error">'. t('Warning! This will limit will be applied to all fields in this group. Reducing the number of values after data has been created will result in the loss of data!') .'</p>';
+  $form['settings']['combo']['multiple'] = array(
+    '#type' => 'select',
+    '#title' => t('Number of combo values'),
+    '#options' => array('' => t('N/A'), 1 => t('Unlimited'), 0 => 1) + drupal_map_assoc(range(2, 10)),
+    '#default_value' => isset($group['settings']['combo']['multiple']) ? $group['settings']['combo']['multiple'] : '',
+    '#description' => $description,
+  );
+
   $form['weight'] = array('#type' => 'hidden', '#default_value' => $group['weight']);
   $form['group_name'] = array('#type' => 'hidden', '#default_value' => $group_name);
 
@@ -155,6 +212,24 @@ function fieldgroup_group_edit_form(&$form_state, $type_name, $group_name) {
   );
 
   return $form;
+}
+
+function fieldgroup_group_edit_form_validate($form, &$form_state) {
+  $form_values = $form_state['values'];
+  if (!$form_values['settings']['combo']['is_combo']) {
+    return;
+  }
+  // Make sure we don't set the multiple values to a number that
+  // would result in lost data.
+  $content_type = $form['#content_type'];
+  $groups = fieldgroup_groups($content_type['type']);
+  $group = $groups[$form_values['group_name']];
+  foreach ($group['fields'] as $field_name => $data) {
+    $max_existing = content_max_delta($field_name, $content_type['type']);
+    if ($max_existing > $form_values['settings']['combo']['multiple']) {
+      form_set_error('settings][combo][multiple', t('The content type %type already has %multiple multiple values in the database, you cannot set the number of combo values to less than this or you would risk losing data.', array('%type' => $content_type['label'], '%multiple' => $max_existing)));
+    }
+  }
 }
 
 function fieldgroup_group_edit_form_submit($form, &$form_state) {
@@ -287,6 +362,11 @@ function fieldgroup_form_alter(&$form, $form_state, $form_id) {
         // Hide the fieldgroup, because the fields are inaccessible.
         $form[$group_name]['#access'] = FALSE;
       }
+      // If this is a combo group, alter it.
+      if (!empty($group['settings']['combo']) && !empty($group['settings']['combo']['is_combo'])) {
+//       if (!empty($group['settings']['combo']['is_combo'])) {
+        fieldgroup_combo_form($form, $form_state, $form_id, $group);
+      }
     }
 
   }
@@ -294,10 +374,18 @@ function fieldgroup_form_alter(&$form, $form_state, $form_id) {
   // when using Content Copy.
   elseif ($form_id == 'content_field_edit_form' && isset($form['widget'])) {
     $content_type = content_types($form['type_name']['#value']);
+    $groups = fieldgroup_groups($content_type['type']);
+    $group_name = _fieldgroup_field_get_group($content_type['type'], $form['field_name']['#value']);
+    $group = isset($groups[$group_name]) ? $groups[$group_name] : array();
     $form['widget']['group'] = array(
       '#type' => 'value',
       '#value' => _fieldgroup_field_get_group($content_type['type'], $form['field_name']['#value']),
     );
+    // If this field is in a combo group, override the multiple value settings.
+    if (!empty($group) && !empty($group['settings']['combo']['is_combo'])) {
+      $form['field']['multiple']['#value'] = $group['settings']['combo']['multiple'];
+      $form['field']['multiple']['#access'] = FALSE;
+    }
   }
   elseif ($form_id == 'content_field_overview_form') {
     $form['#validate'][] = 'fieldgroup_field_overview_form_validate';
@@ -363,6 +451,7 @@ function fieldgroup_field_overview_form_validate($form, &$form_state) {
     // Fail validation if attempt to nest fields under a new group without the
     // proper information. Not raising an error would cause the nested fields
     // to get weights the user doesn't expect.
+    
     foreach ($form_values as $key => $values) {
       if ($values['parent'] == '_add_new_group') {
         form_set_error('_add_new_group][label', t('Add new group: you need to provide a label.'));
@@ -371,6 +460,134 @@ function fieldgroup_field_overview_form_validate($form, &$form_state) {
       }
     }
   }
+  
+  // See if we have fields moving into or out of a combo group.
+  $fields = array();
+  $groups = array();
+  foreach ($form_values as $key => $values) {
+    if (!empty($form[$key]['#row_type']) && $form[$key]['#row_type'] == 'group') {
+      // Gather up info about all groups.
+      $groups[$key] = $form_values[$key]['group'];
+    }
+    if (!empty($form[$key]['#row_type']) && $form[$key]['#row_type'] == 'field') {
+      if ($values['prev_parent'] != $values['parent']) {
+        // Gather up fields that have moved in or out of a group.
+        $fields[$key] = $form_values[$key]['field'];  
+      }
+    }
+  }
+    
+  // TODO Add other validation here to prevent moving fields that
+  // won't work in combo groups from being added to them.
+    
+  if (!empty($fields)) {
+    foreach ($fields as $field_name => $field) {
+      $new_group = $form_values[$field_name]['parent'];
+      $old_group = $form_values[$field_name]['prev_parent'];
+      if ($groups[$new_group]['settings']['combo']['is_combo']) {
+        $content_type = content_types($form_values['type_name']);
+        $max_existing = content_max_delta($field_name, $content_type['type']);
+        if ($max_existing > $groups[$new_group]['settings']['combo']['multiple']) {
+          form_set_error($field_name, t('You are moving the field %field, which already has %multiple values, into a combo group with fewer multiple values. You would lose data if you made this change.', array('%field' => $field['widget']['label'], '%multiple' => $max_existing)));  
+        }
+        else {
+          drupal_set_message(t('You are moving %field into a combo group.', array('%field' => $field['widget']['label'])));
+        }
+      }
+      elseif ($groups[$old_group]['settings']['combo']['is_combo']) {
+        drupal_set_message(t('You are moving %field out of a combo group.', array('%field' => $field['widget']['label'])));  
+      }
+    }
+  }
+}
+
+/**
+ * Align the delta values of each field in the combo group.
+ * 
+ * Swap the field name and delta for each combo group so we can 
+ * d-n-d each collection of fields as a single delta item.
+ */
+function fieldgroup_combo_form(&$form, &$form_state, $form_id, $group) {
+  $fields = $group['fields'];
+  $content_fields = content_fields();
+  $group_name = $group['group_name'];
+  $max = $group['settings']['combo']['multiple'];
+
+  $form[$group_name]['#theme'] = 'fieldgroup_multiple_values';
+  $form[$group_name]['#multiple'] = !empty($max);
+  $form[$group_name]['#group_name'] = $group_name;
+  $form[$group_name]['#group_label'] = $group['label'];
+  $form[$group_name]['#element_validate'] = array('fieldgroup_combo_form_validate');
+  $form[$group_name]['#tree'] = TRUE;
+      
+  for ($delta = 0; $delta < $max; $delta++) {
+    foreach ($fields as $field_name => $field) {
+      // Transfer the delta value of the field to the group delta.
+      $form[$group_name][$delta][$field_name] = isset($form[$group_name][$field_name][$delta]) ? $form[$group_name][$field_name][$delta] : NULL;
+
+      // Transfer attributes of the field to the new field location.
+      foreach ($form[$group_name][$field_name] as $key => $value) {
+        if (!is_numeric($key)) {
+          $form[$group_name][$delta][$field_name][$key] = $value;
+        }
+      }
+      
+      // Each individual field should be a single value item.
+      $form[$group_name][$delta][$field_name]['#multiple'] = FALSE;
+      
+      if (isset($form[$group_name][$field_name][$delta]['_weight'])) {
+        $form[$group_name][$delta]['_weight'] = $form[$group_name][$field_name][$delta]['_weight'];
+      }
+       
+      // Add in our validation step, and make sure it preceeds other processing
+      // so we can massage the element back to the normal value.
+      if (isset($form[$group_name][$delta][$field_name]['#element_validate'])) {
+        array_unshift($form[$group_name][$delta][$field_name]['#element_validate'], 'fieldgroup_combo_item_validate');
+      }
+      else {
+        $form[$group_name][$delta][$field_name]['#element_validate'] = array('fieldgroup_combo_item_validate');
+      }
+      
+      unset($form[$group_name][$delta][$field_name]['_weight']);
+      unset($form[$group_name][$delta][$field_name]['#theme']);
+    }
+  }
+  // Unset the original group values.
+  foreach ($fields as $field_name => $field) {
+    unset($form[$group_name][$field_name]);
+  }
+  $form['#element_validate'][] = 'fieldgroup_combo_form_validate';
+}
+
+/**
+ * Swap transposed field/delta values back to their normal positions.
+ */
+function fieldgroup_combo_item_validate($element, &$form_state) {
+  $field_name = array_pop($element['#parents']);
+  $delta = array_pop($element['#parents']);
+  $group = array_pop($element['#parents']);
+  
+  // Examine the post values to see what order the new fields
+  // belong in. This is very hackish and should be done better,
+  // but it works for now.
+  $new = array();
+  foreach ($element['#post'][$group] as $count => $value) {
+    $new[$value['_weight']] = $count;
+  }
+  ksort($new);
+  $count = 0;
+  foreach ($new as $value) {
+    if ($delta == $value) {
+      $delta = $count;
+      break;
+    }
+    $count++;
+  }
+  // We figured out what the new order for the fields is, 
+  // so set these values.
+  array_push($element['#parents'], $field_name);
+  array_push($element['#parents'], $delta);
+  form_set_value($element, $element['#value'], $form_state);
 }
 
 function fieldgroup_field_overview_form_submit($form, &$form_state) {
@@ -553,6 +770,10 @@ function fieldgroup_node_type($op, $info) {
   }
 }
 
+function fieldgroup_types() {
+  return array(0 => t('Standard'), 1 => t('Combo'));
+}
+
 function fieldgroup_tablename($version = NULL) {
   if (is_null($version)) {
     $version = variable_get('fieldgroup_schema_version', 0);
@@ -584,15 +805,28 @@ function fieldgroup_save_group($type_name, $group) {
     db_query("INSERT INTO {". fieldgroup_tablename() ."} (type_name, group_name, label, settings, weight)
              VALUES ('%s', '%s', '%s', '%s', %d)", $type_name, $group['group_name'], $group['label'], serialize($group['settings']), $group['weight']);
     cache_clear_all('fieldgroup_data', content_cache_tablename());
-    return SAVED_NEW;
+    $ret = SAVED_NEW;
   }
   else {
     db_query("UPDATE {". fieldgroup_tablename() ."} SET label = '%s', settings = '%s', weight = %d ".
              "WHERE type_name = '%s' AND group_name = '%s'",
              $group['label'], serialize($group['settings']), $group['weight'], $type_name, $group['group_name']);
     cache_clear_all('fieldgroup_data', content_cache_tablename());
-    return SAVED_UPDATED;
+    $ret = SAVED_UPDATED;
   }
+
+  // For a combo group, update all the included fields with the right multiple value setting.
+  if ($group['settings']['combo']['is_combo']) {
+    $types = content_types();
+    $multiple = $group['settings']['combo']['multiple'];
+    $result = db_query("SELECT field_name, type_name FROM {". fieldgroup_fields_tablename() ."} WHERE group_name = '%s'", $group['group_name']);
+    while ($row = db_fetch_array($result)) {
+      $field = $types[$row['type_name']]['fields'][$row['field_name']];
+      $field['multiple'] = $multiple;
+      content_field_instance_update($field);
+    }
+  }
+  return $ret;
 }
 
 function fieldgroup_update_fields($form_values) {
@@ -644,6 +878,63 @@ function theme_fieldgroup_fieldset($element) {
   }
 
   return '<fieldset'. drupal_attributes($element['#attributes']) .'>'. ($element['#title'] ? '<legend>'. $element['#title'] .'</legend>' : '') . (isset($element['#description']) && $element['#description'] ? '<div class="description">'. $element['#description'] .'</div>' : '') . (!empty($element['#children']) ? $element['#children'] : '') . (isset($element['#value']) ? $element['#value'] : '') ."</fieldset>\n";
+}
+
+
+/**
+ * Theme an individual form element.
+ *
+ * Combine multiple values into a table with drag-n-drop reordering.
+ * 
+ * TODO 
+ * With a little tweaking, the original theme, content_multiple_values,
+ * could be made to work for the fieldgroup, too, and this could be
+ * eliminated.
+ */
+function theme_fieldgroup_multiple_values($element) {
+  $output = '';
+  if ($element['#multiple'] >= 1) {
+    $table_id = $element['#group_name'] .'_values';
+    $order_class = $element['#group_name'] .'-delta-order';
+    
+    $header = array(
+      array(
+        'data' => $element['#group_label'],
+        'colspan' => 2
+      ),
+      t('Order'),
+    );
+    $rows = array();
+
+    foreach (element_children($element) as $key) {
+      if ($key !== $element['#group_name'] .'_add_more') {
+        $element[$key]['_weight']['#attributes']['class'] = $order_class;
+        $delta_element = drupal_render($element[$key]['_weight']);
+        $cells = array(
+          array('data' => '', 'class' => 'content-multiple-drag'),
+          drupal_render($element[$key]),
+          array('data' => $delta_element, 'class' => 'delta-order'),
+        );
+        $rows[] = array(
+          'data' => $cells,
+          'class' => 'draggable',
+        );
+      }
+    }
+
+    $output .= theme('table', $header, $rows, array('id' => $table_id, 'class' => 'content-multiple-table'));
+    $output .= $element['#description'] ? '<div class="description">'. $element['#description'] .'</div>' : '';
+    $output .= drupal_render($element[$element['#group_name'] .'_add_more']);
+
+    drupal_add_tabledrag($table_id, 'order', 'sibling', $order_class);
+  }
+  else {
+    foreach (element_children($element) as $key) {
+      $output .= drupal_render($element[$key]);
+    }
+  }
+
+  return $output;
 }
 
 /**
