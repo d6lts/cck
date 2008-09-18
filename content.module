@@ -515,6 +515,8 @@ function content_notify($op, $module) {
       content_clear_type_cache();
       break;
     case 'disable':
+      db_query("UPDATE {". content_field_tablename() ."} SET active=0 WHERE module='%s'", $module);
+      db_query("UPDATE {". content_instance_tablename() ."} SET widget_active=0 WHERE widget_module='%s'", $module);
       content_clear_type_cache(TRUE);
       break;
   }
