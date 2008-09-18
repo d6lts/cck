@@ -123,7 +123,8 @@ class content_handler_field extends views_handler_field_node {
     // sure it's in the query.
     // We use the relationship table alias if the field is retrieved
     // through a relationship.
-    $table_alias = isset($this->options['relationship']) ? $this->view->relationship[$this->options['relationship']]->alias : 'node';
+    $relationship = isset($this->options['relationship']) && $this->options['relationship'] !== 'none';
+    $table_alias = $relationship ? $this->view->relationship[$this->options['relationship']]->alias : 'node';
     $this->view->query->add_field($table_alias, 'type');
 
     parent::query();
