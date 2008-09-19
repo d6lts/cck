@@ -21,7 +21,7 @@ Be sure to visit update.php after uploading this release.
 - Views integration : Add default label for userref and noderef relationships.
 - #234774 Nifty new UI to add fields and groups (requires a cache clear) + initial integration with advanced_help module.
 - #281749 by asimmonds: fix '0' not parsed as an alias for allowed values.
-- #309365 by jhuckabee - Views integration: Consider relationships when force-adding the 'Node: Type' field.
+- #309365 Views integration: Consider relationships when force-adding the 'Node: Type' field - thks jhuckabee.
 - #308215 by Reg - Nodereference: Do not filter on empty string when querying for referenceable nodes.
 - #308778 Fix $item['view'] element missing for tokens and contemplate.
 - #310414 Fix broken redirects when adding fields to content types with an underscore in their machine names.

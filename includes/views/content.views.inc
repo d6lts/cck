@@ -199,10 +199,14 @@ function content_views_field_views_data($field) {
       }
     }
 
-    $additional_fields = $columns;
+    // Ensure all columns are retrieved,
+    // plus the delta for multiple fields,
+    // plus the node type, that's sometimes used by formatters.
+    $additional_fields = drupal_map_assoc($columns);
     if ($field['multiple']) {
-      array_push($additional_fields, 'delta');
+      $additional_fields['delta'] = 'delta';
     }
+    $additional_fields['type'] = array('table' => 'node', 'field' => 'type');
 
     $data[$columns[0]] = array(
       'group' => t('Content'),
