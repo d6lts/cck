@@ -10,6 +10,15 @@
 class content_handler_field_multiple extends content_handler_field {
   var $defer_query;
 
+  function init(&$view, $options) {
+    $field = $this->content_field;
+    parent::init($view, $options);
+    if ($field['multiple']) {
+      $this->additional_fields['delta'] = 'delta';
+    }
+    $this->additional_fields['type'] = array('table' => 'node', 'field' => 'type');
+  }
+
   function options(&$options) {
     parent::options($options);
     $options['multiple'] = array(
@@ -79,14 +88,17 @@ class content_handler_field_multiple extends content_handler_field {
     // in a separate query (one per field).
     $this->defer_query = $options['multiple']['group'] && $field['multiple'];
 
-    // If this is not a grouped field, use the generic field handler query.
+    // Non-grouped field: use the generic field handler query.
     if (!$this->defer_query) {
       return parent::query();
     }
 
-    // We don't add anything to the query. The data is retrieved in pre_render()
-    // in order to avoid duplicate results.
-    $this->field_alias = $this->real_field;
+    // Grouped field: overwrite the existing additional_fields, because they
+    // would cause duplicate rows for multiple values. The only field we add
+    // is vid, which will be used to retrieve the actual values in pre_render.
+    $this->additional_fields = array('vid' => array('table' => 'node', 'field' => 'vid'));
+    $this->add_additional_fields();
+    $this->field_alias = $this->aliases['vid'];
 
     // If the field is sortable (table sort), we just have to join the table
     // ("Node: Distinct" will be required to avoid duplicates...)
@@ -110,36 +122,37 @@ class content_handler_field_multiple extends content_handler_field {
     $options = $this->options;
 
     $this->field_values = array();
-    // Build the list of nids to retrieve.
+    // Build the list of vids to retrieve.
     // TODO: try fetching from cache_content first ??
-    $nids = array();
+    $vids = array();
     $this->field_values = array();
-    foreach ($values as $value) {
-      $nid = $value->{$this->additional_fields['nid']};
-      $nids[] = $nid;
-      $this->field_values[$nid] = array();
+    foreach ($values as $result) {
+      $vids[] = $result->{$this->field_alias};
     }
 
     // List columns to retrieve.
-    $table_alias = content_views_tablename($field);
-    $query_columns = array("$table_alias.delta AS delta");
+    $alias = content_views_tablename($field);
+
+    $query_columns = array(
+      'node.type',
+      "$alias.vid AS parent_vid",
+      "$alias.delta"
+    );
     foreach ($db_info['columns'] as $column => $attributes) {
-      $query_columns[] = "$table_alias.$attributes[column] AS $column";
+      $query_columns[] = "$alias.$attributes[column] AS $column";
     }
-    // Make sure node.nid is aliased so it isn't confused with
-    // nodereference's nid column.
-    $query = "SELECT node.nid AS parent_nid, ". implode(', ', $query_columns) .
-             " FROM {node} node".
-             " LEFT JOIN {". $db_info['table'] ."} $table_alias ON node.vid = $table_alias.vid".
-             " WHERE node.nid IN (". implode(',', $nids) .")".
-             " ORDER BY node.nid ASC, $table_alias.delta ". ($options['multiple']['multiple_reversed'] ? 'DESC' : 'ASC');
+    $query = 'SELECT '. implode(', ', $query_columns) .
+             ' FROM {'. $db_info['table'] ."} $alias".
+             " LEFT JOIN {node} node ON node.vid = $alias.vid".
+             " WHERE $alias.vid IN (". implode(',', $vids) .')'.
+             " ORDER BY node.nid ASC, $alias.delta ". ($options['multiple']['multiple_reversed'] ? 'DESC' : 'ASC');
     $result = db_query($query);
 
     while ($item = db_fetch_array($result)) {
       $delta = !empty($item['delta']) ? $item['delta'] : 0;
       $item['#delta'] = $item['delta'];
       unset($item['delta']);
-      $this->field_values[$item['parent_nid']][$delta] = $item;
+      $this->field_values[$item['parent_vid']][$delta] = $item;
     }
   }
 
@@ -163,32 +176,34 @@ class content_handler_field_multiple extends content_handler_field {
 
     $count = 0;
     $items = array();
-    foreach ($this->field_values[$values->{$this->additional_fields['nid']}] as $item) {
-      // 'Starting from n': Let the first n values pass.
-      if (empty($options['multiple']['multiple_from']) || ($count >= $options['multiple']['multiple_from'])) {
-        // 'Display m values'.
-        if (empty($options['multiple']['multiple_number']) || (count($items) < $options['multiple']['multiple_number'])) {
-          $value = content_format($field, $item, $options['format'], $values);
-          if (!empty($value)) {
-            $items[] = $this->render_link($value, $values);
+    $vid = $values->{$this->field_alias};
+    if (isset($this->field_values[$vid])) {
+      foreach ($this->field_values[$vid] as $item) {
+        // 'Starting from n': Let the first n values pass.
+        if (empty($options['multiple']['multiple_from']) || ($count >= $options['multiple']['multiple_from'])) {
+          // 'Display m values'.
+          if (empty($options['multiple']['multiple_number']) || (count($items) < $options['multiple']['multiple_number'])) {
+            $value = content_format($field, $item, $options['format'], $values);
+            if (!empty($value)) {
+              $items[] = $this->render_link($value, $values);
+            }
+          }
+          else {
+            // We displayed the number of values that were asked, no need to render more.
+            break;
           }
         }
-        else {
-          // We displayed the number of values that were asked, no need to render more.
-          break;
-        }
+        $count++;
       }
-      $count++;
+      if (count($items) > 1) {
+        // TODO: could we use generic field display ?
+        return theme('content_view_multiple_field', $items, $field, $values);
+      }
+      elseif ($items) {
+        return $items[0];
+      }
     }
-    if (count($items) > 1) {
-      // TODO: could we use generic field display ?
-      return theme('content_view_multiple_field', $items, $field, $values);
-    }
-    elseif (count($items) == 1) {
-      return $items[0];
-    }
-    else {
-      return '';
-    }
+
+    return '';
   }
 }

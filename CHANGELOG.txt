@@ -27,6 +27,7 @@ Be sure to visit update.php after uploading this release.
 - #310414 Fix broken redirects when adding fields to content types with an underscore in their machine names.
 - #310484 by merlinofchaos - Views integration: Allow relationships to work nicely with multiple values.
 - Views integration: reorder elements in the field's settings to ba a little more logical.
+- #306604 Views integration: fix relationships with 'group multiple values' option. Thx merlinofchaos for the help.
 
 CCK 6.2-rc7
 ===========
