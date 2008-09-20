@@ -12,7 +12,6 @@ class content_handler_field_multiple extends content_handler_field {
 
   function options(&$options) {
     parent::options($options);
-    $field = $this->content_field;
     $options['multiple'] = array(
       'group' => TRUE,
       'multiple_number' => '',
@@ -32,6 +31,7 @@ class content_handler_field_multiple extends content_handler_field {
 
     $form['multiple'] = array(
       '#access' => $field['multiple'],
+      '#weight' => 1,
     );
     $form['multiple']['group'] = array(
       '#title' => t('Group multiple values'),

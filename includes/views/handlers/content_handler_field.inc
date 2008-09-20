@@ -38,6 +38,26 @@ class content_handler_field extends views_handler_field_node {
     $field = $this->content_field;
     $options = $this->options;
 
+    $form['label_type'] = array(
+      '#title' => t('Label'),
+      '#type' => 'radios',
+      '#options' => array(
+        'none' => t('None'),
+        'widget' => t('Widget label (@label)', array('@label' => $field['widget']['label'])),
+        'custom' => t('Custom'),
+      ),
+      '#default_value' => $options['label_type'],
+      '#weight' => 2,
+    );
+    $form['label'] = array(
+      '#title' => t('Custom label'),
+      '#type' => 'textfield',
+      '#default_value' => $options['label'],
+      '#process' => array('views_process_dependency'),
+      '#dependency' => array('radio:options[label_type]' => array('custom')),
+      '#weight' => 3,
+     );
+
     $field_types = _content_field_types();
     $formatters = array();
     if (is_array($field_types[$field['type']]['formatters'])) {
@@ -51,28 +71,8 @@ class content_handler_field extends views_handler_field_node {
       '#options' => $formatters,
       '#required' => TRUE,
       '#default_value' => $options['format'],
-      '#weight' => 0,
+      '#weight' => 4,
     );
-
-    $form['label_type'] = array(
-      '#title' => t('Label'),
-      '#type' => 'radios',
-      '#options' => array(
-        'none' => t('None'),
-        'widget' => t('Widget label (@label)', array('@label' => $field['widget']['label'])),
-        'custom' => t('Custom'),
-      ),
-      '#default_value' => $options['label_type'],
-      '#weight' => 1,
-    );
-    $form['label'] = array(
-      '#title' => t('Custom label'),
-      '#type' => 'textfield',
-      '#default_value' => $options['label'],
-      '#process' => array('views_process_dependency'),
-      '#dependency' => array('radio:options[label_type]' => array('custom')),
-      '#weight' => 2,
-     );
   }
 
   function label() {
