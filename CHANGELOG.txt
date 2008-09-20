@@ -5,6 +5,7 @@ CCK 6.2-dev
 
 Be sure to visit update.php after uploading this release.
 
+- #119102 Combo field prep, add group_type column to content_group table.
 - #310420 Make sure fields created by disabled modules get marked inactive in the database.
 - #119102 Combo field prep, allow way to override multiple values settings for optionwidgets.
 - #119102 Combo field prep, add prev_parent and group info to display fields overview.

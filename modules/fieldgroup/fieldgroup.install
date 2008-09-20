@@ -48,6 +48,7 @@ function fieldgroup_disable() {
 function fieldgroup_schema() {
   $schema['content_group'] = array(
     'fields' => array(
+      'group_type' => array('type' => 'varchar', 'length' => 32, 'not null' => TRUE, 'default' => 'standard'),
       'type_name'  => array('type' => 'varchar', 'length' => 32, 'not null' => TRUE, 'default' => ''),
       'group_name' => array('type' => 'varchar', 'length' => 32, 'not null' => TRUE, 'default' => ''),
       'label'      => array('type' => 'varchar', 'length' => 255, 'not null' => TRUE, 'default' => ''),
@@ -230,5 +231,14 @@ function fieldgroup_update_6002() {
 function fieldgroup_update_6003() {
   $ret = array();
   db_change_field($ret, 'content_group', 'weight', 'weight', array('type' => 'int', 'not null' => TRUE, 'default' => 0));
+  return $ret;
+}
+
+/**
+ * Add 'type' property for fieldgroups.
+ */
+function fieldgroup_update_6004() {
+  $ret = array();
+  db_add_field($ret, 'content_group', 'group_type', array('type' => 'varchar', 'length' => 32, 'not null' => TRUE, 'default' => 'standard'));
   return $ret;
 }

@@ -145,7 +145,7 @@ function fieldgroup_group_edit_form(&$form_state, $type_name, $group_name) {
   }
   $form['weight'] = array('#type' => 'hidden', '#default_value' => $group['weight']);
   $form['group_name'] = array('#type' => 'hidden', '#default_value' => $group_name);
-
+  $form['group_type'] = array('#type' => 'hidden', '#default_value' => $group['group_type']);
   $form['#content_type'] = $content_type;
 
   $form['submit'] = array(
@@ -581,15 +581,15 @@ function fieldgroup_save_group($type_name, $group) {
 
   if (!isset($groups[$group['group_name']])) {
     // Accept group name from programmed submissions if valid.
-    db_query("INSERT INTO {". fieldgroup_tablename() ."} (type_name, group_name, label, settings, weight)
-             VALUES ('%s', '%s', '%s', '%s', %d)", $type_name, $group['group_name'], $group['label'], serialize($group['settings']), $group['weight']);
+    db_query("INSERT INTO {". fieldgroup_tablename() ."} (group_type, type_name, group_name, label, settings, weight)
+             VALUES ('%s', %s', '%s', '%s', '%s', %d)", $group['group_type'], $type_name, $group['group_name'], $group['label'], serialize($group['settings']), $group['weight']);
     cache_clear_all('fieldgroup_data', content_cache_tablename());
     return SAVED_NEW;
   }
   else {
-    db_query("UPDATE {". fieldgroup_tablename() ."} SET label = '%s', settings = '%s', weight = %d ".
+    db_query("UPDATE {". fieldgroup_tablename() ."} SET group_type = '%s', label = '%s', settings = '%s', weight = %d ".
              "WHERE type_name = '%s' AND group_name = '%s'",
-             $group['label'], serialize($group['settings']), $group['weight'], $type_name, $group['group_name']);
+             $group['group_type'], $group['label'], serialize($group['settings']), $group['weight'], $type_name, $group['group_name']);
     cache_clear_all('fieldgroup_data', content_cache_tablename());
     return SAVED_UPDATED;
   }
