@@ -240,5 +240,6 @@ function fieldgroup_update_6003() {
 function fieldgroup_update_6004() {
   $ret = array();
   db_add_field($ret, 'content_group', 'group_type', array('type' => 'varchar', 'length' => 32, 'not null' => TRUE, 'default' => 'standard'));
+  $ret[] = update_sql("DELETE FROM {cache_content} WHERE cid='fieldgroup_data'");
   return $ret;
 }
