@@ -380,6 +380,7 @@ function fieldgroup_field_overview_form_submit($form, &$form_state) {
   // Create new group if needed.
   if (!empty($form_values['_add_new_group']['label'])) {
     $group = $form_values['_add_new_group'];
+    $group['group_type'] = 'standard';
     $group['settings'] = _field_group_default_settings();
     fieldgroup_save_group($type_name, $group);
     $new_group_name = $group['group_name'];
@@ -582,7 +583,7 @@ function fieldgroup_save_group($type_name, $group) {
   if (!isset($groups[$group['group_name']])) {
     // Accept group name from programmed submissions if valid.
     db_query("INSERT INTO {". fieldgroup_tablename() ."} (group_type, type_name, group_name, label, settings, weight)
-             VALUES ('%s', %s', '%s', '%s', '%s', %d)", $group['group_type'], $type_name, $group['group_name'], $group['label'], serialize($group['settings']), $group['weight']);
+             VALUES ('%s', '%s', '%s', '%s', '%s', %d)", $group['group_type'], $type_name, $group['group_name'], $group['label'], serialize($group['settings']), $group['weight']);
     cache_clear_all('fieldgroup_data', content_cache_tablename());
     return SAVED_NEW;
   }
