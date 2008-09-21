@@ -28,6 +28,9 @@ function template_preprocess_content_field_overview_form(&$vars) {
   $order = $dummy ? explode(' ', trim(drupal_render($dummy))) : array();
 
   $vars['help'] = theme('advanced_help_topic', 'content', 'manage-fields') . t('Add fields and groups to the content type, and arrange them on content display and input forms.');
+  if (!module_exists('advanced_help')) {
+    $vars['help'] .= '<br/>' . t('Note: Installing the !adv_help module will let you access more and better help.', array('!adv_help' => l('Advanced help', 'http://drupal.org/project/advanced_help')));
+  }
 
   $rows = array();
   while ($order) {
