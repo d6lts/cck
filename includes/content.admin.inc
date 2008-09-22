@@ -114,6 +114,7 @@ function content_field_overview_form(&$form_state, $type_name) {
   $groups = $group_options = array();
   if (module_exists('fieldgroup')) {
     $groups = fieldgroup_groups($type['type']);
+    $group_types = fieldgroup_types();
     $group_options = _fieldgroup_groups_label($type['type']);
     // Add the ability to group under the newly created row.
     $group_options['_add_new_group'] = '_add_new_group';
@@ -166,6 +167,7 @@ function content_field_overview_form(&$form_state, $type_name) {
     $form[$name] = array(
       'label' => array('#value' => check_plain($group['label'])),
       'group_name' => array('#value' => $group['group_name']),
+      'group_type' => array('#value' => t($group_types[$group['group_type']])),
       'configure' => array('#value' => l(t('Configure'), 'admin/content/node-type/'. $type['url_str'] .'/groups/'. $group['group_name'])),
       'remove' => array('#value' => l(t('Remove'), 'admin/content/node-type/'. $type['url_str'] .'/groups/'. $group['group_name'] .'/remove')),
       'weight' => array('#type' => 'textfield', '#default_value' => $weight, '#size' => 3),
@@ -289,6 +291,18 @@ function content_field_overview_form(&$form_state, $type_name) {
         '#field_prefix' => 'group_',
         '#size' => 15,
         '#description' => t('Group name (a-z, 0-9, _)'),
+      ),
+      // TODO Come back and allow an option to select a group type at
+      // this stage. It can't be done until the workflow is changed.
+      // The user has to configure group settings before adding fields
+      // so validation can be done on potential fields.
+      // Until then we'll set all new groups to 'standard' since there
+      // is no special validation done on standard groups.
+      'group_type' => array(
+        '#type' => 'textfield',
+        '#type' => 'hidden',
+        '#description' => t('Group type'),
+        '#default_value' => 'standard',
       ),
       'weight' => array('#type' => 'textfield', '#default_value' => $weight, '#size' => 3),
       'parent' => array('#type' => 'hidden', '#default_value' => ''),

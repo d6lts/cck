@@ -4,6 +4,12 @@
 /**
  * @file
  * Create field groups for CCK fields.
+ * 
+ * Hooks for other modules to intervene include:
+ * - hook_fieldgroup_view: Alter the group $element added to $node->content.
+ * - hook_fieldgroup_form: Alter the group portion of the node form.
+ * - hook_fieldgroup_types: Add additional fieldgroup group_types.
+ * - hook_fieldgroup_save: Do additional processing when a fieldgroup is saved.
  */
 /**
  * Implementation of hook_init().
@@ -102,6 +108,12 @@ function fieldgroup_group_edit_form(&$form_state, $type_name, $group_name) {
     '#default_value' => $group['label'],
     '#required' => TRUE,
   );
+
+  // Set a default value for group type early in the form so it 
+  // can be overridden by subsequent form elements added by other modules.
+  $group_type = !empty($group['group_type']) ? $group['group_type'] : 'standard';
+  $form['group_type'] = array('#type' => 'hidden', '#default_value' => $group_type);
+
   $form['settings']['#tree'] = TRUE;
   $form['settings']['form'] = array(
     '#type' => 'fieldset',
@@ -145,7 +157,6 @@ function fieldgroup_group_edit_form(&$form_state, $type_name, $group_name) {
   }
   $form['weight'] = array('#type' => 'hidden', '#default_value' => $group['weight']);
   $form['group_name'] = array('#type' => 'hidden', '#default_value' => $group_name);
-  $form['group_type'] = array('#type' => 'hidden', '#default_value' => $group['group_type']);
   $form['#content_type'] = $content_type;
 
   $form['submit'] = array(
@@ -160,7 +171,6 @@ function fieldgroup_group_edit_form(&$form_state, $type_name, $group_name) {
 function fieldgroup_group_edit_form_submit($form, &$form_state) {
   $form_values = $form_state['values'];
   $content_type = $form['#content_type'];
-
   fieldgroup_save_group($content_type['type'], $form_values);
   $form_state['redirect'] = 'admin/content/node-type/'. $content_type['url_str'] .'/fields';
 }
@@ -287,6 +297,15 @@ function fieldgroup_form_alter(&$form, $form_state, $form_id) {
         // Hide the fieldgroup, because the fields are inaccessible.
         $form[$group_name]['#access'] = FALSE;
       }
+      
+      // Allow other modules to alter the form.
+      // Can't use module_invoke_all because we want
+      // to be able to use a reference to $form and $form_state.
+      foreach (module_implements('fieldgroup_form') as $module) {
+        $function = $module .'_fieldgroup_form';
+        $function($form, $form_state, $form_id, $group);
+      }
+      
     }
 
   }
@@ -331,7 +350,8 @@ function fieldgroup_field_overview_form_validate($form, &$form_state) {
     // Group name validation.
     else {
       $group_name = $group['group_name'];
-
+      $group['group_type'] = !empty($group['group_type']) ? $group['group_type'] : 'standard';
+      
       // Add the 'group_' prefix.
       if (substr($group_name, 0, 6) != 'group_') {
         $group_name = 'group_'. $group_name;
@@ -363,6 +383,7 @@ function fieldgroup_field_overview_form_validate($form, &$form_state) {
     // Fail validation if attempt to nest fields under a new group without the
     // proper information. Not raising an error would cause the nested fields
     // to get weights the user doesn't expect.
+    
     foreach ($form_values as $key => $values) {
       if ($values['parent'] == '_add_new_group') {
         form_set_error('_add_new_group][label', t('Add new group: you need to provide a label.'));
@@ -380,7 +401,6 @@ function fieldgroup_field_overview_form_submit($form, &$form_state) {
   // Create new group if needed.
   if (!empty($form_values['_add_new_group']['label'])) {
     $group = $form_values['_add_new_group'];
-    $group['group_type'] = 'standard';
     $group['settings'] = _field_group_default_settings();
     fieldgroup_save_group($type_name, $group);
     $new_group_name = $group['group_name'];
@@ -464,7 +484,7 @@ function fieldgroup_field_remove_form_submit($form, &$form_state) {
 function fieldgroup_nodeapi(&$node, $op, $teaser, $page) {
   switch ($op) {
     case 'view':
-      // NODE_BUILD_NORMAL is 0, and ('whatever' == 0) is TRUE, so we need a ===.
+  	  // NODE_BUILD_NORMAL is 0, and ('whatever' == 0) is TRUE, so we need a ===.
       if ($node->build_mode === NODE_BUILD_NORMAL || $node->build_mode == NODE_BUILD_PREVIEW) {
         $context = $teaser ? 'teaser' : 'full';
       }
@@ -483,6 +503,7 @@ function fieldgroup_nodeapi(&$node, $op, $teaser, $page) {
           '#description' => $label ? content_filter_xss(t($group['settings']['display']['description'])) : '',
         );
         $format = isset($group['settings']['display'][$context]['format']) ? $group['settings']['display'][$context]['format'] : 'fieldset';
+        
         switch ($format) {
           case 'simple':
             $element['#type'] = 'fieldgroup_simple';
@@ -501,10 +522,22 @@ function fieldgroup_nodeapi(&$node, $op, $teaser, $page) {
             $element['#attributes'] = array('class' => 'fieldgroup '. strtr($group['group_name'], '_', '-'));
             break;
         }
-
         foreach ($group['fields'] as $field_name => $field) {
           if (isset($node->content[$field_name])) {
             $element[$field_name] = $node->content[$field_name];
+          }
+        }
+        
+        // Allow other modules to alter the group view.
+        // Can't use module_invoke_all because we want
+        // to be able to use a reference to $node and $element.
+        foreach (module_implements('fieldgroup_view') as $module) {
+          $function = $module .'_fieldgroup_view';
+          $function($node, $element, $group, $context);
+        }
+                
+        foreach ($group['fields'] as $field_name => $field) {
+          if (isset($node->content[$field_name])) {
             unset($node->content[$field_name]);
           }
         }
@@ -554,6 +587,13 @@ function fieldgroup_node_type($op, $info) {
   }
 }
 
+function fieldgroup_types() {
+  $types = array('standard' => t('Standard'));
+  // Allow other modules to add new group_types.
+  $types = array_merge($types, module_invoke_all('fieldgroup_types'));
+  return $types;
+}
+
 function fieldgroup_tablename($version = NULL) {
   if (is_null($version)) {
     $version = variable_get('fieldgroup_schema_version', 0);
@@ -580,10 +620,16 @@ function fieldgroup_fields_tablename($version = NULL) {
 function fieldgroup_save_group($type_name, $group) {
   $groups = fieldgroup_groups($type_name);
 
+  // Allow other modules to intervene when the group is saved.
+  foreach (module_implements('fieldgroup_save_group') as $module) {
+    $function = $module .'_fieldgroup_save_group';
+    $function($group);
+  }
+  
   if (!isset($groups[$group['group_name']])) {
     // Accept group name from programmed submissions if valid.
-    db_query("INSERT INTO {". fieldgroup_tablename() ."} (group_type, type_name, group_name, label, settings, weight)
-             VALUES ('%s', '%s', '%s', '%s', '%s', %d)", $group['group_type'], $type_name, $group['group_name'], $group['label'], serialize($group['settings']), $group['weight']);
+    db_query("INSERT INTO {". fieldgroup_tablename() ."} (group_type, type_name, group_name, label, settings, weight)".
+      " VALUES ('%s', '%s', '%s', '%s', '%s', %d)", $group['group_type'], $type_name, $group['group_name'], $group['label'], serialize($group['settings']), $group['weight']);
     cache_clear_all('fieldgroup_data', content_cache_tablename());
     return SAVED_NEW;
   }
@@ -601,12 +647,10 @@ function fieldgroup_update_fields($form_values) {
 
   if ($default != $form_values['group']) {
     if ($form_values['group'] && !$default) {
-      db_query("INSERT INTO {". fieldgroup_fields_tablename() ."} (type_name, group_name, field_name) VALUES ('%s', '%s', '%s')",
-                $form_values['type_name'], $form_values['group'], $form_values['field_name']);
+      db_query("INSERT INTO {". fieldgroup_fields_tablename() ."} (type_name, group_name, field_name) VALUES ('%s', '%s', '%s')", $form_values['type_name'], $form_values['group'], $form_values['field_name']);
     }
     elseif ($form_values['group']) {
-      db_query("UPDATE {". fieldgroup_fields_tablename() ."} SET group_name = '%s' WHERE type_name = '%s' AND field_name = '%s'",
-                $form_values['group'], $form_values['type_name'], $form_values['field_name']);
+      db_query("UPDATE {". fieldgroup_fields_tablename() ."} SET group_name = '%s' WHERE type_name = '%s' AND field_name = '%s'", $form_values['group'], $form_values['type_name'], $form_values['field_name']);
     }
     else {
       db_query("DELETE FROM {". fieldgroup_fields_tablename() ."} WHERE type_name = '%s' AND field_name = '%s'", $form_values['type_name'], $form_values['field_name']);
@@ -643,9 +687,9 @@ function theme_fieldgroup_fieldset($element) {
       $element['#attributes']['class'] .= ' collapsed';
     }
   }
-
   return '<fieldset'. drupal_attributes($element['#attributes']) .'>'. ($element['#title'] ? '<legend>'. $element['#title'] .'</legend>' : '') . (isset($element['#description']) && $element['#description'] ? '<div class="description">'. $element['#description'] .'</div>' : '') . (!empty($element['#children']) ? $element['#children'] : '') . (isset($element['#value']) ? $element['#value'] : '') ."</fieldset>\n";
 }
+
 
 /**
  * Process variables for fieldgroup.tpl.php.

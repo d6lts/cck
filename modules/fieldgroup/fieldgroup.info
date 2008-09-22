@@ -1,6 +1,6 @@
 ; $Id$
 name = Fieldgroup
-description = Create field groups for CCK fields.
+description = Create display groups for CCK fields.
 dependencies[] = content
 package = CCK
 core = 6.x

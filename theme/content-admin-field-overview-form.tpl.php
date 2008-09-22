@@ -38,7 +38,7 @@
           </td>
           <td><?php print $row->weight . $row->parent . $row->hidden_name; ?></td>
           <td><?php print $row->group_name; ?></td>
-          <td></td>
+          <td><?php print $row->group_type; ?></td>
           <td><?php print $row->configure; ?>&nbsp;&nbsp;<?php print $row->remove; ?></td>
           <?php break;
         case 'extra': ?>
@@ -87,7 +87,8 @@
           </td>
           <td><div class="content-new">&nbsp;</div><?php print $row->weight . $row->parent . $row->hidden_name; ?></td>
           <td><div class="content-new">&nbsp;</div><?php print $row->group_name; ?></td>
-          <td colspan="2"></td>
+          <td><div class="content-new">&nbsp;</div><?php print $row->group_type; ?></td>
+          <td></td>
         <?php break;
       endswitch; ?>
       </tr>

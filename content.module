@@ -2149,7 +2149,7 @@ function content_extra_field_weight($type_name, $pseudo_field_name) {
 function content_max_delta($field_name, $type_name = NULL) {
   $fields = content_fields();
   $field = $fields[$field_name];
-  
+   
   // Non-multiple value fields don't use the delta column,
   // but could exist in multiple databases. If any value
   // exists in any examined table, the max delta will be zero.
