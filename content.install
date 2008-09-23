@@ -219,12 +219,11 @@ function content_update_last_removed() {
 
 /**
  * Helper function for module updates :
- *
+ * - checks no updates are pending for content.module
+ * - checks content module and the module being updated are both enabled.
  *
  * @param $module
  *   The name of the module being updated.
- *   The function will chack that this module is actually enabled
- *   before running the updates.
  */
 function content_check_update($module = NULL) {
   $ret = array();
@@ -236,7 +235,11 @@ function content_check_update($module = NULL) {
     return $ret;
   }
   // Check that content.module is up-to-date before running field module updates.
-  if ($module && (drupal_get_installed_schema_version('content', TRUE) < max(drupal_get_schema_versions('content')))) {
+  $current =  @drupal_get_installed_schema_version('content', TRUE);
+  $current = $current ? $current : 0;
+  $updates = drupal_get_schema_versions('content');
+  $updates = !empty($updates) ? $updates : array(0);
+  if ($module && ($current < max($updates))) {
     drupal_set_message(t('Some updates are still pending. Please return to <a href="@update-php">update.php</a> and run the remaining updates.', array('@update-php' => base_path() .'update.php?op=selection')), 'warning', FALSE);
     $ret['#abort'] = array('success' => FALSE, 'query' => t('Updates for content.module need to be run first.<br/>Please re-run the update script.'));
     return $ret;
