@@ -9,11 +9,11 @@
     <thead>
       <tr>
         <th><?php print t('Field'); ?></th>
-        <?php if ($simple): ?>
+        <?php if ($basic): ?>
           <th><?php print t('Label'); ?></th>
         <?php endif; ?>
-        <?php foreach ($contexts as $context => $title): ?>
-          <th><?php print $title; ?></th>
+        <?php foreach ($contexts as $key => $value): ?>
+          <th><?php print $value['title']; ?></th>
         <?php endforeach; ?>
       </tr>
     </thead>
@@ -23,7 +23,7 @@
       foreach ($rows as $row): ?>
         <tr class="<?php print $count % 2 == 0 ? 'odd' : 'even'; ?>">
           <td><?php print $row->indentation; ?><span class="<?php print $row->label_class; ?>"><?php print $row->human_name; ?></span></td>
-          <?php if ($simple): ?>
+          <?php if ($basic): ?>
             <td><?php print $row->label; ?></td>
           <?php endif; ?>
           <?php foreach ($contexts as $context => $title): ?>

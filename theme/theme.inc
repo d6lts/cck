@@ -131,7 +131,7 @@ function template_preprocess_content_display_overview_form(&$vars) {
   }
   $order = $dummy ? explode(' ', trim(drupal_render($dummy))) : array();
 
-  if ($contexts_selector == CONTENT_CONTEXTS_SIMPLE) {
+  if ($contexts_selector == 'basic') {
     $help = t("Configure how this content type's fields and field labels should be displayed when it's viewed in teaser and full-page mode.");
   }
   else {
@@ -145,8 +145,8 @@ function template_preprocess_content_display_overview_form(&$vars) {
     return;
   }
 
-  $vars['simple'] = $contexts_selector == CONTENT_CONTEXTS_SIMPLE;
-  $vars['contexts'] = _content_admin_display_contexts($contexts_selector);
+  $vars['basic'] = $contexts_selector == 'basic';
+  $vars['contexts'] = content_build_modes($contexts_selector);
 
   $rows = array();
   foreach ($order as $key) {

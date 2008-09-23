@@ -8,10 +8,6 @@
 define('CONTENT_DB_STORAGE_PER_FIELD', 0);
 define('CONTENT_DB_STORAGE_PER_CONTENT_TYPE', 1);
 
-define('CONTENT_CONTEXTS_SIMPLE', 0);
-define('CONTENT_CONTEXTS_ADVANCED', 1);
-define('CONTENT_CONTEXTS_ALL', 2);
-
 define('CONTENT_CALLBACK_NONE', 0x0001);
 define('CONTENT_CALLBACK_DEFAULT', 0x0002);
 define('CONTENT_CALLBACK_CUSTOM', 0x0004);
@@ -130,19 +126,16 @@ function content_menu() {
         'type' => MENU_LOCAL_TASK,
         'weight' => 2,
       );
-      $items['admin/content/node-type/'. $type_url_str .'/display/general'] = array(
-        'title' => 'General',
-        'page arguments' => array('content_display_overview_form', $type_name),
-        'type' => MENU_DEFAULT_LOCAL_TASK,
-        'weight' => 0,
-      );
-      $items['admin/content/node-type/'. $type_url_str .'/display/advanced'] = array(
-        'title' => 'Advanced',
-        'page arguments' => array('content_display_overview_form', $type_name, (string)CONTENT_CONTEXTS_ADVANCED),
-        'access arguments' => array('administer content types'),
-        'type' => MENU_LOCAL_TASK,
-        'weight' => 1,
-      );
+      $contexts = content_build_modes('_tabs');
+      foreach ($contexts as $key => $tab) {
+        $items['admin/content/node-type/'. $type_url_str .'/display/'. $key] = array(
+          'title' => $tab['title'],
+          'page arguments' => array('content_display_overview_form', $type_name, $key),
+          'access arguments' => array('administer content types'),
+          'type' => $key == 'basic' ? MENU_DEFAULT_LOCAL_TASK : MENU_LOCAL_TASK,
+          'weight' => $key == 'basic' ? 0 : 1,
+        );
+      }
       // Cast as an array in case this is called before any fields have
       // been added, like when a new content type is created.
       foreach ((array) $content_type['fields'] as $field) {
@@ -1689,25 +1682,117 @@ function content_format($field, $item, $formatter = 'default', $node = NULL) {
 }
 
 /**
- * Array of possible display contexts for fields.
+ * Registry of available node build modes.
+ *
+ * @param $selector
+ *   Determines what information should be returned.
+ * @return
+ *   Depending on the value of the $selector parameter:
+ *   - NULL: a flat list of all available build modes.
+ *   The other two options are mainly used internally by CCK's UI:
+ *   - '_tabs': the list of tabs to be shown on the 'Display fields' screens.
+ *   - a string tab id: the build modes in this tab.
  */
-function _content_admin_display_contexts($selector = CONTENT_CONTEXTS_ALL) {
-  $contexts = array();
+function content_build_modes($selector = NULL) {
+  static $info;
 
-  if ($selector == CONTENT_CONTEXTS_ALL || $selector == CONTENT_CONTEXTS_SIMPLE) {
-    $contexts['teaser'] = t('Teaser');
-    $contexts['full'] = t('Full node');
-  }
-
-  if ($selector == CONTENT_CONTEXTS_ALL || $selector == CONTENT_CONTEXTS_ADVANCED) {
-    $contexts[NODE_BUILD_RSS] = t('RSS Item');
-    if (module_exists('search')) {
-      $contexts[NODE_BUILD_SEARCH_INDEX] = t('Search Index');
-      $contexts[NODE_BUILD_SEARCH_RESULT] = t('Search Result');
+  if (!isset($info)) {
+    $data = module_invoke_all('content_build_modes');
+    $flat = array();
+    foreach ($data as $tab) {
+      $flat = array_merge($flat, $tab['build modes']);
     }
+    $info = array('tabs' => $data, 'build modes' => $flat);
   }
 
-  return $contexts;
+  if ($selector === '_tabs') {
+    return $info['tabs'];
+  }
+  elseif (isset($selector) && isset($info['tabs'][$selector])) {
+    return isset($info['tabs'][$selector]) ? $info['tabs'][$selector]['build modes'] : array();
+  }
+  else {
+    return $info['build modes'];
+  }
+}
+
+/**
+ * Implementations of hook_content_build_modes
+ * on behalf of core modules.
+ *
+ * @return
+ * An array describing the build modes used by the module.
+ * They are grouped by secondary tabs on CCK's 'Display fields' screens.
+ *
+ * Expected format:
+ * array(
+ *   // The first level keys (tab1_url, tab2_url) will be used to generate
+ *   // the url of the tab: admin/content/node-type/[type_name]/display/[tab1_url]
+ *   // A module can add its render modes to a tab defined by another module.
+ *   // In this case, there's no need to provide a 'title' for this tab.
+ *   'tab1_url' => array(
+ *     'title' => t('The human-readable title of the tab'),
+ *     'build modes' => array(
+ *       // The keys of the 'context' array are the values used in $node->build_mode.
+ *       'mymodule_mode1' => array(
+ *         'title' => t('The human-readable name of the build mode'),
+ *        // The 'views style' property determines if the render mode should be
+ *        // available as an option in Views' 'node' row style (not implemented yet).
+ *        'views style' => TRUE,
+ *       ),
+ *       'mymodule_mode2' => array(
+ *         'title' => t('Mode 2'),
+ *         'views style' => TRUE,
+ *       ),
+ *     ),
+ *   ),
+ *   'tab2_url' => array(
+ *     // ...
+ *   ),
+ * );
+ */
+function node_content_build_modes() {
+  return array(
+    'basic' => array(
+      'title' => t('Basic'),
+      'build modes' => array(
+        'teaser' => array(
+          'title' => t('Teaser'),
+          'views style' => TRUE,
+        ),
+        'full' => array(
+          'title' => t('Full node'),
+          'views style' => TRUE,
+        ),
+      ),
+    ),
+    'rss' => array(
+      'title' => t('RSS'),
+      'build modes' => array(
+        NODE_BUILD_RSS => array(
+          'title' => t('RSS'),
+          'views style' => FALSE,
+        ),
+      ),
+    ),
+  );
+}
+function search_content_build_modes() {
+  return array(
+    'search' => array(
+      'title' => t('Search'),
+      'build modes' => array(
+        NODE_BUILD_SEARCH_INDEX => array(
+          'title' => t('Search Index'),
+          'views style' => FALSE,
+        ),
+        NODE_BUILD_SEARCH_RESULT => array(
+          'title' => t('Search Result'),
+          'views style' => FALSE,
+        ),
+      ),
+    ),
+  );
 }
 
 /**

@@ -85,7 +85,7 @@ function content_instance_default_values($field_name, $type_name, $widget_type) 
     $widget['widget_active'] = 1;
   }
 
-  $settings_names = array_merge(array('label'), array_keys(_content_admin_display_contexts()));
+  $settings_names = array_merge(array('label'), array_keys(content_build_modes()));
   $widget['display_settings'] = array();
   foreach ($settings_names as $name) {
     $widget['display_settings'][$name]['format'] = ($name == 'label') ? 'above' : 'default';

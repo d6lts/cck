@@ -152,7 +152,7 @@ function fieldgroup_group_edit_form(&$form_state, $type_name, $group_name) {
     '#required' => FALSE,
   );
   module_load_include('inc', 'content', 'includes/content.admin');
-  foreach (array_merge(array_keys(_content_admin_display_contexts()), array('label')) as $key) {
+  foreach (array_merge(array_keys(content_build_modes()), array('label')) as $key) {
     $form['settings']['display'][$key] = array('#type' => 'value', '#value' => $group['settings']['display'][$key]);
   }
   $form['weight'] = array('#type' => 'hidden', '#default_value' => $group['weight']);
@@ -450,7 +450,7 @@ function _field_group_default_settings() {
     'display' => array('description' => '', 'label' => 'above'),
   );
   module_load_include('inc', 'content', 'includes/content.admin');
-  foreach (array_keys(_content_admin_display_contexts()) as $key) {
+  foreach (array_keys(content_build_modes()) as $key) {
     $settings['display'][$key]['format'] = 'fieldset';
   }
   return $settings;

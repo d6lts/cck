@@ -517,7 +517,7 @@ function content_field_overview_form_submit($form, &$form_state) {
  * Form includes form widgets to select which fields appear for teaser, full node
  * and how the field labels should be rendered.
  */
-function content_display_overview_form(&$form_state, $type_name, $contexts_selector = CONTENT_CONTEXTS_SIMPLE) {
+function content_display_overview_form(&$form_state, $type_name, $contexts_selector = 'basic') {
   // Gather type information.
   $type = content_types($type_name);
   $field_types = _content_field_types();
@@ -528,7 +528,7 @@ function content_display_overview_form(&$form_state, $type_name, $contexts_selec
     $groups = fieldgroup_groups($type['type']);
     $group_options = _fieldgroup_groups_label($type['type']);
   }
-  $contexts = _content_admin_display_contexts($contexts_selector);
+  $contexts = content_build_modes($contexts_selector);
 
   $form = array(
     '#tree' => TRUE,
@@ -563,7 +563,7 @@ function content_display_overview_form(&$form_state, $type_name, $contexts_selec
     );
 
     // Label
-    if ($contexts_selector == CONTENT_CONTEXTS_SIMPLE) {
+    if ($contexts_selector == 'basic') {
       $form[$name]['label']['format'] = array(
         '#type' => 'select',
         '#options' => $label_options,
@@ -577,7 +577,7 @@ function content_display_overview_form(&$form_state, $type_name, $contexts_selec
       $options[$formatter_name] = $formatter_info['label'];
     }
     $options['hidden'] = t('<Hidden>');
-    foreach ($contexts as $key => $title) {
+    foreach ($contexts as $key => $value) {
       $form[$name][$key]['format'] = array(
         '#type' => 'select',
         '#options' => $options,
@@ -607,7 +607,7 @@ function content_display_overview_form(&$form_state, $type_name, $contexts_selec
       'human_name' => array('#value' => check_plain($group['label'])),
       'weight' => array('#type' => 'value', '#value' => $weight),
     );
-    if ($contexts_selector == CONTENT_CONTEXTS_SIMPLE) {
+    if ($contexts_selector == 'basic') {
       $form[$name]['label'] = array(
         '#type' => 'select',
         '#options' => $label_options,
