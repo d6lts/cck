@@ -63,3 +63,13 @@ function optionwidgets_update_6000() {
   content_associate_fields('optionwidgets');
   return $ret;
 }
+
+/**
+ * Update 6000 was possibly broken if it was executed while
+ * the modules were still disabled, so we re-run it.
+ * Having it run a second time on sites that got updated correctly has no
+ * side-effect (see http://drupal.org/node/310873).
+ */
+function optionwidgets_update_6001() {
+  return optionwidgets_update_6000();
+}

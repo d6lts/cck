@@ -114,3 +114,16 @@ function text_update_6001() {
   }
   return $ret;
 }
+
+/**
+ * Update 6000 and 6001 were possibly broken if they were executed while
+ * the modules were still disabled, so we re-run them.
+ * Having them run a second time on sites that got updated correctly has no
+ * side-effect (see http://drupal.org/node/310873).
+ */
+function text_update_6002() {
+  return text_update_6000();
+}
+function text_update_6003() {
+  return text_update_6001();
+}
