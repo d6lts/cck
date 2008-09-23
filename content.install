@@ -218,6 +218,32 @@ function content_update_last_removed() {
 }
 
 /**
+ * Helper function for module updates :
+ *
+ *
+ * @param $module
+ *   The name of the module being updated.
+ *   The function will chack that this module is actually enabled
+ *   before running the updates.
+ */
+function content_check_update($module = NULL) {
+  $ret = array();
+  // Check that modules are enabled before running their updates.
+  if (!module_exists('content') || ($module && !module_exists($module))) {
+    drupal_set_message(t("Updates for CCK-related modules require the modules to be enabled on the <a href=\"@admin-modules-path\">administer modules page</a>. After doing so, you'll need to return to <a href=\"@update-php\">update.php</a> and run the remaining updates.", array('@admin-modules-path' => url('admin/build/modules'), '@update-php' => base_path() .'update.php?op=selection')), 'warning', FALSE);
+    $query_message = $module ? t('content.module and !module.module need to be enabled.<br/>Please enable them and re-run the update script.', array('!module' => $module)) : t('content.module needs to be enabled.<br/>Please enable it and re-run the update script.');
+    $ret['#abort'] = array('success' => FALSE, 'query' => $query_message);
+    return $ret;
+  }
+  // Check that content.module is up-to-date before running field module updates.
+  if ($module && (drupal_get_installed_schema_version('content', TRUE) < max(drupal_get_schema_versions('content')))) {
+    drupal_set_message(t('Some updates are still pending. Please return to <a href="@update-php">update.php</a> and run the remaining updates.', array('@update-php' => base_path() .'update.php?op=selection')), 'warning', FALSE);
+    $ret['#abort'] = array('success' => FALSE, 'query' => t('Updates for content.module need to be run first.<br/>Please re-run the update script.'));
+    return $ret;
+  }
+}
+
+/**
  * Add module name to fields table to make it easier to identify the fields to delete when a module
  * is uninstalled.
  *
@@ -225,6 +251,10 @@ function content_update_last_removed() {
  * is no other way to find the associated fields.
  */
 function content_update_6000() {
+  if ($abort = content_check_update()) {
+    return $abort;
+  }
+
   $ret = array();
 
   drupal_load('module', 'content');
@@ -268,6 +298,10 @@ function content_update_6000() {
  * with 'content_field'.
  */
 function content_update_6001() {
+  if ($abort = content_check_update()) {
+    return $abort;
+  }
+
   $ret = array();
   drupal_load('module', 'content');
   if (db_table_exists('content_node_field')) {
@@ -285,6 +319,10 @@ function content_update_6001() {
  * Switching to adding those tables only when needed.
  */
 function content_update_6002() {
+  if ($abort = content_check_update()) {
+    return $abort;
+  }
+
   $ret = array();
 
   drupal_load('module', 'content');
@@ -314,6 +352,10 @@ function content_update_6002() {
  * This update function will only be useful for early D6 testers...
  */
 function content_update_6003() {
+  if ($abort = content_check_update()) {
+    return $abort;
+  }
+
   $ret = array();
   if (db_column_exists('content_node_field', 'columns')) {
     db_change_field($ret, 'content_node_field', 'columns', 'db_columns', array('type' => 'text', 'size' => 'medium', 'not null' => TRUE));
@@ -326,6 +368,10 @@ function content_update_6003() {
  * Large tables might deserve a multipass update.
  */
 function content_update_6004(&$sandbox) {
+  if ($abort = content_check_update()) {
+    return $abort;
+  }
+
   $ret = array();
 
   // Do nothing if the indexes were already created by D5's content_update_1009.
@@ -367,6 +413,10 @@ function content_update_6004(&$sandbox) {
  * Add 'locked' property for fields.
  */
 function content_update_6005() {
+  if ($abort = content_check_update()) {
+    return $abort;
+  }
+
   $ret = array();
   drupal_load('module', 'content');
   db_add_field($ret, content_field_tablename(), 'locked', array('type' => 'int', 'size' => 'tiny', 'not null' => TRUE, 'default' => 0));
@@ -377,6 +427,10 @@ function content_update_6005() {
  * Make sure the 'locked' column is NOT NULL (error in previous content_update_6005().
  */
 function content_update_6006() {
+  if ($abort = content_check_update()) {
+    return $abort;
+  }
+
   $ret = array();
   drupal_load('module', 'content');
   db_change_field($ret, content_field_tablename(), 'locked', 'locked', array('type' => 'int', 'size' => 'tiny', 'not null' => TRUE, 'default' => 0));
@@ -388,5 +442,9 @@ function content_update_6006() {
  * are updated.
  */
 function content_update_6007() {
+  if ($abort = content_check_update()) {
+    return $abort;
+  }
+
   return array();
 }

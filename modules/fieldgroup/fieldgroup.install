@@ -184,13 +184,11 @@ function fieldgroup_update_4() {
  * Move fieldgroup tables to the content_* namespace.
  */
 function fieldgroup_update_6000() {
-  $ret = array();
-
-  if (drupal_get_installed_schema_version('content') < 6000) {
-    drupal_set_message(t('Some updates are still pending. Please return to <a href="@update-php">update.php</a> and run the remaining updates.', array('@update-php' => base_path() .'update.php?op=selection')), 'warning');
-    $ret['#abort'] = array('success' => FALSE, 'query' => t('Updates for content.module need to be run first.<br/>Please re-run the update script.'));
-    return $ret;
+  if ($abort = content_check_update('fieldgroup')) {
+    return $abort;
   }
+
+  $ret = array();
 
   db_rename_table($ret, 'node_group', 'content_group');
   db_rename_table($ret, 'node_group_fields', 'content_group_fields');
@@ -206,6 +204,10 @@ function fieldgroup_update_6000() {
  * New D6 installs earlier than RC5 need this, as it was missing in fieldgroup_install.
  */
 function fieldgroup_update_6001() {
+  if ($abort = content_check_update('fieldgroup')) {
+    return $abort;
+  }
+
   $ret = array();
   $ret[] = update_sql("UPDATE {system} SET weight = 9 WHERE name = 'fieldgroup'");
   return $ret;
@@ -216,6 +218,10 @@ function fieldgroup_update_6001() {
  * This was missing in D6 releases earlier than RC5. Ensure we don't run this twice.
  */
 function fieldgroup_update_6002() {
+  if ($abort = content_check_update('fieldgroup')) {
+    return $abort;
+  }
+
   $ret = array();
   if (db_table_exists('node_group')) {
     db_rename_table($ret, 'node_group', 'content_group');
@@ -229,6 +235,10 @@ function fieldgroup_update_6002() {
  * Remove tinyint (127) limitation on group weights.
  */
 function fieldgroup_update_6003() {
+  if ($abort = content_check_update('fieldgroup')) {
+    return $abort;
+  }
+
   $ret = array();
   db_change_field($ret, 'content_group', 'weight', 'weight', array('type' => 'int', 'not null' => TRUE, 'default' => 0));
   return $ret;
@@ -238,6 +248,10 @@ function fieldgroup_update_6003() {
  * Add 'type' property for fieldgroups.
  */
 function fieldgroup_update_6004() {
+  if ($abort = content_check_update('fieldgroup')) {
+    return $abort;
+  }
+
   $ret = array();
   db_add_field($ret, 'content_group', 'group_type', array('type' => 'varchar', 'length' => 32, 'not null' => TRUE, 'default' => 'standard'));
   $ret[] = update_sql("DELETE FROM {cache_content} WHERE cid='fieldgroup_data'");

@@ -33,6 +33,7 @@ Be sure to visit update.php after uploading this release.
 - #306604 Views integration: fix relationships with 'group multiple values' option. Thx merlinofchaos for the help.
 - Add a message on the 'Manage fields' screen about the benefits of advanced_help module.
 - #311883 by hass : Fix a string go give translators better context.
+- #310873 Upgrade path : abort updates if content.module and/or field modules are disabled.
 
 CCK 6.2-rc7
 ===========

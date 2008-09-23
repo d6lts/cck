@@ -49,13 +49,11 @@ function optionwidgets_update_last_removed() {
  * the module names in the field and instance tables, so do it here.
  */
 function optionwidgets_update_6000() {
-  $ret = array();
-
-  if (drupal_get_installed_schema_version('content') < 6000) {
-    drupal_set_message(t('Some updates are still pending. Please return to <a href="@update-php">update.php</a> and run the remaining updates.', array('@update-php' => base_path() .'update.php?op=selection')), 'warning');
-    $ret['#abort'] = array('success' => FALSE, 'query' => t('Updates for content.module need to be run first.<br/>Please re-run the update script.'));
-    return $ret;
+  if ($abort = content_check_update('optionwidgets')) {
+    return $abort;
   }
+
+  $ret = array();
 
   drupal_load('module', 'content');
   $ret[] = update_sql("UPDATE {". content_instance_tablename() ."} SET widget_type = 'optionwidgets_select' WHERE widget_type = 'options_select'");
