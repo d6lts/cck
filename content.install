@@ -235,11 +235,7 @@ function content_check_update($module = NULL) {
     return $ret;
   }
   // Check that content.module is up-to-date before running field module updates.
-  $current =  @drupal_get_installed_schema_version('content', TRUE);
-  $current = $current ? $current : 0;
-  $updates = drupal_get_schema_versions('content');
-  $updates = !empty($updates) ? $updates : array(0);
-  if ($module && ($current < max($updates))) {
+  if ($module && (drupal_get_installed_schema_version('content', TRUE) < max(drupal_get_schema_versions('content')))) {
     drupal_set_message(t('Some updates are still pending. Please return to <a href="@update-php">update.php</a> and run the remaining updates.', array('@update-php' => base_path() .'update.php?op=selection')), 'warning', FALSE);
     $ret['#abort'] = array('success' => FALSE, 'query' => t('Updates for content.module need to be run first.<br/>Please re-run the update script.'));
     return $ret;
