@@ -728,7 +728,7 @@ function content_field($op, &$node, $field, &$items, $teaser, $page) {
         if ($single) {
           foreach ($items as $delta => $item) {
             $element['items'][$delta] += $format_info;
-            $element['items'][$delta]['#delta'] = $delta;
+            $element['items'][$delta]['#item']['#delta'] = $delta;
           }
         }
         else {
