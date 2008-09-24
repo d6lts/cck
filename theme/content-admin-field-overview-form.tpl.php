@@ -77,18 +77,18 @@
           <td colspan="2"><div class="content-new">&nbsp;</div><?php print $row->field_name; ?></td>
           <td><div class="content-new">&nbsp;</div><?php print $row->widget_type; ?></td>
           <?php break;
-          case 'add_new_group': ?>
+       case 'add_new_group': ?>
           <td>
             <?php print $row->indentation; ?>
             <div class="<?php print $row->label_class; ?>">
-              <div class="content-new"><?php print theme('advanced_help_topic', 'content', 'add-new-group') . t('New group'); ?></div>
+              <div class="content-new"><?php print $row->title; ?></div>
               <?php print $row->label; ?>
             </div>
           </td>
           <td><div class="content-new">&nbsp;</div><?php print $row->weight . $row->parent . $row->hidden_name; ?></td>
           <td><div class="content-new">&nbsp;</div><?php print $row->group_name; ?></td>
+          <td><div class="content-new">&nbsp;</div><?php print $row->group_option; ?></td>
           <td><div class="content-new">&nbsp;</div><?php print $row->group_type; ?></td>
-          <td></td>
         <?php break;
       endswitch; ?>
       </tr>

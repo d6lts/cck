@@ -281,6 +281,7 @@ function content_field_overview_form(&$form_state, $type_name) {
     $weight++;
     $name = '_add_new_group';
     $form[$name] = array(
+      'title' => array('#value' => theme('advanced_help_topic', 'content', 'add-new-group') . t('New group')),
       'label' => array(
         '#type' => 'textfield',
         '#size' => 15,
@@ -292,17 +293,13 @@ function content_field_overview_form(&$form_state, $type_name) {
         '#size' => 15,
         '#description' => t('Group name (a-z, 0-9, _)'),
       ),
-      // TODO Come back and allow an option to select a group type at
-      // this stage. It can't be done until the workflow is changed.
-      // The user has to configure group settings before adding fields
-      // so validation can be done on potential fields.
-      // Until then we'll set all new groups to 'standard' since there
-      // is no special validation done on standard groups.
-      'group_type' => array(
-        '#type' => 'textfield',
+      'group_option' => array(
         '#type' => 'hidden',
-        '#description' => t('Group type'),
-        '#default_value' => 'standard',
+        '#value' => '',
+      ),
+      'group_type' => array(
+        '#type' => 'hidden',
+        '#value' => 'standard',
       ),
       'weight' => array('#type' => 'textfield', '#default_value' => $weight, '#size' => 3),
       'parent' => array('#type' => 'hidden', '#default_value' => ''),

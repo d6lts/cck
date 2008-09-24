@@ -33,6 +33,16 @@ function template_preprocess_content_field_overview_form(&$vars) {
   }
 
   $rows = array();
+  
+  // Identify the new item keys in the form, they look like
+  // _add_new_field, add_new_group.
+  $keys = array_keys($form);
+  $add_rows = array();
+  foreach ($keys as $key) {
+    if (substr($key, 0, 4) == '_add') {
+      $add_rows[] = $key;
+    }
+  }
   while ($order) {
     $key = reset($order);
     $element = &$form[$key];
@@ -40,7 +50,7 @@ function template_preprocess_content_field_overview_form(&$vars) {
     // Only display the 'Add' separator if the 'add' rows are still
     // at the end of the table.
     if (!isset($added_separator)) {
-      $remaining_rows = array_diff($order, array('_add_new_field', '_add_existing_field', '_add_new_group'));
+      $remaining_rows = array_diff($order, $add_rows);
       if (empty($remaining_rows) && empty($element['#depth'])) {
         $row = new stdClass();
         $row->row_type = 'separator';
