@@ -9,6 +9,7 @@
  * - hook_fieldgroup_view: Alter the group $element added to $node->content.
  * - hook_fieldgroup_form: Alter the group portion of the node form.
  * - hook_fieldgroup_types: Add additional fieldgroup group_types.
+ * - hook_fieldgroup_default_settings: Add additional fieldgroup default settings.
  * - hook_fieldgroup_save: Do additional processing when a fieldgroup is saved.
  */
 /**
@@ -333,51 +334,79 @@ function fieldgroup_form_alter(&$form, $form_state, $form_id) {
   }
 }
 
+/**
+ * API for group name validation.
+ * 
+ * Pulled into separate function to be re-usable.
+ */
+function fieldgroup_validate_name($group) {
+  $errors = array();
+  
+  // No label.
+  if (!$group['label']) {
+    $errors['label'][] = t('You need to provide a label.');
+  }
+
+  // No group name.
+  if (!$group['group_name']) {
+    $errors['group_name'][] = t('You need to provide a group name.');
+  }
+  // Group name validation.
+  else {
+    $group_name = $group['group_name'];
+    $group['group_type'] = !empty($group['group_type']) ? $group['group_type'] : 'standard';
+      
+    // Add the 'group_' prefix.
+    if (substr($group_name, 0, 6) != 'group_') {
+      $group_name = 'group_'. $group_name;
+    }
+
+    // Invalid field name.
+    if (!preg_match('!^group_[a-z0-9_]+$!', $group_name)) {
+      $errors['group_name'][] = t('The group name %group_name is invalid. The name must include only lowercase unaccentuated letters, numbers, and underscores.', array('%group_name' => $group_name));
+    }
+    if (strlen($group_name) > 32) {
+      $errors['group_name'][] = t('The group name %group_name is too long. The name is limited to 32 characters, including the \'group_\' prefix.', array('%group_name' => $group_name));
+    }
+
+    // Group name already exists.
+    $used = FALSE;
+    $groups = fieldgroup_groups();
+    foreach ($groups as $type => $groups_per_type) {
+      foreach ($groups_per_type as $existing_group) {
+        $used |= ($existing_group['group_name'] == $group_name);
+      }
+    }
+    if ($used) {
+      $errors['group_name'][] = t('The group name %group_name already exists.', array('%group_name' => $group_name));
+    }
+    if (empty($errors['group_name'])) {
+      $group['group_name'] = $group_name;
+    }
+  }
+  return array('group_name' => $group['group_name'], 'errors' => $errors);
+}
+
 function fieldgroup_field_overview_form_validate($form, &$form_state) {
   $form_values = $form_state['values'];
   $group = $form_values['_add_new_group'];
 
   if (array_filter(array($group['label'], $group['group_name']))) {
-    // No label.
-    if (!$group['label']) {
-      form_set_error('_add_new_group][label', t('Add new group: you need to provide a label.'));
-    }
-
-    // No group name.
-    if (!$group['group_name']) {
-      form_set_error('_add_new_group][group_name', t('Add new group: you need to provide a group name.'));
-    }
-    // Group name validation.
-    else {
-      $group_name = $group['group_name'];
-      $group['group_type'] = !empty($group['group_type']) ? $group['group_type'] : 'standard';
-      
-      // Add the 'group_' prefix.
-      if (substr($group_name, 0, 6) != 'group_') {
-        $group_name = 'group_'. $group_name;
-        form_set_value($form['_add_new_group']['group_name'], $group_name, $form_state);
-      }
-
-      // Invalid field name.
-      if (!preg_match('!^group_[a-z0-9_]+$!', $group_name)) {
-        form_set_error('_add_new_group][group_name', t('Add new group: the group name %group_name is invalid. The name must include only lowercase unaccentuated letters, numbers, and underscores.', array('%group_name' => $group_name)));
-      }
-      if (strlen($group_name) > 32) {
-        form_set_error('_add_new_group][group_name', t('Add new group: the group name %group_name is too long. The name is limited to 32 characters, including the \'group_\' prefix.', array('%group_name' => $group_name)));
-      }
-
-      // Group name already exists.
-      $used = FALSE;
-      $groups = fieldgroup_groups();
-      foreach ($groups as $type => $groups_per_type) {
-        foreach ($groups_per_type as $existing_group) {
-          $used |= ($existing_group['group_name'] == $group_name);
+    $validation = fieldgroup_validate_name($group);
+    if (!empty($validation['errors'])) {
+      foreach ($validation['errors'] as $type => $messages) {
+        foreach ($messages as $message) {
+          if ($type == 'label') {
+            form_set_error('_add_new_group][label', t('Add new group:') .' '. $message);
+          }
+          else {
+            form_set_error('_add_new_group][group_name', t('Add new group:') .' '. $message);
+          }
         }
       }
-      if ($used) {
-        form_set_error('_add_new_group][group_name', t('Add new group: the group name %group_name already exists.', array('%group_name' => $group_name)));
-      }
     }
+    $group_name = $validation['group_name'];
+    form_set_value($form['_add_new_group']['group_name'], $group_name, $form_state);
   }
   else {
     // Fail validation if attempt to nest fields under a new group without the
@@ -401,7 +430,7 @@ function fieldgroup_field_overview_form_submit($form, &$form_state) {
   // Create new group if needed.
   if (!empty($form_values['_add_new_group']['label'])) {
     $group = $form_values['_add_new_group'];
-    $group['settings'] = _field_group_default_settings();
+    $group['settings'] = field_group_default_settings($group['group_type']);
     fieldgroup_save_group($type_name, $group);
     $new_group_name = $group['group_name'];
   }
@@ -444,7 +473,7 @@ function fieldgroup_field_overview_form_submit($form, &$form_state) {
   cache_clear_all('fieldgroup_data', content_cache_tablename());
 }
 
-function _field_group_default_settings() {
+function field_group_default_settings($group_type) {
   $settings = array(
     'form' => array('style' => 'fieldset', 'description' => ''),
     'display' => array('description' => '', 'label' => 'above'),
@@ -453,6 +482,8 @@ function _field_group_default_settings() {
   foreach (array_keys(content_build_modes()) as $key) {
     $settings['display'][$key]['format'] = 'fieldset';
   }
+  // Allow other modules to add new default settings.
+  $settings = array_merge($settings, module_invoke_all('fieldgroup_default_settings', $group_type));
   return $settings;
 }
 

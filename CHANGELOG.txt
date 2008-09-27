@@ -5,6 +5,7 @@ CCK 6.2-dev
 
 Be sure to visit update.php after uploading this release.
 
+- #119102 Combo field prep, rework fieldgroup name validation into API to be used by other modules.
 - #312546 by stella - Change some links to make translation easier.
 - Added the #delta value to the wrong place in the element, it was inaccessible to the formatter theme.
 - #119102 Combo field prep, rework the field overview form so it can hanle other kinds of groups.
