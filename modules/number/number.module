@@ -483,13 +483,13 @@ function number_process($element, $edit, $form_state, $form) {
   }
   switch ($field['type']) {
     case 'number_float':
-      $element['#element_validate'][] = array('number_float_validate');
+      $element['#element_validate'][] = 'number_float_validate';
       break;
     case 'number_integer':
-      $element['#element_validate'][] = array('number_integer_validate');
+      $element['#element_validate'][] = 'number_integer_validate';
       break;
     case 'number_decimal':
-      $element['#element_validate'][] = array('number_decimal_validate');
+      $element['#element_validate'][] = 'number_decimal_validate';
       $element['#decimal'] = isset($field['decimal']) ? $field['decimal'] : '.';
       $element['#precision'] = isset($field['precision']) ? $field['precision'] : 10;
       $element['#scale'] = isset($field['scale']) ? $field['scale'] : 2;
