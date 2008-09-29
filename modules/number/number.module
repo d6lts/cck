@@ -468,6 +468,11 @@ function number_process($element, $edit, $form_state, $form) {
 
   $prefixes = array();
   $suffixes = array();
+  
+  // Make sure we don't wipe out element validation added elsewhere.
+  if (empty($element['#element_validate'])) {
+    $element['#element_validate'] = array();
+  }
   if (!empty($field['prefix'])) {
     $prefixes = explode('|', $field['prefix']);
     $element[$field_key]['#field_prefix'] = array_pop($prefixes);
@@ -478,13 +483,13 @@ function number_process($element, $edit, $form_state, $form) {
   }
   switch ($field['type']) {
     case 'number_float':
-      $element['#element_validate'] = array('number_float_validate');
+      $element['#element_validate'][] = array('number_float_validate');
       break;
     case 'number_integer':
-      $element['#element_validate'] = array('number_integer_validate');
+      $element['#element_validate'][] = array('number_integer_validate');
       break;
     case 'number_decimal':
-      $element['#element_validate'] = array('number_decimal_validate');
+      $element['#element_validate'][] = array('number_decimal_validate');
       $element['#decimal'] = isset($field['decimal']) ? $field['decimal'] : '.';
       $element['#precision'] = isset($field['precision']) ? $field['precision'] : 10;
       $element['#scale'] = isset($field['scale']) ? $field['scale'] : 2;
