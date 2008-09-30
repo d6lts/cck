@@ -572,7 +572,8 @@ function nodereference_optionwidgets_validate($element, &$form_state) {
   $value = $form_state['values'];
   foreach ($element['#parents'] as $parent) {
     $value = $value[$parent];
-    if ($parent == $field_key) {
+    // Use === to be sure we get right results if parent is a zero (delta) value.
+    if ($parent === $field_key) {
       $element['#parents'] = $new_parents;
       form_set_value($element, $value, $form_state);
       break;
