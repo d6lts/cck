@@ -34,14 +34,6 @@ function content_help($path, $arg) {
 }
 
 /**
- * Implementation of hook_devel_caches.
- * Include {cache_content} in the list of tables cleared by devel's 'empty cache'
- */
-function content_devel_caches() {
-  return array(content_cache_tablename());
-}
-
-/**
  * Implementation of hook_flush_caches.
  */
 function content_flush_caches() {

@@ -195,6 +195,7 @@ function nodereference_field($op, &$node, $field, &$items, $teaser, $page) {
           $error_element = isset($item['_error_element']) ? $item['_error_element'] : '';
           if (is_array($item) && isset($item['_error_element'])) unset($item['_error_element']);
           if (!empty($item['nid'])) {
+            dsm($item);
             if (!isset($refs[$item['nid']])) {
               form_set_error($error_element, t("%name: this post can't be referenced.", array('%name' => t($field['widget']['label']))));
             }
