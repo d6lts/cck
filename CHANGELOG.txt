@@ -5,8 +5,9 @@ CCK 6.2-dev
 
 Be sure to visit update.php after uploading this release.
 
-- Use === in nodereference validation to be sure we get right results if parent is a zero (delta) value instead of a string name.
-- #314843 Make sure number module doesn't override #element_validate set by other modules.
+- Add more documentation of how nested nodereference and userreference items work.
+- #119102 Combo field prep, Use === in userreference and nodereference validation to be sure we get right results if parent is a zero (delta) value instead of a string name.
+- #119102, #314843 Make sure module process code doesn't override #element_validate set by other modules.
 - #119102 Combo field prep, rework fieldgroup name validation into API to be used by other modules.
 - #312546 by stella - Change some links to make translation easier.
 - Added the #delta value to the wrong place in the element, it was inaccessible to the formatter theme.
