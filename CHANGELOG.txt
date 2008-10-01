@@ -5,6 +5,7 @@ CCK 6.2-dev
 
 Be sure to visit update.php after uploading this release.
 
+- Clean up inconsistencies in unsetting _error_element, sometimes not unsetting it, sometimes not testing before unsetting it causing undefined index errors.
 - Add more documentation of how nested nodereference and userreference items work.
 - #119102 Combo field prep, Use === in userreference and nodereference validation to be sure we get right results if parent is a zero (delta) value instead of a string name.
 - #119102, #314843 Make sure module process code doesn't override #element_validate set by other modules.

@@ -228,6 +228,7 @@ function number_field($op, &$node, $field, &$items, $teaser, $page) {
       if (is_array($items)) {
         foreach ($items as $delta => $item) {
           $error_element = isset($item['_error_element']) ? $item['_error_element'] : '';
+          if (is_array($item) && isset($item['_error_element'])) unset($item['_error_element']);
           if ($item['value'] != '') {
             if (is_numeric($field['min']) && $item['value'] < $field['min']) {
               form_set_error($error_element, t('%name: the value may be no smaller than %min.', array('%name' => t($field['widget']['label']), '%min' => $field['min'])));

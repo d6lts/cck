@@ -180,7 +180,7 @@ function userreference_field($op, &$node, $field, &$items, $teaser, $page) {
       foreach ($items as $delta => $item) {
         if (is_array($item)) {
           $error_element = isset($item['_error_element']) ? $item['_error_element'] : '';
-          unset($item['_error_element']);
+          if (is_array($item) && isset($item['_error_element'])) unset($item['_error_element']);
           if (!empty($item['uid']) && !array_key_exists($item['uid'], _userreference_potential_references($field, '', $item['uid']))) {
             form_set_error($error_element, t('%name: invalid user.', array('%name' => t($field['widget']['label']))));
           }
