@@ -3,6 +3,9 @@
 CCK 6.2-dev
 ===========
 
+CCK 6.2-rc8
+===========
+
 Be sure to visit update.php after uploading this release.
 
 - #314986 by moshe weitzman, remove hook_devel_caches(), deprecated in favor of content_flush_caches().
