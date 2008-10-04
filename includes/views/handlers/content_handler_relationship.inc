@@ -2,6 +2,7 @@
 // $Id$
 
 /**
+ * @file
  * Handles content relationships and deals properly with multiple
  * values by allowing the views administrator to select deltas.
  */
@@ -14,7 +15,7 @@ class content_handler_relationship extends views_handler_relationship {
   }
 
   /**
-   * Add a delta selector if multiple is true.
+   * Add a delta selector if multiple is TRUE.
    */
   function options_form(&$form, &$form_state) {
     parent::options_form($form, $form_state);

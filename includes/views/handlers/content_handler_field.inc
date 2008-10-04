@@ -2,6 +2,7 @@
 // $Id$
 
 /**
+ * @file
  * The subclass adds basic field and formatter info,
  * for field-specific subclasses to use if they need to.
  *

@@ -155,7 +155,7 @@ function content_field_overview_form(&$form_state, $type_name) {
     if ($field['locked']) {
       $form[$name]['configure'] = array('#value' => t('Locked'));
       $form[$name]['remove'] = array();
-      $form[$name]['#disabled_row'] = true;
+      $form[$name]['#disabled_row'] = TRUE;
     }
     $form['#field_rows'][] = $name;
     $weights[] = $weight;
@@ -680,7 +680,7 @@ function content_widget_type_options($field_type = NULL, $by_label = FALSE) {
   if (!isset($options)) {
     $options = array();
     foreach (_content_widget_types() as $widget_type_name => $widget_type) {
-      foreach($widget_type['field types'] as $widget_field_type) {
+      foreach ($widget_type['field types'] as $widget_field_type) {
         $options[$widget_field_type][$widget_type_name] = t($widget_type['label']);
       }
     }
@@ -1197,7 +1197,7 @@ function content_field_edit_form_validate($form, &$form_state) {
 
         form_set_error('default_value_php', t('The default value PHP code returned an incorrect value.<br/>Expected format: <pre>!sample</pre> Returned value: @value', array(
           '!sample' => $sample,
-          '@value' => print_r($return, true))));
+          '@value' => print_r($return, TRUE))));
         return;
       }
       else {
@@ -1232,7 +1232,7 @@ function content_field_edit_form_validate($form, &$form_state) {
       if (form_get_errors()) {
         if (trim($form_values['default_value_php'])) {
           form_set_error('default_value_php', t("The PHP code for 'default value' returned @value, which is invalid.", array(
-            '@value' => print_r($default_value, true))));
+            '@value' => print_r($default_value, TRUE))));
         }
         else {
           form_set_error('default_value', t('The default value is invalid.'));

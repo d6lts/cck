@@ -1,9 +1,11 @@
 <?php
-//$Id$
+// $Id$
+
 /**
  * @file
  * Field conversion for fields handled by this module.
  */
+
 /**
  * Implementation of hook_views_convert().
  *

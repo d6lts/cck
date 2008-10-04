@@ -2,6 +2,7 @@
 // $Id$
 
 /**
+ * @file
  * Handler for 'content_php_array_autocomplete' style.
  */
 class content_plugin_style_php_array_ac extends views_plugin_style {

@@ -152,7 +152,7 @@ function content_views_field_views_data($field) {
     $table_alias = content_views_tablename($field);
 
     $types = array();
-    foreach(content_types() as $type) {
+    foreach (content_types() as $type) {
       if (isset($type['fields'][$field['field_name']])) {
         $types[] = $type['name'];
       }

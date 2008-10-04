@@ -2,6 +2,7 @@
 // $Id$
 
 /**
+ * @file
  * An extended subclass for field handling that adds multiple field grouping.
  *
  * Fields that want multiple value grouping options in addition to basic

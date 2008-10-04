@@ -2,6 +2,7 @@
 // $Id$
 
 /**
+ * @file
  * Create fields' form for a content type.
  *
  * Each field defines its own component of the content entry form, via its

@@ -3,6 +3,8 @@
 CCK 6.2-dev
 ===========
 
+- #317032 by hass, code cleanup.
+
 CCK 6.2-rc8
 ===========
 

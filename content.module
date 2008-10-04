@@ -1113,7 +1113,7 @@ function content_write_record($table, &$object, $update = array()) {
       $query .= $field .' = '. $placeholders[$id];
     }
 
-    foreach ($update as $key){
+    foreach ($update as $key) {
       $conditions[] = "$key = ". db_type_placeholder($schema['fields'][$key]['type']);
       $values[] = $object->$key;
     }

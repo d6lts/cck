@@ -2,6 +2,7 @@
 // $Id$
 
 /**
+ * @file
  * Implementation of hook_content_build_modes
  * (on behalf of token.module)
  */

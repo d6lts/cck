@@ -1,6 +1,8 @@
 <?php
 // $Id$
+
 /**
+ * @file
  * Panels 2 interface for CCK fieldgroups and fields.
  *
  * TODO:
@@ -9,6 +11,7 @@
  *   capability is added to Panels.
  *
  */
+
 /**
  * Implementation of hook_panels_content_types()
  */

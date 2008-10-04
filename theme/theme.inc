@@ -2,6 +2,7 @@
 // $Id$
 
 /**
+ * @file
  * Theme preprocess function for content-admin-field-overview-form.tpl.php.
  */
 function template_preprocess_content_field_overview_form(&$vars) {

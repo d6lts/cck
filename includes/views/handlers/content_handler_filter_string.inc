@@ -2,6 +2,7 @@
 // $Id$
 
 /**
+ * @file
  * The subclass simply adds properties,
  * for field-specific subclasses to use if they need to.
  */

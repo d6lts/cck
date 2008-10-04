@@ -2,6 +2,7 @@
 // $Id$
 
 /**
+ * @file
  * Handler for 'content_simple' display.
  */
 class content_plugin_display_simple extends views_plugin_display {

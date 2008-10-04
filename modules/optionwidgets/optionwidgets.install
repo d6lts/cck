@@ -2,6 +2,7 @@
 // $Id$
 
 /**
+ * @file
  * Implementation of hook_install().
  */
 function optionwidgets_install() {

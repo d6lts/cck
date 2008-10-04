@@ -1,9 +1,11 @@
 <?php
-//$Id$
+// $Id$
+
 /**
  * @file
  * Functions needed for Devel module integration.
  */
+
 /**
  * Enrich the $node that is about to be saved with arbitrary 
  * information in each of its CCK fields.

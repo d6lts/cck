@@ -1,6 +1,8 @@
 <?php
 // $Id$
+
 /**
+ * @file
  * Implementation of hook_install().
  */
 function content_permissions_install() {
