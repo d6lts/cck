@@ -37,6 +37,9 @@ ALWAYS BACKUP YOUR DATABASE BEFORE UPGRADING!
 
 3) Install Drupal version 6. Leave all contributed modules out of
    the modules folder until core modules are up and running.
+   Set your administration theme to a core theme like Garland until
+   everything has been updated to help ensure you don't encounter
+   theme-related problems accessing the administration area.
 
 4) Once core is running, upload and install the latest 6.x versions 
    of ONLY CCK CORE FILES (the ones in the tarball on the CCK
@@ -45,11 +48,17 @@ ALWAYS BACKUP YOUR DATABASE BEFORE UPGRADING!
    modules folder until the core CCK files are updated and working 
    correctly.
 
-5) Once the core CCK modules are updated and working correctly,
+5) After updating CCK core modules, you may get messages saying that
+   some updates failed and that you need to run update.php again.
+   If you get messages like that, keep re-running update.php until
+   you get no more messages.
+
+6) Once the core CCK modules are updated and working correctly,
    add other CCK modules to the modules folder, enable them,
    and run update.php. For best results, do this one module at a
    time so you can tell immediately if any of them create problems
    without letting those problems interfere with other updates.
+
 
 Your database should now be ready to run in CCK version 6.x
 
@@ -66,6 +75,12 @@ are not enabled. That means that modules that rely on core CCK may try
 to run their updates even if core CCK is not enabled, and contributed
 CCK modules that have broken updates will have their broken updates
 run even if they are not enabled.
+
+A number of updates are dependent on other updates and won't work
+until previous updates are finished or specific modules are enabled,
+so you may get messages that other modules need to be enabled or that
+update.php needs to be re-run, and you need to follow those instructions
+until all the updates complete.
 
 Taking extra time during the upgrade by leaving modules out of the
 modules folder altogether until you are ready to enable and update them
