@@ -26,7 +26,7 @@ function nodereference_rules_action_info() {
       ),
     ),
     'module' => 'CCK',
-    'help' => 'Note that if the field has multiple values, only the first content node will be loaded.',
+    'help' => t('Note that if the field has multiple values, only the first content node will be loaded.'),
   );
   return $info;
 }

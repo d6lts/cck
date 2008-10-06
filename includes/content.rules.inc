@@ -20,7 +20,7 @@ function content_rules_action_info() {
       ),
     ),
     'eval input' => array('code'),
-    'help' => 'You should make sure that the used field exists in the given content type.',
+    'help' => t('You should make sure that the used field exists in the given content type.'),
     'module' => 'CCK',
   );
   return $info;
@@ -94,9 +94,9 @@ function content_rules_action_populate_field_form($settings, &$form, &$form_stat
       '#title' => t('Code'),
       '#default_value' => $settings['code'],
       '#rows' => 6,
-      '#description' => t("Advanced usage only: PHP code that returns a value. Should not include &lt;?php ?&gt; delimiters. If this field is filled out, the value returned by this code will override any value specified above. Expected format: <pre>!sample</pre>Using !link_devel 'devel load' tab on a content page might help you figure out the expected format.", array(
+      '#description' => t('Advanced usage only: PHP code that returns the value to set. Should not include &lt;?php ?&gt; delimiters. If this field is filled out, the value returned by this code will override any value specified above. Expected format: <pre>!sample</pre>Using <a href="@link_devel">devel.module\'s</a> \'devel load\' tab on a content page might help you figure out the expected format.', array(
         '!sample' => $sample,
-        '!link_devel' => l("devel.module's", 'http://www.drupal.org/project/devel'),
+        '@link_devel' => 'http://www.drupal.org/project/devel',
       )),
     );
 
@@ -173,7 +173,7 @@ function content_rules_action_populate_field_submit(&$settings, $form, &$form_st
  * Label callback: Improve the label of the action.
  */
 function content_rules_action_populate_field_label($settings, $argument_labels) {
-  return t('Populate @node\'s @field', array('@field' => $settings['field_name']) + $argument_labels);
+  return t("Populate @node's @field", array('@field' => $settings['field_name']) + $argument_labels);
 }
 
 function workflow_ng_action_populate_field_upgrade(&$element) {
@@ -195,7 +195,7 @@ function content_rules_condition_info() {
       'node' => array('type' => 'node', 'label' => t('Content')),
     ),
     'eval input' => array('code'),
-    'help' => 'You should make sure that the used field exists in the given content type. The condition returns TRUE, if the selected field has the given value.',
+    'help' => t('You should make sure that the used field exists in the given content type. The condition returns TRUE, if the selected field has the given value.'),
     'module' => 'CCK',
   );
   $info['content_rules_field_changed'] = array(
@@ -204,7 +204,7 @@ function content_rules_condition_info() {
       'node' => array('type' => 'node', 'label' => t('Content containing changes')),
       'node_unchanged' => array('type' => 'node', 'label' => t('Content not containing changes')),
     ),
-    'help' => 'You should make sure that the used field exists in the given content type.',
+    'help' => t('You should make sure that the used field exists in the given content type.'),
     'module' => 'CCK',
   );
   return $info;
@@ -241,7 +241,7 @@ function content_rules_field_has_value_submit(&$settings, $form, &$form_state) {
 }
 
 function content_rules_field_has_value_label($settings, $argument_labels) {
-  return t('@node\'s @field has value', array('@field' => $settings['field_name']) + $argument_labels);
+  return t("@node's @field has value", array('@field' => $settings['field_name']) + $argument_labels);
 }
 
 /**
@@ -267,7 +267,7 @@ function content_rules_field_changed_form($settings, &$form, &$form_state) {
 }
 
 function content_rules_field_changed_label($settings, $argument_labels) {
-  return t('@node\'s @field has changed', array('@field' => $settings['field_name']) + $argument_labels);
+  return t("@node's @field has changed", array('@field' => $settings['field_name']) + $argument_labels);
 }
 
 
@@ -285,7 +285,6 @@ function content_rules_get_field_names_by_type($type = NULL) {
   asort($fields);
   return $fields;
 }
-
 
 function _content_rules_get_field_value($settings, &$state) {
   if ($settings['code']) {
