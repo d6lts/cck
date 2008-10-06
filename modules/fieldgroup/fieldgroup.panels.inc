@@ -87,7 +87,7 @@ function fieldgroup_panels_edit_fieldgroup($id, $parents, $conf = array()) {
   // Add each group to the list with the content type it is from in parentheses
   foreach ($types as $type) {
     foreach ($type as $group) {
-      $group_list[$group['group_name']] = $group['label'] . ' (' . $group['type_name'] . ')';
+      $group_list[$group['group_name']] = t('@group_label (@group_type_name)', array('@group_label' => $group['label'], '@group_type_name' => $group['type_name']);
     }
   }
   $form['type_name'] = array(

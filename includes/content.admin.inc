@@ -65,7 +65,7 @@ function content_fields_list() {
   $rows = array();
   foreach ($fields as $field) {
     $row = array();
-    $row[] = $field['field_name'] . ($field['locked'] ? ' (' . t('Locked') .')' : '');
+    $row[] = $field['locked'] ? t('@field_name (Locked)', array('@field_name' => $field['field_name'])) : $field['field_name'];
     $row[] = t($field_types[$field['type']]['label']);
 
     $types = array();
