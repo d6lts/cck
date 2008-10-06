@@ -3,6 +3,7 @@
 CCK 6.2-dev
 ===========
 
+- Change update instructions to recommend leaving CCK modules out of the modules folder until they're enabled.
 - #317036 by hass, context-sensitive translation fixes.
 - #316354 by fago, hass, fix translation issues in rules.inc files.
 - #312546 by stella, code cleanup.
