@@ -15,7 +15,7 @@ function attachUpdateSelects(context) {
 
   // 'Field type' select updates its 'Widget' select.
   $('#content-field-overview .content-field-type-select', context).each(function() {
-    this.targetSelect = $('.content-widget-type-select', $(this).parents('tr'));
+    this.targetSelect = $('.content-widget-type-select', $(this).parents('tr').eq(0));
 
     $(this).change(function() {
       var selectedFieldType = this.options[this.selectedIndex].value;
@@ -30,8 +30,8 @@ function attachUpdateSelects(context) {
 
   // 'Existing field' select updates its 'Widget' select and 'Label' textfield.
   $('#content-field-overview .content-field-select', context).each(function() {
-    this.targetSelect = $('.content-widget-type-select', $(this).parents('tr'));
-    this.targetTextfield = $('.content-label-textfield', $(this).parents('tr'));
+    this.targetSelect = $('.content-widget-type-select', $(this).parents('tr').eq(0));
+    this.targetTextfield = $('.content-label-textfield', $(this).parents('tr').eq(0));
 
     $(this).change(function(e, updateText) {
       var updateText = (typeof(updateText) == 'undefined') ? true : updateText;
