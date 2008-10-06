@@ -28,12 +28,12 @@ Your database should now be ready to run in CCK version 6.x
 UPDATING FROM VERSION 5.x to 6.x
 ================================================================
 
-YOU MUST RUN ALL POSSIBLE UPDATES TO YOUR DATABASE IN 5.x USING 
+YOU MUST RUN ALL POSSIBLE UPDATES TO YOUR DATABASE IN 5.x USING
 THE LATEST 5.x CODE, BEFORE UPGRADING FROM 5.x to 6.x.
 
 ALWAYS BACKUP YOUR DATABASE BEFORE UPGRADING!
 
-1) Before upgrading to 6.x, upload the latest 5.x versions of all 
+1) Before upgrading to 6.x, upload the latest 5.x versions of all
    CCK modules, go to update.php and run all possible updates.
 
 2) Install Drupal version 6. Once it is running, upload and install
@@ -44,7 +44,7 @@ Your database should now be ready to run in CCK version 6.x
 
 ================================================================
 
-These steps are necessary because of significant changes in the 
+These steps are necessary because of significant changes in the
 database structure between the 4.7 and 6.x versions. These changes
-make it extremely difficult to create an automatic upgrade path that 
+make it extremely difficult to create an automatic upgrade path that
 will work reliably in every possible situation.

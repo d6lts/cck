@@ -469,7 +469,7 @@ function number_process($element, $edit, $form_state, $form) {
 
   $prefixes = array();
   $suffixes = array();
-  
+
   // Make sure we don't wipe out element validation added elsewhere.
   if (empty($element['#element_validate'])) {
     $element['#element_validate'] = array();

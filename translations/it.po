@@ -1,5 +1,5 @@
 # $Id$
-# 
+#
 # LANGUAGE translation of Drupal (general)
 # Copyright YEAR NAME <EMAIL@ADDRESS>
 # Generated from files:
@@ -24,7 +24,7 @@
 # optionwidgets.info,v 1.2.2.2 2007/01/05 11:57:46 yched
 # text.info,v 1.2.2.2 2007/01/05 11:57:46 yched
 # userreference.info,v 1.2.2.2 2007/01/05 11:57:46 yched
-# 
+#
 msgid ""
 ""
 msgstr "Project-Id-Version: PROJECT VERSION\n"

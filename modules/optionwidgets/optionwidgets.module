@@ -200,12 +200,12 @@ function optionwidgets_buttons_process($element, $edit, &$form_state, $form) {
   );
 
   // Set #element_validate in a way that it will not wipe out other
-  // validation functions already set by other modules. 
+  // validation functions already set by other modules.
   if (empty($element['#element_validate'])) {
     $element['#element_validate'] = array();
   }
   array_unshift($element['#element_validate'], 'optionwidgets_validate');
-      
+
   // Make sure field info will be available to the validator which
   // does not get the values in $form.
   $form_state['#field_info'][$field['field_name']] = $field;
@@ -288,7 +288,7 @@ function optionwidgets_onoff_process($element, $edit, &$form_state, $form) {
     '#default_value' => isset($element['#value'][$field_key][0]) ? $element['#value'][$field_key][0] == $on_value : FALSE,
     '#return_value' => $on_value,
   );
-  
+
   // Set #element_validate in a way that it will not wipe out other
   // validation functions already set by other modules.
   if (empty($element['#element_validate'])) {

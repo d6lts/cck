@@ -7,7 +7,7 @@
  */
 
 /**
- * Enrich the $node that is about to be saved with arbitrary 
+ * Enrich the $node that is about to be saved with arbitrary
  * information in each of its CCK fields.
  **/
 function content_generate_fields(&$node) {
@@ -57,7 +57,7 @@ function content_generate_fields(&$node) {
 
 /**
  * A simple function to return multiple values for fields that use
- * custom multiple value widgets but don't need any other special multiple 
+ * custom multiple value widgets but don't need any other special multiple
  * values handling. This will call the field generation function
  * a random number of times and compile the results into a node array.
  */
@@ -91,7 +91,7 @@ if (module_exists('text')) {
       return _text_content_generate($node, $field);
     }
   }
-  
+
   function _text_content_generate($node, $field) {
     $node_field = array();
     if ($field['widget']['rows'] > 1) {
@@ -141,20 +141,20 @@ if (module_exists('number')) {
           $max = is_numeric($field['max']) ? $field['max'] : 10000;
           $scale = 0;
           break;
-      
+
         case 'number_decimal':
           $precision = is_numeric($field['precision']) ? $field['precision'] : 10;
           $scale = is_numeric($field['scale']) ? $field['scale'] : 2;
           $max = is_numeric($field['max']) ? $field['max'] : pow(10, $precision);
           break;
-        
+
         case 'number_float':
           $precision = rand(10, 32);
           $scale = rand(0, 2);
           $max = is_numeric($field['max']) ? $field['max'] : pow(10, $precision);
           break;
-      }  
-      $node_field['value'] = round(rand($min, $max), $scale);    
+      }
+      $node_field['value'] = round(rand($min, $max), $scale);
     }
     return $node_field;
   }
@@ -169,7 +169,7 @@ if (module_exists('nodereference')) {
       return _nodereference_content_generate($node, $field);
     }
   }
-  
+
   function _nodereference_content_generate($node, $field) {
     $node_field = array();
     $allowed_values = nodereference_allowed_values($field);
@@ -191,7 +191,7 @@ if (module_exists('userreference')) {
       return _userreference_content_generate($node, $field);
     }
   }
-  
+
   function _userreference_content_generate($node, $field) {
     $node_field = array();
     $allowed_values = userreference_allowed_values($field);

@@ -28,8 +28,8 @@ function content_permissions_nodeapi(&$node, $op, $a3 = NULL, $a4 = NULL) {
 
 /**
  *  Remove inaccessible fields from nodes.
- * 
- * @see content_field_form(). 
+ *
+ * @see content_field_form().
  */
 function content_permissions_field_access($op, $field) {
   switch ($op) {
@@ -42,8 +42,8 @@ function content_permissions_field_access($op, $field) {
 
 /**
  *  The default field access callback. Remove inaccessible fields from Views.
- * 
- * @see content_views_field_views_data(). 
+ *
+ * @see content_views_field_views_data().
  */
 function content_views_access_callback($field) {
   return user_access('view '. $field['field_name']);

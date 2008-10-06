@@ -513,7 +513,7 @@ function userreference_autocomplete_process($element, $edit, $form_state, $form)
   // Used so that hook_field('validate') knows where to flag an error.
   $element['_error_element'] = array(
     '#type' => 'value',
-    // Wrapping the element around a text_textfield element creates a 
+    // Wrapping the element around a text_textfield element creates a
     // nested element, so the final id will look like 'field-name-0-uid-uid'.
     '#value' => implode('][', array_merge($element['#parents'], array($field_key, $field_key))),
   );
@@ -526,7 +526,7 @@ function userreference_autocomplete_process($element, $edit, $form_state, $form)
  * Remove the wrapper layer and set the right element's value.
  * We don't know exactly where this element is, so we drill down
  * through the element until we get to our key.
- * 
+ *
  * We use $form_state['values'] instead of $element['#value']
  * to be sure we have the most accurate value when other modules
  * like optionwidgets are using #element_validate to alter the value.
@@ -551,7 +551,7 @@ function userreference_optionwidgets_validate($element, &$form_state) {
  * Validate an autocomplete element.
  *
  * Remove the wrapper layer and set the right element's value.
- * This will move the nested value at 'field-name-0-uid-uid' 
+ * This will move the nested value at 'field-name-0-uid-uid'
  * back to its original location, 'field-name-0-uid'.
  */
 function userreference_autocomplete_validate($element, &$form_state) {

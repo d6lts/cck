@@ -2202,31 +2202,31 @@ function content_extra_field_weight($type_name, $pseudo_field_name) {
 
 /**
  * Find max delta value actually in use for a field.
- * 
- * Helper function to do things like tell when we should prevent a 
+ *
+ * Helper function to do things like tell when we should prevent a
  * change in multiple value settings that would result in data loss,
  * or know if content actually exists for a field.
- * 
- * @param $field_name 
+ *
+ * @param $field_name
  *   The field name to examine.
- * @param $type_name 
+ * @param $type_name
  *   If provided, search only for existing data in that type,
  *   otherwise search for all instances of field data in all types.
- * @return 
+ * @return
  *   NULL if field is not in use, or the maximum delta value in use.
- * 
+ *
  * TODO
  * Go back to the field settings validation and use this function
- * to prevent (or confirm) changes in multiple values that 
+ * to prevent (or confirm) changes in multiple values that
  * would destroy data.
- *  
+ *
  * Fields with only NULL data will show up as being in use.
  * Do we want to eliminate them from the results?
  */
 function content_max_delta($field_name, $type_name = NULL) {
   $fields = content_fields();
   $field = $fields[$field_name];
-   
+
   // Non-multiple value fields don't use the delta column,
   // but could exist in multiple databases. If any value
   // exists in any examined table, the max delta will be zero.

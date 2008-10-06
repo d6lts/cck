@@ -34,7 +34,7 @@ function template_preprocess_content_field_overview_form(&$vars) {
   }
 
   $rows = array();
-  
+
   // Identify the new item keys in the form, they look like
   // _add_new_field, add_new_group.
   $keys = array_keys($form);

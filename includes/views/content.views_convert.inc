@@ -32,12 +32,12 @@ function content_views_convert($display, $type, &$view, $views_field) {
       }
     }
   }
-  
+
   // Is this a field that CCK should handle? If not, return.
   if (!in_array($views_field['field'], array_keys($views_fields))) {
     return;
   }
-  
+
   // Now update values, options, etc. to those selected in the imported view.
   switch ($type) {
     case 'field':
