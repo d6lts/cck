@@ -3,6 +3,7 @@
 CCK 6.2-dev
 ===========
 
+- #312546 by stella, code cleanup.
 - #311146 by Brian294, dheffron, yched, and others, fix critical javascript problem in new Manage fields UI screen in some themes.
 - #317032 by hass, code cleanup.
 

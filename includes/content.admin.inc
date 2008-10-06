@@ -1049,7 +1049,7 @@ function content_field_edit_form(&$form_state, $type_name, $field_name) {
         '#tree' => TRUE,
         '#description' => t('Advanced usage only: PHP code that returns a default value. Should not include &lt;?php ?&gt; delimiters. If this field is filled out, the value returned by this code will override any value specified above. Expected format: <pre>!sample</pre>To figure out the expected format, you can use the <em>devel load</em> tab provided by <a href="@link_devel">devel module</a> on a %type content page.', array(
           '!sample' => $sample,
-          '@link_devel' => url('http://www.drupal.org/project/devel'),
+          '@link_devel' => 'http://www.drupal.org/project/devel',
           '%type' => $type_name)),
       );
     }
