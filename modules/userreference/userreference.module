@@ -100,7 +100,7 @@ function userreference_field_settings($op, $field) {
         $views = array('--' => '--');
         $all_views = views_get_all_views();
         foreach ($all_views as $view) {
-          // Only 'node' views that have fields will work for our purpose.
+          // Only 'users' views that have fields will work for our purpose.
           if ($view->base_table == 'users' && !empty($view->display['default']->display_options['fields'])) {
             if ($view->type == 'Default') {
               $views[t('Default Views')][$view->name] = $view->name;
