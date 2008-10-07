@@ -229,15 +229,23 @@ function content_check_update($module = NULL) {
   $ret = array();
   // Check that modules are enabled before running their updates.
   if (!module_exists('content') || ($module && !module_exists($module))) {
-    drupal_set_message(t("Updates for CCK-related modules require the modules to be enabled on the <a href=\"@admin-modules-path\">administer modules page</a>. After doing so, you'll need to return to <a href=\"@update-php\">update.php</a> and run the remaining updates.", array('@admin-modules-path' => url('admin/build/modules'), '@update-php' => base_path() .'update.php?op=selection')), 'warning', FALSE);
-    $query_message = $module ? t('content.module and !module.module need to be enabled.<br/>Please enable them and re-run the update script.', array('!module' => $module)) : t('content.module needs to be enabled.<br/>Please enable it and re-run the update script.');
+    drupal_set_message(t("Updates for CCK-related modules are not run until the modules are enabled on the <a href=\"@admin-modules-path\">administer modules page</a>. When you enable them, you'll need to return to <a href=\"@update-php\">update.php</a> and run the remaining updates.", array('@admin-modules-path' => url('admin/build/modules'), '@update-php' => base_path() .'update.php?op=selection')), 'warning', FALSE);
+    // The content module is not enabled, nothing else can happen.
+    if ($module && !module_exists('content') && module_exists($module)) {
+      $query_message = t('!module.module has updates but cannot be updated because content.module is not enabled.<br />If and when content.module is enabled, you will need to re-run the update script.', array('!module' => $module));
+    }
+    // The requested module is not enabled, which may be intentional.
+    // Just let the user know there are updates to be processed if updated later.
+    elseif ($module) {
+      $query_message = t('!module.module has updates and is available in the modules folder but is not enabled.<br />If and when it is enabled, you will need to re-run the update script.', array('!module' => $module));
+    }
     $ret['#abort'] = array('success' => FALSE, 'query' => $query_message);
     return $ret;
   }
   // Check that content.module is up-to-date before running field module updates.
   if ($module && (drupal_get_installed_schema_version('content', TRUE) < max(drupal_get_schema_versions('content')))) {
     drupal_set_message(t('Some updates are still pending. Please return to <a href="@update-php">update.php</a> and run the remaining updates.', array('@update-php' => base_path() .'update.php?op=selection')), 'warning', FALSE);
-    $ret['#abort'] = array('success' => FALSE, 'query' => t('Updates for content.module need to be run first.<br/>Please re-run the update script.'));
+    $ret['#abort'] = array('success' => FALSE, 'query' => t('Some updates are still pending.<br/>Please re-run the update script.'));
     return $ret;
   }
 }

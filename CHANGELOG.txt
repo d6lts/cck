@@ -3,6 +3,7 @@
 CCK 6.2-dev
 ===========
 
+- #318227 Clean up update abort logic to more clearly explain what still needs to be done, add a helper function to prevent dangerous database operations until database is updated.
 - #317232 Change css file name from content.css to content-module.css to avoid namespace collisions.
 - #316656 Default weight must be zero, not NULL, or form ordering will be incorrect.
 - #107407 by dopry, optimization patch, do nothing in hook_form_alter() and hook_nodeapi() if there are no fields.
