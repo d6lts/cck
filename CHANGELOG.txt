@@ -3,6 +3,7 @@
 5--dev
 ======
 
+- #316656 Default weight must be zero, not NULL, or form ordering will be incorrect.
 - #309558 by mroswell : fix PHP doc typo.
 - #281749 by asimmonds: fix '0' not parsed as an alias for allowed values.
 - #308215 by Reg - Nodereference: Do not filter on empty string when querying for referenceable nodes.
