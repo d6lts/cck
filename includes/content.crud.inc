@@ -109,7 +109,7 @@ function content_field_instance_expand($field) {
   }
   $field['widget'] = !empty($field['widget_settings']) ? $field['widget_settings'] : array();
   $field['widget']['label'] = !empty($field['label']) ? $field['label'] : $field['field_name'];
-  $field['widget']['weight'] = !empty($field['weight']) ? $field['weight'] : NULL;
+  $field['widget']['weight'] = !empty($field['weight']) ? $field['weight'] : 0;
   $field['widget']['description'] = !empty($field['description']) ? $field['description'] : '';
 
   if (!empty($field['widget_type'])) {
