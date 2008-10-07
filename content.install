@@ -232,12 +232,12 @@ function content_check_update($module = NULL) {
     drupal_set_message(t("Updates for CCK-related modules are not run until the modules are enabled on the <a href=\"@admin-modules-path\">administer modules page</a>. When you enable them, you'll need to return to <a href=\"@update-php\">update.php</a> and run the remaining updates.", array('@admin-modules-path' => url('admin/build/modules'), '@update-php' => base_path() .'update.php?op=selection')), 'warning', FALSE);
     // The content module is not enabled, nothing else can happen.
     if ($module && !module_exists('content') && module_exists($module)) {
-      $query_message = t('!module.module has updates but cannot be updated because content.module is not enabled.<br />If and when content.module is enabled, you will need to re-run the update script.', array('!module' => $module));
+      $query_message = t('!module.module has updates but cannot be updated because content.module is not enabled.<br />If and when content.module is enabled, you will need to re-run the update script. You will continue to see this message until the module is enabled and updates are run.', array('!module' => $module));
     }
     // The requested module is not enabled, which may be intentional.
     // Just let the user know there are updates to be processed if updated later.
     elseif ($module) {
-      $query_message = t('!module.module has updates and is available in the modules folder but is not enabled.<br />If and when it is enabled, you will need to re-run the update script.', array('!module' => $module));
+      $query_message = t('!module.module has updates and is available in the modules folder but is not enabled.<br />If and when it is enabled, you will need to re-run the update script. You will continue to see this message until the module is enabled and updates are run.', array('!module' => $module));
     }
     $ret['#abort'] = array('success' => FALSE, 'query' => $query_message);
     return $ret;
