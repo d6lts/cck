@@ -235,7 +235,7 @@ function content_check_update($module = NULL) {
       $query_message = t('!module.module has updates but cannot be updated because content.module is not enabled.<br />If and when content.module is enabled, you will need to re-run the update script. You will continue to see this message until the module is enabled and updates are run.', array('!module' => $module));
     }
     // The requested module is not enabled, which may be intentional.
-    // Just let the user know there are updates to be processed if updated later.
+    // Just let the user know there are updates to be processed if enabled later.
     elseif ($module) {
       $query_message = t('!module.module has updates and is available in the modules folder but is not enabled.<br />If and when it is enabled, you will need to re-run the update script. You will continue to see this message until the module is enabled and updates are run.', array('!module' => $module));
     }
