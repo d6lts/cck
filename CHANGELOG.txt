@@ -3,6 +3,7 @@
 CCK 6.2-dev
 ===========
 
+- Get rid of helper function content_is_updated(), we can do it better using the content version variable.
 - #318224 by brmassa, fix several errors in Content Copy.
 - #318387 Make sure old fieldgroup updates don't run if tables were never created.
 - #318227 Clean up update abort logic to more clearly explain what still needs to be done, add a helper function to prevent dangerous database operations until database is updated.

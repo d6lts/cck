@@ -81,7 +81,7 @@ function content_types_install() {
  * Implementation of hook_install().
  */
 function content_install() {
-  variable_set('content_schema_version', 6002);
+  variable_set('content_schema_version', 6008);
   drupal_install_schema('content');
 }
 
@@ -367,6 +367,7 @@ function content_update_6003() {
   if (db_column_exists('content_node_field', 'columns')) {
     db_change_field($ret, 'content_node_field', 'columns', 'db_columns', array('type' => 'text', 'size' => 'medium', 'not null' => TRUE));
   }
+  variable_set('content_schema_version', 6003);
   return $ret;
 }
 
@@ -412,7 +413,7 @@ function content_update_6004(&$sandbox) {
   if ($sandbox['count']) {
     $ret['#finished'] = 1 - count($sandbox['tables']) / $sandbox['count'];
   }
-
+  variable_set('content_schema_version', 6004);
   return $ret;
 }
 
@@ -427,6 +428,7 @@ function content_update_6005() {
   $ret = array();
   drupal_load('module', 'content');
   db_add_field($ret, content_field_tablename(), 'locked', array('type' => 'int', 'size' => 'tiny', 'not null' => TRUE, 'default' => 0));
+  variable_set('content_schema_version', 6005);
   return $ret;
 }
 
@@ -441,6 +443,7 @@ function content_update_6006() {
   $ret = array();
   drupal_load('module', 'content');
   db_change_field($ret, content_field_tablename(), 'locked', 'locked', array('type' => 'int', 'size' => 'tiny', 'not null' => TRUE, 'default' => 0));
+  variable_set('content_schema_version', 6006);
   return $ret;
 }
 
@@ -453,5 +456,18 @@ function content_update_6007() {
     return $abort;
   }
 
+  variable_set('content_schema_version', 6007);
+  return array();
+}
+
+/**
+ * Dummy update function to make sure schema version gets updated.
+ */
+function content_update_6008() {
+  if ($abort = content_check_update()) {
+    return $abort;
+  }
+
+  variable_set('content_schema_version', 6008);
   return array();
 }

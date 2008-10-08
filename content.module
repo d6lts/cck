@@ -94,8 +94,8 @@ function content_menu() {
   );
 
   // Make sure this doesn't fire until content_types is working,
-  // needed to avoid errors on initial installation.
-  if (!defined('MAINTENANCE_MODE') && content_is_updated()) {
+  // and tables are updated, needed to avoid errors on initial installation.
+  if (!defined('MAINTENANCE_MODE') && variable_get('content_schema_version', -1) >= 6007) {
     foreach (node_get_types() as $type) {
       $type_name = $type->type;
       $content_type = content_types($type_name);
@@ -500,9 +500,9 @@ function content_notify($op, $module) {
       content_clear_type_cache();
       break;
     case 'disable':
-      // When CCK modules are disabled before content module's update is run,
-      // we can't do this.
-      if (!content_is_updated()) {
+      // When CCK modules are disabled before content module's update is run
+      // to add the active column, we can't do this.
+      if (!variable_get('content_schema_version', -1) >= 6007) {
         return FALSE;
       }
       db_query("UPDATE {". content_field_tablename() ."} SET active=0 WHERE module='%s'", $module);
@@ -520,8 +520,8 @@ function content_notify($op, $module) {
  */
 function content_associate_fields($module) {
   // When CCK modules are enabled before content module's update is run,
-  // we can't do this.
-  if (!content_is_updated()) {
+  // to add module and active columns, we can't do this.
+  if (!variable_get('content_schema_version', -1) >= 6007) {
     return FALSE;
   }
   $module_fields = module_invoke($module, 'field_info');
@@ -893,8 +893,9 @@ function _content_sort_items_value_helper($a, $b) {
  * Handle storage ops for _content_field_invoke_default().
  */
 function content_storage($op, $node) {
-  // Don't try this before content module's update is run.
-  if (!content_is_updated()) {
+  // Don't try this before content module's update is run to add
+  // the active and module columns.
+  if (!variable_get('content_schema_version', -1) >= 6007) {
     return FALSE;
   }
 
@@ -1312,8 +1313,9 @@ function _content_type_info($reset = FALSE) {
     // or when uninstalled and some subsequent field module uninstall
     // attempts to refresh the data.
 
-    // Don't try this before content module's update is run.
-    if (!content_is_updated()) {
+    // Don't try this before content module's update is run
+    // to add module and active columns to the table.
+    if (!variable_get('content_schema_version', -1) >= 6007) {
       return array();
     }
 
@@ -1880,20 +1882,6 @@ function content_cache_tablename() {
   else {
     return 'cache_content';
   }
-}
-
-/**
- * Test before trying database operations.
- */
-function content_is_updated() {
-  if (!db_table_exists(content_field_tablename())) {
-    return FALSE;
-  }
-  if (!db_column_exists(content_field_tablename(), 'active') 
-  || !db_column_exists(content_field_tablename(), 'module')) {
-    return FALSE;
-  }
-  return TRUE;
 }
 
 /**
