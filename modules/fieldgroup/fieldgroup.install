@@ -76,6 +76,9 @@ function fieldgroup_schema() {
  */
 function fieldgroup_update_1() {
   $ret = array();
+  if (!db_table_exists('node_group')) {
+    return $ret;
+  }
   switch ($GLOBALS['db_type']) {
     case 'pgsql':
       $ret[] = update_sql("UPDATE {node_group} SET group_name = 'group_'||SUBSTRING(group_name FROM 7)");
@@ -96,6 +99,9 @@ function fieldgroup_update_1() {
  */
 function fieldgroup_update_2() {
   $ret = array();
+  if (!db_table_exists('node_group')) {
+    return $ret;
+  }
 
   // set settings column to accept larger values
   switch ($GLOBALS['db_type']) {
@@ -140,6 +146,9 @@ function fieldgroup_update_2() {
  */
 function fieldgroup_update_3() {
   $ret = array();
+  if (!db_table_exists('node_group')) {
+    return $ret;
+  }
   $result = db_query("SELECT * FROM {node_group}");
   while ($group = db_fetch_array($result)) {
     $group['settings'] = unserialize($group['settings']);

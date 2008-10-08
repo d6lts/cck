@@ -3,6 +3,7 @@
 CCK 6.2-dev
 ===========
 
+- #318387 Make sure old fieldgroup updates don't run if tables were never created.
 - #318227 Clean up update abort logic to more clearly explain what still needs to be done, add a helper function to prevent dangerous database operations until database is updated.
 - #317232 Change css file name from content.css to content-module.css to avoid namespace collisions.
 - #316656 Default weight must be zero, not NULL, or form ordering will be incorrect.
