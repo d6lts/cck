@@ -93,12 +93,35 @@ function content_fields_list() {
 }
 
 /**
+ * Helper function to display a message about inactive fields.
+ */
+function content_inactive_message($type_name) {
+  $inactive_fields = content_inactive_fields($type_name);
+  if (!empty($inactive_fields)) {
+    $field_types = _content_field_types();
+    $widget_types = _content_widget_types($type_name);
+    drupal_set_message(t('This content type has inactive fields. Inactive fields are not included in lists of available fields until their modules are enabled.'), 'error');
+    foreach ($inactive_fields as $field_name => $field) {
+      drupal_set_message(t('!field (!field_name) is an inactive !field_type field that uses a !widget_type widget.', array(
+      '!field' => $field['widget']['label'], 
+      '!field_name' => $field['field_name'], 
+      '!field_type' => array_key_exists($field['type'], $field_types) ? $field_types[$field['type']]['label'] : $field['type'],
+      '!widget_type' => array_key_exists($field['widget']['type'], $widget_types) ? $widget_types[$field['widget']['type']]['label'] : $field['widget']['type'],
+      )));        
+    }
+  }
+}
+
+/**
  * Menu callback; listing of fields for a content type.
  *
  * Allows fields to be reordered and nested in fieldgroups using
  * JS drag-n-drop. Non-CCK form elements can also be moved around.
  */
 function content_field_overview_form(&$form_state, $type_name) {
+  
+  content_inactive_message($type_name);
+    
   // When displaying the form, make sure the list of fields
   // is up-to-date.
   if (empty($form_state['post'])) {
@@ -515,6 +538,8 @@ function content_field_overview_form_submit($form, &$form_state) {
  * and how the field labels should be rendered.
  */
 function content_display_overview_form(&$form_state, $type_name, $contexts_selector = 'basic') {
+  content_inactive_message($type_name);
+
   // Gather type information.
   $type = content_types($type_name);
   $field_types = _content_field_types();
