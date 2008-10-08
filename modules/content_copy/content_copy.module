@@ -407,7 +407,7 @@ function content_copy_import_form_submit($form, &$form_state) {
 
     if (!empty($field['field_name']) && isset($content_info['content types'][$type_name]['fields'][$field_name])) {
       drupal_set_message(t('The imported field %field_label (%field_name) was not added to %type because that field already exists in %type.', array(
-        '%field_label' => $field_label, '%field_name' => $field_name, '%type' => $type_name)));
+        '%field_label' => $field['label'], '%field_name' => $field_name, '%type' => $type_name)));
     }
     else {
 
@@ -430,7 +430,7 @@ function content_copy_import_form_submit($form, &$form_state) {
  */
 function content_copy_form_alter(&$form, &$form_state, $form_id) {
   $alter_forms = array('node_type_form', 'content_field_edit_form', 'fieldgroup_group_edit_form');
-  if (isset($GLOBALS['content_copy']) && $GLOBALS['content_copy']['status'] == 'export' && in_array($form_id, $alter_forms)) {
+  if (isset($GLOBALS['content_copy']) && isset($GLOBALS['content_copy']['status']) && $GLOBALS['content_copy']['status'] == 'export' && in_array($form_id, $alter_forms)) {
     $form['#submit'][] = 'content_copy_record_macro';
   }
 }
