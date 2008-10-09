@@ -280,7 +280,7 @@ function content_copy_import_form(&$form_state, $type_name = '') {
  */
 function content_copy_import_form_submit($form, &$form_state) {
   $form_values = $form_state['values'];
-
+  
   // Get the content type we are importing into.
   $type_name = $form_values['type_name'];
   $type_label = node_get_types('name', $type_name);
@@ -404,7 +404,7 @@ function content_copy_import_form_submit($form, &$form_state) {
     // Make sure the field doesn't already exist in the type.
     // If so, do nothing, fields can't be duplicated within a content type.
     $field_name   = $field['field_name'];
-
+      
     if (!empty($field['field_name']) && isset($content_info['content types'][$type_name]['fields'][$field_name])) {
       drupal_set_message(t('The imported field %field_label (%field_name) was not added to %type because that field already exists in %type.', array(
         '%field_label' => $field['label'], '%field_name' => $field_name, '%type' => $type_name)));
@@ -417,9 +417,10 @@ function content_copy_import_form_submit($form, &$form_state) {
       $field = content_field_instance_create($field);
       drupal_set_message(t('The field %field_label (%field_name) was added to the content type %type.', array(
         '%field_label' => $field['widget']['label'], '%field_name' => $field_name, '%type' => $type_label)));
-    }
-    if (module_exists('fieldgroup') && isset($imported_groups)) {
-      fieldgroup_update_fields($field);
+
+      if (module_exists('fieldgroup') && isset($imported_groups)) {
+        fieldgroup_update_fields($field);
+      }
     }
   }
 }
