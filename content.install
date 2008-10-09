@@ -473,7 +473,12 @@ function content_update_6008() {
 }
 
 function content_update_6009() {
-  $result = db_query("SELECT *  FROM {content_field_instance}");
+  if ($abort = content_check_update()) {
+    return $abort;
+  }
+
+  $ret = array();
+  $result = db_query("SELECT *  FROM {content_node_field_instance}");
   while ($type = db_fetch_array($result)) {
     $new_settings = array();
     $display_settings = unserialize($type['display_settings']);  
@@ -492,7 +497,8 @@ function content_update_6009() {
         'teaser' => array('format' => 'default', 'exclude' => 0),
         );
     }
-    db_query("UPDATE {content_field_instance} SET display_settings='%s' WHERE field_name='%s' AND type_name='%s'", serialize($new_settings), $type['field_name'], $type['type_name']);
+    db_query("UPDATE {content_node_field_instance} SET display_settings='%s' WHERE field_name='%s' AND type_name='%s'", serialize($new_settings), $type['field_name'], $type['type_name']);
   }
   variable_set('content_schema_version', 6009);
+  return $ret;
 }

@@ -269,6 +269,7 @@ function fieldgroup_update_6004() {
 }
 
 function fieldgroup_update_6005() {
+  $ret = array();
   $result = db_query("SELECT *  FROM {content_group}");
   while ($type = db_fetch_array($result)) {
     $new_settings = array();
@@ -292,4 +293,5 @@ function fieldgroup_update_6005() {
     }
     db_query("UPDATE {content_group} SET settings='%s' WHERE group_name='%s' AND type_name='%s'", serialize($new_settings), $type['group_name'], $type['type_name']);
   }
+  return $ret;
 }
