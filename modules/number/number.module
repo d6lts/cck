@@ -520,11 +520,12 @@ function number_float_validate($element, &$form_state) {
     $start = $value;
     $value = preg_replace('@[^-0-9\.]@', '', $value);
     if ($start != $value) {
-      // No reason to make this an error, just need to inform user what has changed.
-      drupal_set_message(t('Only numbers and decimals are allowed in %field. %start was changed to %value.', array(
-      '%field' => t($field['widget']['label']), '%start' => $start, '%value' => $value)));
+      $error_field = implode('][', $element['#parents']) .']['. $field_key;
+      form_set_error($error_field, t('Only numbers and decimals are allowed in %field.', array('%field' => t($field['widget']['label']))));
     }
-    form_set_value($element[$field_key], $value, $form_state);
+    else {
+      form_set_value($element[$field_key], $value, $form_state);
+    }
   }
 }
 
@@ -542,11 +543,12 @@ function number_integer_validate($element, &$form_state) {
     $start = $value;
     $value = preg_replace('@[^-0-9]@', '', $value);
     if ($start != $value) {
-      // No reason to make this an error, just need to inform user what has changed.
-      drupal_set_message(t('Only numbers are allowed in %field. %start was changed to %value.', array(
-      '%field' => t($field['widget']['label']), '%start' => $start, '%value' => $value)));
+      $error_field = implode('][', $element['#parents']) .']['. $field_key;
+      form_set_error($error_field, t('Only numbers are allowed in %field.', array('%field' => t($field['widget']['label']))));
     }
-    form_set_value($element[$field_key], $value, $form_state);
+    else {
+      form_set_value($element[$field_key], $value, $form_state);
+    }
   }
 }
 
@@ -565,13 +567,14 @@ function number_decimal_validate($element, &$form_state) {
     $start = $value;
     $value = preg_replace('@[^-0-9\\'. $decimal .']@', '', $value);
     if ($start != $value) {
-      // No reason to make this an error, just need to inform user what has changed.
-      drupal_set_message( t('Only numbers and the decimal character (%decimal) are allowed in %field. %start was changed to %value.', array(
-      '%decimal' => $element['#decimal'], '%field' => t($field['widget']['label']), '%start' => $start, '%value' => $value)));
+      $error_field = implode('][', $element['#parents']) .']['. $field_key;
+      form_set_error($error_field, t('Only numbers and the decimal character (%decimal) are allowed in %field.', array('%decimal' => $element['#decimal'], '%field' => t($field['widget']['label']))));
     }
-    $value = str_replace($element['#decimal'], '.', $value);
-    $value = round($value, $element['#scale']);
-    form_set_value($element[$field_key], $value, $form_state);
+    else {
+      $value = str_replace($element['#decimal'], '.', $value);
+      $value = round($value, $element['#scale']);
+      form_set_value($element[$field_key], $value, $form_state);
+    }
   }
 }
 
