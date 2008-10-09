@@ -2299,7 +2299,7 @@ function content_inactive_fields($type_name = NULL) {
   $all = content_field_instance_read($param, TRUE);
   $active = array_keys(content_fields());
   foreach ($all as $field) {
-    if (!array_key_exists($field['field_name'], $active)) {
+    if (!in_array($field['field_name'], $active)) {
       $inactive[$field['type_name']][$field['field_name']] = content_field_instance_expand($field);
     }
   }
