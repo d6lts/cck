@@ -14,6 +14,7 @@
         <?php endif; ?>
         <?php foreach ($contexts as $key => $value): ?>
           <th><?php print $value['title']; ?></th>
+          <th><?php print t('Exclude'); ?></th>
         <?php endforeach; ?>
       </tr>
     </thead>
@@ -27,7 +28,8 @@
             <td><?php print $row->label; ?></td>
           <?php endif; ?>
           <?php foreach ($contexts as $context => $title): ?>
-            <td><?php print $row->{$context}; ?></td>
+            <td><?php print $row->{$context}->format; ?></td>
+            <td><?php print $row->{$context}->exclude; ?></td>
           <?php endforeach; ?>
         </tr>
         <?php $count++;

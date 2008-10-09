@@ -89,13 +89,14 @@ function content_instance_default_values($field_name, $type_name, $widget_type) 
   $widget['display_settings'] = array();
   foreach ($settings_names as $name) {
     $widget['display_settings'][$name]['format'] = ($name == 'label') ? 'above' : 'default';
+    $widget['display_settings'][$name]['exclude'] = 0;
   }
 
   // Make sure widget settings all have an index in the array.
   $settings_names = module_invoke($module, 'widget_settings', 'save', $widget);
   $widget['widget_settings'] = array();
   foreach ((array) $settings_names as $name) {
-    $widget['widget_settings'][$name] = NULL;
+    $widget['widget_settings'][$name]['format'] = NULL;
   }
   return $widget;
 }
