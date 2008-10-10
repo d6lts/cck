@@ -1,0 +1,251 @@
+# Vietnamese translation of cck (6.x-2.0-rc4)
+# Copyright (c) 2008 by the Vietnamese translation team
+# Generated from files:
+#  example_field.php,v 1.5.2.2 2008/07/03 12:44:51 yched
+#  content.admin.inc,v 1.181.2.20 2008/07/10 12:49:09 yched
+#  number.module,v 1.91.2.8 2008/07/07 13:15:30 yched
+#  text.module,v 1.95.2.7 2008/07/07 13:15:30 yched
+#  simple_field.php,v 1.5.2.2 2008/07/03 12:44:51 yched
+#  userreference.module,v 1.106.2.7 2008/07/07 13:15:31 yched
+#  fieldgroup.module,v 1.79.2.7 2008/07/10 12:49:09 yched
+#  content.module,v 1.301.2.22 2008/07/10 12:49:09 yched
+#  content.crud.inc,v 1.76.2.4 2008/07/10 12:49:09 yched
+#  content.info,v 1.6 2007/07/04 23:46:29 yched
+#  content.views.inc,v 1.68.2.8 2008/07/06 16:04:02 yched
+#  text.info,v 1.9 2008/04/23 18:02:31 dww
+#  nodereference.module,v 1.138.2.15 2008/07/10 00:41:30 yched
+#  content_copy.module,v 1.27.2.1 2008/07/09 13:43:15 yched
+#  content_copy.info,v 1.6 2008/04/23 18:01:48 dww
+#  content_permissions.info,v 1.2 2008/04/23 18:01:52 dww
+#  fieldgroup.info,v 1.6 2008/04/23 18:01:58 dww
+#  nodereference.info,v 1.8 2008/04/23 18:02:07 dww
+#  number.info,v 1.7 2008/04/23 18:02:16 dww
+#  optionwidgets.info,v 1.7 2008/04/23 18:02:24 dww
+#  userreference.info,v 1.8 2008/04/23 18:02:38 dww
+#  optionwidgets.module,v 1.69.2.5 2008/07/05 00:26:54 yched
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: cck (6.x-2.0-rc4)\n"
+"POT-Creation-Date: 2008-10-09 19:55-0700\n"
+"PO-Revision-Date: 2008-10-10 09:59+0700\n"
+"Language-Team: Vietnamese\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Last-Translator: The Hong Truong <thehongtt@gmail.com>\n"
+
+#: examples/example_field.php:188;
+#: includes/content.admin.inc:949,962;
+#: modules/number/number.module:144,153;
+#: modules/text/text.module:103,112
+msgid "Code"
+msgstr "Mã"
+
+#: examples/example_field.php:383;
+#: examples/simple_field.php:327;
+#: modules/text/text.module:200;
+#: modules/userreference/userreference.module:146
+msgid "Default"
+msgstr "Mặc định"
+
+#: includes/content.admin.inc:794;
+#: modules/fieldgroup/fieldgroup.module:236
+msgid "Cancel"
+msgstr "Bỏ qua"
+
+#: includes/content.admin.inc:201,408;
+#: modules/fieldgroup/fieldgroup.module:110,363
+msgid "Save"
+msgstr "Lưu"
+
+#: includes/content.admin.inc:16;
+#: modules/fieldgroup/fieldgroup.module:156
+msgid "Description"
+msgstr "Mô tả"
+
+#: content.module:557,564,0;
+#: includes/content.crud.inc:592,630
+msgid "content"
+msgstr "nội dung"
+
+#: includes/content.admin.inc:148,164,794;
+#: modules/fieldgroup/fieldgroup.module:236
+msgid "Remove"
+msgstr "Gỡ bỏ"
+
+#: content.info:0;
+#: includes/content.views.inc:61,98
+msgid "Content"
+msgstr "Nội dung"
+
+#: includes/content.admin.inc:901;
+#: modules/fieldgroup/fieldgroup.module:143
+msgid "Help text"
+msgstr "Văn bản trợ giúp"
+
+#: examples/example_field.php:107;
+#: examples/simple_field.php:115;
+#: modules/text/text.module:49;
+#: modules/text/text.info:0
+msgid "Text"
+msgstr "Văn bản"
+
+#: content.module:156;
+#: includes/content.admin.inc:532
+msgid "Add field"
+msgstr "Thêm trường dữ liệu"
+
+#: examples/example_field.php:167;
+#: examples/simple_field.php:164;
+#: modules/text/text.module:75
+msgid "Maximum length"
+msgstr "Độ dài tối đa"
+
+#: examples/example_field.php:170;
+#: examples/simple_field.php:167;
+#: modules/text/text.module:78
+msgid "The maximum length of the field in characters. Leave blank for an unlimited size."
+msgstr "Số ký tự tối đa cho trường. Để trống nếu muốn độ dài là vô hạn."
+
+#: examples/example_field.php:551;
+#: examples/simple_field.php:430;
+#: modules/text/text.module:320
+msgid "Rows"
+msgstr "Số dòng"
+
+#: examples/example_field.php:560;
+#: examples/simple_field.php:438;
+#: modules/text/text.module:329
+msgid "\"Rows\" must be a positive integer."
+msgstr "\"Số dòng\" phải là một số nguyên dương."
+
+#: includes/content.admin.inc:212,419,627,854;
+#: includes/content.views.inc:308;
+#: modules/fieldgroup/fieldgroup.module:121
+msgid "Label"
+msgstr "Nhãn"
+
+#: content.module:1637;
+#: modules/nodereference/nodereference.module:214
+msgid "Teaser"
+msgstr "Bản cắt"
+
+#: content.module:103;
+#: modules/content_copy/content_copy.module:125
+msgid "Fields"
+msgstr "Các trường"
+
+#: examples/example_field.php:174;
+#: modules/number/number.module:129;
+#: modules/text/text.module:88
+msgid "Allowed values list"
+msgstr "Danh sách các giá trị được phép"
+
+#: examples/example_field.php:158,388;
+#: examples/simple_field.php:332;
+#: modules/text/text.module:66,205;
+#: modules/userreference/userreference.module:151
+msgid "Plain text"
+msgstr "Ký tự đơn giản"
+
+#: examples/example_field.php:158;
+#: modules/text/text.module:66
+msgid "Filtered text (user selects input format)"
+msgstr "Văn bản được lọc (người dùng chọn định dạng dữ liệu v`o)"
+
+#: examples/example_field.php:161;
+#: modules/text/text.module:69
+msgid "Text processing"
+msgstr "Xử lý văn bản"
+
+#: examples/example_field.php:287;
+#: examples/simple_field.php:231
+msgid "%label is longer than %max characters."
+msgstr "%label dài hơn %max ký tự."
+
+#: content.info:0;
+#: modules/content_copy/content_copy.info:0;
+#: modules/content_permissions/content_permissions.info:0;
+#: modules/fieldgroup/fieldgroup.info:0;
+#: modules/nodereference/nodereference.info:0;
+#: modules/number/number.info:0;
+#: modules/optionwidgets/optionwidgets.info:0;
+#: modules/text/text.info:0;
+#: modules/userreference/userreference.info:0
+msgid "CCK"
+msgstr "CCK"
+
+#: examples/example_field.php:393;
+#: modules/text/text.module:210
+msgid "Trimmed"
+msgstr "Rút gọn"
+
+#: examples/example_field.php:182;
+#: includes/content.admin.inc:934;
+#: modules/number/number.module:137;
+#: modules/text/text.module:96
+msgid "PHP code"
+msgstr "Mã PHP"
+
+#: content.module:1638;
+#: modules/nodereference/nodereference.module:209
+msgid "Full node"
+msgstr "Node đầy đủ"
+
+#: modules/nodereference/nodereference.module:302;
+#: modules/optionwidgets/optionwidgets.module:68;
+#: modules/userreference/userreference.module:198
+msgid "Select list"
+msgstr "Danh sách chọn lựa"
+
+#: examples/example_field.php:191;
+#: modules/number/number.module:147;
+#: modules/text/text.module:106
+msgid "Advanced usage only: PHP code that returns a keyed array of allowed values. Should not include &lt;?php ?&gt; delimiters. If this field is filled out, the array returned by this code will override the allowed values list above."
+msgstr "Chỉ sử dụng nâng cao: Đoạn mã PHP có trả về một mảng, có khoá, các giá trị được phép. Không nên bao gồm các ký tự phân cách &lt;?php ?&gt;. Nếu trường này được điền dữ liệu vào, mảng được trả về bởi đoạn mã này sẽ quá tải lên danh sách các giá trị ở trên."
+
+#: examples/example_field.php:476;
+#: examples/simple_field.php:400;
+#: modules/number/number.module:342;
+#: modules/text/text.module:260
+msgid "Text field"
+msgstr "Trường dữ liệu bản văn"
+
+#: modules/nodereference/nodereference.module:310;
+#: modules/userreference/userreference.module:206
+msgid "Autocomplete text field"
+msgstr "Trường dữ liệu autocomplete"
+
+#: modules/number/number.module:123;
+#: modules/text/text.module:82
+msgid "Allowed values"
+msgstr "Các giá trị được phép"
+
+#: includes/content.admin.inc:963;
+#: modules/number/number.module:154;
+#: modules/text/text.module:113
+msgid "&lt;none&gt;"
+msgstr "&lt;rỗng&gt;"
+
+#: includes/content.admin.inc:964;
+#: modules/number/number.module:155;
+#: modules/text/text.module:114
+msgid "You're not allowed to input PHP code."
+msgstr "Bạn không được phép nhập mã PHP."
+
+#: modules/number/number.module:133;
+#: modules/text/text.module:92
+msgid "The possible values this field can contain. Enter one value per line, in the format key|label. The key is the value that will be stored in the database and it must match the field storage type, %type. The label is optional and the key will be used as the label if no label is specified.<br />Allowed HTML tags: @tags"
+msgstr ""
+
+#: modules/number/number.module:155;
+#: modules/text/text.module:114
+msgid "This PHP code was set by an administrator and will override the allowed values list above."
+msgstr "Đoạn mã PHP này được thiết lập bởi người quản trị và sẽ quá tải lên danh sách các giá trị có thể, ở trên."
+
+#: modules/number/number.module:228;
+#: modules/text/text.module:161
+msgid "%name: illegal value."
+msgstr "%name: giá trị không hợp lệ."
+

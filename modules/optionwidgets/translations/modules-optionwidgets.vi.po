@@ -1,0 +1,70 @@
+# Vietnamese translation of cck (6.x-2.0-rc4)
+# Copyright (c) 2008 by the Vietnamese translation team
+# Generated from files:
+#  optionwidgets.module,v 1.69.2.5 2008/07/05 00:26:54 yched
+#  optionwidgets.info,v 1.7 2008/04/23 18:02:24 dww
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: cck (6.x-2.0-rc4)\n"
+"POT-Creation-Date: 2008-10-09 19:55-0700\n"
+"PO-Revision-Date: YYYY-mm-DD HH:MM+ZZZZ\n"
+"Language-Team: Vietnamese\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: modules/optionwidgets/optionwidgets.module:401
+msgid "N/A"
+msgstr "N/A"
+
+#: modules/optionwidgets/optionwidgets.info:0
+msgid "Option Widgets"
+msgstr ""
+
+#: modules/optionwidgets/optionwidgets.info:0
+msgid ""
+"Defines selection, check box and radio button widgets for text and "
+"numeric fields."
+msgstr ""
+
+#: modules/optionwidgets/optionwidgets.module:76
+msgid "Check boxes/radio buttons"
+msgstr ""
+
+#: modules/optionwidgets/optionwidgets.module:84
+msgid "Single on/off checkbox"
+msgstr ""
+
+#: modules/optionwidgets/optionwidgets.module:0
+msgid "optionwidgets"
+msgstr "optionwidgets"
+
+#: modules/optionwidgets/optionwidgets.module:12
+msgid ""
+"For a 'single on/off checkbox' widget, define the 'off' value first, "
+"then the 'on' value in the <strong>Allowed values</strong> section. "
+"Note that the checkbox will be labeled with the label of the 'on' "
+"value."
+msgstr ""
+
+#: modules/optionwidgets/optionwidgets.module:15
+msgid ""
+"The 'checkboxes/radio buttons' widget will display checkboxes if the "
+"multiple values option is selected for this field, otherwise radios "
+"will be displayed."
+msgstr ""
+
+#: modules/optionwidgets/optionwidgets.module:10
+msgid ""
+"Create a list of options as a list in <strong>Allowed values "
+"list</strong> or as an array in PHP code. These values will be the "
+"same for %field in all content types."
+msgstr ""
+
+#: modules/optionwidgets/optionwidgets.module:25
+msgid "You need to specify the 'allowed values' for this field."
+msgstr ""
+"Bạn cần xác định 'các giá trị được phép' cho "
+"trường dữ liệu này."
+

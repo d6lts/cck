@@ -1,0 +1,37 @@
+# Vietnamese translation of cck (6.x-2.0-rc4)
+# Copyright (c) 2008 by the Vietnamese translation team
+# Generated from file: example_field.php,v 1.5.2.2 2008/07/03 12:44:51 yched
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: cck (6.x-2.0-rc4)\n"
+"POT-Creation-Date: 2008-10-09 19:55-0700\n"
+"PO-Revision-Date: YYYY-mm-DD HH:MM+ZZZZ\n"
+"Language-Team: Vietnamese\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: examples/example_field.php:278
+msgid "Illegal value for %name."
+msgstr "Giá trị cho %name không hợp lệ."
+
+#: examples/example_field.php:178
+msgid ""
+"The possible values this field can contain. Enter one value per line, "
+"in the format key|label. The key is the value that will be stored in "
+"the database and it must match the field storage type, %type. The "
+"label is optional and the key will be used as the label if no label is "
+"specified."
+msgstr ""
+"Những giá trị trường này có thể chứa đựng. Nhập "
+"vào mỗi giá trị một dòng, trong định dạng khóa|nhãn. "
+"Khóa là giá trị được lưu trữ trong cơ sở dữ liệu "
+"và nó phải trùng khớp với kiểu lưu trữ trường, %type. "
+"Nhãn là tùy chọn và khóa sử sẽ được sử dụng như "
+"trường nếu không có nhãn được xác định."
+
+#: examples/example_field.php:484
+msgid "Text area"
+msgstr "Vùng văn bản"
+
