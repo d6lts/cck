@@ -604,7 +604,10 @@ function fieldgroup_wrapper_post_render($content, $element) {
   // The display settings are not in quite the same place in the
   // group and the field, so create the value the theme will expect.
   $group['display_settings'] = $group['settings']['display'];
-  return theme('content_content', $content, $group, $element['#context']);
+  if (theme('content_exclude', $content, $group, $element['#context'])) {
+    return '';
+  }
+  return $content;
 }
 
 /*

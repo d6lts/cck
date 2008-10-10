@@ -200,7 +200,7 @@ function content_theme() {
       'path' => $path,
       'arguments' => array('form' => NULL),
     ),
-    'content_content' => array(
+    'content_exclude' => array(
       'arguments' => array('content' => NULL, 'object' => array(), 'context' => NULL),
     ),
     'content_view_multiple_field' => array(
@@ -2038,7 +2038,10 @@ function content_default_value(&$form, &$form_state, $field, $delta) {
 function content_field_wrapper_post_render($content, $element) {
   $fields = content_fields();
   $field = $fields[$element['#field_name']];
-  return theme('content_content', $content, $field, $element['#context']);
+  if (theme('content_exclude', $content, $field, $element['#context'])) {
+    return '';
+  }
+  return $content;
 }
 
 
@@ -2087,18 +2090,18 @@ function content_field_wrapper_post_render($content, $element) {
  *    - NODE_BUILD_PRINT
  *
  * @return
- *   The content to be added to $content in this context.
+ *   Whether or not content is to be added to $content in this context.
  *   Uses the value of the 'Exclude' checkbox for this field
  *   as set on the Manage fields screen.
  */
-function theme_content_content($content, $object, $context) {
+function theme_content_exclude($content, $object, $context) {
   if (empty($object['display_settings']) 
     || !is_array($object['display_settings'][$context]) 
     || empty($object['display_settings'][$context]['exclude'])) {
-    return $content;
+    return FALSE;
   }
   else {
-    return '';
+    return TRUE;
   }
 }
 
