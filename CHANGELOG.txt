@@ -3,6 +3,7 @@
 CCK 6.2-dev
 ===========
 
+- Fix bad logic in testing content version variable to prevent warning messages before content module is updated.
 - #300368 Add option on Display fields screen to omit fields or groups from the $content value passed to the node template.
 - Get rid of t() around Views field label since Views already has it marked as a translatable option.
 - #285470 by jhuckabee, store field label in the view in all cases, previously only custom labels were stored.

@@ -505,7 +505,7 @@ function content_notify($op, $module) {
     case 'disable':
       // When CCK modules are disabled before content module's update is run
       // to add the active column, we can't do this.
-      if (!variable_get('content_schema_version', -1) >= 6007) {
+      if (variable_get('content_schema_version', -1) < 6007) {
         return FALSE;
       }
       db_query("UPDATE {". content_field_tablename() ."} SET active=0 WHERE module='%s'", $module);
@@ -524,7 +524,7 @@ function content_notify($op, $module) {
 function content_associate_fields($module) {
   // When CCK modules are enabled before content module's update is run,
   // to add module and active columns, we can't do this.
-  if (!variable_get('content_schema_version', -1) >= 6007) {
+  if (variable_get('content_schema_version', -1) < 6007) {
     return FALSE;
   }
   $module_fields = module_invoke($module, 'field_info');
@@ -903,7 +903,7 @@ function _content_sort_items_value_helper($a, $b) {
 function content_storage($op, $node) {
   // Don't try this before content module's update is run to add
   // the active and module columns.
-  if (!variable_get('content_schema_version', -1) >= 6007) {
+  if (variable_get('content_schema_version', -1) < 6007) {
     return FALSE;
   }
 
@@ -1323,7 +1323,7 @@ function _content_type_info($reset = FALSE) {
 
     // Don't try this before content module's update is run
     // to add module and active columns to the table.
-    if (!variable_get('content_schema_version', -1) >= 6007) {
+    if (variable_get('content_schema_version', -1) < 6007) {
       return array();
     }
 
