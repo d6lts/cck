@@ -250,9 +250,11 @@ function content_check_update($module = NULL) {
   }
   // If everything is OK and updates are not aborted, make sure 
   // content_associate_fields() gets run. With all the complexity of
-  // the dependend updates, it can get lost when an update is aborted. 
-  // It won't hurt anything to do it more than once in order to be sure
-  // it doesn't get missed.
+  // the dependent updates, it can get missed when an update is aborted. 
+  // It won't hurt anything to do this more than once in order to be sure
+  // it doesn't get skipped. Without this step, we can end up with
+  // field modules that are enabled and updated, but not marked as active
+  // in the content_node_field table.
   if ($module and module_exists($module)) {
     content_associate_fields($module);
   }
