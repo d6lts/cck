@@ -248,6 +248,14 @@ function content_check_update($module = NULL) {
     $ret['#abort'] = array('success' => FALSE, 'query' => t('Some updates are still pending.<br/>Please re-run the update script.'));
     return $ret;
   }
+  // If everything is OK and updates are not aborted, make sure 
+  // content_associate_fields() gets run. With all the complexity of
+  // the dependend updates, it can get lost when an update is aborted. 
+  // It won't hurt anything to do it more than once in order to be sure
+  // it doesn't get missed.
+  if ($module and module_exists($module)) {
+    content_associate_fields($module);
+  }
 }
 
 /**
