@@ -1,10 +1,11 @@
+; $Id$
+
 THIS MODULE IS STILL EXPERIMENTAL AND NOT READY FOR PRODUCTION!
 ===================================================================
 
 To try it out, add a content_multigroup.info file to the module. 
 The info file should be a plain text file that looks like:
 ===================================================================
-; $Id$
 name = Content Multigroup
 description = Combine multiple CCK fields into repeating field collections that work in unison. This module is experimental and not ready for production.
 dependencies[] = content
