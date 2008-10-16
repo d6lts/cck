@@ -103,11 +103,11 @@ function content_inactive_message($type_name) {
     drupal_set_message(t('This content type has inactive fields. Inactive fields are not included in lists of available fields until their modules are enabled.'), 'error');
     foreach ($inactive_fields as $field_name => $field) {
       drupal_set_message(t('!field (!field_name) is an inactive !field_type field that uses a !widget_type widget.', array(
-      '!field' => $field['widget']['label'], 
-      '!field_name' => $field['field_name'], 
+      '!field' => $field['widget']['label'],
+      '!field_name' => $field['field_name'],
       '!field_type' => array_key_exists($field['type'], $field_types) ? $field_types[$field['type']]['label'] : $field['type'],
       '!widget_type' => array_key_exists($field['widget']['type'], $widget_types) ? $widget_types[$field['widget']['type']]['label'] : $field['widget']['type'],
-      )));        
+      )));
     }
   }
 }
@@ -119,9 +119,9 @@ function content_inactive_message($type_name) {
  * JS drag-n-drop. Non-CCK form elements can also be moved around.
  */
 function content_field_overview_form(&$form_state, $type_name) {
-  
+
   content_inactive_message($type_name);
-    
+
   // When displaying the form, make sure the list of fields
   // is up-to-date.
   if (empty($form_state['post'])) {
@@ -231,9 +231,9 @@ function content_field_overview_form(&$form_state, $type_name) {
   $weight = max($weights) + 1;
   $field_type_options = content_field_type_options();
   $widget_type_options = content_widget_type_options(NULL, TRUE);
-  array_unshift($field_type_options, t('- Select a field type -'));
-  array_unshift($widget_type_options, t('- Select a widget -'));
   if ($field_type_options && $widget_type_options) {
+    array_unshift($field_type_options, t('- Select a field type -'));
+    array_unshift($widget_type_options, t('- Select a widget -'));
     $name = '_add_new_field';
     $form[$name] = array(
       'label' => array(
@@ -551,7 +551,7 @@ function content_display_overview_form(&$form_state, $type_name, $contexts_selec
     $group_options = _fieldgroup_groups_label($type['type']);
   }
   $contexts = content_build_modes($contexts_selector);
-  
+
   $form = array(
     '#tree' => TRUE,
     '#type_name' => $type['type'],
@@ -599,7 +599,7 @@ function content_display_overview_form(&$form_state, $type_name, $contexts_selec
       $options[$formatter_name] = $formatter_info['label'];
     }
     $options['hidden'] = t('<Hidden>');
-    
+
     foreach ($contexts as $key => $value) {
       $form[$name][$key]['format'] = array(
         '#type' => 'select',
@@ -1133,7 +1133,7 @@ function content_field_edit_form(&$form_state, $type_name, $field_name) {
   if (is_array($additions)) {
     $form['field'] = array_merge($form['field'], $additions);
   }
-  
+
   $form['submit'] = array(
     '#type' => 'submit',
     '#value' => t('Save field settings'),
