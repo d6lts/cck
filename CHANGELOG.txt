@@ -14,6 +14,7 @@ CCK 6.2-dev
 - #320743 Revert group names uniqueness rules as per D5 behavior (group names unique only inside content types).
 - #310219 followup : numeric (core) rendering modes were not preserved in some cases.
 - Fix 'unknown index' warnings on fieldgroups settings pages.
+- #320139 by Moonshine - Noderef / Userref: Fix single-quotes encoding in 'Views' mode with option widgets.
 
 CCK 6.2-rc10
 ============

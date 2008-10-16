@@ -653,7 +653,7 @@ function nodereference_allowed_values($field) {
   foreach ($references as $key => $value) {
     // Views theming runs check_plain (htmlentities) on the values.
     // We reverse that with html_entity_decode.
-    $options[$key] = html_entity_decode(strip_tags($value['rendered']));
+    $options[$key] = html_entity_decode(strip_tags($value['rendered']), ENT_QUOTES);
   }
   return $options;
 }
