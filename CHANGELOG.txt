@@ -12,6 +12,7 @@ CCK 6.2-dev
 - #318224 by brmassa, error in Content Copy handling of fieldgroups.
 - #198508 Add messages to Manage fields screen about inactive fields.
 - #320743 Revert group names uniqueness rules as per D5 behavior (group names unique only inside content types).
+- #310219 followup : numeric (core) rendering modes were not preserved in some cases.
 
 CCK 6.2-rc10
 ============

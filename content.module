@@ -1719,7 +1719,8 @@ function content_build_modes($selector = NULL) {
     $data = module_invoke_all('content_build_modes');
     $flat = array();
     foreach ($data as $tab) {
-      $flat = array_merge($flat, $tab['build modes']);
+      // Use the + operator to preserve numeric indexes (core build modes).
+      $flat += (array) $tab['build modes'];
     }
     $info = array('tabs' => $data, 'build modes' => $flat);
   }
