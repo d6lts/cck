@@ -2049,36 +2049,36 @@ function content_field_wrapper_post_render($content, $element) {
  * 'Theme' function for a field's addition to $content.
  *
  * Adapts the all-inclusive $content variable in node templates to allow
- * some field content to be excluded. This is a theme, so it can be
+ * some field content to be excluded. This is a theme function, so it can be
  * overridden in different themes to produce different results.
- * 
- * The html for individual fields and groups are available in the 
+ *
+ * The html for individual fields and groups are available in the
  * $FIELD_NAME_rendered and $GROUP_NAME_rendered variables.
- * 
+ *
  * This allows more flexibility in node templates : you can use custom markup
  * around a few specific fields, and print the rest of the node with $content.
  *
  * @param $content
  *    The themed content for this field or group.
- * 
+ *
  * @param $object
  *    The field or group array for this item.
  *    $object['#type_name'] holds the content type.
  *    $object['#field_name'] holds the field name (if a field).
  *    $object['#group_name'] holds the group name (if a group).
- *    $object['display_settings'] holds the display settings 
- *    for all contexts, in an array like: 
+ *    $object['display_settings'] holds the display settings
+ *    for all contexts, in an array like:
  *      $object['display_settings'] => array(
  *        'full' => array(
- *          'format' => 'default', 
+ *          'format' => 'default',
  *          'exclude' => 0,
  *         ),
  *        'teaser' => array(
- *          'format' => 'default', 
+ *          'format' => 'default',
  *          'exclude' => 1,
  *         ),
  *      );
- *      
+ *
  * @param $context
  *    The context for which the node is being rendered.
  *    Can be one of the following values :
@@ -2095,8 +2095,8 @@ function content_field_wrapper_post_render($content, $element) {
  *   as set on the Manage fields screen.
  */
 function theme_content_exclude($content, $object, $context) {
-  if (empty($object['display_settings']) 
-    || !is_array($object['display_settings'][$context]) 
+  if (empty($object['display_settings'])
+    || !is_array($object['display_settings'][$context])
     || empty($object['display_settings'][$context]['exclude'])) {
     return FALSE;
   }
