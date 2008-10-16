@@ -6,12 +6,12 @@
  * Create complex, repeating groups of CCK fields that work in unison.
  *
  * @See README.txt.
- * 
+ *
  */
 
 function content_multigroup_help($path, $arg) {
   switch ($path) {
-    case ('admin/help#content_multigroup'): 
+    case ('admin/help#content_multigroup'):
       return t('The fields in a Standard group are independent of each other and each can have either single or multiple values. The fields in a Multigroup are treated as a repeating collection of single value fields.');
   }
 }
@@ -69,8 +69,8 @@ function content_multigroup_fieldgroup_default_settings($group_type) {
 
 function content_multigroup_multiple_values() {
   return array(
-    //'' => t('N/A'), 
-    1 => t('Unlimited'), 
+    //'' => t('N/A'),
+    1 => t('Unlimited'),
     0 => 1) + drupal_map_assoc(range(2, 10));
 }
 
@@ -92,7 +92,7 @@ function content_multigroup_menu() {
  * Implementation of hook_form_alter().
  */
 function content_multigroup_form_alter(&$form, $form_state, $form_id) {
-  // If this is a field edit form and the field is in a Multigroup, 
+  // If this is a field edit form and the field is in a Multigroup,
   // override the multiple value settings.
   if ($form_id == 'content_field_edit_form' && isset($form['widget'])) {
     $content_type = content_types($form['type_name']['#value']);
@@ -130,25 +130,25 @@ function content_multigroup_field_overview_form(&$form, &$form_state) {
 }
 
 /**
- * Validation for creating/moving fields and groups on the 
+ * Validation for creating/moving fields and groups on the
  * Manage Fields screen.
  */
 function content_multigroup_field_overview_form_validate($form, &$form_state) {
   $form_values = $form_state['values'];
-  
+
   $type_name = $form['#type_name'];
   $fields = array();
   $groups = array();
-    
+
   $group = $form_values['_add_new_group'];
   if (array_filter(array($group['label'], $group['group_name']))) {
-    
+
     $group['settings'] = field_group_default_settings($form_values['_add_new_group']['group_type']);
     $group = $form_values['_add_new_group'];
-    $validation = fieldgroup_validate_name($group);
-    
+    $validation = fieldgroup_validate_name($group, $form['#type_name']);
+
     // If there's something wrong with the new group,
-    // don't bother doing any more validation, further 
+    // don't bother doing any more validation, further
     // processing will be stopped by the fieldgroup module.
     if (!empty($validation['errors'])) {
       return;
@@ -157,7 +157,7 @@ function content_multigroup_field_overview_form_validate($form, &$form_state) {
     $new_group_name = $group['group_name'];
     $groups['_add_new_group'] = $group;
   }
-  
+
   // See if we have fields moving into or out of a Multigroup.
   // Set any fields to use the new name here so they will get processed
   // correctly by the fieldgroup module when saved.
@@ -166,7 +166,7 @@ function content_multigroup_field_overview_form_validate($form, &$form_state) {
       $values['parent'] = $new_group_name;
       $form_values[$key] = $values;
     }
-    
+
     if (!empty($form[$key]['#row_type']) && $form[$key]['#row_type'] == 'group') {
       // Gather up info about all groups.
       $group_name = $form_values[$key]['group']['group_name'];
@@ -175,11 +175,11 @@ function content_multigroup_field_overview_form_validate($form, &$form_state) {
     if (!empty($form[$key]['#row_type']) && $form[$key]['#row_type'] == 'field') {
       if ($values['prev_parent'] != $values['parent']) {
         // Gather up fields that have moved in or out of a group.
-        $fields[$key] = $form_values[$key]['field'];  
+        $fields[$key] = $form_values[$key]['field'];
       }
     }
   }
-  
+
   if (!empty($fields)) {
     foreach ($fields as $field_name => $field) {
       $new_group = $form_values[$field_name]['parent'];
@@ -187,7 +187,7 @@ function content_multigroup_field_overview_form_validate($form, &$form_state) {
       if (!empty($new_group) && isset($groups[$new_group]) && $groups[$new_group]['group_type'] == 'multigroup') {
         $allowed_in = content_multigroup_allowed_in($field, $groups[$new_group]);
         if (!$allowed_in['allowed']) {
-          form_set_error($field_name, $allowed_in['message']);  
+          form_set_error($field_name, $allowed_in['message']);
         }
         else {
           if (!empty($allowed_in['message'])) {
@@ -208,10 +208,10 @@ function content_multigroup_field_overview_form_validate($form, &$form_state) {
       elseif (!empty($old_group) && isset($groups[$old_group]) && $groups[$old_group]['group_type'] == 'multigroup') {
         $allowed_out = content_multigroup_allowed_out($field, $groups[$old_group]);
         if (!$allowed_out['allowed']) {
-          form_set_error($field_name, $allowed_out['message']);  
+          form_set_error($field_name, $allowed_out['message']);
         }
         elseif (!empty($allowed_out['message'])) {
-          drupal_set_message($allowed_out['message']);  
+          drupal_set_message($allowed_out['message']);
         }
       }
     }
@@ -219,14 +219,14 @@ function content_multigroup_field_overview_form_validate($form, &$form_state) {
 }
 
 /**
- * Helper function for deciding if a field is 
+ * Helper function for deciding if a field is
  * allowed into a Multigroup.
  */
 function content_multigroup_allowed_in($field, $group) {
   if ($group['group_type'] != 'multigroup') {
     return array('allowed' => TRUE, 'message' => '');
   }
-  
+
   // We can't allow fields with more multiple values than the group has
   // to be moved into it.
   $max_existing = content_max_delta($field['field_name']);
@@ -234,34 +234,34 @@ function content_multigroup_allowed_in($field, $group) {
   $multiple_values = content_multigroup_multiple_values();
   if ($group_max != 1 && $max_existing > $group_max) {
     return array(
-      'allowed' => FALSE, 
+      'allowed' => FALSE,
       'message' => t('This change is not allowed. The field %field already has %multiple values in the database but the group %group only allows %group_max. Making this change would result in the loss of data.', array('%field' => $field['widget']['label'], '%multiple' => $max_existing, '%group' => $group['label'], '%group_max' => $multiple_values[$group_max]))
-    );  
+    );
   }
-  
+
   // Fields that handle their own multiple values may not have the same values
   // in Multigroup fields and normal fields. We don't know if they will work or not.
-  
-  // Adding a hook here where widgets that handle their own multiple values 
+
+  // Adding a hook here where widgets that handle their own multiple values
   // that will work correctly in Multigroups can allow their fields in.
-  
+
   if (content_handle('widget', 'multiple values', $field) != CONTENT_HANDLE_CORE) {
     $allowed_widgets = array(
-      'optionwidgets_select', 
-      'optionwidgets_buttons', 
-      'optionwidgets_onoff', 
-      'nodereference_buttons', 
-      'nodereference_select', 
-      'userreference_buttons', 
+      'optionwidgets_select',
+      'optionwidgets_buttons',
+      'optionwidgets_onoff',
+      'nodereference_buttons',
+      'nodereference_select',
+      'userreference_buttons',
       'userreference_select',
       );
     $allowed_widgets = array_merge($allowed_widgets, module_invoke_all('content_multigroup_allowed_widgets'));
     if (!in_array($field['widget']['type'], $allowed_widgets)) {
       return array(
-        'allowed' => FALSE, 
+        'allowed' => FALSE,
         'message' => t('This change is not allowed. The field %field handles multiple values differently than the Content module. Making this change could result in the loss of data.', array('%field' => $field['widget']['label']))
       );
-    } 
+    }
   }
 
   // Allow other modules to intervene.
@@ -272,14 +272,14 @@ function content_multigroup_allowed_in($field, $group) {
     if ($result['allowed'] === FALSE) {
       return array('allowed' => FALSE, 'message' => $result['message']);
     }
-  }    
-   
+  }
+
   $message = t('You are moving the field %field into a Multigroup.', array('%field' => $field['widget']['label']));
   return array('allowed' => TRUE, 'message' => $message);
 }
 
 /**
- * Helper function for deciding if a field is 
+ * Helper function for deciding if a field is
  * allowed out of a Multigroup.
  */
 function content_multigroup_allowed_out($field, $group) {
@@ -290,27 +290,27 @@ function content_multigroup_allowed_out($field, $group) {
   // In a Multigroup the same option can be selected multiple times,
   // but that is not possible in a normal group.
 
-  // Adding a hook here where widgets that handle their own multiple values 
+  // Adding a hook here where widgets that handle their own multiple values
   // can indicate their fields should not be removed from Multigroups.
-  
+
   $max_existing = content_max_delta($field['field_name']);
   $no_remove_widgets = array(
-      'optionwidgets_select', 
-      'optionwidgets_buttons', 
-      'optionwidgets_onoff', 
-      'nodereference_buttons', 
-      'nodereference_select', 
-      'userreference_buttons', 
+      'optionwidgets_select',
+      'optionwidgets_buttons',
+      'optionwidgets_onoff',
+      'nodereference_buttons',
+      'nodereference_select',
+      'userreference_buttons',
       'userreference_select',
       );
   $no_remove_widgets = array_merge($no_remove_widgets, module_invoke_all('content_multigroup_no_remove_widgets'));
   if (in_array($field['widget']['type'], $no_remove_widgets) && $max_existing > 0) {
     return array(
-      'allowed' => FALSE, 
+      'allowed' => FALSE,
       'message' => t('This change is not allowed. The field %field already has data created and uses a widget that stores data differently in a Standard group than in a Multigroup. Making this change could result in the loss of data.', array('%field' => $field['widget']['label']))
-    );  
+    );
   }
-  
+
   // Allow other modules to intervene.
   // Any failure will prevent this action.
   foreach (module_implements('content_multigroup_allowed_out') as $module) {
@@ -319,10 +319,10 @@ function content_multigroup_allowed_out($field, $group) {
     if ($result['allowed'] === FALSE) {
       return array('allowed' => FALSE, 'message' => $result['message']);
     }
-  }    
-   
+  }
+
   $message = t('You are moving the field %field out of a Multigroup.', array('%field' => $field['widget']['label']));
-  return array('allowed' => TRUE, 'message' => $message);  
+  return array('allowed' => TRUE, 'message' => $message);
 }
 
 /**
@@ -331,10 +331,10 @@ function content_multigroup_allowed_out($field, $group) {
  * Add an additional selector for setting multigroup field display format.
  */
 function content_multigroup_display_overview_form(&$form, &$form_state) {
-  
+
   $type_name = $form['#type_name'];
   $contexts_selector = $form['#contexts'];
-  
+
   // Gather type information.
   $type = content_types($type_name);
   $field_types = _content_field_types();
@@ -364,7 +364,7 @@ function content_multigroup_display_overview_form(&$form, &$form_state) {
       continue;
     }
     $defaults = $group['settings']['multigroup']['display_settings'];
-    
+
     $form_name = $name .'_subgroup';
     $form['#fields'] = array_merge(array($form_name), $form['#fields']);
     $form[$form_name] = array(
@@ -392,13 +392,13 @@ function content_multigroup_display_overview_form(&$form, &$form_state) {
 
 /**
  * Submit handler for the display overview form.
- * 
+ *
  * Do this in pre_save so we catch it before the content module
  * tries to use our 'field'.
  */
 function content_multigroup_display_overview_form_submit($form, &$form_state) {
   $form_values = $form_state['values'];
-    
+
   // Find any groups we inserted into the display fields form,
   // save our settings, and remove them from $form_state.
   foreach ($form_values as $key => $values) {
@@ -406,13 +406,13 @@ function content_multigroup_display_overview_form_submit($form, &$form_state) {
       $group_name = str_replace('_subgroup', '', $key);
       $groups = fieldgroup_groups($form['#type_name']);
       $group = $groups[$group_name];
-          
+
       // We have some numeric keys here, so we can't use array_merge.
       foreach ($values as $k => $v) {
         $group['settings']['multigroup']['display_settings'][$k] = $v;
       }
       fieldgroup_save_group($form['#type_name'], $group);
-      
+
       // Make sure group information is immediately updated.
       cache_clear_all('fieldgroup_data', content_cache_tablename());
       fieldgroup_groups('', FALSE, TRUE);
@@ -422,17 +422,17 @@ function content_multigroup_display_overview_form_submit($form, &$form_state) {
 }
 
 /**
- * Alter the Fieldgroup edit form 
+ * Alter the Fieldgroup edit form
  * to add Multigroup settings.
  */
 function content_multigroup_group_edit_form(&$form, &$form_state) {
   $type_name = $form['#content_type']['type'];
   $group_name = $form['group_name']['#default_value'];
-  
+
   $content_type = content_types($type_name);
   $groups = fieldgroup_groups($content_type['type']);
   $group = $groups[$group_name];
-  
+
   if ($group['group_type'] != 'multigroup') {
     return;
   }
@@ -449,11 +449,11 @@ function content_multigroup_group_edit_form(&$form, &$form_state) {
     '#collapsed' => FALSE,
     '#collapsible' => TRUE,
   );
-  
+
   $description = t('Number of times to repeat the collection of Multigroup fields.') . ' ';
   $description .= t("'Unlimited' will provide an 'Add more' button so the users can add repeat it as many times as they like.") . ' ';
   $description .= t('All fields in this group will automatically be set to allow this number of values.');
-    
+
   $multiple = isset($group['settings']['multigroup']['multiple']) ? $group['settings']['multigroup']['multiple'] : 1;
   $form['settings']['multigroup']['multiple'] = array(
     '#tree' => TRUE,
@@ -479,7 +479,7 @@ function content_multigroup_group_edit_form(&$form, &$form_state) {
       '#default_value' => isset($group['settings']['multigroup']['labels'][$i]) ? $group['settings']['multigroup']['labels'][$i] : '',
     );
   }
-  
+
   $form['#validate'][] = 'content_multigroup_group_edit_form_validate';
   $form['#submit'][] = 'content_multigroup_group_edit_form_submit';
   return $form;
@@ -501,7 +501,7 @@ function content_multigroup_group_edit_form_validate($form, &$form_state) {
     // Make sure we don't set the multiple values to a number that
     // would result in lost data.
     $max_existing = content_max_delta($field_name);
-    if ($form_values['settings']['multigroup']['multiple'] != 1 
+    if ($form_values['settings']['multigroup']['multiple'] != 1
       && $max_existing > $form_values['settings']['multigroup']['multiple']) {
       form_set_error('settings][multigroup][multiple', t('The field %field in this group already has %multiple values in the database. To prevent the loss of data you cannot set the number of Multigroup values to less than this.', array('%field' => $data['label'], '%multiple' => $max_existing)));
     }
@@ -510,7 +510,7 @@ function content_multigroup_group_edit_form_validate($form, &$form_state) {
 
 /**
  * Submit the Fieldgroup edit form.
- * 
+ *
  * Update multiple values of fields contained in Multigroups.
  */
 function content_multigroup_group_edit_form_submit($form, &$form_state) {
@@ -534,28 +534,28 @@ function content_multigroup_group_edit_form_submit($form, &$form_state) {
 
 /**
  * Implementation of hook_fieldgroup_form().
- * 
+ *
  * Align the delta values of each field in the Multigroup.
- * 
- * Swap the field name and delta for each Multigroup so we can 
+ *
+ * Swap the field name and delta for each Multigroup so we can
  * d-n-d each collection of fields as a single delta item.
  */
 function content_multigroup_fieldgroup_form(&$form, &$form_state, $form_id, $group) {
-  if ($group['group_type'] != 'multigroup' || 
+  if ($group['group_type'] != 'multigroup' ||
     !empty($form[$group['group_name']]['#access']) || empty($form[$group['group_name']])) {
     return;
   }
-  
+
   $node = $form['#node'];
   $fields = $group['fields'];
   $content_fields = content_fields();
   $group_name = $group['group_name'];
-  
+
   // Use the first field in the group to get the item counts.
   $first_field_name = array_shift(array_keys($group['fields']));
   $first_field = isset($content_fields[$first_field_name]) ? $content_fields[$first_field_name] : array();
   $first_field_items = isset($node->$first_field_name) ? $node->$first_field_name : array();
-     
+
   $group['multiple'] = $group['settings']['multigroup']['multiple'];
   switch ($group['multiple']) {
     case 0:
@@ -581,7 +581,7 @@ function content_multigroup_fieldgroup_form(&$form, &$form_state, $form_id, $gro
       $max = $group['multiple'] - 1;
       break;
   }
-  
+
   $form[$group_name]['#theme'] = 'content_multigroup_node_form';
   $form[$group_name]['#multiple'] = !empty($max);
   $form[$group_name]['#type_name'] = $group['type_name'];
@@ -589,11 +589,11 @@ function content_multigroup_fieldgroup_form(&$form, &$form_state, $form_id, $gro
   $form[$group_name]['#group_label'] = $group['label'];
   $form[$group_name]['#element_validate'] = array('content_multigroup_node_form_validate');
   $form[$group_name]['#tree'] = TRUE;
-      
+
   for ($delta = 0; $delta <= $max; $delta++) {
     content_multigroup_group_form($form, $form_state, $group, $delta);
   }
-  
+
   // Unset the original group field values now that we've moved them.
   foreach ($fields as $field_name => $field) {
     unset($form[$group_name][$field_name]);
@@ -606,23 +606,23 @@ function content_multigroup_fieldgroup_form(&$form, &$form_state, $form_id, $gro
 
 /**
  * Create a new delta value for the group.
- * 
+ *
  * Called in form_alter and by AHAH add more.
  */
 function content_multigroup_group_form(&$form, &$form_state, $group, $delta) {
-  if ($group['group_type'] != 'multigroup' || 
+  if ($group['group_type'] != 'multigroup' ||
     !empty($form[$group['group_name']]['#access']) || empty($form[$group['group_name']])) {
     return;
   }
   module_load_include('inc', 'content', 'includes/content.node_form');
-  
+
   $node = $form['#node'];
   $fields = $group['fields'];
   $content_fields = content_fields();
   $group_name = $group['group_name'];
   $group['multiple'] = $group['settings']['multigroup']['multiple'];
   $form[$group_name]['#fields'] = array_keys($group['fields']);
-  
+
   foreach ($fields as $field_name => $group_field) {
     if (empty($form[$group_name][$delta])) {
       $form[$group_name] += array($delta => array($field_name => array()));
@@ -630,7 +630,7 @@ function content_multigroup_group_form(&$form, &$form_state, $group, $delta) {
     else {
       $form[$group_name][$delta][$field_name] = array();
     }
-     
+
     $form[$group_name][$delta]['_weight'] = array(
       '#type' => 'weight',
       '#delta' => $delta, // this 'delta' is the 'weight' element's property
@@ -642,24 +642,24 @@ function content_multigroup_group_form(&$form, &$form_state, $group, $delta) {
       '#value' => $delta,
     );
 
-    
+
     $field = $content_fields[$field_name];
-      
-    // Make each field into a pseudo single value field 
+
+    // Make each field into a pseudo single value field
     // with the right delta value.
     $field['multiple'] = FALSE;
-    
+
     // Make sure new fields after the first have an 'empty' option.
     $field['required'] = $delta > 0 ? FALSE : $field['required'];
-    
+
     $form['#field_info'][$field_name] = $field;
     $node_copy = drupal_clone($node);
-      
+
     // Set the form '#node' to the delta value we want so the Content
-    // module will feed the right $items to the field module in 
+    // module will feed the right $items to the field module in
     // content_field_form().
-      
-    // There may be missing delta values for fields that were 
+
+    // There may be missing delta values for fields that were
     // never created, so check first.
     if (!empty($node->$field_name) && count($node->$field_name) >= $delta + 1) {
       $node_copy->$field_name = array($delta => $node->{$field_name}[$delta]);
@@ -669,7 +669,7 @@ function content_multigroup_group_form(&$form, &$form_state, $group, $delta) {
     }
     $form['#node'] = $node_copy;
     $field_form = content_field_form($form, $form_state, $field, $delta);
-              
+
     // Place the new $field_form into the $delta position in the group form.
     if (content_handle('widget', 'multiple values', $field) == CONTENT_HANDLE_CORE) {
       $value = array_key_exists($delta, $field_form[$field_name]) ? $delta : 0;
@@ -679,8 +679,8 @@ function content_multigroup_group_form(&$form, &$form_state, $group, $delta) {
       $form[$group_name][$delta][$field_name] = $field_form[$field_name];
     }
     $form[$group_name][$delta][$field_name]['#weight'] = $field['widget']['weight'];
-      
-    // Add in our validation step, and make sure it preceeds other 
+
+    // Add in our validation step, and make sure it preceeds other
     // processing so we can massage the element back to the normal position.
     if (empty($form[$group_name][$delta][$field_name]['#element_validate'])) {
       $form[$group_name][$delta][$field_name]['#element_validate'] = array();
@@ -690,26 +690,26 @@ function content_multigroup_group_form(&$form, &$form_state, $group, $delta) {
 
   // Reset the form '#node' back to its original value.
   $form['#node'] = $node;
-  
-  return $form;  
+
+  return $form;
 }
 
 /**
- * Swap transposed field/delta values back 
+ * Swap transposed field/delta values back
  * to their normal positions in the node.
  */
 function content_multigroup_node_item_validate($element, &$form_state) {
   static $weights = array();
-  
-  //dsm($form_state['values']); 
+
+  //dsm($form_state['values']);
   $form_values = $form_state['values'];
   $field_name = array_pop($element['#parents']);
   $delta = array_pop($element['#parents']);
   $group_name = array_pop($element['#parents']);
-    
+
   // Identify the new delta value for each field.
-  
-  // Find the original delta values for this group, save as static value 
+
+  // Find the original delta values for this group, save as static value
   // because the group will acquire and lose values while we process it.
   if (!array_key_exists($group_name, $weights)) {
     $items = $form_state['values'][$group_name];
@@ -735,31 +735,31 @@ function content_multigroup_node_item_validate($element, &$form_state) {
       $count++;
     }
   }
-  // We figured out what the new order for the fields is, 
+  // We figured out what the new order for the fields is,
   // so set the value for the new delta.
-  
+
   // We move these new values back up to the top level of the
   // node and out of the group so the Content module will find and
   // save the new values and so they don't get mixed into the
   // remaining, unaltered, values in the group.
   array_push($element['#parents'], $field_name);
   array_push($element['#parents'], $delta);
-  
+
   // It's very important to use $form_values instead of $element['#value']
   // here, because $element['#value'] is sometimes missing changes
   // made in #element_validate processing done by other modules.
   $value = isset($form_values[$group_name][$delta][$field_name]) ? $form_values[$group_name][$delta][$field_name] : NULL;
-  
+
   // Fields that use optionwidgets have an extra array level in the value
-  // because of the optionwidgets transposition that forces a delta value 
+  // because of the optionwidgets transposition that forces a delta value
   // into the result array. This works fine when a delta value is between
-  // the field name and the field value, as in normal nodes, but not when 
-  // we reverse the field and the delta, so in this case we need to 
+  // the field name and the field value, as in normal nodes, but not when
+  // we reverse the field and the delta, so in this case we need to
   // promote the nested delta value back up to the field level.
   if (is_array($value) && content_multigroup_uses_optionwidgets($field_name, $element['#type_name'])) {
     $value = array_shift($value);
   }
-  
+
   //dsm('setting value of '. $field_name.'>'.$delta);
   //dsm($value);
   form_set_value($element, $value, $form_state);
@@ -773,18 +773,18 @@ function content_multigroup_uses_optionwidgets($field_name, $type_name) {
   static $optionwidgets;
   if (empty($optionwidgets)) {
     $optionwidgets = array(
-      'optionwidgets_select', 
-      'optionwidgets_buttons', 
-      'optionwidgets_onoff', 
-      'nodereference_buttons', 
-      'nodereference_select', 
-      'userreference_buttons', 
+      'optionwidgets_select',
+      'optionwidgets_buttons',
+      'optionwidgets_onoff',
+      'nodereference_buttons',
+      'nodereference_select',
+      'userreference_buttons',
       'userreference_select',
       );
     // Add hook where other widgets that use optionwidgets can announce it.
-    $optionwidgets = array_merge($optionwidgets, module_invoke_all('content_multigroup_uses_optionwidgets'));  
+    $optionwidgets = array_merge($optionwidgets, module_invoke_all('content_multigroup_uses_optionwidgets'));
   }
-    
+
   $types = content_types($type_name);
   $fields = $types['fields'];
   $field = $fields[$field_name];
@@ -799,7 +799,7 @@ function content_multigroup_uses_optionwidgets($field_name, $type_name) {
  */
 function content_multigroup_node_form_validate($element, $form_state) {
   // We moved all the new field values out of the field group
-  // and up to the top level of the node, now get rid of the 
+  // and up to the top level of the node, now get rid of the
   // original group values.
   form_set_value($element, NULL, $form_state);
   return;
@@ -812,16 +812,16 @@ function content_multigroup_fieldgroup_view(&$node, &$element, $group, $context)
   if ($group['group_type'] != 'multigroup') {
     return;
   }
-          
+
   $group_name = $group['group_name'];
   $node_copy = drupal_clone($node);
   $max = $group['settings']['multigroup']['multiple'];
-  
+
   $count = 0;
   foreach ($group['fields'] as $field_name => $field) {
     $count = max($count, count($node->$field_name));
   }
-  
+
   $group['multiple'] = isset($group['settings']['multigroup']['multiple']) ? $group['settings']['multigroup']['multiple'] : 1;
   $labels = isset($group['settings']['multigroup']['labels']) ? $group['settings']['multigroup']['labels'] : array();
   $format = isset($group['settings']['multigroup']['display_settings'][$context]['format']) ? $group['settings']['multigroup']['display_settings'][$context]['format'] : 'fieldset';
@@ -838,14 +838,14 @@ function content_multigroup_fieldgroup_view(&$node, &$element, $group, $context)
       $max = $group['multiple'];
       break;
   }
-  
+
   for ($delta = 0; $delta < $max; $delta++) {
     $element[$delta] = array('#weight' => $delta);
-    
+
     $label = !empty($labels[$delta]) && $show_label == 'above' ? $labels[$delta] : '';
-    
+
     foreach ($group['fields'] as $field_name => $field) {
-              
+
       // Create a pseudo node that only has the value we want
       // in this group and pass it to the formatter.
       if (isset($node->content[$field_name])) {
@@ -868,15 +868,15 @@ function content_multigroup_fieldgroup_view(&$node, &$element, $group, $context)
       case 'hr':
         $element[$delta]['#theme'] = 'content_multigroup_display_hr';
         $element[$delta]['#title'] = $label;
-        break;  
+        break;
       default:
         $element[$delta]['#theme'] = 'content_multigroup_display_simple';
         $element[$delta]['#title'] = $label;
         break;
     }
-          
+
   }
-  
+
   foreach ($group['fields'] as $field_name => $field) {
     if (isset($element[$field_name])) {
       unset($element[$field_name]);
@@ -894,7 +894,7 @@ function theme_content_multigroup_node_form($element) {
   if ($element['#multiple'] >= 1) {
     $table_id = $element['#group_name'] .'_values';
     $order_class = $element['#group_name'] .'-delta-order';
-    
+
     $header = array(
       array(
         'data' => '',
@@ -907,7 +907,7 @@ function theme_content_multigroup_node_form($element) {
     $group = $groups[$element['#group_name']];
     $labels = isset($group['settings']['multigroup']['labels']) ? $group['settings']['multigroup']['labels'] : array();
     $multiple = isset($group['settings']['multigroup']['multiple']) ? $group['settings']['multigroup']['multiple'] : 1;
-    
+
     $i = 0;
     foreach (element_children($element) as $delta => $key) {
       if ($key !== $element['#group_name'] .'_add_more') {
@@ -921,11 +921,11 @@ function theme_content_multigroup_node_form($element) {
         );
         $rows[] = array(
           'data' => $cells,
-          // TODO Tablesort drag n drop is not working with complex 
+          // TODO Tablesort drag n drop is not working with complex
           // field validation. The fields appear to work correctly,
-          // but element validation seems to get missed or confused 
+          // but element validation seems to get missed or confused
           // causing validation errors. Need to investigate why.
-          'class' => 'draggable', 
+          'class' => 'draggable',
         );
       }
       $i++;
@@ -1009,7 +1009,7 @@ function content_multigroup_add_more_submit($form, &$form_state) {
 
 /**
  * Menu callback for AHAH addition of new empty widgets.
- * 
+ *
  * Adapted from content_add_more_js to work with groups instead of fields.
  */
 function content_multigroup_add_more_js($type_name_url, $group_name) {
@@ -1017,7 +1017,7 @@ function content_multigroup_add_more_js($type_name_url, $group_name) {
   $groups = fieldgroup_groups($type['type']);
   $group = $groups[$group_name];
   $group['multiple'] = $group['settings']['multigroup']['multiple'];
-  
+
   if (($group['multiple'] != 1) || empty($_POST['form_build_id'])) {
     // Invalid request.
     drupal_json(array('data' => ''));
@@ -1065,11 +1065,11 @@ function content_multigroup_add_more_js($type_name_url, $group_name) {
   $_POST[$group_name] = _content_sort_items($group, $_POST[$group_name]);
 
   // Build our new form element for the whole group, asking for one more element.
-  
+
   $form_state['item_count'] = array($group_name => count($_POST[$group_name]) + 1);
   $delta = max(array_keys($_POST[$group_name])) + 1;
   content_multigroup_group_form($form, $form_state, $group, $delta);
-  
+
   // Save the new definition of the form.
   $form_state['values'] = array();
   form_set_cache($form_build_id, $form, $form_state);
@@ -1086,7 +1086,7 @@ function content_multigroup_add_more_js($type_name_url, $group_name) {
 
   // Render the new output.
   $group_form = $form[$group_name];
-  
+
   // We add a div around the new content to receive the ahah effect.
   $group_form[$delta]['#prefix'] = '<div class="ahah-new-content">'. (isset($group_form[$delta]['#prefix']) ? $group_form[$delta]['#prefix'] : '');
   $group_form[$delta]['#suffix'] = (isset($group_form[$delta]['#suffix']) ? $group_form[$delta]['#suffix'] : '') .'</div>';

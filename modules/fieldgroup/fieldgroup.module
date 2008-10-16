@@ -340,7 +340,7 @@ function fieldgroup_form_alter(&$form, $form_state, $form_id) {
  *
  * Pulled into separate function to be re-usable.
  */
-function fieldgroup_validate_name($group) {
+function fieldgroup_validate_name($group, $type_name) {
   $errors = array();
 
   // No label.
@@ -371,14 +371,8 @@ function fieldgroup_validate_name($group) {
     }
 
     // Group name already exists.
-    $used = FALSE;
-    $groups = fieldgroup_groups();
-    foreach ($groups as $type => $groups_per_type) {
-      foreach ($groups_per_type as $existing_group) {
-        $used |= ($existing_group['group_name'] == $group_name);
-      }
-    }
-    if ($used) {
+    $groups = fieldgroup_groups($type_name);
+    if (isset($groups[$group_name])) {
       $errors['group_name'][] = t('The group name %group_name already exists.', array('%group_name' => $group_name));
     }
     if (empty($errors['group_name'])) {
@@ -393,7 +387,7 @@ function fieldgroup_field_overview_form_validate($form, &$form_state) {
   $group = $form_values['_add_new_group'];
 
   if (array_filter(array($group['label'], $group['group_name']))) {
-    $validation = fieldgroup_validate_name($group);
+    $validation = fieldgroup_validate_name($group, $form['#type_name']);
     if (!empty($validation['errors'])) {
       foreach ($validation['errors'] as $type => $messages) {
         foreach ($messages as $message) {
@@ -600,7 +594,7 @@ function fieldgroup_nodeapi(&$node, $op, $teaser, $page) {
 function fieldgroup_wrapper_post_render($content, $element) {
   $groups = fieldgroup_groups($element['#type_name']);
   $group = $groups[$element['#group_name']];
-  
+
   // The display settings are not in quite the same place in the
   // group and the field, so create the value the theme will expect.
   $group['display_settings'] = $group['settings']['display'];
