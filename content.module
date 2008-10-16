@@ -2088,6 +2088,8 @@ function content_field_wrapper_post_render($content, $element) {
  *    - NODE_BUILD_SEARCH_RESULT
  *    - NODE_BUILD_RSS
  *    - NODE_BUILD_PRINT
+ *    - ... any other custom build mode exposed by 3rd party modules using
+ *      hook_content_build_modes().
  *
  * @return
  *   Whether or not content is to be added to $content in this context.
