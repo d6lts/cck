@@ -81,7 +81,7 @@
           <td>
             <?php print $row->indentation; ?>
             <div class="<?php print $row->label_class; ?>">
-              <div class="content-new"><?php print $row->title; ?></div>
+              <div class="content-new"><?php print theme('advanced_help_topic', 'content', 'add-new-group') . t('New group'); ?></div>
               <?php print $row->label; ?>
             </div>
           </td>

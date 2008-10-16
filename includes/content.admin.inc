@@ -304,7 +304,6 @@ function content_field_overview_form(&$form_state, $type_name) {
     $weight++;
     $name = '_add_new_group';
     $form[$name] = array(
-      'title' => array('#value' => theme('advanced_help_topic', 'content', 'add-new-group') . t('New group')),
       'label' => array(
         '#type' => 'textfield',
         '#size' => 15,
