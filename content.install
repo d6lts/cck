@@ -248,9 +248,9 @@ function content_check_update($module = NULL) {
     $ret['#abort'] = array('success' => FALSE, 'query' => t('Some updates are still pending.<br/>Please re-run the update script.'));
     return $ret;
   }
-  // If everything is OK and updates are not aborted, make sure 
+  // If everything is OK and updates are not aborted, make sure
   // content_associate_fields() gets run. With all the complexity of
-  // the dependent updates, it can get missed when an update is aborted. 
+  // the dependent updates, it can get missed when an update is aborted.
   // It won't hurt anything to do this more than once in order to be sure
   // it doesn't get skipped. Without this step, we can end up with
   // field modules that are enabled and updated, but not marked as active
@@ -482,6 +482,9 @@ function content_update_6008() {
   return array();
 }
 
+/**
+ * Add the 'exclude from $content' display setting to all existing field instances.
+ */
 function content_update_6009() {
   if ($abort = content_check_update()) {
     return $abort;
@@ -491,7 +494,7 @@ function content_update_6009() {
   $result = db_query("SELECT *  FROM {content_node_field_instance}");
   while ($type = db_fetch_array($result)) {
     $new_settings = array();
-    $display_settings = unserialize($type['display_settings']);  
+    $display_settings = unserialize($type['display_settings']);
     if (!empty($display_settings)) {
       foreach ($display_settings as $key => $val) {
         $new_settings[$key] = $val;
