@@ -152,13 +152,15 @@ function fieldgroup_group_edit_form(&$form_state, $type_name, $group_name) {
     '#description' => t('A description of the group.'),
     '#required' => FALSE,
   );
-  module_load_include('inc', 'content', 'includes/content.admin');
-  foreach (array_merge(array_keys(content_build_modes()), array('label')) as $key) {
-    $form['settings']['display'][$key]['format'] = array('#type' => 'value', '#value' => is_array($group['settings']['display'][$key]) ? $group['settings']['display'][$key]['format'] : $group['settings']['display'][$key]);
-    $form['settings']['display'][$key]['exclude'] = array('#type' => 'value', '#value' => is_array($group['settings']['display'][$key]) ? $group['settings']['display'][$key]['exclude'] : 0);
+
+  foreach (array_keys(content_build_modes()) as $key) {
+    $form['settings']['display'][$key]['format'] = array('#type' => 'value', '#value' => isset($group['settings']['display'][$key]['format']) ? $group['settings']['display'][$key]['format'] : 'fieldset');
+    $form['settings']['display'][$key]['exclude'] = array('#type' => 'value', '#value' => isset($group['settings']['display'][$key]['exclude']) ? $group['settings']['display'][$key]['exclude'] : 0);
   }
+  $form['settings']['display']['label'] = array('#type' => 'value', '#value' => $group['settings']['display']['label']);
   $form['weight'] = array('#type' => 'hidden', '#default_value' => $group['weight']);
   $form['group_name'] = array('#type' => 'hidden', '#default_value' => $group_name);
+
   $form['#content_type'] = $content_type;
 
   $form['submit'] = array(
