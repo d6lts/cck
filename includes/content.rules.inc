@@ -56,6 +56,11 @@ function content_rules_action_populate_field_form($settings, &$form, &$form_stat
       '#description' => t('Select the machine-name of the field.'),
       '#required' => TRUE,
     );
+    // Hide some form elements in the first step.
+    $form['negate']['#access'] = FALSE;
+    $form['input_help']['#access'] = FALSE;
+    $form['weight']['#access'] = FALSE;
+
     // Replace the usual submit handlers with a own handler.
     $form['submit']['#submit'] = array('content_rules_action_populate_field_form_step_submit');
     $form['submit']['#value'] = t('Continue');
