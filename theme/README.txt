@@ -56,18 +56,35 @@ array(
     'view' => '<a href="node/5">Title of node 5</a>',
   ),
 );
-Raw data are *not* sanitized for output, it is therefore *not advised* to use them
-directly. Use the 'view' value, or run the values through content_format().
+Raw data are *not* sanitized for output, it is therefore *not advised* to use
+them directly. Use the 'view' value, or run the values through content_format().
 
+1.c Excluding fields from the $content variable
+-----------------------------------------------
 
-Note that the $content variable used by default in node templates contains the
-rendered html for the whole node : body, file attachments, fivestar widgets, ...
-*and* CCK fields and fieldgroups.
-If you want to use the more fine-grained variables described above, you cannot use
-$content because you'd get duplicate information. Your template then needs to handle
-the display of all the node components itself.
+By default, the $content variable used in node templates contains the rendered
+html for the whole node : body, file attachments, fivestar widgets, ... *and*
+CCK fields and fieldgroups.
 
-1.c Special case : nodes in nodereference fields
+If for some fields you want to use the more fine-grained variables described
+in 1.b above, you might want to use the 'Exclude' checkboxes on the 'Display
+fields' screen, so that the output of those fields is excluded from the
+$content variable.
+
+You can then customize the display and layout of some CCK fields or groups
+using the $<FIELD_NAME>_rendered / $<GROUP_NAME>_rendered variables, and trust
+$content to display 'the rest' without getting duplicate information.
+
+Advanced trick:
+The 'Exclude' checkboxes affect all active themes. On sites with multiple
+themes, however, the list of fields to exclude from $content might need to be
+different across the themes, depending on how their respective node templates
+are structured.
+A theme can bypass the settings specified by the 'Exclude' checkboxes by
+overriding the theme_content_exclude() function to specify the list of fields to
+exclude for this theme (see the PHPDoc of the function for more information).
+
+1.d Special case : nodes in nodereference fields
 ------------------------------------------------
 
 In addition to the above, the following suggestions will be looked for
