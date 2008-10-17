@@ -685,18 +685,8 @@ function content_field($op, &$node, $field, &$items, $teaser, $page) {
         $context = $node->build_mode;
       }
 
-      $field_types = _content_field_types();
-      $formatters = $field_types[$field['type']]['formatters'];
       $formatter_name = isset($field['display_settings'][$context]['format']) ? $field['display_settings'][$context]['format'] : 'default';
-
-      if (!isset($formatters[$formatter_name]) && $formatter_name != 'hidden') {
-        // This might happen when the selected formatter has been renamed in the
-        // module, or if the module has been disabled since then.
-        $formatter_name = 'default';
-      }
-
-      if (isset($formatters[$formatter_name])) {
-        $formatter = $formatters[$formatter_name];
+      if ($formatter = _content_get_formatter($formatter_name, $field['type'])) {
         $theme = $formatter['module'] .'_formatter_'. $formatter_name;
         $single = (content_handle('formatter', 'multiple values', $formatter) == CONTENT_HANDLE_CORE);
 
@@ -1307,6 +1297,23 @@ function _content_widget_types() {
 }
 
 /**
+ * Return the formatter description corresponding to a formatter name,
+ * defaulting to 'default' if none is found.
+ */
+function _content_get_formatter($formatter_name, $field_type) {
+  $field_types = _content_field_types();
+  $formatters = $field_types[$field_type]['formatters'];
+
+  if (!isset($formatters[$formatter_name]) && $formatter_name != 'hidden') {
+    // This might happen when the selected formatter has been renamed in the
+    // module, or if the module has been disabled since then.
+    $formatter_name = 'default';
+  }
+
+  return isset($formatters[$formatter_name]) ? $formatters[$formatter_name] : FALSE;
+}
+
+/**
  * Collate all information on content types, fields, and related structures.
  *
  * @param $reset
@@ -1633,7 +1640,7 @@ function _content_filter_xss_display_allowed_tags() {
  * @param $item
  *   The field item(s) to be formatted (such as $node->field_foo[0],
  *   or $node->field_foo if the formatter handles multiple values itself)
- * @param $formatter
+ * @param $formatter_name
  *   The name of the formatter to use.
  * @param $node
  *   Optionally, the containing node object for context purposes and
@@ -1644,60 +1651,55 @@ function _content_filter_xss_display_allowed_tags() {
  *   It will have been passed through the necessary check_plain() or check_markup()
  *   functions as necessary.
  */
-function content_format($field, $item, $formatter = 'default', $node = NULL) {
+function content_format($field, $item, $formatter_name = 'default', $node = NULL) {
   if (!is_array($field)) {
     $field = content_fields($field);
   }
-  $field_types = _content_field_types();
-  $formatters = $field_types[$field['type']]['formatters'];
-  if (!isset($formatters[$formatter])) {
-    $formatter = 'default';
-  }
 
-  $formatter_name = $formatter;
-  $formatter = $formatters[$formatter_name];
-  $theme = $formatter['module'] .'_formatter_'. $formatter_name;
+  if ($formatter = _content_get_formatter($formatter_name, $field['type'])) {
+    $theme = $formatter['module'] .'_formatter_'. $formatter_name;
 
-  // A real node will have the type name in $node->type,
-  // a Views pseudo-node will have the type name in $node->node_type.
-  $element = array(
-    '#theme' => $theme,
-    '#field_name' => $field['field_name'],
-    '#type_name' => isset($node->type) ? $node->type : (isset($node->node_type) ? $node->node_type : ''),
-    '#formatter' => $formatter_name,
-    '#node' => $node,
-    '#delta' => isset($item['#delta']) ? $item['#delta'] : NULL,
-  );
+    // A real node will have the type name in $node->type,
+    // a Views pseudo-node will have the type name in $node->node_type.
+    $element = array(
+      '#theme' => $theme,
+      '#field_name' => $field['field_name'],
+      '#type_name' => isset($node->type) ? $node->type : (isset($node->node_type) ? $node->node_type : ''),
+      '#formatter' => $formatter_name,
+      '#node' => $node,
+      '#delta' => isset($item['#delta']) ? $item['#delta'] : NULL,
+    );
 
-  if (content_handle('formatter', 'multiple values', $formatter) == CONTENT_HANDLE_CORE) {
-    // Single value formatter.
+    if (content_handle('formatter', 'multiple values', $formatter) == CONTENT_HANDLE_CORE) {
+      // Single value formatter.
 
-    // hook_field('sanitize') expects an array of items, so we build one.
-    $items = array($item);
-    $function = $field['module'] .'_field';
-    if (function_exists($function)) {
-      $function('sanitize', $node, $field, $items, FALSE, FALSE);
+      // hook_field('sanitize') expects an array of items, so we build one.
+      $items = array($item);
+      $function = $field['module'] .'_field';
+      if (function_exists($function)) {
+        $function('sanitize', $node, $field, $items, FALSE, FALSE);
+      }
+
+      $element['#item'] = $items[0];
+    }
+    else {
+      // Multiple values formatter.
+      $items = $item;
+      $function = $field['module'] .'_field';
+      if (function_exists($function)) {
+        $function('sanitize', $node, $field, $items, FALSE, FALSE);
+      }
+
+      foreach ($items as $delta => $item) {
+        $element[$delta] = array(
+          '#item' => $item,
+          '#weight' => $delta,
+        );
+      }
     }
 
-    $element['#item'] = $items[0];
+    return theme($theme, $element);
   }
-  else {
-    // Multiple values formatter.
-    $items = $item;
-    $function = $field['module'] .'_field';
-    if (function_exists($function)) {
-      $function('sanitize', $node, $field, $items, FALSE, FALSE);
-    }
-
-    foreach ($items as $delta => $item) {
-      $element[$delta] = array(
-        '#item' => $item,
-        '#weight' => $delta,
-      );
-    }
-  }
-
-  return theme($theme, $element);
 }
 
 /**

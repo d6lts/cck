@@ -175,33 +175,51 @@ class content_handler_field_multiple extends content_handler_field {
     // TODO there may be a better way to do this.
     $this->aliases['nid'] = 'nid';
 
-    $count = 0;
-    $items = array();
     $vid = $values->{$this->field_alias};
     if (isset($this->field_values[$vid])) {
+      // Gather items, respecting the 'Display n values starting from m' settings.
+      $count_skipped = 0;
+      $items = array();
       foreach ($this->field_values[$vid] as $item) {
-        // 'Starting from n': Let the first n values pass.
-        if (empty($options['multiple']['multiple_from']) || ($count >= $options['multiple']['multiple_from'])) {
-          // 'Display m values'.
+        if (empty($options['multiple']['multiple_from']) || ($count_skipped >= $options['multiple']['multiple_from'])) {
           if (empty($options['multiple']['multiple_number']) || (count($items) < $options['multiple']['multiple_number'])) {
-            $value = content_format($field, $item, $options['format'], $values);
-            if (!empty($value)) {
-              $items[] = $this->render_link($value, $values);
-            }
+            $items[] = $item;
           }
           else {
-            // We displayed the number of values that were asked, no need to render more.
             break;
           }
         }
-        $count++;
+        $count_skipped++;
       }
-      if (count($items) > 1) {
-        // TODO: could we use generic field display ?
-        return theme('content_view_multiple_field', $items, $field, $values);
-      }
-      elseif ($items) {
-        return $items[0];
+
+      // Render items.
+      $formatter_name = $options['format'];
+      if ($items && ($formatter = _content_get_formatter($formatter_name, $field['type']))) {
+        $rendered = array();
+        if (content_handle('formatter', 'multiple values', $formatter) == CONTENT_HANDLE_CORE) {
+          // Single-value formatter.
+          foreach ($items as $item) {
+            $output = content_format($field, $item, $formatter_name, $values);
+            if (!empty($output)) {
+              $rendered[] = $this->render_link($output, $values);
+            }
+          }
+        }
+        else {
+          // Multiple values formatter.
+          $output = content_format($field, $items, $formatter_name, $values);
+          if (!empty($output)) {
+            $rendered[] = $this->render_link($output, $values);
+          }
+        }
+
+        if (count($rendered) > 1) {
+          // TODO: could we use generic field display ?
+          return theme('content_view_multiple_field', $rendered, $field, $values);
+        }
+        elseif ($rendered) {
+          return $rendered[0];
+        }
       }
     }
 
