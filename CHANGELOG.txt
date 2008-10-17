@@ -7,6 +7,7 @@
 - #309558 by mroswell : fix PHP doc typo.
 - #281749 by asimmonds: fix '0' not parsed as an alias for allowed values.
 - #308215 by Reg - Nodereference: Do not filter on empty string when querying for referenceable nodes.
+- #318143 by Douggreen - Panels integration: make widget label translatable.
 
 5--1.9
 ======
