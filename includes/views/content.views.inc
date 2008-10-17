@@ -52,7 +52,8 @@ function content_views_handlers() {
         'parent' => 'views_handler_filter_numeric',
       ),
       'content_handler_filter_float' => array(
-        'parent' => 'views_handler_filter_float',
+        // views_handler_filter_float is defined in views_handler_filter_numeric.inc
+        'parent' => 'views_handler_filter_numeric',
       ),
       'content_handler_filter_many_to_one' => array(
         'parent' => 'views_handler_filter_many_to_one',
@@ -185,7 +186,7 @@ function content_views_field_views_data($field) {
           break;
         case 'numeric':
         case 'float':
-          $filters[] = class_exists('views_handler_filter_float') ? 'content_handler_filter_float' : 'content_handler_filter_numeric';
+          $filters[] = 'content_handler_filter_float';
           $arguments[] = 'content_handler_argument_numeric';
           break;
 

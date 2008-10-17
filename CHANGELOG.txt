@@ -16,6 +16,7 @@ CCK 6.2-dev
 - Fix 'unknown index' warnings on fieldgroups settings pages.
 - #320139 by Moonshine - Noderef / Userref: Fix single-quotes encoding in 'Views' mode with option widgets.
 - #318143 by Douggreen - Panels integration: make widget label translatable.
+- #321147 Views integration: float/decimal filters round values to integers.
 
 CCK 6.2-rc10
 ============
