@@ -112,7 +112,7 @@ function content_panels_render_field($conf, $panel_args, $context) {
   $block->delta = $conf['field_name'];
 
   if ($conf['label'] == 'normal') {
-    $block->title = $field['widget']['label'];
+    $block->title = t($field['widget']['label']);
   }
   $node_field = isset($node->$field['field_name']) ? $node->$field['field_name'] : array();
   if (content_handle('field', 'view', $field) == CONTENT_CALLBACK_CUSTOM) {
