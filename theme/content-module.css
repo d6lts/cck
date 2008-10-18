@@ -76,6 +76,9 @@ table#content-field-overview .content-new {
 }
 
 /* 'Advanced help' pages */
+.advanced-help-topic dd {
+  margin-bottom: .5em;
+}
 .advanced-help-topic span.code {
   background-color:#EDF1F3;
   font-family:"Bitstream Vera Sans Mono",Monaco,"Lucida Console",monospace;
