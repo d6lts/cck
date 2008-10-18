@@ -76,9 +76,9 @@ table#content-field-overview .content-new {
 }
 
 /* 'Advanced help' pages */
-.advanced-help-topic dt {
-  font-weight: bold;
-}
-.advanced-help-topic dd {
-  margin-bottom: 1em;
+.advanced-help-topic span.code {
+  background-color:#EDF1F3;
+  font-family:"Bitstream Vera Sans Mono",Monaco,"Lucida Console",monospace;
+  font-size:0.9em;
+  padding:1px;
 }

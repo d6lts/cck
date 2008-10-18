@@ -19,6 +19,7 @@ CCK 6.2-dev
 - #321147 Views integration: float/decimal filters round values to integers.
 - #321702 Views integration: fix rendering of multiple-values formatters.
 - #322917 Upgrade path: Missing information text on update 6000 when content.module not enabled.
+- Replaced theming instructions in theme/README.txt with advanced_help pages.
 
 CCK 6.2-rc10
 ============
