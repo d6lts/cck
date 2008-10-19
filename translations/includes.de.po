@@ -17,7 +17,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: German translation of CCK\n"
 "POT-Creation-Date: 2008-10-19 16:51+0200\n"
-"PO-Revision-Date: 2008-10-19 23:46+0100\n"
+"PO-Revision-Date: 2008-10-19 23:49+0100\n"
 "Last-Translator: Alexander Haß\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -534,11 +534,11 @@ msgstr "Token"
 
 #: includes/content.token.inc:78
 msgid "Referenced node ID"
-msgstr "Verwiesene Beitrags-ID"
+msgstr "Referenzierte Beitrags-ID"
 
 #: includes/content.token.inc:79
 msgid "Referenced node title"
-msgstr "Verwiesener Beitragstitel"
+msgstr "Referenzierter Beitragstitel"
 
 #: includes/content.token.inc:80
 msgid "Formatted html link to the referenced node."
@@ -546,11 +546,11 @@ msgstr "Formatierter HTML-Link zu dem referenzierten Beitrag."
 
 #: includes/content.token.inc:81
 msgid "Relative path alias to the referenced node."
-msgstr "Relativer Pfadalias zu dem verwiesenen Beitrag."
+msgstr "Relativer Pfadalias zu dem referenzierten Beitrag."
 
 #: includes/content.token.inc:82
 msgid "Absolute path alias to the referenced node."
-msgstr "Absoluter Pfadalias zu dem verwiesenen Beitrag."
+msgstr "Absoluter Pfadalias zu dem referenzierten Beitrag."
 
 #: includes/content.token.inc:108
 msgid "Raw number value"
@@ -570,11 +570,11 @@ msgstr "Formatierter und gefilterter Text"
 
 #: includes/content.token.inc:155
 msgid "Referenced user ID"
-msgstr "Verwiesene Benutzer-ID"
+msgstr "Referenzierte Benutzer-ID"
 
 #: includes/content.token.inc:156
 msgid "Referenced user name"
-msgstr "Verwiesener Benutzername"
+msgstr "Referenzierter Benutzername"
 
 #: includes/content.token.inc:157
 msgid "Formatted HTML link to referenced user"
