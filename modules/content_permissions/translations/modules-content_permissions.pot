@@ -3,15 +3,15 @@
 # LANGUAGE translation of Drupal (modules-content_permissions)
 # Copyright YEAR NAME <EMAIL@ADDRESS>
 # Generated from files:
-#  content_permissions.module,v 1.5 2008/05/11 19:20:09 dopry
-#  content_permissions.install,v 1.1.2.1 2008/06/09 17:45:28 yched
+#  content_permissions.module,v 1.5.2.2 2008/10/06 15:11:39 karens
+#  content_permissions.install,v 1.1.2.2 2008/10/04 13:14:22 karens
 #  content_permissions.info,v 1.2 2008/04/23 18:01:52 dww
 #
 #, fuzzy
 msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
-"POT-Creation-Date: 2008-08-25 22:44+0200\n"
+"POT-Creation-Date: 2008-10-19 16:51+0200\n"
 "PO-Revision-Date: YYYY-mm-DD HH:MM+ZZZZ\n"
 "Last-Translator: NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <EMAIL@ADDRESS>\n"
@@ -36,7 +36,7 @@ msgstr ""
 msgid "content_permissions"
 msgstr ""
 
-#: modules/content_permissions/content_permissions.install:7
+#: modules/content_permissions/content_permissions.install:9
 msgid "Please <a href=\"!url\">configure your field permissions</a> immediately. All fields are inaccessible by default."
 msgstr ""
 
