@@ -17,7 +17,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: German translation of CCK\n"
 "POT-Creation-Date: 2008-10-19 16:51+0200\n"
-"PO-Revision-Date: 2008-10-19 22:58+0100\n"
+"PO-Revision-Date: 2008-10-19 23:45+0100\n"
 "Last-Translator: Alexander Haß\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -34,7 +34,7 @@ msgstr "Das Content-Modul ist eine erforderliche Komponente des Content Construc
 
 #: content.module:22
 msgid "When adding a custom field to a content type, you determine its type (whether it will contain text, numbers, or references to other objects) and how it will be displayed (either as a text field or area, a select box, checkbox, radio button, or autocompleting field). A field may have multiple values (i.e., a \"person\" may have multiple e-mail addresses) or a single value (i.e., an \"employee\" has a single employee identification number). As you add and edit fields, CCK automatically adjusts the structure of the database as necessary. CCK also provides a number of other features, including intelligent caching for your custom data, an import and export facility for content type definitions, and integration with other contributed modules."
-msgstr "Beim Hinzufügen eines benutzerdefiniertes Feldes zu einem Inhaltstyp, wird der Typ festgelegt (ob dieser Text enthält, Zahlen oder Verweise auf andere Objekte) und wie dieser Angezeigt wird (entweder als Textfeld oder -bereich, Auswahlfeld, Kontrollkästchen, Auswahlknopf oder Autovervollständigungsfeld). Ein Feld kann mehrere Werte enthalten (d.h., eine „Person“ kann mehrere E-Mail-Adressen haben) oder ein einfacher Wert (d.h., ein „Mitarbeiter“ hat eine Mitarbeiteridentifikationsnummer). Wenn Felder hinzugefügt und bearbeitet werden, passt CCK automatisch die Datenbank an die erforderliche Struktur an. CCK ermöglich auch eine Anzahl von anderen Funktionen, inklusive intelligenten Caching für benutzerdefinierte Daten, eine Import- und Export-Möglichkeit von definierten Inhaltstypen und die Integration von weiteren Modulen."
+msgstr "Beim Hinzufügen eines benutzerdefiniertes Feldes zu einem Inhaltstyp, wird der Typ festgelegt (ob dieser Text enthält, Zahlen oder Referenzen auf andere Objekte) und wie dieser Angezeigt wird (entweder als Textfeld oder -bereich, Auswahlfeld, Kontrollkästchen, Auswahlknopf oder Autovervollständigungsfeld). Ein Feld kann mehrere Werte enthalten (d.h., eine „Person“ kann mehrere E-Mail-Adressen haben) oder ein einfacher Wert (d.h., ein „Mitarbeiter“ hat eine Mitarbeiteridentifikationsnummer). Sollten Felder hinzugefügt und bearbeitet werden, passt CCK automatisch die Datenbank an die erforderliche Struktur an. CCK ermöglich auch eine Anzahl von anderen Funktionen, inklusive intelligenten Caching für benutzerdefinierte Daten, eine Import- und Export-Möglichkeit von festgelegten Inhaltstypen und die Integration von weiteren Modulen."
 
 #: content.module:23
 msgid "Custom field types are provided by a set of optional modules included with CCK (each module provides a different type). The <a href=\"@modules\">modules page</a> allows you to enable or disable CCK components. A default installation of CCK includes:"

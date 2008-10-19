@@ -17,7 +17,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: German translation of CCK\n"
 "POT-Creation-Date: 2008-10-19 16:51+0200\n"
-"PO-Revision-Date: 2008-10-19 22:57+0100\n"
+"PO-Revision-Date: 2008-10-19 23:46+0100\n"
 "Last-Translator: Alexander Haß\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -542,7 +542,7 @@ msgstr "Verwiesener Beitragstitel"
 
 #: includes/content.token.inc:80
 msgid "Formatted html link to the referenced node."
-msgstr "Formatierter HTML-Verweis zu dem verwiesenen Beitrag."
+msgstr "Formatierter HTML-Link zu dem referenzierten Beitrag."
 
 #: includes/content.token.inc:81
 msgid "Relative path alias to the referenced node."
@@ -578,13 +578,13 @@ msgstr "Verwiesener Benutzername"
 
 #: includes/content.token.inc:157
 msgid "Formatted HTML link to referenced user"
-msgstr "Formatierter HTML-Verweis zu dem verwiesenen Benutzer."
+msgstr "Formatierter HTML-Link zu dem referenzierten Benutzer."
 
 #: includes/content.token.inc:158
 msgid "Relative path alias to the referenced user."
-msgstr "Relativer Pfadalias zu dem verwiesenen Benutzer."
+msgstr "Relativer Pfadalias zu dem referenzierten Benutzer."
 
 #: includes/content.token.inc:159
 msgid "Absolute path alias to the referenced user."
-msgstr "Absoluter Pfadalias zu dem verwiesenen Benutzer."
+msgstr "Absoluter Pfadalias zu dem referenzierten Benutzer."
 
