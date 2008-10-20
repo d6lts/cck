@@ -354,9 +354,9 @@ function content_multigroup_display_overview_form(&$form, &$form_state) {
   );
   $options = array(
     'none' => t('none'),
-    'fieldset' => t('fieldset'),
-    'hr' => t('horizontal line'),
-    //'table' => t('table'), // TODO add this later
+    'fieldset' => t('Fieldset'),
+    'hr' => t('Horizontal line'),
+    //'table' => t('Table'), // TODO add this later
     'hidden' => t('<Hidden>'),
   );
   foreach ($groups as $name => $group) {
