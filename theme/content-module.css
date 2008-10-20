@@ -76,6 +76,12 @@ table#content-field-overview .content-new {
 }
 
 /* 'Advanced help' pages */
+.advanced-help-topic h3,
+.advanced-help-topic h4,
+.advanced-help-topic h5,
+.advanced-help-topic h6  {
+  margin:1em 0 .5em 0;
+}
 .advanced-help-topic dd {
   margin-bottom: .5em;
 }
@@ -84,4 +90,7 @@ table#content-field-overview .content-new {
   font-family:"Bitstream Vera Sans Mono",Monaco,"Lucida Console",monospace;
   font-size:0.9em;
   padding:1px;
+}
+.advanced-help-topic .content-border {
+  border:1px solid #AAA
 }
