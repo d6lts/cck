@@ -21,6 +21,7 @@ CCK 6.2-dev
 - #322917 Upgrade path: Missing information text on update 6000 when content.module not enabled.
 - Replaced theming instructions in theme/README.txt with advanced_help pages.
 - #323436 by hass: fix a few strings + translation bugs.
+- #323745 by robertgarrigos: Fix performance issue when submitting 'display fields' form.
 
 CCK 6.2-rc10
 ============

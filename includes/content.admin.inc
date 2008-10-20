@@ -678,7 +678,6 @@ function content_display_overview_form_submit($form, &$form_state) {
       $field['display_settings'] = $values + $field['display_settings'];
       content_field_instance_update($field);
     }
-    content_clear_type_cache();
   }
 
   drupal_set_message(t('Your settings have been saved.'));
