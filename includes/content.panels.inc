@@ -52,9 +52,9 @@ function content_panels_edit_field($id, $parents, $conf = array()) {
       'normal' => t('Block title'),
       'above' => t('Above'),
       'inline' => t('Inline'),
-      'hidden' => t('hidden'),
+      'hidden' => t('Hidden'),
     ),
-    '#description' => t('Configure how the label is going to be displayed'),
+    '#description' => t('Configure how the label is going to be displayed.'),
   );
   $options = array('' => '');
   $fields = content_fields();

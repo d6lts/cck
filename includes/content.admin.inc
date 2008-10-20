@@ -561,8 +561,8 @@ function content_display_overview_form(&$form_state, $type_name, $contexts_selec
   );
 
   if (empty($fields)) {
-    drupal_set_message(t("There are no fields configured for this content type. You can add new fields on the !link page.", array(
-      '!link' => l(t('Manage fields'), 'admin/content/node-type/'. $type['url_str'] .'/fields'))), 'warning');
+    drupal_set_message(t('There are no fields configured for this content type. You can add new fields on the <a href="@link">Manage fields</a> page.', array(
+      '@link' => url('admin/content/node-type/'. $type['url_str'] .'/fields'))), 'warning');
     return $form;
   }
 

@@ -20,6 +20,7 @@ CCK 6.2-dev
 - #321702 Views integration: fix rendering of multiple-values formatters.
 - #322917 Upgrade path: Missing information text on update 6000 when content.module not enabled.
 - Replaced theming instructions in theme/README.txt with advanced_help pages.
+- #323436 by hass: fix a few strings + translation bugs.
 
 CCK 6.2-rc10
 ============
