@@ -95,6 +95,20 @@ function content_views_plugins() {
         'use pager' => FALSE,
         'accept attachments' => FALSE,
       ),
+      'content_references' => array(
+        'path' => drupal_get_path('module', 'content') . '/includes/views/handlers',
+        // Those strings are not translated for now.
+        // We'll need to change that if / when we remove 'no ui'
+        'title' => 'Simple - for reference fields', // TODO: better name ? (currently not displayed anyway)
+        'help' => 'Destination-agnostic display. Mostly useful for programmatic views.',
+        'parent' => 'content_simple',
+        'handler' => 'content_plugin_display_references',
+        'no ui' => TRUE, // Programmatic use only.
+        'uses hook menu' => FALSE,
+        'use ajax' => FALSE,
+        'use pager' => FALSE,
+        'accept attachments' => FALSE,
+      ),
     ),
     'style' => array(
       'content_php_array_autocomplete' => array(
