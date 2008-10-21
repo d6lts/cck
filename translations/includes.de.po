@@ -17,7 +17,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: German translation of CCK\n"
 "POT-Creation-Date: 2008-10-19 16:51+0200\n"
-"PO-Revision-Date: 2008-10-19 23:49+0100\n"
+"PO-Revision-Date: 2008-10-22 00:15+0100\n"
 "Last-Translator: Alexander Haß\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -105,7 +105,7 @@ msgstr "Der zu speichernde Datentyp."
 
 #: includes/content.admin.inc:258;290
 msgid "Form element to edit the data."
-msgstr "Formularelement zum Bearbeiten von Daten."
+msgstr "Formularelement zum Bearbeiten der Daten."
 
 #: includes/content.admin.inc:274
 msgid "- Select an existing field -"
@@ -145,11 +145,11 @@ msgstr "Neues Feld hinzufügen: Der Feldname %field_name ist bereits vorhanden."
 
 #: includes/content.admin.inc:401
 msgid "Add new field: you need to select a field type."
-msgstr "Neues Feld hinzufügen: Ein Feldtyp muss angegeben werden."
+msgstr "Neues Feld hinzufügen: Ein Feldtyp muss ausgewählt werden."
 
 #: includes/content.admin.inc:406
 msgid "Add new field: you need to select a widget."
-msgstr "Neues Feld hinzufügen: Ein Steuerelement muss angegeben werden."
+msgstr "Neues Feld hinzufügen: Ein Steuerelement muss ausgewählt werden."
 
 #: includes/content.admin.inc:412
 msgid "Add new field: invalid widget."
@@ -207,11 +207,11 @@ msgstr "einfach"
 
 #: includes/content.admin.inc:626
 msgid "fieldset - collapsible"
-msgstr "Felder - Zusammenklappbar"
+msgstr "Feldgruppe - Zusammenklappbar"
 
 #: includes/content.admin.inc:627
 msgid "fieldset - collapsed"
-msgstr "Felder - Zusammengeklappt"
+msgstr "Feldgruppe - Zusammengeklappt"
 
 #: includes/content.admin.inc:684
 msgid "Your settings have been saved."
@@ -235,7 +235,7 @@ msgstr "Ein Name der im Inhaltstyp %type als Beschriftung für dieses Feld verwe
 
 #: includes/content.admin.inc:801
 msgid "The type of data you would like to store in the database with this field. This option cannot be changed."
-msgstr "Der Typ von Daten der mit diesem Feld in der Datenbank gespeichert werden soll. Diese Option kann nicht geändert werden."
+msgstr "Der Datentyp der mit diesem Feld in der Datenbank gespeichert werden soll. Diese Option kann nicht geändert werden."
 
 #: includes/content.admin.inc:806;990
 msgid "Widget type"
@@ -243,7 +243,7 @@ msgstr "Steuerelement"
 
 #: includes/content.admin.inc:810
 msgid "The type of form element you would like to present to the user when creating this field in the %type content type."
-msgstr "Der Typ von Formularelement der dem Benutzer angezeigt wird, wenn dieses Feld im Inhaltstyp %type erstellt wird."
+msgstr "Der Formularelementtyp der dem Benutzer angezeigt wird, wenn dieses Feld im Inhaltstyp %type erstellt wird."
 
 #: includes/content.admin.inc:820
 #: includes/content.rules.inc:66
@@ -443,7 +443,7 @@ msgstr "Versteckt"
 #: includes/content.panels.inc:57
 #, fuzzy
 msgid "Configure how the label is going to be displayed"
-msgstr "Die Anzeige der Beschreibung konfigurieren"
+msgstr "Die Darstellung der Beschreibung konfigurieren"
 
 #: includes/content.panels.inc:73
 msgid "Field / Formatter"

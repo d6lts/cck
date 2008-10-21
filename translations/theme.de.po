@@ -17,7 +17,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: German translation of CCK\n"
 "POT-Creation-Date: 2008-10-19 16:51+0200\n"
-"PO-Revision-Date: 2008-10-19 19:42+0100\n"
+"PO-Revision-Date: 2008-10-22 00:19+0100\n"
 "Last-Translator: Alexander Haß\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -50,11 +50,11 @@ msgstr "Neue Gruppe"
 
 #: theme/theme.inc:31
 msgid "Add fields and groups to the content type, and arrange them on content display and input forms."
-msgstr ""
+msgstr "Fügt Felder und Gruppen zu dem Inhaltstyp hinzu und ordnet diese auf der Inhaltsansicht und den Eingabeformularen an."
 
 #: theme/theme.inc:33
 msgid "Note: Installing the <a href=\"!adv_help\">Advanced help</a> module will let you access more and better help."
-msgstr ""
+msgstr "Hinweis: Die Installation des <a href=\"!adv_help\">Erweiterte Hilfe</a>-Modul ermöglicht den Zugriff auf weitere und bessere Hilfe."
 
 #: theme/theme.inc:146
 msgid "Configure how this content type's fields and field labels should be displayed when it's viewed in teaser and full-page mode."
@@ -66,7 +66,7 @@ msgstr "Die Anzeige von Feldern dieses Inhaltstyps konfigurieren, wenn dieser im
 
 #: theme/theme.inc:151
 msgid "Use the 'Exclude' checkbox to exclude an item from the !content value passed to the node template."
-msgstr ""
+msgstr "Das ‚Ausschließen‘-Ankreuzfeld kann verwendet werden, um einen Eintrag aus dem an die Beitragsvorlage übergebenen !content-Wert zu entfernen."
 
 #~ msgid "Name"
 #~ msgstr "Name"

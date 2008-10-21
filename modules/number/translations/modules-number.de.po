@@ -17,7 +17,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: German translation of CCK\n"
 "POT-Creation-Date: 2008-10-19 16:51+0200\n"
-"PO-Revision-Date: 2008-10-19 19:05+0100\n"
+"PO-Revision-Date: 2008-10-21 23:20+0100\n"
 "Last-Translator: Alexander Haß\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -82,7 +82,7 @@ msgstr "Dezimalzeichen"
 
 #: modules/number/number.module:106
 msgid "The character users will input to mark the decimal point in forms."
-msgstr "Das von Benutzern in Formularen zu verwendende Zeichen zur Trennung von Dezimalenstellen."
+msgstr "Das von Benutzern in Formularen als Dezimalzeichen zu verwendende Symbol."
 
 #: modules/number/number.module:112
 msgid "Prefix"
@@ -124,19 +124,19 @@ msgstr "unformatiert"
 #: modules/number/number.module:524
 #, fuzzy
 msgid "Only numbers and decimals are allowed in %field."
-msgstr "In %field sind nur Ganzzahlen und Fließkommazahlen zulässig."
+msgstr "Im Feld %field sind nur Ganzzahlen und Fließkommazahlen zulässig."
 
 # Integer validation: English needs work
 #: modules/number/number.module:547
 #, fuzzy
 msgid "Only numbers are allowed in %field."
-msgstr "In %field sind nur Ganzzahlen zulässig."
+msgstr "Im Feld %field sind nur Ganzzahlen zulässig."
 
 # Decimal validation with decimal character: English needs work
 #: modules/number/number.module:571
 #, fuzzy
 msgid "Only numbers and the decimal character (%decimal) are allowed in %field."
-msgstr "In %field sind nur Dezimalzahlen und das Dezimaltrennzeichen (%decimal) zulässig."
+msgstr "Im Feld %field sind nur Dezimalzahlen und das Dezimaltrennzeichen (%decimal) zulässig."
 
 #: modules/number/number.module:0
 msgid "number"
