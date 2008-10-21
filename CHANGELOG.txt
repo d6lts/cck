@@ -22,6 +22,8 @@ CCK 6.2-dev
 - Replaced theming instructions in theme/README.txt with advanced_help pages.
 - #323436 by hass: fix a few strings + translation bugs.
 - #323745 by robertgarrigos: Fix performance issue when submitting 'display fields' form.
+- #298651 by smk-ka, yched - Nodereference/Userreference: Enhance performance on large sites.
+  This also adds 'autocomplete mode' widget settings (full string / beginning of string)
 
 CCK 6.2-rc10
 ============
