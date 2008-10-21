@@ -23,7 +23,8 @@ CCK 6.2-dev
 - #323436 by hass: fix a few strings + translation bugs.
 - #323745 by robertgarrigos: Fix performance issue when submitting 'display fields' form.
 - #298651 by smk-ka, yched - Nodereference/Userreference: Enhance performance on large sites.
-  This also adds 'autocomplete mode' widget settings (full string / beginning of string)
+  This also adds 'autocomplete mode' widget settings (full string / beginning of string).
+- #316292 by fractile81: Turn potentially time-consuming updates into multi-pass updates.
 
 CCK 6.2-rc10
 ============
