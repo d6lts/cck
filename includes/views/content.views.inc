@@ -219,7 +219,7 @@ function content_views_field_views_data($field) {
 
     $data[$columns[0]] = array(
       'group' => t('Content'),
-      'title' => t($field_types[$field['type']]['label']) .': '. t($field['widget']['label']) . ' ('. $field['field_name'] .')',
+      'title' => t($field['widget']['label']) . ' ('. $field['field_name'] .')',
       'help' =>  t($field_types[$field['type']]['label']) .' - '. t('Appears in: @types', array('@types' => implode(', ', $types))),
       'field' => array(
         'field' => $columns[0],
@@ -228,7 +228,6 @@ function content_views_field_views_data($field) {
         'click sortable' => $sorts[0],
         'additional fields' => $additional_fields,
         'content_field_name' => $field['field_name'],
-        'allow empty' => TRUE,
         // Access control modules should implement content_views_access_callback().
         'access callback' => 'content_views_access_callback',
         'access arguments' => array($field),
@@ -237,12 +236,10 @@ function content_views_field_views_data($field) {
         'field' => $columns[0],
         'table' => $db_info['table'],
         'handler' => $arguments[0],
-        'click sortable' => $sorts[0], // TODO used in once place in node.views.inc, should we use it here?
         'name field' => '', // TODO
         'additional fields' => $additional_fields,
         'content_field_name' => $field['field_name'],
         'empty field name' => t('<No value>'),
-        'allow empty' => TRUE,
       ),
       'filter' => array(
         'field' => $columns[0],
@@ -263,7 +260,6 @@ function content_views_field_views_data($field) {
         'handler' => 'content_handler_sort',
         'additional fields' => $additional_fields,
         'content_field_name' => $field['field_name'],
-        'allow empty' => TRUE,
       );
     }
     // TODO: provide automatic filters, sorts, and arguments for each column, not just the first?
