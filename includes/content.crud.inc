@@ -96,7 +96,7 @@ function content_instance_default_values($field_name, $type_name, $widget_type) 
   $settings_names = module_invoke($module, 'widget_settings', 'save', $widget);
   $widget['widget_settings'] = array();
   foreach ((array) $settings_names as $name) {
-    $widget['widget_settings'][$name]['format'] = NULL;
+    $widget['widget_settings'][$name] = NULL;
   }
   return $widget;
 }
