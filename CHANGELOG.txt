@@ -26,6 +26,7 @@ CCK 6.2-dev
   This also adds 'autocomplete mode' widget settings (full string / beginning of string).
 - #316292 by fractile81: Turn potentially time-consuming updates into multi-pass updates.
 - Remove unwanted 'N/A' option on noderef/userref fields using checkboxes.
+- #319131 by Moonshine - Add 'title-raw' token for noderef fields.
 
 CCK 6.2-rc10
 ============

@@ -77,6 +77,7 @@ if (module_exists('nodereference')) {
 
       $tokens['node reference']['nid']   = t('Referenced node ID');
       $tokens['node reference']['title'] = t('Referenced node title');
+      $tokens['node reference']['title-raw'] = t('Referenced node unfiltered title. WARNING - raw user input.');
       $tokens['node reference']['link']  = t("Formatted html link to the referenced node.");
       $tokens['node reference']['path']  = t("Relative path alias to the referenced node.");
       $tokens['node reference']['url']  = t("Absolute path alias to the referenced node.");
@@ -89,8 +90,10 @@ if (module_exists('nodereference')) {
     if ($type == 'field') {
       $item = $object[0];
 
+      $title = is_numeric($item['nid']) ? _nodereference_titles($item['nid']) : '';
       $tokens['nid']   = $item['nid'];
-      $tokens['title'] = isset($item['view']) ? strip_tags($item['view']) : '';
+      $tokens['title'] = $title ? check_plain($title) : '';
+      $tokens['title-raw'] = $title;
       $tokens['link']  = isset($item['view']) ? $item['view'] : '';
       $tokens['path'] = url('node/' . $item['nid']);
       $tokens['url'] = url('node/' . $item['nid'], array('absolute' => TRUE));
