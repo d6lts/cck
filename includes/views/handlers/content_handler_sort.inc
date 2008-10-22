@@ -47,7 +47,7 @@ class content_handler_sort extends views_handler_sort {
         '#options' => $options,
         '#default_value' => $this->options['delta'],
         '#title' => t('Delta'),
-        '#description' => t('The delta allows you to select which item in a multiple value field will be used for sorting. Select "1" to use the first item, "2" for the second item, and so on..'),
+        '#description' => t('The delta allows you to select which item in a multiple value field will be used for sorting. Select "1" to use the first item, "2" for the second item, and so on.'),
       );
     }
   }
@@ -68,11 +68,5 @@ class content_handler_sort extends views_handler_sort {
       $this->table_alias = $this->query->add_table($this->table, $this->relationship, $join);
     }
     return $this->table_alias;
-  }
-
-  function query() {
-    $this->ensure_my_table();
-    // Add the field.
-    $this->query->add_orderby($this->table_alias, $this->real_field, $this->options['order']);
   }
 }
