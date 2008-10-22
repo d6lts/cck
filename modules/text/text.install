@@ -152,5 +152,5 @@ function text_update_6002() {
   return text_update_6000();
 }
 function text_update_6003(&$sandbox) {
-  return text_update_6001(&$sandbox);
+  return text_update_6001($sandbox);
 }
