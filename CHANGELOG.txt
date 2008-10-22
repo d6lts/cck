@@ -29,6 +29,7 @@ CCK 6.2-dev
 - #316292 by fractile81: Turn potentially time-consuming updates into multi-pass updates.
 - Remove unwanted 'N/A' option on noderef/userref fields using checkboxes.
 - #319131 by Moonshine - Add 'title-raw' token for noderef fields.
+- #324300 Views integration: fix sorting for multiple fields by forcing the sort to act on one specific delta.
 
 CCK 6.2-rc10
 ============
