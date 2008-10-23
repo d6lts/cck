@@ -3,16 +3,16 @@
 # LANGUAGE translation of Drupal (modules-optionwidgets)
 # Copyright YEAR NAME <EMAIL@ADDRESS>
 # Generated from files:
-#  optionwidgets.module,v 1.69.2.18 2008/10/06 15:11:39 karens
+#  optionwidgets.module,v 1.69.2.19 2008/10/22 16:20:37 yched
 #  optionwidgets.info,v 1.7 2008/04/23 18:02:24 dww
-#  text.module,v 1.95.2.20 2008/10/01 17:04:31 karens
+#  text.module,v 1.95.2.21 2008/10/23 00:23:09 yched
 #  text.info,v 1.9 2008/04/23 18:02:31 dww
 #
 #, fuzzy
 msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
-"POT-Creation-Date: 2008-10-19 16:51+0200\n"
+"POT-Creation-Date: 2008-10-23 19:54+0200\n"
 "PO-Revision-Date: YYYY-mm-DD HH:MM+ZZZZ\n"
 "Last-Translator: NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <EMAIL@ADDRESS>\n"
@@ -41,11 +41,11 @@ msgstr ""
 msgid "Single on/off checkbox"
 msgstr ""
 
-#: modules/optionwidgets/optionwidgets.module:397
+#: modules/optionwidgets/optionwidgets.module:399
 msgid "N/A"
 msgstr ""
 
-#: modules/optionwidgets/optionwidgets.module:401
+#: modules/optionwidgets/optionwidgets.module:403
 msgid "- None -"
 msgstr ""
 

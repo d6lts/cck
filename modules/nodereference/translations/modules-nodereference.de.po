@@ -16,8 +16,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: German translation of CCK\n"
-"POT-Creation-Date: 2008-10-19 16:51+0200\n"
-"PO-Revision-Date: 2008-10-19 23:50+0100\n"
+"POT-Creation-Date: 2008-10-23 19:54+0200\n"
+"PO-Revision-Date: 2008-10-23 20:50+0100\n"
 "Last-Translator: Alexander Haß\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -73,23 +73,27 @@ msgstr "Die zur Auswahl von Beiträgen verwendete Ansicht"
 msgid "Choose the \"Views module\" view that selects the nodes that can be referenced.<br />Note:<ul><li>Only views that have fields will work for this purpose.</li><li>This will discard the \"Content types\" settings above. Use the view's \"filters\" section instead.</li><li>Use the view's \"fields\" section to display additional informations about candidate nodes on node creation/edition form.</li><li>Use the view's \"sort criteria\" section to determine the order in which candidate nodes will be displayed.</li></ul>"
 msgstr "Wähle die „Views-Modul“-Ansicht das die Beiträge auswählt, die Referenziert werden können.<br />Hinweis:<ul><li>Nur Ansichten mit Feldern werden für diesen Zweck nutzbar sein.</li><li>Dies wird die obigen Einstellungen der „Inhaltsttypen“ verwerfen. Stattdessen sollte hierfür der „Filter“-Bereich der Ansicht verwendet werden.</li><li>Um weitere Informationen über Beitragskandidaten für das Erstellungs-/Bearbeitungsformular anzuzeigen, kann das Ansichten-Feld verwendet werden.</li><li>Um die Reihenfolge der Beitragskandidaten festzulegen sollte das „Sortierkriterium“ von Ansichten verwendet werden.</li></ul>"
 
-#: modules/nodereference/nodereference.module:199
+#: modules/nodereference/nodereference.module:205
 msgid "%name: this post can't be referenced."
 msgstr "%name: Dieser Beitrag kann nicht referenziert werden."
 
-#: modules/nodereference/nodereference.module:224
+#: modules/nodereference/nodereference.module:229
 msgid "Title (link)"
 msgstr "Titel (Link)"
 
-#: modules/nodereference/nodereference.module:229
+#: modules/nodereference/nodereference.module:234
 msgid "Title (no link)"
 msgstr "Titel (kein Link)"
 
-#: modules/nodereference/nodereference.module:624
+#: modules/nodereference/nodereference.module:410
+msgid "Select the method used to collect autocomplete suggestions. Note that <em>Contains</em> can cause performance issues on sites with thousands of nodes."
+msgstr "Die Methode zur Sammlung von Autovervollständigungsvorschlägen auswählen. Dabei ist zu beachten, dass <em>Enthält</em> auf Websites mit tausenden von Beiträgen große Performanceprobleme verursachen kann."
+
+#: modules/nodereference/nodereference.module:658
 msgid "%name: title mismatch. Please check your selection."
 msgstr "%name: Der Titel ist ungültig. Bitte die Auswahl überprüfen."
 
-#: modules/nodereference/nodereference.module:631
+#: modules/nodereference/nodereference.module:665
 msgid "%name: found no valid post with that title."
 msgstr "%name: Kein gültiger Beitrag mit diesem Titel gefunden."
 

@@ -19,8 +19,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: German translation of CCK\n"
-"POT-Creation-Date: 2008-10-19 16:51+0200\n"
-"PO-Revision-Date: 2008-10-22 00:14+0100\n"
+"POT-Creation-Date: 2008-10-23 19:54+0200\n"
+"PO-Revision-Date: 2008-10-23 20:46+0100\n"
 "Last-Translator: Alexander Haß\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -36,12 +36,12 @@ msgid "Order"
 msgstr "Reihenfolge"
 
 #: content.module:1782
-#: modules/nodereference/nodereference.module:239
+#: modules/nodereference/nodereference.module:244
 msgid "Teaser"
 msgstr "Anrisstext"
 
 #: content.module:1786
-#: modules/nodereference/nodereference.module:234
+#: modules/nodereference/nodereference.module:239
 msgid "Full node"
 msgstr "Vollständiger Beitrag"
 
@@ -54,11 +54,6 @@ msgstr "Inhalt"
 #: modules/content_copy/content_copy.module:110
 msgid "Fields"
 msgstr "Felder"
-
-#: content.module:104
-#: includes/content.admin.inc:565
-msgid "Manage fields"
-msgstr "Felder verwalten"
 
 #: includes/content.admin.inc:16
 #: theme/content-admin-field-overview-form.tpl.php:12
@@ -80,12 +75,12 @@ msgstr "Beschreibung"
 msgid "Operations"
 msgstr "Operationen"
 
-#: includes/content.admin.inc:169;195;882
+#: includes/content.admin.inc:169;195;881
 #: modules/fieldgroup/fieldgroup.module:200
 msgid "Remove"
 msgstr "Entfernen"
 
-#: includes/content.admin.inc:242;280;310;791;972
+#: includes/content.admin.inc:242;280;310;790;971
 #: includes/content.panels.inc:49
 #: includes/views/handlers/content_handler_field.inc:43
 #: modules/fieldgroup/fieldgroup.module:108
@@ -115,52 +110,47 @@ msgstr "<Versteckt>"
 msgid "Exclude"
 msgstr "Ausschließen"
 
-#: includes/content.admin.inc:625
-#: modules/content_multigroup/content_multigroup.module:357
-msgid "fieldset"
-msgstr "Feldgruppe"
-
-#: includes/content.admin.inc:882
+#: includes/content.admin.inc:881
 #: modules/fieldgroup/fieldgroup.module:200
 msgid "Cancel"
 msgstr "Abbrechen"
 
-#: includes/content.admin.inc:1018
+#: includes/content.admin.inc:1017
 #: modules/fieldgroup/fieldgroup.module:136
 msgid "Help text"
 msgstr "Hilfetext"
 
-#: includes/content.admin.inc:1068
+#: includes/content.admin.inc:1067
 #: modules/number/number.module:140
 #: modules/text/text.module:96
 msgid "PHP code"
 msgstr "PHP-Code"
 
-#: includes/content.admin.inc:1083;1096
+#: includes/content.admin.inc:1082;1095
 #: includes/content.rules.inc:99
 #: modules/number/number.module:147;156
 #: modules/text/text.module:103;112
 msgid "Code"
 msgstr "Kürzel"
 
-#: includes/content.admin.inc:1097
+#: includes/content.admin.inc:1096
 #: modules/number/number.module:157
 #: modules/text/text.module:113
 msgid "&lt;none&gt;"
 msgstr "&lt;Keine&gt;"
 
-#: includes/content.admin.inc:1098
+#: includes/content.admin.inc:1097
 #: modules/number/number.module:158
 #: modules/text/text.module:114
 msgid "You're not allowed to input PHP code."
 msgstr "Keine Berechtigung zur Eingabe von PHP-Code vorhanden."
 
-#: includes/content.admin.inc:1121
+#: includes/content.admin.inc:1120
 #: modules/content_multigroup/content_multigroup.module:73
 msgid "Unlimited"
 msgstr "Unbegrenzt"
 
-#: includes/content.admin.inc:1138
+#: includes/content.admin.inc:1137
 #: modules/content_copy/content_copy.module:200
 msgid "Save field settings"
 msgstr "Feldeinstellungen speichern"
@@ -188,41 +178,57 @@ msgid "none"
 msgstr "Keine"
 
 #: modules/nodereference/nodereference.module:99
-#: modules/userreference/userreference.module:106
+#: modules/userreference/userreference.module:96
 msgid "Default Views"
 msgstr "Standardansichten"
 
 #: modules/nodereference/nodereference.module:102
-#: modules/userreference/userreference.module:109
+#: modules/userreference/userreference.module:99
 msgid "Existing Views"
 msgstr "Vorhandene Ansichten"
 
 #: modules/nodereference/nodereference.module:123
-#: modules/userreference/userreference.module:130
+#: modules/userreference/userreference.module:120
 msgid "View arguments"
 msgstr "Argumente anzeigen"
 
 #: modules/nodereference/nodereference.module:126
-#: modules/userreference/userreference.module:133
+#: modules/userreference/userreference.module:123
 msgid "Provide a comma separated list of arguments to pass to the view."
 msgstr "Eine kommagetrennte Liste von Argumenten angeben, welche an die Ansicht übergeben werden."
 
-#: modules/nodereference/nodereference.module:329
+#: modules/nodereference/nodereference.module:334
 #: modules/optionwidgets/optionwidgets.module:80
-#: modules/userreference/userreference.module:261
+#: modules/userreference/userreference.module:259
 msgid "Select list"
 msgstr "Auswahlliste"
 
-#: modules/nodereference/nodereference.module:337
+#: modules/nodereference/nodereference.module:342
 #: modules/optionwidgets/optionwidgets.module:88
-#: modules/userreference/userreference.module:269
+#: modules/userreference/userreference.module:267
 msgid "Check boxes/radio buttons"
 msgstr "Ankreuzfelder/Auswahlknöpfe"
 
-#: modules/nodereference/nodereference.module:345
-#: modules/userreference/userreference.module:277
+#: modules/nodereference/nodereference.module:350
+#: modules/userreference/userreference.module:275
 msgid "Autocomplete text field"
 msgstr "Textfeld mit Autovervollständigung"
+
+#: modules/nodereference/nodereference.module:404
+#: modules/userreference/userreference.module:329
+#, fuzzy
+msgid "Autocomplete matching"
+msgstr "Autovervollständigungsvergleich"
+
+#: modules/nodereference/nodereference.module:407
+#: modules/userreference/userreference.module:332
+msgid "Starts with"
+msgstr "Beginnt mit"
+
+#: modules/nodereference/nodereference.module:408
+#: modules/userreference/userreference.module:333
+msgid "Contains"
+msgstr "Enthält"
 
 #: modules/number/number.module:126
 #: modules/text/text.module:82
@@ -260,15 +266,12 @@ msgid "Text field"
 msgstr "Textfeld"
 
 #: modules/text/text.module:66;207
-#: modules/userreference/userreference.module:214
+#: modules/userreference/userreference.module:212
 msgid "Plain text"
 msgstr "Einfacher Text"
 
 #: modules/text/text.module:202
-#: modules/userreference/userreference.module:209
+#: modules/userreference/userreference.module:207
 msgid "Default"
 msgstr "Standard"
-
-#~ msgid "Add field"
-#~ msgstr "Feld hinzufügen"
 

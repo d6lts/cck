@@ -3,14 +3,14 @@
 # LANGUAGE translation of Drupal (modules-content_multigroup)
 # Copyright YEAR NAME <EMAIL@ADDRESS>
 # Generated from files:
-#  content_multigroup.module,v 1.1.2.2 2008/10/16 22:52:54 yched
+#  content_multigroup.module,v 1.1.2.4 2008/10/22 11:02:41 yched
 #  modules/content_multigroup/content_multigroup.info: n/a
 #
 #, fuzzy
 msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
-"POT-Creation-Date: 2008-10-19 16:51+0200\n"
+"POT-Creation-Date: 2008-10-23 20:01+0200\n"
 "PO-Revision-Date: YYYY-mm-DD HH:MM+ZZZZ\n"
 "Last-Translator: NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <EMAIL@ADDRESS>\n"
@@ -23,16 +23,12 @@ msgstr ""
 msgid "The fields in a Standard group are independent of each other and each can have either single or multiple values. The fields in a Multigroup are treated as a repeating collection of single value fields."
 msgstr ""
 
-#: modules/content_multigroup/content_multigroup.module:53
+#: modules/content_multigroup/content_multigroup.module:53;123
 msgid "Multigroup"
 msgstr ""
 
 #: modules/content_multigroup/content_multigroup.module:122
-msgid "Standard: simple field collection"
-msgstr ""
-
-#: modules/content_multigroup/content_multigroup.module:123
-msgid "Multigroup: fields that move in unison"
+msgid "Standard"
 msgstr ""
 
 #: modules/content_multigroup/content_multigroup.module:126
@@ -63,8 +59,12 @@ msgstr ""
 msgid "You are moving the field %field out of a Multigroup."
 msgstr ""
 
+#: modules/content_multigroup/content_multigroup.module:357
+msgid "Fieldset"
+msgstr ""
+
 #: modules/content_multigroup/content_multigroup.module:358
-msgid "horizontal line"
+msgid "Horizontal line"
 msgstr ""
 
 #: modules/content_multigroup/content_multigroup.module:371

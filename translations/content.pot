@@ -7,9 +7,8 @@
 #  content.install,v 1.85.2.29 2008/10/18 12:44:37 yched
 #  content.info,v 1.6 2007/07/04 23:46:29 yched
 #  content.rules.inc,v 1.1.2.3 2008/10/17 13:27:11 fago
-#  content.views.inc,v 1.1.2.10 2008/10/17 14:29:34 yched
+#  content.views.inc,v 1.1.2.14 2008/10/22 19:27:51 yched
 #  content_copy.info,v 1.6 2008/04/23 18:01:48 dww
-#  modules/content_multigroup/content_multigroup.info: n/a
 #  content_permissions.info,v 1.2 2008/04/23 18:01:52 dww
 #  fieldgroup.info,v 1.6.2.1 2008/09/22 18:25:21 karens
 #  nodereference.info,v 1.8 2008/04/23 18:02:07 dww
@@ -22,7 +21,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
-"POT-Creation-Date: 2008-10-19 16:51+0200\n"
+"POT-Creation-Date: 2008-10-23 19:54+0200\n"
 "PO-Revision-Date: YYYY-mm-DD HH:MM+ZZZZ\n"
 "Last-Translator: NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <EMAIL@ADDRESS>\n"
@@ -143,6 +142,10 @@ msgstr ""
 msgid "Use PHP input for field settings (dangerous - grant with care)"
 msgstr ""
 
+#: content.module:104
+msgid "Manage fields"
+msgstr ""
+
 #: content.module:113
 msgid "Display fields"
 msgstr ""
@@ -179,7 +182,7 @@ msgstr ""
 msgid "CCK integration with Views module requires Views 6.x-2.0-rc2 or greater."
 msgstr ""
 
-#: content.info:0 includes/content.rules.inc:19;200 includes/views/content.views.inc:163;207
+#: content.info:0 includes/content.rules.inc:19;200 includes/views/content.views.inc:177;221
 msgid "Content"
 msgstr ""
 
@@ -187,7 +190,7 @@ msgstr ""
 msgid "Allows administrators to define new content types."
 msgstr ""
 
-#: content.info:0 modules/content_copy/content_copy.info:0 modules/content_multigroup/content_multigroup.info:0 modules/content_permissions/content_permissions.info:0 modules/fieldgroup/fieldgroup.info:0 modules/nodereference/nodereference.info:0 modules/number/number.info:0 modules/optionwidgets/optionwidgets.info:0 modules/text/text.info:0 modules/userreference/userreference.info:0
+#: content.info:0 modules/content_copy/content_copy.info:0 modules/content_permissions/content_permissions.info:0 modules/fieldgroup/fieldgroup.info:0 modules/nodereference/nodereference.info:0 modules/number/number.info:0 modules/optionwidgets/optionwidgets.info:0 modules/text/text.info:0 modules/userreference/userreference.info:0
 msgid "CCK"
 msgstr ""
 
