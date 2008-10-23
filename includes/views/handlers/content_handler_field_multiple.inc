@@ -128,7 +128,9 @@ class content_handler_field_multiple extends content_handler_field {
     $vids = array();
     $this->field_values = array();
     foreach ($values as $result) {
-      $vids[] = $result->{$this->field_alias};
+      if (isset($result->{$this->field_alias})) {
+        $vids[] = $result->{$this->field_alias};
+      }
     }
 
     // List columns to retrieve.
