@@ -167,7 +167,7 @@ function text_field($op, &$node, $field, &$items, $teaser, $page) {
           }
         }
       }
-      break;
+      return $items;
 
     case 'sanitize':
       foreach ($items as $delta => $item) {

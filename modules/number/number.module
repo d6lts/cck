@@ -253,7 +253,7 @@ function number_field($op, &$node, $field, &$items, $teaser, $page) {
           }
         }
       }
-      break;
+      return $items;
   }
 }
 
