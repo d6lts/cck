@@ -31,6 +31,7 @@ CCK 6.2-dev
 - #319131 by Moonshine - Add 'title-raw' token for noderef fields.
 - #324300 Views integration: fix sorting for multiple fields by allowing the sort to act on one specific delta.
 - Views integration: fix broken query for fields retrieved through relationships when relation is empty.
+- #325262 Fix flawed logic in filtering out empty values.
 
 CCK 6.2-rc10
 ============

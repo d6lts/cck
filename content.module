@@ -654,13 +654,14 @@ function content_field($op, &$node, $field, &$items, $teaser, $page) {
       // TODO: is it still needed ?
       unset($items[$field['field_name'] .'_add_more']);
 
-      // Filter out empty values.
-      $items = content_set_empty($field, $items);
-
       if (content_handle('widget', 'multiple values', $field) == CONTENT_HANDLE_CORE) {
         // Reorder items to account for drag-n-drop reordering.
         $items = _content_sort_items($field, $items);
       }
+
+      // Filter out empty values.
+      $items = content_set_empty($field, $items);
+
       break;
 
     case 'view':
@@ -668,13 +669,13 @@ function content_field($op, &$node, $field, &$items, $teaser, $page) {
 
       // Previewed nodes bypass the 'presave' op, so we need to some massaging.
       if ($node->build_mode == NODE_BUILD_PREVIEW && content_handle('widget', 'multiple values', $field) == CONTENT_HANDLE_CORE) {
-        // Filter out empty values.
-        $items = content_set_empty($field, $items);
-
         if (content_handle('widget', 'multiple values', $field) == CONTENT_HANDLE_CORE) {
           // Reorder items to account for drag-n-drop reordering.
           $items = _content_sort_items($field, $items);
         }
+
+        // Filter out empty values.
+        $items = content_set_empty($field, $items);
       }
 
       // NODE_BUILD_NORMAL is 0, and ('whatever' == 0) is TRUE, so we need a ===.
@@ -816,34 +817,35 @@ function content_field($op, &$node, $field, &$items, $teaser, $page) {
 }
 
 /**
- * Helper function to set NULL values and unset items where needed.
+ * Helper function to filter out empty values.
  *
- * If a specified number of multiple values was requested or this is
- * the zero delta, save even if empty and keep a NULL value for each
- * of its columns so there is a marker row in the database, otherwise
- * unset the item.
+ * On order to keep marker rows in the database, the function ensures
+ * that the right number of 'all columns NULL' values is kept.
  *
  * @param array $field
  * @param array $items
  * @return array
- *   returns emptied and adjusted item array
+ *   returns filtered and adjusted item array
  */
 function content_set_empty($field, $items) {
+  // Filter out empty values.
+  $filtered = array();
   $function = $field['module'] .'_content_is_empty';
-  $max_delta = $field['multiple'] > 1 ? $field['multiple'] : 0;
   foreach ((array) $items as $delta => $item) {
-    if ($function($item, $field)) {
-      if ($delta <= $max_delta) {
-        foreach (array_keys($field['columns']) as $column) {
-          $items[$delta][$column] = NULL;
-        }
-      }
-      else {
-        unset($items[$delta]);
-      }
+    if (!$function($item, $field)) {
+      $filtered[] = $item;
     }
   }
-  return $items;
+
+  // Make sure we store the right number of 'empty' values.
+  $empty = array();
+  foreach (array_keys($field['columns']) as $column) {
+    $empty[$column] = NULL;
+  }
+  $pad = $field['multiple'] > 1 ? $field['multiple'] : 1;
+  $filtered = array_pad($filtered, $pad, $empty);
+
+  return $filtered;
 }
 
 /**
