@@ -147,7 +147,9 @@ function userreference_field_settings($op, $field) {
 
       // Swap the filter handler to the 'in' operator.
       $data[$table_alias][$field['field_name'] .'_uid']['filter']['handler'] = 'content_handler_filter_many_to_one';
-
+      // Use users.name for summaries.
+      $data[$table_alias][$field['field_name'] .'_nid']['argument']['name table'] = 'node';
+      $data[$table_alias][$field['field_name'] .'_nid']['argument']['name field'] = 'title';
       // Add a relationship for related user.
       $data[$table_alias][$field['field_name'] .'_uid']['relationship'] = array(
         'base' => 'users',

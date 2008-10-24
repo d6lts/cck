@@ -32,6 +32,7 @@ CCK 6.2-dev
 - #324300 Views integration: fix sorting for multiple fields by allowing the sort to act on one specific delta.
 - Views integration: fix broken query for fields retrieved through relationships when relation is empty.
 - #325262 Fix flawed logic in filtering out empty values.
+- #297322 Views integration: display node title / user name for argument summaries with noderef / userref fields.
 
 CCK 6.2-rc10
 ============
