@@ -178,7 +178,7 @@ function content_rules_action_populate_field_submit(&$settings, $form, &$form_st
  * Label callback: Improve the label of the action.
  */
 function content_rules_action_populate_field_label($settings, $argument_labels) {
-  return t("Populate @node's @field", array('@field' => $settings['field_name']) + $argument_labels);
+  return t("Populate @node's field '@field'", array('@field' => $settings['field_name']) + $argument_labels);
 }
 
 function workflow_ng_action_populate_field_upgrade(&$element) {
@@ -246,7 +246,7 @@ function content_rules_field_has_value_submit(&$settings, $form, &$form_state) {
 }
 
 function content_rules_field_has_value_label($settings, $argument_labels) {
-  return t("@node's @field has value", array('@field' => $settings['field_name']) + $argument_labels);
+  return t("@node's field '@field' has value", array('@field' => $settings['field_name']) + $argument_labels);
 }
 
 /**
@@ -272,7 +272,7 @@ function content_rules_field_changed_form($settings, &$form, &$form_state) {
 }
 
 function content_rules_field_changed_label($settings, $argument_labels) {
-  return t("@node's @field has changed", array('@field' => $settings['field_name']) + $argument_labels);
+  return t("@node's field '@field' has been changed", array('@field' => $settings['field_name']) + $argument_labels);
 }
 
 
