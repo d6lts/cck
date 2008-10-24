@@ -140,6 +140,7 @@ function text_field_settings($op, $field) {
 
         // Filter: swap the handler to the 'many to one' operator.
         $data[$table_alias][$field['field_name'] .'_value']['filter']['handler'] = 'content_handler_filter_many_to_one';
+        // Argument : swap the handler to the 'many to one' operator.
         $data[$table_alias][$field['field_name'] .'_value']['argument']['handler'] = 'content_handler_argument_many_to_one';
         return $data;
       }
