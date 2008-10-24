@@ -156,7 +156,7 @@ function userreference_field_settings($op, $field) {
         'field' => $db_info['columns']['uid']['column'],
         'handler' => 'content_handler_relationship',
         'label' => t($field['widget']['label']),
-        'multiple' => $field['multiple'],
+        'content_field_name' => $field['field_name'],
       );
       return $data;
 
