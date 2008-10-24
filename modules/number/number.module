@@ -193,9 +193,10 @@ function number_field_settings($op, $field) {
         $db_info = content_database_info($field);
         $table_alias = content_views_tablename($field);
 
-        // Swap the filter handler to the 'in' operator.
+        // Filter: swap the handler to the 'many to one' operator.
         $data[$table_alias][$field['field_name'] .'_value']['filter']['handler'] = 'content_handler_filter_many_to_one';
         $data[$table_alias][$field['field_name'] .'_value']['filter']['numeric'] = TRUE;
+        // Argument: swap the handler to the 'many to one' operator
         $data[$table_alias][$field['field_name'] .'_value']['argument']['handler'] = 'content_handler_argument_many_to_one';
         $data[$table_alias][$field['field_name'] .'_value']['argument']['numeric'] = TRUE;
         return $data;
