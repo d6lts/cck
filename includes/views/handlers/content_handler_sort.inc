@@ -3,8 +3,8 @@
 
 /**
  * @file
- * The subclass simply adds properties,
- * for field-specific subclasses to use if they need to.
+ * Handles sorts and deals properly with multiple
+ * values by allowing the views administrator to select deltas.
  */
 class content_handler_sort extends views_handler_sort {
   var $content_field;

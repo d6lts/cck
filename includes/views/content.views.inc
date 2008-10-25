@@ -236,7 +236,6 @@ function content_views_field_views_data($field) {
         'field' => $columns[0],
         'table' => $db_info['table'],
         'handler' => $arguments[0],
-        'name field' => '', // TODO
         'additional fields' => $additional_fields,
         'content_field_name' => $field['field_name'],
         'empty field name' => t('<No value>'),
@@ -251,8 +250,6 @@ function content_views_field_views_data($field) {
         'allow empty' => TRUE,
       ),
     );
-    // TODO do we need different handling for sorts with Views 2,
-    // especially when relationships are involved?
     if (!empty($sorts[0])) {
       $data[$columns[0]]['sort'] = array(
         'field' => $columns[0],
