@@ -155,7 +155,6 @@ function content_field_overview_form(&$form_state, $type_name) {
     '#extra' => array_keys($extra),
     '#field_rows' => array(),
     '#group_rows' => array(),
-    '#order' => array(),
   );
 
   // Fields.
@@ -557,7 +556,6 @@ function content_display_overview_form(&$form_state, $type_name, $contexts_selec
     '#fields' => array_keys($fields),
     '#groups' => array_keys($groups),
     '#contexts' => $contexts_selector,
-    '#order' => array(),
   );
 
   if (empty($fields)) {
