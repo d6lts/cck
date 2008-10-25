@@ -47,6 +47,7 @@ class content_handler_field_multiple extends content_handler_field {
       '#title' => t('Group multiple values'),
       '#type' => 'checkbox',
       '#default_value' => $options['multiple']['group'],
+      '#description' => t('If unchecked, each item in the field will create a new row, which may appear to cause duplicates. This setting is not compatible with click-sorting in table displays.'),
     );
     // Make the string translatable by keeping it as a whole rather than
     // translating prefix and suffix separately.
@@ -79,6 +80,16 @@ class content_handler_field_multiple extends content_handler_field {
       '#process' => array('views_process_dependency'),
       '#dependency' => array('edit-options-multiple-group' => array(TRUE)),
     );
+  }
+
+  /**
+   * Determine if this field is click sortable.
+   */
+  function click_sortable() {
+    $field = $this->content_field;
+    $options = $this->options;
+
+    return !empty($this->definition['click sortable']) && !($options['multiple']['group'] && $field['multiple']);
   }
 
   function query() {
