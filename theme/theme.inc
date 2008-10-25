@@ -98,9 +98,7 @@ function template_preprocess_content_field_overview_form(&$vars) {
   $vars['submit'] = drupal_render($form);
 
   // Add tabledrag behavior.
-//  drupal_add_tabledrag('content-field-overview', 'match', 'parent', 'group-parent', 'group-parent', 'field-name', FALSE, 1);
   drupal_add_tabledrag('content-field-overview', 'match', 'parent', 'group-parent', 'group-parent', 'field-name', TRUE, 1);
-//  drupal_add_tabledrag('content-field-overview', 'order', 'sibling', 'field-weight', NULL, NULL, FALSE);
   drupal_add_tabledrag('content-field-overview', 'order', 'sibling', 'field-weight');
 
   // Add settings for the update selects behavior.
