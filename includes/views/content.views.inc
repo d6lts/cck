@@ -242,7 +242,6 @@ function content_views_field_views_data($field) {
       ),
       'filter' => array(
         'field' => $columns[0],
-        'title' => t($field['widget']['label']),
         'table' => $db_info['table'],
         'handler' => $filters[0],
         'additional fields' => $additional_fields,
