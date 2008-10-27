@@ -8,34 +8,15 @@
 function template_preprocess_content_field_overview_form(&$vars) {
   $form = &$vars['form'];
 
-  // Put weight and parenting values into a $dummy render structure
-  // that will figure out the corresponding row order.
-  $dummy = array();
-  // Group rows: account for weight.
-  foreach ($form['#group_rows'] as $name) {
-    $dummy[$name] = array('#weight' => $form[$name]['weight']['#value'], '#value' => $name .' ');
-  }
-  // Field rows : account for weight and parenting.
-  foreach ($form['#field_rows'] as $name) {
-    $dummy[$name] = array('#weight' => $form[$name]['weight']['#value'], '#value' => $name .' ');
-    if (module_exists('fieldgroup')) {
-      if ($parent = $form[$name]['parent']['#value']) {
-        $form[$name]['#depth'] = 1;
-        $dummy[$parent][$name] = $dummy[$name];
-        unset($dummy[$name]);
-      }
-    }
-  }
-  $order = $dummy ? explode(' ', trim(drupal_render($dummy))) : array();
-
   $vars['help'] = theme('advanced_help_topic', 'content', 'manage-fields') . t('Add fields and groups to the content type, and arrange them on content display and input forms.');
   if (!module_exists('advanced_help')) {
     $vars['help'] .= '<br/>' . t('Note: Installing the <a href="!adv_help">Advanced help</a> module will let you access more and better help.', array('!adv_help' => 'http://drupal.org/project/advanced_help'));
   }
 
+  $order = _content_overview_order($form, $form['#field_rows'], $form['#group_rows']);
   $rows = array();
 
-  // Identify the new item keys in the form, they look like
+  // Identify the 'new item' keys in the form, they look like
   // _add_new_field, add_new_group.
   $keys = array_keys($form);
   $add_rows = array();
@@ -98,7 +79,9 @@ function template_preprocess_content_field_overview_form(&$vars) {
   $vars['submit'] = drupal_render($form);
 
   // Add tabledrag behavior.
+//  drupal_add_tabledrag('content-field-overview', 'match', 'parent', 'group-parent', 'group-parent', 'field-name', FALSE, 1);
   drupal_add_tabledrag('content-field-overview', 'match', 'parent', 'group-parent', 'group-parent', 'field-name', TRUE, 1);
+//  drupal_add_tabledrag('content-field-overview', 'order', 'sibling', 'field-weight', NULL, NULL, FALSE);
   drupal_add_tabledrag('content-field-overview', 'order', 'sibling', 'field-weight');
 
   // Add settings for the update selects behavior.
@@ -116,29 +99,10 @@ function template_preprocess_content_field_overview_form(&$vars) {
  */
 function template_preprocess_content_display_overview_form(&$vars) {
   $form = &$vars['form'];
-  $contexts_selector = $form['#contexts'];
 
-  // Put weight and parenting values into a $dummy render structure
-  // that will figure out the corresponding row order.
-  $dummy = array();
-  // Group rows: account for weight.
-  if (module_exists('fieldgroup')) {
-    foreach ($form['#groups'] as $name) {
-      $dummy[$name] = array('#weight' => $form[$name]['weight']['#value'], '#value' => $name .' ');
-    }
-  }
-  // Field rows : account for weight and parenting.
-  foreach ($form['#fields'] as $name) {
-    $dummy[$name] = array('#weight' => $form[$name]['weight']['#value'], '#value' => $name .' ');
-    if (module_exists('fieldgroup')) {
-      if ($parent = $form[$name]['parent']['#value']) {
-        $form[$name]['#depth'] = 1;
-        $dummy[$parent][$name] = $dummy[$name];
-        unset($dummy[$name]);
-      }
-    }
-  }
-  $order = $dummy ? explode(' ', trim(drupal_render($dummy))) : array();
+  $contexts_selector = $form['#contexts'];
+  $vars['basic'] = $contexts_selector == 'basic';
+  $vars['contexts'] = content_build_modes($contexts_selector);
 
   if ($contexts_selector == 'basic') {
     $help = t("Configure how this content type's fields and field labels should be displayed when it's viewed in teaser and full-page mode.");
@@ -149,14 +113,12 @@ function template_preprocess_content_display_overview_form(&$vars) {
   $help .= ' '. t("Use the 'Exclude' checkbox to exclude an item from the !content value passed to the node template.", array('!content' => '$content'));
   $vars['help'] = $help;
 
+  $order = _content_overview_order($form, $form['#fields'], $form['#groups']);
   if (empty($order)) {
     $vars['rows'] = array();
     $vars['submit'] = '';
     return;
   }
-
-  $vars['basic'] = $contexts_selector == 'basic';
-  $vars['contexts'] = content_build_modes($contexts_selector);
 
   $rows = array();
   foreach ($order as $key) {

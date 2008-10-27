@@ -56,7 +56,8 @@
   margin: 4px 4px 0 0;
 }
 #content-field-overview-form .label-group,
-#content-display-overview-form .label-group {
+#content-display-overview-form .label-group,
+#content-copy-export-form .label-group {
   font-weight: bold;
 }
 table#content-field-overview .label-add-new-field,

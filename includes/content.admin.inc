@@ -1585,6 +1585,37 @@ function content_alter_db_cleanup() {
 }
 
 /**
+ * Helper function to order fields and groups when theming (preprocessing)
+ * overview forms.
+ *
+ * The $form is passed by reference because we assign depths as parenting
+ * relationships are sorted out.
+ */
+function _content_overview_order(&$form, $field_rows, $group_rows) {
+  // Put weight and parenting values into a $dummy render structure
+  // and let drupal_render figure out the corresponding row order.
+  $dummy = array();
+  // Group rows: account for weight.
+  if (module_exists('fieldgroup')) {
+    foreach ($group_rows as $name) {
+      $dummy[$name] = array('#weight' => $form[$name]['weight']['#value'], '#value' => $name .' ');
+    }
+  }
+  // Field rows : account for weight and parenting.
+  foreach ($field_rows as $name) {
+    $dummy[$name] = array('#weight' => $form[$name]['weight']['#value'], '#value' => $name .' ');
+    if (module_exists('fieldgroup')) {
+      if ($parent = $form[$name]['parent']['#value']) {
+        $form[$name]['#depth'] = 1;
+        $dummy[$parent][$name] = $dummy[$name];
+        unset($dummy[$name]);
+      }
+    }
+  }
+  return $dummy ? explode(' ', trim(drupal_render($dummy))) : array();
+}
+
+/**
  * Batching process for changing the field schema,
  * running each affected node through node_save() first, to
  * fire all hooks.
