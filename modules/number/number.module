@@ -27,41 +27,21 @@ function number_theme() {
 
 /**
  * Implementation of hook_field_info().
- *
- * Here we indicate that the content module will use its default
- * handling for the view of these fields.
- *
- * Callbacks can be omitted if default handing is used.
- * They're included here just so this module can be used
- * as an example for custom modules that might do things
- * differently.
  */
 function number_field_info() {
   return array(
     'number_integer' => array(
       'label' => t('Integer'),
       'description' => t('Store a number in the database as an integer.'),
-      'callbacks' => array(
-        'tables' => CONTENT_CALLBACK_DEFAULT,
-        'arguments' => CONTENT_CALLBACK_DEFAULT,
-        ),
-      ),
+    ),
     'number_decimal' => array(
       'label' => t('Decimal'),
       'description' => t('Store a number in the database in a fixed decimal format.'),
-      'callbacks' => array(
-        'tables' => CONTENT_CALLBACK_DEFAULT,
-        'arguments' => CONTENT_CALLBACK_DEFAULT,
-        ),
-      ),
+    ),
     'number_float' => array(
       'label' => t('Float'),
       'description' => t('Store a number in the database in a floating point format.'),
-      'callbacks' => array(
-        'tables' => CONTENT_CALLBACK_DEFAULT,
-        'arguments' => CONTENT_CALLBACK_DEFAULT,
-        ),
-      ),
+    ),
   );
 }
 

@@ -115,20 +115,10 @@ function content_panels_render_field($conf, $panel_args, $context) {
     $block->title = t($field['widget']['label']);
   }
   $node_field = isset($node->$field['field_name']) ? $node->$field['field_name'] : array();
-  if (content_handle('field', 'view', $field) == CONTENT_CALLBACK_CUSTOM) {
-    $field_types = _content_field_types();
-    $module = $field_types[$field['type']]['module'];
-    $function = $module .'_field';
-    if (function_exists($function)) {
-      $value = $function('view', $node, $field, $node_field, 0, 0);
-    }
+  foreach ($node_field as $delta => $item) {
+    $node_field[$delta]['view'] = content_format($field, $item, $formatter, $node);
   }
-  else {
-    foreach ($node_field as $delta => $item) {
-      $node_field[$delta]['view'] = content_format($field, $item, $formatter, $node);
-    }
-    $value = theme('field', $node, $field, $node_field, 0, 0);
-  }
+  $value = theme('field', $node, $field, $node_field, 0, 0);
   $block->content = $value;
 
   return $block;
