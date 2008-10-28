@@ -215,7 +215,6 @@ function content_copy_export($form_values) {
   module_load_include('inc', 'node', 'content_types');
   drupal_execute('node_type_form', $node_state, node_get_types('type', $form_values['type_name']));
 
-  // TODO : also export "extra" fields weights.
   module_load_include('inc', 'content', 'includes/content.admin');
   module_load_include('inc', 'content', 'includes/content.crud');
 
@@ -260,7 +259,14 @@ function content_copy_export($form_values) {
   }
 
   // Convert the macro array into formatted text.
-  return content_copy_get_macro();
+  $output = content_copy_get_macro();
+
+  // Add weights of non-CCK fields.
+  if ($extra = variable_get('content_extra_weights_'. $form_values['type_name'], array())) {
+    $output .= "\$content[extra]  = ". var_export((array) $extra, TRUE) .";\n";
+  }
+
+  return $output;
 }
 
 /**
@@ -356,7 +362,7 @@ function content_copy_import_form_submit($form, &$form_state) {
 
   // It is allowed to import a type with no fields,
   // so the fields array could be empty and must be cast as an array.
-  $imported_fields = (array) $content['fields'];
+  $imported_fields = isset($content['fields']) ? $content['fields'] : array();
 
   // Perform more pre-import error trapping.
   // If there are potential problems, exit without doing the import.
@@ -364,6 +370,7 @@ function content_copy_import_form_submit($form, &$form_state) {
 
   // The groups array could be empty and still valid, make sure to cast it as an array.
   // If there are groups in the import, make sure the fieldgroup module is enabled.
+  $imported_groups = array();
   if (isset($content['groups']) && module_exists('fieldgroup')) {
     $imported_groups = (array) $content['groups'];
   }
@@ -433,11 +440,10 @@ function content_copy_import_form_submit($form, &$form_state) {
             )));
        return;
     }
-    // TODO : also import "extra" fields weights.
   }
 
   // Create the groups for this type, if they don't already exist.
-  if (module_exists('fieldgroup') && isset($imported_groups)) {
+  if (module_exists('fieldgroup') && $imported_groups) {
     foreach ($imported_groups as $group) {
       $group_name = $group['group_name'];
       fieldgroup_save_group($type_name, $group);
@@ -470,6 +476,11 @@ function content_copy_import_form_submit($form, &$form_state) {
         fieldgroup_update_fields($field);
       }
     }
+  }
+
+  // Import weights of non-CCK fields.
+  if (isset($content['extra'])) {
+    variable_set('content_extra_weights_'. $type_name, $content['extra']);
   }
 }
 
