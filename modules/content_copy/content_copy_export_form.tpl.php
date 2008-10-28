@@ -6,7 +6,6 @@ if ($form['#step'] == 2):
     <table id="content-copy-export" class="sticky-enabled">
       <thead>
         <tr>
-          <!-- <th class="<?php print $select_all_class; ?>"></th> -->
           <th><?php print t('Export'); ?></th>
           <th><?php print t('Label'); ?></th>
           <th><?php print t('Name'); ?></th>
