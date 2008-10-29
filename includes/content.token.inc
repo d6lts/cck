@@ -25,22 +25,24 @@ function content_token_values($type, $object = NULL) {
   $tokens = array();
   if ($type == 'node') {
     $node = $object;
-    $node->build_mode = 'token';
-    $node->content = array();
-    content_view($node);
-    // The formatted values will only be known after the content has been rendered.
-    drupal_render($node->content);
-    content_alter($node);
+    // Prevent against invalid 'nodes' built by broken 3rd party code.
+    if (isset($node->type) && ($type = content_types($node->type))) {
+      $node->build_mode = 'token';
+      $node->content = array();
+      content_view($node);
+      // The formatted values will only be known after the content has been rendered.
+      drupal_render($node->content);
+      content_alter($node);
 
-    $field_types = _content_field_types();
-    $type = content_types($node->type);
-    foreach ($type['fields'] as $field) {
-      $items = $node->{$field['field_name']};
-      $function = $field_types[$field['type']]['module'] . '_token_values';
-      if (!empty($items) && function_exists($function)) {
-        $token_values = $function('field', $items);
-        foreach ($token_values as $token => $value) {
-          $tokens[$field['field_name'] .'-'. $token] = $value;
+      $field_types = _content_field_types();
+      foreach ($type['fields'] as $field) {
+        $items = $node->{$field['field_name']};
+        $function = $field_types[$field['type']]['module'] . '_token_values';
+        if (!empty($items) && function_exists($function)) {
+          $token_values = $function('field', $items);
+          foreach ($token_values as $token => $value) {
+            $tokens[$field['field_name'] .'-'. $token] = $value;
+          }
         }
       }
     }

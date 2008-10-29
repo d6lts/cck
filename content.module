@@ -367,7 +367,8 @@ function content_alter(&$node, $teaser = FALSE, $page = FALSE) {
 function content_prepare_translation(&$node) {
   $default_additions = _content_field_invoke_default('prepare translation', $node);
   $additions = _content_field_invoke('prepare translation', $node);
-  // Merge module additions after the default ones to enable overriding of field values.
+  // Merge module additions after the default ones to enable overriding
+  // of field values.
   $node = (object) array_merge((array) $node, $default_additions, $additions);
 }
 
@@ -375,11 +376,14 @@ function content_prepare_translation(&$node) {
  * Implementation of hook_nodeapi().
  */
 function content_nodeapi(&$node, $op, $a3 = NULL, $a4 = NULL) {
-  $type = content_types($node->type);
-  if (!empty($type['fields'])) {
-    $callback = 'content_'. str_replace(' ', '_', $op);
-    if (function_exists($callback)) {
-      $callback($node, $a3, $a4);
+  // Prevent against invalid 'nodes' built by broken 3rd party code.
+  if (isset($node->type) && ($type = content_types($node->type))) {
+    // Save cycles if the type has no CCK fields.
+    if (!empty($type['fields'])) {
+      $callback = 'content_'. str_replace(' ', '_', $op);
+      if (function_exists($callback)) {
+        $callback($node, $a3, $a4);
+      }
     }
   }
 }

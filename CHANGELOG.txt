@@ -37,6 +37,7 @@ CCK 6.2-dev
 - #324301 Optionwidgets: check for maximum number of values.
 - #320632 Content Copy: Make fields/groups checked for export by default + display the list in an overview table.
 - Content Copy: Import / export weights of dnd-enabled non-CCK fields.
+- #327715 Babysit 'invalid foreach' warnings caused by invalid incoming $node objects.
 
 CCK 6.2-rc10
 ============
