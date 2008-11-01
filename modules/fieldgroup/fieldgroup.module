@@ -513,78 +513,81 @@ function fieldgroup_field_remove_form_submit($form, &$form_state) {
 function fieldgroup_nodeapi(&$node, $op, $teaser, $page) {
   switch ($op) {
     case 'view':
-      // NODE_BUILD_NORMAL is 0, and ('whatever' == 0) is TRUE, so we need a ===.
-      if ($node->build_mode === NODE_BUILD_NORMAL || $node->build_mode == NODE_BUILD_PREVIEW) {
-        $context = $teaser ? 'teaser' : 'full';
-      }
-      else {
-        $context = $node->build_mode;
-      }
-
-      foreach (fieldgroup_groups($node->type) as $group_name => $group) {
-        // Do not include group labels when indexing content.
-        if ($context == NODE_BUILD_SEARCH_INDEX) {
-          $group['settings']['display']['label'] = 'hidden';
+      // Prevent against invalid 'nodes' built by broken 3rd party code.
+      if (isset($node->type) && ($type = content_types($node->type))) {
+        // NODE_BUILD_NORMAL is 0, and ('whatever' == 0) is TRUE, so we need a ===.
+        if ($node->build_mode === NODE_BUILD_NORMAL || $node->build_mode == NODE_BUILD_PREVIEW) {
+          $context = $teaser ? 'teaser' : 'full';
         }
-        $label = $group['settings']['display']['label'] == 'above';
-        $element = array(
-          '#title' => $label ? check_plain(t($group['label'])) : '',
-          '#description' => $label ? content_filter_xss(t($group['settings']['display']['description'])) : '',
-        );
-        $format = isset($group['settings']['display'][$context]['format']) ? $group['settings']['display'][$context]['format'] : 'fieldset';
-
-        switch ($format) {
-          case 'simple':
-            $element['#type'] = 'fieldgroup_simple';
-            $element['#group_name'] = $group_name;
-            break;
-          case 'hidden':
-            $element['#access'] = FALSE;
-            break;
-
-          case 'fieldset_collapsed':
-            $element['#collapsed'] = TRUE;
-          case 'fieldset_collapsible':
-            $element['#collapsible'] = TRUE;
-          case 'fieldset':
-            $element['#type'] = 'fieldgroup_fieldset';
-            $element['#attributes'] = array('class' => 'fieldgroup '. strtr($group['group_name'], '_', '-'));
-            break;
+        else {
+          $context = $node->build_mode;
         }
-        foreach ($group['fields'] as $field_name => $field) {
-          if (isset($node->content[$field_name])) {
-            $element[$field_name] = $node->content[$field_name];
+
+        foreach (fieldgroup_groups($node->type) as $group_name => $group) {
+          // Do not include group labels when indexing content.
+          if ($context == NODE_BUILD_SEARCH_INDEX) {
+            $group['settings']['display']['label'] = 'hidden';
           }
-        }
+          $label = $group['settings']['display']['label'] == 'above';
+          $element = array(
+            '#title' => $label ? check_plain(t($group['label'])) : '',
+            '#description' => $label ? content_filter_xss(t($group['settings']['display']['description'])) : '',
+          );
+          $format = isset($group['settings']['display'][$context]['format']) ? $group['settings']['display'][$context]['format'] : 'fieldset';
 
-        // Allow other modules to alter the group view.
-        // Can't use module_invoke_all because we want
-        // to be able to use a reference to $node and $element.
-        foreach (module_implements('fieldgroup_view') as $module) {
-          $function = $module .'_fieldgroup_view';
-          $function($node, $element, $group, $context);
-        }
+          switch ($format) {
+            case 'simple':
+              $element['#type'] = 'fieldgroup_simple';
+              $element['#group_name'] = $group_name;
+              break;
+            case 'hidden':
+              $element['#access'] = FALSE;
+              break;
 
-        foreach ($group['fields'] as $field_name => $field) {
-          if (isset($node->content[$field_name])) {
-            unset($node->content[$field_name]);
+            case 'fieldset_collapsed':
+              $element['#collapsed'] = TRUE;
+            case 'fieldset_collapsible':
+              $element['#collapsible'] = TRUE;
+            case 'fieldset':
+              $element['#type'] = 'fieldgroup_fieldset';
+              $element['#attributes'] = array('class' => 'fieldgroup '. strtr($group['group_name'], '_', '-'));
+              break;
           }
+          foreach ($group['fields'] as $field_name => $field) {
+            if (isset($node->content[$field_name])) {
+              $element[$field_name] = $node->content[$field_name];
+            }
+          }
+
+          // Allow other modules to alter the group view.
+          // Can't use module_invoke_all because we want
+          // to be able to use a reference to $node and $element.
+          foreach (module_implements('fieldgroup_view') as $module) {
+            $function = $module .'_fieldgroup_view';
+            $function($node, $element, $group, $context);
+          }
+
+          foreach ($group['fields'] as $field_name => $field) {
+            if (isset($node->content[$field_name])) {
+              unset($node->content[$field_name]);
+            }
+          }
+
+          // The wrapper lets us get the themed output for the group
+          // to populate the $GROUP_NAME_rendered variable for node templates,
+          // and hide it from the $content variable if needed.
+          // See fieldgroup_preprocess_node(), theme_fieldgroup_wrapper().
+          $wrapper = array(
+            'group' => $element,
+            '#weight' => $group['weight'],
+            '#post_render' => array('fieldgroup_wrapper_post_render'),
+            '#group_name' => $group_name,
+            '#type_name' => $node->type,
+            '#context' => $context,
+          );
+
+          $node->content[$group_name] = $wrapper;
         }
-
-        // The wrapper lets us get the themed output for the group
-        // to populate the $GROUP_NAME_rendered variable for node templates,
-        // and hide it from the $content variable if needed.
-        // See fieldgroup_preprocess_node(), theme_fieldgroup_wrapper().
-        $wrapper = array(
-          'group' => $element,
-          '#weight' => $group['weight'],
-          '#post_render' => array('fieldgroup_wrapper_post_render'),
-          '#group_name' => $group_name,
-          '#type_name' => $node->type,
-          '#context' => $context,
-        );
-
-        $node->content[$group_name] = $wrapper;
       }
       break;
   }
