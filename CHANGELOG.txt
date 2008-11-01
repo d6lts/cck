@@ -38,6 +38,7 @@ CCK 6.2-dev
 - #320632 Content Copy: Make fields/groups checked for export by default + display the list in an overview table.
 - Content Copy: Import / export weights of dnd-enabled non-CCK fields.
 - #327715 Babysit 'invalid foreach' warnings caused by invalid incoming $node objects.
+- #328763 Adjust weight of non-cck fields even if there are no CCK fields for the content type.
 
 CCK 6.2-rc10
 ============
