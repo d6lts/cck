@@ -14,10 +14,19 @@ class content_handler_field_multiple extends content_handler_field {
   function init(&$view, $options) {
     $field = $this->content_field;
     parent::init($view, $options);
-    if ($field['multiple']) {
-      $this->additional_fields['delta'] = 'delta';
+
+    $this->defer_query = $options['multiple']['group'] && $field['multiple'];
+
+    if ($this->defer_query) {
+      // Grouped field: ditch the existing additional_fields (field columns + delta).
+      // In the main query we'll only need:
+      // - vid, which will be used to retrieve the actual values in pre_render,
+      // - node type, which wil be used to render the results.
+      $this->additional_fields = array(
+        'vid' => array('table' => 'node', 'field' => 'vid'),
+        'type' => array('table' => 'node', 'field' => 'type'),
+      );
     }
-    $this->additional_fields['type'] = array('table' => 'node', 'field' => 'type');
   }
 
   function options(&$options) {
@@ -89,43 +98,25 @@ class content_handler_field_multiple extends content_handler_field {
     $field = $this->content_field;
     $options = $this->options;
 
-    return !empty($this->definition['click sortable']) && !($options['multiple']['group'] && $field['multiple']);
+    // Grouped fields are not click-sortable.
+    return !empty($this->definition['click sortable']) && !$this->defer_query;
   }
 
   function query() {
-    $field = $this->content_field;
-    $options = $this->options;
-
-    // 'Group multiple values' : the values for the field will be retrieved
-    // in a separate query (one per field).
-    $this->defer_query = $options['multiple']['group'] && $field['multiple'];
-
-    // Non-grouped field: use the generic field handler query.
+    // If this is not a grouped field, use the generic query().
     if (!$this->defer_query) {
       return parent::query();
     }
 
-    // Grouped field: overwrite the existing additional_fields, because they
-    // would cause duplicate rows for multiple values. The only field we add
-    // is vid, which will be used to retrieve the actual values in pre_render.
-    $this->additional_fields = array('vid' => array('table' => 'node', 'field' => 'vid'));
+    // Grouped field: do NOT call ensure_my_table, only add additional fields.
     $this->add_additional_fields();
     $this->field_alias = $this->aliases['vid'];
-
-    // If the field is sortable (table sort), we just have to join the table
-    // ("Node: Distinct" will be required to avoid duplicates...)
-    // if ($field['sortable']) {
-    //   $this->ensure_my_table();
-    // }
   }
 
   function pre_render($values) {
-    // There are no values to render in a summary view.
-    if (isset($this->view->build_info['summary'])) {
-      return parent::pre_render($values);
-    }
-    // If this is not a grouped field, use the parent pre_render().
-    if (!$this->defer_query || empty($values)) {
+    // If there are no values to render (displaying a summary, or query returned no results),
+    // or if this is not a grouped field, do nothing specific.
+    if (isset($this->view->build_info['summary']) || empty($values) || !$this->defer_query) {
       return parent::pre_render($values);
     }
 
@@ -133,7 +124,6 @@ class content_handler_field_multiple extends content_handler_field {
     $db_info = content_database_info($field);
     $options = $this->options;
 
-    $this->field_values = array();
     // Build the list of vids to retrieve.
     // TODO: try fetching from cache_content first ??
     $vids = array();
@@ -146,11 +136,10 @@ class content_handler_field_multiple extends content_handler_field {
 
     // List columns to retrieve.
     $alias = content_views_tablename($field);
-
     $query_columns = array(
-      'node.type',
-      "$alias.vid AS parent_vid",
-      "$alias.delta"
+      // Prefix with '_' to avoid clashing with field columns named 'vid' or 'delta'.
+      "node.vid AS _vid",
+      "$alias.delta as _delta"
     );
     foreach ($db_info['columns'] as $column => $attributes) {
       $query_columns[] = "$alias.$attributes[column] AS $column";
@@ -158,15 +147,17 @@ class content_handler_field_multiple extends content_handler_field {
     $query = 'SELECT '. implode(', ', $query_columns) .
              ' FROM {'. $db_info['table'] ."} $alias".
              " LEFT JOIN {node} node ON node.vid = $alias.vid".
-             " WHERE $alias.vid IN (". implode(',', $vids) .')'.
+             " WHERE node.vid IN (". implode(',', $vids) .')'.
              " ORDER BY node.nid ASC, $alias.delta ". ($options['multiple']['multiple_reversed'] ? 'DESC' : 'ASC');
     $result = db_query($query);
 
     while ($item = db_fetch_array($result)) {
-      $delta = !empty($item['delta']) ? $item['delta'] : 0;
-      $item['#delta'] = $item['delta'];
-      unset($item['delta']);
-      $this->field_values[$item['parent_vid']][$delta] = $item;
+      $vid = $item['_vid'];
+      unset($item['_vid']);
+      $delta = !empty($item['_delta']) ? $item['_delta'] : 0;
+      $item['#delta'] = $item['_delta'];
+      unset($item['_delta']);
+      $this->field_values[$vid][$delta] = $item;
     }
   }
 
@@ -179,13 +170,9 @@ class content_handler_field_multiple extends content_handler_field {
     $field = $this->content_field;
     $options = $this->options;
 
-    // $values will be used as a fake $node object;
-    // we provide a build_mode for rendering.
-    $values->build_mode = NODE_BUILD_NORMAL;
-
     // This needs to be set for the $this->render_link() to work. It would
     // have been set in the query, if we hadn't bypassed the normal query.
-    // TODO there may be a better way to do this.
+    // TODO : Not relatioship safe !.
     $this->aliases['nid'] = 'nid';
 
     $vid = $values->{$this->field_alias};
@@ -205,6 +192,14 @@ class content_handler_field_multiple extends content_handler_field {
         $count_skipped++;
       }
 
+      // Build a pseudo-node from the retrieved values.
+      $node = $values;
+      // content_format and formatters will need a 'type'.
+      $node->type = $values->{$this->aliases['type']};
+      // Some formatters need to behave differently depending on the build_mode
+      // (for instance: preview), so we provide one.
+      $node->build_mode = NODE_BUILD_NORMAL;
+
       // Render items.
       $formatter_name = $options['format'];
       if ($items && ($formatter = _content_get_formatter($formatter_name, $field['type']))) {
@@ -212,7 +207,7 @@ class content_handler_field_multiple extends content_handler_field {
         if (content_handle('formatter', 'multiple values', $formatter) == CONTENT_HANDLE_CORE) {
           // Single-value formatter.
           foreach ($items as $item) {
-            $output = content_format($field, $item, $formatter_name, $values);
+            $output = content_format($field, $item, $formatter_name, $node);
             if (!empty($output)) {
               $rendered[] = $this->render_link($output, $values);
             }

@@ -1660,12 +1660,10 @@ function content_format($field, $item, $formatter_name = 'default', $node = NULL
   if ($formatter = _content_get_formatter($formatter_name, $field['type'])) {
     $theme = $formatter['module'] .'_formatter_'. $formatter_name;
 
-    // A real node will have the type name in $node->type,
-    // a Views pseudo-node will have the type name in $node->node_type.
     $element = array(
       '#theme' => $theme,
       '#field_name' => $field['field_name'],
-      '#type_name' => isset($node->type) ? $node->type : (isset($node->node_type) ? $node->node_type : ''),
+      '#type_name' => isset($node->type) ? $node->type :'',
       '#formatter' => $formatter_name,
       '#node' => $node,
       '#delta' => isset($item['#delta']) ? $item['#delta'] : NULL,

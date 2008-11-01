@@ -39,6 +39,7 @@ CCK 6.2-dev
 - Content Copy: Import / export weights of dnd-enabled non-CCK fields.
 - #327715 Babysit 'invalid foreach' warnings caused by invalid incoming $node objects.
 - #328763 Adjust weight of non-cck fields even if there are no CCK fields for the content type.
+- Views integration: fixed a few non-relationship safe areas.
 
 CCK 6.2-rc10
 ============
