@@ -249,7 +249,7 @@ function content_field_overview_form(&$form_state, $type_name) {
       'type' => array(
         '#type' => 'select',
         '#options' => $field_type_options,
-        '#description' => t('Type of data to store.'),
+        '#description' => theme('advanced_help_topic', 'content', 'fields') . t('Type of data to store.'),
       ),
       'widget_type' => array(
         '#type' => 'select',
