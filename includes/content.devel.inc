@@ -19,8 +19,8 @@ function content_generate_fields(&$node) {
     foreach ($type['fields'] as $field) {
       $node_field = array();
       // If module handles own multiples, then only call its hook once.
-      if (content_callback('field', 'multiple values', $field) != CONTENT_CALLBACK_DEFAULT) {
-        $max = 1;
+      if (content_handle('widget', 'multiple values', $field) == CONTENT_HANDLE_MODULE) {
+        $max = 0;
       }
       else {
         switch ($field['multiple']) {
@@ -50,7 +50,7 @@ function content_generate_fields(&$node) {
           }
         }
       }
-      $node->$field['field_name'] = $node_field;
+      $node->{$field['field_name']} = $node_field;
     }
   }
 }

@@ -3,6 +3,7 @@
 CCK 6.2-dev
 ===========
 
+- #329037 Fix small bug in content_generate function method of calling fields that handle their own multiple values.
 - #324826 Change Advanced help path and topic to use & prefix per latest change in Advanced help.
 - #324610 Add Advanced help files for basic fields and hooks so they'll show up in the CCK advanced help documentation. Intended to be used as examples by other field modules for a way to add more field documentation.
 - #321024 Add content_associate_fields() to the content_check_update() function because it can get skipped when updates are aborted or the content module is not yet updated.
