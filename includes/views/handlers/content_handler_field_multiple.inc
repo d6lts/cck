@@ -136,11 +136,14 @@ class content_handler_field_multiple extends content_handler_field {
 
     // List columns to retrieve.
     $alias = content_views_tablename($field);
+    // Prefix aliases with '_' to avoid clashing with field columns names.
     $query_columns = array(
-      // Prefix with '_' to avoid clashing with field columns named 'vid' or 'delta'.
-      "node.vid AS _vid",
-      "$alias.delta as _delta"
+      'node.vid AS _vid',
+      "$alias.delta as _delta",
+      // nid is needed to generate the links for 'link to node' option.
+      'node.nid AS _nid',
     );
+    // The actual field columns.
     foreach ($db_info['columns'] as $column => $attributes) {
       $query_columns[] = "$alias.$attributes[column] AS $column";
     }
@@ -152,6 +155,7 @@ class content_handler_field_multiple extends content_handler_field {
     $result = db_query($query);
 
     while ($item = db_fetch_array($result)) {
+      // Clean up the $item from vid and delta. We keep nid for now.
       $vid = $item['_vid'];
       unset($item['_vid']);
       $delta = !empty($item['_delta']) ? $item['_delta'] : 0;
@@ -170,11 +174,6 @@ class content_handler_field_multiple extends content_handler_field {
     $field = $this->content_field;
     $options = $this->options;
 
-    // This needs to be set for the $this->render_link() to work. It would
-    // have been set in the query, if we hadn't bypassed the normal query.
-    // TODO : Not relatioship safe !.
-    $this->aliases['nid'] = 'nid';
-
     $vid = $values->{$this->field_alias};
     if (isset($this->field_values[$vid])) {
       // Gather items, respecting the 'Display n values starting from m' settings.
@@ -183,6 +182,9 @@ class content_handler_field_multiple extends content_handler_field {
       foreach ($this->field_values[$vid] as $item) {
         if (empty($options['multiple']['multiple_from']) || ($count_skipped >= $options['multiple']['multiple_from'])) {
           if (empty($options['multiple']['multiple_number']) || (count($items) < $options['multiple']['multiple_number'])) {
+            // Grab the nid - needed for render_link().
+            $nid = $item['_nid'];
+            unset($item['_nid']);
             $items[] = $item;
           }
           else {
@@ -209,7 +211,7 @@ class content_handler_field_multiple extends content_handler_field {
           foreach ($items as $item) {
             $output = content_format($field, $item, $formatter_name, $node);
             if (!empty($output)) {
-              $rendered[] = $this->render_link($output, $values);
+              $rendered[] = $this->render_link($output, (object) array('nid' => $nid));
             }
           }
         }
@@ -217,7 +219,7 @@ class content_handler_field_multiple extends content_handler_field {
           // Multiple values formatter.
           $output = content_format($field, $items, $formatter_name, $values);
           if (!empty($output)) {
-            $rendered[] = $this->render_link($output, $values);
+            $rendered[] = $this->render_link($output, (object) array('nid' => $nid));
           }
         }
 
@@ -233,4 +235,18 @@ class content_handler_field_multiple extends content_handler_field {
 
     return '';
   }
+
+  function render_link($data, $values) {
+    if (!$this->defer_query || empty($this->field_values)) {
+      return parent::render_link($data, $values);
+    }
+
+    if (!empty($this->options['link_to_node'])) {
+      return l($data, "node/" . $values->nid, array('html' => TRUE));
+    }
+    else {
+      return $data;
+    }
+  }
+
 }
