@@ -317,7 +317,7 @@ function content_delete_revision(&$node) {
 }
 
 /**
- * Implementataion of hook_nodeapi 'view' op.
+ * Implementation of hook_nodeapi 'view' op.
  *
  * Generate field render arrays.
  */
@@ -328,6 +328,55 @@ function content_view(&$node, $teaser = FALSE, $page = FALSE) {
   // Merge fields.
   $additions = _content_field_invoke_default('view', $node, $teaser, $page);
   $node->content = array_merge((array) $node->content, $additions);
+}
+
+/**
+ * Render a single field, fully themed with label and multiple values.
+ *
+ * To be used by third-party code (Views, Panels...) that needs to output
+ * an isolated field. Do *not* use inside node templates, use the
+ * $FIELD_NAME_rendered variables instead.
+ *
+ * By default, the field is displayed using the settings defined for the
+ * 'full node' or 'teaser' contexts (depending on the value of the $teaser param).
+ * Set $node->build_mode to a different value to use a different context.
+ *
+ * Different settings can be specified by adjusting $field['display_settings'].
+ *
+ * @param $field
+ *   The field definition.
+ * @param $node
+ *   The node containing the field to display. Can be a 'pseudo-node', containing
+ *   at least 'type', 'nid', 'vid', and the field data.
+ * @param $teaser
+ * @param $page
+ *   Similar to hook_nodeapi('view')
+ * @return
+ *   The themed output for the field.
+ */
+function content_view_field($field, $node, $teaser = FALSE, $page = FALSE) {
+  $output = '';
+  if (isset($node->$field['field_name'])) {
+    $items = $node->$field['field_name'];
+
+    // Use 'full'/'teaser' if not specified otherwise.
+    $node->build_mode = isset($node->build_mode) ? $node->build_mode : NODE_BUILD_NORMAL;
+
+    // One-field equivalent to _content_field_invoke('sanitize').
+    $field_types = _content_field_types();
+    $module = $field_types[$field['type']]['module'];
+    $function = $module .'_field';
+    if (function_exists($function)) {
+      $function('sanitize', $node, $field, $items, $teaser, $page);
+      $node->$field['field_name'] = $items;
+    }
+
+    $view = content_field('view', $node, $field, $items, $teaser, $page);
+    // content_field('view') adds a wrapper to handle variables and 'excluded'
+    // fields for node templates. We bypass it and render the actual field.
+    $output = drupal_render($view[$field['field_name']]['field']);
+  }
+  return $output;
 }
 
 /**
@@ -690,11 +739,18 @@ function content_field($op, &$node, $field, &$items, $teaser, $page) {
         $theme = $formatter['module'] .'_formatter_'. $formatter_name;
         $single = (content_handle('formatter', 'multiple values', $formatter) == CONTENT_HANDLE_CORE);
 
+        $label_display = isset($field['display_settings']['label']['format']) ? $field['display_settings']['label']['format'] : 'above';
+        // Do not include field labels when indexing content.
+        if ($context == NODE_BUILD_SEARCH_INDEX) {
+          $label_display = 'hidden';
+        }
+
         $element = array(
           '#type' => 'content_field',
           '#title' => check_plain(t($field['widget']['label'])),
           '#field_name' => $field['field_name'],
           '#access' => $formatter_name != 'hidden',
+          '#label_display' => $label_display,
           '#node' => $node,
           '#teaser' => $teaser,
           '#page' => $page,
@@ -2132,11 +2188,6 @@ function content_preprocess_content_field(&$variables) {
   $variables['field'] = $field;
   $variables['items'] = array();
 
-  // Do not include field labels when indexing content.
-  if ($element['#context'] == NODE_BUILD_SEARCH_INDEX) {
-    $field['display_settings']['label']['format'] = 'hidden';
-  }
-
   if ($element['#single']) {
     // Single value formatter.
     foreach (element_children($element['items']) as $delta) {
@@ -2177,7 +2228,7 @@ function content_preprocess_content_field(&$variables) {
     'field_type_css' => strtr($field['type'], '_', '-'),
     'field_name_css' => strtr($field['field_name'], '_', '-'),
     'label' => check_plain(t($field['widget']['label'])),
-    'label_display' => isset($field['display_settings']['label']['format']) ? $field['display_settings']['label']['format'] : 'above',
+    'label_display' => $element['#label_display'],
     'field_empty' => $field_empty,
     'template_files' => array(
       'content-field',
