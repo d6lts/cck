@@ -42,6 +42,8 @@ CCK 6.2-dev
 - #328763 Adjust weight of non-cck fields even if there are no CCK fields for the content type.
 - Views integration: fixed a few non-relationship safe areas.
 - Views integration: fix 'link this field to its node'+'group multiple'+relationships.
+- #329447 add content_view_field() API function to display a single field, fully themed with label and multiple values, to be used by 3rd party code.
+- #323681 Panels integration: make 'field as pane' work again.
 
 CCK 6.2-rc10
 ============
