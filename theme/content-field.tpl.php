@@ -2,7 +2,7 @@
 // $Id$
 
 /**
- * @file field.tpl.php
+ * @file content-field.tpl.php
  * Default theme implementation to display the value of a field.
  *
  * Available variables:
