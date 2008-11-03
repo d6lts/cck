@@ -3,12 +3,23 @@
 CCK 6.2-dev
 ===========
 
+Note: Filters available for CCK fields in Views have changed slightly since the RC releases.
+If upgrading from a RC release, you might need to check your views, and if needed.
+This only applies to filters defined on Text or Number fields that specify a list of 'Allowed values'.
+Filters on other CCK fields are not affected.
+
+Main new features since RC10:
+- #300368 Add option on Display fields screen to omit fields or groups from the $content value passed to the node template.
+- #298651 by smk-ka, yched - Nodereference/Userreference: Enhance performance on large sites.
+  This also adds 'autocomplete mode' widget settings (full string / beginning of string).
+- #329447 add content_view_field() API function to display a single field, fully themed with label and multiple values, to be used by 3rd party code.
+
+Other changes:
 - #329037 Fix small bug in content_generate function method of calling fields that handle their own multiple values.
 - #324826 Change Advanced help path and topic to use & prefix per latest change in Advanced help.
 - #324610 Add Advanced help files for basic fields and hooks so they'll show up in the CCK advanced help documentation. Intended to be used as examples by other field modules for a way to add more field documentation.
 - #321024 Add content_associate_fields() to the content_check_update() function because it can get skipped when updates are aborted or the content module is not yet updated.
 - Fix bad logic in testing content version variable to prevent warning messages before content module is updated.
-- #300368 Add option on Display fields screen to omit fields or groups from the $content value passed to the node template.
 - Get rid of t() around Views field label since Views already has it marked as a translatable option.
 - #285470 by jhuckabee, store field label in the view in all cases, previously only custom labels were stored.
 - #266309 by abbasmousavi, change silent fix to error message for invalid input into number fields.
@@ -25,8 +36,6 @@ CCK 6.2-dev
 - Replaced theming instructions in theme/README.txt with advanced_help pages.
 - #323436 by hass: fix a few strings + translation bugs.
 - #323745 by robertgarrigos: Fix performance issue when submitting 'display fields' form.
-- #298651 by smk-ka, yched - Nodereference/Userreference: Enhance performance on large sites.
-  This also adds 'autocomplete mode' widget settings (full string / beginning of string).
 - #316292 by fractile81: Turn potentially time-consuming updates into multi-pass updates.
 - Remove unwanted 'N/A' option on noderef/userref fields using checkboxes.
 - #319131 by Moonshine - Add 'title-raw' token for noderef fields.
@@ -42,8 +51,8 @@ CCK 6.2-dev
 - #328763 Adjust weight of non-cck fields even if there are no CCK fields for the content type.
 - Views integration: fixed a few non-relationship safe areas.
 - Views integration: fix 'link this field to its node'+'group multiple'+relationships.
-- #329447 add content_view_field() API function to display a single field, fully themed with label and multiple values, to be used by 3rd party code.
 - #323681 Panels integration: make 'field as pane' work again.
+- #311912 Views integration: The many_to_one filters for fields with 'allowed values' gain should not replace the regular 'starts with'/'greater than' filters.
 
 CCK 6.2-rc10
 ============
