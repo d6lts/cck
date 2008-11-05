@@ -2,13 +2,13 @@
 #
 # LANGUAGE translation of Drupal (includes-views)
 # Copyright YEAR NAME <EMAIL@ADDRESS>
-# Generated from file: content.views.inc,v 1.1.2.14 2008/10/22 19:27:51 yched
+# Generated from file: content.views.inc,v 1.1.2.17 2008/11/03 20:56:12 yched
 #
 #, fuzzy
 msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
-"POT-Creation-Date: 2008-10-23 19:54+0200\n"
+"POT-Creation-Date: 2008-11-05 12:14+0100\n"
 "PO-Revision-Date: YYYY-mm-DD HH:MM+ZZZZ\n"
 "Last-Translator: NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <EMAIL@ADDRESS>\n"
@@ -17,7 +17,11 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=INTEGER; plural=EXPRESSION;\n"
 
-#: includes/views/content.views.inc:223
+#: includes/views/content.views.inc:222
+msgid "@label - (!name)"
+msgstr ""
+
+#: includes/views/content.views.inc:224
 msgid "Appears in: @types"
 msgstr ""
 
