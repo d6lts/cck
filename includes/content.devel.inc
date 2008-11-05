@@ -4,13 +4,21 @@
 /**
  * @file
  * Functions needed for Devel module integration.
+ * 
+ * TODO
+ * This is not really working correctly yet. It is getting called once
+ * for every field and then generating every field each time. But if
+ * you only process one field at a time the earlier ones lose their values.
+ * The current method works to create values, but is overly processor-
+ * intensive and needs to be reworked in a way that each field is 
+ * only processed once and all values are retained.
  */
 
 /**
  * Enrich the $node that is about to be saved with arbitrary
  * information in each of its CCK fields.
  **/
-function content_generate_fields(&$node) {
+function content_generate_fields(&$node, $field) {
   $type_name = $node->type;
   $type = content_types($type_name);
   $field_types = _content_field_types();
