@@ -1,8 +1,13 @@
 // $Id$
 
-5--dev
-======
+5--1.10
+=======
 
+IMPORTANT : this release fixes (minor) cross-site scripting (XSS) vulnerabilities
+in nodereference.module, userreference.module and content_copy.module.
+See the Security Annoucement on http://drupal.org/node/330546 for more information.
+
+Other changes
 - #316656 Default weight must be zero, not NULL, or form ordering will be incorrect.
 - #309558 by mroswell : fix PHP doc typo.
 - #281749 by asimmonds: fix '0' not parsed as an alias for allowed values.

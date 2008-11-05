@@ -63,7 +63,7 @@ function content_views_field_tables($field) {
     if ($field['multiple']) {
       $addlfields[] = 'delta';
     }
-    
+
     $table['fields'] = array();
     $table['fields'][$main_column['column']] = array(
       'name' => $field_types[$field['type']]['label'] .': '. $field['widget']['label'] .' ('. $field['field_name'] .')',

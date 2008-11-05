@@ -426,7 +426,7 @@ function userreference_user($op, &$edit, &$account, $category = NULL) {
           }
           if (isset($values[$node_type])) {
             $links[$node_type] = array(
-              'title' => $node_types[$node_type]['name'],
+              'title' => check_plain($node_types[$node_type]['name']),
               'value' => theme('item_list', $values[$node_type])
             );
           }
