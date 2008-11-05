@@ -16,8 +16,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: German translation of CCK\n"
-"POT-Creation-Date: 2008-10-23 19:54+0200\n"
-"PO-Revision-Date: 2008-10-23 20:06+0100\n"
+"POT-Creation-Date: 2008-11-05 12:54+0100\n"
+"PO-Revision-Date: 2008-11-05 13:20+0100\n"
 "Last-Translator: Alexander Haß\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -48,11 +48,15 @@ msgstr "Für dieses Feld müssen die „zulässigen Werte“ angegeben werden."
 msgid "Single on/off checkbox"
 msgstr "Einzelne an/aus Checkbox"
 
-#: modules/optionwidgets/optionwidgets.module:399
+#: modules/optionwidgets/optionwidgets.module:326
+msgid "%name: this field cannot hold more that @count values."
+msgstr "%name: Dieses Feld kann nicht mehr als @count Werte enthalten."
+
+#: modules/optionwidgets/optionwidgets.module:411
 msgid "N/A"
 msgstr "k.A."
 
-#: modules/optionwidgets/optionwidgets.module:403
+#: modules/optionwidgets/optionwidgets.module:415
 msgid "- None -"
 msgstr "- Keine -"
 
@@ -68,7 +72,7 @@ msgstr "Options-Steuerelemente"
 msgid "Defines selection, check box and radio button widgets for text and numeric fields."
 msgstr "Definiert Auswahl-, Checkbox- und Radiobutton-Steuerelemente für Texte und numerische Felder."
 
-#: modules/text/text.module:49
+#: modules/text/text.module:41
 #: modules/text/text.info:0
 msgid "Text"
 msgstr "Text"

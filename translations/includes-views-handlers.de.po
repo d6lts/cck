@@ -16,8 +16,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: German translation of CCK\n"
-"POT-Creation-Date: 2008-10-23 19:54+0200\n"
-"PO-Revision-Date: 2008-10-23 20:29+0100\n"
+"POT-Creation-Date: 2008-11-05 12:54+0100\n"
+"PO-Revision-Date: 2008-11-05 13:23+0100\n"
 "Last-Translator: Alexander Haß\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -28,53 +28,57 @@ msgstr ""
 "X-Poedit-Country: GERMANY\n"
 "X-Poedit-SourceCharset: utf-8\n"
 
-#: includes/views/handlers/content_handler_field.inc:46
+#: includes/views/handlers/content_handler_field.inc:56
 msgid "None"
 msgstr "Keines"
 
-#: includes/views/handlers/content_handler_field.inc:47
+#: includes/views/handlers/content_handler_field.inc:57
 msgid "Widget label (@label)"
 msgstr "Steuerelement (@label)"
 
-#: includes/views/handlers/content_handler_field.inc:48
+#: includes/views/handlers/content_handler_field.inc:58
 msgid "Custom"
 msgstr "Benutzerdefiniert"
 
-#: includes/views/handlers/content_handler_field.inc:54
+#: includes/views/handlers/content_handler_field.inc:64
 msgid "Custom label"
 msgstr "Benutzerdefinierte Bezeichnung"
 
-#: includes/views/handlers/content_handler_field.inc:70
+#: includes/views/handlers/content_handler_field.inc:80
 msgid "Format"
 msgstr "Format"
 
-#: includes/views/handlers/content_handler_field_multiple.inc:47
+#: includes/views/handlers/content_handler_field_multiple.inc:56
 msgid "Group multiple values"
 msgstr "Mehrfachwerte gruppieren"
 
-#: includes/views/handlers/content_handler_field_multiple.inc:53
+#: includes/views/handlers/content_handler_field_multiple.inc:59
+msgid "If unchecked, each item in the field will create a new row, which may appear to cause duplicates. This setting is not compatible with click-sorting in table displays."
+msgstr ""
+
+#: includes/views/handlers/content_handler_field_multiple.inc:63
 msgid "Show @count value(s)"
 msgstr "@count Werte anzeigen"
 
-#: includes/views/handlers/content_handler_field_multiple.inc:64
+#: includes/views/handlers/content_handler_field_multiple.inc:74
 msgid "starting from @count"
 msgstr "Beginnt bei @count"
 
-#: includes/views/handlers/content_handler_field_multiple.inc:75
+#: includes/views/handlers/content_handler_field_multiple.inc:85
 msgid "Reversed (start from last values)"
 msgstr "Umgedreht (Beginnt bei den letzten Werten)"
 
-#: includes/views/handlers/content_handler_relationship.inc:30
+#: includes/views/handlers/content_handler_relationship.inc:40
 #: includes/views/handlers/content_handler_sort.inc:41
 msgid "All"
 msgstr "Alle"
 
-#: includes/views/handlers/content_handler_relationship.inc:38
+#: includes/views/handlers/content_handler_relationship.inc:48
 #: includes/views/handlers/content_handler_sort.inc:49
 msgid "Delta"
 msgstr "Delta"
 
-#: includes/views/handlers/content_handler_relationship.inc:39
+#: includes/views/handlers/content_handler_relationship.inc:49
 msgid "The delta allows you to select which item in a multiple value field to key the relationship off of. Select \"1\" to use the first item, \"2\" for the second item, and so on. If you select \"All\", each item in the field will create a new row, which may appear to cause duplicates."
 msgstr ""
 

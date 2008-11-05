@@ -5,13 +5,13 @@
 # Generated from files:
 #  fieldgroup.panels.inc,v 1.1.2.4 2008/10/06 17:21:51 karens
 #  fieldgroup.info,v 1.6.2.1 2008/09/22 18:25:21 karens
-#  fieldgroup.module,v 1.79.2.38 2008/10/16 23:44:45 yched
+#  fieldgroup.module,v 1.79.2.39 2008/11/01 14:10:37 yched
 #
 #, fuzzy
 msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
-"POT-Creation-Date: 2008-10-23 19:54+0200\n"
+"POT-Creation-Date: 2008-11-05 12:54+0100\n"
 "PO-Revision-Date: YYYY-mm-DD HH:MM+ZZZZ\n"
 "Last-Translator: NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <EMAIL@ADDRESS>\n"
@@ -132,7 +132,7 @@ msgstr ""
 msgid "Add new group: you need to provide a group name."
 msgstr ""
 
-#: modules/fieldgroup/fieldgroup.module:641
+#: modules/fieldgroup/fieldgroup.module:644
 msgid "Standard group"
 msgstr ""
 

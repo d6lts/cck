@@ -16,8 +16,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: German translation of CCK\n"
-"POT-Creation-Date: 2008-10-23 19:54+0200\n"
-"PO-Revision-Date: 2008-10-23 20:05+0100\n"
+"POT-Creation-Date: 2008-11-05 12:54+0100\n"
+"PO-Revision-Date: 2008-11-05 13:18+0100\n"
 "Last-Translator: Alexander Haß\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -64,7 +64,7 @@ msgstr "Formulareinstellungen"
 
 #: modules/fieldgroup/fieldgroup.module:122
 msgid "These settings apply to the group in the node editing form."
-msgstr "Diese Einstellungen gelten im Bearbeitungsformular des Beitrages für die Gruppe."
+msgstr "Diese Einstellungen gelten für die Gruppe im Bearbeitungsformular des Beitrages."
 
 #: modules/fieldgroup/fieldgroup.module:126
 msgid "Style"
@@ -92,7 +92,7 @@ msgstr "Anzeigeeinstellungen"
 
 #: modules/fieldgroup/fieldgroup.module:145
 msgid "These settings apply to the group on node display."
-msgstr "Diese Einstellungen gelten in der Beitragsanzeige für die Gruppe."
+msgstr "Diese Einstellungen gelten bei der Beitragsanzeige für die Gruppe."
 
 #: modules/fieldgroup/fieldgroup.module:152
 msgid "A description of the group."
@@ -142,7 +142,7 @@ msgstr "Neue Gruppe hinzufügen: Eine Bezeichnung muss angegeben werden."
 msgid "Add new group: you need to provide a group name."
 msgstr "Neue Gruppe hinzufügen: Ein Gruppenname muss angegeben werden."
 
-#: modules/fieldgroup/fieldgroup.module:641
+#: modules/fieldgroup/fieldgroup.module:644
 msgid "Standard group"
 msgstr "Standard-Gruppe"
 

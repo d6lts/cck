@@ -3,7 +3,7 @@
 # LANGUAGE translation of Drupal (modules-content_permissions)
 # Copyright YEAR NAME <EMAIL@ADDRESS>
 # Generated from files:
-#  content_permissions.module,v 1.5.2.2 2008/10/06 15:11:39 karens
+#  content_permissions.module,v 1.5.2.3 2008/10/29 19:29:26 yched
 #  content_permissions.install,v 1.1.2.2 2008/10/04 13:14:22 karens
 #  content_permissions.info,v 1.2 2008/04/23 18:01:52 dww
 #
@@ -11,7 +11,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
-"POT-Creation-Date: 2008-10-23 19:54+0200\n"
+"POT-Creation-Date: 2008-11-05 12:54+0100\n"
 "PO-Revision-Date: YYYY-mm-DD HH:MM+ZZZZ\n"
 "Last-Translator: NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <EMAIL@ADDRESS>\n"

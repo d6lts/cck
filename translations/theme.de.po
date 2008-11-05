@@ -16,8 +16,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: German translation of CCK\n"
-"POT-Creation-Date: 2008-10-23 19:54+0200\n"
-"PO-Revision-Date: 2008-10-23 20:30+0100\n"
+"POT-Creation-Date: 2008-11-05 12:54+0100\n"
+"PO-Revision-Date: 2008-11-05 13:08+0100\n"
 "Last-Translator: Alexander Haß\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -48,23 +48,27 @@ msgstr "Vorhandenes Feld"
 msgid "New group"
 msgstr "Neue Gruppe"
 
-#: theme/theme.inc:31
+#: theme/theme.inc:11
 msgid "Add fields and groups to the content type, and arrange them on content display and input forms."
 msgstr "Fügt Felder und Gruppen zu dem Inhaltstyp hinzu und ordnet diese auf der Inhaltsansicht und den Eingabeformularen an."
 
-#: theme/theme.inc:33
+#: theme/theme.inc:13
+msgid "You can add a field to a group by dragging it below and to the right of the group."
+msgstr "Ein Feld kann einer Gruppe hinzugefügt werden, indem es unterhalb der Zeile dieser Gruppe leicht nach rechts gezogen wird."
+
+#: theme/theme.inc:16
 msgid "Note: Installing the <a href=\"!adv_help\">Advanced help</a> module will let you access more and better help."
 msgstr "Hinweis: Die Installation des <a href=\"!adv_help\">Erweiterte Hilfe</a>-Modul ermöglicht den Zugriff auf weitere und bessere Hilfe."
 
-#: theme/theme.inc:146
+#: theme/theme.inc:111
 msgid "Configure how this content type's fields and field labels should be displayed when it's viewed in teaser and full-page mode."
 msgstr "Die Anzeige von Feldern und Bezeichnungen dieses Inhaltstyps konfigurieren, wenn dieser im Anrisstext und ganzseiten Modus angezeigt wird."
 
-#: theme/theme.inc:149
+#: theme/theme.inc:114
 msgid "Configure how this content type's fields should be displayed when it's rendered in the following contexts."
 msgstr "Die Anzeige von Feldern dieses Inhaltstyps konfigurieren, wenn dieser im folgenden Kontext angezeigt wird."
 
-#: theme/theme.inc:151
+#: theme/theme.inc:116
 msgid "Use the 'Exclude' checkbox to exclude an item from the !content value passed to the node template."
 msgstr "Das ‚Ausschließen‘-Ankreuzfeld kann verwendet werden, um einen Eintrag aus dem an die Beitragsvorlage übergebenen !content-Wert zu entfernen."
 
