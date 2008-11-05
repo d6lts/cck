@@ -3,6 +3,7 @@
 CCK 6.2-dev
 ===========
 
+=======
 Note: Filters available for CCK fields in Views have changed slightly since the RC releases.
 If upgrading from a RC release, you might need to check your views, and if needed.
 This only applies to filters defined on Text or Number fields that specify a list of 'Allowed values'.
@@ -15,6 +16,7 @@ Main new features since RC10:
 - #329447 add content_view_field() API function to display a single field, fully themed with label and multiple values, to be used by 3rd party code.
 
 Other changes:
+- Fix bug in content_generate that was adding fully formatted textarea values to textfield fields.
 - #329037 Fix small bug in content_generate function method of calling fields that handle their own multiple values.
 - #324826 Change Advanced help path and topic to use & prefix per latest change in Advanced help.
 - #324610 Add Advanced help files for basic fields and hooks so they'll show up in the CCK advanced help documentation. Intended to be used as examples by other field modules for a way to add more field documentation.

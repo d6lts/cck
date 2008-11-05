@@ -94,7 +94,7 @@ if (module_exists('text')) {
 
   function _text_content_generate($node, $field) {
     $node_field = array();
-    if ($field['widget']['rows'] > 1) {
+    if ($field['widget']['type'] == 'text_textarea') {
       $format = $field['text_processing'] ? rand(0, 3) : 0;
       $node_field['value'] = devel_create_content($format);
       $node_field['format'] = $format;
