@@ -1,9 +1,12 @@
 //$Id$
 
-CCK 6.2-dev
+CCK 6.x-2.0
 ===========
 
-=======
+IMPORTANT : this release fixes (minor) cross-site scripting (XSS) vulnerabilities
+in nodereference.module, userreference.module, content_copy.module, and CCK's Views integration
+See the Security Annoucement on http://drupal.org/node/330546 for more information.
+
 Note: Filters available for CCK fields in Views have changed slightly since the RC releases.
 If upgrading from a RC release, you might need to check your views, and if needed.
 This only applies to filters defined on Text or Number fields that specify a list of 'Allowed values'.
@@ -57,8 +60,8 @@ Other changes:
 - #323681 Panels integration: make 'field as pane' work again.
 - #311912 Views integration: The many_to_one filters for fields with 'allowed values' gain should not replace the regular 'starts with'/'greater than' filters.
 
-CCK 6.2-rc10
-============
+CCK 6.x-2.0-rc10
+================
 
 - Get rid of helper function content_is_updated(), we can do it better using the content version variable.
 - #318224 by brmassa, fix several errors in Content Copy.
@@ -69,8 +72,8 @@ CCK 6.2-rc10
 - #107407 by dopry, optimization patch, do nothing in hook_form_alter() and hook_nodeapi() if there are no fields.
 - #317932 Fix userreference documentation typo.
 
-CCK 6.2-rc9
-===========
+CCK 6.x-2.0-rc9
+===============
 
 - Change update instructions to recommend leaving CCK modules out of the modules folder until they're enabled.
 - #317036 by hass, context-sensitive translation fixes.
@@ -79,8 +82,8 @@ CCK 6.2-rc9
 - #311146 by Brian294, dheffron, yched, and others, fix critical javascript problem in new Manage fields UI screen in some themes.
 - #317032 by hass, code cleanup.
 
-CCK 6.2-rc8
-===========
+CCK 6.x-2.0-rc8
+===============
 
 Be sure to visit update.php after uploading this release.
 
@@ -124,8 +127,8 @@ Be sure to visit update.php after uploading this release.
 - #310873 Upgrade path : abort updates if content.module and/or field modules are disabled, and fix existing sites possibly affected.
 - #310219 Let modules expose additional display modes iunder the 'Display fields' tab : hook_content_build_modes().
 
-CCK 6.2-rc7
-===========
+CCK 6.x-2.0-rc7
+===============
 
 Note:
 - There has been a few files moved around since RC6, so be sure to *delete* the previous contents
@@ -200,8 +203,8 @@ Other changes:
 - Content copy: wrong page title after export code has been generated.
 - Fieldgroup: fix broken node preview.
 
-CCK 6.2.rc6
-===========
+CCK 6.x-2.0-rc6
+===============
 
 Hotfix release for:
 - #295537 fix warnings in update 6004 when site has no actual cck fields.
@@ -210,8 +213,8 @@ Those errors were harmless, no need to worry or run update.php again if you had 
 Minor fix:
 - #265795 by smk-ka: formatter labels go through t() twice in Views exposed data.
 
-CCK 6.2.rc5
-===========
+CCK 6.x-2.0-rc5
+===============
 
 Main bugs fixed :
 - #281388 Optionwidgets: Unselect values doesn't take.
@@ -254,8 +257,8 @@ Other changes :
 - #75423 by mh89 - Text: 'size' setting for textfield widget.
 
 
-CCK 6.2.rc4
-===========
+CCK 6.x-2.0-rc4
+===============
 
 This RC Mainly fixes a critical bug :
 http://www.drupal.org/node/277968 - Saving 'Display Fields' wipes widget settings.
@@ -286,19 +289,22 @@ http://www.drupal.org/node/277968 - Saving 'Display Fields' wipes widget setting
 - #279190 content_crud_instance_update wiped existing widget settings in some cases.
   Also added a tests for a few basic properties of the CRUD API.
 
-CCK 6.2.rc3
-===========
+CCK 6.x-2.0-rc3
+===============
+
 - #278116 by Damien Tournoud: Make some strings easier to translate in views intergration forms.
 - #278135 fix some translation quirks + fix french typography for ':' :-)
 - Nodereference: 'Title mismatch. Please check your selection' error should break validation (+ fix typo).
 - #277968 by jpetso: Fix fatal error when cck folder lives in the main /modules folder.
 
-CCK 6.2.rc2
-============
+CCK 6.x-2.0-rc2
+===============
+
 - #276994 Follow up, remove conditional loading for content.views.inc, Views handles it.
 
-CCK 6.2.rc1
-============
+CCK 6.x-2.0-rc1
+===============
+
 - #276994 Remove views_include_handlers() from content.views.inc, no longer needed.
 - Change 'allow_empty' to 'allow empty' so that Views filters work correctly.
 - #272871 Pass #node to formatters to be consistent with the values that were available in the D5 version.

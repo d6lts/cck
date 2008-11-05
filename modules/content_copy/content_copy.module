@@ -530,7 +530,7 @@ function content_copy_types() {
   $types = array();
   $content_info = _content_type_info();
   foreach ($content_info['content types'] as $type_name => $val) {
-    $types[$type_name] = $val['name'] .' ('. $type_name .')';
+    $types[$type_name] = check_plain($val['name']) .' ('. $type_name .')';
   }
   return $types;
 }

@@ -75,7 +75,7 @@ function nodereference_field_settings($op, $field) {
         '#title' => t('Content types that can be referenced'),
         '#multiple' => TRUE,
         '#default_value' => is_array($field['referenceable_types']) ? $field['referenceable_types'] : array(),
-        '#options' => node_get_types('names'),
+        '#options' => array_map('check_plain', node_get_types('names')),
       );
       if (module_exists('views')) {
         $views = array('--' => '--');
@@ -942,7 +942,6 @@ function theme_nodereference_select($element) {
 function theme_nodereference_buttons($element) {
   return $element['#children'];
 }
-
 
 function theme_nodereference_autocomplete($element) {
   return $element['#children'];

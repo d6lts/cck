@@ -861,7 +861,7 @@ function userreference_user($type, &$edit, &$account) {
           if (isset($values[$node_type])) {
             $additions[] = array(
               '#type' => 'user_profile_item',
-              '#title' => $node_types[$node_type]['name'],
+              '#title' => check_plain($node_types[$node_type]['name']),
               '#value' => theme('item_list', $values[$node_type]),
             );
           }

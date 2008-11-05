@@ -169,6 +169,7 @@ function content_views_field_views_data($field) {
     $types = array();
     foreach (content_types() as $type) {
       if (isset($type['fields'][$field['field_name']])) {
+        // TODO : run check_plain here instead of on the imploded string below ?
         $types[] = $type['name'];
       }
     }
@@ -219,8 +220,8 @@ function content_views_field_views_data($field) {
 
     $data[$columns[0]] = array(
       'group' => t('Content'),
-      'title' => t($field['widget']['label']) . ' ('. $field['field_name'] .')',
-      'title_short' => t($field['widget']['label']),
+      'title' => t('@label - (!name)', array('@label' => t($field['widget']['label']), '!name' => $field['field_name'])),
+      'title_short' => check_plain(t($field['widget']['label'])),
       'help' =>  t($field_types[$field['type']]['label']) .' - '. t('Appears in: @types', array('@types' => implode(', ', $types))),
       'field' => array(
         'field' => $columns[0],

@@ -128,7 +128,7 @@ function text_field_settings($op, $field) {
 
         // Filter: Add a 'many to one' filter.
         $copy = $data[$table_alias][$field['field_name'] .'_value'];
-        $copy['title'] = check_plain(t($field['widget']['label'])) .' ('. $field['field_name'] .') - '. t('Allowed values');
+        $copy['title'] = t('@label (!name) - Allowed values', array('@label' => t($field['widget']['label']), '!name' => $field['field_name']));
         $copy['filter']['handler'] = 'content_handler_filter_many_to_one';
         unset($copy['field'], $copy['argument'], $copy['sort']);
         $data[$table_alias][$field['field_name'] .'_value_many_to_one'] = $copy;
