@@ -17,7 +17,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: German translation of CCK\n"
 "POT-Creation-Date: 2008-11-05 12:54+0100\n"
-"PO-Revision-Date: 2008-11-05 13:03+0100\n"
+"PO-Revision-Date: 2008-11-05 16:51+0100\n"
 "Last-Translator: Alexander Haß\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -371,7 +371,7 @@ msgstr "Anzahl von Werten"
 
 #: includes/content.admin.inc:1232
 msgid "The default value PHP code returned an incorrect value.<br/>Expected format: <pre>!sample</pre> Returned value: @value"
-msgstr "Der Standardwert den PHP-Code bei ungültigen Werten zurückliefert<br/>Erwartetes Format: <pre>!sample</pre>zurückgegebener Wert : @value"
+msgstr "Der Standardwert den PHP-Code bei ungültigen Werten zurückliefert.<br/>Erwartetes Format: <pre>!sample</pre>zurückgegebener Wert: @value"
 
 #: includes/content.admin.inc:1268
 msgid "The PHP code for 'default value' returned @value, which is invalid."
