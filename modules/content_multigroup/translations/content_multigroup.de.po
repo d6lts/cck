@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: German translation for combofield\n"
 "POT-Creation-Date: 2008-10-23 20:01+0200\n"
-"PO-Revision-Date: 2008-10-23 20:03+0100\n"
+"PO-Revision-Date: 2008-11-05 13:25+0100\n"
 "Last-Translator: Alexander Haß\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -83,7 +83,7 @@ msgstr "Die Anzahl von Wiederholungen der Mehrfachgruppenfeldersammlungen."
 
 #: modules/content_multigroup/content_multigroup.module:454
 msgid "'Unlimited' will provide an 'Add more' button so the users can add repeat it as many times as they like."
-msgstr "„Unbegrenzt“ stellt Benutzern einen „Weitere hinzufügen“-Button zu Verfügung, damit diese so viele Wiederholungen hinzufügen können wie sie möchten."
+msgstr "„Unbegrenzt“ stellt Benutzern einen „Weitere hinzufügen“-Schaltknopf zu Verfügung, damit diese so viele Wiederholungen hinzufügen können wie sie möchten."
 
 #: modules/content_multigroup/content_multigroup.module:455
 msgid "All fields in this group will automatically be set to allow this number of values."
