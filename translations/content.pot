@@ -3,11 +3,11 @@
 # LANGUAGE translation of Drupal (root)
 # Copyright YEAR NAME <EMAIL@ADDRESS>
 # Generated from files:
-#  content.module,v 1.301.2.77 2008/10/17 16:47:08 yched
+#  content.module,v 1.301.2.82 2008/11/03 13:11:00 yched
 #  content.install,v 1.85.2.29 2008/10/18 12:44:37 yched
 #  content.info,v 1.6 2007/07/04 23:46:29 yched
-#  content.rules.inc,v 1.1.2.3 2008/10/17 13:27:11 fago
-#  content.views.inc,v 1.1.2.14 2008/10/22 19:27:51 yched
+#  content.rules.inc,v 1.1.2.4 2008/10/24 11:11:48 fago
+#  content.views.inc,v 1.1.2.17 2008/11/03 20:56:12 yched
 #  content_copy.info,v 1.6 2008/04/23 18:01:48 dww
 #  content_permissions.info,v 1.2 2008/04/23 18:01:52 dww
 #  fieldgroup.info,v 1.6.2.1 2008/09/22 18:25:21 karens
@@ -21,7 +21,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
-"POT-Creation-Date: 2008-10-23 19:54+0200\n"
+"POT-Creation-Date: 2008-11-05 12:25+0100\n"
 "PO-Revision-Date: YYYY-mm-DD HH:MM+ZZZZ\n"
 "Last-Translator: NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <EMAIL@ADDRESS>\n"
@@ -66,80 +66,84 @@ msgstr ""
 msgid "For more information, see the online handbook entry for <a href=\"@handbook-cck\">CCK</a> or the <a href=\"@project-cck\">CCK project page</a>."
 msgstr ""
 
-#: content.module:430
+#: content.module:478
 msgid "This field is required."
 msgstr ""
 
-#: content.module:434
+#: content.module:482
 msgid "!title: !required"
 msgstr ""
 
-#: content.module:1779
+#: content.module:1834
 msgid "Basic"
 msgstr ""
 
-#: content.module:1792;1795
+#: content.module:1847;1850
 msgid "RSS"
 msgstr ""
 
-#: content.module:1805
+#: content.module:1860
 msgid "Search"
 msgstr ""
 
-#: content.module:1808
+#: content.module:1863
 msgid "Search Index"
 msgstr ""
 
-#: content.module:1812
+#: content.module:1867
 msgid "Search Result"
 msgstr ""
 
-#: content.module:2232;2239
+#: content.module:2282;2289
 msgid "Node module form."
 msgstr ""
 
-#: content.module:2246
+#: content.module:2296
 msgid "Language"
 msgstr ""
 
-#: content.module:2247
+#: content.module:2297
 msgid "Locale module form."
 msgstr ""
 
-#: content.module:2253
+#: content.module:2303
 msgid "Menu settings"
 msgstr ""
 
-#: content.module:2254
+#: content.module:2304
 msgid "Menu module form."
 msgstr ""
 
-#: content.module:2260
+#: content.module:2310
 msgid "Taxonomy"
 msgstr ""
 
-#: content.module:2261
+#: content.module:2311
 msgid "Taxonomy module form."
 msgstr ""
 
-#: content.module:2267
+#: content.module:2317
 msgid "File attachments"
 msgstr ""
 
-#: content.module:2268
+#: content.module:2318
 msgid "Upload module form."
 msgstr ""
 
-#: content.module:533
+#: content.module:581
 msgid "Updating field type %type with module %module."
 msgstr ""
 
-#: content.module:540
+#: content.module:588
 msgid "Updating widget type %type with module %module."
 msgstr ""
 
 #: content.module:63
 msgid "Use PHP input for field settings (dangerous - grant with care)"
+msgstr ""
+
+#: content.module:82
+msgid "Fields"
 msgstr ""
 
 #: content.module:104

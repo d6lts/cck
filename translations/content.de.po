@@ -16,8 +16,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: German translation of CCK\n"
-"POT-Creation-Date: 2008-10-23 19:54+0200\n"
-"PO-Revision-Date: 2008-10-23 20:20+0100\n"
+"POT-Creation-Date: 2008-11-05 12:25+0100\n"
+"PO-Revision-Date: 2008-11-05 12:27+0100\n"
 "Last-Translator: Alexander Haß\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -64,81 +64,85 @@ msgstr "<em>Feldgruppe</em>, welches zusammenklappbare Feldgruppen erstellt, die
 msgid "For more information, see the online handbook entry for <a href=\"@handbook-cck\">CCK</a> or the <a href=\"@project-cck\">CCK project page</a>."
 msgstr "Nähere Informationen bezüglich der Konfiguration und Anpassung gibt es auf der Handbuch-Seite zum <a href=\"@handbook-cck\">CCK-Modul</a> oder auf der <a href=\"@project-cck\">CCK-Projektseite</a>."
 
-#: content.module:430
+#: content.module:478
 msgid "This field is required."
 msgstr "Dieses Feld wird benötigt."
 
-#: content.module:434
+#: content.module:482
 msgid "!title: !required"
 msgstr "!title: !required"
 
-#: content.module:1779
+#: content.module:1834
 msgid "Basic"
 msgstr "Basis"
 
-#: content.module:1792;1795
+#: content.module:1847;1850
 msgid "RSS"
 msgstr "RSS"
 
-#: content.module:1805
+#: content.module:1860
 msgid "Search"
 msgstr "Suchen"
 
-#: content.module:1808
+#: content.module:1863
 msgid "Search Index"
 msgstr "Suchindex"
 
-#: content.module:1812
+#: content.module:1867
 msgid "Search Result"
 msgstr "Suchergebnis"
 
-#: content.module:2232;2239
+#: content.module:2282;2289
 msgid "Node module form."
 msgstr "Formular des Beitrag-Moduls."
 
-#: content.module:2246
+#: content.module:2296
 msgid "Language"
 msgstr "Sprache"
 
-#: content.module:2247
+#: content.module:2297
 msgid "Locale module form."
 msgstr "Formular des Locale-Moduls."
 
-#: content.module:2253
+#: content.module:2303
 msgid "Menu settings"
 msgstr "Menüeinstellungen"
 
-#: content.module:2254
+#: content.module:2304
 msgid "Menu module form."
 msgstr "Formular des Menü-Moduls."
 
-#: content.module:2260
+#: content.module:2310
 msgid "Taxonomy"
 msgstr "Taxonomie"
 
-#: content.module:2261
+#: content.module:2311
 msgid "Taxonomy module form."
 msgstr "Formular des Taxonomie-Moduls."
 
-#: content.module:2267
+#: content.module:2317
 msgid "File attachments"
 msgstr "Dateianhänge"
 
-#: content.module:2268
+#: content.module:2318
 msgid "Upload module form."
 msgstr "Formular des Upload-Moduls."
 
-#: content.module:533
+#: content.module:581
 msgid "Updating field type %type with module %module."
 msgstr "Feldtyp %type wird mit Modul %module aktualisiert."
 
-#: content.module:540
+#: content.module:588
 msgid "Updating widget type %type with module %module."
 msgstr "Widget %type wird mit Modul %module aktualisiert."
 
 #: content.module:63
 msgid "Use PHP input for field settings (dangerous - grant with care)"
 msgstr "PHP-Eingabe für Feldeinstellungen verwenden (Gefährlich - mit Vorsicht zu gewähren)"
+
+#: content.module:82
+msgid "Fields"
+msgstr "Felder"
 
 #: content.module:104
 msgid "Manage fields"
