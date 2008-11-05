@@ -81,7 +81,7 @@ function content_copy_export_form(&$form_state) {
   $type_name = isset($form_values['type_name']) ? $form_values['type_name'] : '';
   if ($type_name) {
     $type = content_types($type_name);
-    $fields = $type['fields'];
+    $exportable_fields = content_copy_fields($type_name);
     if (module_exists('fieldgroup')) {
       $groups = fieldgroup_groups($type_name);
     }
@@ -115,17 +115,18 @@ function content_copy_export_form(&$form_state) {
       );
 
       $form += array(
-        '#fields' => array_keys($fields),
+        '#fields' => $exportable_fields,
         '#groups' => array_keys($groups),
       );
 
       $fields_options = $groups_options = array();
 
       // Fields.
-      foreach ($fields as $name => $field) {
-        $fields_options[$name] = '';
+      foreach ($exportable_fields as $field_name) {
+        $field = content_fields($field_name, $type_name);
+        $fields_options[$field_name] = '';
         $weight = $field['widget']['weight'];
-        $form[$name] = array(
+        $form[$field_name] = array(
           'human_name' => array('#value' => check_plain($field['widget']['label'])),
           'field_name' => array('#value' => $field['field_name']),
           'type' => array('#value' => $field['type']),
@@ -152,7 +153,10 @@ function content_copy_export_form(&$form_state) {
           '#row_type' => 'group',
         );
         foreach ($group['fields'] as $field_name => $field) {
-          $form[$field_name]['parent']['#value'] = $name;
+          // Do nothing for non-exportable (inactive) fields.
+          if (isset($form[$field_name])) {
+            $form[$field_name]['parent']['#value'] = $name;
+          }
         }
       }
       if ($groups) {
@@ -461,7 +465,7 @@ function content_copy_import_form_submit($form, &$form_state) {
 
     if (!empty($field['field_name']) && isset($content_info['content types'][$type_name]['fields'][$field_name])) {
       drupal_set_message(t('The imported field %field_label (%field_name) was not added to %type because that field already exists in %type.', array(
-        '%field_label' => $field['label'], '%field_name' => $field_name, '%type' => $type_name)));
+        '%field_label' => $field['label'], '%field_name' => $field_name, '%type' => $type_label)));
     }
     else {
 
@@ -493,6 +497,30 @@ function content_copy_form_alter(&$form, &$form_state, $form_id) {
   if (isset($GLOBALS['content_copy']) && isset($GLOBALS['content_copy']['status']) && $GLOBALS['content_copy']['status'] == 'export' && in_array($form_id, $alter_forms)) {
     $form['#submit'][] = 'content_copy_record_macro';
   }
+}
+
+/**
+ * Get all the *active* fields for a content type.
+ */
+function content_copy_fields($type_name) {
+  $fields = array();
+  if (!$type_name) {
+    return $fields;
+  }
+  $content_info = _content_type_info();
+  foreach ($content_info['content types'][$type_name]['fields'] as $field_name => $field) {
+    // Omit fields from the export if their module is not currently installed
+    // otherwise the system will generate errors when the macro tries to execute their forms.
+    $field_types = _content_field_types();
+    $field_module = $field_types[$field['type']]['module'];
+    $widget_types = _content_widget_types();
+    $widget_module = $widget_types[$field['widget']['type']]['module'];
+
+    if (!$field['locked'] && !empty($field_module) && module_exists($field_module) && !empty($widget_module) && module_exists($widget_module)) {
+      $fields[] = $field_name;
+    }
+  }
+  return $fields;
 }
 
 /**
