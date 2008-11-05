@@ -16,7 +16,7 @@ Main new features since RC10:
 - #329447 add content_view_field() API function to display a single field, fully themed with label and multiple values, to be used by 3rd party code.
 
 Other changes:
-- Content_generate should be passing field info.
+- Content_generate should be passing field info and updating $items.
 - Fix bug in content_generate that was adding fully formatted textarea values to textfield fields.
 - #329037 Fix small bug in content_generate function method of calling fields that handle their own multiple values.
 - #324826 Change Advanced help path and topic to use & prefix per latest change in Advanced help.

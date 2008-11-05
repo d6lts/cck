@@ -684,6 +684,7 @@ function content_field($op, &$node, $field, &$items, $teaser, $page) {
       if (!empty($node->devel_generate)) {
         include_once('./'. drupal_get_path('module', 'content') .'/includes/content.devel.inc');
         content_generate_fields($node, $field);
+        $items = $node->{$field['field_name']};
       }
 
       // Manual node_save calls might not have all fields filled in.
