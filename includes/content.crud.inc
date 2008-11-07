@@ -448,12 +448,15 @@ function content_field_instance_read($param = NULL, $include_inactive = FALSE) {
       $args[] = $value;
     }
   }
+  if (!$include_inactive) {
+    $cond[] = 'nf.active = 1';
+    $cond[] = 'nfi.widget_active = 1';
+  }
+  $where = $cond ? ' WHERE '. implode(' AND ', $cond) : '';
 
-  $condition = $cond ? " AND ". implode(' AND ', $cond) : '';
   $db_result = db_query("SELECT * FROM {". content_instance_tablename() ."} nfi ".
     " JOIN {". content_field_tablename() ."} nf ON nfi.field_name = nf.field_name ".
-    ($include_inactive ? ' ' : ' WHERE nf.active = 1 AND nfi.widget_active = 1 ').
-    $condition ." ORDER BY nfi.weight ASC, nfi.label ASC", $args);
+    "$where ORDER BY nfi.weight ASC, nfi.label ASC", $args);
 
   $fields = array();
   while ($instance = db_fetch_array($db_result)) {
