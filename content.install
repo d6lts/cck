@@ -94,6 +94,10 @@ function content_uninstall() {
   // The variable is used during the uninstall process,
   // so we removed it at the very end.
   variable_del('content_schema_version');
+  // Remove extra weights.
+  foreach (node_get_types('names') as $type_name) {
+    variable_del("content_extra_weights_$type_name");
+  }
 }
 
 /**
