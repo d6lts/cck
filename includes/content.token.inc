@@ -26,7 +26,8 @@ function content_token_values($type, $object = NULL) {
   if ($type == 'node') {
     $node = $object;
     // Prevent against invalid 'nodes' built by broken 3rd party code.
-    if (isset($node->type) && ($type = content_types($node->type))) {
+    if (isset($node->type)) {
+      $type = content_types($node->type);
       $node->build_mode = 'token';
       $node->content = array();
       content_view($node);
