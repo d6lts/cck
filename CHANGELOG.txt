@@ -6,6 +6,7 @@ CCK 6.x-2.1-dev
 - #331293 by Timo.Kissing - Content copy: fix pretty much useless export form  (#320632 followup).
 - #331179 Userreference: 'reverse link' checkbox stayed unchecked.
 - Uninstall forgot to remove some variables.
+- #331794 Fix false positives for "The default value is invalid" error message.
 
 CCK 6.x-2.0
 ===========
