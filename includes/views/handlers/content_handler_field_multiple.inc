@@ -241,7 +241,7 @@ class content_handler_field_multiple extends content_handler_field {
       return parent::render_link($data, $values);
     }
 
-    if (!empty($this->options['link_to_node']) && $data) {
+    if (!empty($this->options['link_to_node']) && $data !== NULL && $data !== '') {
       return l($data, "node/" . $values->nid, array('html' => TRUE));
     }
     else {
