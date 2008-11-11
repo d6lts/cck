@@ -167,7 +167,7 @@ class content_handler_field_multiple extends content_handler_field {
 
   function render($values) {
     // If this is not a grouped field, use content_handler_field::render().
-    if (!$this->defer_query || empty($this->field_values)) {
+    if (!$this->defer_query) {
       return parent::render($values);
     }
 
@@ -237,7 +237,7 @@ class content_handler_field_multiple extends content_handler_field {
   }
 
   function render_link($data, $values) {
-    if (!$this->defer_query || empty($this->field_values)) {
+    if (!$this->defer_query) {
       return parent::render_link($data, $values);
     }
 
