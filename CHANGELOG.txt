@@ -8,7 +8,8 @@ CCK 6.x-2.1-dev
 - Uninstall forgot to remove some variables.
 - #331794 Fix false positives for "The default value is invalid" error message.
 - #331995 Fix 'invalid argument for foreach' warning on nodes with inexistent type.
-- #331033 Fix fatal error in content_handler_field.inc in some circumstances.
+- #331033 Views integration: Fix fatal error in content_handler_field.inc in some circumstances.
+- Views integration: make sure our own render_link doesn't output empty links (see #332679).
 
 CCK 6.x-2.0
 ===========
