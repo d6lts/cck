@@ -15,7 +15,7 @@ class content_handler_field_multiple extends content_handler_field {
     $field = $this->content_field;
     parent::init($view, $options);
 
-    $this->defer_query = $options['multiple']['group'] && $field['multiple'];
+    $this->defer_query = !empty($options['multiple']['group']) && $field['multiple'];
 
     if ($this->defer_query) {
       // Grouped field: ditch the existing additional_fields (field columns + delta).
