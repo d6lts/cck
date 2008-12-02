@@ -1,0 +1,14 @@
+/* $Id$ */
+
+/* 'Manage fields' overview */
+table.content-field-overview, table.content-field-overview fieldset table {
+  width:100%;
+}
+table.content-field-overview td {
+  width:14%;
+}
+.content-field-overview-empty {
+  text-align:center;
+}
+
+

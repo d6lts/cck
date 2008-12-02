@@ -1,0 +1,10 @@
+; $Id$
+name = Fields
+description = Fields in core.  Whatever that means!
+package = Core - fields
+core = 7.x
+files[] = content.module
+files[] = content.install
+files[] = includes/content.crud.inc
+files[] = includes/content.alter.inc
+files[] = includes/content.node_form.inc

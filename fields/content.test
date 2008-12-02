@@ -1,0 +1,237 @@
+<?php
+
+class FieldAPITestCase extends DrupalWebTestCase {
+  /**
+   * Create a field in a highly verified sort of way.
+   *
+   * @param $field_type
+   *   The Field Type to create.
+   * @param $field_module
+   *   The module that implements $field_type.
+   * @param $defaults
+   *   An array of field type specific properties to create the field
+   *   with.
+   * @return
+   *   A new field with the specified properties.
+   */
+  function _testCreateField($field_type, $field_module, $defaults) {
+    // Create a field with all default values.
+    $function_new = $field_type . '_field_new';
+    $field = $function_new($this->randomName(10));
+    $field_name = $field['field_name'];
+    $this->assertIdentical(field_create_field($field), TRUE, t('Create field.'));
+
+    // Read it back and verify.
+    $fields = field_get_field(array('field_name' => $field_name));
+    $read = $fields[$field_name];
+    $this->assertIdentical($read['field_name'], $field_name, t('Field created'));
+    $this->assertIdentical($read['module'], $field_module, t('Module set correctly'));
+    $this->assertEqual($read['required'], FALSE, t('required set correctly'));
+    $this->assertEqual($read['shareable'], FALSE, t('shareable set correctly'));
+    $this->assertEqual($read['multiple'], 0, t('multiple set correctly'));
+    $this->assertEqual($read['db_storage'], CONTENT_DB_STORAGE_PER_CONTENT_TYPE, t('db_storage set correctly'));
+
+    // Field names must be unique.
+    $this->assertIdentical(field_create_field($field), FALSE, t('Cannot create duplicate field name.'));
+
+    // Create another field with non-default values.
+    $field_name = $field['field_name'] = $this->randomName(10);
+    $field['required'] = TRUE;
+    $field['shareable'] = TRUE;
+    $field['multiple'] = 1;
+    $this->assertIdentical(field_create_field(array_merge($field, $defaults)), TRUE, t('Create field.'));
+
+    // Read it back and verify.
+    $fields = field_get_field(array('field_name' => $field_name));
+    $read = $fields[$field_name];
+    $this->assertIdentical($read['field_name'], $field_name, t('Field created.'));
+    $this->assertIdentical($read['module'], $field_module, t('Module set correctly.'));
+    $this->assertEqual($read['required'], TRUE, t("'required' set correctly."));
+    $this->assertEqual($read['shareable'], TRUE, t("'shareable' set correctly."));
+    $this->assertEqual($read['multiple'], 1, t("'multiple' set correctly."));
+    $this->assertEqual($read['db_storage'], CONTENT_DB_STORAGE_PER_FIELD, t("'db_storage' set correctly."));
+    foreach ($defaults as $key => $val) {
+      $this->assertEqual($read[$key], $val, t("'@property' set correctly.", array('@property' => $key)));
+    }
+
+    return $read;
+  }
+}
+
+class FieldAPITest extends DrupalWebTestCase {
+  /**
+   * Implementation of getInfo().
+   */
+  function getInfo() {
+    return array(
+      'name'  => t('Field API'),
+      'description'  => t('Test Drupal\'s Field API'),
+      'group' => t('Fields')
+    );
+  }
+
+  function setUp() {
+    parent::setUp('content', 'text');
+  }
+
+  function testCreateField() {
+    // Create a field.
+    $field = text_field_new($this->randomName(10));
+    $field_name = $field['field_name'];
+    $this->assertIdentical(field_create_field($field), TRUE, t('Create field.'));
+
+    // Read it back and verify.
+    $fields = field_get_field(array('field_name' => $field_name));
+    $read = $fields[$field_name];
+    $this->assertIdentical($read['field_name'], $field_name, t('Field created'));
+    $this->assertIdentical($read['module'], 'text', t('Module set correctly'));
+    $this->assertEqual($read['required'], FALSE, t('required set correctly'));
+    $this->assertEqual($read['shareable'], FALSE, t('shareable set correctly'));
+    $this->assertEqual($read['multiple'], 0, t('multiple set correctly'));
+    $this->assertEqual($read['db_storage'], CONTENT_DB_STORAGE_PER_CONTENT_TYPE, t('db_storage set correctly'));
+
+    // Field names must be unique.
+    $this->assertIdentical(field_create_field($field), FALSE, t('Cannot create duplicate field name.'));
+
+    // Create another field with non-default values.
+    $field_name = $field['field_name'] = $this->randomName(10);
+    $field['required'] = TRUE;
+    $field['shareable'] = TRUE;
+    $field['multiple'] = 1;
+    $this->assertIdentical(field_create_field($field), TRUE, t('Create field.'));
+
+    // Read it back and verify.
+    $fields = field_get_field(array('field_name' => $field_name));
+    $read = $fields[$field_name];
+    $this->assertIdentical($read['field_name'], $field_name, t('Field created.'));
+    $this->assertIdentical($read['module'], 'text', t('Module set correctly.'));
+    $this->assertEqual($read['required'], TRUE, t("'required' set correctly."));
+    $this->assertEqual($read['shareable'], TRUE, t("'shareable' set correctly."));
+    $this->assertEqual($read['multiple'], 1, t("'multiple' set correctly."));
+    $this->assertEqual($read['db_storage'], CONTENT_DB_STORAGE_PER_FIELD, t("'db_storage' set correctly."));
+  }
+
+  function testCreateFieldInstance() {
+    // Create a field.
+    $field = text_field_new('');
+    $field_name = $field['field_name'] =  $this->randomName(10);
+    $this->assertIdentical(field_create_field($field), TRUE, t('Create field.'));
+
+    // Create a field instance structure.  Set some non-default values,
+    // including the text widget's "rows" setting, so we can verify them.
+    $content_type = 'article';
+    $instance = text_field_instance_new($field_name, $content_type, 'text_textarea');
+    $instance['widget']['weight'] = 12;
+    $label = $instance['widget']['label'] = 'label:'. $this->randomName(32);
+    $description = $instance['widget']['description'] = 'description:'. $this->randomName(32);
+    $rows = $instance['widget']['rows'] = 17;
+
+    // Cannot create an instance on a non-existant content type.
+    $instance['type_name'] = 'this_content_type_does_not_exist';
+    $this->assertEqual(field_create_instance($instance), FALSE, t('Cannot create an instance on a non-existant content type.'));
+
+    // Create the instance.
+    $instance['type_name'] = $content_type;
+    $this->assertEqual(field_create_instance($instance), TRUE, t('Create instance.'));
+
+    // Read it back and verify.
+    $read = $this->_readAndVerifyInstance($instance);
+    $this->assertEqual($read['widget']['rows'], $rows, t('widget[rows] matches.'));
+
+    // TODO: display settings
+
+    // The field instance's database columns exist.
+    foreach ($field['columns'] as $column => $attrs) {
+      $this->assertIdentical(db_column_exists('content_type_article', $field_name .'_'. $column), TRUE, t("Field's column @column exists.", array('@column' => $column)));
+    }
+
+    // The field can be saved and loaded.
+    $node = new stdClass();
+    $node->type = $content_type;
+    $node->title = 'title';
+    $field_value[0]['value'] = $this->randomName(64);
+    $node->$field_name = $field_value;
+    node_save($node);
+
+    $newnode = node_load($node->nid);
+    $newfield = $newnode->$field_name;
+    $this->assertIdentical($field_value[0]['value'], $newfield[0]['value'], t('New field is saved and loaded.'));
+
+    // The field's label and value are displayed via local API within
+    // the current request.
+    $this->drupalGet('node/' . $node->nid);
+    $this->_content = node_view($newnode, FALSE, TRUE);
+    $this->plain_text = FALSE;
+    $this->assertText($label, t('New field label is displayed.'));
+    $this->assertText($field_value[0]['value'], t('New field value is displayed.'));
+
+    // The field's label and value are displayed on subsequent requests.
+    $this->drupalGet('node/'.$node->nid);
+    $this->assertText($label, 'New field label is displayed.');
+    $this->assertText($field_value[0]['value'], 'New field value is displayed.');
+    
+    // Field is shown on form, using the widget settings, via local
+    // API within the current request.
+    if (drupal_function_exists('node_add')) {
+      $this->_content = node_add('article');
+      $this->plain_text = FALSE;
+      $this->assertText($description, "New field description ($description) is shown on form.");
+      $this->assertPattern('@<textarea[^>]+rows="'. $rows .'"@', "New text field has correct number of rows ($rows).");
+    }
+
+    // Field is shown on form, using the widget settings, on
+    // subsequent requests.
+    $web_user = $this->drupalCreateUser(array('edit own article content', 'create article content'));
+    $this->drupalLogin($web_user);
+    $this->drupalGet('node/add/article');
+    $this->assertText($description, t('New field description is shown on form.'));
+    $this->assertPattern('@<textarea[^>]+rows="'. $rows .'"@', t('New text field has correct number of rows.'));
+
+    // Field submission works.
+    $edit['title'] = $this->randomName(32);
+    $newvalue = $edit[$field_name .'[0][value]'] = $this->randomName(32);
+    $this->drupalPost('node/add/article', $edit, t('Save'));
+    $node = node_load(array('title' => $edit['title']));
+    $newfield = $node->$field_name;
+    $this->assertIdentical($edit[$field_name .'[0][value]'], $newfield[0]['value'], t('Field value submitted via form loads.'));
+
+    // Cannot re-instantiate a non-shared field.
+    $instance['type'] = 'page';
+    $this->assertEqual(field_create_instance($instance), FALSE, t('Cannot re-instantiate non-shared field.'));
+
+    // Update the instance.
+    $newinstance = field_get_instances(array('field_name' => $field_name, 'type_name' => $content_type));
+    $this->assertIdentical(count($newinstance), 1, t('Read existing field instance.'));
+    $newinstance = $newinstance[0];
+    $newlabel = $newinstance['widget']['label'] = 'label:'. $this->randomName(32);
+    $newdescription = $newinstance['widget']['description'] = 'description:'. $this->randomName(32);
+    $newrows = $newinstance['widget']['rows'] = $rows*2;
+    $this->assertEqual(field_update_instance($newinstance), TRUE, t('Update field.'));
+    $read = $this->_readAndVerifyInstance($newinstance);
+    $this->assertEqual($read['widget']['rows'], $newrows, t('Updated widget->rows set correctly.'));
+
+    // Verify the new instance settings.
+    $this->drupalGet('node/'.$node->nid);
+    $this->assertNoText($label, t('Old field label is not displayed.'));
+    $this->assertText($newlabel, t('New field label is displayed.'));
+    $this->assertText($newvalue, t('Field value is still displayed.'));
+    $this->drupalGet('node/add/article');
+    $this->assertNoText($description, t('Old field description is not shown on form.'));
+    $this->assertText($newdescription, t('New field description is shown on form.'));
+    $this->assertNoPattern('@<textarea[^>]+rows="'. $rows .'"@', t('Old # of rows is not used.'));
+    $this->assertPattern('@<textarea[^>]+rows="'. $newrows .'"@', t('New # of rows is used.'));
+  }
+
+  protected function _readAndVerifyInstance($instance) {
+    $read = field_get_instances(array('field_name' => $instance['field_name'], 'type_name' => $instance['type_name']));
+    $this->assertIdentical(count($read), 1, t('Read instance @field_name/@type_name', array('@field_name' => $instance['field_name'], '@type_name' => $instance['type_name'])));
+    $this->assertIdentical($read[0]['field_name'], $instance['field_name'], t('field_name matches.'));
+    $this->assertIdentical($read[0]['type_name'], $instance['type_name'], t('type_name matches.'));
+    $this->assertEqual($read[0]['widget']['weight'], $instance['widget']['weight'], t('Widget weight matches.'));
+    $this->assertIdentical($read[0]['widget']['label'], $instance['widget']['label'], t('Widget label matches.'));
+    $this->assertIdentical($read[0]['widget']['description'], $instance['widget']['description'], t('Widget description matches.'));
+    $this->assertIdentical($read[0]['widget']['type'], $instance['widget']['type'], t('Widget type matches.'));
+    $this->assertIdentical($read[0]['widget']['module'], $instance['widget']['module'], t('Widget module matches.'));
+    return $read[0];
+  }
+}

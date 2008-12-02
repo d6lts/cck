@@ -1,0 +1,43 @@
+<?php
+// $Id$
+
+/**
+ * @file
+ * Implementation of hook_install().
+ */
+function text_install() {
+  drupal_load('module', 'content');
+  content_notify('install', 'text');
+}
+
+/**
+ * Implementation of hook_uninstall().
+ */
+function text_uninstall() {
+  drupal_load('module', 'content');
+  content_notify('uninstall', 'text');
+}
+
+/**
+ * Implementation of hook_enable().
+ *
+ * Notify content module when this module is enabled.
+ */
+function text_enable() {
+  drupal_load('module', 'content');
+  content_notify('enable', 'text');
+}
+
+/**
+ * Implementation of hook_disable().
+ *
+ * Notify content module when this module is disabled.
+ */
+function text_disable() {
+  drupal_load('module', 'content');
+  content_notify('disable', 'text');
+}
+
+function text_update_last_removed() {
+  return 5;
+}

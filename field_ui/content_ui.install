@@ -1,0 +1,11 @@
+<?php
+// $Id$
+
+/**
+ * Implementation of hook_uninstall().
+ */
+function content_ui_uninstall() {
+  foreach (node_get_types('names') as $type_name) {
+    variable_del("content_extra_weights_$type_name");
+  }
+}
