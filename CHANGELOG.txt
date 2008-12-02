@@ -1,5 +1,11 @@
 // $Id$
 
+5--1.x
+======
+
+- #339753 by MrGeneYUss - fix invalid admin/content/types/[type]/edit path (not actually used in the UI).
+
+
 5--1.10
 =======
 

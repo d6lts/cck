@@ -100,8 +100,7 @@ function content_menu($may_cache) {
     if (arg(0) == 'admin' && arg(1) == 'content' && arg(2) == 'types') {
 
       $content_type = content_types(arg(3));
-      $type = node_get_types('types', $content_type['type']);
-
+      $type = node_get_types('type', $content_type['type']);
 
       if (!empty($type) && arg(3) && arg(3) == $content_type['url_str']) {
         $items[] = array(
