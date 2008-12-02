@@ -14,6 +14,7 @@ function content_types_install() {
   drupal_load('module', 'content');
   module_load_include('inc', 'content', '/includes/content.crud');
   $module_field_types = $module_widgets = array();
+  // TODO D7 : we shouldn't use module_list : http://drupal.org/node/224333#module_implements_not_module_list
   foreach (module_list() as $module) {
     if ($field_type = module_invoke($module, 'field_info')) {
       $module_field_types[$module] = $field_type;

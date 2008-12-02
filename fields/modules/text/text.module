@@ -189,7 +189,7 @@ function text_field($op, &$node, $instance, &$items, $teaser, $page) {
       foreach ($items as $delta => $item) {
         if (!empty($field['text_processing'])) {
           $check = is_null($node) || (isset($node->build_mode) && $node->build_mode == NODE_BUILD_PREVIEW);
-          $text = isset($item['value']) ? check_markup($item['value'], $item['format'], $check) : '';
+          $text = isset($item['value']) ? check_markup($item['value'], $item['format'], $node->language, $check) : '';
         }
         else {
           $text = check_plain($item['value']);

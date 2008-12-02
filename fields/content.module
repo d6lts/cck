@@ -1306,7 +1306,7 @@ function _content_type_info($reset = FALSE) {
       );
 
       // Populate field types.
-      foreach (module_list() as $module) {
+      foreach (module_implements('field_info') as $module) {
         $module_field_types = module_invoke($module, 'field_info');
         if ($module_field_types) {
           foreach ($module_field_types as $name => $field_info) {
@@ -1320,7 +1320,7 @@ function _content_type_info($reset = FALSE) {
       }
 
       // Populate widget types and formatters for known field types.
-      foreach (module_list() as $module) {
+      foreach (module_implements('widget_info') as $module) {
         if ($module_widgets = module_invoke($module, 'widget_info')) {
           foreach ($module_widgets as $name => $widget_info) {
             // Truncate names to match the value that is stored in the database.
@@ -1337,7 +1337,9 @@ function _content_type_info($reset = FALSE) {
             }
           }
         }
+      }
 
+      foreach (module_implements('field_formatter_info') as $module) {
         if ($module_formatters = module_invoke($module, 'field_formatter_info')) {
           foreach ($module_formatters as $name => $formatter_info) {
             foreach ($formatter_info['field types'] as $field_type) {
