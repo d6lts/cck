@@ -1,5 +1,10 @@
 //$Id$
 
+CCK 6.x-2.x
+===========
+
+- #339537 by markus_petrux: fix orphan fields in {content_group_fields} table when fields are removed.
+
 CCK 6.x-2.1
 ===========
 

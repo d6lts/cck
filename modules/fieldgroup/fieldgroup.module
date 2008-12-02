@@ -87,7 +87,7 @@ function fieldgroup_elements() {
  */
 function fieldgroup_content_fieldapi($op, $field) {
   switch ($op) {
-    case 'delete':
+    case 'delete instance':
       db_query("DELETE FROM {". fieldgroup_fields_tablename() ."} WHERE field_name = '%s'", $field['field_name']);
       break;
   }

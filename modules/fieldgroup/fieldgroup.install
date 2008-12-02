@@ -298,3 +298,12 @@ function fieldgroup_update_6005() {
   }
   return $ret;
 }
+
+/**
+ * Remove orphaned fields (see http://drupal.org/node/339537).
+ */
+function fieldgroup_update_6006() {
+  $ret = array();
+  $ret[] = update_sql("DELETE FROM {content_group_fields} WHERE (field_name, type_name) NOT IN (SELECT field_name, type_name FROM content_node_field_instance)");
+  return $ret;
+}
