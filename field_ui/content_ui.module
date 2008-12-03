@@ -24,18 +24,6 @@ function content_ui_help($path, $arg) {
       $output .= '<p>'. t('For more information, see the online handbook entry for <a href="@handbook-cck">CCK</a> or the <a href="@project-cck">CCK project page</a>.', array('@handbook-cck' => 'http://drupal.org/handbook/modules/cck', '@project-cck' => 'http://drupal.org/project/cck')) .'</p>';
       return $output;
   }
-
-  if (preg_match('!^admin/build/node-type/.*/display!', $path)) {
-    if (preg_match('!^admin/build/node-type/.*/display$!', $path)) {
-      return t("Configure how this content type's fields and field labels should be displayed when it's viewed in teaser and full-page mode.");
-    }
-    else {
-      return t("Configure how this content type's fields should be displayed when it's rendered in the following contexts.");
-    }
-  }
-  if (preg_match('!^admin/build/node-type/.*/fields$!', $path)) {
-    return t('Control the order of fields in the input form.');
-  }
 }
 
 /**
@@ -49,35 +37,18 @@ function content_ui_perm() {
  * Implementation of hook_init().
  */
 function content_ui_init() {
-  drupal_add_css(drupal_get_path('module', 'content_ui') .'/theme/content.css');
-
-  if (content_ui_menu_needs_rebuild()) {
-    content_clear_type_cache(TRUE);
-    menu_rebuild();
-    content_ui_menu_needs_rebuild(FALSE);
-  }
+  // TODO D7 : be smarter ?
+  drupal_add_css(drupal_get_path('module', 'content_ui') .'/theme/content_ui.css');
 }
 
 /**
- * Flag / unflag the menus for rebuilding, or read the current
- * value of the flag.
- *
- * When adding new content types and fields, a menu rebuild is needed
- * to update field paths, but sometimes it won't work right until
- * other processes complete.
- * We therefore store a flag in the session and actually rebuild on next
- * page load (content_init()).
+ * Implementation of hook_menu_alter().
  */
-function content_ui_menu_needs_rebuild($rebuild = NULL) {
-  if (!isset($rebuild)) {
-    return isset($_SESSION['content_menu_needs_rebuild']);
-  }
-  elseif ($rebuild) {
-    $_SESSION['content_menu_needs_rebuild'] = TRUE;
-  }
-  else {
-    unset($_SESSION['content_menu_needs_rebuild']);
-  }
+function content_ui_menu_alter(&$items) {
+  // Customize the content types page with our own callback
+  $items['admin/build/types']['page callback'] = 'content_types_overview';
+  $items['admin/build/types']['file'] = 'content_ui.admin.inc';
+  $items['admin/build/types']['file path'] = drupal_get_path('module', 'content_ui') .'/includes';
 }
 
 /**
@@ -87,14 +58,14 @@ function content_ui_menu() {
   $items = array();
   $items['admin/build/types/fields'] = array(
     'title' => 'Fields',
-    'page callback' => '_content_admin_type_fields',
+    'page callback' => 'content_fields_list',
     'access arguments' => array('administer content types'),
     'file' => 'includes/content.admin.inc',
     'type' => MENU_LOCAL_TASK,
   );
 
   // Make sure this doesn't fire until content_types is working,
-  // needed to avoid errors on initial installation.
+  // and tables are updated, needed to avoid errors on initial installation.
   if (!defined('MAINTENANCE_MODE')) {
     foreach (node_get_types() as $type) {
       $type_name = $type->type;
@@ -103,7 +74,7 @@ function content_ui_menu() {
       $items['admin/build/node-type/'. $type_url_str .'/fields'] = array(
         'title' => 'Manage fields',
         'page callback' => 'drupal_get_form',
-        'page arguments' => array('content_admin_field_overview_form', $type_name),
+        'page arguments' => array('content_field_overview_form', $type_name),
         'access arguments' => array('administer content types'),
         'file' => 'includes/content.admin.inc',
         'type' => MENU_LOCAL_TASK,
@@ -112,40 +83,30 @@ function content_ui_menu() {
       $items['admin/build/node-type/'. $type_url_str .'/display'] = array(
         'title' => 'Display fields',
         'page callback' => 'drupal_get_form',
-        'page arguments' => array('content_admin_display_overview_form', $type_name),
+        'page arguments' => array('content_display_overview_form', $type_name),
         'access arguments' => array('administer content types'),
         'file' => 'includes/content.admin.inc',
         'type' => MENU_LOCAL_TASK,
         'weight' => 2,
       );
-      $items['admin/build/node-type/'. $type_url_str .'/display/general'] = array(
-        'title' => 'General',
-        'page arguments' => array('content_admin_display_overview_form', $type_name),
-        'type' => MENU_DEFAULT_LOCAL_TASK,
-        'weight' => 0,
-      );
-      $items['admin/build/node-type/'. $type_url_str .'/display/advanced'] = array(
-        'title' => 'Advanced',
-        'page arguments' => array('content_admin_display_overview_form', $type_name, (string)CONTENT_CONTEXTS_ADVANCED),
-        'access arguments' => array('administer content types'),
-        'type' => MENU_LOCAL_TASK,
-        'weight' => 1,
-      );
-      $items['admin/build/node-type/'. $type_url_str .'/add_field'] = array(
-        'title' => 'Add field',
-        'page callback' => '_content_admin_field_add',
-        'page arguments' => array($type_name),
-        'access arguments' => array('administer content types'),
-        'file' => 'includes/content.admin.inc',
-        'type' => MENU_LOCAL_TASK,
-        'weight' => 3,
-      );
-      foreach ($content_type['fields'] as $field) {
-        $field_name = $field['field_name'];
+      $contexts = content_build_modes('_tabs');
+      foreach ($contexts as $key => $tab) {
+        $items['admin/build/node-type/'. $type_url_str .'/display/'. $key] = array(
+          'title' => $tab['title'],
+          'page arguments' => array('content_display_overview_form', $type_name, $key),
+          'access arguments' => array('administer content types'),
+          'type' => $key == 'basic' ? MENU_DEFAULT_LOCAL_TASK : MENU_LOCAL_TASK,
+          'weight' => $key == 'basic' ? 0 : 1,
+        );
+      }
+      // Cast as an array in case this is called before any fields have
+      // been added, like when a new content type is created.
+      foreach ((array) $content_type['instances'] as $instance) {
+        $field_name = $instance['field_name'];
         $items['admin/build/node-type/'. $type_url_str .'/fields/'. $field_name] = array(
-          'title' => $field['widget']['label'],
+          'title' => $instance['widget']['label'],
           'page callback' => 'drupal_get_form',
-          'page arguments' => array('_content_admin_field', $type_name, $field_name),
+          'page arguments' => array('content_field_edit_form', $type_name, $field_name),
           'access arguments' => array('administer content types'),
           'file' => 'includes/content.admin.inc',
           'type' => MENU_LOCAL_TASK,
@@ -153,7 +114,7 @@ function content_ui_menu() {
         $items['admin/build/node-type/'. $type_url_str .'/fields/'. $field_name .'/remove'] = array(
           'title' => 'Remove field',
           'page callback' => 'drupal_get_form',
-          'page arguments' => array('_content_admin_field_remove', $type_name, $field_name),
+          'page arguments' => array('content_field_remove_form', $type_name, $field_name),
           'access arguments' => array('administer content types'),
           'file' => 'includes/content.admin.inc',
           'type' => MENU_CALLBACK,
@@ -162,6 +123,35 @@ function content_ui_menu() {
     }
   }
   return $items;
+}
+
+/**
+ * Implementation of hook_theme().
+ */
+function content_ui_theme() {
+  $path = drupal_get_path('module', 'content_ui') .'/theme';
+  require_once "./$path/theme.inc";
+
+  return array(
+    'content_overview_links' => array(
+      'arguments' => array(),
+    ),
+    'content_field_overview_form' => array(
+      'template' => 'content-admin-field-overview-form',
+      'file' => 'theme.inc',
+      'path' => $path,
+      'arguments' => array('form' => NULL),
+    ),
+    'content_display_overview_form' => array(
+      'template' => 'content-admin-display-overview-form',
+      'file' => 'theme.inc',
+      'path' => $path,
+      'arguments' => array('form' => NULL),
+    ),
+    'content_multiple_values' => array(
+      'arguments' => array('element' => NULL),
+    ),
+  );
 }
 
 /**
@@ -201,6 +191,18 @@ function content_ui_form_alter(&$form, $form_state, $form_id) {
   }
 }
 
+ /**
+ * Hide specified fields from the $content variable in node templates.
+ */
+// TODO D7 : ??
+function content_field_wrapper_post_render($content, $element) {
+  $fields = content_fields();
+  $field = $fields[$element['#field_name']];
+  if (theme('content_exclude', $content, $field, $element['#context'])) {
+    return '';
+  }
+  return $content;
+}
 
 /**
  * Implementation of hook_content_extra_fields.
@@ -291,24 +293,7 @@ function content_ui_extra_field_weight($type_name, $pseudo_field_name) {
   }
 }
 
-/**
- * Implementation of hook_theme().
- */
-function content_ui_theme() {
-  $path = drupal_get_path('module', 'content') .'/theme';
 
-  return array(
-    'content_admin_field_overview_form' => array(
-      'arguments' => array('form' => NULL),
-    ),
-    'content_admin_display_overview_form' => array(
-      'arguments' => array('form' => NULL),
-    ),
-    'content_admin_field_add_new_field_widget_type' => array(
-      'arguments' => array('form' => NULL),
-    ),
-  );
-}
 
 /**
  *  Implementation of hook_node_type()

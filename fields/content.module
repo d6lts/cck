@@ -2091,24 +2091,24 @@ function content_preprocess_node(&$vars) {
  * Helper function to identify inactive fields.
  */
 function content_inactive_fields($type_name = NULL) {
-  module_load_include('inc', 'content', 'includes/content.crud');
-  if (!empty($type_name)) {
-    $param = array('type_name' => $type_name);
-    $inactive = array($type_name => array());
-  }
-  else {
-    $param = array();
-    $inactive = array();
-  }
-  $all = content_field_instance_read($param, TRUE);
-  $active = array_keys(content_fields());
-  foreach ($all as $field) {
-    if (!in_array($field['field_name'], $active)) {
-      $inactive[$field['type_name']][$field['field_name']] = content_field_instance_expand($field);
-    }
-  }
-  if (!empty($type_name)) {
-    return $inactive[$type_name];
-  }
-  return $inactive;
+//  module_load_include('inc', 'content', 'includes/content.crud');
+//  if (!empty($type_name)) {
+//    $param = array('type_name' => $type_name);
+//    $inactive = array($type_name => array());
+//  }
+//  else {
+//    $param = array();
+//    $inactive = array();
+//  }
+//  $all = content_field_instance_read($param, TRUE);
+//  $active = array_keys(content_fields());
+//  foreach ($all as $field) {
+//    if (!in_array($field['field_name'], $active)) {
+//      $inactive[$field['type_name']][$field['field_name']] = content_field_instance_expand($field);
+//    }
+//  }
+//  if (!empty($type_name)) {
+//    return $inactive[$type_name];
+//  }
+//  return $inactive;
 }
