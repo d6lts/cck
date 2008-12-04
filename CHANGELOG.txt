@@ -5,6 +5,7 @@ CCK 6.x-2.x
 
 - #339537 by markus_petrux: fix orphan fields in {content_group_fields} table when fields are removed.
 - Views integration: use shorter titles in Views admin summaries (see http://drupal.org/node/326034).
+- #334290 by drewish - Userreference: user names not displayed in Views summaries.
 
 CCK 6.x-2.1
 ===========
