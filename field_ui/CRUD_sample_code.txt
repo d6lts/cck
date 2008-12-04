@@ -1,0 +1,50 @@
+// *_field_new() / field_create_field();
+$field = text_field_new('field_text');
+$field['shareable'] = 1;
+$instance['text_processing'] = TRUE;
+field_create_field($field);
+
+// *_field_instance_new() / field_create_instance()
+$instance = text_field_instance_new('field_text', 'article', 'text_textarea');
+$instance['widget']['label'] = 'field_text';
+field_create_instance($instance);
+$instance = text_field_instance_new('field_text', 'page', 'text_textarea');
+$instance['widget']['label'] = 'field_text';
+field_create_instance($instance);
+
+// Multiple field
+$field = text_field_new('field_text_multiple');
+$field['shareable'] = 1;
+$field['multiple'] = 1;
+field_create_field($field);
+
+$instance = text_field_instance_new('field_text_multiple', 'article', 'text_textfield');
+$instance['text_processing'] = 1;
+$instance['widget']['label'] = 'field_text_multiple';
+field_create_instance($instance);
+
+
+// field_get_field();
+$fields = field_get_field(array('field_name' => 'field_text'));
+dsm($fields);
+$fields = field_get_field(array('type' => 'text'));
+dsm($fields);
+$fields = field_get_field(array('type' => 'text', 'field_name' => 'field_text'));
+dsm($fields);
+
+// field_get_instances()
+$instances = field_get_instances(array('field_name' => 'field_text'));
+dsm($instances);
+$instances = field_get_instances(array('type_name' => 'page'));
+dsm($instances);
+$instances = field_get_instances(array('type_name' => 'page', 'field_name' => 'field_text'));
+dsm($instances);
+
+// field_update_instance()
+$instance = field_get_instance('field_text', 'page');
+$instance['widget']['label'] = 'field_text';
+field_update_instance($instance);
+dsm(field_get_instance('field_text', 'page'));
+
+// field_delete_instance();
+field_delete_instance('field_text', 'article');
