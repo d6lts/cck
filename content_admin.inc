@@ -925,13 +925,13 @@ function _content_admin_field_validate($form_id, $form_values, $form) {
   // validate the result using the field validation.
   if (content_handle('widget', 'default value', $field) == CONTENT_CALLBACK_DEFAULT) {
 
-    // If this is a programmed form, get rid of the default value widget, 
+    // If this is a programmed form, get rid of the default value widget,
     // we have the default values already.
     if ($form['#programmed']) {
       form_set_value(array('#parents' => array('default_value_widget')), NULL);
       return;
     }
-    
+
     if (isset($form_values['default_value_php']) && ($php = trim($form_values['default_value_php']))) {
       ob_start();
       $return = eval($php);
@@ -1206,7 +1206,7 @@ function content_alter_db_field($previous_field, $previous_columns, $new_field, 
                   delta int unsigned NOT NULL default '0',
                   nid int unsigned NOT NULL default '0',
                   PRIMARY KEY (vid,delta),
-                  KEY nid (nid),
+                  KEY nid (nid)
                 ) /*!40100 DEFAULT CHARACTER SET utf8 */");
                 break;
 
@@ -1230,7 +1230,7 @@ function content_alter_db_field($previous_field, $previous_columns, $new_field, 
                   vid int unsigned NOT NULL default '0',
                   nid int unsigned NOT NULL default '0',
                   PRIMARY KEY (vid),
-                  KEY nid (nid),
+                  KEY nid (nid)
                 ) /*!40100 DEFAULT CHARACTER SET utf8 */");
                 break;
 
@@ -1238,7 +1238,7 @@ function content_alter_db_field($previous_field, $previous_columns, $new_field, 
                   db_query("CREATE TABLE {". $new_db_info['table'] ."} (
                     vid int_unsigned NOT NULL default '0',
                     nid int_unsigned NOT NULL default '0',
-                    PRIMARY KEY (vid),
+                    PRIMARY KEY (vid)
                   )");
                   db_query("CREATE INDEX {". $new_db_info['table'] ."}_nid_idx ON {". $new_db_info['table'] ."}(nid)");
                   break;
