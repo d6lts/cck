@@ -27,13 +27,13 @@ function content_types_overview() {
       // Make the description smaller
       $row[] = array('data' => filter_xss_admin($type->description), 'class' => 'description');
       // Set the edit column.
-      $row[] = array('data' => l(t('edit'), 'admin/content/node-type/'. $type_url_str));
+      $row[] = array('data' => l(t('edit'), 'admin/build/node-type/'. $type_url_str));
       // Set links for managing fields.
       // TODO: a hook to allow other content modules to add more stuff?
-      $row[] = array('data' => l(t('manage fields'), 'admin/content/node-type/'. $type_url_str .'/fields'));
+      $row[] = array('data' => l(t('manage fields'), 'admin/build/node-type/'. $type_url_str .'/fields'));
       // Set the delete column.
       if ($type->custom) {
-        $row[] = array('data' => l(t('delete'), 'admin/content/node-type/'. $type_url_str .'/delete'));
+        $row[] = array('data' => l(t('delete'), 'admin/build/node-type/'. $type_url_str .'/delete'));
       }
       else {
         $row[] = array('data' => '');
@@ -51,7 +51,7 @@ function content_types_overview() {
 }
 
 function theme_content_overview_links() {
-  return '<div class="content-overview-links">'. l(t('� Add a new content type'), 'admin/content/types/add') .'</div>';
+  return '<div class="content-overview-links">'. l(t('� Add a new content type'), 'admin/build/types/add') .'</div>';
 }
 
 /**
@@ -497,7 +497,7 @@ function content_field_overview_form_submit($form, &$form_state) {
 //    if (content_field_instance_create($field)) {
 //      // Store new field information for fieldgroup submit handler.
 //      $form_state['fields_added']['_add_new_field'] = $field['field_name'];
-//      $destinations[] = 'admin/content/node-type/'. $type['url_str'] .'/fields/'. $field['field_name'];
+//      $destinations[] = 'admin/build/node-type/'. $type['url_str'] .'/fields/'. $field['field_name'];
 //    }
 //    else {
 //      drupal_set_message(t('There was a problem creating field %label.', array(
@@ -519,7 +519,7 @@ function content_field_overview_form_submit($form, &$form_state) {
 //      if (content_field_instance_create($field)) {
 //        // Store new field information for fieldgroup submit handler.
 //        $form_state['fields_added']['_add_existing_field'] = $field['field_name'];
-//        $destinations[] = 'admin/content/node-type/'. $type['url_str'] .'/fields/'. $field['field_name'];
+//        $destinations[] = 'admin/build/node-type/'. $type['url_str'] .'/fields/'. $field['field_name'];
 //      }
 //      else {
 //        drupal_set_message(t('There was a problem adding field %label.', array('%label' => $field['field_name'])));
@@ -566,7 +566,7 @@ function content_display_overview_form(&$form_state, $type_name, $contexts_selec
 
   if (empty($instances)) {
     drupal_set_message(t('There are no fields configured for this content type. You can add new fields on the <a href="@link">Manage fields</a> page.', array(
-      '@link' => url('admin/content/node-type/'. $type['url_str'] .'/fields'))), 'warning');
+      '@link' => url('admin/build/node-type/'. $type['url_str'] .'/fields'))), 'warning');
     return $form;
   }
 
@@ -1319,7 +1319,7 @@ function content_field_edit_form_submit($form, &$form_state) {
 //  else {
 //    drupal_set_message(t('Saved field %label.', array('%label' => $form_values['label'])));
 //    $type = content_types($form_values['type_name']);
-//    $form_state['redirect'] = 'admin/content/node-type/'. $type['url_str'] .'/fields';
+//    $form_state['redirect'] = 'admin/build/node-type/'. $type['url_str'] .'/fields';
 //  }
 }
 
