@@ -234,7 +234,7 @@ function field_instance_new($field_name, $type_name, $widget_type) {
  */
 function field_instance_get_field($instance) {
   if (!isset($instance['field']) || $instance['_field_name'] != $instance['field_name']) {
-    $fields = field_get_field(array('field_name' => $instance['field_name']));
+    $fields = field_get_fields(array('field_name' => $instance['field_name']));
     if (count($fields) != 1) {
       return NULL;
     }
@@ -262,7 +262,7 @@ function field_create_field($field) {
   }
 
   // Ensure the field name is unique.
-  $prior_field = field_get_field(array('field_name' => $field['field_name']));
+  $prior_field = field_get_fields(array('field_name' => $field['field_name']));
   if (!empty($prior_field)) {
     field_error(t('Attempt to create field name %name which already exists.', array('%name' => $field['field_name'])));
     return FALSE;
@@ -320,9 +320,9 @@ function field_create_instance($instance) {
   // Get prior instances of this field, if any.
   $prior_instances = field_get_instances(array('field_name' => $instance['field_name']));
 
-  // Non-shared fields cannot have more than one instance.
+  // Non-shareable fields cannot have more than one instance.
   if (!$field['shareable'] && count($prior_instances) > 0) {
-    field_error(t('Attempt to re-instantiate non-shared field %name.', array('%name' => $field['field_name'])));
+    field_error(t('Attempt to re-instantiate non-shareable field %name.', array('%name' => $field['field_name'])));
     return FALSE;
   }
 
@@ -526,21 +526,23 @@ function _field_write_instance($instance, $op = 'update') {
  *   An array of properties to use in selecting fields. Valid keys:
  *   - 'field_name' - The name of the field.
  *   - 'type' - The type of the field.
- *   If NULL, all instances will be returned.
+ *   If NULL, all fields will be returned.
  * @param $include_inactive
  *   TRUE will return fields that are 'inactive', because their field
  *   module is currently disabled.
  * @return
  *   The fields array.
  */
-function field_get_field($param, $include_inactive = FALSE) {
+function field_get_fields($param, $include_inactive = FALSE) {
   $query = db_select(content_field_tablename(), 'f', array('fetch' => PDO::FETCH_ASSOC))
     ->fields('f');
 
   if (is_array($param)) {
     // Turn the conditions into a query.
     foreach ($param as $key => $value) {
-      $query->condition($key, $value);
+      if (in_array($key, array('field_name', 'type'))) {
+        $query->condition($key, $value);
+      }
     }
   }
   if (!$include_inactive) {
@@ -616,7 +618,9 @@ function field_get_instances($param = NULL, $include_inactive = FALSE) {
   if (is_array($param)) {
     // Turn the conditions into a query.
     foreach ($param as $key => $value) {
-      $query->condition("fi.$key", $value);
+      if (in_array($key, array('field_name', 'type_name'))) {
+        $query->condition("fi.$key", $value);
+      }
     }
   }
   if (!$include_inactive) {

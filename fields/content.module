@@ -1357,7 +1357,7 @@ function _content_type_info($reset = FALSE) {
       module_load_include('inc', 'content', 'includes/content.crud');
 
       // Populate Fields.
-      $info['fields'] = field_get_field(NULL);
+      $info['fields'] = field_get_fields(NULL);
 
       // Populate content types and field instances.
       foreach (node_get_types('types', NULL, TRUE) as $type_name => $data) {
@@ -1718,7 +1718,7 @@ function content_build_modes($selector = NULL) {
  * Expected format:
  * array(
  *   // The first level keys (tab1_url, tab2_url) will be used to generate
- *   // the url of the tab: admin/content/node-type/[type_name]/display/[tab1_url]
+ *   // the url of the tab: admin/build/node-type/[type_name]/display/[tab1_url]
  *   // A module can add its render modes to a tab defined by another module.
  *   // In this case, there's no need to provide a 'title' for this tab.
  *   'tab1_url' => array(

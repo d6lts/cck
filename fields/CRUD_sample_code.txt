@@ -24,12 +24,12 @@ $instance['widget']['label'] = 'field_text_multiple';
 field_create_instance($instance);
 
 
-// field_get_field();
-$fields = field_get_field(array('field_name' => 'field_text'));
+// field_get_fields();
+$fields = field_get_fields(array('field_name' => 'field_text'));
 dsm($fields);
-$fields = field_get_field(array('type' => 'text'));
+$fields = field_get_fields(array('type' => 'text'));
 dsm($fields);
-$fields = field_get_field(array('type' => 'text', 'field_name' => 'field_text'));
+$fields = field_get_fields(array('type' => 'text', 'field_name' => 'field_text'));
 dsm($fields);
 
 // field_get_instances()

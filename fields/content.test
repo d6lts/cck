@@ -22,7 +22,7 @@ class FieldAPITestCase extends DrupalWebTestCase {
     $this->assertIdentical(field_create_field($field), TRUE, t('Create field.'));
 
     // Read it back and verify.
-    $fields = field_get_field(array('field_name' => $field_name));
+    $fields = field_get_fields(array('field_name' => $field_name));
     $read = $fields[$field_name];
     $this->assertIdentical($read['field_name'], $field_name, t('Field created'));
     $this->assertIdentical($read['module'], $field_module, t('Module set correctly'));
@@ -42,7 +42,7 @@ class FieldAPITestCase extends DrupalWebTestCase {
     $this->assertIdentical(field_create_field(array_merge($field, $defaults)), TRUE, t('Create field.'));
 
     // Read it back and verify.
-    $fields = field_get_field(array('field_name' => $field_name));
+    $fields = field_get_fields(array('field_name' => $field_name));
     $read = $fields[$field_name];
     $this->assertIdentical($read['field_name'], $field_name, t('Field created.'));
     $this->assertIdentical($read['module'], $field_module, t('Module set correctly.'));
@@ -81,7 +81,7 @@ class FieldAPITest extends DrupalWebTestCase {
     $this->assertIdentical(field_create_field($field), TRUE, t('Create field.'));
 
     // Read it back and verify.
-    $fields = field_get_field(array('field_name' => $field_name));
+    $fields = field_get_fields(array('field_name' => $field_name));
     $read = $fields[$field_name];
     $this->assertIdentical($read['field_name'], $field_name, t('Field created'));
     $this->assertIdentical($read['module'], 'text', t('Module set correctly'));
@@ -101,7 +101,7 @@ class FieldAPITest extends DrupalWebTestCase {
     $this->assertIdentical(field_create_field($field), TRUE, t('Create field.'));
 
     // Read it back and verify.
-    $fields = field_get_field(array('field_name' => $field_name));
+    $fields = field_get_fields(array('field_name' => $field_name));
     $read = $fields[$field_name];
     $this->assertIdentical($read['field_name'], $field_name, t('Field created.'));
     $this->assertIdentical($read['module'], 'text', t('Module set correctly.'));
@@ -169,7 +169,7 @@ class FieldAPITest extends DrupalWebTestCase {
     $this->drupalGet('node/'.$node->nid);
     $this->assertText($label, 'New field label is displayed.');
     $this->assertText($field_value[0]['value'], 'New field value is displayed.');
-    
+
     // Field is shown on form, using the widget settings, via local
     // API within the current request.
     if (drupal_function_exists('node_add')) {
