@@ -98,8 +98,8 @@ if (module_exists('nodereference')) {
       $tokens['title'] = $title ? check_plain($title) : '';
       $tokens['title-raw'] = $title;
       $tokens['link']  = isset($item['view']) ? $item['view'] : '';
-      $tokens['path'] = url('node/' . $item['nid']);
-      $tokens['url'] = url('node/' . $item['nid'], array('absolute' => TRUE));
+      $tokens['path'] = is_numeric($item['nid']) ? url('node/' . $item['nid']) : '';
+      $tokens['url'] = is_numeric($item['nid']) ? url('node/' . $item['nid'], array('absolute' => TRUE)) : '';
 
       return $tokens;
     }
@@ -175,8 +175,8 @@ if (module_exists('userreference')) {
       $tokens['uid']   = $item['uid'];
       $tokens['name']  = isset($item['view']) ? strip_tags($item['view']) : '';
       $tokens['link']  = isset($item['view']) ? $item['view'] : '';
-      $tokens['path'] = url('user/' . $item['uid']);
-      $tokens['url'] = url('user/' . $item['uid'], array('absolute' => TRUE));
+      $tokens['path'] = is_numeric($item['uid']) ? url('user/' . $item['uid']) : '';
+      $tokens['url'] = is_numeric($item['uid']) ? url('user/' . $item['uid'], array('absolute' => TRUE)) : '';
 
       return $tokens;
     }
