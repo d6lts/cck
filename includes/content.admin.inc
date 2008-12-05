@@ -1831,7 +1831,7 @@ function content_field_replace($nid, $updates) {
 }
 
 /**
- * Halper form element validator : integer.
+ * Helper form element validator : integer.
  */
 function _element_validate_integer($element, &$form_state) {
   $value = $element['#value'];
@@ -1841,7 +1841,7 @@ function _element_validate_integer($element, &$form_state) {
 }
 
 /**
- * Halper form element validator : integer > 0.
+ * Helper form element validator : integer > 0.
  */
 function _element_validate_integer_positive($element, &$form_state) {
   $value = $element['#value'];
@@ -1851,7 +1851,7 @@ function _element_validate_integer_positive($element, &$form_state) {
 }
 
 /**
- * Halper form element validator : number.
+ * Helper form element validator : number.
  */
 function _element_validate_number($element, &$form_state) {
   $value = $element['#value'];
