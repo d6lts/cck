@@ -7,6 +7,7 @@ CCK 6.x-2.x
 - Views integration: use shorter titles in Views admin summaries (see http://drupal.org/node/326034).
 - #334290 by drewish - Userreference: user names not displayed in Views summaries.
 - #343138 by duellj - Fix tokens for empty noderef / userref fields.
+- #343306 Validate text 'max length' to be a positive integer
 
 CCK 6.x-2.1
 ===========
