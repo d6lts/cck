@@ -390,8 +390,7 @@ function field_delete_instance($field_name, $type_name) {
   include_once('./'. drupal_get_path('module', 'content') .'/includes/content.alter.inc');
 
   // Get the previous field value.
-  // YCHED : should call field_get_instance() instead ?
-  $instance = array_pop(field_get_instances(array('field_name' => $field_name, 'type_name' => $type_name)));
+  $instance = field_get_instance($field_name, $type_name);
 
   // TODO : error if no instance.
   // Invoke hook_field().
