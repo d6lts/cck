@@ -90,8 +90,8 @@ function content_nodeapi_insert(&$node) {
     $type = content_types($node->type);
     // Save cycles if the type has no fields.
     if (!empty($type['instances'])) {
+      _content_field_invoke('insert', $node);
       content_storage_write($node);
-      _content_field_invoke_default('insert', $node);
     }
   }
 }
@@ -105,8 +105,8 @@ function content_nodeapi_update(&$node) {
     $type = content_types($node->type);
     // Save cycles if the type has no fields.
     if (!empty($type['instances'])) {
+      _content_field_invoke('update', $node);
       content_storage_write($node, TRUE);
-      _content_field_invoke_default('update', $node);
       cache_clear_all('content:'. $node->nid .':'. $node->vid, 'cache_content');
     }
   }
@@ -121,8 +121,8 @@ function content_nodeapi_delete(&$node) {
     $type = content_types($node->type);
     // Save cycles if the type has no fields.
     if (!empty($type['instances'])) {
+      _content_field_invoke('delete', $node);
       content_storage_delete($node);
-      _content_field_invoke_default('delete', $node);
       cache_clear_all('content:'. $node->nid .':', 'cache_content', TRUE);
     }
   }
