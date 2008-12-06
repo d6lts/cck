@@ -309,7 +309,7 @@ function field_create_field($field) {
  *   TRUE on success, FALSE on failure.
  */
 function field_create_instance($instance) {
-  include_once('./'. drupal_get_path('module', 'content') .'/includes/content.alter.inc');
+  include_once('./'. drupal_get_path('module', 'content') .'/includes/content.db.inc');
 
   // $instance['type_name'] must exist
   if (node_get_types('type', $instance['type_name']) == FALSE) {
@@ -386,7 +386,7 @@ function field_update_instance($new_instance) {
 /**
  * Delete an existing field instance.  Someone is going to say this
  * should take a FieldInstance structure for uniformity, and they will
- * probably be right.  TODO: Untested!
+ * probably be right.  TODO D7: Untested!
  *
  * @param $field_name
  *   The name of the field instance to delete.
@@ -394,7 +394,7 @@ function field_update_instance($new_instance) {
  *   The content type of the field instance to delete.
  */
 function field_delete_instance($field_name, $type_name) {
-  include_once('./'. drupal_get_path('module', 'content') .'/includes/content.alter.inc');
+  include_once('./'. drupal_get_path('module', 'content') .'/includes/content.db.inc');
 
   // Get the previous field value.
   $instance = field_get_instance($field_name, $type_name);

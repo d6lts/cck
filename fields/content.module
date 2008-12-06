@@ -5,6 +5,7 @@
  * Allows administrators to associate custom fields to content types.
  */
 
+// TODO D7 : move to content.db.inc ?
 define('CONTENT_DB_STORAGE_PER_FIELD', 0);
 define('CONTENT_DB_STORAGE_PER_CONTENT_TYPE', 1);
 
@@ -34,7 +35,7 @@ function content_flush_caches() {
  */
 function content_init() {
   module_load_include('inc', 'content', 'includes/content.crud');
-  module_load_include('inc', 'content', 'includes/content.alter');
+  module_load_include('inc', 'content', 'includes/content.db');
 }
 
 
@@ -95,244 +96,6 @@ function content_theme() {
 }
 
 /**
- * Load data for a node type's fields.
- * Implementation of hook_nodeapi_load.
- *
- * When loading one of the content.module nodes, we need to let each field handle
- * its own loading. This can make for a number of queries in some cases, so we
- * cache the loaded object structure and invalidate it during the update process.
- */
-function content_nodeapi_load(&$node) {
-  // Prevent against invalid 'nodes' built by broken 3rd party code.
-  if (isset($node->type)) {
-    $type = content_types($node->type);
-    // Save cycles if the type has no fields.
-    if (!empty($type['instances'])) {
-      $cid = 'content:'. $node->nid .':'. $node->vid;
-      if ($cached = cache_get($cid, content_cache_tablename())) {
-        foreach ($cached->data as $key => $value) {
-          $node->$key = $value;
-        }
-      }
-      else {
-        $default_additions = _content_field_invoke_default('load', $node);
-        if ($default_additions) {
-          foreach ($default_additions as $key => $value) {
-            $node->$key = $value;
-          }
-        }
-        $additions = _content_field_invoke('load', $node);
-        if ($additions) {
-          foreach ($additions as $key => $value) {
-            $node->$key = $value;
-            $default_additions[$key] = $value;
-          }
-        }
-        cache_set($cid, $default_additions, content_cache_tablename());
-      }
-    }
-  }
-}
-
-/**
- * Implementation of hook_nodeapi_validate.
- *
- */
-function content_nodeapi_validate(&$node, $form = NULL) {
-  // Prevent against invalid 'nodes' built by broken 3rd party code.
-  if (isset($node->type)) {
-    $type = content_types($node->type);
-    // Save cycles if the type has no fields.
-    if (!empty($type['instances'])) {
-      _content_field_invoke('validate', $node, $form);
-      _content_field_invoke_default('validate', $node, $form);
-    }
-  }
-}
-
-/**
- * Implementation of hook_nodeapi_presave.
- */
-function content_nodeapi_presave(&$node) {
-  // Prevent against invalid 'nodes' built by broken 3rd party code.
-  if (isset($node->type)) {
-    $type = content_types($node->type);
-    // Save cycles if the type has no fields.
-    if (!empty($type['instances'])) {
-      _content_field_invoke('presave', $node);
-      _content_field_invoke_default('presave', $node);
-    }
-  }
-}
-
-/**
- * Implementation of hook_nodeapi_insert.
- */
-function content_nodeapi_insert(&$node) {
-  // Prevent against invalid 'nodes' built by broken 3rd party code.
-  if (isset($node->type)) {
-    $type = content_types($node->type);
-    // Save cycles if the type has no fields.
-    if (!empty($type['instances'])) {
-      _content_field_invoke('insert', $node);
-      _content_field_invoke_default('insert', $node);
-    }
-  }
-}
-
-/**
- * Implementation of hook_nodeapi_update.
- */
-function content_nodeapi_update(&$node) {
-  // Prevent against invalid 'nodes' built by broken 3rd party code.
-  if (isset($node->type)) {
-    $type = content_types($node->type);
-    // Save cycles if the type has no fields.
-    if (!empty($type['instances'])) {
-      _content_field_invoke('update', $node);
-      _content_field_invoke_default('update', $node);
-      cache_clear_all('content:'. $node->nid .':'. $node->vid, 'cache_content');
-    }
-  }
-}
-
-/**
- * Implementation of hook_nodeapi_delete.
- */
-function content_nodeapi_delete(&$node) {
-  // Prevent against invalid 'nodes' built by broken 3rd party code.
-  if (isset($node->type)) {
-    $type = content_types($node->type);
-    // Save cycles if the type has no fields.
-    if (!empty($type['instances'])) {
-      _content_field_invoke('delete', $node);
-      _content_field_invoke_default('delete', $node);
-      cache_clear_all('content:'. $node->nid .':', 'cache_content', TRUE);
-    }
-  }
-}
-
-/**
- * Implementation of hook_nodeapi_delete_revision.
- */
-function content_nodeapi_delete_revision(&$node) {
-  // Prevent against invalid 'nodes' built by broken 3rd party code.
-  if (isset($node->type)) {
-    $type = content_types($node->type);
-    // Save cycles if the type has no fields.
-    if (!empty($type['instances'])) {
-      _content_field_invoke('delete revision', $node);
-      _content_field_invoke_default('delete revision', $node);
-      cache_clear_all('content:'. $node->nid .':'. $node->vid, 'cache_content');
-    }
-  }
-}
-
-/**
- * Implementataion of content_nodeapi_view.
- */
-function content_nodeapi_view(&$node, $teaser = FALSE, $page = FALSE) {
-  // Prevent against invalid 'nodes' built by broken 3rd party code.
-  if (isset($node->type)) {
-    $type = content_types($node->type);
-    // Save cycles if the type has no fields.
-    if (!empty($type['instances'])) {
-      // Let field modules sanitize their data for output.
-      // TODO D7 : we could reintegrate hook_field('view') for this ?
-      _content_field_invoke('sanitize', $node, $teaser, $page);
-
-      // Merge fields.
-      $additions = _content_field_invoke_default('view', $node, $teaser, $page);
-      $node->content = array_merge((array) $node->content, $additions);
-    }
-  }
-}
-
-/**
- * Render a single field, fully themed with label and multiple values.
- *
- * To be used by third-party code (Views, Panels...) that needs to output
- * an isolated field. Do *not* use inside node templates, use the
- * $FIELD_NAME_rendered variables instead.
- *
- * By default, the field is displayed using the settings defined for the
- * 'full node' or 'teaser' contexts (depending on the value of the $teaser param).
- * Set $node->build_mode to a different value to use a different context.
- *
- * Different settings can be specified by adjusting $field['display_settings'].
- *
- * @param $field
- *   The field definition.
- * @param $node
- *   The node containing the field to display. Can be a 'pseudo-node', containing
- *   at least 'type', 'nid', 'vid', and the field data.
- * @param $teaser
- * @param $page
- *   Similar to hook_nodeapi('view')
- * @return
- *   The themed output for the field.
- */
-function content_view_field($field, $node, $teaser = FALSE, $page = FALSE) {
-  $output = '';
-  if (isset($node->$field['field_name'])) {
-    $items = $node->$field['field_name'];
-
-    // Use 'full'/'teaser' if not specified otherwise.
-    $node->build_mode = isset($node->build_mode) ? $node->build_mode : NODE_BUILD_NORMAL;
-
-    // One-field equivalent to _content_field_invoke('sanitize').
-    $field_types = _content_field_types();
-    $module = $field_types[$field['type']]['module'];
-    $function = $module .'_field';
-    if (function_exists($function)) {
-      $function('sanitize', $node, $field, $items, $teaser, $page);
-      $node->$field['field_name'] = $items;
-    }
-
-    $view = content_field('view', $node, $field, $items, $teaser, $page);
-    // content_field('view') adds a wrapper to handle variables and 'excluded'
-    // fields for node templates. We bypass it and render the actual field.
-    $output = drupal_render($view[$field['field_name']]['field']);
-  }
-  return $output;
-}
-
-/**
- * Implementation of hook_nodeapi_alter.
- *
- * Add back the formatted values in the 'view' element for all fields,
- * so that node templates can use it.
- */
-function content_nodeapi_alter(&$node, $teaser = FALSE, $page = FALSE) {
-  // Prevent against invalid 'nodes' built by broken 3rd party code.
-  if (isset($node->type)) {
-    $type = content_types($node->type);
-    // Save cycles if the type has no fields.
-    if (!empty($type['instances'])) {
-      _content_field_invoke_default('alter', $node, $teaser, $page);
-    }
-  }
-}
-
-/**
- * Implementation of hook_nodeapi_prepare_translation.
- */
-function content_nodeapi_prepare_translation(&$node) {
-  // Prevent against invalid 'nodes' built by broken 3rd party code.
-  if (isset($node->type)) {
-    $type = content_types($node->type);
-    // Save cycles if the type has no fields.
-    if (!empty($type['instances'])) {
-      $default_additions = _content_field_invoke_default('prepare translation', $node);
-      $additions = _content_field_invoke('prepare translation', $node);
-      // Merge module additions after the default ones to enable overriding
-      // of field values.
-      $node = (object) array_merge((array) $node, $default_additions, $additions);
-    }
-  }
-}
-
-/**
  *  Implementation of hook_form_alter().
  */
 function content_form_alter(&$form, $form_state, $form_id) {
@@ -349,6 +112,7 @@ function content_form_alter(&$form, $form_state, $form_id) {
 /**
  * Proxy function to call content_add_more_submit(), because it might not be
  * included yet when the form is processed and invokes the callback.
+ * TODO D7 : the registry might avoid this now.
  */
 function content_add_more_submit_proxy($form, &$form_state) {
   module_load_include('inc', 'content', 'includes/content.node_form');
@@ -518,13 +282,12 @@ function content_associate_fields($module) {
  * drupal_render() to display the formatted output for an individual field.
  * i.e. print drupal_render($node->countent['field_foo']);
  *
- * The code now supports both single value formatters, which theme an
- * individual item value as has been done in previous version of CCK,
- * and multiple value formatters, which theme all values for the field
- * in a single theme. The multiple value formatters could be used, for
- * instance, to plot field values on a single map or display them
- * in a graph. Single value formatters are the default, multiple value
- * formatters can be designated as such in formatter_info().
+ * The code supports both single value formatters, which theme an individual
+ * item value, and multiple value formatters, which theme all values for the
+ * field in a single theme. The multiple value formatters could be used, for
+ * instance, to plot field values on a single map or display them in a graph.
+ * Single value formatters are the default, multiple value formatters can be
+ * designated as such in formatter_info().
  *
  * The node array will look like:
  *   $node->content['field_foo']['wrapper'] = array(
@@ -585,7 +348,7 @@ function content_field($op, &$node, $instance, &$items, $teaser, $page) {
       // On node insert, we need to make sure all tables get at least an empty
       // record, or subsequent edits, using drupal_write_record() in update mode,
       // won't insert any data.
-      // Missing fields on node update are handled in content_storage().
+      // Missing fields on node update are handled in content_storage_write().
       if (empty($items) && !isset($node->nid)) {
         foreach (array_keys($field['columns']) as $column) {
           $items[0][$column] = NULL;
@@ -811,291 +574,6 @@ function _content_sort_items_value_helper($a, $b) {
 }
 
 /**
- * Handle storage ops for _content_field_invoke_default().
- */
-function content_storage($op, $node) {
-  $type_name = $node->type;
-  $type = content_types($type_name);
-
-  switch ($op) {
-    case 'load':
-      // OPTIMIZE: load all non multiple fields in a single JOIN query ?
-      // warning: 61-join limit in MySQL ?
-      $additions = array();
-      // For each table used by this content type,
-      foreach ($type['tables'] as $table) {
-        $schema = drupal_get_schema($table);
-        // The per-type table might not have any fields actually stored in it.
-        // TODO D7 : remove this specific case (empty per-type table) ?
-        if (!$schema['content fields']) {
-          continue;
-        }
-
-        $query = db_select($table, 't')
-          ->fields('t')
-          ->condition('vid', $node->vid);
-        // If we're loading a table for a multiple field,
-        // we fetch all rows (values) ordered by delta,
-        // else we only fetch one row.
-        if (isset($schema['fields']['delta'])) {
-          $query->orderBy('delta');
-        }
-        else {
-          $query->range(0, 1);
-        }
-        $results = $query->execute();
-        // For each table row, populate the fields.
-        foreach ($results as $row) {
-          // For each field stored in the table, add the field item.
-          foreach ($schema['content fields'] as $field_name) {
-            $item = array();
-            $instance = content_fields($field_name, $type_name);
-            $db_info = content_database_info($instance);
-            // For each column declared by the field, populate the item.
-            foreach ($db_info['columns'] as $column => $attributes) {
-              $item[$column] = $row->$attributes['column'];
-            }
-
-            // Add the item to the field values for the node.
-            if (!isset($additions[$field_name])) {
-              $additions[$field_name] = array();
-            }
-            $additions[$field_name][] = $item;
-          }
-        }
-      }
-      return $additions;
-
-    case 'insert':
-    case 'update':
-      // TODO D7 : we used [content|drupal]_write_record mainly because it generated placeholders for us. Unneeded now with PDO.
-      // !! Be sure to check direct node_save with missing fields (leave field as is) / fields set to NULL (set field to empty)
-      foreach ($type['tables'] as $table) {
-        $schema = drupal_get_schema($table);
-        $record = array();
-        foreach ($schema['content fields'] as $field_name) {
-          if (isset($node->$field_name)) {
-            $instance = content_fields($field_name, $type_name);
-
-            // Multiple fields need specific handling, we'll deal with
-            // them later on.
-            $field = field_instance_get_field($instance);
-            if ($field['multiple']) {
-              continue;
-            }
-
-            $db_info = content_database_info($instance);
-            foreach ($db_info['columns'] as $column => $attributes) {
-              $record[$attributes['column']] = $node->{$field_name}[0][$column];
-            }
-          }
-        }
-        // $record might be empty because
-        // - the table stores a multiple field :
-        //   we do nothing, this is handled later on
-        // - this is the per-type table and no field is actually stored in it :
-        //   we still store the nid and vid
-        // TODO D7 : remove this specific case (empty per-type table) ?
-        if (count($record) || empty($schema['content fields'])) {
-          $record['nid'] = $node->nid;
-          $record['vid'] = $node->vid;
-          // Can't rely on the insert/update op of the node to decide if this
-          // is an insert or an update, a node or revision may have existed
-          // before any fields were created, so there may not be an entry here.
-
-          // TODO - should we auto create an entry for all existing nodes when
-          // fields are added to content types -- either a NULL value
-          // or the default value? May need to offer the user an option of
-          // how to handle that.
-
-          // TODO D7 : merge query ?
-          if (db_query("SELECT COUNT(*) FROM {". $table ."} WHERE vid = :vid", array(':vid' => $node->vid))->fetchField()) {
-            content_write_record($table, $record, array('vid'));
-          }
-          else {
-            content_write_record($table, $record);
-          }
-        }
-      }
-
-      // Handle multiple fields.
-      foreach ($type['instances'] as $instance) {
-        $field = field_instance_get_field($instance);
-        $field_name = $field['field_name'];
-        if ($field['multiple'] && isset($node->$field_name)) {
-          $db_info = content_database_info($instance);
-          // TODO D7 : Merge query ? multi update ?
-          // Delete and insert, rather than update, in case a value was added.
-          if ($op == 'update') {
-            db_delete($db_info['table'])
-              ->condition('vid', $node->vid)
-              ->execute();
-          }
-          foreach ($node->$field_name as $delta => $item) {
-            $record = array();
-            foreach ($db_info['columns'] as $column => $attributes) {
-              $record[$attributes['column']] = $item[$column];
-            }
-            $record['nid'] = $node->nid;
-            $record['vid'] = $node->vid;
-            $record['delta'] = $delta;
-            content_write_record($db_info['table'], $record);
-          }
-        }
-      }
-      break;
-
-    case 'delete':
-      foreach ($type['tables'] as $table) {
-        db_delete($table)
-          ->condition('nid', $node->nid)
-          ->execute();
-      }
-      break;
-
-    case 'delete revision':
-      foreach ($type['tables'] as $table) {
-        db_delete($table)
-          ->condition('vid', $node->vid)
-          ->execute();
-      }
-      break;
-  }
-}
-
-/**
- * Save a record to the database based upon the schema.
- *
- * Directly copied from core's drupal_write_record, which can't update a
- * column to NULL. See http://drupal.org/node/227677 and
- * http://drupal.org/node/226264 for more details about that problem.
- *
- * Default values are filled in for missing items, and 'serial' (auto increment)
- * types are filled in with IDs.
- *
- * @param $table
- *   The name of the table; this must exist in schema API.
- * @param $object
- *   The object to write. This is a reference, as defaults according to
- *   the schema may be filled in on the object, as well as ID on the serial
- *   type(s). Both array an object types may be passed.
- * @param $update
- *   If this is an update, specify the primary keys' field names. It is the
- *   caller's responsibility to know if a record for this object already
- *   exists in the database. If there is only 1 key, you may pass a simple string.
- * @return
- *   Failure to write a record will return FALSE. Otherwise SAVED_NEW or
- *   SAVED_UPDATED is returned depending on the operation performed. The
- *   $object parameter contains values for any serial fields defined by
- *   the $table. For example, $object->nid will be populated after inserting
- *   a new node.
- */
-function content_write_record($table, &$object, $update = array()) {
-  // Standardize $update to an array.
-  if (is_string($update)) {
-    $update = array($update);
-  }
-
-  // Convert to an object if needed.
-  if (is_array($object)) {
-    $object = (object) $object;
-    $array = TRUE;
-  }
-  else {
-    $array = FALSE;
-  }
-
-  $schema = drupal_get_schema($table);
-  if (empty($schema)) {
-    return FALSE;
-  }
-
-  $fields = $defs = $values = $serials = $placeholders = array();
-
-  // Go through our schema, build SQL, and when inserting, fill in defaults for
-  // fields that are not set.
-  foreach ($schema['fields'] as $field => $info) {
-    // Special case -- skip serial types if we are updating.
-    if ($info['type'] == 'serial' && count($update)) {
-      continue;
-    }
-
-    // For inserts, populate defaults from Schema if not already provided
-    if (!isset($object->$field) && !count($update) && isset($info['default'])) {
-      $object->$field = $info['default'];
-    }
-
-    // Track serial fields so we can helpfully populate them after the query.
-    if ($info['type'] == 'serial') {
-      $serials[] = $field;
-      // Ignore values for serials when inserting data. Unsupported.
-      unset($object->$field);
-    }
-
-    // Build arrays for the fields, placeholders, and values in our query.
-    if (isset($object->$field) || array_key_exists($field, $object)) {
-      $fields[] = $field;
-      if (isset($object->$field)) {
-        $placeholders[] = db_type_placeholder($info['type']);
-
-        if (empty($info['serialize'])) {
-          $values[] = $object->$field;
-        }
-        else {
-          $values[] = serialize($object->$field);
-        }
-      }
-      else {
-        $placeholders[] = 'NULL';
-      }
-    }
-  }
-
-  // Build the SQL.
-  $query = '';
-  if (!count($update)) {
-    $query = "INSERT INTO {". $table ."} (". implode(', ', $fields) .') VALUES ('. implode(', ', $placeholders) .')';
-    $return = SAVED_NEW;
-  }
-  else {
-    $query = '';
-    foreach ($fields as $id => $field) {
-      if ($query) {
-        $query .= ', ';
-      }
-      $query .= $field .' = '. $placeholders[$id];
-    }
-
-    foreach ($update as $key) {
-      $conditions[] = "$key = ". db_type_placeholder($schema['fields'][$key]['type']);
-      $values[] = $object->$key;
-    }
-
-    $query = "UPDATE {". $table ."} SET $query WHERE ". implode(' AND ', $conditions);
-    $return = SAVED_UPDATED;
-  }
-
-  // Execute the SQL.
-  if (db_query($query, $values)) {
-    if ($serials) {
-      // Get last insert ids and fill them in.
-      foreach ($serials as $field) {
-        $object->$field = db_last_insert_id($table, $field);
-      }
-    }
-
-    // If we began with an array, convert back so we don't surprise the caller.
-    if ($array) {
-      $object = (array) $object;
-    }
-
-    return $return;
-  }
-
-  return FALSE;
-}
-
-/**
  * Invoke a field hook.
  *
  * For each operation, both this function and _content_field_invoke_default() are
@@ -1144,25 +622,18 @@ function _content_field_invoke_default($op, &$node, $teaser = NULL, $page = NULL
   $field_types = _content_field_types();
 
   $return = array();
-  // The operations involving database queries are better off handled by table
-  // rather than by field.
-  if (in_array($op, array('load', 'insert', 'update', 'delete', 'delete revision'))) {
-    return content_storage($op, $node);
-  }
-  else {
-    foreach ($type['instances'] as $instance) {
-      $field_name = $instance['field_name'];
-      $items = isset($node->$field_name) ? $node->$field_name : array();
-      $result = content_field($op, $node, $instance, $items, $teaser, $page);
-      if (is_array($result)) {
-        $return = array_merge($return, $result);
-      }
-      else if (isset($result)) {
-        $return[] = $result;
-      }
-      if (isset($node->$field_name)) {
-        $node->$field_name = $items;
-      }
+  foreach ($type['instances'] as $instance) {
+    $field_name = $instance['field_name'];
+    $items = isset($node->$field_name) ? $node->$field_name : array();
+    $result = content_field($op, $node, $instance, $items, $teaser, $page);
+    if (is_array($result)) {
+      $return = array_merge($return, $result);
+    }
+    else if (isset($result)) {
+      $return[] = $result;
+    }
+    if (isset($node->$field_name)) {
+      $node->$field_name = $items;
     }
   }
   return $return;
@@ -1403,7 +874,7 @@ function _content_type_info($reset = FALSE) {
 }
 
 /**
- *  Implementation of hook_node_type()
+ * Implementation of hook_node_type()
  */
 function content_node_type($op, $info) {
   switch ($op) {
@@ -1479,18 +950,6 @@ function content_database_info($instance) {
   }
 
   return $db_info;
-}
-
-/**
- * Helper function for identifying the storage type for a field.
- *
- * TODO: This should depend on 'shareable', not # of instances.
- */
-function content_storage_type($field) {
-  if ($field['multiple'] > 0 || $field['shareable']) {
-    return CONTENT_DB_STORAGE_PER_FIELD;
-  }
-  return CONTENT_DB_STORAGE_PER_CONTENT_TYPE;
 }
 
 /**
@@ -1672,6 +1131,55 @@ function content_format($field, $item, $formatter_name = 'default', $node = NULL
 }
 
 /**
+ * Render a single field, fully themed with label and multiple values.
+ *
+ * To be used by third-party code (Views, Panels...) that needs to output
+ * an isolated field. Do *not* use inside node templates, use the
+ * $FIELD_NAME_rendered variables instead.
+ *
+ * By default, the field is displayed using the settings defined for the
+ * 'full node' or 'teaser' contexts (depending on the value of the $teaser param).
+ * Set $node->build_mode to a different value to use a different context.
+ *
+ * Different settings can be specified by adjusting $field['display_settings'].
+ *
+ * @param $field
+ *   The field definition.
+ * @param $node
+ *   The node containing the field to display. Can be a 'pseudo-node', containing
+ *   at least 'type', 'nid', 'vid', and the field data.
+ * @param $teaser
+ * @param $page
+ *   Similar to hook_nodeapi('view')
+ * @return
+ *   The themed output for the field.
+ */
+function content_view_field($field, $node, $teaser = FALSE, $page = FALSE) {
+  $output = '';
+  if (isset($node->$field['field_name'])) {
+    $items = $node->$field['field_name'];
+
+    // Use 'full'/'teaser' if not specified otherwise.
+    $node->build_mode = isset($node->build_mode) ? $node->build_mode : NODE_BUILD_NORMAL;
+
+    // One-field equivalent to _content_field_invoke('sanitize').
+    $field_types = _content_field_types();
+    $module = $field_types[$field['type']]['module'];
+    $function = $module .'_field';
+    if (function_exists($function)) {
+      $function('sanitize', $node, $field, $items, $teaser, $page);
+      $node->$field['field_name'] = $items;
+    }
+
+    $view = content_field('view', $node, $field, $items, $teaser, $page);
+    // content_field('view') adds a wrapper to handle variables and 'excluded'
+    // fields for node templates. We bypass it and render the actual field.
+    $output = drupal_render($view[$field['field_name']]['field']);
+  }
+  return $output;
+}
+
+/**
  * TODO D7: really belongs to field.modle ?
  * Registry of available node build modes.
  *
@@ -1835,51 +1343,6 @@ function content_cache_tablename() {
 }
 
 /**
- * A basic schema used by all field and type tables.
- *
- * This will only add the columns relevant for the specified field.
- * Leave $field['columns'] empty to get only the base schema,
- * otherwise the function will return the whole thing.
- */
-function content_table_schema($field = NULL) {
-  $schema = array(
-    'fields' => array(
-      'vid' => array('type' => 'int', 'unsigned' => TRUE, 'not null' => TRUE, 'default' => 0),
-      'nid' => array('type' => 'int', 'unsigned' => TRUE, 'not null' => TRUE, 'default' => 0)
-    ),
-    'primary key' => array('vid'),
-    'indexes' => array(
-      'nid'    => array('nid'),
-    ),
-  );
-
-  // Add delta column if needed.
-  if (!empty($field['multiple'])) {
-    $schema['fields']['delta'] = array('type' => 'int', 'unsigned' => TRUE, 'not null' => TRUE, 'default' => 0);
-    $schema['primary key'][] = 'delta';
-  }
-  $schema['content fields'] = array();
-
-  // Add field columns column if needed.
-  // This function is called from install files where it is not safe
-  // to use content_fields() or content_database_info(), so we
-  // just used the column values stored in the $field.
-  // We also need the schema to include fields from disabled modules
-  // or there will be no way to delete those fields.
-
-  if (!empty($field['columns'])) {
-    foreach ($field['columns'] as $column => $attributes) {
-      $column_name =  $field['field_name'] .'_'. $column;
-      unset($attributes['column']);
-      unset($attributes['sortable']);
-      $schema['fields'][$column_name] = $attributes;
-    }
-    $schema['content fields'][] = $field['field_name'];
-  }
-  return $schema;
-}
-
-/**
  * TODO D7: check what is actually needed here
  *  Helper function for determining the behavior of a field
  *  with respect to a given operation.
@@ -1996,7 +1459,6 @@ function content_default_value(&$form, &$form_state, $field, $delta) {
   return (array) $default_value;
 }
 
-/**
 /**
  * Theme preprocess function for field.tpl.php.
  *

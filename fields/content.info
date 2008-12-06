@@ -6,5 +6,6 @@ core = 7.x
 files[] = content.module
 files[] = content.install
 files[] = includes/content.crud.inc
-files[] = includes/content.alter.inc
+files[] = includes/content.db.inc
+files[] = includes/content.nodeapi.inc
 files[] = includes/content.node_form.inc

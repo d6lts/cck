@@ -189,7 +189,9 @@ class FieldAPITest extends DrupalWebTestCase {
     $edit['title'] = $this->randomName(32);
     $newvalue = $edit[$field_name .'[0][value]'] = $this->randomName(32);
     $this->drupalPost('node/add/article', $edit, t('Save'));
-    $node = node_load(array('title' => $edit['title']));
+    $nodes = node_load_multiple(array(), array('title' => $edit['title']));
+    $this->assertIdentical(count($nodes), 1, t('Node created via form loads.'));
+    $node = reset($nodes);
     $newfield = $node->$field_name;
     $this->assertIdentical($edit[$field_name .'[0][value]'], $newfield[0]['value'], t('Field value submitted via form loads.'));
 
