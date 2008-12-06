@@ -22,8 +22,7 @@ class FieldAPITestCase extends DrupalWebTestCase {
     $this->assertIdentical(field_create_field($field), TRUE, t('Create field.'));
 
     // Read it back and verify.
-    $fields = field_get_fields(array('field_name' => $field_name));
-    $read = $fields[$field_name];
+    $read = field_get_field($field_name);
     $this->assertIdentical($read['field_name'], $field_name, t('Field created'));
     $this->assertIdentical($read['module'], $field_module, t('Module set correctly'));
     $this->assertEqual($read['required'], FALSE, t('required set correctly'));
@@ -35,15 +34,14 @@ class FieldAPITestCase extends DrupalWebTestCase {
     $this->assertIdentical(field_create_field($field), FALSE, t('Cannot create duplicate field name.'));
 
     // Create another field with non-default values.
-    $field_name = $field['field_name'] = $this->randomName(10);
+    $field_name = $field['field_name'] = strtolower($this->randomName(10));
     $field['required'] = TRUE;
     $field['shareable'] = TRUE;
     $field['multiple'] = 1;
     $this->assertIdentical(field_create_field(array_merge($field, $defaults)), TRUE, t('Create field.'));
 
     // Read it back and verify.
-    $fields = field_get_fields(array('field_name' => $field_name));
-    $read = $fields[$field_name];
+    $read = field_get_field($field_name);
     $this->assertIdentical($read['field_name'], $field_name, t('Field created.'));
     $this->assertIdentical($read['module'], $field_module, t('Module set correctly.'));
     $this->assertEqual($read['required'], TRUE, t("'required' set correctly."));
@@ -94,15 +92,14 @@ class FieldAPITest extends DrupalWebTestCase {
     $this->assertIdentical(field_create_field($field), FALSE, t('Cannot create duplicate field name.'));
 
     // Create another field with non-default values.
-    $field_name = $field['field_name'] = $this->randomName(10);
+    $field_name = $field['field_name'] = strtolower($this->randomName(10));
     $field['required'] = TRUE;
     $field['shareable'] = TRUE;
     $field['multiple'] = 1;
     $this->assertIdentical(field_create_field($field), TRUE, t('Create field.'));
 
     // Read it back and verify.
-    $fields = field_get_fields(array('field_name' => $field_name));
-    $read = $fields[$field_name];
+    $read = field_get_field($field_name);
     $this->assertIdentical($read['field_name'], $field_name, t('Field created.'));
     $this->assertIdentical($read['module'], 'text', t('Module set correctly.'));
     $this->assertEqual($read['required'], TRUE, t("'required' set correctly."));
@@ -114,7 +111,7 @@ class FieldAPITest extends DrupalWebTestCase {
   function testCreateFieldInstance() {
     // Create a field.
     $field = text_field_new('');
-    $field_name = $field['field_name'] =  $this->randomName(10);
+    $field_name = $field['field_name'] =  strtolower($this->randomName(10));
     $this->assertIdentical(field_create_field($field), TRUE, t('Create field.'));
 
     // Create a field instance structure.  Set some non-default values,
@@ -173,6 +170,7 @@ class FieldAPITest extends DrupalWebTestCase {
     // Field is shown on form, using the widget settings, via local
     // API within the current request.
     if (drupal_function_exists('node_add')) {
+      // TODO D7: doesn't seem to work ? (no widget for the field)
       $this->_content = node_add('article');
       $this->plain_text = FALSE;
       $this->assertText($description, "New field description ($description) is shown on form.");
@@ -195,14 +193,13 @@ class FieldAPITest extends DrupalWebTestCase {
     $newfield = $node->$field_name;
     $this->assertIdentical($edit[$field_name .'[0][value]'], $newfield[0]['value'], t('Field value submitted via form loads.'));
 
-    // Cannot re-instantiate a non-shared field.
+    // Cannot re-instantiate a non-shareable field.
     $instance['type'] = 'page';
-    $this->assertEqual(field_create_instance($instance), FALSE, t('Cannot re-instantiate non-shared field.'));
+    $this->assertEqual(field_create_instance($instance), FALSE, t('Cannot re-instantiate non-shareable field.'));
 
     // Update the instance.
-    $newinstance = field_get_instances(array('field_name' => $field_name, 'type_name' => $content_type));
-    $this->assertIdentical(count($newinstance), 1, t('Read existing field instance.'));
-    $newinstance = $newinstance[0];
+    $newinstance = field_get_instance($field_name, $content_type);
+    $this->assertNotNull($newinstance, t('Read existing field instance.'));
     $newlabel = $newinstance['widget']['label'] = 'label:'. $this->randomName(32);
     $newdescription = $newinstance['widget']['description'] = 'description:'. $this->randomName(32);
     $newrows = $newinstance['widget']['rows'] = $rows*2;
@@ -223,15 +220,15 @@ class FieldAPITest extends DrupalWebTestCase {
   }
 
   protected function _readAndVerifyInstance($instance) {
-    $read = field_get_instances(array('field_name' => $instance['field_name'], 'type_name' => $instance['type_name']));
-    $this->assertIdentical(count($read), 1, t('Read instance @field_name/@type_name', array('@field_name' => $instance['field_name'], '@type_name' => $instance['type_name'])));
-    $this->assertIdentical($read[0]['field_name'], $instance['field_name'], t('field_name matches.'));
-    $this->assertIdentical($read[0]['type_name'], $instance['type_name'], t('type_name matches.'));
-    $this->assertEqual($read[0]['widget']['weight'], $instance['widget']['weight'], t('Widget weight matches.'));
-    $this->assertIdentical($read[0]['widget']['label'], $instance['widget']['label'], t('Widget label matches.'));
-    $this->assertIdentical($read[0]['widget']['description'], $instance['widget']['description'], t('Widget description matches.'));
-    $this->assertIdentical($read[0]['widget']['type'], $instance['widget']['type'], t('Widget type matches.'));
-    $this->assertIdentical($read[0]['widget']['module'], $instance['widget']['module'], t('Widget module matches.'));
-    return $read[0];
+    $read = field_get_instance($instance['field_name'], $instance['type_name']);
+    $this->assertNotNull($read, t('Read instance @field_name/@type_name', array('@field_name' => $instance['field_name'], '@type_name' => $instance['type_name'])));
+    $this->assertIdentical($read['field_name'], $instance['field_name'], t('field_name matches.'));
+    $this->assertIdentical($read['type_name'], $instance['type_name'], t('type_name matches.'));
+    $this->assertEqual($read['widget']['weight'], $instance['widget']['weight'], t('Widget weight matches.'));
+    $this->assertIdentical($read['widget']['label'], $instance['widget']['label'], t('Widget label matches.'));
+    $this->assertIdentical($read['widget']['description'], $instance['widget']['description'], t('Widget description matches.'));
+    $this->assertIdentical($read['widget']['type'], $instance['widget']['type'], t('Widget type matches.'));
+    $this->assertIdentical($read['widget']['module'], $instance['widget']['module'], t('Widget module matches.'));
+    return $read;
   }
 }

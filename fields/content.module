@@ -106,7 +106,7 @@ function content_nodeapi_load(&$node) {
   // Prevent against invalid 'nodes' built by broken 3rd party code.
   if (isset($node->type)) {
     $type = content_types($node->type);
-    // Save cycles if the type has no CCK fields.
+    // Save cycles if the type has no fields.
     if (!empty($type['instances'])) {
       $cid = 'content:'. $node->nid .':'. $node->vid;
       if ($cached = cache_get($cid, content_cache_tablename())) {
@@ -142,7 +142,7 @@ function content_nodeapi_validate(&$node, $form = NULL) {
   // Prevent against invalid 'nodes' built by broken 3rd party code.
   if (isset($node->type)) {
     $type = content_types($node->type);
-    // Save cycles if the type has no CCK fields.
+    // Save cycles if the type has no fields.
     if (!empty($type['instances'])) {
       _content_field_invoke('validate', $node, $form);
       _content_field_invoke_default('validate', $node, $form);
@@ -157,7 +157,7 @@ function content_nodeapi_presave(&$node) {
   // Prevent against invalid 'nodes' built by broken 3rd party code.
   if (isset($node->type)) {
     $type = content_types($node->type);
-    // Save cycles if the type has no CCK fields.
+    // Save cycles if the type has no fields.
     if (!empty($type['instances'])) {
       _content_field_invoke('presave', $node);
       _content_field_invoke_default('presave', $node);
@@ -172,7 +172,7 @@ function content_nodeapi_insert(&$node) {
   // Prevent against invalid 'nodes' built by broken 3rd party code.
   if (isset($node->type)) {
     $type = content_types($node->type);
-    // Save cycles if the type has no CCK fields.
+    // Save cycles if the type has no fields.
     if (!empty($type['instances'])) {
       _content_field_invoke('insert', $node);
       _content_field_invoke_default('insert', $node);
@@ -187,7 +187,7 @@ function content_nodeapi_update(&$node) {
   // Prevent against invalid 'nodes' built by broken 3rd party code.
   if (isset($node->type)) {
     $type = content_types($node->type);
-    // Save cycles if the type has no CCK fields.
+    // Save cycles if the type has no fields.
     if (!empty($type['instances'])) {
       _content_field_invoke('update', $node);
       _content_field_invoke_default('update', $node);
@@ -203,7 +203,7 @@ function content_nodeapi_delete(&$node) {
   // Prevent against invalid 'nodes' built by broken 3rd party code.
   if (isset($node->type)) {
     $type = content_types($node->type);
-    // Save cycles if the type has no CCK fields.
+    // Save cycles if the type has no fields.
     if (!empty($type['instances'])) {
       _content_field_invoke('delete', $node);
       _content_field_invoke_default('delete', $node);
@@ -219,7 +219,7 @@ function content_nodeapi_delete_revision(&$node) {
   // Prevent against invalid 'nodes' built by broken 3rd party code.
   if (isset($node->type)) {
     $type = content_types($node->type);
-    // Save cycles if the type has no CCK fields.
+    // Save cycles if the type has no fields.
     if (!empty($type['instances'])) {
       _content_field_invoke('delete revision', $node);
       _content_field_invoke_default('delete revision', $node);
@@ -235,7 +235,7 @@ function content_nodeapi_view(&$node, $teaser = FALSE, $page = FALSE) {
   // Prevent against invalid 'nodes' built by broken 3rd party code.
   if (isset($node->type)) {
     $type = content_types($node->type);
-    // Save cycles if the type has no CCK fields.
+    // Save cycles if the type has no fields.
     if (!empty($type['instances'])) {
       // Let field modules sanitize their data for output.
       // TODO D7 : we could reintegrate hook_field('view') for this ?
@@ -307,7 +307,7 @@ function content_nodeapi_alter(&$node, $teaser = FALSE, $page = FALSE) {
   // Prevent against invalid 'nodes' built by broken 3rd party code.
   if (isset($node->type)) {
     $type = content_types($node->type);
-    // Save cycles if the type has no CCK fields.
+    // Save cycles if the type has no fields.
     if (!empty($type['instances'])) {
       _content_field_invoke_default('alter', $node, $teaser, $page);
     }
@@ -321,7 +321,7 @@ function content_nodeapi_prepare_translation(&$node) {
   // Prevent against invalid 'nodes' built by broken 3rd party code.
   if (isset($node->type)) {
     $type = content_types($node->type);
-    // Save cycles if the type has no CCK fields.
+    // Save cycles if the type has no fields.
     if (!empty($type['instances'])) {
       $default_additions = _content_field_invoke_default('prepare translation', $node);
       $additions = _content_field_invoke('prepare translation', $node);
@@ -826,6 +826,7 @@ function content_storage($op, $node) {
       foreach ($type['tables'] as $table) {
         $schema = drupal_get_schema($table);
         // The per-type table might not have any fields actually stored in it.
+        // TODO D7 : remove this specific case (empty per-type table) ?
         if (!$schema['content fields']) {
           continue;
         }
@@ -1713,7 +1714,7 @@ function content_build_modes($selector = NULL) {
  *
  * @return
  * An array describing the build modes used by the module.
- * They are grouped by secondary tabs on CCK's 'Display fields' screens.
+ * They are grouped by secondary tabs on the 'Display fields' screens.
  *
  * Expected format:
  * array(

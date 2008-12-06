@@ -234,11 +234,12 @@ function field_instance_new($field_name, $type_name, $widget_type) {
  */
 function field_instance_get_field($instance) {
   if (!isset($instance['field']) || $instance['_field_name'] != $instance['field_name']) {
-    $fields = field_get_fields(array('field_name' => $instance['field_name']));
-    if (count($fields) != 1) {
+    $field = field_get_field($instance['field_name']);
+    if (!$field) {
       return NULL;
     }
-    $instance['field'] = reset($fields);
+    $instance['field'] = $field;
+    // TODO D7 : ???
     $instance['_field_name'] = $instance['field_name'];
   }
   return $instance['field'];
@@ -262,8 +263,8 @@ function field_create_field($field) {
   }
 
   // Ensure the field name is unique.
-  $prior_field = field_get_fields(array('field_name' => $field['field_name']));
-  if (!empty($prior_field)) {
+  $prior_field = field_get_field($field['field_name']);
+  if ($prior_field) {
     field_error(t('Attempt to create field name %name which already exists.', array('%name' => $field['field_name'])));
     return FALSE;
   }
@@ -357,8 +358,8 @@ function field_create_instance($instance) {
  */
 function field_update_instance($new_instance) {
   // Verify that the instance already exists.
-  $previous = field_get_instances(array('field_name' => $new_instance['field_name'], 'type_name' => $new_instance['type_name']));
-  if (count($previous) != 1) {
+  $previous = field_get_instance($new_instance['field_name'], $new_instance['type_name']);
+  if (!$previous) {
     field_error(t('Attempt to update a non-existant field instance %name/%type.', array('%name' => $new_instance['field_name'], '%type' => $new_instance['type_name'])));
     return FALSE;
   }
@@ -520,6 +521,21 @@ function _field_write_instance($instance, $op = 'update') {
 
 /**
  * Load a field.
+ *
+ * @param $field_name
+ *   A field name.
+ * @return
+ *  The specified field, or NULL if it does not exist.
+ */
+function field_get_field($field_name) {
+  $fields = field_get_fields(array('field_name' => $field_name));
+  if (!empty($fields)) {
+    return $fields[$field_name];
+  }
+}
+
+/**
+ * Loads fields matching certain criteria.
  *
  * @param $param
  *   An array of properties to use in selecting fields. Valid keys:
