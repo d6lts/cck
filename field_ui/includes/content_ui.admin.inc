@@ -116,7 +116,7 @@ function content_inactive_message($type_name) {
  * Menu callback; listing of fields for a content type.
  *
  * Allows fields to be reordered and nested in fieldgroups using
- * JS drag-n-drop. Non-CCK form elements can also be moved around.
+ * JS drag-n-drop. Non-field form elements can also be moved around.
  */
 function content_field_overview_form(&$form_state, $type_name) {
 
@@ -211,7 +211,7 @@ function content_field_overview_form(&$form_state, $type_name) {
     $weights[] = $weight;
   }
 
-  // Non-CCK 'fields'.
+  // Non-field elements.
   foreach ($extra as $name => $label) {
     $weight = $extra[$name]['weight'];
     $form[$name] = array(

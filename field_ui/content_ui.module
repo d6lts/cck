@@ -182,7 +182,7 @@ function content_ui_form_alter(&$form, $form_state, $form_id) {
   if (isset($form['type']) && isset($form['#node']) && $form['type']['#value'] .'_node_form' == $form_id) {
     $type = content_types($form['#node']->type);
     // TODO D7 : storage for extra settings...
-    // Adjust weights for non-CCK fields.
+    // Adjust weights for non-field elements.
     foreach ($type['extra'] as $key => $value) {
       if (isset($form[$key])) {
         $form[$key]['#weight'] = $value['weight'];
