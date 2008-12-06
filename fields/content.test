@@ -170,9 +170,9 @@ class FieldAPITest extends DrupalWebTestCase {
     // Field is shown on form, using the widget settings, via local
     // API within the current request.
     if (drupal_function_exists('node_add')) {
-      // TODO D7: doesn't seem to work ? (no widget for the field)
-      $this->_content = node_add('article');
+      $this->content = node_add('article');
       $this->plain_text = FALSE;
+	  // TODO : fails - why ?
       $this->assertText($description, "New field description ($description) is shown on form.");
       $this->assertPattern('@<textarea[^>]+rows="'. $rows .'"@', "New text field has correct number of rows ($rows).");
     }
