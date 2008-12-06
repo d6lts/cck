@@ -26,7 +26,7 @@
  * constitute fundamentally altering the field's identity.  However, a
  * field can be "converted" to a new field (of the same or different
  * field type) to provide new functionality or semantics for the
- * existing data.  TODO: Field conversion is not yet implemented.
+ * existing data.  TODO D7: Field conversion is not yet implemented.
  *
  * A Field Instance is the binding of a Field to a Content Type.
  * Field Instances have properties that define the association, such
@@ -34,12 +34,12 @@
  * field instance's properties do not affect the field's underlying
  * data and can be changed without altering the field itself.
  *
- * TODO: More docs.  We need to separate Field API consumer
+ * TODO D7: More docs.  We need to separate Field API consumer
  * documentation (e.g. above) from field module implementor
  * documentation (e.g. below).
  *
  * A hook_field() is available for each field instance action,
- * and each hook receives the nested field => widget array as an argument.
+ * and each hook receives the nested instance => widget array as an argument.
  *
  * The hook_field_$ops() include:
  *
@@ -47,6 +47,8 @@
  *   - read instance
  *   - update instance
  *   - delete instance
+ *  TODO D7 : Clashes with CCK's hook_field (load, validate, sanitize...), called for a given field type.
+ *  This is more like hook_content_fieldapi (invoke all modules).
  *
  * Another function, content_module_delete($module) will clean up
  * after a module that has been deleted by removing all data and
@@ -129,9 +131,9 @@ function field_new($field_name, $field_type) {
   $field['shareable'] = 0;
   $field['module'] = $module;
   $field['active'] = module_exists($module) ? 1 : 0;
-  $field['columns'] = module_invoke($module, 'field_settings', 'database columns', $field);
+  $field['columns'] = (array) module_invoke($module, 'field_settings', 'database columns', $field);
   // Ensure columns always default to NULL values.
-  foreach ((array) $field['columns'] as $column_name => $column) {
+  foreach ($field['columns'] as $column_name => $column) {
     $field['columns'][$column_name]['not null'] = FALSE;
   }
 
@@ -273,7 +275,7 @@ function field_create_field($field) {
   if (empty($field['module']) && !empty($field['type'])) {
     $field_types = _content_field_types();
     $field['module'] = $field_types[$field['type']]['module'];
-    // YCHED : we shouldn't allow incoming 'module' (or at least always overwrite it
+    // YCHED : we shouldn't allow incoming 'module' (or at least always overwrite it)
   }
   // YCHED : error if no field type ?
 
@@ -282,6 +284,10 @@ function field_create_field($field) {
 
   // Get a fresh copy of the column information whenever a field is created.
   $field['columns'] = (array) module_invoke($field['module'], 'field_settings', 'database columns', $field);
+  // Ensure columns always default to NULL values.
+  foreach ($field['columns'] as $column_name => $column) {
+    $field['columns'][$column_name]['not null'] = FALSE;
+  }
 
   // Save the new field definition.
   _field_write_field($field, 'create');
@@ -393,7 +399,7 @@ function field_delete_instance($field_name, $type_name) {
   // Get the previous field value.
   $instance = field_get_instance($field_name, $type_name);
 
-  // TODO : error if no instance.
+  // TODO D7: error if no instance.
   // Invoke hook_field().
   module_invoke_all('field_delete_instance', $instance);
 
@@ -402,8 +408,6 @@ function field_delete_instance($field_name, $type_name) {
     ->condition('field_name', $instance['field_name'])
     ->condition('type_name', $instance['type_name'])
     ->execute();
-//  db_query("DELETE FROM {". content_instance_tablename() .
-//    "} WHERE field_name = :field_name AND type_name = :type_name", array(':field_name' => $instance['field_name'], ':type_name' => $instance['type_name']));
 
   // If no instances remain, delete the database storage entirely.
   // This is always the case for non-shareable fields and may be the
