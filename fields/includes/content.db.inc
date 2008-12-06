@@ -12,6 +12,65 @@ function content_storage_type($field) {
 }
 
 /**
+ * Retrieve the database storage location(s) for a field instance.
+ *
+ * TODO : add a word about why it's not included in the global
+ * _content_type_info array.
+ * TODO D7: Figure out why that really is; I suspect it can be, now.
+ *
+ * @param $field
+ *   The field whose database information is requested.
+ * @return
+ *   An array with the keys:
+ *     "table": The name of the database table where the field data is stored.
+ *     "columns": An array of columns stored for this field. Each is a collection
+ *       of information returned from hook_field_settings('database columns'),
+ *       with the addition of a "column" attribute which holds the name of the
+ *       database column that stores the data.
+ */
+function content_database_info($instance) {
+  $db_info = array();
+
+  // XXX I do not understand why this is necessary; CCK used to take
+  // care to load content.crud.inc when necessary.  We should use the
+  // code registry instead, but figure out why this is necessary.
+  drupal_function_exists('field_instance_get_field');
+
+  $field = field_instance_get_field($instance);
+  if ($field['db_storage'] == CONTENT_DB_STORAGE_PER_FIELD) {
+    $db_info['table'] = _content_tablename($field['field_name'], CONTENT_DB_STORAGE_PER_FIELD);
+  }
+  else {
+    $db_info['table'] = _content_tablename($instance['type_name'], CONTENT_DB_STORAGE_PER_CONTENT_TYPE);
+  }
+
+  $db_info['columns'] = (array) $field['columns'];
+  // Generate column names for this field from generic column names.
+  foreach ($db_info['columns'] as $column_name => $attributes) {
+    $db_info['columns'][$column_name]['column'] = $field['field_name'] .'_'. $column_name;
+  }
+
+  return $db_info;
+}
+
+
+/**
+ * Generate a table name for a field or a content type.
+ *
+ * @param $name
+ *   The name of the content type or content field
+ * @param $storage
+ *   CONTENT_DB_STORAGE_PER_FIELD or CONTENT_DB_STORAGE_PER_CONTENT_TYPE
+ * @return
+ *   A string containing the generated name for the database table
+ */
+function _content_tablename($name, $storage) {
+  // TODO D7 : table names rehaul...
+  $name = str_replace('-', '_', $name);
+  return ($storage == CONTENT_DB_STORAGE_PER_CONTENT_TYPE) ? "content_type_$name" : "content_$name";
+}
+
+/**
  * A basic schema used by all field and type tables.
  *
  * This will only add the columns relevant for the specified field.
