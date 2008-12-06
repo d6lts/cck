@@ -137,8 +137,8 @@ function content_nodeapi_delete_revision(&$node) {
     $type = content_types($node->type);
     // Save cycles if the type has no fields.
     if (!empty($type['instances'])) {
+      _content_field_invoke('delete revision', $node);
       content_storage_delete_revision($node);
-      _content_field_invoke_default('delete revision', $node);
       cache_clear_all('content:'. $node->nid .':'. $node->vid, 'cache_content');
     }
   }
