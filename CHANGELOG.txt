@@ -8,6 +8,7 @@ CCK 6.x-2.x
 - #334290 by drewish - Userreference: user names not displayed in Views summaries.
 - #343138 by duellj - Fix tokens for empty noderef / userref fields.
 - #343306 Validate text 'max length' to be a positive integer
+- #344004 by markus_petrux - Diff integration : fix error on non-'core CCK' field types.
 
 CCK 6.x-2.1
 ===========

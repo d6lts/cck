@@ -44,24 +44,18 @@ function content_diff(&$old_node, &$new_node) {
             $new_values = _cck_text_diff_values($new_node, $field);
           }
           break;
-        case 'link':
-          if (isset($old_node->$field['field_name'])) {
-            $old_values = _cck_link_diff_values($old_node, $field);
-          }
-          if (isset($new_node->$field['field_name'])) {
-            $new_values = _cck_link_diff_values($new_node, $field);
-          }
-          break;
       }
-      $result[$field['field_name']] = array(
-        '#name' => $field['widget']['label'],
-        '#old' => $old_values,
-        '#new' => $new_values,
-        '#weight' => $field['widget']['weight'],
-        '#format' => array(
-          'show_header' => FALSE,
-        ),
-      );
+      if ($old_values || $new_values) {
+        $result[$field['field_name']] = array(
+          '#name' => $field['widget']['label'],
+          '#old' => $old_values,
+          '#new' => $new_values,
+          '#weight' => $field['widget']['weight'],
+          '#format' => array(
+            'show_header' => FALSE,
+          ),
+        );
+      }
     }
   }
   return $result;
@@ -92,19 +86,6 @@ function _cck_nodereference_diff_values(&$node, &$field) {
   foreach ($node->$field['field_name'] as $item) {
     if ($item['nid']) {
       $result[] = db_result(db_query('SELECT title FROM {node} WHERE nid=%d', $item['nid']));
-    }
-  }
-  return $result;
-}
-
-function _cck_link_diff_values(&$node, &$field) {
-  $result = array();
-  foreach ($node->$field['field_name'] as $item) {
-    if ($item['url']) {
-      $result[] = 'url: '. $item['url'];
-    }
-    if ($item['title']) {
-      $result[] = 'title: '. $item['title'];
     }
   }
   return $result;
