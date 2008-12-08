@@ -46,6 +46,8 @@ function content_diff(&$old_node, &$new_node) {
 
 /**
  * Default 'implementation' of hook_content_diff_values.
+ *
+ * Note that diff.module takes care of running check_plain on the output.
  */
 function content_content_diff_values($node, $field, $items) {
   $return = array();
