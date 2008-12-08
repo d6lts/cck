@@ -10,6 +10,9 @@ CCK 6.x-2.x
 - #343306 Validate text 'max length' to be a positive integer
 - #344004 by markus_petrux - Diff integration : fix error on non-'core CCK' field types.
 - Diff integration: limit the number of additional queries for noderef/userref.
+- Diff integration: refactored around a new hook_content_diff_values() to save contrib field modules the
+burden of implementing hook_diff. For most field types, the default content_field_content_diff_values()
+should be enough, though.
 
 CCK 6.x-2.1
 ===========

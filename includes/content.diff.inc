@@ -13,37 +13,20 @@
  */
 function content_diff(&$old_node, &$new_node) {
   $result = array();
-  $cck_info = content_types($new_node->type);
-  if ($cck_info) {
-    foreach ($cck_info['fields'] as $field) {
+  // Prevent against invalid 'nodes' built by broken 3rd party code.
+  if (isset($new_node->type)) {
+    $type = content_types($new_node->type);
+    $field_types = _content_field_types();
+    foreach ($type['fields'] as $field) {
+      $function = $field_types[$field['type']]['module'] . '_content_diff_values';
+      $function = function_exists($function) ? $function : 'content_content_diff_values';
       $old_values = array();
       $new_values = array();
-      switch ($field['type']) {
-        case 'nodereference':
-          if (isset($old_node->$field['field_name'])) {
-            $old_values = _cck_nodereference_diff_values($old_node, $field);
-          }
-          if (isset($new_node->$field['field_name'])) {
-            $new_values = _cck_nodereference_diff_values($new_node, $field);
-          }
-          break;
-        case 'userreference':
-          if (isset($old_node->$field['field_name'])) {
-            $old_values = _cck_userreference_diff_values($old_node, $field);
-          }
-          if (isset($new_node->$field['field_name'])) {
-            $new_values = _cck_userreference_diff_values($new_node, $field);
-          }
-          break;
-        case 'number_integer':
-        case 'text':
-          if (isset($old_node->$field['field_name'])) {
-            $old_values = _cck_text_diff_values($old_node, $field);
-          }
-          if (isset($new_node->$field['field_name'])) {
-            $new_values = _cck_text_diff_values($new_node, $field);
-          }
-          break;
+      if (isset($old_node->$field['field_name'])) {
+        $old_values = $function($old_node, $field, $old_node->$field['field_name']);
+      }
+      if (isset($new_node->$field['field_name'])) {
+        $new_values = $function($new_node, $field, $new_node->$field['field_name']);
       }
       if ($old_values || $new_values) {
         $result[$field['field_name']] = array(
@@ -61,67 +44,79 @@ function content_diff(&$old_node, &$new_node) {
   return $result;
 }
 
-function _cck_text_diff_values(&$node, &$field) {
-  $result = array();
-  foreach ($node->$field['field_name'] as $item) {
+/**
+ * Default 'implementation' of hook_content_diff_values.
+ */
+function content_content_diff_values($node, $field, $items) {
+  $return = array();
+  foreach ($items as $item) {
     foreach (explode("\n", $item['value']) as $i) {
-      $result[] = $i;
-    }
-  }
-  return $result;
-}
-
-function _cck_userreference_diff_values($node, $field) {
-  static $titles = array();
-  // Gather ids.
-  $ids = array();
-  foreach ($node->$field['field_name'] as $item) {
-    if ($item['uid'] && is_numeric($item['uid'])) {
-      $ids[] = $item['uid'];
-    }
-  }
-  // Fetch titles we don't know yet.
-  $queried_ids = array_diff($ids, array_keys($titles));
-  if ($queried_ids) {
-    $result = db_query('SELECT uid, name FROM {users} WHERE uid IN ('. db_placeholders($queried_ids) .')', $queried_ids);
-    while ($row = db_fetch_array($result)) {
-      $titles[$row['uid']] = $row['name'];
-    }
-  }
-  // Return result.
-  $return = array();
-  foreach ($node->$field['field_name'] as $item) {
-    if ($item['uid'] && isset($titles[$item['uid']])) {
-      $return[] = $titles[$item['uid']];
+      $return[] = $i;
     }
   }
   return $return;
 }
 
-function _cck_nodereference_diff_values($node, $field) {
-  static $titles = array();
-  // Gather ids.
-  $ids = array();
-  foreach ($node->$field['field_name'] as $item) {
-    if ($item['nid'] && is_numeric($item['nid'])) {
-      $ids[] = $item['nid'];
+if (module_exists('userreference')) {
+  /**
+   * Implementation of hook_content_diff_values.
+   */
+  function userreference_content_diff_values($node, $field, $items) {
+    static $titles = array();
+    // Gather ids.
+    $ids = array();
+    foreach ($items as $item) {
+      if ($item['uid'] && is_numeric($item['uid'])) {
+        $ids[] = $item['uid'];
+      }
     }
-  }
-  // Fetch titles we don't know yet.
-  $queried_ids = array_diff($ids, array_keys($titles));
-  if ($queried_ids) {
-    dsm($queried_ids);
-    $result = db_query('SELECT nid, title FROM {node} WHERE nid IN ('. db_placeholders($queried_ids) .')', $queried_ids);
-    while ($row = db_fetch_array($result)) {
-      $titles[$row['nid']] = $row['title'];
+    // Fetch titles we don't know yet.
+    $queried_ids = array_diff($ids, array_keys($titles));
+    if ($queried_ids) {
+      $result = db_query('SELECT uid, name FROM {users} WHERE uid IN ('. db_placeholders($queried_ids) .')', $queried_ids);
+      while ($row = db_fetch_array($result)) {
+        $titles[$row['uid']] = $row['name'];
+      }
     }
-  }
-  // Return result.
-  $return = array();
-  foreach ($node->$field['field_name'] as $item) {
-    if ($item['nid'] && isset($titles[$item['nid']])) {
-      $return[] = $titles[$item['nid']];
+    // Return result.
+    $return = array();
+    foreach ($items as $item) {
+      if ($item['uid'] && isset($titles[$item['uid']])) {
+        $return[] = $titles[$item['uid']];
+      }
     }
+    return $return;
   }
-  return $return;
+}
+
+if (module_exists('nodereference')) {
+  /**
+   * Implementation of hook_content_diff_values.
+   */
+  function nodereference_content_diff_values($node, $field, $items) {
+    static $titles = array();
+    // Gather ids.
+    $ids = array();
+    foreach ($items as $item) {
+      if ($item['nid'] && is_numeric($item['nid'])) {
+        $ids[] = $item['nid'];
+      }
+    }
+    // Fetch titles we don't know yet.
+    $queried_ids = array_diff($ids, array_keys($titles));
+    if ($queried_ids) {
+      $result = db_query('SELECT nid, title FROM {node} WHERE nid IN ('. db_placeholders($queried_ids) .')', $queried_ids);
+      while ($row = db_fetch_array($result)) {
+        $titles[$row['nid']] = $row['title'];
+      }
+    }
+    // Return result.
+    $return = array();
+    foreach ($items as $item) {
+      if ($item['nid'] && isset($titles[$item['nid']])) {
+        $return[] = $titles[$item['nid']];
+      }
+    }
+    return $return;
+  }
 }
