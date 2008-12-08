@@ -71,22 +71,57 @@ function _cck_text_diff_values(&$node, &$field) {
   return $result;
 }
 
-function _cck_userreference_diff_values(&$node, &$field) {
-  $result = array();
+function _cck_userreference_diff_values($node, $field) {
+  static $titles = array();
+  // Gather ids.
+  $ids = array();
   foreach ($node->$field['field_name'] as $item) {
-    if ($item['uid']) {
-      $result[] = db_result(db_query('SELECT name FROM {users} WHERE uid=%d', $item['uid']));
+    if ($item['uid'] && is_numeric($item['uid'])) {
+      $ids[] = $item['uid'];
     }
   }
-  return $result;
+  // Fetch titles we don't know yet.
+  $queried_ids = array_diff($ids, array_keys($titles));
+  if ($queried_ids) {
+    $result = db_query('SELECT uid, name FROM {users} WHERE uid IN ('. db_placeholders($queried_ids) .')', $queried_ids);
+    while ($row = db_fetch_array($result)) {
+      $titles[$row['uid']] = $row['name'];
+    }
+  }
+  // Return result.
+  $return = array();
+  foreach ($node->$field['field_name'] as $item) {
+    if ($item['uid'] && isset($titles[$item['uid']])) {
+      $return[] = $titles[$item['uid']];
+    }
+  }
+  return $return;
 }
 
-function _cck_nodereference_diff_values(&$node, &$field) {
-  $result = array();
+function _cck_nodereference_diff_values($node, $field) {
+  static $titles = array();
+  // Gather ids.
+  $ids = array();
   foreach ($node->$field['field_name'] as $item) {
-    if ($item['nid']) {
-      $result[] = db_result(db_query('SELECT title FROM {node} WHERE nid=%d', $item['nid']));
+    if ($item['nid'] && is_numeric($item['nid'])) {
+      $ids[] = $item['nid'];
     }
   }
-  return $result;
+  // Fetch titles we don't know yet.
+  $queried_ids = array_diff($ids, array_keys($titles));
+  if ($queried_ids) {
+    dsm($queried_ids);
+    $result = db_query('SELECT nid, title FROM {node} WHERE nid IN ('. db_placeholders($queried_ids) .')', $queried_ids);
+    while ($row = db_fetch_array($result)) {
+      $titles[$row['nid']] = $row['title'];
+    }
+  }
+  // Return result.
+  $return = array();
+  foreach ($node->$field['field_name'] as $item) {
+    if ($item['nid'] && isset($titles[$item['nid']])) {
+      $return[] = $titles[$item['nid']];
+    }
+  }
+  return $return;
 }
