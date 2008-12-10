@@ -6,14 +6,19 @@ hook comparison: D7                              D6                             
 -----------------------------------------------------------------------------------------------------------------------------
 hook_field_info()                                unchanged
 hook_field_columns($field)                       hook_field_settings('database columns')  defines 'data pins' in SQL-lingo
-hook_field_settings($field_type)                 hook_field_settings('save')              also returns default values for the settings - move into
+hook_field_settings($field_type)                 hook_field_settings('save')              also returns default values for the settings - move into hook_field_info() ?
 hook_field_settings_form($field)                 hook_field_settings('form')              only for UI
 hook_field_settings_form_validate($field)        hook_field_settings('validate')          only for UI + fully deprecate in favor of regular FAPI validation ?
 
 hook_field() - not de-'$op'ified yet - see below
+hook_field_is_empty($item, $field)               unchanged
+
+hook_instance_settings($field_type)              -                                        also returns default values for the settings - move into hook_field_info() ?
+hook_instance_settings_form($instance)           -                                        only for UI
+hook_instance_settings_form_validate($instance)  -                                        only for UI + fully deprecate for regular FAPI validation ?
 
 hook_widget_info()                               unchanged
-hook_widget_settings($widget_type)               hook_widget_settings('save')             also returns default values for the settings
+hook_widget_settings($widget_type)               hook_widget_settings('save')             also returns default values for the settings - move into hook_field_info() ?
 hook_widget_settings_form($instance)             hook_widget_settings('form')             only for UI
 hook_widget_settings_form_validate($instance)    hook_widget_settings('validate')         only for UI + fully deprecate in favor of regular FAPI validation ?
 hook_widget()                                    unchanged                                return FAPI element

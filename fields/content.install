@@ -126,16 +126,17 @@ function content_schema() {
   );
   $schema['content_node_field_instance'] = array(
     'fields' => array(
-      'field_name'       => array('type' => 'varchar', 'length' => 32, 'not null' => TRUE, 'default' => ''),
-      'type_name'        => array('type' => 'varchar', 'length' => 32, 'not null' => TRUE, 'default' => ''),
-      'weight'           => array('type' => 'int', 'not null' => TRUE, 'default' => 0),
-      'label'            => array('type' => 'varchar', 'length' => 255, 'not null' => TRUE, 'default' => ''),
-      'widget_type'      => array('type' => 'varchar', 'length' => 32, 'not null' => TRUE, 'default' => ''),
-      'widget_settings'  => array('type' => 'text', 'size' => 'medium', 'not null' => TRUE, 'serialize' => TRUE),
-      'display_settings' => array('type' => 'text', 'size' => 'medium', 'not null' => TRUE, 'serialize' => TRUE),
-      'description'      => array('type' => 'text', 'size' => 'medium', 'not null' => TRUE),
-      'widget_module'    => array('type' => 'varchar', 'length' => 127, 'not null' => TRUE, 'default' => ''),
-      'widget_active'    => array('type' => 'int', 'size' => 'tiny', 'not null' => TRUE, 'default' => 0),
+      'field_name'        => array('type' => 'varchar', 'length' => 32, 'not null' => TRUE, 'default' => ''),
+      'type_name'         => array('type' => 'varchar', 'length' => 32, 'not null' => TRUE, 'default' => ''),
+      'weight'            => array('type' => 'int', 'not null' => TRUE, 'default' => 0),
+      'label'             => array('type' => 'varchar', 'length' => 255, 'not null' => TRUE, 'default' => ''),
+      'instance_settings' => array('type' => 'text', 'size' => 'medium', 'not null' => TRUE, 'serialize' => TRUE),
+      'widget_type'       => array('type' => 'varchar', 'length' => 32, 'not null' => TRUE, 'default' => ''),
+      'widget_settings'   => array('type' => 'text', 'size' => 'medium', 'not null' => TRUE, 'serialize' => TRUE),
+      'display_settings'  => array('type' => 'text', 'size' => 'medium', 'not null' => TRUE, 'serialize' => TRUE),
+      'description'       => array('type' => 'text', 'size' => 'medium', 'not null' => TRUE),
+      'widget_module'     => array('type' => 'varchar', 'length' => 127, 'not null' => TRUE, 'default' => ''),
+      'widget_active'     => array('type' => 'int', 'size' => 'tiny', 'not null' => TRUE, 'default' => 0),
     ),
     'primary key' => array('field_name', 'type_name'),
   );

@@ -219,7 +219,8 @@ function field_instance_new($field_name, $type_name, $widget_type) {
     $instance['display_settings'][$name]['format'] = ($name == 'label') ? 'above' : 'default';
   }
 
-  // Initialize widget settings.
+  // Initialize instance and widget settings.
+  $instance += (array) module_invoke($module, 'instance_settings', $field['type']);
   $instance['widget'] += (array) module_invoke($module, 'widget_settings', $widget_type);
 
   return $instance;
@@ -465,6 +466,16 @@ function _content_field_instance_array2db($instance) {
   if (!isset($instance['widget'])) {
     return $instance;
   }
+
+  // TODO D7 : check 'instance_settings' work ok (text.module has none).
+  $instance['instance_settings'] = array();
+  $field = field_instance_get_field($instance);
+  $settings = (array) module_invoke($field['module'], 'instance_settings', $field['type']);
+  foreach ($settings as $key => $value) {
+    $instance['instance_settings'][$key] = (isset($instance[$key]) || $instance[$key] === 0 || $instance[$key] === '') ? $instance[$key] : $value;
+    unset($instance[$key]); // XXX why do this?
+  }
+
   $instance['widget_type'] = !empty($instance['widget']['type']) ? $instance['widget']['type'] : '';
   $instance['weight'] = !empty($instance['widget']['weight']) ? $instance['widget']['weight'] : 0;
   $instance['label'] = !empty($instance['widget']['label']) ? $instance['widget']['label'] : $instance['field_name'];

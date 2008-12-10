@@ -1008,6 +1008,7 @@ function content_field_edit_form(&$form_state, $type_name, $field_name) {
     '#submit' => array('content_field_edit_form_submit_update_basic'),
   );
 
+  // TODO D7 : include instance_settings
   $form['widget'] = array(
     '#type' => 'fieldset',
     '#title' => t('%type settings', array('%type' => $type['name'])),
