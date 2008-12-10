@@ -1,6 +1,43 @@
 <?php
 // $Id$
 
+/*
+hook comparison: D7                              D6                                       Remarks
+-----------------------------------------------------------------------------------------------------------------------------
+hook_field_info()                                unchanged
+hook_field_columns($field)                       hook_field_settings('database columns')  defines 'data pins' in SQL-lingo
+hook_field_settings($field_type)                 hook_field_settings('save')              also returns default values for the settings - move into
+hook_field_settings_form($field)                 hook_field_settings('form')              only for UI
+hook_field_settings_form_validate($field)        hook_field_settings('validate')          only for UI + fully deprecate in favor of regular FAPI validation ?
+
+hook_field() - not de-'$op'ified yet - see below
+
+hook_widget_info()                               unchanged
+hook_widget_settings($widget_type)               hook_widget_settings('save')             also returns default values for the settings
+hook_widget_settings_form($instance)             hook_widget_settings('form')             only for UI
+hook_widget_settings_form_validate($instance)    hook_widget_settings('validate')         only for UI + fully deprecate in favor of regular FAPI validation ?
+hook_widget()                                    unchanged                                return FAPI element
+
+hook_formatter_info()                            unchanged
+
+
+hook_field(): D6 $op    Field type implementation   Default implementation
+--------------------------------------------------------------------------
+'validate'              x                           x (currently unused)
+'presave'               x (use cases ?)             x
+'load'                  x                           - (content_storage)
+'insert'                x                           - (content_storage)
+'update'                x                           - (content_storage)
+'delete'                x                           - (content_storage)
+'delete revision'       x                           - (content_storage)
+'sanitize'              x                           -
+'prepare translation'   x (noderef uses it)         x
+'view'                  -                           x
+'alter'                 - (?)                       x
+Note : Few (no ?) $ops actually involve both implemntations (field type + default)...
+
+*/
+
 /**
  * @file
  * Defines simple text field types.
@@ -39,9 +76,8 @@ function text_field_new($field_name = NULL) {
  * to TextWidgetSettings here.
  */
 function text_field_instance_new($field_name, $type_name, $widget_type) {
+  // TODO D7 : really needed, now that settings are pre-populated ?
   $instance = field_instance_new($field_name, $type_name, $widget_type);
-  // YCHED : shouldn't be needed ?
-  $instance['widget']['rows'] = NULL;
   return $instance;
 }
 
@@ -84,82 +120,92 @@ function text_field_info() {
 }
 
 /**
+ * Implementation of hook_field_columns().
+ */
+function text_field_columns($field) {
+  if (empty($field['max_length']) || $field['max_length'] > 255) {
+    $columns['value'] = array('type' => 'text', 'size' => 'big', 'not null' => FALSE, 'sortable' => TRUE);
+  }
+  else {
+    $columns['value'] = array('type' => 'varchar', 'length' => $field['max_length'], 'not null' => FALSE, 'sortable' => TRUE);
+  }
+  if (!empty($field['text_processing'])) {
+    $columns['format'] = array('type' => 'int', 'unsigned' => TRUE, 'not null' => FALSE);
+  }
+  return $columns;
+}
+
+/**
  * Implementation of hook_field_settings().
  */
-function text_field_settings($op, $field) {
-  switch ($op) {
-    case 'form':
-      $form = array();
-      $options = array(0 => t('Plain text'), 1 => t('Filtered text (user selects input format)'));
-      $form['text_processing'] = array(
-        '#type' => 'radios',
-        '#title' => t('Text processing'),
-        '#default_value' => is_numeric($field['text_processing']) ? $field['text_processing'] : 0,
-        '#options' => $options,
-      );
-      $form['max_length'] = array(
-        '#type' => 'textfield',
-        '#title' => t('Maximum length'),
-        '#default_value' => is_numeric($field['max_length']) ? $field['max_length'] : '',
-        '#required' => FALSE,
-        '#element_validate' => array('_element_validate_integer_positive'),
-        '#description' => t('The maximum length of the field in characters. Leave blank for an unlimited size.'),
-      );
-      $form['allowed_values_fieldset'] = array(
-        '#type' => 'fieldset',
-        '#title' => t('Allowed values'),
-        '#collapsible' => TRUE,
-        '#collapsed' => TRUE,
-      );
-      $form['allowed_values_fieldset']['allowed_values'] = array(
-        '#type' => 'textarea',
-        '#title' => t('Allowed values list'),
-        '#default_value' => !empty($field['allowed_values']) ? $field['allowed_values'] : '',
-        '#required' => FALSE,
-        '#rows' => 10,
-        '#description' => t('The possible values this field can contain. Enter one value per line, in the format key|label. The key is the value that will be stored in the database, and it must match the field storage type (%type). The label is optional, and the key will be used as the label if no label is specified.<br />Allowed HTML tags: @tags', array('%type' => $field['type'], '@tags' => _content_filter_xss_display_allowed_tags())),
-      );
-      $form['allowed_values_fieldset']['advanced_options'] = array(
-        '#type' => 'fieldset',
-        '#title' => t('PHP code'),
-        '#collapsible' => TRUE,
-        '#collapsed' => empty($field['allowed_values_php']),
-      );
-      if (user_access('Use PHP input for field settings (dangerous - grant with care)')) {
-        $form['allowed_values_fieldset']['advanced_options']['allowed_values_php'] = array(
-          '#type' => 'textarea',
-          '#title' => t('Code'),
-          '#default_value' => !empty($field['allowed_values_php']) ? $field['allowed_values_php'] : '',
-          '#rows' => 6,
-          '#description' => t('Advanced usage only: PHP code that returns a keyed array of allowed values. Should not include &lt;?php ?&gt; delimiters. If this field is filled out, the array returned by this code will override the allowed values list above.'),
-        );
-      }
-      else {
-        $form['allowed_values_fieldset']['advanced_options']['markup_allowed_values_php'] = array(
-          '#type' => 'item',
-          '#title' => t('Code'),
-          '#value' => !empty($field['allowed_values_php']) ? '<code>'. check_plain($field['allowed_values_php']) .'</code>' : t('&lt;none&gt;'),
-          '#description' => empty($field['allowed_values_php']) ? t("You're not allowed to input PHP code.") : t('This PHP code was set by an administrator and will override the allowed values list above.'),
-        );
-      }
-      return $form;
+// TODO D7 : move into hook_field_info() ?
+function text_field_settings($field_type) {
+  return array(
+    'text_processing' => 0,
+    'max_length' => '',
+    'allowed_values' => '',
+    'allowed_values_php' => '',
+  );
+}
 
-    case 'save':
-      return array('text_processing', 'max_length', 'allowed_values', 'allowed_values_php');
-
-    case 'database columns':
-      if (empty($field['max_length']) || $field['max_length'] > 255) {
-        $columns['value'] = array('type' => 'text', 'size' => 'big', 'not null' => FALSE, 'sortable' => TRUE);
-      }
-      else {
-        $columns['value'] = array('type' => 'varchar', 'length' => $field['max_length'], 'not null' => FALSE, 'sortable' => TRUE);
-      }
-      if (!empty($field['text_processing'])) {
-        $columns['format'] = array('type' => 'int', 'unsigned' => TRUE, 'not null' => FALSE);
-      }
-      return $columns;
-
+/**
+ * Implementation of hook_field_settings_form().
+ */
+function text_field_settings_form($field) {
+  $form = array();
+  $options = array(0 => t('Plain text'), 1 => t('Filtered text (user selects input format)'));
+  $form['text_processing'] = array(
+    '#type' => 'radios',
+    '#title' => t('Text processing'),
+    '#default_value' => $field['text_processing'],
+    '#options' => $options,
+  );
+  $form['max_length'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Maximum length'),
+    '#default_value' => $field['max_length'],
+    '#required' => FALSE,
+    '#element_validate' => array('_element_validate_integer_positive'),
+    '#description' => t('The maximum length of the field in characters. Leave blank for an unlimited size.'),
+  );
+  $form['allowed_values_fieldset'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Allowed values'),
+    '#collapsible' => TRUE,
+    '#collapsed' => TRUE,
+  );
+  $form['allowed_values_fieldset']['allowed_values'] = array(
+    '#type' => 'textarea',
+    '#title' => t('Allowed values list'),
+    '#default_value' => $field['allowed_values'],
+    '#required' => FALSE,
+    '#rows' => 10,
+    '#description' => t('The possible values this field can contain. Enter one value per line, in the format key|label. The key is the value that will be stored in the database, and it must match the field storage type (%type). The label is optional, and the key will be used as the label if no label is specified.<br />Allowed HTML tags: @tags', array('%type' => $field['type'], '@tags' => _content_filter_xss_display_allowed_tags())),
+  );
+  $form['allowed_values_fieldset']['advanced_options'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('PHP code'),
+    '#collapsible' => TRUE,
+    '#collapsed' => empty($field['allowed_values_php']),
+  );
+  if (user_access('Use PHP input for field settings (dangerous - grant with care)')) {
+    $form['allowed_values_fieldset']['advanced_options']['allowed_values_php'] = array(
+      '#type' => 'textarea',
+      '#title' => t('Code'),
+      '#default_value' => $field['allowed_values_php'],
+      '#rows' => 6,
+      '#description' => t('Advanced usage only: PHP code that returns a keyed array of allowed values. Should not include &lt;?php ?&gt; delimiters. If this field is filled out, the array returned by this code will override the allowed values list above.'),
+    );
   }
+  else {
+    $form['allowed_values_fieldset']['advanced_options']['markup_allowed_values_php'] = array(
+      '#type' => 'item',
+      '#title' => t('Code'),
+      '#value' => !empty($field['allowed_values_php']) ? '<code>'. check_plain($field['allowed_values_php']) .'</code>' : t('&lt;none&gt;'),
+      '#description' => empty($field['allowed_values_php']) ? t("You're not allowed to input PHP code.") : t('This PHP code was set by an administrator and will override the allowed values list above.'),
+    );
+  }
+  return $form;
 }
 
 /**
@@ -328,38 +374,43 @@ function text_elements() {
 /**
  * Implementation of hook_widget_settings().
  */
-function text_widget_settings($op, $instance) {
-  $widget =& $instance['widget'];
-  switch ($op) {
-    case 'form':
-      $form = array();
-      $rows = (isset($widget['rows']) && is_numeric($widget['rows'])) ? $widget['rows'] : 5;
-      $size = (isset($widget['size']) && is_numeric($widget['size'])) ? $widget['size'] : 60;
-      if ($widget['type'] == 'text_textfield') {
-        $form['rows'] = array('#type' => 'hidden', '#value' => $rows);
-        $form['size'] = array(
-          '#type' => 'textfield',
-          '#title' => t('Size of textfield'),
-          '#default_value' => $size,
-          '#element_validate' => array('_element_validate_integer_positive'),
-          '#required' => TRUE,
-        );
-      }
-      else {
-        $form['rows'] = array(
-          '#type' => 'textfield',
-          '#title' => t('Rows'),
-          '#default_value' => $rows,
-          '#element_validate' => array('_element_validate_integer_positive'),
-          '#required' => TRUE,
-        );
-        $form['size'] = array('#type' => 'hidden', '#value' => $size);
-      }
-      return $form;
+// TODO D7 : move into hook_widget_info() ?
+function text_widget_settings($widget_type) {
+  switch($widget_type) {
+    case 'text_textfield':
+      return array('size' => 60);
 
-    case 'save':
-      return array('rows', 'size');
+    case 'text_textarea':
+      return array('rows' => 5);
   }
+}
+
+/**
+ * Implementation of hook_widget_settings_form().
+ */
+function text_widget_settings_form($instance) {
+  $widget = $instance['widget'];
+  if ($widget['type'] == 'text_textfield') {
+    $form['rows'] = array('#type' => 'hidden', '#value' => $widget['size']);
+    $form['size'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Size of textfield'),
+      '#default_value' => $widget['size'],
+      '#element_validate' => array('_element_validate_integer_positive'),
+      '#required' => TRUE,
+    );
+  }
+  else {
+    $form['rows'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Rows'),
+      '#default_value' => $widget['rows'],
+      '#element_validate' => array('_element_validate_integer_positive'),
+      '#required' => TRUE,
+    );
+    $form['size'] = array('#type' => 'hidden', '#value' => $widget['rows']);
+  }
+  return $form;
 }
 
 /**

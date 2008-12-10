@@ -1019,7 +1019,7 @@ function content_field_edit_form(&$form_state, $type_name, $field_name) {
     '#type' => 'hidden',
     '#default_value' => $instance['widget']['weight'],
   );
-  $additions = module_invoke($widget_type['module'], 'widget_settings', 'form', $instance['widget']);
+  $additions = module_invoke($widget_type['module'], 'widget_settings_form', $instance);
   if (is_array($additions)) {
     $form['widget'] = array_merge($form['widget'], $additions);
   }
@@ -1204,8 +1204,9 @@ function content_field_edit_form_validate($form, &$form_state) {
 //    // dsm($dropped_data);
 //  }
 //
-//  module_invoke($widget_type['module'], 'widget_settings', 'validate', array_merge($field, $form_values));
-//  module_invoke($field_type['module'], 'field_settings', 'validate', array_merge($field, $form_values));
+//  TODO D7 : deprecate hook_*_settings_form_validate in favor of regular FAPI validation ?
+//  module_invoke($widget_type['module'], 'widget_settings_form_validate', array_merge($field, $form_values));
+//  module_invoke($field_type['module'], 'field_settings_form_validate', array_merge($field, $form_values));
 //
 //  // If content.module is handling the default value,
 //  // validate the result using the field validation.

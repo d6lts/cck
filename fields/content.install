@@ -56,7 +56,7 @@ function content_types_install() {
     if (!empty($field['module']) && !empty($field['widget_module'])) {
       $field['widget_settings'] = unserialize($field['widget_settings']);
       $field['display_settings'] = unserialize($field['display_settings']);
-      $field['columns'] = module_invoke($field['module'], 'field_settings', 'database columns', $field);
+      $field['columns'] = module_invoke($field['module'], 'field_columns', $field);
       $field = content_field_instance_expand($field);
       $fields[$field['type_name']][$field['field_name']] = $field;
     }

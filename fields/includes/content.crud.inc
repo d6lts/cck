@@ -131,7 +131,7 @@ function field_new($field_name, $field_type) {
   $field['shareable'] = 0;
   $field['module'] = $module;
   $field['active'] = module_exists($module) ? 1 : 0;
-  $field['columns'] = (array) module_invoke($module, 'field_settings', 'database columns', $field);
+  $field['columns'] = (array) module_invoke($module, 'field_columns', $field);
   // Ensure columns always default to NULL values.
   foreach ($field['columns'] as $column_name => $column) {
     $field['columns'][$column_name]['not null'] = FALSE;
@@ -140,10 +140,7 @@ function field_new($field_name, $field_type) {
   $field['db_storage'] = CONTENT_DB_STORAGE_PER_CONTENT_TYPE;
 
   // Create all per-field-type properties.
-  $settings = module_invoke($module, 'field_settings', 'save', $field);
-  foreach ((array)$settings as $setting) {
-    $field[$setting] = NULL;
-  }
+  $field += (array) module_invoke($module, 'field_settings', $field_type);
 
   return $field;
 }
@@ -191,17 +188,23 @@ function field_new($field_name, $field_type) {
  *  The content type to which to bind the field.
  */
 function field_instance_new($field_name, $type_name, $widget_type) {
-  $widget_types = _content_widget_types();
-  $module = $widget_types[$widget_type]['module'];
+  $field = field_get_field($field_name);
+  // TODO D7 : check that the field exists
+  // TODO D7 : check that the field does not already exist on thet node type.
 
   $instance['field_name'] = $field_name;
   $instance['type_name'] = $type_name;
 
+  // TODO D7 : check that the widget is valid for the field type
+  $widget_types = _content_widget_types();
+  $module = $widget_types[$widget_type]['module'];
+
+  $instance['widget']['type'] = $widget_type;
+  $instance['widget']['module'] = $module;
+
   $instance['widget']['weight'] = 0;
   $instance['widget']['label'] = $field_name;
   $instance['widget']['description'] = '';
-  $instance['widget']['type'] = $widget_type;
-  $instance['widget']['module'] = $module;
 
   $instance['display_settings'] = array();
 
@@ -216,11 +219,8 @@ function field_instance_new($field_name, $type_name, $widget_type) {
     $instance['display_settings'][$name]['format'] = ($name == 'label') ? 'above' : 'default';
   }
 
-  // Make sure widget settings all have an index in the array.
-  $settings = module_invoke($module, 'widget_settings', 'save', $instance);
-  foreach ((array) $settings as $setting) {
-    $instance['widget'][$setting] = NULL;
-  }
+  // Initialize widget settings.
+  $instance['widget'] += (array) module_invoke($module, 'widget_settings', $widget_type);
 
   return $instance;
 }
@@ -279,11 +279,10 @@ function field_create_field($field) {
   }
   // YCHED : error if no field type ?
 
-  // The storage type may need to be updated.
   $field['db_storage'] = content_storage_type($field);
 
   // Get a fresh copy of the column information whenever a field is created.
-  $field['columns'] = (array) module_invoke($field['module'], 'field_settings', 'database columns', $field);
+  $field['columns'] = (array) module_invoke($field['module'], 'field_columns', $field);
   // Ensure columns always default to NULL values.
   foreach ($field['columns'] as $column_name => $column) {
     $field['columns'][$column_name]['not null'] = FALSE;
@@ -370,6 +369,8 @@ function field_update_instance($new_instance) {
     return FALSE;
   }
 
+  // TODO D7 : return with error if either field module or widget module are not enabled
+
   // Invoke hook_field().
   module_invoke_all('field_update_instance', $new_instance);
 
@@ -434,14 +435,14 @@ function field_delete_instance($field_name, $type_name) {
 function _field_write_field($field, $op = 'update') {
   // Rearrange the data to create the global_settings array.
   $field['global_settings'] = array();
-  $setting_names = module_invoke($field['module'], 'field_settings', 'save', $field);
-  if (is_array($setting_names)) {
-    foreach ($setting_names as $setting) {
-      $field['global_settings'][$setting] = isset($field[$setting]) ? $field[$setting] : '';
-      unset($field[$setting]); // XXX why do this?
-    }
+  $settings = (array) module_invoke($field['module'], 'field_settings', $field);
+  foreach ($settings as $key => $value) {
+    $field['global_settings'][$key] = (isset($field[$key]) || $field[$key] === 0 || $field[$key] === '') ? $field[$key] : $value;
+    unset($field[$key]); // XXX why do this?
   }
+
   // 'columns' is a reserved word in MySQL4, so our column is named 'db_columns'.
+  // TODO D7 : can be renamed to 'columns' now that we require MySQL5 ?
   $field['db_columns'] = $field['columns'];
   unset($field['columns']);
 
@@ -455,6 +456,7 @@ function _field_write_field($field, $op = 'update') {
   }
   $field['columns'] = $field['db_columns'];
   unset($field['db_columns']);
+
   // TODO D7 : do we want the return value ?
   return $field;
 }
@@ -463,13 +465,15 @@ function _content_field_instance_array2db($instance) {
   if (!isset($instance['widget'])) {
     return $instance;
   }
-  $instance['widget_settings'] = !empty($instance['widget']) ? $instance['widget'] : array();
   $instance['widget_type'] = !empty($instance['widget']['type']) ? $instance['widget']['type'] : '';
   $instance['weight'] = !empty($instance['widget']['weight']) ? $instance['widget']['weight'] : 0;
   $instance['label'] = !empty($instance['widget']['label']) ? $instance['widget']['label'] : $instance['field_name'];
   $instance['description'] = !empty($instance['widget']['description']) ? $instance['widget']['description'] : '';
   $instance['type_name'] = !empty($instance['type_name']) ? $instance['type_name'] : '';
 
+  // WIdget module.
+  // TODO D7 : are there really cases where $instance['widget']['module'] wouldn't be set ?
+  // Why don't we do the same for the 'field' module when writing a $field ?
   if (!empty($instance['widget']['module'])) {
     $widget_module = $instance['widget']['module'];
   }
@@ -481,12 +485,15 @@ function _content_field_instance_array2db($instance) {
     $widget_module = '';
   }
   $instance['widget_module'] = $widget_module;
-  unset($instance['widget_settings']['type']);
-  unset($instance['widget_settings']['weight']);
-  unset($instance['widget_settings']['label']);
-  unset($instance['widget_settings']['description']);
-  unset($instance['widget_settings']['module']);
+
+  // Widget settings.
+  $instance['widget_settings'] = array();
+  $settings = (array) module_invoke($widget_module, 'widget_settings', $instance['widget']['type']);
+  foreach ($settings as $key => $value) {
+    $instance['widget_settings'][$key] = (isset($instance['widget'][$key]) || $instance['widget'][$key] === 0 || $instance['widget'][$key] === '') ? $instance['widget'][$key] : $value;
+  }
   unset($instance['widget']);
+
   return $instance;
 }
 
@@ -500,17 +507,6 @@ function _content_field_instance_array2db($instance) {
 // TODO D7 : could the $op be ditched using a merge query ?
 function _field_write_instance($instance, $op = 'update') {
   $instance = _content_field_instance_array2db($instance);
-  // Rearrange the data to create the widget_settings array.
-  // YCHED: Why isn't _content_field_instance_array2db() enough ?
-//  $setting_names = module_invoke($instance['widget']['module'], 'widget_settings', 'save', $instance);
-//  if (is_array($setting_names)) {
-//    foreach ($setting_names as $setting) {
-//      $instance['widget'][$setting] = isset($instance['widget'][$setting])? $instance['widget'][$setting] : '';
-//    }
-//  }
-//
-//  // TODO: fix this
-//  $instance['widget_settings'] = $instance['widget'];
 
   switch ($op) {
     case 'create':
@@ -520,6 +516,7 @@ function _field_write_instance($instance, $op = 'update') {
       drupal_write_record(content_instance_tablename(), $instance, array('field_name', 'type_name'));
       break;
   }
+  // TODO D7 : do we want the return value ?
   return $instance;
 }
 

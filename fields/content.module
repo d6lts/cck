@@ -256,7 +256,7 @@ function content_associate_fields($module) {
   foreach ($types as $type_name => $fields) {
     foreach ($fields as $field) {
       if ($field['module'] == $module && !in_array($field['field_name'], $fields_set)) {
-        $columns = module_invoke($field['module'], 'field_settings', 'database columns', $field);
+        $columns = module_invoke($field['module'], 'field_columns', $field);
         db_update(content_field_tablename())
           ->fields(array('db_columns' => serialize($columns)))
           ->condition('field_name', $field['field_name'])
