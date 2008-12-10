@@ -1082,10 +1082,8 @@ function content_field_edit_form(&$form_state, $type_name, $field_name) {
     );
 
     if (user_access('Use PHP input for field settings (dangerous - grant with care)')) {
-      $db_info = content_database_info($field);
-      $columns = array_keys($db_info['columns']);
-      foreach ($columns as $key => $column) {
-        $columns[$key] = t("'@column' => value for @column", array('@column' => $column));
+      foreach (array_keys($field['columns']) as $column) {
+        $columns[] = t("'@column' => value for @column", array('@column' => $column));
       }
       $sample = t("return array(\n  0 => array(@columns),\n  // You'll usually want to stop here. Provide more values\n  // if you want your 'default value' to be multi-valued:\n  1 => array(@columns),\n  2 => ...\n);", array('@columns' => implode(', ', $columns)));
 
@@ -1237,10 +1235,8 @@ function content_field_edit_form_validate($form, &$form_state) {
 //        }
 //      }
 //      if ($error) {
-//        $db_info = content_database_info($field);
-//        $columns = array_keys($db_info['columns']);
-//        foreach ($columns as $key => $column) {
-//          $columns[$key] = t("'@column' => value for @column", array('@column' => $column));
+//        foreach (array_keys($field['columns']) as $column) {
+//          $columns[] = t("'@column' => value for @column", array('@column' => $column));
 //        }
 //        $sample = t("return array(\n  0 => array(@columns),\n  // You'll usually want to stop here. Provide more values\n  // if you want your 'default value' to be multi-valued:\n  1 => array(@columns),\n  2 => ...\n);", array('@columns' => implode(', ', $columns)));
 //
