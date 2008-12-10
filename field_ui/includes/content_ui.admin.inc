@@ -1064,9 +1064,10 @@ function content_field_edit_form(&$form_state, $type_name, $field_name) {
     $widget_form_state = array('values' => array($field['field_name'] => $default_value));
     // Make sure the default value is not a required field.
     $widget_field = $field;
+    $widget_instance = $instance;
     $widget_field['required'] = FALSE;
     module_load_include('inc', 'content', 'includes/content.node_form');
-    $form_element = content_field_form($widget_form, $widget_form_state, $widget_field, 0);
+    $form_element = content_field_form($widget_form, $widget_form_state, $widget_field, $widget_instance, 0);
     $form['widget']['default_value_fieldset']['default_value_widget'] = $form_element;
     $form['widget']['default_value_fieldset']['default_value_widget']['#tree'] = TRUE;
     // Set up form info that the default value widget will need to find in the form.
@@ -1138,7 +1139,7 @@ function content_field_edit_form(&$form_state, $type_name, $field_name) {
     '#value' => serialize($field),
   );
 
-  $additions = module_invoke($field_type['module'], 'field_settings', 'form', $field);
+  $additions = module_invoke($field_type['module'], 'field_settings_form', $field);
   if (is_array($additions)) {
     $form['field'] = array_merge($form['field'], $additions);
   }

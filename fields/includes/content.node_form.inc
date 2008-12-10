@@ -10,8 +10,9 @@
 function content_form(&$form, &$form_state) {
   $type = content_types($form['type']['#value']);
   foreach ($type['instances'] as $field_name => $instance) {
+    $field = field_instance_get_field($instance);
     $form['#field_info'][$instance['field_name']] = $instance;
-    $form += (array) content_field_form($form, $form_state, $instance);
+    $form += (array) content_field_form($form, $form_state, $field, $instance);
   }
   return $form;
 }
@@ -34,12 +35,11 @@ function content_form(&$form, &$form_state) {
  *   use to get only a specific delta value of a multiple value field, otherwise
  *   function will return the entire $field form element.
  */
-function content_field_form(&$form, &$form_state, $instance, $get_delta = NULL) {
+function content_field_form(&$form, &$form_state, $field, $instance, $get_delta = NULL) {
   // XXX I do not understand why this is necessary; CCK used to take
   // care to load content.crud.inc when necessary.  We should use the
   // code registry instead, but figure out why this is necessary.
   drupal_function_exists('field_instance_get_field');
-  $field = field_instance_get_field($instance);
 
   $form['#cache'] = FALSE;
   $node = $form['#node'];
@@ -109,7 +109,7 @@ function content_field_form(&$form, &$form_state, $instance, $get_delta = NULL) 
       $delta = isset($get_delta) ? $get_delta : 0;
       if ($element = $function($form, $form_state, $instance, $items, $delta)) {
         $title = check_plain(t($instance['widget']['label']));
-        $description = content_filter_xss(t($field['widget']['description']));
+        $description = content_filter_xss(t($instance['widget']['description']));
         $defaults = array(
           '#required' => $get_delta > 0 ? FALSE : $field['required'],
           '#columns'  => array_keys($field['columns']),
