@@ -1715,7 +1715,7 @@ function content_format($field, $item, $formatter_name = 'default', $node = NULL
     $field = content_fields($field);
   }
 
-  if ($formatter = _content_get_formatter($formatter_name, $field['type'])) {
+  if (content_access('view', $field) && $formatter = _content_get_formatter($formatter_name, $field['type'])) {
     $theme = $formatter['module'] .'_formatter_'. $formatter_name;
 
     $element = array(
