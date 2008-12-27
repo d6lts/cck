@@ -14,6 +14,7 @@ CCK 6.x-2.x
 burden of implementing hook_diff. For most field types, the default content_field_content_diff_values()
 should be enough, though.
 - #344216 by dbabbage: Fix incorrect url to Schema module in tests descriptions.
+- #336174 Move actual field access check in content.module, with content_permission.module providing one permission-based implementation.
 
 CCK 6.x-2.1
 ===========

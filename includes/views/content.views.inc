@@ -230,9 +230,8 @@ function content_views_field_views_data($field) {
         'click sortable' => $sorts[0],
         'additional fields' => $additional_fields,
         'content_field_name' => $field['field_name'],
-        // Access control modules should implement content_views_access_callback().
-        'access callback' => 'content_views_access_callback',
-        'access arguments' => array($field),
+        'access callback' => 'content_access',
+        'access arguments' => array('view', $field),
       ),
       'argument' => array(
         'field' => $columns[0],
