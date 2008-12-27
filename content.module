@@ -2114,8 +2114,8 @@ function content_access($op, $field, $account = NULL) {
     $account = $user;
   }
 
-  $field_access = module_invoke_all('field_access', $field, $account);
-  foreach ($field_access as $value) {
+  $access = module_invoke_all('field_access', $field, $account);
+  foreach ($access as $value) {
     if ($value === FALSE) {
       return FALSE;
     }
