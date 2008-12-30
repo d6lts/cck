@@ -17,6 +17,7 @@ should be enough, though.
 - #336174 Move actual field access check in content.module, with content_permission.module providing one permission-based implementation.
 - #336174 (followup) Make sure content_view_field() and content_format() both respect field access rules.
 - #351929 by lyricnz - Views integration: make sure formatters get a pseudo-node with enough info.
+- #131953 by markus_petrux - Views integration: expose additional db columns.
 
 CCK 6.x-2.1
 ===========
