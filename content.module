@@ -735,8 +735,9 @@ function content_field($op, &$node, $field, &$items, $teaser, $page) {
       else {
         $context = $node->build_mode;
       }
-
-      $formatter_name = isset($field['display_settings'][$context]['format']) ? $field['display_settings'][$context]['format'] : 'default';
+      // The field may be missing info for $contexts added by modules 
+      // enabled after the field was last edited.
+      $formatter_name = isset($field['display_settings'][$context]) && isset($field['display_settings'][$context]['format']) ? $field['display_settings'][$context]['format'] : 'default';
       if ($formatter = _content_get_formatter($formatter_name, $field['type'])) {
         $theme = $formatter['module'] .'_formatter_'. $formatter_name;
         $single = (content_handle('formatter', 'multiple values', $formatter) == CONTENT_HANDLE_CORE);
@@ -2188,7 +2189,10 @@ function content_field_wrapper_post_render($content, $element) {
  *   as set on the Manage fields screen.
  */
 function theme_content_exclude($content, $object, $context) {
-  if (empty($object['display_settings'])
+  // The field may be missing info for $contexts added by modules 
+  // enabled after the field was last edited.
+  if (empty($object['display_settings']) 
+    || empty($object['display_settings'][$context])
     || !is_array($object['display_settings'][$context])
     || empty($object['display_settings'][$context]['exclude'])) {
     return FALSE;
