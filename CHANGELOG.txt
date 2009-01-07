@@ -19,6 +19,7 @@ should be enough, though.
 - #336174 (followup) Make sure content_view_field() and content_format() both respect field access rules.
 - #351929 by lyricnz - Views integration: make sure formatters get a pseudo-node with enough info.
 - #131953 by markus_petrux - Views integration: expose additional db columns.
+- #355712 by fractile81 - Fieldgroup: fix extraneous cache clears.
 
 CCK 6.x-2.1
 ===========

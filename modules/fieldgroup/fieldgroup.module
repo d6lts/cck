@@ -89,9 +89,9 @@ function fieldgroup_content_fieldapi($op, $field) {
   switch ($op) {
     case 'delete instance':
       db_query("DELETE FROM {". fieldgroup_fields_tablename() ."} WHERE field_name = '%s'", $field['field_name']);
+      cache_clear_all('fieldgroup_data', content_cache_tablename());
       break;
   }
-  cache_clear_all('fieldgroup_data', content_cache_tablename());
 }
 
 function fieldgroup_group_edit_form(&$form_state, $type_name, $group_name) {
