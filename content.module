@@ -2428,8 +2428,7 @@ function content_max_delta($field_name, $type_name = NULL) {
       if (empty($type_name) || $content_type['type'] == $type_name) {
         foreach ($content_type['fields'] as $field) {
           $db_info = content_database_info($field);
-          $table = $db_info['table'];
-          if (db_result(db_query("SELECT COUNT(*) FROM {$table}")) >= 1) {
+          if (db_result(db_query("SELECT COUNT(*) FROM {". $db_info['table'] ."}")) >= 1) {
             return 0;
           }
         }
@@ -2441,12 +2440,11 @@ function content_max_delta($field_name, $type_name = NULL) {
   // in the node table to limit the type.
   else {
     $db_info = content_database_info($field);
-    $table = $db_info['table'];
     if (!empty($type_name)) {
-      $delta = db_result(db_query("SELECT MAX(delta) FROM {$table} f LEFT JOIN {node} n ON f.vid = n.vid WHERE n.type = '%s'", $type_name));
+      $delta = db_result(db_query("SELECT MAX(delta) FROM {". $db_info['table'] ."} f LEFT JOIN {node} n ON f.vid = n.vid WHERE n.type = '%s'", $type_name));
     }
     else {
-      $delta = db_result(db_query("SELECT MAX(delta) FROM {$table}"));
+      $delta = db_result(db_query("SELECT MAX(delta) FROM {". $db_info['table'] ."}"));
     }
     if ($delta >= 0) {
       return $delta;
