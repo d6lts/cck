@@ -25,6 +25,7 @@ should be enough, though.
 - Fix 'undefined variable' notice when submitting field settings form with 'php code for default value.
 - #353012 User reference - fix duplicate 'reverse links' on user profile pages when the same user is referenced by several userref fields in a node. Also improves performance.
 - #342427 Views integration - fix summaries for nodereference and userreference fields.
+- #349987 by Michelle - Panels integration for fieldgroups.
 
 CCK 6.x-2.1
 ===========
