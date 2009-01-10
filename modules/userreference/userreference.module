@@ -823,28 +823,22 @@ function userreference_user($type, &$edit, &$account) {
       // table comes up in more than one content type, we only need
       // to search it once.
       $search_tables = array();
-      $search_links = array();
       foreach ($types as $type_name => $type) {
         foreach ($type['fields'] as $field) {
           // Only add tables when reverse link has been selected.
           if ($field['type'] == 'userreference' && !empty($field['widget']['reverse_link'])) {
             $db_info = content_database_info($field);
             $search_tables[$db_info['table']] = $db_info['columns']['uid']['column'];
-            $search_links[$db_info['table']] = $field['widget']['reverse_link'];
           }
         }
       }
       foreach ($search_tables as $table => $column) {
-        $ids = db_query(db_rewrite_sql("SELECT DISTINCT(n.nid) FROM {node} n LEFT JOIN {". $table ."} f ON n.vid = f.vid WHERE f.". $column ."=". $account->uid. " AND n.status = 1"));
+        $ids = db_query(db_rewrite_sql("SELECT DISTINCT(n.nid), n.title, n.type FROM {node} n LEFT JOIN {". $table ."} f ON n.vid = f.vid WHERE f.". $column ."=". $account->uid. " AND n.status = 1"));
         while ($data = db_fetch_object($ids)) {
-          // TODO, do we really want a complete node_load() here? We only need the title to create a link.
-          $node = node_load($data->nid);
-          $node->reverse_link = $search_links[$table];
-          $additions[$node->type][] = $node;
+          $additions[$data->type][$data->nid] = $data->title;
         }
       }
       $account->userreference = $additions;
-      return;
       break;
 
     case 'view':
@@ -853,10 +847,8 @@ function userreference_user($type, &$edit, &$account) {
         $additions = array();
         $values = array();
         foreach ($account->userreference as $node_type => $nodes) {
-          foreach ($nodes as $node) {
-            if ($node->reverse_link) {
-              $values[$node_type][] = l($node->title, 'node/'. $node->nid);
-            }
+          foreach ($nodes as $nid => $title) {
+            $values[$node_type][] = l($title, 'node/'. $nid);
           }
           if (isset($values[$node_type])) {
             $additions[] = array(

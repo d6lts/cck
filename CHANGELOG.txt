@@ -23,6 +23,7 @@ should be enough, though.
 - #355712 by fractile81 - Fieldgroup: fix extraneous cache clears.
 - #356666 by flobruit - fix 'exclude' display setting wrongly set across shared instances of a field.
 - Fix 'undefined variable' notice when submitting field settings form with 'php code for default value.
+- #353012 User reference - fix duplicate 'reverse links' on user profile pages when the same user is referenced by several userref fields in a node. Also improves performance.
 
 CCK 6.x-2.1
 ===========
