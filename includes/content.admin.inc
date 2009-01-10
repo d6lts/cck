@@ -1207,6 +1207,7 @@ function content_field_edit_form_validate($form, &$form_state) {
 
     if (isset($form_values['default_value_php']) &&
     ($php = trim($form_values['default_value_php']))) {
+      $error = FALSE;
       ob_start();
       $return = eval($php);
       ob_end_clean();
