@@ -139,7 +139,13 @@ function nodereference_field_settings($op, $field) {
       // Filter: swap the handler to the 'in' operator.
       $data[$table_alias][$field['field_name'] .'_nid']['filter']['handler'] = 'content_handler_filter_many_to_one';
       // Argument: use node.title for summaries.
-      $data[$table_alias][$field['field_name'] .'_nid']['argument']['name table'] = 'node';
+      $data["node_$table_alias"]['table']['join']['node'] = array(
+        'table' => 'node',
+        'field' => 'nid',
+        'left_table' => $table_alias,
+        'left_field' => $field['field_name'] .'_nid',
+      );
+      $data[$table_alias][$field['field_name'] .'_nid']['argument']['name table'] = "node_$table_alias";
       $data[$table_alias][$field['field_name'] .'_nid']['argument']['name field'] = 'title';
       // Relationship: add a relationship for related node.
       $data[$table_alias][$field['field_name'] .'_nid']['relationship'] = array(

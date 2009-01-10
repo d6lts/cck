@@ -135,8 +135,15 @@ function userreference_field_settings($op, $field) {
 
       // Filter : swap the handler to the 'in' operator.
       $data[$table_alias][$field['field_name'] .'_uid']['filter']['handler'] = 'content_handler_filter_many_to_one';
-      // Argument: use users.name for summaries.
-      $data[$table_alias][$field['field_name'] .'_uid']['argument']['name table'] = 'users';
+      // Argument: get the user name for summaries.
+      // We need to join a new instance of the users table.
+      $data["users_$table_alias"]['table']['join']['node'] = array(
+        'table' => 'users',
+        'field' => 'uid',
+        'left_table' => $table_alias,
+        'left_field' => $field['field_name'] .'_uid',
+      );
+      $data[$table_alias][$field['field_name'] .'_uid']['argument']['name table'] = "users_$table_alias";
       $data[$table_alias][$field['field_name'] .'_uid']['argument']['name field'] = 'name';
       // Relationship: Add a relationship for related user.
       $data[$table_alias][$field['field_name'] .'_uid']['relationship'] = array(
