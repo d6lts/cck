@@ -2371,7 +2371,8 @@ function content_content_extra_fields($type_name) {
       'description' => t('Poll module settings.'),
       'weight' => -3
     );
-  }  if (module_exists('upload') && variable_get("upload_$type_name", TRUE)) {
+  }  
+  if (module_exists('upload') && variable_get("upload_$type_name", TRUE)) {
     $extra['attachments'] = array(
       'label' => t('File attachments'),
       'description' => t('Upload module form.'),
