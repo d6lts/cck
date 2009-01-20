@@ -2355,7 +2355,23 @@ function content_content_extra_fields($type_name) {
       'weight' => 10
     );
   }
-  if (module_exists('upload') && variable_get("upload_$type_name", TRUE)) {
+  if ($type_name == 'poll' && module_exists('poll')) {
+    $extra['title'] = array(
+      'label' => t('Poll title'),
+      'description' => t('Poll module title.'),
+      'weight' => -5
+    );
+    $extra['choice_wrapper'] = array(
+      'label' => t('Poll choices'),
+      'description' => t('Poll module choices.'),
+      'weight' => -4
+    );
+    $extra['settings'] = array(
+      'label' => t('Poll settings'),
+      'description' => t('Poll module settings.'),
+      'weight' => -3
+    );
+  }  if (module_exists('upload') && variable_get("upload_$type_name", TRUE)) {
     $extra['attachments'] = array(
       'label' => t('File attachments'),
       'description' => t('Upload module form.'),
