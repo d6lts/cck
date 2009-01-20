@@ -2348,6 +2348,13 @@ function content_content_extra_fields($type_name) {
       'weight' => -3
     );
   }
+  if (module_exists('book')) {
+    $extra['book'] = array(
+      'label' => t('Book'),
+      'description' => t('Book module form.'),
+      'weight' => 10
+    );
+  }
   if (module_exists('upload') && variable_get("upload_$type_name", TRUE)) {
     $extra['attachments'] = array(
       'label' => t('File attachments'),

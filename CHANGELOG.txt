@@ -3,6 +3,7 @@
 CCK 6.x-2.x
 ===========
 
+- Add book form to Manage fields screen.
 - Fix devel_generate for decimal and float values.
 - #358700 Can't use array_slice() on assoc array in PHP4.
 - #196421 Prefixed tables weren't getting queried correctly.
