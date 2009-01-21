@@ -61,6 +61,9 @@ function content_fields_list() {
   $fields = content_fields();
   $field_types = _content_field_types();
 
+  // Sort fields by field name.
+  ksort($fields);
+
   $header = array(t('Field name'), t('Field type'), t('Used in'));
   $rows = array();
   foreach ($fields as $field) {
