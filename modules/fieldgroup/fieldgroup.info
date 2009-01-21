@@ -1,0 +1,7 @@
+; $Id$
+name = Fieldgroup
+description = Create display groups for CCK fields.
+dependencies[] = cck
+package = CCK
+core = 7.x
+files[]=fieldgroup.module

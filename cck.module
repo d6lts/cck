@@ -1,0 +1,564 @@
+<?php
+// $Id$
+/**
+ * @file
+ * Allows administrators to associate custom fields to content types.
+ */
+
+/**
+ * Implementation of hook_help().
+ */
+function cck_help($path, $arg) {
+  switch ($path) {
+    case 'admin/help#cck':
+      // TODO Rewrite help to refer to only the appropriate functions and files for the new system.
+      return '';
+    case 'admin/build/fields':
+      return t('The list below shows all fields currently in use for easy reference.');
+
+  }
+}
+
+/**
+ * Implementation of hook_perm().
+ */
+function cck_perm() {
+  return array('Use PHP input for field settings (dangerous - grant with care)');
+}
+
+/**
+ * Implementation of hook_init().
+ */
+function cck_init() {
+  // TODO D7 : be smarter ?
+  drupal_add_css(drupal_get_path('module', 'cck') .'/theme/cck.css');
+}
+
+/**
+ * Implementation of hook_menu_alter().
+ */
+function cck_menu_alter(&$items) {
+  // Customize the content types page with our own callback
+  $items['admin/build/types']['page callback'] = 'cck_types_overview';
+  $items['admin/build/types']['file'] = 'cck.admin.inc';
+  $items['admin/build/types']['file path'] = drupal_get_path('module', 'cck') .'/includes';
+}
+
+/**
+ * Implementation of hook_menu().
+ */
+function cck_menu() {
+  // Set up menus for both content types and user settings.
+
+  $items = array();
+  $items['admin/build/fields'] = array(
+    'title' => 'Fields',
+    'description' => 'Manage custom fields that have been added to content types or users.',
+    'page callback' => 'cck_fields_list',
+    'access arguments' => array('administer content types'),
+    'type' => MENU_NORMAL_ITEM,
+  );
+  $items['admin/build/fields/list'] = array(
+    'title' => 'Field list',
+    'page callback' => 'cck_fields_list',
+    'access arguments' => array('administer content types'),
+    'type' => MENU_DEFAULT_LOCAL_TASK,
+    'weight' => 1,
+  );
+  // TODO D7 : remove, debug code
+  $items['admin/build/fields/field-info'] = array(
+    'title' => 'Field Info (debug)',
+    'page callback' => 'cck_debug_field_info',
+    'access arguments' => array('administer content types'),
+    'type' => MENU_LOCAL_TASK,
+    'weight' => 2,
+  );
+  $items['admin/build/types/field-info'] = array(
+    'title' => 'Field Info (debug)',
+    'page callback' => 'cck_debug_field_info',
+    'access arguments' => array('administer content types'),
+    'type' => MENU_LOCAL_TASK,
+    'weight' => 2,
+  );
+  // Create an 'Edit' tab for the user.
+  $items['admin/user/settings/edit'] = array(
+    'title' => 'Edit',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('user_admin_settings'),
+    'access arguments' => array('administer users'),
+    'type' => MENU_DEFAULT_LOCAL_TASK,
+  );
+
+
+  // Make sure this doesn't fire until field_bundles is working,
+  // and tables are updated, needed to avoid errors on initial installation.
+  if (!defined('MAINTENANCE_MODE')) {
+    // Create tabs for all possible bundles.
+    foreach (field_info_fieldable_types() as $obj_type => $info) {
+      foreach ($info['bundles'] as $bundle_name => $bundle_label) {
+        $admin_path = cck_bundle_admin_path($bundle_name);
+        $items[$admin_path .'/fields'] = array(
+          'title' => 'Manage fields',
+          'page callback' => 'drupal_get_form',
+          'page arguments' => array('cck_field_overview_form', $bundle_name),
+          'access arguments' => array('administer content types'),
+          'type' => MENU_LOCAL_TASK,
+          'weight' => 1,
+        );
+        // A dummy function to trigger a page refresh so that
+        // field menus get rebuilt correctly when new fields are added.
+        $items[$admin_path .'/fields/refresh'] = array(
+          'title' => 'Refresh menu',
+          'page callback' => 'drupal_get_form',
+          'page arguments' => array('cck_field_menu_refresh', $bundle_name),
+          'access arguments' => array('administer content types'),
+          'type' => MENU_CALLBACK,
+          'weight' => 1,
+        );
+        $items[$admin_path .'/display'] = array(
+          'title' => 'Display fields',
+          'page callback' => 'drupal_get_form',
+          'page arguments' => array('cck_display_overview_form', $bundle_name),
+          'access arguments' => array('administer content types'),
+          'type' => MENU_LOCAL_TASK,
+          'weight' => 2,
+        );
+
+        // 'Display fields' tab and context secondary tabs.
+        $tabs = cck_build_modes($obj_type);
+        foreach ($tabs as $key => $tab) {
+          $items[$admin_path .'/display/'. $key] = array(
+            'title' => $tab['title'],
+            'page arguments' => array('cck_display_overview_form', $bundle_name, $key),
+            'access arguments' => array('administer content types'),
+            'type' => $key == 'basic' ? MENU_DEFAULT_LOCAL_TASK : MENU_LOCAL_TASK,
+            'weight' => $key == 'basic' ? 0 : 1,
+          );
+        }
+
+        // Add tabs for any instances that are already created.
+        $instances = field_info_instances($bundle_name);
+        foreach ($instances as $instance) {
+          $field_name = $instance['field_name'];
+          $items[$admin_path .'/fields/'. $field_name] = array(
+            'title' => $instance['label'],
+            'page callback' => 'drupal_get_form',
+            'page arguments' => array('cck_field_edit_form', $bundle_name, $field_name),
+            'access arguments' => array('administer content types'),
+            'type' => MENU_LOCAL_TASK,
+          );
+          $items[$admin_path .'/fields/'. $field_name .'/edit'] = array(
+            'title' => 'Configure instance settings',
+            'page callback' => 'drupal_get_form',
+            'page arguments' => array('cck_field_edit_form', $bundle_name, $field_name),
+            'access arguments' => array('administer content types'),
+            'type' => MENU_DEFAULT_LOCAL_TASK,
+          );
+          $items[$admin_path .'/fields/'. $field_name .'/field-settings'] = array(
+            'title' => 'Configure field settings',
+            'page callback' => 'drupal_get_form',
+            'page arguments' => array('cck_field_settings_form', $bundle_name, $field_name),
+            'access arguments' => array('administer content types'),
+            'type' => MENU_LOCAL_TASK,
+          );
+          $items[$admin_path .'/fields/'. $field_name .'/widget-type'] = array(
+            'title' => 'Change widget type',
+            'page callback' => 'drupal_get_form',
+            'page arguments' => array('cck_widget_type_form', $bundle_name, $field_name),
+            'access arguments' => array('administer content types'),
+            'type' => MENU_LOCAL_TASK,
+          );
+          $items[$admin_path .'/fields/'. $field_name .'/remove'] = array(
+            'title' => 'Remove instance',
+            'page callback' => 'drupal_get_form',
+            'page arguments' => array('cck_field_remove_form', $bundle_name, $field_name),
+            'access arguments' => array('administer content types'),
+            'type' => MENU_LOCAL_TASK,
+          );
+        }
+      }
+    }
+  }
+  return $items;
+}
+
+function cck_debug_field_info() {
+  dsm(_field_info());
+  return '';
+}
+
+/**
+ * Implementation of hook_theme().
+ */
+function cck_theme() {
+  $path = drupal_get_path('module', 'cck') .'/theme';
+  require_once "./$path/theme.inc";
+
+  return array(
+    'cck_field_overview_form' => array(
+      'template' => 'cck-admin-field-overview-form',
+      'path' => $path,
+      'arguments' => array('form' => NULL),
+    ),
+    'cck_display_overview_form' => array(
+      'template' => 'cck-admin-display-overview-form',
+      'path' => $path,
+      'arguments' => array('form' => NULL),
+    ),
+  );
+}
+
+/**
+ * Implementation of hook_field_attach_pre_view().
+ */
+function cck_field_attach_view($output, $obj_type, &$object, $teaser, $page) {
+  // Add identifier to the object to be used to alter extra fields in the view.
+  list($id, $vid, $bundle) = field_attach_extract_ids($obj_type, $object);
+  $object->content['#fieldable'] = TRUE;
+  $object->content['#bundle'] = $bundle;
+  return $output;
+}
+
+/**
+ * 
+ */
+function cck_field_attach_insert($obj_type, &$object) {
+  
+  // Add identifier to the object to be used to alter extra fields in the view.
+  list($id, $vid, $bundle) = field_attach_extract_ids($obj_type, $object);
+
+  // Implement hook_devel_generate(), if needed.
+  if (!empty($object->devel_generate)) {
+    include_once('./'. drupal_get_path('module', 'cck') .'/includes/cck.devel.inc');
+    cck_generate_fields($object, $bundle);
+  }  
+
+}
+
+/**
+ * Implementation of hook_field_attach_form().
+ */
+function cck_field_attach_form($obj_type, &$object, &$form, &$form_state) {
+  // Add identifier to the object to be used to alter extra fields in the form.
+  list($id, $vid, $bundle) = field_attach_extract_ids($obj_type, $object);
+  $form['#fieldable'] = TRUE;
+  $form['#bundle'] = $bundle;
+}
+
+/**
+ *  Implementation of hook_form_alter().
+ */
+function cck_form_alter(&$form, $form_state, $form_id) {
+  if (!empty($form['#fieldable']) && isset($form['#bundle'])) {
+    $bundle_name = $form['#bundle'];
+    $extra = cck_extra_field_values($bundle_name);
+    foreach ($extra as $key => $value) {
+      if (isset($form[$key])) {
+        $form[$key]['#weight'] = $value['weight'];
+      }
+    }
+  }
+}
+
+/**
+ * Implementation of profile_alter().
+ *
+ * Change extra weights here after extra fields have been added.
+ * Hook field_attach_post_view() is too early, other fields aren't
+ * all added to the form at that point.
+ *
+ * TODO Can we make the view alter more generic? This requires that
+ * we specifically alter each individual 'view' for all fieldable entities.
+ */
+function cck_profile_alter($account) {
+  if (!empty($account->content['#fieldable']) && isset($account->content['#bundle'])) {
+    $bundle_name = $account->content['#bundle'];
+    $extra = cck_extra_field_values($bundle_name);
+    foreach ($extra as $key => $value) {
+      if (isset($account->content[$key])) {
+        $account->content[$key]['#weight'] = $value['weight'];
+      }
+    }
+  }
+}
+
+/**
+ * Implementation of node_view_alter.
+ *
+ * Change extra weights here after extra fields have been added.
+ * Hook field_attach_post_view() is too early, other fields aren't
+ * all added to the form at that point.
+ *
+ * TODO Can we make the view alter more generic? This requires that
+ * we specifically alter each individual 'view' for all fieldable entities.
+ */
+function cck_node_view_alter(&$node, $teaser = FALSE, $page = FALSE) {
+  if (!empty($node->content['#fieldable']) && isset($node->content['#bundle'])) {
+    $bundle_name = $node->content['#bundle'];
+    $extra = cck_extra_field_values($bundle_name);
+    foreach ($extra as $key => $value) {
+      // Some core 'fields' use a different key in node forms and in 'view'
+      // render arrays.
+      if (isset($value['view']) && isset($node->content[$value['view']])) {
+        $node->content[$value['view']]['#weight'] = $value['weight'];
+      }
+      elseif (isset($node->content[$key])) {
+        $node->content[$key]['#weight'] = $value['weight'];
+      }
+    }
+  }
+}
+
+/**
+ * Implementation of hook_cck_extra_fields.
+ */
+function cck_cck_extra_fields($bundle_name) {
+  if ($bundle_name == 'user') {
+    return _cck_user_extra_fields();
+  }
+  else {
+    return _cck_node_extra_fields($bundle_name);
+  }
+}
+
+// TODO Add other user elements here.
+// How to do this for users? The form elements are totally different
+// than the view elements.
+function _cck_user_extra_fields() {
+  $extra = array();
+  $extra['account'] = array(
+    'label' => 'User name and password',
+    'description' => t('User module form element'),
+    'weight' => -10
+  );
+  $extra['timezone'] = array(
+    'label' => 'Timezone',
+    'description' => t('User module form element.'),
+    'weight' => 6
+  );
+  $extra['summary'] = array(
+    'label' => 'History',
+    'description' => t('User module view element.'),
+    'weight' => 5
+  );
+  return $extra;
+}
+
+function _cck_node_extra_fields($type_name) {
+  $type = node_get_types('type', $type_name);
+  $extra = array();
+
+  if ($type->has_title) {
+    $extra['title'] = array(
+      'label' => $type->title_label,
+      'description' => t('Node module element.'),
+      'weight' => -5
+    );
+  }
+  if ($type->has_body) {
+    $extra['body_field'] = array(
+      'label' => $type->body_label,
+      'description' => t('Node module element.'),
+      'weight' => 0,
+      'view' => 'body'
+    );
+  }
+  if (module_exists('locale') && variable_get("language_content_type_$type_name", 0)) {
+    $extra['language'] = array(
+      'label' => t('Language'),
+      'description' => t('Locale module element.'),
+      'weight' => 0
+    );
+  }
+  if (module_exists('menu')) {
+    $extra['menu'] = array(
+      'label' => t('Menu settings'),
+      'description' => t('Menu module element.'),
+      'weight' => -2
+    );
+  }
+  if (module_exists('taxonomy') && taxonomy_get_vocabularies($type_name)) {
+    $extra['taxonomy'] = array(
+      'label' => t('Taxonomy'),
+      'description' => t('Taxonomy module element.'),
+      'weight' => -3
+    );
+  }
+  if (module_exists('book')) {
+    $extra['book'] = array(
+      'label' => t('Book'),
+      'description' => t('Book module element.'),
+      'weight' => 10
+    );
+  }
+  if (module_exists('upload') && variable_get("upload_$type_name", TRUE)) {
+    $extra['attachments'] = array(
+      'label' => t('File attachments'),
+      'description' => t('Upload module element.'),
+      'weight' => 30,
+      'view' => 'files'
+    );
+  }
+
+  return $extra;
+}
+
+/**
+ * Retrieve the user-defined weight for non-CCK node 'fields'.
+ *
+ * CCK's 'Manage fields' page lets users reorder node fields, including non-CCK
+ * items (body, taxonomy, other hook_nodeapi-added elements by contrib modules...).
+ * Contrib modules that want to have their 'fields' supported need to expose
+ * them with hook_cck_extra_fields, and use this function to retrieve the
+ * user-defined weight.
+ *
+ * @param $type_name
+ *   The content type name.
+ * @param $pseudo_field_name
+ *   The name of the 'field'.
+ * @return
+ *   The weight for the 'field', respecting the user settings stored
+ *   by field.module.
+ */
+function cck_extra_field_weight($bundle_name, $pseudo_field_name) {
+  $extra = cck_extra_field_values($bundle_name);
+  if (isset($extra[$pseudo_field_name])) {
+    return $extra[$pseudo_field_name]['weight'];
+  }
+}
+
+function cck_extra_field_values($bundle_name) {
+  static $info = array();
+
+  if (empty($info)) {
+    $info = array();
+    $bundles = field_info_bundles();
+    foreach ($bundles as $bundle => $bundle_label) {
+      // Gather information about non-CCK 'fields'.
+      $extra = module_invoke_all('cck_extra_fields', $bundle);
+      drupal_alter('cck_extra_fields', $extra, $bundle);
+
+      // Add saved weights.
+      foreach (variable_get('cck_extra_weights_'. $bundle, array()) as $key => $value) {
+        // Some stored entries might not exist anymore, for instance if uploads
+        // have been disabled, or vocabularies removed...
+        if (isset($extra[$key])) {
+          $extra[$key]['weight'] = $value;
+        }
+      }
+      $info[$bundle] = $extra;
+    }
+  }
+  if (array_key_exists($bundle_name, $info)) {
+    return $info[$bundle_name];
+  }
+  else {
+    return array();
+  }
+}
+
+
+function cck_build_modes($obj_type, $tab_selector = NULL) {
+  static $info;
+
+  if (!isset($info[$obj_type])) {
+    $info[$obj_type] = module_invoke_all('cck_build_modes');
+    // Collect titles, and filter out non active modes.
+    $active_modes = field_build_modes($obj_type);
+    foreach ($info[$obj_type] as $tab => $values) {
+      $modes = array();
+      foreach ($info[$obj_type][$tab]['build modes'] as $mode) {
+        if (isset($active_modes[$mode])) {
+          $modes[$mode] = $active_modes[$mode];
+        }
+      }
+      if ($modes) {
+        $info[$obj_type][$tab]['build modes'] = $modes;
+      }
+      else {
+        unset($info[$obj_type][$tab]);
+      }
+    }
+  }
+  if ($tab_selector) {
+    return isset($info[$obj_type][$tab_selector]) ? $info[$obj_type][$tab_selector]['build modes'] : array();
+  }
+  else {
+    return $info[$obj_type];
+  }
+}
+
+/**
+ * Implementation of hook_cck_build_modes(), on behalf of other core modules.
+ *
+ * @return
+ * An array describing the build modes defined by the module, grouped by tabs.
+ *
+ * Expected format:
+ * array(
+ *   // A module can add its render modes to a tab defined by another module.
+ *   'tab1' => array(
+ *     'title' => t('The human-readable title of the tab'),
+ *     'build modes' => array('mymodule_mode1', 'mymodule_mode2'),
+ *   ),
+ *   'tab2' => array(
+ *     // ...
+ *   ),
+ * );
+ */
+function cck_cck_build_modes() {
+  $modes = array(
+    'basic' => array(
+      'title' => t('Basic'),
+      'build modes' => array('teaser', 'full'),
+    ),
+    'rss' => array(
+      'title' => t('RSS'),
+      'build modes' => array(NODE_BUILD_RSS),
+    ),
+    'print' => array(
+      'title' => t('Print'),
+      'build modes' => array(NODE_BUILD_PRINT),
+    ),
+    'search' => array(
+      'title' => t('Search'),
+      'build modes' => array(NODE_BUILD_SEARCH_INDEX, NODE_BUILD_SEARCH_RESULT),
+    ),
+  );
+  return $modes;
+}
+
+/**
+ *  Implementation of hook_node_type().
+ *
+ *  TODO Right way to do this in D7? Not needed for users since the user type is never deleted.
+ *   Content types could be deleted. Not sure about other entities.
+ *   [yched] : fieldable will need to take care of calling field_rename_bundle(), field_delete_bundle()
+ *     when appropriate anyway. Those functions - we don't have them yet :) - will need to call a hook
+ *     so that CCK UI is notified of this.
+ */
+function cck_node_type($op, $info) {
+  switch ($op) {
+    case 'update':
+      if ($extra = variable_get('cck_extra_weights_'. $info->old_type, array())) {
+        variable_set('cck_extra_weights_'. $info->type, $extra);
+        variable_del('cck_extra_weights_'. $info->old_type);
+      }
+      break;
+    case 'delete':
+      variable_del('cck_extra_weights_'. $info->type);
+      break;
+  }
+}
+
+/**
+ * Helper function to create the right administration path for a bundle.
+ */
+function cck_bundle_admin_path($bundle_name) {
+  if ($bundle_name == 'user') {
+    return 'admin/user/settings';
+  }
+  else {
+    return 'admin/build/node-type/' . str_replace('_', '-', $bundle_name);
+  }
+}

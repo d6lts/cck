@@ -1,0 +1,8 @@
+; $Id$
+name = Node Reference
+description = Defines a field type for referencing one node from another.
+dependencies[] = text
+dependencies[] = option_widgets
+files[]=node_reference.module
+package = Core - fields
+core = 7.x
