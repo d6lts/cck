@@ -1,8 +1,0 @@
-; $Id: content.info,v 1.6 2007/07/04 23:46:29 yched Exp $
-name = Fields UI
-description = Add fields to content types through a User Interface.
-package = CCK
-core = 7.x
-files[] = content_ui.module
-files[] = includes/content_ui.admin.inc
-files[] = theme/theme.inc
