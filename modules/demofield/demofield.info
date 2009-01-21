@@ -1,0 +1,6 @@
+; $Id$
+name = Demo Field
+description = Demo attaching a field to users and nodes
+dependencies[] = text
+core = 7.x
+files[] = demofield.module

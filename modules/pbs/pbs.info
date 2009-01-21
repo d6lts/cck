@@ -1,0 +1,8 @@
+; $Id$
+name = Per-bundle Storage
+description = Maintain denormalized storage tables containing all single-value felds for every bundle.
+package = CCK
+core = 7.x
+files[] = pbs.module
+files[] = pbs.fieldapi.inc
+files[] = pbs.install
