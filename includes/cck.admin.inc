@@ -79,7 +79,7 @@ function cck_fields_list() {
   }
   else {
     // Sort rows by field name.
-    ksort($instances);
+    ksort($rows);
     $output = theme('table', $header, $rows);
   }
   return $output;
