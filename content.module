@@ -2408,6 +2408,7 @@ function content_extra_field_weight($type_name, $pseudo_field_name) {
   // information for 'extra' fields hasn't been refreshed yet.
   if (!isset($type['extra'][$pseudo_field_name])) {
     content_clear_type_cache();
+    $type = content_types($type_name);
   }
 
   if (isset($type['extra'][$pseudo_field_name])) {
