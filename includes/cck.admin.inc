@@ -1112,9 +1112,12 @@ function cck_field_edit_form(&$form_state, $bundle, $field_name) {
   $output = '';
   $instance = field_read_instance($field_name, $bundle);
   $field = field_read_field($field_name);
-
   $form = array();
-
+  $form['field'] = array(
+    '#type' => 'value',
+    '#value' => $field,
+    );
+    
   if (!empty($field['locked'])) {
     $output = array();
     $output['locked'] = array(
@@ -1175,8 +1178,8 @@ function cck_field_edit_form(&$form_state, $bundle, $field_name) {
     'active' => array('#type' => 'value', '#value' => !empty($field['instance']['widget']['active']) ? 1 : 0),
     );
 
-  // Add additional field instance settings from the widget module.
-  $additions = module_invoke($widget_type['module'], 'field_instance_settings_form', $instance);
+  // Add additional field instance settings from the field module.
+  $additions = module_invoke($field['module'], 'field_instance_settings_form', $instance);
   if (is_array($additions)) {
     $form['instance']['settings'] = $additions;
   }
@@ -1187,22 +1190,30 @@ function cck_field_edit_form(&$form_state, $bundle, $field_name) {
     $form['instance']['widget']['settings'] = $additions;
     $form['instance']['widget']['active']['#value'] = 1;
   }
-
-  // Add handling for default value if not provided by field.
-  if (field_behaviors_widget('default value', $instance) == FIELD_BEHAVIOR_DEFAULT) {
+  
+  // Add handling for default value if not provided by any other module.
+  // Field modules that want to provide their own default value handling
+  // or provide no default values should populate $instance['default_value_function']
+  // with some function name to make sure CCK doesn't try to intervene.
+  if (empty($instance['default_value_function']) || $instance['default_value_function'] == 'cck_field_default_value') {
     // Store the original default value for use in programmed forms.
     // Set '#default_value' instead of '#value' so programmed values
     // can override whatever we set here.
-    $default_value = $instance['widget']['default_value'];
-    $default_value_php = $instance['widget']['default_value_php'];
-    $form['instance']['widget']['default_value'] = array(
+    // TODO this may not apply now that default values handling has changed.
+    $default_value = cck_field_get_setting('default_value', 'instance', $field, $instance);
+    $default_value_php = cck_field_get_setting('default_value_php', 'instance', $field, $instance);
+    $form['instance']['default_value'] = array(
       '#type' => 'value',
-      '#default_value' => $instance['widget']['default_value'],
+      '#default_value' => $default_value,
     );
-    $form['instance']['widget']['default_value_php'] = array(
+    $form['instance']['default_value_php'] = array(
       '#type' => 'value',
-      '#default_value' => $instance['widget']['default_value_php'],
+      '#default_value' => $default_value_php,
     );
+    $form['instance']['default_value_function'] = array(
+      '#type' => 'value',
+      '#default_value' => 'cck_field_default_value',
+      );
 
     // We can't tell at the time we build the form if this is a programmed
     // form or not, so we always end up adding the default value widget
@@ -1214,7 +1225,6 @@ function cck_field_edit_form(&$form_state, $bundle, $field_name) {
     '#type' => 'submit',
     '#value' => t('Save settings'),
   );
-
   return $form;
 }
 
@@ -1222,7 +1232,9 @@ function cck_field_edit_form(&$form_state, $bundle, $field_name) {
  * Build default value fieldset.
  */
 function cck_default_value_widget($field, $instance, &$form, &$form_state) {
-  $form['instance']['widget']['default_value_widget'] = array(
+  $default_value = cck_field_get_setting('default_value', 'instance', $field, $instance);
+  $default_value_php = cck_field_get_setting('default_value_php', 'instance', $field, $instance);
+  $form['instance']['default_value_widget'] = array(
     '#type' => 'fieldset',
     '#title' => t('Default value'),
     '#collapsible' => FALSE,
@@ -1234,7 +1246,7 @@ function cck_default_value_widget($field, $instance, &$form, &$form_state) {
   $instance['required'] = FALSE;
   $instance['label'] = t('Default value');
   $instance['description'] = '';
-  $items = $instance['widget']['default_value'];
+  $items = $default_value;
   // Set up form info that the default value widget will need to find in the form.
   $form['#fields'] = array(
     $field['field_name'] => array(
@@ -1242,29 +1254,30 @@ function cck_default_value_widget($field, $instance, &$form, &$form_state) {
       'instance' => $instance,
     ),
   );
-  drupal_function_exists('field_field_form');
+  drupal_function_exists('field_default_form');
   // TODO allow multiple values (still requires some more work on 'add more' JS handler)
-  $form['instance']['widget']['default_value_widget'] += field_field_form(NULL, NULL, $field, $instance, $items, $form, $form_state, 0);
-  $form['#fields'][$field['field_name']]['form_path'] = array('instance', 'widget', 'default_value_widget', $field['field_name']);
-
+  $widget_form = field_default_form(NULL, NULL, $field, $instance, $items, $form, $form_state, 0);
+  $form['instance']['default_value_widget'] += $widget_form;
+  $form['#fields'][$field['field_name']]['form_path'] = array('instance', 'default_value_widget', $field['field_name']);
+  
   // Advanced: PHP code.
-  $form['instance']['widget']['default_value_widget']['advanced_options'] = array(
+  $form['instance']['default_value_widget']['advanced_options'] = array(
     '#type' => 'fieldset',
     '#title' => t('PHP code'),
     '#collapsible' => TRUE,
-    '#collapsed' => empty($instance['widget']['default_value_php']),
+    '#collapsed' => empty($default_value_php),
   );
-
+  
   if (user_access('Use PHP input for field settings (dangerous - grant with care)')) {
     foreach (array_keys($field['columns']) as $column) {
       $columns[] = t("'@column' => value for @column", array('@column' => $column));
     }
     $sample = t("return array(\n  0 => array(@columns),\n  // You'll usually want to stop here. Provide more values\n  // if you want your 'default value' to be multi-valued:\n  1 => array(@columns),\n  2 => ...\n);", array('@columns' => implode(', ', $columns)));
 
-    $form['instance']['widget']['default_value_widget']['advanced_options']['default_value_php'] = array(
+    $form['instance']['default_value_widget']['advanced_options']['default_value_php'] = array(
       '#type' => 'textarea',
       '#title' => t('Code'),
-      '#default_value' => isset($instance['widget']['default_value_php']) ? $instance['widget']['default_value_php'] : '',
+      '#default_value' => isset($default_value_php) ? $default_value_php : '',
       '#rows' => 6,
       '#tree' => TRUE,
       '#description' => t('Advanced usage only: PHP code that returns a default value. Should not include &lt;?php ?&gt; delimiters. If this field is filled out, the value returned by this code will override any value specified above. Expected format: <pre>!sample</pre>To figure out the expected format, you can use the <em>devel load</em> tab provided by <a href="@link_devel">devel module</a> on a %type content page. <strong>The option to embed PHP code in the field definition is provided for backwards compatibility and could be deprecated in the future. It is strongly recommended that you move this code to a custom function in a custom module and simply identify the custom function in the box above!</strong>', array(
@@ -1274,11 +1287,11 @@ function cck_default_value_widget($field, $instance, &$form, &$form_state) {
     );
   }
   else {
-    $form['instance']['widget']['default_value_widget']['advanced_options']['markup_default_value_php'] = array(
+    $form['instance']['default_value_widget']['advanced_options']['markup_default_value_php'] = array(
       '#type' => 'item',
       '#title' => t('Code'),
-      '#value' => !empty($instance['widget']['default_value_php']) ? '<code>'. check_plain($instance['widget']['default_value_php']) .'</code>' : t('&lt;none&gt;'),
-      '#description' => empty($instance['widget']['default_value_php']) ? t("You're not allowed to input PHP code.") : t('This PHP code was set by an administrator and will override any value specified above.'),
+      '#value' => !empty($default_value_php) ? '<code>'. check_plain($default_value_php) .'</code>' : t('&lt;none&gt;'),
+      '#description' => empty($default_value_php) ? t("You're not allowed to input PHP code.") : t('This PHP code was set by an administrator and will override any value specified above.'),
     );
   }
 }
@@ -1388,10 +1401,16 @@ function cck_field_edit_form_validate($form, &$form_state) {
 function cck_field_edit_form_submit($form, &$form_state) {
   $form_values = $form_state['values'];
   $instance = $form_values['instance'];
+  $field = $form_values['field'];
+  
+  cck_field_set_setting('default_value', 'instance', $instance['default_value_widget'][$instance['field_name']], $field, $instance);
+  cck_field_set_setting('default_value_php', 'instance', $instance['default_value_widget']['advanced_options']['default_value_php'], $field, $instance);
 
   // Make sure the default value widget does not get stored.
-  if (isset($instance['widget']['default_value_widget'])) {
-    unset($instance['widget']['default_value_widget']);
+  if (isset($instance['default_value_widget'])) {
+    unset($instance['default_value_widget']);
+    unset($instance['default_value']);
+    unset($instance['default_value_php']);
   }
 
   // TODO, move this to cck.text.inc and cck.number.inc??
@@ -1511,3 +1530,4 @@ function _element_validate_number($element, &$form_state) {
     form_error($element, t('%name must be a number.', array('%name' => $element['#title'])));
   }
 }
+

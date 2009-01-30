@@ -2,6 +2,6 @@
 name = Fieldgroup
 description = Create display groups for CCK fields.
 dependencies[] = cck
+files[]=fieldgroup.module
 package = CCK
 core = 7.x
-files[]=fieldgroup.module

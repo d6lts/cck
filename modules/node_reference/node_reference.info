@@ -4,5 +4,5 @@ description = Defines a field type for referencing one node from another.
 dependencies[] = text
 dependencies[] = option_widgets
 files[]=node_reference.module
-package = Core - fields
+package = CCK
 core = 7.x

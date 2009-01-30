@@ -76,23 +76,16 @@ function content_update_7000() {
   - Field settings should be limited to settings that affect the schema,
     all others should be instance settings.
   - Display is now $instance['display'] instead of $instance['display_settings']
-  - Display format now adds label to every context instead of one label
-      at the top level, for a more consistent structure.  
+  - Display format now adds label to every context instead of one label at the top level, for a more consistent structure.  
   - Rename display options, formatter names are now prefixed with field name.      
-  - No more content type: $field['widget']['type_name'] 
-      becomes $instance['bundle']
-  - Required is now $instance['required'] 
-      instead of $field['required']
-  - Label is now $instance['label'] 
-      instead of $field['widget']['label']
-  - Description is now $instance['description'] 
-      instead of $field['widget']['description']
+  - No more content type: $field['widget']['type_name'] becomes $instance['bundle']
+  - Required is now $instance['required'] instead of $field['required']
+  - Label is now $instance['label'] instead of $field['widget']['label']
+  - Description is now $instance['description'] instead of $field['widget']['description']
   - Weight is now $instance['weight'] instead of $field['widget']['weight']
-  - Text module textareas are now a separate field type so the 
-      db schema won't change.
-  - Text module format columns are always set and don't change by field settings 
-      so the db schema won't change.
+  - Text module textareas are now a separate field type so the db schema won't change.
+  - Text module format columns are always set and don't change by field settings so the db schema won't change.
   - Text and Number with allowed values are now made into List field types.
-  
+  - Default values are moved out of the field settings into the cck_field_settings table maintained by CCK
 }
 */

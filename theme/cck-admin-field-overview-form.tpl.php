@@ -88,7 +88,7 @@
             </div>
           </td>
           <td><div class="cck-new">&nbsp;</div><?php print $row->weight . $row->parent . $row->hidden_name; ?></td>
-          <td><div class="cck-new">&nbsp;</div><?php print $row->group_name; ?></td>
+          <td colspan="2"><div class="cck-new">&nbsp;</div><?php print $row->group_name; ?></td>
           <td><div class="cck-new">&nbsp;</div><?php print $row->group_type; ?></td>
           <td><div class="cck-new">&nbsp;</div><?php print $row->group_option; ?></td>
         <?php break;

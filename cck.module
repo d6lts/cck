@@ -211,7 +211,7 @@ function cck_theme() {
 /**
  * Implementation of hook_field_attach_pre_view().
  */
-function cck_field_attach_view($output, $obj_type, &$object, $teaser, $page) {
+function cck_field_attach_view($output, $obj_type, &$object, $teaser) {
   // Add identifier to the object to be used to alter extra fields in the view.
   list($id, $vid, $bundle) = field_attach_extract_ids($obj_type, $object);
   $object->content['#fieldable'] = TRUE;
@@ -220,10 +220,10 @@ function cck_field_attach_view($output, $obj_type, &$object, $teaser, $page) {
 }
 
 /**
- * 
+ *
  */
 function cck_field_attach_insert($obj_type, &$object) {
-  
+
   // Add identifier to the object to be used to alter extra fields in the view.
   list($id, $vid, $bundle) = field_attach_extract_ids($obj_type, $object);
 
@@ -231,7 +231,7 @@ function cck_field_attach_insert($obj_type, &$object) {
   if (!empty($object->devel_generate)) {
     include_once('./'. drupal_get_path('module', 'cck') .'/includes/cck.devel.inc');
     cck_generate_fields($object, $bundle);
-  }  
+  }
 
 }
 
@@ -316,6 +316,7 @@ function cck_cck_extra_fields($bundle_name) {
   if ($bundle_name == 'user') {
     return _cck_user_extra_fields();
   }
+  // TODO: we'll need to recognize other non single-mundle fieldable types.
   else {
     return _cck_node_extra_fields($bundle_name);
   }
@@ -345,59 +346,59 @@ function _cck_user_extra_fields() {
 }
 
 function _cck_node_extra_fields($type_name) {
-  $type = node_get_types('type', $type_name);
   $extra = array();
-
-  if ($type->has_title) {
-    $extra['title'] = array(
-      'label' => $type->title_label,
-      'description' => t('Node module element.'),
-      'weight' => -5
-    );
-  }
-  if ($type->has_body) {
-    $extra['body_field'] = array(
-      'label' => $type->body_label,
-      'description' => t('Node module element.'),
-      'weight' => 0,
-      'view' => 'body'
-    );
-  }
-  if (module_exists('locale') && variable_get("language_content_type_$type_name", 0)) {
-    $extra['language'] = array(
-      'label' => t('Language'),
-      'description' => t('Locale module element.'),
-      'weight' => 0
-    );
-  }
-  if (module_exists('menu')) {
-    $extra['menu'] = array(
-      'label' => t('Menu settings'),
-      'description' => t('Menu module element.'),
-      'weight' => -2
-    );
-  }
-  if (module_exists('taxonomy') && taxonomy_get_vocabularies($type_name)) {
-    $extra['taxonomy'] = array(
-      'label' => t('Taxonomy'),
-      'description' => t('Taxonomy module element.'),
-      'weight' => -3
-    );
-  }
-  if (module_exists('book')) {
-    $extra['book'] = array(
-      'label' => t('Book'),
-      'description' => t('Book module element.'),
-      'weight' => 10
-    );
-  }
-  if (module_exists('upload') && variable_get("upload_$type_name", TRUE)) {
-    $extra['attachments'] = array(
-      'label' => t('File attachments'),
-      'description' => t('Upload module element.'),
-      'weight' => 30,
-      'view' => 'files'
-    );
+  if ($type = node_get_types('type', $type_name)) {
+    if ($type->has_title) {
+      $extra['title'] = array(
+        'label' => $type->title_label,
+        'description' => t('Node module element.'),
+        'weight' => -5
+      );
+    }
+    if ($type->has_body) {
+      $extra['body_field'] = array(
+        'label' => $type->body_label,
+        'description' => t('Node module element.'),
+        'weight' => 0,
+        'view' => 'body'
+      );
+    }
+    if (module_exists('locale') && variable_get("language_content_type_$type_name", 0)) {
+      $extra['language'] = array(
+        'label' => t('Language'),
+        'description' => t('Locale module element.'),
+        'weight' => 0
+      );
+    }
+    if (module_exists('menu')) {
+      $extra['menu'] = array(
+        'label' => t('Menu settings'),
+        'description' => t('Menu module element.'),
+        'weight' => -2
+      );
+    }
+    if (module_exists('taxonomy') && taxonomy_get_vocabularies($type_name)) {
+      $extra['taxonomy'] = array(
+        'label' => t('Taxonomy'),
+        'description' => t('Taxonomy module element.'),
+        'weight' => -3
+      );
+    }
+    if (module_exists('book')) {
+      $extra['book'] = array(
+        'label' => t('Book'),
+        'description' => t('Book module element.'),
+        'weight' => 10
+      );
+    }
+    if (module_exists('upload') && variable_get("upload_$type_name", TRUE)) {
+      $extra['attachments'] = array(
+        'label' => t('File attachments'),
+        'description' => t('Upload module element.'),
+        'weight' => 30,
+        'view' => 'files'
+      );
+    }
   }
 
   return $extra;
@@ -539,6 +540,15 @@ function cck_cck_build_modes() {
  */
 function cck_node_type($op, $info) {
   switch ($op) {
+    case 'insert':
+      // TODO Fix this.
+      // Trying to get the Manage Fields screen for a new content type to
+      // work immediately after the new type is created. Even this won't do it,
+      // MF screen is still 'Page not found' after the new type is created.
+      field_cache_clear();
+      menu_rebuild();
+      break;
+    
     case 'update':
       if ($extra = variable_get('cck_extra_weights_'. $info->old_type, array())) {
         variable_set('cck_extra_weights_'. $info->type, $extra);
@@ -561,4 +571,95 @@ function cck_bundle_admin_path($bundle_name) {
   else {
     return 'admin/build/node-type/' . str_replace('_', '-', $bundle_name);
   }
+}
+
+/**
+ * We store all settings in a flat text field, but some settings
+ * will be arrays that need to be serialized and unserialized,
+ * like the default_value.
+ */
+function cck_serialized_settings() {
+  return array('default_value');
+}
+
+/**
+ * Helper function to retrieve field settings stored by CCK.
+ * 
+ * CCK uses the 'cck_field_settings' table to store custom settings
+ * not used by core.
+ */
+function cck_field_get_setting($setting, $setting_type, $field, $instance) {
+  $value = db_select('cck_field_settings', 'fs')->fields('fs', array('setting_option'))
+    ->condition('fs.setting', $setting)
+    ->condition('fs.setting_type', $setting_type)
+    ->condition('fs.field_name', $field['field_name'])
+    ->condition('fs.bundle', $instance['bundle'])
+    ->execute()->fetchField();
+  if (in_array($setting, cck_serialized_settings())) {
+    $value = unserialize($value);
+  }
+  return $value;
+}
+
+/**
+ * Helper function to set field settings stored by CCK.
+ * 
+ * CCK uses the 'cck_field_settings' table to store custom settings
+ * not used by core.
+ */
+function cck_field_set_setting($setting, $setting_type, $value, $field, $instance) {
+  // Delete any prior values.
+  db_delete('cck_field_settings')
+    ->condition('field_name', $field['field_name'])
+    ->condition('bundle', $instance['bundle'])
+    ->condition('setting', $setting)
+    ->condition('setting_type', $setting_type)
+    ->execute();
+  // Create the new values.
+  if (in_array($setting, cck_serialized_settings())) {
+    $value = serialize($value);
+  }
+  $record = array(
+    'field_name' => $field['field_name'],
+    'bundle' => $instance['bundle'],
+    'setting' => $setting,
+    'setting_option' => $value,
+    'setting_type' => $setting_type,
+  );
+  $primary_keys = array();
+  drupal_write_record('cck_field_settings', $record, $primary_keys);
+}
+
+/**
+ * Implementation of hook_field_default_value().
+ *  
+ * Helper function to return the correct default value for a field
+ * on behalf of fields managed in the CCK UI.
+ *
+ *  @param $obj_type
+ *    The object type.
+ *  @param $object
+ *    The object.
+ *  @param $field
+ *    The field array.
+ *  @param $instance
+ *    The field array.
+ *  @return
+ *    The default value for that field.
+ */
+function cck_field_default_value($obj_type, $object, $field, $instance) {
+  $default_value = array();
+  $default_setting = cck_field_get_setting('default_value', 'instance', $field, $instance);
+  $default_setting_php = cck_field_get_setting('default_value_php', 'instance', $field, $instance);
+  if (!empty($default_setting_php)) {
+    ob_start();
+    $result = eval($default_setting_php);
+    if (is_array($result)) {
+      $default_value = $result;
+    }
+  }
+  elseif (!empty($default_setting)) {
+    $default_value = $default_setting;
+  }
+  return (array) $default_value;
 }

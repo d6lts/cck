@@ -366,6 +366,8 @@ function node_reference_field_widget_settings($op, $widget) {
  * @param $form_state
  *   the form_state, $form_state['values'][$field['field_name']]
  *   holds the field's form values.
+ * @param $field
+ *   The field structure.
  * @param $instance
  *   the field instance array
  * @param $items
@@ -376,7 +378,7 @@ function node_reference_field_widget_settings($op, $widget) {
  * @return
  *   the form item for a single element for this field
  */
-function node_reference_field_widget(&$form, &$form_state, $instance, $items, $delta = 0) {
+function node_reference_field_widget(&$form, &$form_state, $field, $instance, $items, $delta = 0) {
   switch ($instance['widget']['type']) {
     case 'node_reference_select':
       $element = array(
