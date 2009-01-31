@@ -587,14 +587,26 @@ function cck_serialized_settings() {
  * 
  * CCK uses the 'cck_field_settings' table to store custom settings
  * not used by core.
+ * 
+ * Field settings will have no $instance nor a db bundle column.
  */
-function cck_field_get_setting($setting, $setting_type, $field, $instance) {
-  $value = db_select('cck_field_settings', 'fs')->fields('fs', array('setting_option'))
-    ->condition('fs.setting', $setting)
-    ->condition('fs.setting_type', $setting_type)
-    ->condition('fs.field_name', $field['field_name'])
-    ->condition('fs.bundle', $instance['bundle'])
-    ->execute()->fetchField();
+function cck_field_get_setting($setting, $setting_type, $field, $instance = NULL) {
+  if ($setting_type == 'field' || empty($instance)) {
+    $value = db_select('cck_field_settings', 'fs')->fields('fs', array('setting_option'))
+      ->condition('fs.setting', $setting)
+      ->condition('fs.setting_type', $setting_type)
+      ->condition('fs.field_name', $field['field_name'])
+      ->execute()->fetchField();    
+  }
+  else {
+    $value = db_select('cck_field_settings', 'fs')->fields('fs', array('setting_option'))
+      ->condition('fs.setting', $setting)
+      ->condition('fs.setting_type', $setting_type)
+      ->condition('fs.field_name', $field['field_name'])
+      ->condition('fs.bundle', $instance['bundle'])
+      ->execute()->fetchField();
+  }
+  
   if (in_array($setting, cck_serialized_settings())) {
     $value = unserialize($value);
   }
@@ -606,22 +618,34 @@ function cck_field_get_setting($setting, $setting_type, $field, $instance) {
  * 
  * CCK uses the 'cck_field_settings' table to store custom settings
  * not used by core.
+ * 
+ * Field settings will have no $instance nor a db bundle column.
  */
-function cck_field_set_setting($setting, $setting_type, $value, $field, $instance) {
+function cck_field_set_setting($setting, $setting_type, $value, $field, $instance = NULL) {
   // Delete any prior values.
-  db_delete('cck_field_settings')
-    ->condition('field_name', $field['field_name'])
-    ->condition('bundle', $instance['bundle'])
-    ->condition('setting', $setting)
-    ->condition('setting_type', $setting_type)
-    ->execute();
+  $bundle = ($setting_type == 'field' || empty($instance)) ? NULL : $instance['bundle'];
+  if ($setting_type == 'field' || empty($instance)) {
+    db_delete('cck_field_settings')
+      ->condition('field_name', $field['field_name'])
+      ->condition('setting', $setting)
+      ->condition('setting_type', $setting_type)
+      ->execute();
+  }
+  else {
+    db_delete('cck_field_settings')
+      ->condition('field_name', $field['field_name'])
+      ->condition('bundle', $bundle)
+      ->condition('setting', $setting)
+      ->condition('setting_type', $setting_type)
+      ->execute();
+  }
   // Create the new values.
   if (in_array($setting, cck_serialized_settings())) {
     $value = serialize($value);
   }
   $record = array(
     'field_name' => $field['field_name'],
-    'bundle' => $instance['bundle'],
+    'bundle' => $bundle,
     'setting' => $setting,
     'setting_option' => $value,
     'setting_type' => $setting_type,

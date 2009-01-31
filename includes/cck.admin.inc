@@ -57,7 +57,6 @@ function cck_types_overview() {
 function cck_fields_list() {
   $instances = field_info_instances();
   $field_types = field_info_field_types();
-
   $bundles = field_info_bundles();
   $header = array(t('Field name'), t('Field type'), t('Used in'));
   $rows = array();

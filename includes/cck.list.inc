@@ -2,18 +2,11 @@
 // $Id$
 
 /**
- * Get the PHP code for allowed values for a field.
- */
-function cck_list_get_allowed_values_php($field) {
-  return db_query("SELECT f.setting_option FROM {cck_field_settings} f WHERE setting_type='field' AND setting='allowed_values_php' AND field_name = :field_name", array(':field_name' => $field['field_name']))->fetchField();
-}
-
-/**
  * A custom function to return allowed values from PHP code.
  */
 function cck_list_allowed_values_php($field) {
   $allowed_values = array();
-  $php = cck_list_get_allowed_values_php($field);
+  $php = cck_field_get_setting('allowed_values_php', 'field', $field);
   if (!empty($php)) {
     ob_start();
     $result = eval($php);
@@ -30,15 +23,14 @@ function cck_list_allowed_values_php($field) {
  * on behalf of core List module.
  */
 function list_field_settings_form($field, $instance) {
-    
   $form = array(
     '#element_validate' => array('list_field_settings_form_validate'),
     );
   
-  $defaults = list_field_settings($field['type']);
+  $defaults = field_info_field_settings($field['type']);
   $settings = array_merge($defaults, $field['settings']);
-  $settings['allowed_values_php'] = cck_list_get_allowed_values_php($field);
-  
+  $settings['allowed_values_php'] = cck_field_get_setting('allowed_values_php', 'field', $field);
+  $settings['allowed_values_function'] = !empty($field['allowed_values_function']) && $field['allowed_values_function'] != 'cck_list_allowed_values_php' ? $field['allowed_values_function'] : '';
   $form['allowed_values'] = array(
     '#type' => 'textarea',
     '#title' => t('Allowed values list'),
@@ -87,17 +79,10 @@ function list_field_settings_form_validate($form, &$form_state) {
   $field = $form_values['field'];
   $field_name = $field['field_name'];
   $option = $form_values['field']['settings']['advanced_options']['allowed_values_php'];
-  db_query("DELETE FROM {cck_field_settings} WHERE setting='field' AND setting_type='allowed_values_php' AND field_name = ':field_name'", array(':field_name' => $field['field_name']));
-  if (!empty($option)) {
-    $record = array(
-      'field_name' => $field_name,
-      'bundle' => NULL,
-      'setting_type' => 'field',
-      'setting' => 'allowed_values_php',
-      'setting_option' => $option,
-    );
-    drupal_write_record('cck_field_settings', $record, array());  
+  cck_field_set_setting('allowed_values_php', 'field', $option, $field);
+  
+  if (empty($form_values['allowed_values_function'])) {
     form_set_value($form['allowed_values_function'], 'cck_list_allowed_values_php', $form_state);
-    form_set_value($form['advanced_options'], NULL, $form_state);    
   }
+  form_set_value($form['advanced_options'], NULL, $form_state);    
 }
