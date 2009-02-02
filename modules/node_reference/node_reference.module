@@ -431,12 +431,12 @@ function node_reference_autocomplete_value($element, $edit = FALSE) {
  */
 function node_reference_select_process($element, $edit, $form_state, $form) {
   // The node_reference_select widget doesn't need to create its own
-  // element, it can wrap around the optionwidgets_select element.
+  // element, it can wrap around the options_select element.
   // This will create a new, nested instance of the field.
   // Add a validation step where the value can be unwrapped.
   $field_key  = $element['#columns'][0];
   $element[$field_key] = array(
-    '#type' => 'optionwidgets_select',
+    '#type' => 'options_select',
     '#default_value' => isset($element['#value']) ? $element['#value'] : '',
     // The following values were set by the field module and need
     // to be passed down to the nested element.
@@ -451,7 +451,7 @@ function node_reference_select_process($element, $edit, $form_state, $form) {
   if (empty($element[$field_key]['#element_validate'])) {
     $element[$field_key]['#element_validate'] = array();
   }
-  array_unshift($element[$field_key]['#element_validate'], 'node_reference_optionwidgets_validate');
+  array_unshift($element[$field_key]['#element_validate'], 'node_reference_options_validate');
   return $element;
 }
 
@@ -465,12 +465,12 @@ function node_reference_select_process($element, $edit, $form_state, $form) {
  */
 function node_reference_buttons_process($element, $edit, $form_state, $form) {
   // The node_reference_select widget doesn't need to create its own
-  // element, it can wrap around the optionwidgets_select element.
+  // element, it can wrap around the options_select element.
   // This will create a new, nested instance of the field.
   // Add a validation step where the value can be unwrapped.
   $field_key  = $element['#columns'][0];
   $element[$field_key] = array(
-    '#type' => 'optionwidgets_buttons',
+    '#type' => 'options_buttons',
     '#default_value' => isset($element['#value']) ? $element['#value'] : '',
     // The following values were set by the field module and need
     // to be passed down to the nested element.
@@ -485,7 +485,7 @@ function node_reference_buttons_process($element, $edit, $form_state, $form) {
   if (empty($element[$field_key]['#element_validate'])) {
     $element[$field_key]['#element_validate'] = array();
   }
-  array_unshift($element[$field_key]['#element_validate'], 'node_reference_optionwidgets_validate');
+  array_unshift($element[$field_key]['#element_validate'], 'node_reference_options_validate');
   return $element;
 }
 
@@ -542,9 +542,9 @@ function node_reference_autocomplete_process($element, $edit, $form_state, $form
  *
  * We use $form_state['values'] instead of $element['#value']
  * to be sure we have the most accurate value when other modules
- * like optionwidgets are using #element_validate to alter the value.
+ * like options are using #element_validate to alter the value.
  */
-function node_reference_optionwidgets_validate($element, &$form_state) {
+function node_reference_options_validate($element, &$form_state) {
   $field_key  = $element['#columns'][0];
 
   $value = $form_state['values'];

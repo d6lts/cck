@@ -260,6 +260,7 @@ function cck_form_alter(&$form, $form_state, $form_id) {
   }
 }
 
+
 /**
  * Implementation of profile_alter().
  *
@@ -687,3 +688,30 @@ function cck_field_default_value($obj_type, $object, $field, $instance) {
   }
   return (array) $default_value;
 }
+
+/**
+ * Helper function to identify inactive fields.
+ */
+function cck_inactive_fields($type_name = NULL) {
+//  module_load_include('inc', 'field', 'includes/field.crud');
+//  if (!empty($type_name)) {
+//    $param = array('type_name' => $type_name);
+//    $inactive = array($type_name => array());
+//  }
+//  else {
+//    $param = array();
+//    $inactive = array();
+//  }
+//  $all = field_field_instance_read($param, TRUE);
+//  $active = array_keys(field_fields());
+//  foreach ($all as $field) {
+//    if (!in_array($field['field_name'], $active)) {
+//      $inactive[$field['type_name']][$field['field_name']] = field_field_instance_expand($field);
+//    }
+//  }
+//  if (!empty($type_name)) {
+//    return $inactive[$type_name];
+//  }
+//  return $inactive;
+}
+

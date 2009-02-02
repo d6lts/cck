@@ -55,9 +55,8 @@ function text_widget_settings_form($instance) {
  * Implementation of hook_field_instance_settings_form()
  * on behalf of core Text module.
  */
-function text_field_instance_settings_form($instance) {
+function text_field_instance_settings_form($field, $instance) {
   $widget = $instance['widget'];
-  $field = field_info_field($instance['field_name']);
   $field_type = field_info_field_types($field['type']);
   $defaults = field_info_instance_settings($field['type']);
   $settings = array_merge($defaults, $instance['settings']);

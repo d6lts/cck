@@ -2,7 +2,7 @@
 name = Node Reference
 description = Defines a field type for referencing one node from another.
 dependencies[] = text
-dependencies[] = option_widgets
+dependencies[] = options
 files[]=node_reference.module
 package = CCK
 core = 7.x

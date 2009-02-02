@@ -64,7 +64,7 @@ jQuery.fn.cckPopulateOptions = function(options, selected) {
 
     // If possible, keep the same widget selected when changing field type.
     // This is based on textual value, since the internal value might be
-    // different (optionwidgets_buttons vs. nodereference_buttons).
+    // different (options_buttons vs. nodereference_buttons).
     var previousSelectedText = this.options[this.selectedIndex].text;
 
     var html = '';

@@ -53,7 +53,7 @@ function cck_schema() {
       'setting_option' => array(
         'type' => 'text',
         'size' => 'medium',
-        'not null' => TRUE,
+        'not null' => FALSE,
         'description' => 'The custom value for this setting.',
       ),
     ),

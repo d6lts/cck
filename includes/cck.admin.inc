@@ -89,7 +89,7 @@ function cck_fields_list() {
  */
 function cck_inactive_message($bundle) {
   // TODO : adapt to new D7 APIs
-  $inactive_fields = field_inactive_fields($bundle);
+  $inactive_fields = cck_inactive_fields($bundle);
   if (!empty($inactive_fields)) {
     $field_types = _field_field_types();
     $widget_types = _field_widget_types($bundle);
@@ -846,9 +846,8 @@ function cck_field_has_data($field_name) {
  * Menu callback; presents the field settings edit page.
  */
 function cck_field_settings_form(&$form_state, $bundle, $field_name) {
-  // TODO D7 : why do we fetch from the db instead of fetching from field_info_field() / field_info_instance() ?
-  $instance = field_read_instance($field_name, $bundle);
-  $field = field_read_field($field_name);
+  $instance = field_info_field($field_name, $bundle);
+  $field = field_info_field($field_name);
   $field_type = field_info_field_types($field['type']);
 
   $info_function = $field['module'] .'_field_info';
@@ -881,25 +880,12 @@ function cck_field_settings_form(&$form_state, $bundle, $field_name) {
   $form['field']['module'] = array('#type' => 'value', '#value' => $field['module']);
   $form['field']['active'] = array('#type' => 'value', '#value' => $field['active']);
 
-  // Build the configurable field values.
-  $description = t('Maximum number of values users can enter for this field.');
-  if (field_behaviors_widget('multiple values', $instance) == FIELD_BEHAVIOR_DEFAULT) {
-    $description .= '<br/>'. t("'Unlimited' will provide an 'Add more' button so the users can add as many values as they like.");
-  }
-  $form['field']['cardinality'] = array(
-    '#type' => 'select',
-    '#title' => t('Number of values'),
-    '#options' => array(FIELD_CARDINALITY_UNLIMITED => t('Unlimited')) + drupal_map_assoc(range(1, 10)),
-    '#default_value' => $field['cardinality'],
-    '#description' => $description,
-    '#disabled' => $has_data,
-  );
-
   // Add settings provided by the field module.
   $form['field']['settings'] = array();
   $additions = module_invoke($field_type['module'], 'field_settings_form', $field, $instance);
   if (is_array($additions)) {
     $form['field']['settings'] = $additions;
+    // TODO Filter this so only the settings that cannot be changed are shown in this form.
   }
   foreach ($form['field']['settings'] as $key => $setting) {
     if (substr($key, 0, 1) != '#') {
@@ -950,7 +936,7 @@ function cck_field_update_field($field) {
   $module = $field_types[$field['type']]['module'];
 
   // Make sure field settings at least have their default values.
-  if (!is_array($field['settings'])) {
+  if (empty($field['settings']) || !is_array($field['settings'])) {
     $field['settings'] = array();
   }
   $field['settings'] += (array) module_invoke($module, 'field_settings', $field['type']);
@@ -1112,10 +1098,7 @@ function cck_field_edit_form(&$form_state, $bundle, $field_name) {
   $instance = field_read_instance($field_name, $bundle);
   $field = field_read_field($field_name);
   $form = array();
-  $form['field'] = array(
-    '#type' => 'value',
-    '#value' => $field,
-    );
+  $form['#field'] = $field;
     
   if (!empty($field['locked'])) {
     $output = array();
@@ -1128,7 +1111,7 @@ function cck_field_edit_form(&$form_state, $bundle, $field_name) {
   $field_type = field_info_field_types($field['type']);
   $widget_type = field_info_widget_types($instance['widget']['type']);
   $bundles = field_info_bundles();
-
+  
   $title = isset($instance['label']) ? $instance['label'] : $instance['field_name'];
   drupal_set_title(check_plain($title));
 
@@ -1178,7 +1161,7 @@ function cck_field_edit_form(&$form_state, $bundle, $field_name) {
     );
 
   // Add additional field instance settings from the field module.
-  $additions = module_invoke($field['module'], 'field_instance_settings_form', $instance);
+  $additions = module_invoke($field['module'], 'field_instance_settings_form', $field, $instance);
   if (is_array($additions)) {
     $form['instance']['settings'] = $additions;
   }
@@ -1220,6 +1203,43 @@ function cck_field_edit_form(&$form_state, $bundle, $field_name) {
     cck_default_value_widget($field, $instance, $form, $form_state);
   }
 
+  $info_function = $field['module'] .'_field_info';
+  $info = $info_function();
+  $description = '<p><strong>'. $info[$field['type']]['label'] .':</strong> ';
+  $description .= $info[$field['type']]['description'] .'</p>';
+  $form['#prefix'] = '<div class="description">'. $description .'</div>';
+
+  $description = '<p>'. t('These settings apply to the %field field everywhere it is used.', array(
+      '%field' => $instance['label'])) .'</p>';
+
+  // Create a form structure for the field values.
+  $form['field'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('%field field settings', array('%field' => $instance['label'])),
+    '#description' => $description,
+    '#tree' => TRUE,
+  );
+
+  // Build the configurable field values.
+  $description = t('Maximum number of values users can enter for this field.');
+  if (field_behaviors_widget('multiple values', $instance) == FIELD_BEHAVIOR_DEFAULT) {
+    $description .= '<br/>'. t("'Unlimited' will provide an 'Add more' button so the users can add as many values as they like.");
+  }
+  $form['field']['cardinality'] = array(
+    '#type' => 'select',
+    '#title' => t('Number of values'),
+    '#options' => array(FIELD_CARDINALITY_UNLIMITED => t('Unlimited')) + drupal_map_assoc(range(1, 10)),
+    '#default_value' => $field['cardinality'],
+    '#description' => $description,
+  );
+
+  // Add additional field settings from the field module.
+  $additions = module_invoke($field['module'], 'field_settings_form', $field, $instance);
+  if (is_array($additions)) {
+    $form['field']['settings'] = $additions;
+    // TODO Filter out the settings that cannot be changed.
+  }
+    
   $form['submit'] = array(
     '#type' => 'submit',
     '#value' => t('Save settings'),

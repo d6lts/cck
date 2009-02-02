@@ -32,9 +32,8 @@ function number_field_settings_form($field) {
   return $form;
 }
 
-function number_field_instance_settings_form($instance) {
+function number_field_instance_settings_form($field, $instance) {
   $widget = $instance['widget'];
-  $field = field_info_field($instance['field_name']);
   $field_type = field_info_field_types($field['type']);
   $defaults = field_info_instance_settings($field['type']);
   $settings = array_merge($defaults, $instance['settings']);
