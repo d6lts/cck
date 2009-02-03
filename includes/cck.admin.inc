@@ -1326,17 +1326,14 @@ function cck_default_value_widget($field, $instance, &$form, &$form_state) {
  * Validate a field's settings.
  */
 function cck_field_edit_form_validate($form, &$form_state) {
-
   $form_values = $form_state['values'];
   $instance = $form_values['instance'];
   $field = field_info_field($instance['field_name']);
-
   $field_type = field_info_field_types($field['type']);
   $widget_type = field_info_widget_types($instance['widget']['type']);
 
-  // TODO D7 : deprecate hook_*_settings_form_validate in favor of regular FAPI validation ?
-  module_invoke($widget_type['module'], 'widget_settings_form_validate', array_merge($instance, $form_values));
-  module_invoke($field_type['module'], 'field_settings_form_validate', array_merge($instance, $form_values));
+  // Do no validation here. Assume field and widget modules are 
+  // handling their own validation of form settings.
 
   // If field.module is handling the default value,
   // validate the result using the field validation.
@@ -1427,7 +1424,7 @@ function cck_field_edit_form_validate($form, &$form_state) {
 function cck_field_edit_form_submit($form, &$form_state) {
   $form_values = $form_state['values'];
   $instance = $form_values['instance'];
-  $field = $form_values['field'];
+  $field = field_info_field($instance['field_name']);
   
   cck_field_set_setting('default_value', 'instance', $instance['default_value_widget'][$instance['field_name']], $field, $instance);
   cck_field_set_setting('default_value_php', 'instance', $instance['default_value_widget']['advanced_options']['default_value_php'], $field, $instance);
