@@ -1,7 +1,8 @@
-Experimental Drupal 7 code - do not use !!
+CCK for D7
 ------------------------------------------
 
-The HEAD of CCK is now being used for D7 development and
-will not work in earlier versions. The code is being split
-into the parts that will remain in contrib and the parts
-that will be moved to core.
+This is now the home of the contrib UI for
+the Fields in Core patch for D7, compatible
+with the D7 version of core.
+
+Mostly working but still under development.
