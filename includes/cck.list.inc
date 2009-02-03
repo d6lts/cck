@@ -44,6 +44,7 @@ function list_field_settings_form($field, $instance) {
   $form = array(
     '#element_validate' => array('list_field_settings_form_validate'),
     '#prefix' => '<div class="form-item"><label>' . t('Allowed values') . ':</label><div class="description">' . $description . '</div></div>',
+    '#field' => $field,
     );
   
   // Retrieve allowed_values and allowed_values_php, which are non-core

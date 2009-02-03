@@ -848,6 +848,13 @@ function cck_field_has_data($field_name) {
 function cck_field_settings_form(&$form_state, $bundle, $field_name) {
   $instance = field_info_field($field_name, $bundle);
   $field = field_info_field($field_name);
+  
+  // When a field is first created, we have to get data from the db.
+  if (!isset($instance['label'])) {
+    $instance = field_read_instance($field_name, $bundle);
+    $field = field_read_field($field_name);
+  }
+  
   $field_type = field_info_field_types($field['type']);
 
   $info_function = $field['module'] .'_field_info';
