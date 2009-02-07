@@ -183,10 +183,15 @@ function cck_menu() {
 }
 
 function cck_debug_field_info() {
-  module_load_include('inc', 'field', 'field.info');
-  dsm(_field_info_collate_types());
-  dsm(_field_info_collate_fields());
-  return '';
+  if (drupal_function_exists('dsm')) {
+    module_load_include('inc', 'field', 'field.info');
+    dsm(_field_info_collate_types());
+    dsm(_field_info_collate_fields());
+    return '';
+  }
+  else {
+    return t('You need to enable devel.module to see this page');
+  }
 }
 
 /**
