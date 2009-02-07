@@ -86,7 +86,7 @@ function template_preprocess_cck_field_overview_form(&$vars) {
     array_shift($order);
   }
   $vars['rows'] = $rows;
-  $vars['submit'] = drupal_render($form);
+  $vars['submit'] = drupal_render_children($form);
 
   // Add tabledrag behavior.
 //  drupal_add_tabledrag('cck-field-overview', 'match', 'parent', 'group-parent', 'group-parent', 'field-name', FALSE, 1);
@@ -160,5 +160,5 @@ function template_preprocess_cck_display_overview_form(&$vars) {
   }
 
   $vars['rows'] = $rows;
-  $vars['submit'] = drupal_render($form);
+  $vars['submit'] = drupal_render_children($form);
 }

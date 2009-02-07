@@ -183,7 +183,9 @@ function cck_menu() {
 }
 
 function cck_debug_field_info() {
-  dsm(_field_info());
+  module_load_include('inc', 'field', 'field.info');
+  dsm(_field_info_collate_types());
+  dsm(_field_info_collate_fields());
   return '';
 }
 
@@ -259,7 +261,6 @@ function cck_form_alter(&$form, $form_state, $form_id) {
     }
   }
 }
-
 
 /**
  * Implementation of profile_alter().
@@ -549,7 +550,7 @@ function cck_node_type($op, $info) {
       field_cache_clear();
       menu_rebuild();
       break;
-    
+
     case 'update':
       if ($extra = variable_get('cck_extra_weights_'. $info->old_type, array())) {
         variable_set('cck_extra_weights_'. $info->type, $extra);
@@ -585,10 +586,10 @@ function cck_serialized_settings() {
 
 /**
  * Helper function to retrieve field settings stored by CCK.
- * 
+ *
  * CCK uses the 'cck_field_settings' table to store custom settings
  * not used by core.
- * 
+ *
  * Field settings will have no $instance nor a db bundle column.
  */
 function cck_field_get_setting($setting, $setting_type, $field, $instance = NULL) {
@@ -597,7 +598,7 @@ function cck_field_get_setting($setting, $setting_type, $field, $instance = NULL
       ->condition('fs.setting', $setting)
       ->condition('fs.setting_type', $setting_type)
       ->condition('fs.field_name', $field['field_name'])
-      ->execute()->fetchField();    
+      ->execute()->fetchField();
   }
   else {
     $value = db_select('cck_field_settings', 'fs')->fields('fs', array('setting_option'))
@@ -607,7 +608,7 @@ function cck_field_get_setting($setting, $setting_type, $field, $instance = NULL
       ->condition('fs.bundle', $instance['bundle'])
       ->execute()->fetchField();
   }
-  
+
   if (in_array($setting, cck_serialized_settings())) {
     $value = unserialize($value);
   }
@@ -616,10 +617,10 @@ function cck_field_get_setting($setting, $setting_type, $field, $instance = NULL
 
 /**
  * Helper function to set field settings stored by CCK.
- * 
+ *
  * CCK uses the 'cck_field_settings' table to store custom settings
  * not used by core.
- * 
+ *
  * Field settings will have no $instance nor a db bundle column.
  */
 function cck_field_set_setting($setting, $setting_type, $value, $field, $instance = NULL) {
@@ -657,7 +658,7 @@ function cck_field_set_setting($setting, $setting_type, $value, $field, $instanc
 
 /**
  * Implementation of hook_field_default_value().
- *  
+ *
  * Helper function to return the correct default value for a field
  * on behalf of fields managed in the CCK UI.
  *
@@ -714,4 +715,3 @@ function cck_inactive_fields($type_name = NULL) {
 //  }
 //  return $inactive;
 }
-
