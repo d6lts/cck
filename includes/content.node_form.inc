@@ -363,6 +363,11 @@ function content_add_more_js($type_name_url, $field_name) {
   $output_js = isset($javascript['setting']) ? '<script type="text/javascript">jQuery.extend(Drupal.settings, '. drupal_to_js(call_user_func_array('array_merge_recursive', $javascript['setting'])) .');</script>' : '';
 
   $output = theme('status_messages') . drupal_render($field_form) . $output_js;
-  drupal_json(array('status' => TRUE, 'data' => $output));
+
+  // Using drupal_json() breaks filefield's file upload, because the jQuery
+  // Form plugin handles file uploads in a way that is not compatible with
+  // 'text/javascript' response type.
+  $_GLOBALS['devel_shutdown'] =  FALSE;
+  print drupal_to_js(array('status' => TRUE, 'data' => $output));
   exit;
 }
