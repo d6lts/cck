@@ -33,6 +33,8 @@ should be enough, though.
 - #362216 by markus_petrux - sort the admin/content/types/fields overview by field name.
 - #363456 by dww - Fix some cases of bogus d-n-d reordering of 'pseudo-fields'.
 - #366935 by drewish - Make the 'Views mode' feature in noderef / ueserref visible even if no usable View exists yet.
+- #371306 fix duplicate HTML when using the JS-'add more' button.
+
 
 CCK 6.x-2.1
 ===========

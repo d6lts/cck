@@ -351,6 +351,8 @@ function content_add_more_js($type_name_url, $field_name) {
   // We add a div around the new content to receive the ahah effect.
   $field_form[$delta]['#prefix'] = '<div class="ahah-new-content">'. (isset($field_form[$delta]['#prefix']) ? $field_form[$delta]['#prefix'] : '');
   $field_form[$delta]['#suffix'] = (isset($field_form[$delta]['#suffix']) ? $field_form[$delta]['#suffix'] : '') .'</div>';
+  // Prevent duplicate wrapper.
+  unset($field_form['#prefix'], $field_form['#suffix']);
 
   // If a newly inserted widget contains AHAH behaviors, they normally won't
   // work because AHAH doesn't know about those - it just attaches to the exact
