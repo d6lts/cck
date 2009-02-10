@@ -239,10 +239,10 @@ function content_multiple_value_form(&$form, &$form_state, $field, $items) {
     );
 
     // Add wrappers for the fields and 'more' button.
-    // TODO: could be simplified ?
-    $form_element['#prefix'] = '<div class="clear-block" id="'. $field_name_css .'-add-more-wrapper"><div id="'. $field_name_css .'-items">';
-    $form_element[$field_name .'_add_more']['#prefix'] = '<div class="content-add-more">';
-    $form_element[$field_name .'_add_more']['#suffix'] =  '</div></div></div>';
+    $form_element['#prefix'] = '<div id="'. $field_name_css .'-items">';
+    $form_element['#suffix'] = '</div>';
+    $form_element[$field_name .'_add_more']['#prefix'] = '<div class="content-add-more clear-block">';
+    $form_element[$field_name .'_add_more']['#suffix'] =  '</div>';
   }
   return $form_element;
 }
