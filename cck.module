@@ -216,21 +216,40 @@ function cck_theme() {
 }
 
 /**
- * Implementation of hook_field_attach_pre_view().
+ * Implementation of hook_field_attach_form().
+ */
+function cck_field_attach_form($obj_type, &$object, &$form, &$form_state) {
+  // Add identifier to the object to be used to alter extra fields in the form.
+  list($id, $vid, $bundle) = field_attach_extract_ids($obj_type, $object);
+  $form['#fieldable'] = TRUE;
+  $form['#bundle'] = $bundle;
+  $form['#pre_render'][] = 'cck_alter_extra_weights';
+  $form['#cck_extra_fields'] = cck_extra_field_values($bundle);
+}
+
+/**
+ * Implementation of hook_field_attach_view().
  */
 function cck_field_attach_view($output, $obj_type, &$object, $teaser) {
   // Add identifier to the object to be used to alter extra fields in the view.
   list($id, $vid, $bundle) = field_attach_extract_ids($obj_type, $object);
   $object->content['#fieldable'] = TRUE;
   $object->content['#bundle'] = $bundle;
+
+  // TODO : doesn't work for user profiles, because template_preprocess_user_profile()
+  // uses its own hack to generate separate template variables, and never calls
+  // drupal_render() on the whole object. Depending on how this evolves (or not),
+  // we might need to move the #pre_render callback on each separate element.
+  $object->content['#pre_render'][] = 'cck_alter_extra_weights';
+  $object->content['#cck_extra_fields'] = cck_extra_field_values($bundle);
+
   return $output;
 }
 
 /**
- *
+ * Implementation of hook_field_attach_insert().
  */
 function cck_field_attach_insert($obj_type, &$object) {
-
   // Add identifier to the object to be used to alter extra fields in the view.
   list($id, $vid, $bundle) = field_attach_extract_ids($obj_type, $object);
 
@@ -239,81 +258,25 @@ function cck_field_attach_insert($obj_type, &$object) {
     include_once('./'. drupal_get_path('module', 'cck') .'/includes/cck.devel.inc');
     cck_generate_fields($object, $bundle);
   }
-
 }
 
 /**
- * Implementation of hook_field_attach_form().
+ * Pre-render callback to adjust weights of non-CCK fields.
  */
-function cck_field_attach_form($obj_type, &$object, &$form, &$form_state) {
-  // Add identifier to the object to be used to alter extra fields in the form.
-  list($id, $vid, $bundle) = field_attach_extract_ids($obj_type, $object);
-  $form['#fieldable'] = TRUE;
-  $form['#bundle'] = $bundle;
-}
-
-/**
- *  Implementation of hook_form_alter().
- */
-function cck_form_alter(&$form, $form_state, $form_id) {
-  if (!empty($form['#fieldable']) && isset($form['#bundle'])) {
-    $bundle_name = $form['#bundle'];
-    $extra = cck_extra_field_values($bundle_name);
-    foreach ($extra as $key => $value) {
-      if (isset($form[$key])) {
-        $form[$key]['#weight'] = $value['weight'];
-      }
-    }
-  }
-}
-
-/**
- * Implementation of profile_alter().
- *
- * Change extra weights here after extra fields have been added.
- * Hook field_attach_post_view() is too early, other fields aren't
- * all added to the form at that point.
- *
- * TODO Can we make the view alter more generic? This requires that
- * we specifically alter each individual 'view' for all fieldable entities.
- */
-function cck_profile_alter($account) {
-  if (!empty($account->content['#fieldable']) && isset($account->content['#bundle'])) {
-    $bundle_name = $account->content['#bundle'];
-    $extra = cck_extra_field_values($bundle_name);
-    foreach ($extra as $key => $value) {
-      if (isset($account->content[$key])) {
-        $account->content[$key]['#weight'] = $value['weight'];
-      }
-    }
-  }
-}
-
-/**
- * Implementation of node_view_alter.
- *
- * Change extra weights here after extra fields have been added.
- * Hook field_attach_post_view() is too early, other fields aren't
- * all added to the form at that point.
- *
- * TODO Can we make the view alter more generic? This requires that
- * we specifically alter each individual 'view' for all fieldable entities.
- */
-function cck_node_view_alter(&$node, $teaser = FALSE, $page = FALSE) {
-  if (!empty($node->content['#fieldable']) && isset($node->content['#bundle'])) {
-    $bundle_name = $node->content['#bundle'];
-    $extra = cck_extra_field_values($bundle_name);
-    foreach ($extra as $key => $value) {
+function cck_alter_extra_weights($elements) {
+  if (isset($elements['#cck_extra_fields'])) {
+    foreach ($elements['#cck_extra_fields'] as $key => $value) {
       // Some core 'fields' use a different key in node forms and in 'view'
-      // render arrays.
-      if (isset($value['view']) && isset($node->content[$value['view']])) {
-        $node->content[$value['view']]['#weight'] = $value['weight'];
+      // render arrays. Check we're not on a form first.
+      if (!isset($elements['#build_id']) && isset($value['view']) && isset($elements[$value['view']])) {
+        $elements[$value['view']]['#weight'] = $value['weight'];
       }
-      elseif (isset($node->content[$key])) {
-        $node->content[$key]['#weight'] = $value['weight'];
+      elseif (isset($elements[$key])) {
+        $elements[$key]['#weight'] = $value['weight'];
       }
     }
   }
+  return $elements;
 }
 
 /**
