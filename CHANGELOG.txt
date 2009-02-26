@@ -40,6 +40,7 @@ should be enough, though.
 - #370004 by dopry - Fix JS-'add more' button breaking fielfield's AHAH upload.
 - #374213 by rpanna - Fieldgroup: All field instances removed their groups when one instance is deleted from a content type.
 - #356158 by markus_petrux - Fix more (hopefully all ?) cases of bogus d-n-d reordering of 'pseudo-fields'.
+- #381876 by DamienMcKenna - Content Copy: Fix formatting glitch in exported type definitions.
 
 CCK 6.x-2.1
 ===========
