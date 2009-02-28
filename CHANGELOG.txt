@@ -41,6 +41,7 @@ should be enough, though.
 - #374213 by rpanna - Fieldgroup: All field instances removed their groups when one instance is deleted from a content type.
 - #356158 by markus_petrux - Fix more (hopefully all ?) cases of bogus d-n-d reordering of 'pseudo-fields'.
 - #381876 by DamienMcKenna - Content Copy: Fix formatting glitch in exported type definitions.
+- #346202 Fieldgroup: let the 'simple' template be overridable (thks fiskit) + allow template variants.
 
 CCK 6.x-2.1
 ===========
