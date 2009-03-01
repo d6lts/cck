@@ -245,7 +245,10 @@ function content_field_overview_form(&$form_state, $type_name) {
       ),
       'field_name' => array(
         '#type' => 'textfield',
-        '#field_prefix' => 'field_',
+        // This field should stay LTR even for RTL languages.
+        '#field_prefix' => '<span dir="ltr">field_',
+        '#field_suffix' => '</span>&lrm;',
+        '#attributes' => array('dir'=>'ltr'),
         '#size' => 15,
         '#description' => t('Field name (a-z, 0-9, _)'),
       ),
@@ -313,7 +316,10 @@ function content_field_overview_form(&$form_state, $type_name) {
       ),
       'group_name' => array(
         '#type' => 'textfield',
-        '#field_prefix' => 'group_',
+        // This field should stay LTR even for RTL languages.
+        '#field_prefix' => '<span dir="ltr">group_',
+        '#field_suffix' => '</span>&lrm;',
+        '#attributes' => array('dir'=>'ltr'),
         '#size' => 15,
         '#description' => t('Group name (a-z, 0-9, _)'),
       ),
