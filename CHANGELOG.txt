@@ -43,6 +43,7 @@ should be enough, though.
 - #381876 by DamienMcKenna - Content Copy: Fix formatting glitch in exported type definitions.
 - #346202 Fieldgroup: let the 'simple' template be overridable (thks fiskit) + allow template variants.
 - #382004 by elcuco - Field name and group name fields should stay LTR for RTL languages.
+- #375316 Nodereference/Userreference: Ensure allowed values always return at least an empty array.
 
 CCK 6.x-2.1
 ===========

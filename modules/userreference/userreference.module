@@ -654,7 +654,7 @@ function _userreference_potential_references($field, $string = '', $match = 'con
     }
 
     // Store the results.
-    $results[$cid] = $references;
+    $results[$cid] = !empty($references) ? $references : array();
   }
 
   return $results[$cid];
