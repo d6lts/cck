@@ -657,12 +657,13 @@ function _node_reference_potential_references($field, $string = '', $match = 'co
   $cid = $field['field_name'] .':'. $match .':'. ($string !== '' ? $string : implode('-', $ids)) .':'. $limit;
   if (!isset($results[$cid])) {
     $references = FALSE;
+    // TODO : reintegrate Views mode ?
     if ($references === FALSE) {
       $references = _node_reference_potential_references_standard($field, $string, $match, $ids, $limit);
     }
 
     // Store the results.
-    $results[$cid] = $references;
+    $results[$cid] = !empty($references) ? $references : array();
   }
 
   return $results[$cid];
