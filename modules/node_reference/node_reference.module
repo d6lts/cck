@@ -110,17 +110,27 @@ function node_reference_field($op, $node, $field, &$items, $teaser, $page) {
       // Extract nids to check.
       $ids = array();
       foreach ($items as $delta => $item) {
-        if (is_array($item) && !empty($item['nid']) && is_numeric($item['nid'])) {
-          $ids[] = $item['nid'];
+        if (is_array($item) && !empty($item['nid'])) {
+          if (is_numeric($item['nid'])) {
+            $ids[] = $item['nid'];
+          }
+          else {
+            $error_element = isset($item['_error_element']) ? $item['_error_element'] : '';
+            if (is_array($item) && isset($item['_error_element'])) unset($item['_error_element']);
+            form_set_error($error_element, t("%name: invalid input.", array('%name' => t($field['widget']['label']))));
+          }
         }
       }
-      $refs = _node_reference_potential_references($field, '', NULL, $ids);
-      foreach ($items as $delta => $item) {
-        if (is_array($item)) {
-          $error_element = isset($item['_error_element']) ? $item['_error_element'] : '';
-          if (is_array($item) && isset($item['_error_element'])) unset($item['_error_element']);
-          if (!empty($item['nid']) && !isset($refs[$item['nid']])) {
-            form_set_error($error_element, t("%name: this post can't be referenced.", array('%name' => t($field['widget']['label']))));
+      // Prevent performance hog if there are no ids to check.
+      if ($ids) {
+        $refs = _node_reference_potential_references($field, '', NULL, $ids);
+        foreach ($items as $delta => $item) {
+          if (is_array($item)) {
+            $error_element = isset($item['_error_element']) ? $item['_error_element'] : '';
+            if (is_array($item) && isset($item['_error_element'])) unset($item['_error_element']);
+            if (!empty($item['nid']) && !isset($refs[$item['nid']])) {
+              form_set_error($error_element, t("%name: this post can't be referenced.", array('%name' => t($field['widget']['label']))));
+            }
           }
         }
       }
