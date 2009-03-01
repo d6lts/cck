@@ -174,17 +174,27 @@ function userreference_field($op, &$node, $field, &$items, $teaser, $page) {
       // Extract uids to check.
       $ids = array();
       foreach ($items as $delta => $item) {
-        if (is_array($item) && !empty($item['uid']) && is_numeric($item['uid'])) {
-          $ids[] = $item['uid'];
+        if (is_array($item) && !empty($item['uid'])) {
+          if (is_numeric($item['uid'])) {
+            $ids[] = $item['uid'];
+          }
+          else {
+            $error_element = isset($item['_error_element']) ? $item['_error_element'] : '';
+            if (is_array($item) && isset($item['_error_element'])) unset($item['_error_element']);
+            form_set_error($error_element, t('%name: invalid input.', array('%name' => t($field['widget']['label']))));
+          }
         }
       }
-      $refs = _userreference_potential_references($field, '', NULL, $ids);
-      foreach ($items as $delta => $item) {
-        if (is_array($item)) {
-          $error_element = isset($item['_error_element']) ? $item['_error_element'] : '';
-          if (is_array($item) && isset($item['_error_element'])) unset($item['_error_element']);
-          if (!empty($item['uid']) && !isset($refs[$item['uid']])) {
-            form_set_error($error_element, t('%name: invalid user.', array('%name' => t($field['widget']['label']))));
+      // Prevent performance hog if there are no ids to check.
+      if ($ids) {
+        $refs = _userreference_potential_references($field, '', NULL, $ids);
+        foreach ($items as $delta => $item) {
+          if (is_array($item)) {
+            $error_element = isset($item['_error_element']) ? $item['_error_element'] : '';
+            if (is_array($item) && isset($item['_error_element'])) unset($item['_error_element']);
+            if (!empty($item['uid']) && !isset($refs[$item['uid']])) {
+              form_set_error($error_element, t('%name: invalid user.', array('%name' => t($field['widget']['label']))));
+            }
           }
         }
       }
