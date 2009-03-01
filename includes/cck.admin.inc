@@ -250,7 +250,10 @@ function cck_field_overview_form(&$form_state, $bundle) {
       ),
       'field_name' => array(
         '#type' => 'textfield',
-        '#field_prefix' => 'field_',
+        // This field should stay LTR even for RTL languages.
+        '#field_prefix' => '<span dir="ltr">field_',
+        '#field_suffix' => '</span>&lrm;',
+        '#attributes' => array('dir'=>'ltr'),
         '#size' => 15,
         '#description' => t('Field name (a-z, 0-9, _)'),
       ),
@@ -318,7 +321,10 @@ function cck_field_overview_form(&$form_state, $bundle) {
       ),
       'group_name' => array(
         '#type' => 'textfield',
-        '#field_prefix' => 'group_',
+        // This field should stay LTR even for RTL languages.
+        '#field_prefix' => '<span dir="ltr">group_',
+        '#field_suffix' => '</span>&lrm;',
+        '#attributes' => array('dir'=>'ltr'),
         '#size' => 15,
         '#description' => t('Group name (a-z, 0-9, _)'),
       ),
@@ -848,13 +854,13 @@ function cck_field_has_data($field_name) {
 function cck_field_settings_form(&$form_state, $bundle, $field_name) {
   $instance = field_info_field($field_name, $bundle);
   $field = field_info_field($field_name);
-  
+
   // When a field is first created, we have to get data from the db.
   if (!isset($instance['label'])) {
     $instance = field_read_instance($field_name, $bundle);
     $field = field_read_field($field_name);
   }
-  
+
   $field_type = field_info_field_types($field['type']);
 
   $info_function = $field['module'] .'_field_info';
@@ -1106,7 +1112,7 @@ function cck_field_edit_form(&$form_state, $bundle, $field_name) {
   $field = field_read_field($field_name);
   $form = array();
   $form['#field'] = $field;
-    
+
   if (!empty($field['locked'])) {
     $output = array();
     $output['locked'] = array(
@@ -1118,7 +1124,7 @@ function cck_field_edit_form(&$form_state, $bundle, $field_name) {
   $field_type = field_info_field_types($field['type']);
   $widget_type = field_info_widget_types($instance['widget']['type']);
   $bundles = field_info_bundles();
-  
+
   $title = isset($instance['label']) ? $instance['label'] : $instance['field_name'];
   drupal_set_title(check_plain($title));
 
@@ -1179,7 +1185,7 @@ function cck_field_edit_form(&$form_state, $bundle, $field_name) {
     $form['instance']['widget']['settings'] = $additions;
     $form['instance']['widget']['active']['#value'] = 1;
   }
-  
+
   // Add handling for default value if not provided by any other module.
   // Field modules that want to provide their own default value handling
   // or provide no default values should populate $instance['default_value_function']
@@ -1246,7 +1252,7 @@ function cck_field_edit_form(&$form_state, $bundle, $field_name) {
     $form['field']['settings'] = $additions;
     // TODO Filter out the settings that cannot be changed.
   }
-    
+
   $form['submit'] = array(
     '#type' => 'submit',
     '#value' => t('Save settings'),
@@ -1285,7 +1291,7 @@ function cck_default_value_widget($field, $instance, &$form, &$form_state) {
   $widget_form = field_default_form(NULL, NULL, $field, $instance, $items, $form, $form_state, 0);
   $form['instance']['default_value_widget'] += $widget_form;
   $form['#fields'][$field['field_name']]['form_path'] = array('instance', 'default_value_widget', $field['field_name']);
-  
+
   // Advanced: PHP code.
   $form['instance']['default_value_widget']['advanced_options'] = array(
     '#type' => 'fieldset',
@@ -1293,7 +1299,7 @@ function cck_default_value_widget($field, $instance, &$form, &$form_state) {
     '#collapsible' => TRUE,
     '#collapsed' => empty($default_value_php),
   );
-  
+
   if (user_access('Use PHP input for field settings (dangerous - grant with care)')) {
     foreach (array_keys($field['columns']) as $column) {
       $columns[] = t("'@column' => value for @column", array('@column' => $column));
@@ -1332,7 +1338,7 @@ function cck_field_edit_form_validate($form, &$form_state) {
   $field_type = field_info_field_types($field['type']);
   $widget_type = field_info_widget_types($instance['widget']['type']);
 
-  // Do no validation here. Assume field and widget modules are 
+  // Do no validation here. Assume field and widget modules are
   // handling their own validation of form settings.
 
   // If field.module is handling the default value,
@@ -1425,7 +1431,7 @@ function cck_field_edit_form_submit($form, &$form_state) {
   $form_values = $form_state['values'];
   $instance = $form_values['instance'];
   $field = field_info_field($instance['field_name']);
-  
+
   cck_field_set_setting('default_value', 'instance', $instance['default_value_widget'][$instance['field_name']], $field, $instance);
   cck_field_set_setting('default_value_php', 'instance', $instance['default_value_widget']['advanced_options']['default_value_php'], $field, $instance);
 
