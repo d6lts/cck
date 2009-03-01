@@ -2,7 +2,7 @@
 // $Id$
 
 /**
- * @file fieldgroup.tpl.php
+ * @file fieldgroup-simple.tpl.php
  * Default theme implementation to display the a 'simple-styled' fieldgroup.
  *
  * Available variables:

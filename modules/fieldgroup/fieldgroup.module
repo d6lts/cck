@@ -57,7 +57,7 @@ function fieldgroup_menu() {
 function fieldgroup_theme() {
   return array(
     'fieldgroup_simple' => array(
-      'template' => 'fieldgroup',
+      'template' => 'fieldgroup-simple',
       'arguments' => array('element' => NULL),
     ),
     'fieldgroup_fieldset' => array(
@@ -539,6 +539,7 @@ function fieldgroup_nodeapi(&$node, $op, $teaser, $page) {
             case 'simple':
               $element['#type'] = 'fieldgroup_simple';
               $element['#group_name'] = $group_name;
+              $element['#node'] = $node;
               break;
             case 'hidden':
               $element['#access'] = FALSE;
@@ -740,7 +741,7 @@ function theme_fieldgroup_fieldset($element) {
  * - $description
  * - $content
  *
- * @see fieldgroup.tpl.php
+ * @see fieldgroup-simple.tpl.php
  */
 function fieldgroup_preprocess_fieldgroup_simple(&$vars) {
   $element = $vars['element'];
@@ -750,6 +751,12 @@ function fieldgroup_preprocess_fieldgroup_simple(&$vars) {
   $vars['label'] = isset($element['#title']) ? $element['#title'] : '';;
   $vars['description'] = isset($element['#description']) ? $element['#description'] : '';;
   $vars['content'] = isset($element['#children']) ? $element['#children'] : '';
+  $vars['template_files'] = array(
+    'fieldgroup-simple-',
+    'fieldgroup-simple-'. $element['#group_name'],
+    'fieldgroup-simple-'. $element['#node']->type,
+    'fieldgroup-simple-'. $element['#group_name'] .'-'. $element['#node']->type,
+  );
 }
 
 /**
