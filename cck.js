@@ -1,4 +1,5 @@
 // $Id$
+(function($) {
 
 Drupal.behaviors.cckManageFields = {
   attach: function(context) {
@@ -80,3 +81,4 @@ jQuery.fn.cckPopulateOptions = function(options, selected) {
       .attr('disabled', disabled ? 'disabled' : '');
   });
 }
+})(jQuery);
