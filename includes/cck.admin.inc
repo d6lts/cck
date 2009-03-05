@@ -592,8 +592,8 @@ function cck_display_overview_form(&$form_state, $bundle, $contexts_selector = '
 
   $groups = $group_options = array();
   if (module_exists('fieldgroup')) {
-    $groups = fieldgroup_groups($type['type']);
-    $group_options = _fieldgroup_groups_label($type['type']);
+    $groups = fieldgroup_groups($bundle);
+    $group_options = _fieldgroup_groups_label($bundle);
   }
 
   $contexts = cck_build_modes($entity, $contexts_selector);
