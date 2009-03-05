@@ -2408,7 +2408,7 @@ function content_content_extra_fields($type_name) {
  *   by content.module.
  */
 function content_extra_field_weight($type_name, $pseudo_field_name) {
-  //$type = content_types($type_name);
+  $type = content_types($type_name);
 
   // If we don't have the requested item, this may be because the cached
   // information for 'extra' fields hasn't been refreshed yet.
