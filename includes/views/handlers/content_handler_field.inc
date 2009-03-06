@@ -144,7 +144,7 @@ class content_handler_field extends views_handler_field_node {
     // a div for textareas to prevent wrapping a <span> around a <p>.
     // Earl says we need to be sure that other fields we don't know
     // about won't end up wrapping a span around a block-level element.
-    if ($field['widget']['type'] == 'text_textarea') {
+    if ($this->content_field['widget']['type'] == 'text_textarea') {
       return 'div';
     }
     else {
