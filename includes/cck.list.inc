@@ -134,7 +134,7 @@ function cck_allowed_values($field) {
   $allowed_values[$field['field_name']] = array();
 
   $list = cck_field_get_setting('allowed_values', 'field', $field);
-  $list = explode("\n", $field['settings']['allowed_values']);
+  $list = explode("\n", $list);
   $list = array_map('trim', $list);
   $list = array_filter($list, 'strlen');
   foreach ($list as $opt) {
