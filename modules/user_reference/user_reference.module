@@ -769,3 +769,23 @@ function theme_user_reference_buttons($element) {
 function theme_user_reference_autocomplete($element) {
   return $element['#children'];
 }
+
+/**
+ * Implementation of hook_field_settings_form().
+ */
+function user_reference_field_settings_form($field) {
+  $form = array();
+  $form['referenceable_roles'] = array(
+    '#type' => 'checkboxes',
+    '#title' => t('User roles that can be referenced'),
+    '#default_value' => isset($field['settings']['referenceable_roles']) && is_array($field['settings']['referenceable_roles']) ? array_filter($field['referenceable_roles']) : array(),
+    '#options' => user_roles(1),
+  );
+  $form['referenceable_status'] = array(
+    '#type' => 'checkboxes',
+    '#title' => t('User status that can be referenced'),
+    '#default_value' => isset($field['settings']['referenceable_status']) && is_array($field['settings']['referenceable_status']) ? array_filter($field['referenceable_status']) : array(1),
+    '#options' => array(1 => t('Active'), 0 => t('Blocked')),
+  );
+  return $form;
+}

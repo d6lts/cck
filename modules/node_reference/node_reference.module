@@ -804,13 +804,13 @@ function theme_node_reference_autocomplete($element) {
 /**
  * Implementation of hook_field_settings_form() on behalf of core Nodereference module.
  */
-function nodereference_field_settings_form($field) {
+function node_reference_field_settings_form($field) {
   $form = array();
   $form['referenceable_types'] = array(
     '#type' => 'checkboxes',
     '#title' => t('Content types that can be referenced'),
     '#multiple' => TRUE,
-    '#default_value' => is_array($field['referenceable_types']) ? $field['referenceable_types'] : array(),
+    '#default_value' => is_array($field['settings']['referenceable_types']) ? $field['settings']['referenceable_types'] : array(),
     '#options' => array_map('check_plain', node_get_types('names')),
   );
   return $form;
