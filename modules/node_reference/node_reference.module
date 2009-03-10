@@ -680,8 +680,8 @@ function _node_reference_potential_references_standard($field, $string = '', $ma
   $where = array();
   $args = array();
 
-  if (is_array($field['referenceable_types'])) {
-    foreach (array_filter($field['referenceable_types']) as $related_type) {
+  if (is_array($field['settings']['referenceable_types'])) {
+    foreach (array_filter($field['settings']['referenceable_types']) as $related_type) {
       $related_types[] = "n.type = '%s'";
       $args[] = $related_type;
     }
@@ -748,9 +748,9 @@ function node_reference_node_type($op, $info) {
       if (!empty($info->old_type) && $info->old_type != $info->type) {
         $fields = field_info_fields();
         foreach ($fields as $field_name => $field) {
-          if ($field['type'] == 'node_reference' && isset($field['referenceable_types'][$info->old_type])) {
-            $field['referenceable_types'][$info->type] = empty($field['referenceable_types'][$info->old_type]) ? 0 : $info->type;
-            unset($field['referenceable_types'][$info->old_type]);
+          if ($field['type'] == 'node_reference' && isset($field['settings']['referenceable_types'][$info->old_type])) {
+            $field['settings']['referenceable_types'][$info->type] = empty($field['settings']['referenceable_types'][$info->old_type]) ? 0 : $info->type;
+            unset($field['settings']['referenceable_types'][$info->old_type]);
             content_field_instance_update($field);
           }
         }
