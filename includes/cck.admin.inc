@@ -499,6 +499,7 @@ function cck_field_overview_form_submit($form, &$form_state) {
   $field = array();
   if (!empty($form_values['_add_new_field']['field_name'])) {
     $values = $form_values['_add_new_field'];
+
     $field = array(
       'field_name' => $values['field_name'],
       'type' => $values['type'],
@@ -512,7 +513,7 @@ function cck_field_overview_form_submit($form, &$form_state) {
         'type' => $values['widget_type'],
       ),
     );
-
+    
     // Create the field and instance.
     try {
       field_create_field($field);
@@ -899,10 +900,18 @@ function cck_field_settings_form(&$form_state, $bundle, $field_name) {
   if (is_array($additions)) {
     $form['field']['settings'] = $additions;
     // TODO Filter this so only the settings that cannot be changed are shown in this form.
+    // For now, treating all settings as changeable, which means they show up here and in edit form.
   }
-  foreach ($form['field']['settings'] as $key => $setting) {
-    if (substr($key, 0, 1) != '#') {
-      $form['field']['settings'][$key]['#disabled'] = $has_data;
+  if (empty($form['field']['settings'])) {
+    $form['field']['settings'] = array(
+      '#markup' => t('%field has no field settings.', array('%field' => $instance['label'])),
+      );
+  }
+  else {
+    foreach ($form['field']['settings'] as $key => $setting) {
+      if (substr($key, 0, 1) != '#') {
+        $form['field']['settings'][$key]['#disabled'] = $has_data;
+      }
     }
   }
 
@@ -948,11 +957,8 @@ function cck_field_update_field($field) {
   $field_types = field_info_field_types();
   $module = $field_types[$field['type']]['module'];
 
-  // Make sure field settings at least have their default values.
-  if (empty($field['settings']) || !is_array($field['settings'])) {
-    $field['settings'] = array();
-  }
-  $field['settings'] += (array) module_invoke($module, 'field_settings', $field['type']);
+  $defaults = field_info_field_settings($field['type']);
+  $field['settings'] = array_merge($defaults, $field['settings']);
 
   drupal_write_record('field_config', $field, array('field_name'));
 
@@ -1250,7 +1256,7 @@ function cck_field_edit_form(&$form_state, $bundle, $field_name) {
   $additions = module_invoke($field['module'], 'field_settings_form', $field, $instance);
   if (is_array($additions)) {
     $form['field']['settings'] = $additions;
-    // TODO Filter out the settings that cannot be changed.
+    // TODO Filter in only settings that can be changed.
   }
 
   $form['submit'] = array(
@@ -1430,7 +1436,11 @@ function cck_field_edit_form_validate($form, &$form_state) {
 function cck_field_edit_form_submit($form, &$form_state) {
   $form_values = $form_state['values'];
   $instance = $form_values['instance'];
+  
+  // Update any field settings that have changed.
   $field = field_info_field($instance['field_name']);
+  $field = array_merge($field, $form_state['values']['field']);
+  cck_field_update_field($field);
 
   cck_field_set_setting('default_value', 'instance', $instance['default_value_widget'][$instance['field_name']], $field, $instance);
   cck_field_set_setting('default_value_php', 'instance', $instance['default_value_widget']['advanced_options']['default_value_php'], $field, $instance);
@@ -1449,7 +1459,7 @@ function cck_field_edit_form_submit($form, &$form_state) {
     unset($instance['settings']['allowed_values_fieldset']);
   }
 
-  // Update the instance.
+  // Update the instance settings.
   module_load_include('inc', 'field', 'includes/field.crud');
   field_update_instance($instance);
 
@@ -1559,4 +1569,3 @@ function _element_validate_number($element, &$form_state) {
     form_error($element, t('%name must be a number.', array('%name' => $element['#title'])));
   }
 }
-
