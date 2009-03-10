@@ -39,7 +39,7 @@ function cck_init() {
  */
 function cck_menu_alter(&$items) {
   // Customize the content types page with our own callback
-  $items['admin/build/types']['page callback'] = 'cck_types_overview';
+  //$items['admin/build/types']['page callback'] = 'cck_types_overview';
   $items['admin/build/types']['file'] = 'cck.admin.inc';
   $items['admin/build/types']['file path'] = drupal_get_path('module', 'cck') .'/includes';
 }

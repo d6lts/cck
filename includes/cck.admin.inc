@@ -52,6 +52,17 @@ function cck_types_overview() {
 }
 
 /**
+ * Implementation of hook_content_types_overview().
+ *
+ * Display the default upload settings on the Node type overview page.
+ * 
+ */
+function cck_content_types_operations($type) {
+  $bundle_url_str = str_replace('_', '-', $type->type);
+  return array('data' => l(t('manage fields'), 'admin/build/node-type/'. $bundle_url_str .'/fields'));
+}
+
+/**
  * Menu callback; lists all defined fields for quick reference.
  */
 function cck_fields_list() {
@@ -932,7 +943,7 @@ function cck_field_settings_form_submit($form, &$form_state) {
 
   $form_values = $form_state['values'];
   $field = $form_values['field'];
-
+  
   // Don't allow changes to fields with data.
   if (cck_field_has_data($field['field_name'])) {
     return;

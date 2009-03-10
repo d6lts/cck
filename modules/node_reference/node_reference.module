@@ -67,18 +67,13 @@ function node_reference_field_info() {
 }
 
 /**
- * Implementation of hook_field_settings().
+ * Implementation of hook_field_columns().
  */
-function node_reference_field_settings($op, $field) {
-  switch ($op) {
-
-    case 'database columns':
-      $columns = array(
-        'nid' => array('type' => 'int', 'unsigned' => TRUE, 'not null' => FALSE),
-      );
-      return $columns;
-
-  }
+function node_reference_field_columns($field) {
+  $columns = array(
+    'nid' => array('type' => 'int', 'unsigned' => TRUE, 'not null' => FALSE),
+  );
+  return $columns;
 }
 
 /**
@@ -214,7 +209,7 @@ function theme_field_formatter_node_reference_node($element) {
   $output = '';
   if (!empty($element['#item']['nid']) && is_numeric($element['#item']['nid'])) {
     $node = $element['#node'];
-    $field = field_fields($element['#field_name'], $element['#type_name']);
+    $field = field_fields($element['#field_name'], $element['#bundle']);
     // If no 'referencing node' is set, we are starting a new 'reference thread'
     if (!isset($node->referencing_node)) {
       $recursion_queue = array();
@@ -330,30 +325,27 @@ function node_reference_elements() {
 }
 
 /**
- * Implementation of hook_field_widget_settings().
+ * Implementation of hook_field_widget_settings_form().
  */
-function node_reference_field_widget_settings($op, $widget) {
-  switch ($op) {
-    case 'form':
-      $form = array();
-      $match = isset($widget['autocomplete_match']) ? $widget['autocomplete_match'] : 'contains';
-      if ($widget['type'] == 'node_reference_autocomplete') {
-        $form['autocomplete_match'] = array(
-          '#type' => 'select',
-          '#title' => t('Autocomplete matching'),
-          '#default_value' => $match,
-          '#options' => array(
-            'starts_with' => t('Starts with'),
-            'contains' => t('Contains'),
-          ),
-          '#description' => t('Select the method used to collect autocomplete suggestions. Note that <em>Contains</em> can cause performance issues on sites with thousands of nodes.'),
-        );
-      }
-      else {
-        $form['autocomplete_match'] = array('#type' => 'hidden', '#value' => $match);
-      }
-      return $form;
+function node_reference_field_widget_settings_form($widget) {
+  $form = array();
+  $match = isset($widget['autocomplete_match']) ? $widget['autocomplete_match'] : 'contains';
+  if ($widget['type'] == 'node_reference_autocomplete') {
+    $form['autocomplete_match'] = array(
+      '#type' => 'select',
+      '#title' => t('Autocomplete matching'),
+      '#default_value' => $match,
+      '#options' => array(
+        'starts_with' => t('Starts with'),
+        'contains' => t('Contains'),
+      ),
+      '#description' => t('Select the method used to collect autocomplete suggestions. Note that <em>Contains</em> can cause performance issues on sites with thousands of nodes.'),
+    );
   }
+  else {
+    $form['autocomplete_match'] = array('#type' => 'hidden', '#value' => $match);
+  }
+  return $form;
 }
 
 /**
@@ -454,7 +446,7 @@ function node_reference_select_process($element, $edit, $form_state, $form) {
     '#required' => $element['#required'],
     '#description' => $element['#description'],
     '#field_name' => $element['#field_name'],
-    '#type_name' => $element['#type_name'],
+    '#bundle' => $element['#bundle'],
     '#delta' => $element['#delta'],
     '#columns' => $element['#columns'],
   );
@@ -488,7 +480,7 @@ function node_reference_buttons_process($element, $edit, $form_state, $form) {
     '#required' => $element['#required'],
     '#description' => $element['#description'],
     '#field_name' => $element['#field_name'],
-    '#type_name' => $element['#type_name'],
+    '#bundle' => $element['#bundle'],
     '#delta' => $element['#delta'],
     '#columns' => $element['#columns'],
   );
@@ -524,7 +516,7 @@ function node_reference_autocomplete_process($element, $edit, $form_state, $form
     '#required' => $element['#required'],
     '#description' => $element['#description'],
     '#field_name' => $element['#field_name'],
-    '#type_name' => $element['#type_name'],
+    '#bundle' => $element['#bundle'],
     '#delta' => $element['#delta'],
     '#columns' => $element['#columns'],
   );
@@ -580,8 +572,8 @@ function node_reference_options_validate($element, &$form_state) {
  */
 function node_reference_autocomplete_validate($element, &$form_state) {
   $field_name = $element['#field_name'];
-  $type_name = $element['#type_name'];
-  $field = field_fields($field_name, $type_name);
+  $bundle = $element['#bundle'];
+  $field = field_fields($field_name, $bundle);
   $field_key  = $element['#columns'][0];
   $delta = $element['#delta'];
   $value = $element['#value'][$field_key];
