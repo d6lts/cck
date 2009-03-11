@@ -672,78 +672,78 @@ function user_reference_autocomplete($field_name, $string = '') {
 }
 
 /**
- * Implementation of hook_user().
+ * Implementation of hook_user_load().
  */
-function user_reference_user($type, &$edit, &$account) {
-  switch ($type) {
-    case 'load':
-      // Only add links if we are on the user 'view' page.
-      if (arg(0) != 'user' || arg(2)) {
-        return;
-      }
-      // find CCK user_reference field tables
-      // search through them for matching user ids and load those nodes
-      $additions = array();
-      $types = content_types();
-
-      // Find the table and columns to search through, if the same
-      // table comes up in more than one field type, we only need
-      // to search it once.
-      $search_tables = array();
-      $search_links = array();
-      foreach ($types as $bundle => $type) {
-        foreach ($type['fields'] as $field) {
-          // Only add tables when reverse link has been selected.
-          if ($field['type'] == 'user_reference' && !empty($field['widget']['reverse_link'])) {
-            $db_info = content_database_info($field);
-            $search_tables[$db_info['table']] = $db_info['columns']['uid']['column'];
-            $search_links[$db_info['table']] = $field['widget']['reverse_link'];
-          }
-        }
-      }
-      foreach ($search_tables as $table => $column) {
-        $ids = db_query(db_rewrite_sql("SELECT DISTINCT(n.nid) FROM {node} n LEFT JOIN {". $table ."} f ON n.vid = f.vid WHERE f.". $column ."=". $account->uid. " AND n.status = 1"));
-        while ($data = db_fetch_object($ids)) {
-          // TODO, do we really want a complete node_load() here? We only need the title to create a link.
-          $node = node_load($data->nid);
-          $node->reverse_link = $search_links[$table];
-          $additions[$node->type][] = $node;
-        }
-      }
-      $account->user_reference = $additions;
-      return;
-      break;
-
-    case 'view':
-      if (!empty($account->user_reference)) {
-        $node_types = content_types();
-        $additions = array();
-        $values = array();
-        foreach ($account->user_reference as $node_type => $nodes) {
-          foreach ($nodes as $node) {
-            if ($node->reverse_link) {
-              $values[$node_type][] = l($node->title, 'node/'. $node->nid);
-            }
-          }
-          if (isset($values[$node_type])) {
-            $additions[] = array(
-              '#type' => 'user_profile_item',
-              '#title' => check_plain($node_types[$node_type]['name']),
-              '#value' => theme('item_list', $values[$node_type]),
-            );
-          }
-        }
-        if ($additions) {
-          $account->content['user_reference'] = $additions + array(
-            '#type' => 'user_profile_category',
-            '#attributes' => array('class' => 'user-member'),
-            '#title' => t('Related content'),
-            '#weight' => 10,
-          );
-        }
-      }
-      break;
+function user_reference_user_load(&$edit, &$account) {
+  // Only add links if we are on the user 'view' page.
+  if (arg(0) != 'user' || arg(2)) {
+    return;
   }
+  // find CCK user_reference field tables
+  // search through them for matching user ids and load those nodes
+  $additions = array();
+  $types = content_types();
+
+  // Find the table and columns to search through, if the same
+  // table comes up in more than one field type, we only need
+  // to search it once.
+  $search_tables = array();
+  $search_links = array();
+  foreach ($types as $bundle => $type) {
+    foreach ($type['fields'] as $field) {
+      // Only add tables when reverse link has been selected.
+      if ($field['type'] == 'user_reference' && !empty($field['widget']['reverse_link'])) {
+        $db_info = content_database_info($field);
+        $search_tables[$db_info['table']] = $db_info['columns']['uid']['column'];
+        $search_links[$db_info['table']] = $field['widget']['reverse_link'];
+      }
+    }
+  }
+  foreach ($search_tables as $table => $column) {
+    $ids = db_query(db_rewrite_sql("SELECT DISTINCT(n.nid) FROM {node} n LEFT JOIN {". $table ."} f ON n.vid = f.vid WHERE f.". $column ."=". $account->uid. " AND n.status = 1"));
+    while ($data = db_fetch_object($ids)) {
+      // TODO, do we really want a complete node_load() here? We only need the title to create a link.
+      $node = node_load($data->nid);
+      $node->reverse_link = $search_links[$table];
+      $additions[$node->type][] = $node;
+    }
+  }
+  $account->user_reference = $additions;
+  return;
+}
+
+/**
+ * Implementation of hook_user_view().
+ */
+function user_reference_user_view(&$edit, &$account) {
+  if (!empty($account->user_reference)) {
+    $node_types = content_types();
+    $additions = array();
+    $values = array();
+    foreach ($account->user_reference as $node_type => $nodes) {
+      foreach ($nodes as $node) {
+        if ($node->reverse_link) {
+          $values[$node_type][] = l($node->title, 'node/'. $node->nid);
+        }
+      }
+      if (isset($values[$node_type])) {
+        $additions[] = array(
+          '#type' => 'user_profile_item',
+          '#title' => check_plain($node_types[$node_type]['name']),
+          '#value' => theme('item_list', $values[$node_type]),
+        );
+      }
+    }
+    if ($additions) {
+      $account->content['user_reference'] = $additions + array(
+        '#type' => 'user_profile_category',
+        '#attributes' => array('class' => 'user-member'),
+        '#title' => t('Related content'),
+        '#weight' => 10,
+      );
+    }
+  }
+  break;
 }
 
 /**
