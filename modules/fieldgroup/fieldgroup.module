@@ -426,7 +426,7 @@ function fieldgroup_field_overview_form_submit($form, &$form_state) {
   // Create new group if needed.
   if (!empty($form_values['_add_new_group']['label'])) {
     $group = $form_values['_add_new_group'];
-    $group['settings'] = field_group_default_settings($group['group_type']);
+    $group['settings'] = field_group_default_settings($group['group_type'], $bundle);
     fieldgroup_save_group($bundle, $group);
     $new_group_name = $group['group_name'];
   }
@@ -469,7 +469,7 @@ function fieldgroup_field_overview_form_submit($form, &$form_state) {
   cache_clear_all('fieldgroup_data', 'cache_field');
 }
 
-function field_group_default_settings($group_type) {
+function field_group_default_settings($group_type, $bundle) {
   $settings = array(
     'form' => array('style' => 'fieldset', 'description' => ''),
     'display' => array('description' => '', 'label' => 'above'),

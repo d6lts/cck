@@ -39,7 +39,7 @@ function cck_init() {
  */
 function cck_menu_alter(&$items) {
   // Customize the content types page with our own callback
-  //$items['admin/build/types']['page callback'] = 'cck_types_overview';
+  $items['admin/build/types']['page callback'] = 'cck_types_overview';
   $items['admin/build/types']['file'] = 'cck.admin.inc';
   $items['admin/build/types']['file path'] = drupal_get_path('module', 'cck') .'/includes';
 }
@@ -515,8 +515,8 @@ function cck_node_type($op, $info) {
       // Trying to get the Manage Fields screen for a new content type to
       // work immediately after the new type is created. Even this won't do it,
       // MF screen is still 'Page not found' after the new type is created.
-      field_cache_clear();
       menu_rebuild();
+      field_cache_clear();
       break;
 
     case 'update':
