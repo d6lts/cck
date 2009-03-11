@@ -34,10 +34,10 @@ function user_reference_theme() {
     'user_reference_autocomplete' => array(
       'arguments' => array('element' => NULL),
     ),
-    'field_formatter_formatter_user_reference_default' => array(
+    'field_formatter_user_reference_default' => array(
       'arguments' => array('element'),
     ),
-    'field_formatter_formatter_user_reference_plain' => array(
+    'field_formatter_user_reference_plain' => array(
       'arguments' => array('element'),
     ),
   );
@@ -160,9 +160,8 @@ function user_reference_field_formatter_info() {
 /**
  * Theme function for 'default' user_reference field formatter.
  */
-function theme_field_formatter_formatter_user_reference_default($element) {
+function theme_field_formatter_user_reference_default($element) {
   $output = '';
-
   if (isset($element['#item']['uid']) && $account = user_load(array('uid' => $element['#item']['uid']))) {
     $output = theme('username', $account);
   }
@@ -172,7 +171,7 @@ function theme_field_formatter_formatter_user_reference_default($element) {
 /**
  * Theme function for 'plain' user_reference field formatter.
  */
-function theme_field_formatter_formatter_user_reference_plain($element) {
+function theme_field_formatter_user_reference_plain($element) {
   $output = '';
   if (isset($element['#item']['uid']) && $account = user_load(array('uid' => $element['#item']['uid']))) {
     $output = $account->name;
