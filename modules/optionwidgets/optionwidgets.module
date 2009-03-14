@@ -151,7 +151,8 @@ function optionwidgets_elements() {
  * @param $form
  *   the entire form array, $form['#node'] holds node information
  * @param $form_state
- *   the form_state, $form_state['values'] holds the form values.
+ *   the form_state, $form_state['values'][$field['field_name']]
+ *   holds the field's form values.
  * @param $field
  *   the field array
  * @param $items
