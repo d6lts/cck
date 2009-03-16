@@ -16,7 +16,7 @@ function number_field_settings_form($field) {
     );
     $form['scale'] = array(
       '#type' => 'select',
-      '#options' => drupal_map_assoc(range(0, 6)),
+      '#options' => drupal_map_assoc(range(0, 10)),
       '#title' => t('Scale'),
       '#description' => t('The number of digits to the right of the decimal.'),
       '#default_value' => $field['settings']['scale'],
