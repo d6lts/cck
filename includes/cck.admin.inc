@@ -1357,14 +1357,14 @@ function cck_field_edit_form_validate($form, &$form_state) {
 
   // Do no validation here. Assume field and widget modules are
   // handling their own validation of form settings.
-
+  
   // If field.module is handling the default value,
   // validate the result using the field validation.
   if (field_behaviors_widget('default value', $instance) == FIELD_BEHAVIOR_DEFAULT) {
 
     // If this is a programmed form, get rid of the default value widget,
     // we have the default values already.
-    if ($form['programmed']) {
+    if (!empty($form['programmed'])) {
       form_set_value(array('#parents' => array('instance', 'widget', 'default_value_widget')), NULL, $form_state);
       return;
     }

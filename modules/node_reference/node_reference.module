@@ -59,7 +59,7 @@ function node_reference_field_info() {
     'node_reference' => array(
       'label' => t('Node reference'),
       'description' => t('This field stores the ID of a related node as an integer value.'),
-      'settings' => array('referenceable_types'),
+      'settings' => array('referenceable_types' => array()),
       'default_widget' => 'node_reference_autocomplete',
       'default_formatter' => 'node_reference_default',
     ),
@@ -150,28 +150,28 @@ function node_reference_field_formatter_info() {
   return array(
     'node_reference_default' => array(
       'label' => t('Title (link)'),
-      'field types' => array('node_reference'),
+      'field types' => array('node_reference' => array()),
       'behaviors' => array(
         'multiple values' => FIELD_BEHAVIOR_DEFAULT,
       ),
     ),
     'node_reference_plain' => array(
       'label' => t('Title (no link)'),
-      'field types' => array('node_reference'),
+      'field types' => array('node_reference' => array()),
       'behaviors' => array(
         'multiple values' => FIELD_BEHAVIOR_DEFAULT,
       ),
     ),
     'node_reference_full' => array(
       'label' => t('Full node'),
-      'field types' => array('node_reference'),
+      'field types' => array('node_reference' => array()),
       'behaviors' => array(
         'multiple values' => FIELD_BEHAVIOR_DEFAULT,
       ),
     ),
     'node_reference_teaser' => array(
       'label' => t('Teaser'),
-      'field types' => array('node_reference'),
+      'field types' => array('node_reference' => array()),
       'behaviors' => array(
         'multiple values' => FIELD_BEHAVIOR_DEFAULT,
       ),
@@ -264,7 +264,7 @@ function node_reference_field_widget_info() {
     'node_reference_select' => array(
       'label' => t('Select list'),
       'field types' => array('node_reference'),
-      'settings' => array('autocomplete_match'),
+      'settings' => array('autocomplete_match' => 'contains'),
       'behaviors' => array(
         'multiple values' => FIELD_BEHAVIOR_CUSTOM,
         'default value' => FIELD_BEHAVIOR_DEFAULT,
@@ -273,7 +273,7 @@ function node_reference_field_widget_info() {
     'node_reference_buttons' => array(
       'label' => t('Check boxes/radio buttons'),
       'field types' => array('node_reference'),
-      'settings' => array('autocomplete_match'),
+      'settings' => array('autocomplete_match' => 'contains'),
       'behaviors' => array(
         'multiple values' => FIELD_BEHAVIOR_CUSTOM,
         'default value' => FIELD_BEHAVIOR_DEFAULT,
@@ -282,7 +282,7 @@ function node_reference_field_widget_info() {
     'node_reference_autocomplete' => array(
       'label' => t('Autocomplete text field'),
       'field types' => array('node_reference'),
-      'settings' => array('autocomplete_match'),
+      'settings' => array('autocomplete_match' => 'contains'),
       'behaviors' => array(
         'multiple values' => FIELD_BEHAVIOR_DEFAULT,
         'default value' => FIELD_BEHAVIOR_DEFAULT,

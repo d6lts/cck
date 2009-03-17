@@ -51,7 +51,7 @@ function user_reference_field_info() {
     'user_reference' => array(
       'label' => t('User reference'),
       'description' => t('This field stores the ID of a related user as an integer value.'),
-      'settings' => array('referenceable_roles', 'referenceable_status'),
+      'settings' => array('referenceable_roles' => array(), 'referenceable_status' => array()),
       'default_widget' => 'user_reference_autocomplete',
       'default_formatter' => 'user_reference_default',
     ),
@@ -198,7 +198,7 @@ function user_reference_field_widget_info() {
     'user_reference_select' => array(
       'label' => t('Select list'),
       'field types' => array('user_reference'),
-      'settings' => array('autocomplete_match', 'reverse_link'),
+      'settings' => array('autocomplete_match' => 'contains', 'reverse_link' => 0),
       'behaviors' => array(
         'multiple values' => FIELD_BEHAVIOR_CUSTOM,
         'default value' => FIELD_BEHAVIOR_DEFAULT,
@@ -207,7 +207,7 @@ function user_reference_field_widget_info() {
     'user_reference_buttons' => array(
       'label' => t('Check boxes/radio buttons'),
       'field types' => array('user_reference'),
-      'settings' => array('autocomplete_match', 'reverse_link'),
+      'settings' => array('autocomplete_match' => 'contains', 'reverse_link' => 0),
       'behaviors' => array(
         'multiple values' => FIELD_BEHAVIOR_CUSTOM,
         'default value' => FIELD_BEHAVIOR_DEFAULT,
@@ -216,7 +216,7 @@ function user_reference_field_widget_info() {
     'user_reference_autocomplete' => array(
       'label' => t('Autocomplete text field'),
       'field types' => array('user_reference'),
-      'settings' => array('autocomplete_match', 'reverse_link'),
+      'settings' => array('autocomplete_match' => 'contains', 'reverse_link' => 0),
       'behaviors' => array(
         'multiple values' => FIELD_BEHAVIOR_DEFAULT,
         'default value' => FIELD_BEHAVIOR_DEFAULT,
