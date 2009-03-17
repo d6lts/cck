@@ -247,7 +247,15 @@ class content_handler_field_multiple extends content_handler_field {
     }
 
     if (!empty($this->options['link_to_node']) && $data !== NULL && $data !== '') {
-      return l($data, "node/" . $values->nid, array('html' => TRUE));
+      if (method_exists('render_as_link', 'views_handler_field')) {
+        // Views 2.3+
+        $this->options['alter']['make_link'] = TRUE;
+        $this->options['alter']['path'] = "node/" . $values->{$this->aliases['nid']};
+      }
+      else {
+        // Views up to 2.2
+        return l($data, "node/" . $values->nid, array('html' => TRUE));
+      }
     }
     else {
       return $data;

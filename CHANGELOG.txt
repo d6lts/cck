@@ -10,6 +10,8 @@ Features:
 - #349987 by Michelle - Panels integration for fieldgroups.
 - #362216 by markus_petrux - sort the admin/content/types/fields overview by field name.
 - #242583 by jmiccolis - Number: Push maximum 'scale' setting up to 10 for decimal fields.
+- Correct RTL display.
+- #405452 - Views integration: Update to Views 2.3 API ('link to node'), with 2.2 compatibility preserved.
 
 Bugfixes:
 - #392476 Make sure CCK textarea fields in a View don't have a span wrapped around a block-level element.
