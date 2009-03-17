@@ -162,7 +162,7 @@ function user_reference_field_formatter_info() {
  */
 function theme_field_formatter_user_reference_default($element) {
   $output = '';
-  if (isset($element['#item']['uid']) && $account = user_load(array('uid' => $element['#item']['uid']))) {
+  if (isset($element['#item']['uid']) && $account = user_load($element['#item']['uid'])) {
     $output = theme('username', $account);
   }
   return $output;
@@ -674,7 +674,7 @@ function user_reference_autocomplete($field_name, $string = '') {
 /**
  * Implementation of hook_user_load().
  */
-function user_reference_user_load(&$edit, &$account) {
+function user_reference_user_load(&$account) {
   // Only add links if we are on the user 'view' page.
   if (arg(0) != 'user' || arg(2)) {
     return;
@@ -715,7 +715,7 @@ function user_reference_user_load(&$edit, &$account) {
 /**
  * Implementation of hook_user_view().
  */
-function user_reference_user_view(&$edit, &$account) {
+function user_reference_user_view(&$account) {
   if (!empty($account->user_reference)) {
     $node_types = content_types();
     $additions = array();
