@@ -184,9 +184,9 @@ class content_handler_field extends views_handler_field_node {
     foreach ($db_info['columns'] as $column => $attributes) {
       $item[$column] = $values->{$this->aliases[$attributes['column']]};
     }
-    
+
     $item['#delta'] = $field['multiple'] ?  $values->{$this->aliases['delta']} : 0;
-    
+
     return $this->render_link(content_format($field, $item, $options['format'], $node), $values);
   }
 
