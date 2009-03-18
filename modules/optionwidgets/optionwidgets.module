@@ -233,6 +233,10 @@ function optionwidgets_select_process($element, $edit, &$form_state, $form) {
   }
 
   $options = optionwidgets_options($field);
+
+  // For this specific widget, HTML should be filtered out and entities left unencoded.
+  // See content_allowed_values / content_filter_xss / filter_xss.
+  $options = array_map(create_function('$opt', 'return html_entity_decode(strip_tags($opt), ENT_QUOTES);'), $options);
   $element[$field_key] = array(
     '#type' => 'select',
     '#title' => $element['#title'],

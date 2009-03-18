@@ -1,7 +1,14 @@
 //$Id$
 
-CCK 6.x-2.x
+CCK 6.x-2.2
 ===========
+
+IMPORTANT:
+This release fixes a security issue (XSS vulnerability) in nodereference and userreference modules.
+All sites are using CCK for Drupal 6 are strongly encouraged to upgrade to CCK 2.2.
+Note that the Drupal 5 versions are not affected.
+See the Security Annoucement on http://drupal.org/node/406520 for more informations.
+
 
 Features:
 - #361311 Add poll settings forms to Manage fields screen.
@@ -50,6 +57,7 @@ should be enough, though.
 - #360712 by tombigel - CSS tweaks for RTL languages.
 - #375316 Nodereference/Userreference: Ensure allowed values always return at least an empty array.
 - #368155 Nodereference/Userreference: Fix performance issue on large sites when validating empty noderef/userref fields.
+- #319778 Optionwidgets: Fix double encoding issues for &, >, <,... chars in select lists.
 
 CCK 6.x-2.1
 ===========
