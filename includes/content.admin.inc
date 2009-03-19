@@ -1544,7 +1544,16 @@ function content_alter_db($previous_field, $new_field) {
         $record['delta'] = $data['delta'];
       }
       foreach ($migrate_columns as $column => $attributes) {
-        $record[$column] = is_null($data[$column]) ? NULL : $data[$column];
+        if (is_null($data[$column])) {
+          $record[$column] = NULL;
+        }
+        else {
+          $record[$column] = $data[$column];
+          // Prevent double serializtion in drupal_write_record.
+          if ($attributes['serialize']) {
+            $record[$column] = unserialize($record[$column]);
+          }
+        }
       }
       if (db_result(db_query('SELECT COUNT(*) FROM {'. $new_table .
       '} WHERE vid = %d AND nid = %d', $data['vid'], $data['nid']))) {
