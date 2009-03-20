@@ -1550,7 +1550,7 @@ function content_alter_db($previous_field, $new_field) {
         else {
           $record[$column] = $data[$column];
           // Prevent double serializtion in drupal_write_record.
-          if ($attributes['serialize']) {
+          if (isset($attributes['serialize']) && $attributes['serialize']) {
             $record[$column] = unserialize($record[$column]);
           }
         }
