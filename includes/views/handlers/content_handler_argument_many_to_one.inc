@@ -19,7 +19,7 @@ class content_handler_argument_many_to_one extends views_handler_argument_many_t
     $options = $this->allowed_values();
     $value = $data->{$this->name_alias};
     if (isset($options[$value])) {
-      $value = check_plain($options[$value]);
+      $value = $options[$value];
     }
     else {
       $value = parent::summary_name($data);

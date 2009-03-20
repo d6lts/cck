@@ -5,7 +5,7 @@ CCK 6.x-2.x
 
 Bugfixes:
 - #407446 by quicksketch: prevent double serialization during per-field to per-type migration.
-
+- #407344 fix html appearing in selects in Views filters.
 
 CCK 6.x-2.2
 ===========
