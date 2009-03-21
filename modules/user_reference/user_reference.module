@@ -672,23 +672,26 @@ function user_reference_autocomplete($field_name, $string = '') {
 /**
  * Implementation of hook_user_load().
  */
-function user_reference_user_load(&$account) {
+function user_reference_user_load(&$accounts) {
+    
   // Only add links if we are on the user 'view' page.
   if (arg(0) != 'user' || arg(2)) {
     return;
   }
-  // find CCK user_reference field tables
-  // search through them for matching user ids and load those nodes
-  $additions = array();
-  $types = content_types();
-
-  // Find the table and columns to search through, if the same
-  // table comes up in more than one field type, we only need
-  // to search it once.
-  $search_tables = array();
-  $search_links = array();
-  foreach ($types as $bundle => $type) {
-    foreach ($type['fields'] as $field) {
+  
+  foreach ($accounts as $uid => $account) {
+       
+    // find CCK user_reference field tables
+    // search through them for matching user ids and load those nodes
+    $additions = array();
+    $fields = field_info_instances('user');
+    
+    // Find the table and columns to search through, if the same
+    // table comes up in more than one field type, we only need
+    // to search it once.
+    $search_tables = array();
+    $search_links = array();
+    foreach ($fields as $field) {
       // Only add tables when reverse link has been selected.
       if ($field['type'] == 'user_reference' && !empty($field['widget']['reverse_link'])) {
         $db_info = content_database_info($field);
@@ -696,17 +699,17 @@ function user_reference_user_load(&$account) {
         $search_links[$db_info['table']] = $field['widget']['reverse_link'];
       }
     }
-  }
-  foreach ($search_tables as $table => $column) {
-    $ids = db_query(db_rewrite_sql("SELECT DISTINCT(n.nid) FROM {node} n LEFT JOIN {". $table ."} f ON n.vid = f.vid WHERE f.". $column ."=". $account->uid. " AND n.status = 1"));
-    while ($data = db_fetch_object($ids)) {
-      // TODO, do we really want a complete node_load() here? We only need the title to create a link.
-      $node = node_load($data->nid);
-      $node->reverse_link = $search_links[$table];
-      $additions[$node->type][] = $node;
+    foreach ($search_tables as $table => $column) {
+      $ids = db_query(db_rewrite_sql("SELECT DISTINCT(n.nid) FROM {node} n LEFT JOIN {". $table ."} f ON n.vid = f.vid WHERE f.". $column ."=". $account->uid. " AND n.status = 1"));
+      while ($data = db_fetch_object($ids)) {
+        // TODO, do we really want a complete node_load() here? We only need the title to create a link.
+        $node = node_load($data->nid);
+        $node->reverse_link = $search_links[$table];
+        $additions[$node->type][] = $node;
+      }
     }
+    $accounts[$uid]->user_reference = $additions;
   }
-  $account->user_reference = $additions;
   return;
 }
 
@@ -741,7 +744,6 @@ function user_reference_user_view(&$account) {
       );
     }
   }
-  break;
 }
 
 /**
