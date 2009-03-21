@@ -794,9 +794,8 @@ function _nodereference_potential_references_views($field, $string = '', $match 
     // should be moved to content_plugin_display_references
 
     // Limit result set size.
-    if (isset($limit)) {
-      $view->display_handler->set_option('items_per_page', $limit);
-    }
+    $limit = isset($limit) ? $limit : 0;
+    $view->display_handler->set_option('items_per_page', $limit);
 
     // Get arguments for the view.
     if (!empty($field['advanced_view_args'])) {
