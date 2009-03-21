@@ -969,7 +969,7 @@ function cck_field_update_field($field) {
   $module = $field_types[$field['type']]['module'];
 
   $defaults = field_info_field_settings($field['type']);
-  $field['settings'] = array_merge($defaults, $field['settings']);
+  $field['settings'] = array_merge($defaults, (array) $field['settings']);
 
   drupal_write_record('field_config', $field, array('field_name'));
 

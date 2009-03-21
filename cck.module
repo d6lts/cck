@@ -325,14 +325,6 @@ function _cck_node_extra_fields($type_name) {
         'weight' => -5
       );
     }
-    if ($type->has_body) {
-      $extra['body_field'] = array(
-        'label' => $type->body_label,
-        'description' => t('Node module element.'),
-        'weight' => 0,
-        'view' => 'body'
-      );
-    }
     if (module_exists('locale') && variable_get("language_content_type_$type_name", 0)) {
       $extra['language'] = array(
         'label' => t('Language'),

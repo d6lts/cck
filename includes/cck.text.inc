@@ -9,15 +9,16 @@ function text_field_settings_form($field) {
   $form = array();
   $defaults = field_info_field_settings($field['type']);
   $settings = array_merge($defaults, $field['settings']);
-  $form['max_length'] = array(
-    '#type' => 'textfield',
-    '#title' => t('Maximum length'),
-    '#default_value' => !empty($settings['max_length']) && is_numeric($settings['max_length']) ? $settings['max_length'] :  $defaults['max_length'],
-    '#required' => FALSE,
-    '#element_validate' => array('_element_validate_integer_positive'),
-    '#description' => t('The maximum length of the field in characters. Leave blank for an unlimited size.'),
-  );
-
+  if (isset($defaults['max_length'])) {
+    $form['max_length'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Maximum length'),
+      '#default_value' => !empty($settings['max_length']) && is_numeric($settings['max_length']) ? $settings['max_length'] :  $defaults['max_length'],
+      '#required' => FALSE,
+      '#element_validate' => array('_element_validate_integer_positive'),
+      '#description' => t('The maximum length of the field in characters. Leave blank for an unlimited size.'),
+    );
+  }
   return $form;
 }
 
@@ -29,7 +30,6 @@ function text_widget_settings_form($instance) {
   $widget = $instance['widget'];
   $defaults = field_info_widget_settings($widget['type']);
   $settings = array_merge($defaults, $widget['settings']);
-  $field = field_info_field($instance['field_name']);
   if ($widget['type'] == 'text_textfield') {
     $form['size'] = array(
       '#type' => 'textfield',
@@ -48,7 +48,6 @@ function text_widget_settings_form($instance) {
       '#required' => TRUE,
     );
   }
-  return $form;
 }
 
 /**
@@ -67,5 +66,14 @@ function text_field_instance_settings_form($field, $instance) {
     '#default_value' => !empty($settings['text_processing']) && is_numeric($settings['text_processing']) ? $settings['text_processing'] : $defaults['text_processing'],
     '#options' => $options,
   );
+  if ($field['type'] == 'text_with_summary') {
+    $form['display_summary'] = array(
+      '#type' => 'select',
+      '#options' => array(0 => t('No'), 1 => t('Yes')),
+      '#title' => t('Display summary'),
+      '#description' => t('Display the summary to allow the user to input a summary value. Hide the summary to automatically fill it with a trimmed portion from the main post. '),
+      '#default_value' => !empty($settings['display_summary']) ? $settings['display_summary'] :  0,
+    );
+  }
   return $form;
 }
