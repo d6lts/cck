@@ -729,7 +729,6 @@ function cck_display_overview_form_submit($form, &$form_state) {
       field_update_instance($instance);
     }
   }
-
   drupal_set_message(t('Your settings have been saved.'));
 }
 

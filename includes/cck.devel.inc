@@ -89,8 +89,12 @@ if (module_exists('text')) {
 
   function _text_cck_generate($object, $field, $instance, $bundle) {
     $object_field = array();
-    if ($instance['widget']['type'] == 'text_textarea') {
+    $format = isset($field['text_processing']) ? rand(0, 3) : 0;
+    if ($instance['widget']['type'] != 'text_textfield') {
       $object_field['value'] = devel_create_content($format);
+      if ($instance['widget']['type'] == 'text_textarea_with_summary' && !empty($instance['display_summary'])) {
+        $object_field['summary'] = devel_create_content($format);
+      }
     }
     else {
       // Generate a value that respects max_length.
@@ -99,7 +103,6 @@ if (module_exists('text')) {
       }
       $object_field['value'] = user_password($field['max_length']);
     }
-    $format = isset($field['text_processing']) ? rand(0, 3) : 0;
     $object_field['format'] = $format;
     return $object_field;
   }
