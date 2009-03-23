@@ -23,7 +23,13 @@ function cck_help($path, $arg) {
  * Implementation of hook_perm().
  */
 function cck_perm() {
-  return array('Use PHP input for field settings (dangerous - grant with care)');
+  return array(
+    // TODO : simplify machine name and update existing perms ?
+    'Use PHP input for field settings (dangerous - grant with care)' => array(
+      'title' => t('Use PHP input for field settings'),
+      'description' => t('Enter PHP code in the field for the field settings that allow it. Warning: Give to trusted roles only; this permission has security implications.'),
+    ),
+  );
 }
 
 /**
