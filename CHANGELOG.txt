@@ -5,6 +5,7 @@
 
 - #339753 by MrGeneYUss: fix invalid admin/content/types/[type]/edit path (not actually used in the UI).
 - #341538 by gianfrasoft: fix SQL errors on field creation on rare circumstances.
+- #356908 Number : Correclty filter 'prefix' and 'suffix' properties.
 
 5--1.10
 =======

@@ -234,14 +234,14 @@ function number_field_formatter($field, $item, $formatter, $node) {
     $value = ($item['value']);
     break;
   }
-  $prefixes = explode('|', check_plain($field['prefix']));
-  $suffixes = explode('|', check_plain($field['suffix']));
+  $prefixes = array_map('content_filter_xss', explode('|', check_plain($field['prefix'])));
+  $suffixes = array_map('content_filter_xss', explode('|', check_plain($field['suffix'])));
   if ($prefixes) {
     if (sizeof($prefixes) > 1) {
       $prefix = format_plural($item['value'], $prefixes[0], $prefixes[1]);
     }
     else {
-      $prefix = $field['prefix'];
+      $prefix = $prefixes[0];
     }
   }
   if ($suffixes) {
@@ -249,7 +249,7 @@ function number_field_formatter($field, $item, $formatter, $node) {
       $suffix = format_plural($item['value'], $suffixes[0], $suffixes[1]);
     }
     else {
-      $suffix = $field['suffix'];
+      $suffix = $suffixes[0];
     }
   }
   return $prefix . $value . $suffix;
@@ -279,8 +279,8 @@ function number_widget($op, &$node, $field, &$items) {
       $prefixes = explode('|', $field['prefix']);
       $suffixes = explode('|', $field['suffix']);
       // We take the plural form (if any) for forms.
-      $prefix = array_pop($prefixes);
-      $suffix = array_pop($suffixes);
+      $prefix = content_filter_xss(array_pop($prefixes));
+      $suffix = content_filter_xss(array_pop($suffixes));
 
       $form[$field['field_name']] = array('#tree' => TRUE);
 
