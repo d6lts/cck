@@ -8,6 +8,7 @@ Bugfixes:
 - #407344 fix html appearing in selects in Views filters.
 - #409320 by bengtan: Nodereference / Userreference - fix 'this post cannot be referenced' for views-defined referenceable nodes/users, when the view definition has a 'limit'.
 - #409398 by markus_petrux - fix handling of fieldgroup_types() (prep work for combo / multigroups)
+- #356908 Number : Correclty filter 'prefix' and 'suffix' properties.
 
 CCK 6.x-2.2
 ===========
