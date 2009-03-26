@@ -518,7 +518,7 @@ function cck_node_type($op, $info) {
       break;
 
     case 'update':
-      if ($extra = variable_get('cck_extra_weights_'. $info->old_type, array())) {
+      if (isset($info->old_type) && $info->old_type !== $info->type && $extra = variable_get('cck_extra_weights_'. $info->old_type, array())) {
         variable_set('cck_extra_weights_'. $info->type, $extra);
         variable_del('cck_extra_weights_'. $info->old_type);
       }
