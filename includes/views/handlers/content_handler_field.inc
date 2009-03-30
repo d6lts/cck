@@ -187,7 +187,20 @@ class content_handler_field extends views_handler_field_node {
 
     $item['#delta'] = $field['multiple'] ?  $values->{$this->aliases['delta']} : 0;
 
-    return $this->render_link(content_format($field, $item, $options['format'], $node), $values);
+    // Render items.
+    $formatter_name = $options['format'];
+    if ($formatter = _content_get_formatter($formatter_name, $field['type'])) {
+      if (content_handle('formatter', 'multiple values', $formatter) == CONTENT_HANDLE_CORE) {
+        // Single-value formatter.
+        $output = content_format($field, $item, $formatter_name, $node);
+      }
+      else {
+        // Multiple values formatter - we actually have only one value to display.
+        $output = content_format($field, array($item), $formatter_name, $node);
+      }
+      return $this->render_link($output, $values);
+    }
+    return '';
   }
 
 }

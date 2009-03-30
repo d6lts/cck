@@ -9,6 +9,8 @@ Bugfixes:
 - #409320 by bengtan: Nodereference / Userreference - fix 'this post cannot be referenced' for views-defined referenceable nodes/users, when the view definition has a 'limit'.
 - #409398 by markus_petrux - fix handling of fieldgroup_types() (prep work for combo / multigroups)
 - #356908 Number : Correclty filter 'prefix' and 'suffix' properties.
+- #412058 by fago - Rules integration: Fixed condition 'field has value' when operating on viewed nodes.
+- #413792 Views integration: fix fields using 'multiple formatters' and not 'group multiple fields'. Thanks Crell and quicksketch for the detective work.
 
 CCK 6.x-2.2
 ===========
