@@ -152,6 +152,7 @@ function nodereference_field_settings($op, $field) {
         'left_table' => $table_alias,
         'left_field' => $field['field_name'] .'_nid',
       );
+      $data[$table_alias][$field['field_name'] .'_nid']['argument']['handler'] = 'content_handler_argument_reference';
       $data[$table_alias][$field['field_name'] .'_nid']['argument']['name table'] = "node_$table_alias";
       $data[$table_alias][$field['field_name'] .'_nid']['argument']['name field'] = 'title';
       // Relationship: add a relationship for related node.

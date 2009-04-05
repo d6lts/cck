@@ -32,6 +32,9 @@ function content_views_handlers() {
       'content_handler_argument_numeric' => array(
         'parent' => 'views_handler_argument_numeric',
       ),
+      'content_handler_argument_reference' => array(
+        'parent' => 'content_handler_argument_numeric',
+      ),
       'content_handler_argument_many_to_one' => array(
         'parent' => 'views_handler_argument_many_to_one',
       ),

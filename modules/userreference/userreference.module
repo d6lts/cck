@@ -150,6 +150,7 @@ function userreference_field_settings($op, $field) {
         'left_table' => $table_alias,
         'left_field' => $field['field_name'] .'_uid',
       );
+      $data[$table_alias][$field['field_name'] .'_uid']['argument']['handler'] = 'content_handler_argument_reference';
       $data[$table_alias][$field['field_name'] .'_uid']['argument']['name table'] = "users_$table_alias";
       $data[$table_alias][$field['field_name'] .'_uid']['argument']['name field'] = 'name';
       // Relationship: Add a relationship for related user.
