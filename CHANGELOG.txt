@@ -11,6 +11,7 @@ Bugfixes:
 - #356908 Number : Correclty filter 'prefix' and 'suffix' properties.
 - #412058 by fago - Rules integration: Fixed condition 'field has value' when operating on viewed nodes.
 - #413792 Views integration: fix fields using 'multiple formatters' and not 'group multiple fields'. Thanks Crell and quicksketch for the detective work.
+- #421126 Views integration: Use value aliases if available in argument title replacements.
 
 CCK 6.x-2.2
 ===========

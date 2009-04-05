@@ -28,6 +28,17 @@ class content_handler_argument_many_to_one extends views_handler_argument_many_t
     return $value;
   }
 
+  function title_query() {
+    $options = $this->allowed_values();
+    $values = $this->value;
+    foreach ($values as $key => $value) {
+      if (isset($options[$value])) {
+        $values[$key] = $options[$value];
+      }
+    }
+    return $values;
+  }
+
   function allowed_values() {
     $field = $this->content_field;
     $function = $field['module'] .'_allowed_values';
