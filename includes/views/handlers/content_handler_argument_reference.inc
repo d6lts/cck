@@ -16,9 +16,9 @@ class content_handler_argument_reference extends content_handler_argument_numeri
     $table_data = views_fetch_data($this->name_table);
     $table = array_shift($table_data['table']['join']);
 
-    $result = db_query("SELECT $this->name_field FROM {". $table['table'] ."} WHERE ". $table['field'] ." IN ($placeholders)", $this->value);
-    while ($term = db_fetch_object($result)) {
-      $titles[] = check_plain($term->title);
+    $result = db_query("SELECT $this->name_field AS title FROM {". $table['table'] ."} WHERE ". $table['field'] ." IN ($placeholders)", $this->value);
+    while ($row = db_fetch_object($result)) {
+      $titles[] = check_plain($row->title);
     }
     return $titles;
   }

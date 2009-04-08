@@ -12,7 +12,7 @@ Bugfixes:
 - #412058 by fago - Rules integration: Fixed condition 'field has value' when operating on viewed nodes.
 - #413792 Views integration: fix fields using 'multiple formatters' and not 'group multiple fields'. Thanks Crell and quicksketch for the detective work.
 - #421126 Views integration: Use value aliases in argument title replacements for text / number fields.
-- #397358 by Darren Oh, yched - Views integration: Use node title / user name in argument title replacements for nodereference and userreference argument fields.
+- #397358 by Darren Oh, yched, markus_petrux - Views integration: Use node title / user name in argument title replacements for nodereference and userreference argument fields.
 
 CCK 6.x-2.2
 ===========
