@@ -55,8 +55,7 @@ function content_views_handlers() {
         'parent' => 'views_handler_filter_numeric',
       ),
       'content_handler_filter_float' => array(
-        // views_handler_filter_float is defined in views_handler_filter_numeric.inc
-        'parent' => 'views_handler_filter_numeric',
+        'parent' => 'views_handler_filter_float',
       ),
       'content_handler_filter_many_to_one' => array(
         'parent' => 'views_handler_filter_many_to_one',
