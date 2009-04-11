@@ -3,6 +3,9 @@
 CCK 6.x-2.x
 ===========
 
+Features:
+- #419678 Views integration: expose CCK fields to 'Node revision' Views.
+
 Bugfixes:
 - #407446 by quicksketch: prevent double serialization during per-field to per-type migration.
 - #407344 fix html appearing in selects in Views filters.

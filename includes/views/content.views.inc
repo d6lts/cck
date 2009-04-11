@@ -183,6 +183,11 @@ function content_views_field_views_data($field) {
       'left_field' => 'vid',
       'field' => 'vid',
     );
+    $data['table']['join']['node_revisions'] = array(
+      'table' => $db_info['table'],
+      'left_field' => 'vid',
+      'field' => 'vid',
+    );
 
     // Build the list of columns enabled for default views integration.
     $db_columns = array();
