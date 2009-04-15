@@ -412,6 +412,7 @@ function nodereference_widget_settings($op, $widget) {
     case 'form':
       $form = array();
       $match = isset($widget['autocomplete_match']) ? $widget['autocomplete_match'] : 'contains';
+      $size = (isset($widget['size']) && is_numeric($widget['size'])) ? $widget['size'] : 60;
       if ($widget['type'] == 'nodereference_autocomplete') {
         $form['autocomplete_match'] = array(
           '#type' => 'select',
@@ -423,14 +424,22 @@ function nodereference_widget_settings($op, $widget) {
           ),
           '#description' => t('Select the method used to collect autocomplete suggestions. Note that <em>Contains</em> can cause performance issues on sites with thousands of nodes.'),
         );
+        $form['size'] = array(
+          '#type' => 'textfield',
+          '#title' => t('Size of textfield'),
+          '#default_value' => $size,
+          '#element_validate' => array('_element_validate_integer_positive'),
+          '#required' => TRUE,
+        );
       }
       else {
         $form['autocomplete_match'] = array('#type' => 'hidden', '#value' => $match);
+        $form['size'] = array('#type' => 'hidden', '#value' => $size);
       }
       return $form;
 
     case 'save':
-      return array('autocomplete_match');
+      return array('autocomplete_match', 'size');
   }
 }
 

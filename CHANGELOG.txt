@@ -5,6 +5,7 @@ CCK 6.x-2.x
 
 Features:
 - #419678 Views integration: expose CCK fields to 'Node revision' Views.
+- #399778 by Benjamin Melençon - Nodereference / Userreference: Add 'size' setting to autocomplete widgets.
 
 Bugfixes:
 - #407446 by quicksketch: prevent double serialization during per-field to per-type migration.
