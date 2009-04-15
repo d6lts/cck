@@ -27,6 +27,7 @@ function text_field_settings_form($field) {
  * on behalf of core Text module.
  */
 function text_widget_settings_form($instance) {
+  $form = array();
   $widget = $instance['widget'];
   $defaults = field_info_widget_settings($widget['type']);
   $settings = array_merge($defaults, $widget['settings']);
@@ -48,6 +49,7 @@ function text_widget_settings_form($instance) {
       '#required' => TRUE,
     );
   }
+  return $form;
 }
 
 /**

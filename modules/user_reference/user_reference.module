@@ -198,7 +198,10 @@ function user_reference_field_widget_info() {
     'user_reference_select' => array(
       'label' => t('Select list'),
       'field types' => array('user_reference'),
-      'settings' => array('autocomplete_match' => 'contains', 'reverse_link' => 0),
+      'settings' => array(
+         // TODO : should be an instance setting now
+        'reverse_link' => 0
+      ),
       'behaviors' => array(
         'multiple values' => FIELD_BEHAVIOR_CUSTOM,
         'default value' => FIELD_BEHAVIOR_DEFAULT,
@@ -207,7 +210,10 @@ function user_reference_field_widget_info() {
     'user_reference_buttons' => array(
       'label' => t('Check boxes/radio buttons'),
       'field types' => array('user_reference'),
-      'settings' => array('autocomplete_match' => 'contains', 'reverse_link' => 0),
+      'settings' => array(
+         // TODO : should be an instance setting now
+        'reverse_link' => 0
+      ),
       'behaviors' => array(
         'multiple values' => FIELD_BEHAVIOR_CUSTOM,
         'default value' => FIELD_BEHAVIOR_DEFAULT,
@@ -216,7 +222,12 @@ function user_reference_field_widget_info() {
     'user_reference_autocomplete' => array(
       'label' => t('Autocomplete text field'),
       'field types' => array('user_reference'),
-      'settings' => array('autocomplete_match' => 'contains', 'reverse_link' => 0),
+      'settings' => array(
+        'autocomplete_match' => 'contains',
+        'size' => 60,
+        // TODO : should be an instance setting now
+        'reverse_link' => 0,
+      ),
       'behaviors' => array(
         'multiple values' => FIELD_BEHAVIOR_DEFAULT,
         'default value' => FIELD_BEHAVIOR_DEFAULT,
@@ -261,24 +272,31 @@ function user_reference_elements() {
 /**
  * Implementation of hook_field_widget_settings_form().
  */
-function user_reference_field_widget_settings_form($widget) {
+function user_reference_field_widget_settings_form($instance) {
   $form = array();
-  $match = isset($widget['autocomplete_match']) ? $widget['autocomplete_match'] : 'contains';
+  $widget = $instance['widget'];
+  $defaults = field_info_widget_settings($widget['type']);
+  $settings = array_merge($defaults, $widget['settings']);
   if ($widget['type'] == 'user_reference_autocomplete') {
     $form['autocomplete_match'] = array(
       '#type' => 'select',
       '#title' => t('Autocomplete matching'),
-      '#default_value' => $match,
+      '#default_value' => $settings['autocomplete_match'],
       '#options' => array(
         'starts_with' => t('Starts with'),
         'contains' => t('Contains'),
       ),
       '#description' => t('Select the method used to collect autocomplete suggestions. Note that <em>Contains</em> can cause performance issues on sites with thousands of users.'),
     );
+    $form['size'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Size of textfield'),
+      '#default_value' => $size,
+      '#element_validate' => array('_element_validate_integer_positive'),
+      '#required' => TRUE,
+    );
   }
-  else {
-    $form['autocomplete_match'] = array('#type' => 'hidden', '#value' => $match);
-  }
+  // TODO : should be an instance setting now.
   $form['reverse_link'] = array(
     '#type' => 'checkbox',
     '#title' => t('Reverse link'),
@@ -673,19 +691,19 @@ function user_reference_autocomplete($field_name, $string = '') {
  * Implementation of hook_user_load().
  */
 function user_reference_user_load(&$accounts) {
-    
+
   // Only add links if we are on the user 'view' page.
   if (arg(0) != 'user' || arg(2)) {
     return;
   }
-  
+
   foreach ($accounts as $uid => $account) {
-       
+
     // find CCK user_reference field tables
     // search through them for matching user ids and load those nodes
     $additions = array();
     $fields = field_info_instances('user');
-    
+
     // Find the table and columns to search through, if the same
     // table comes up in more than one field type, we only need
     // to search it once.
