@@ -360,6 +360,7 @@ function userreference_widget_settings($op, $widget) {
       }
       else {
         $form['autocomplete_match'] = array('#type' => 'hidden', '#value' => $match);
+        $form['size'] = array('#type' => 'hidden', '#value' => $size);
       }
       $form['reverse_link'] = array(
         '#type' => 'checkbox',
@@ -367,11 +368,10 @@ function userreference_widget_settings($op, $widget) {
         '#default_value' => isset($widget['reverse_link']) ? $widget['reverse_link'] : 0,
         '#description' => t('If selected, a reverse link back to the referencing node will displayed on the referenced user record.'),
       );
-      $form['size'] = array('#type' => 'hidden', '#value' => $size);
       return $form;
 
     case 'save':
-      return array('autocomplete_match', 'size');
+      return array('autocomplete_match', 'size', 'reverse_link');
   }
 }
 
