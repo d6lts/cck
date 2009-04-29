@@ -40,6 +40,7 @@ function text_field_info() {
     'text' => array(
       'label' => t('Text'),
       'description' => t('Store text in the database.'),
+      'content_icon' => 'icon_content_text.png',
     ),
   );
 }

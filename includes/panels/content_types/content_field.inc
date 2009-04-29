@@ -26,22 +26,28 @@ function content_content_field_content_type_content_types() {
 
   // Get all fields on the site.
   $fields = content_fields();
+  $field_types = _content_field_types();
+  $node_types = node_get_types();
 
   foreach ($fields as $field) {
     // Name the content type a combination of field and node type names.
     $content_type_name = $field['type_name'] . ':' . $field['field_name'];
-    
-    // Assemble the information about the content type. 
-    $info = array();    
-    $info['title'] = t('@type: (field) @field', array('@type' => $field['type_name'], '@field' => $field['field_name']));
-    $info['icon'] = '';
+
+    // Assemble the information about the content type.
+    $info = array();
+    $info['title'] = t('@type: (@field_type) @field', array('@type' => $node_types[$field['type_name']]->name, '@field' => $field['field_name'], '@field_type' => $field_types[$field['type']]['label']));
+
+    if (isset($field_types[$field['type']]['content_icon'])) {
+      $info['icon'] = $field_types[$field['type']]['content_icon'];
+    }
+
     $info['category'] = 'Content';
     $info['description'] = t('Field on the referenced node.');
     $info['required context'] = new ctools_context_required(t('Node'), 'node', array('type' => array($field['type_name'])));
-    
+
     $types[$content_type_name] = $info;
   }
-  
+
   return $types;
 }
 
@@ -59,7 +65,7 @@ function content_content_field_content_type_render($subtype, $conf, $panel_args,
 
   // Get the formatter that was selected in the settings dialog.
   $formatter = $conf['field_formatter'];
-  
+
   // Get more information about our field.
   $field = content_fields($field_name);
 
@@ -105,13 +111,13 @@ function content_content_field_content_type_edit_form(&$form, &$form_state) {
 
   // Get all the information avbout our field.
   $field = content_fields($field_name);
-  
+
   // Get information about all the field types on the site.
   $field_types = _content_field_types();
- 
+
   // Get the information about the type that our field is.
   $type_info = $field_types[$field['type']];
- 
+
   // Put the possible formatters for our type into an array.
   $options = array();
   foreach ($type_info['formatters'] as $formatter_name => $formatter) {

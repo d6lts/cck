@@ -57,8 +57,8 @@ function content_init() {
  * Implementation of hook_ctools_plugin_directory().
  */
 function content_ctools_plugin_directory($module, $plugin) {
-  if ($module == 'ctools') {
-    return 'includes/panels/content_types/' . $plugin;
+  if ($module == 'ctools' && $plugin == 'content_types') {
+    return 'includes/panels/' . $plugin;
   }
 }
 
@@ -729,7 +729,7 @@ function content_field($op, &$node, $field, &$items, $teaser, $page) {
 
     case 'view':
       $addition = array();
-      
+
       // Previewed nodes bypass the 'presave' op, so we need to some massaging.
       if ($node->build_mode == NODE_BUILD_PREVIEW && content_handle('widget', 'multiple values', $field) == CONTENT_HANDLE_CORE) {
         if (content_handle('widget', 'multiple values', $field) == CONTENT_HANDLE_CORE) {
@@ -801,7 +801,7 @@ function content_field($op, &$node, $field, &$items, $teaser, $page) {
         else {
           $element['items'] += $format_info;
         }
-        
+
         // The wrapper lets us get the themed output for the whole field
         // to populate the $FIELD_NAME_rendered variable for node templates,
         // and hide it from the $content variable if needed.
