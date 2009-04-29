@@ -58,7 +58,7 @@ function content_init() {
  */
 function content_ctools_plugin_directory($module, $plugin) {
   if ($module == 'ctools') {
-    return 'plugins/' . $plugin;
+    return 'includes/panels/content_types/' . $plugin;
   }
 }
 

@@ -24,7 +24,7 @@ function fieldgroup_init() {
  */
 function fieldgroup_ctools_plugin_directory($module, $plugin) {
   if ($module == 'ctools') {
-    return 'plugins/' . $plugin;
+    return 'panels/content_types/' . $plugin;
   }
 }
 
