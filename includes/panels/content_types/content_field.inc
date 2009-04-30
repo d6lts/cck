@@ -64,7 +64,7 @@ function content_content_field_content_type_render($subtype, $conf, $panel_args,
   list($node_type, $field_name) = explode(':', $subtype, 2);
 
   // Get the formatter that was selected in the settings dialog.
-  $formatter = $conf['field_formatter'];
+  $formatter = $conf['formatter'];
 
   // Get more information about our field.
   $field = content_fields($field_name);
