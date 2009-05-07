@@ -253,9 +253,9 @@ function cck_field_attach_view($output, $obj_type, &$object, $teaser) {
 }
 
 /**
- * Implementation of hook_field_attach_insert().
+ * Implementation of hook_field_attach_pre_insert().
  */
-function cck_field_attach_insert($obj_type, &$object) {
+function cck_field_attach_pre_insert($obj_type, &$object) {
   // Add identifier to the object to be used to alter extra fields in the view.
   list($id, $vid, $bundle) = field_attach_extract_ids($obj_type, $object);
 
