@@ -171,6 +171,23 @@ class content_handler_field_multiple extends content_handler_field {
     }
   }
 
+  /**
+   * Return DIV or SPAN based upon the field's element type.
+   *
+   * Fields rendered with the 'group multiple' option use <div> markers,
+   * and thus shouldn't be wrapped in a <span>.
+   */
+  function element_type() {
+    if (!$this->defer_query) {
+      return parent::element_type();
+    }
+
+    if (isset($this->definition['element type'])) {
+      return $this->definition['element type'];
+    }
+    return 'div';
+  }
+
   function render($values) {
     // If this is not a grouped field, use content_handler_field::render().
     if (!$this->defer_query) {
