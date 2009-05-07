@@ -1887,6 +1887,19 @@ function search_content_build_modes() {
     ),
   );
 }
+function book_content_build_modes() {
+  return array(
+    'print' => array(
+      'title' => t('Print'),
+      'build modes' => array(
+        NODE_BUILD_PRINT => array(
+          'title' => t('Print'),
+          'views style' => TRUE,
+        ),
+      ),
+    ),
+  );
+}
 
 /**
  * Generate a table name for a field or a content type.

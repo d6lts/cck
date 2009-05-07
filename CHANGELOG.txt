@@ -22,6 +22,7 @@ Bugfixes:
 - #428400 Views integration : Fix fatal error with Views 2.4 (views_handler_filter_float has moved). Preserved compatibility with Views 2.3.
 - #447562 by markus_petrux: fix non-XHTML markup on 'Manage fields' screen.
 - #369364 Views integration: fix non-XHTML markup when displaying fields with the 'group multiple values' option.
+- #441412 by jcnventura - Add 'Print' display context on 'Display fields' pages when book.module is enabled.
 
 CCK 6.x-2.2
 ===========
