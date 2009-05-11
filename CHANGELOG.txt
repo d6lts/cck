@@ -23,6 +23,7 @@ Bugfixes:
 - #447562 by markus_petrux: fix non-XHTML markup on 'Manage fields' screen.
 - #369364 Views integration: fix non-XHTML markup when displaying fields with the 'group multiple values' option.
 - #441412 by jcnventura - Add 'Print' display context on 'Display fields' pages when book.module is enabled.
+- #458952 Let different modules defined the same build_mode information.
 
 CCK 6.x-2.2
 ===========
