@@ -704,13 +704,14 @@ function user_reference_user_load(&$accounts) {
     $additions = array();
     $fields = field_info_instances('user');
 
+    // TODO : replace with field_attach_query() + synchronize with latest D6 code.
+
     // Find the table and columns to search through, if the same
     // table comes up in more than one field type, we only need
     // to search it once.
     $search_tables = array();
     $search_links = array();
     foreach ($fields as $field) {
-      // Only add tables when reverse link has been selected.
       if ($field['type'] == 'user_reference' && !empty($field['widget']['reverse_link'])) {
         $db_info = content_database_info($field);
         $search_tables[$db_info['table']] = $db_info['columns']['uid']['column'];
