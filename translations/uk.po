@@ -47,7 +47,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: cck uk Ukrainian Translation\n"
 "POT-Creation-Date: 2009-05-23 15:31+0300\n"
-"PO-Revision-Date: 2009-05-24 18:43+0300\n"
+"PO-Revision-Date: 2009-05-24 19:21+0300\n"
 "Last-Translator: Andriy Podanenko <podarok@ua.fm>\n"
 "Language-Team: uk <podarok@ua.fm>\n"
 "MIME-Version: 1.0\n"
@@ -212,11 +212,11 @@ msgstr "вміст"
 
 #: content.module:589
 msgid "Updating field type %type with module %module."
-msgstr ""
+msgstr "Оновлення типу поля %type модулем %module."
 
 #: content.module:596
 msgid "Updating widget type %type with module %module."
-msgstr ""
+msgstr "Оновлення типу Візитки %type модулем %module."
 
 #: content.module:63
 msgid "Use PHP input for field settings (dangerous - grant with care)"
@@ -252,11 +252,11 @@ msgstr ""
 
 #: content.install:251
 msgid "Some updates are still pending. Please return to <a href=\"@update-php\">update.php</a> and run the remaining updates."
-msgstr ""
+msgstr "Деякі оновлення все ще в черзі. Прохання повернутись до <a href=\"@update-php\">update.php</a> і запустити необхідні оновлення"
 
 #: content.install:252
 msgid "Some updates are still pending.<br/>Please re-run the update script."
-msgstr ""
+msgstr "Деякі оновлення в черзі.<br/>Прохання перезапустити скрипт оновлення."
 
 #: (duplicate) content.install:10
 msgid "CCK - No Views integration"
@@ -356,7 +356,7 @@ msgstr "Цей тип матеріалу має неактивні поля. Н�
 
 #: includes/content.admin.inc:108
 msgid "!field (!field_name) is an inactive !field_type field that uses a !widget_type widget."
-msgstr ""
+msgstr "!field (!field_name) неактивне поле !field_type що використовує Візитку !widget_type."
 
 #: includes/content.admin.inc:170;196
 msgid "Configure"
@@ -643,7 +643,7 @@ msgstr "код PHP"
 #: includes/content.admin.inc:1083;1238
 #: includes/content.rules.inc:93
 msgid "'@column' => value for @column"
-msgstr ""
+msgstr "'@column' => значення для @column"
 
 #: includes/content.admin.inc:1085;1240
 #: includes/content.rules.inc:95
@@ -728,7 +728,7 @@ msgstr ""
 
 #: includes/content.admin.inc:1281
 msgid "The PHP code for 'default value' returned @value, which is invalid."
-msgstr ""
+msgstr "Код PHP для 'базового значення' повернув @value, що є некоректним"
 
 #: includes/content.admin.inc:1285
 msgid "The default value is invalid."
@@ -799,7 +799,7 @@ msgstr "Поле матеріалу"
 
 #: includes/content.panels.inc:38
 msgid "A content field from the referenced node."
-msgstr ""
+msgstr "Поле матеріалу з пов'язаного матеріалу"
 
 #: includes/content.panels.inc:39
 #: modules/fieldgroup/fieldgroup.panels.inc:31
@@ -821,7 +821,7 @@ msgstr "Сховано"
 
 #: includes/content.panels.inc:57
 msgid "Configure how the label is going to be displayed."
-msgstr ""
+msgstr "Налагодження того, як мітка буде відображатись"
 
 #: includes/content.panels.inc:73
 msgid "Field / Formatter"
@@ -837,7 +837,7 @@ msgstr ""
 
 #: includes/content.rules.inc:15
 msgid "Populate a field"
-msgstr ""
+msgstr "Заповнення поля"
 
 #: includes/content.rules.inc:23;212
 msgid "You should make sure that the used field exists in the given content type."
@@ -1652,28 +1652,28 @@ msgstr ""
 #: modules/number/number.module:178
 #: modules/text/text.module:132
 msgid "@label (!name) - Allowed values"
-msgstr ""
+msgstr "@label (!name) - Дозволені значення"
 
 #: modules/number/number.module:195
 msgid "\"Minimum\" must be a number."
-msgstr ""
+msgstr "\"Найменше\" повинно бути числом."
 
 #: modules/number/number.module:202
 msgid "\"Maximum\" must be a number."
-msgstr ""
+msgstr "\"Найбільше\" повинно бути числом"
 
 #: modules/number/number.module:219
 msgid "%name: the value may be no smaller than %min."
-msgstr ""
+msgstr "%name: значення повинно бути не меншим чим %min."
 
 #: modules/number/number.module:222
 msgid "%name: the value may be no larger than %max."
-msgstr ""
+msgstr "%name: значення повинно бути не більшим чим %max."
 
 #: modules/number/number.module:235
 #: modules/text/text.module:156
 msgid "%name: illegal value."
-msgstr ""
+msgstr "%name: значення некоректне."
 
 #: modules/number/number.module:270
 msgid "unformatted"
@@ -1686,11 +1686,11 @@ msgstr "Текстове поле"
 
 #: modules/number/number.module:512
 msgid "Only numbers and decimals are allowed in %field."
-msgstr ""
+msgstr "Тільки числа і десяткові значення дозволені в полі %field."
 
 #: modules/number/number.module:535
 msgid "Only numbers are allowed in %field."
-msgstr ""
+msgstr "Тільки числа дозволені в полі %field."
 
 #: modules/number/number.module:559
 msgid "Only numbers and the decimal character (%decimal) are allowed in %field."
@@ -1706,7 +1706,7 @@ msgstr "Число"
 
 #: modules/number/number.info:0
 msgid "Defines numeric field types."
-msgstr ""
+msgstr "Зазначення числових типів полей"
 
 #: modules/optionwidgets/optionwidgets.module:19
 msgid "Create a list of options as a list in <strong>Allowed values list</strong> or as an array in PHP code. These values will be the same for %field in all content types."
@@ -1722,7 +1722,7 @@ msgstr ""
 
 #: modules/optionwidgets/optionwidgets.module:37
 msgid "You need to specify the 'allowed values' for this field."
-msgstr ""
+msgstr "Необхідно задавати 'дозвроені значення' для цього поля"
 
 #: modules/optionwidgets/optionwidgets.module:96
 msgid "Single on/off checkbox"
@@ -1730,7 +1730,7 @@ msgstr "Одиночна опція так/ні"
 
 #: modules/optionwidgets/optionwidgets.module:331
 msgid "%name: this field cannot hold more that @count values."
-msgstr ""
+msgstr "%name: це поле не може отримати більше чим @count значень."
 
 #: modules/optionwidgets/optionwidgets.module:416
 msgid "N/A"
@@ -1768,7 +1768,7 @@ msgstr "Чистий текст"
 
 #: modules/text/text.module:54
 msgid "Filtered text (user selects input format)"
-msgstr ""
+msgstr "Фільтрований текст (користувач обирає вхідний формат)"
 
 #: modules/text/text.module:57
 msgid "Text processing"
@@ -1784,7 +1784,7 @@ msgstr ""
 
 #: modules/text/text.module:159
 msgid "%name: the value may not be longer than %max characters."
-msgstr ""
+msgstr "%name: значення не може бути довшим чим %max символів"
 
 #: modules/text/text.module:196
 #: modules/userreference/userreference.module:221
@@ -1813,7 +1813,7 @@ msgstr "текст"
 
 #: modules/text/text.info:0
 msgid "Defines simple text field types."
-msgstr ""
+msgstr "Надання простих текстових типів полів"
 
 #: modules/userreference/userreference.rules.inc:15
 msgid "Load a referenced user"
@@ -1821,7 +1821,7 @@ msgstr "Завантажити згаданого користувача"
 
 #: modules/userreference/userreference.rules.inc:19
 msgid "Content containing the user reference field"
-msgstr ""
+msgstr "Матеріал містить поле пов'язаного користувача"
 
 #: modules/userreference/userreference.rules.inc:25
 msgid "Referenced user"
@@ -1833,7 +1833,7 @@ msgstr ""
 
 #: modules/userreference/userreference.rules.inc:52
 msgid "There are no userreference fields defined."
-msgstr ""
+msgstr "Немає зазначених полей пов'язаного користувача"
 
 #: modules/userreference/userreference.module:52
 msgid "User reference"
@@ -1841,15 +1841,15 @@ msgstr "Посилання на користувача"
 
 #: modules/userreference/userreference.module:53
 msgid "Store the ID of a related user as an integer value."
-msgstr ""
+msgstr "Збереження ID пов'язаного користувача як ціле значення"
 
 #: modules/userreference/userreference.module:67
 msgid "User roles that can be referenced"
-msgstr ""
+msgstr "Ролі користувачів можуть бути пов'язані"
 
 #: modules/userreference/userreference.module:73
 msgid "User status that can be referenced"
-msgstr ""
+msgstr "Статус користувача може бути пов'язаний"
 
 #: modules/userreference/userreference.module:75
 msgid "Active"
@@ -1861,11 +1861,11 @@ msgstr "Заблоковано"
 
 #: modules/userreference/userreference.module:94
 msgid "Advanced - Users that can be referenced (View)"
-msgstr ""
+msgstr "Розширено - Користувачі, що можуть бути пов'язані (Вигляд)"
 
 #: modules/userreference/userreference.module:101
 msgid "View used to select the users"
-msgstr ""
+msgstr "Вигляд використано для вибору користувачів"
 
 #: modules/userreference/userreference.module:104
 msgid "<p>Choose the \"Views module\" view that selects the users that can be referenced.<br />Note:</p>"
