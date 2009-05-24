@@ -47,7 +47,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: cck uk Ukrainian Translation\n"
 "POT-Creation-Date: 2009-05-23 15:31+0300\n"
-"PO-Revision-Date: 2009-05-24 18:26+0300\n"
+"PO-Revision-Date: 2009-05-24 18:43+0300\n"
 "Last-Translator: Andriy Podanenko <podarok@ua.fm>\n"
 "Language-Team: uk <podarok@ua.fm>\n"
 "MIME-Version: 1.0\n"
@@ -92,7 +92,7 @@ msgstr ""
 
 #: content.module:31
 msgid "For more information, see the online handbook entry for <a href=\"@handbook-cck\">CCK</a> or the <a href=\"@project-cck\">CCK project page</a>."
-msgstr ""
+msgstr "Для додаткової інформації читайте розділ довідника <a href=\"@handbook-cck\">CCK</a> на сторінці <a href=\"@project-cck\">CCK проекту</a>."
 
 #: content.module:486
 msgid "This field is required."
@@ -220,7 +220,7 @@ msgstr ""
 
 #: content.module:63
 msgid "Use PHP input for field settings (dangerous - grant with care)"
-msgstr ""
+msgstr "Використання PHP для параметрів поля (небезпечно - використовуйте з обережністю)"
 
 #: content.module:82
 msgid "Fields"
@@ -274,7 +274,7 @@ msgstr "Вміст"
 
 #: content.info:0
 msgid "Allows administrators to define new content types."
-msgstr ""
+msgstr "Дозволяє адміністраторам задавати новий тип матеріалу"
 
 #: content.info:0
 #: modules/content_copy/content_copy.info:0
@@ -328,7 +328,7 @@ msgstr "Немає доступних типів матеріалів."
 
 #: includes/content.admin.inc:54
 msgid "» Add a new content type"
-msgstr ""
+msgstr "» Додавання нового типу матеріалу"
 
 #: includes/content.admin.inc:67;789;984
 msgid "Field name"
@@ -348,11 +348,11 @@ msgstr "@field_name (Заблоковано)"
 
 #: includes/content.admin.inc:90
 msgid "No fields have been defined for any content type yet."
-msgstr ""
+msgstr "Жодних полів ще не задано для жодного типу матеріалів"
 
 #: includes/content.admin.inc:106
 msgid "This content type has inactive fields. Inactive fields are not included in lists of available fields until their modules are enabled."
-msgstr ""
+msgstr "Цей тип матеріалу має неактивні поля. Неактивні поля не включені в список доступних до моменту вмикання їхніх модулів"
 
 #: includes/content.admin.inc:108
 msgid "!field (!field_name) is an inactive !field_type field that uses a !widget_type widget."
@@ -570,19 +570,19 @@ msgstr "Продовження"
 
 #: includes/content.admin.inc:854
 msgid "Updated basic settings for field %label."
-msgstr ""
+msgstr "Оновлено базові параметри для поля %label."
 
 #: includes/content.admin.inc:858
 msgid "There was a problem updating the basic settings for field %label."
-msgstr ""
+msgstr "Виникла проблема оновлення базових параметрів для поля %label."
 
 #: includes/content.admin.inc:885
 msgid "Are you sure you want to remove the field %field?"
-msgstr ""
+msgstr "Ви впевнені, що хочете видалити поле %label?"
 
 #: includes/content.admin.inc:887
 msgid "If you have any content left in this field, it will be lost. This action cannot be undone."
-msgstr ""
+msgstr "Якщо в даному полі знаходиться якийсь матеріал - він буде втрачений. Це незворотня операція"
 
 #: includes/content.admin.inc:888
 #: modules/fieldgroup/fieldgroup.module:203
@@ -591,7 +591,7 @@ msgstr "Скасувати"
 
 #: includes/content.admin.inc:894
 msgid "This field is <strong>locked</strong> and cannot be removed."
-msgstr ""
+msgstr "Поле <strong>заблоковане</strong> і не може бути видалене"
 
 #: includes/content.admin.inc:915
 msgid "Removed field %field from %type."
@@ -599,11 +599,11 @@ msgstr "Видалено поле %field із %type."
 
 #: includes/content.admin.inc:920
 msgid "There was a problem deleting %field from %type."
-msgstr ""
+msgstr "Виникла проблема видалення %field із %type."
 
 #: includes/content.admin.inc:939
 msgid "The field %field is locked and cannot be edited."
-msgstr ""
+msgstr "Поле %field заблоковане і не може бути зміненим"
 
 #: includes/content.admin.inc:973
 msgid "%type basic information"
@@ -619,7 +619,7 @@ msgstr "Параметри для %type"
 
 #: includes/content.admin.inc:1010
 msgid "These settings apply only to the %field field as it appears in the %type content type."
-msgstr ""
+msgstr "Ці параметри застосовуються тільки до поля %field так як знаходиться в типі матеріалу %type"
 
 #: includes/content.admin.inc:1024
 #: modules/fieldgroup/fieldgroup.module:139
@@ -698,7 +698,7 @@ msgstr "Обов'язковий"
 
 #: includes/content.admin.inc:1119
 msgid "Maximum number of values users can enter for this field."
-msgstr ""
+msgstr "Максимальна кількість значень, що користувачі можуть вносити для цього поля"
 
 #: includes/content.admin.inc:1121
 msgid "'Unlimited' will provide an 'Add more' button so the users can add as many values as they like."
