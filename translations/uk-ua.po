@@ -47,7 +47,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: cck uk Ukrainian Translation\n"
 "POT-Creation-Date: 2009-05-23 15:31+0300\n"
-"PO-Revision-Date: 2009-05-24 19:55+0300\n"
+"PO-Revision-Date: 2009-05-24 20:01+0300\n"
 "Last-Translator: Andriy Podanenko <podarok@ua.fm>\n"
 "Language-Team: uk <podarok@ua.fm>\n"
 "MIME-Version: 1.0\n"
@@ -1119,15 +1119,15 @@ msgstr ""
 
 #: modules/content_copy/content_copy.module:418
 msgid "Exiting. No import performed."
-msgstr ""
+msgstr "Вихід. Не виконано втягування;"
 
 #: modules/content_copy/content_copy.module:442
 msgid "An error has occurred adding the content type %type.<br/>Please check the errors displayed for more details."
-msgstr ""
+msgstr "Виникла помилка при додаванні матеріалу типу %type.<br/>Прохання перевірити відображені помилки для додаткових деталей"
 
 #: modules/content_copy/content_copy.module:467
 msgid "The imported field %field_label (%field_name) was not added to %type because that field already exists in %type."
-msgstr ""
+msgstr "Втягнуте поле %field_label (%field_name) не було додано до %type через те, що поле вже існує в %type."
 
 #: modules/content_copy/content_copy.module:476
 msgid "The field %field_label (%field_name) was added to the content type %type."
