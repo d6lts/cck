@@ -47,7 +47,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: cck uk Ukrainian Translation\n"
 "POT-Creation-Date: 2009-05-23 15:31+0300\n"
-"PO-Revision-Date: 2009-05-24 19:21+0300\n"
+"PO-Revision-Date: 2009-05-24 19:55+0300\n"
 "Last-Translator: Andriy Podanenko <podarok@ua.fm>\n"
 "Language-Team: uk <podarok@ua.fm>\n"
 "MIME-Version: 1.0\n"
@@ -553,7 +553,7 @@ msgstr "Людиноподібне ім'я, що буде використано
 
 #: includes/content.admin.inc:807
 msgid "The type of data you would like to store in the database with this field. This option cannot be changed."
-msgstr ""
+msgstr "Тип даних, що бажаєте зберігати в базі даних з допомогою цього поля. Дана операція не може бути змінена."
 
 #: includes/content.admin.inc:812;996
 msgid "Widget type"
@@ -561,7 +561,7 @@ msgstr "Тип Візитки"
 
 #: includes/content.admin.inc:816
 msgid "The type of form element you would like to present to the user when creating this field in the %type content type."
-msgstr ""
+msgstr "Тип елемента форми, що хочете відобразити користувачу, коли створюється це поле в типі матеріалу %type"
 
 #: includes/content.admin.inc:826
 #: includes/content.rules.inc:66
@@ -628,7 +628,7 @@ msgstr "Довідковий текст"
 
 #: includes/content.admin.inc:1027
 msgid "Instructions to present to the user below this field on the editing form.<br />Allowed HTML tags: @tags"
-msgstr ""
+msgstr "Інструкції, що відобразяться користувачу нижче цього поля на формі редагування. <br />Дозволені HTML теги: @tags"
 
 #: includes/content.admin.inc:1053
 msgid "Default value"
@@ -682,7 +682,7 @@ msgstr "Вам недозволено ввожити PHP код"
 
 #: includes/content.admin.inc:1104
 msgid "This PHP code was set by an administrator and will override any value specified above."
-msgstr ""
+msgstr "Код PHP був встановлений адміністратором і буде перезаписувати будь-які значенн, вказані вище"
 
 #: includes/content.admin.inc:1111
 msgid "Global settings"
@@ -690,7 +690,7 @@ msgstr "Глобальні настройки"
 
 #: includes/content.admin.inc:1112
 msgid "These settings apply to the %field field in every content type in which it appears."
-msgstr ""
+msgstr "Ці параметри застосовуються до поля %field в кожному типі матеріалів, в якому воно використовуються."
 
 #: includes/content.admin.inc:1116
 msgid "Required"
@@ -702,11 +702,11 @@ msgstr "Максимальна кількість значень, що кори�
 
 #: includes/content.admin.inc:1121
 msgid "'Unlimited' will provide an 'Add more' button so the users can add as many values as they like."
-msgstr ""
+msgstr "'Необмежено' створить кнопку 'Додати ще', а отже користувачі зможуть додати скільки завгожно власних значенб"
 
 #: includes/content.admin.inc:1123
 msgid "Warning! Changing this setting after data has been created could result in the loss of data!"
-msgstr ""
+msgstr "Попередження! Зміна цих значень після створення даних можуть призвести до втрат даних!"
 
 #: includes/content.admin.inc:1126
 msgid "Number of values"
@@ -724,7 +724,7 @@ msgstr "Збереження параметрів поля"
 
 #: includes/content.admin.inc:1242
 msgid "The default value PHP code returned an incorrect value.<br/>Expected format: <pre>!sample</pre> Returned value: @value"
-msgstr ""
+msgstr "Базове значення, що повертає PHP код - некоректне. <br/>Очікуваний формат: <pre>!sample</pre> Повернене значення: @value"
 
 #: includes/content.admin.inc:1281
 msgid "The PHP code for 'default value' returned @value, which is invalid."
@@ -752,11 +752,11 @@ msgstr "Оновлення викликало помилку"
 
 #: includes/content.admin.inc:1677
 msgid "The database has been altered and data has been migrated or deleted."
-msgstr ""
+msgstr "База даних змінена і дані переміщено або видалено."
 
 #: includes/content.admin.inc:1680
 msgid "An error occurred and database alteration did not complete."
-msgstr ""
+msgstr "Виникла помилка і зміни в базі даних незавершені."
 
 #: includes/content.admin.inc:1783
 msgid "Processing %title"
@@ -783,11 +783,11 @@ msgstr[2] "вдало оброблено @count елементів:"
 
 #: includes/content.crud.inc:589
 msgid "Content fields table %old_name has been renamed to %new_name and field instances have been updated."
-msgstr ""
+msgstr "Таблиця %old_name полей матеріалу була перейменована в %new_name і елементи полей були оновлені"
 
 #: includes/content.crud.inc:633
 msgid "The content fields table %name has been deleted."
-msgstr ""
+msgstr "Таблиця %name полей матеріалу була видалена"
 
 #: includes/content.node_form.inc:223
 msgid "Add another item"
@@ -833,7 +833,7 @@ msgstr "Оберіть поле і форматувальник"
 
 #: includes/content.panels.inc:92
 msgid "\"@s\" field @name"
-msgstr ""
+msgstr "\"@s\" поле @name"
 
 #: includes/content.rules.inc:15
 msgid "Populate a field"
@@ -841,7 +841,7 @@ msgstr "Заповнення поля"
 
 #: includes/content.rules.inc:23;212
 msgid "You should make sure that the used field exists in the given content type."
-msgstr ""
+msgstr "Вам потрібно впевнитись, що використовуване поле наявне в даному типі матеріалу"
 
 #: includes/content.rules.inc:53;266
 #: modules/nodereference/nodereference.rules.inc:45
@@ -852,11 +852,11 @@ msgstr "Поле"
 
 #: includes/content.rules.inc:56
 msgid "Select the machine-name of the field."
-msgstr ""
+msgstr "Вибір комп'ютерного імені поля"
 
 #: includes/content.rules.inc:84
 msgid "Advanced: Specify the fields value with PHP code"
-msgstr ""
+msgstr "Розширене: Вкажіть значення полей кодом PHP"
 
 #: includes/content.rules.inc:102
 msgid "Advanced usage only: PHP code that returns the value to set. Should not include &lt;?php ?&gt; delimiters. If this field is filled out, the value returned by this code will override any value specified above. Expected format: <pre>!sample</pre>Using <a href=\"@link_devel\">devel.module's</a> 'devel load' tab on a content page might help you figure out the expected format."
@@ -864,11 +864,11 @@ msgstr ""
 
 #: includes/content.rules.inc:130
 msgid "You have to return the default value in the expected format."
-msgstr ""
+msgstr "Потрібно повертати базове значення в передбаченому форматі"
 
 #: includes/content.rules.inc:181
 msgid "Populate @node's field '@field'"
-msgstr ""
+msgstr "Заповнення поля '@field' матеріалу @node"
 
 #: includes/content.rules.inc:198
 msgid "Field has value"
@@ -876,7 +876,7 @@ msgstr "Поле має значення"
 
 #: includes/content.rules.inc:203
 msgid "You should make sure that the used field exists in the given content type. The condition returns TRUE, if the selected field has the given value."
-msgstr ""
+msgstr "Вам потрібно переконатись, що дані поля наявні в вказаному типі матеріалу. Повертається TRUE, якщо обрані поля мають вказане значення."
 
 #: includes/content.rules.inc:207
 msgid "Field has changed"
@@ -896,11 +896,11 @@ msgstr "поле @node '@field' має значення"
 
 #: includes/content.rules.inc:269
 msgid "Select the machine-name of the field to look at."
-msgstr ""
+msgstr "Вибір комп'ютерного імені показаному полю"
 
 #: includes/content.rules.inc:275
 msgid "@node's field '@field' has been changed"
-msgstr ""
+msgstr "Змінено поле '@field' матеріалу @node"
 
 #: includes/content.token.inc:12;15
 msgid "Token"
@@ -1012,7 +1012,7 @@ msgstr "Багато значень групи"
 
 #: includes/views/handlers/content_handler_field_multiple.inc:61
 msgid "If unchecked, each item in the field will create a new row, which may appear to cause duplicates. This setting is not compatible with click-sorting in table displays."
-msgstr ""
+msgstr "Якщо не обрано, кожен елемент поля буде створювати новий рядок, що може привести до дублів. Ці параметри несумісні з сортуванням таблиць при кліках на відображенні."
 
 #: includes/views/handlers/content_handler_field_multiple.inc:65
 msgid "Show @count value(s)"
