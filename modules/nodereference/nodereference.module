@@ -52,6 +52,15 @@ function nodereference_theme() {
 }
 
 /**
+ * Implementaion of hook_ctools_plugin_directory().
+ */
+function nodereference_ctools_plugin_directory($module, $plugin) {
+  if ($module == 'ctools' && $plugin == 'relationships') {
+    return 'panels/' . $plugin;
+  }
+}
+
+/**
  * Implementation of hook_field_info().
  */
 function nodereference_field_info() {

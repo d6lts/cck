@@ -7,6 +7,7 @@ Features:
 - #414298 by Michelle, merlinofchaos - Add Panels 3 integration for fields and fieldgroups.
 - #419678 Views integration: expose CCK fields to 'Node revision' Views.
 - #399778 by Benjamin Melençon - Nodereference / Userreference: Add 'size' setting to autocomplete widgets.
+- #479044 by merlinofchaos - Add Panels 3 relatioships for nodereference and userreference fields.
 
 Bugfixes:
 - #407446 by quicksketch: prevent double serialization during per-field to per-type migration.
