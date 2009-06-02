@@ -27,6 +27,7 @@ Bugfixes:
 - #458952 Let different modules defined the same build_mode information.
 - #383038 by markDrupal - Userreference: fix broken 'reverse links' with fields in per-type table.
 - #479074 by rickward: prevent minor XSS vulnerability when displaying user-submitted 'Body field' labels.
+- #479994 by quicksketch: fix "add more' button with devel.module's query logging.
 
 CCK 6.x-2.2
 ===========

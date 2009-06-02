@@ -367,7 +367,7 @@ function content_add_more_js($type_name_url, $field_name) {
   // Using drupal_json() breaks filefield's file upload, because the jQuery
   // Form plugin handles file uploads in a way that is not compatible with
   // 'text/javascript' response type.
-  $_GLOBALS['devel_shutdown'] =  FALSE;
+  $GLOBALS['devel_shutdown'] =  FALSE;
   print drupal_to_js(array('status' => TRUE, 'data' => $output));
   exit;
 }
