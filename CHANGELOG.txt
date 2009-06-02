@@ -20,12 +20,13 @@ Bugfixes:
 - #413792 Views integration: fix fields using 'multiple formatters' and not 'group multiple fields'. Thanks Crell and quicksketch for the detective work.
 - #421126 Views integration: Use value aliases in argument title replacements for text / number fields.
 - #397358 by Darren Oh, yched, markus_petrux - Views integration: Use node title / user name in argument title replacements for nodereference and userreference argument fields.
-- #428400 Views integration : Fix fatal error with Views 2.4 (views_handler_filter_float has moved). Preserved compatibility with Views 2.3.
+- #428400 Views integration: Fix fatal error with Views 2.4 (views_handler_filter_float has moved). Preserved compatibility with Views 2.3.
 - #447562 by markus_petrux: fix non-XHTML markup on 'Manage fields' screen.
 - #369364 Views integration: fix non-XHTML markup when displaying fields with the 'group multiple values' option.
 - #441412 by jcnventura - Add 'Print' display context on 'Display fields' pages when book.module is enabled.
 - #458952 Let different modules defined the same build_mode information.
 - #383038 by markDrupal - Userreference: fix broken 'reverse links' with fields in per-type table.
+- #479074 by rickward: prevent minor XSS vulnerability when displaying user-submitted 'Body field' labels.
 
 CCK 6.x-2.2
 ===========

@@ -215,7 +215,7 @@ function content_field_overview_form(&$form_state, $type_name) {
   foreach ($extra as $name => $label) {
     $weight = $extra[$name]['weight'];
     $form[$name] = array(
-      'label' => array('#value' => t($extra[$name]['label'])),
+      'label' => array('#value' => check_plain(t($extra[$name]['label']))),
       'description' => array('#value' => isset($extra[$name]['description']) ? $extra[$name]['description'] : ''),
       'weight' => array('#type' => 'textfield', '#default_value' => $weight, '#size' => 3),
       'parent' => array('#type' => 'hidden', '#default_value' => ''),
