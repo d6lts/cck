@@ -1,7 +1,14 @@
 //$Id$
 
-CCK 6.x-2.x
+CCK 6.x-2.3
 ===========
+
+Please visit update.php apply pending updates after uploading the new files.
+
+This release:
+- fixes a few bugs,
+- adss initial Panels 3 support (Panels 2 not supported),
+- removes the unfinished Multigroup feature (work on this will continue in an experimental branch)
 
 Features:
 - #414298 by Michelle, merlinofchaos - Add Panels 3 integration for fields and fieldgroups.
