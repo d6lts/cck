@@ -323,7 +323,7 @@ function _cck_user_extra_fields() {
 
 function _cck_node_extra_fields($type_name) {
   $extra = array();
-  if ($type = node_get_types('type', $type_name)) {
+  if ($type = node_type_get_type($type_name)) {
     if ($type->has_title) {
       $extra['title'] = array(
         'label' => $type->title_label,

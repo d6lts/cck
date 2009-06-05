@@ -13,8 +13,8 @@
  * to allow CCK to adapt the $rows array to add its operation?
  */
 function cck_types_overview() {
-  $types = node_get_types();
-  $names = node_get_types('names');
+  $types = node_type_get_types();
+  $names = node_type_get_names();
   $header = array(t('Name'), t('Type'), t('Description'), array('data' => t('Operations'), 'colspan' => '4'),);
   $rows = array();
   foreach ($names as $key => $name) {
@@ -55,7 +55,7 @@ function cck_types_overview() {
  * Implementation of hook_content_types_overview().
  *
  * Display the default upload settings on the Node type overview page.
- * 
+ *
  */
 function cck_content_types_operations($type) {
   $bundle_url_str = str_replace('_', '-', $type->type);
@@ -524,7 +524,7 @@ function cck_field_overview_form_submit($form, &$form_state) {
         'type' => $values['widget_type'],
       ),
     );
-    
+
     // Create the field and instance.
     try {
       field_create_field($field);
@@ -942,7 +942,7 @@ function cck_field_settings_form_submit($form, &$form_state) {
 
   $form_values = $form_state['values'];
   $field = $form_values['field'];
-  
+
   // Don't allow changes to fields with data.
   if (cck_field_has_data($field['field_name'])) {
     return;
@@ -1356,7 +1356,7 @@ function cck_field_edit_form_validate($form, &$form_state) {
 
   // Do no validation here. Assume field and widget modules are
   // handling their own validation of form settings.
-  
+
   // If field.module is handling the default value,
   // validate the result using the field validation.
   if (field_behaviors_widget('default value', $instance) == FIELD_BEHAVIOR_DEFAULT) {
@@ -1446,7 +1446,7 @@ function cck_field_edit_form_validate($form, &$form_state) {
 function cck_field_edit_form_submit($form, &$form_state) {
   $form_values = $form_state['values'];
   $instance = $form_values['instance'];
-  
+
   // Update any field settings that have changed.
   $field = field_info_field($instance['field_name']);
   $field = array_merge($field, $form_state['values']['field']);
