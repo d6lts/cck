@@ -1,5 +1,9 @@
 //$Id$
 
+CCK 6.x-2.x
+===========
+- #482774 Update breaks when CCK is disabled.
+
 CCK 6.x-2.3
 ===========
 

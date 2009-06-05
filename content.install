@@ -525,7 +525,12 @@ function content_update_6009() {
  * See http://drupal.org/node/407446.
  */
 function content_update_6010(&$sandbox) {
+  if ($abort = content_check_update()) {
+    return $abort;
+  }
   $ret = array();
+
+  drupal_load('module', 'content');
 
   // Gather list of tables and columns that need to be updated.
   if (!isset($sandbox['tables'])) {
