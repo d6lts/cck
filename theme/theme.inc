@@ -94,7 +94,7 @@ function template_preprocess_content_field_overview_form(&$vars) {
     $js_fields[$field_name] = array('label' => $field['widget']['label'], 'type' => $field['type'], 'widget' => $field['widget']['type']);
   }
   drupal_add_js(array('contentWidgetTypes' => content_widget_type_options(), 'contentFields' => $js_fields), 'setting');
-  drupal_add_js(drupal_get_path('module', 'content') .'/content.js');
+  drupal_add_js(drupal_get_path('module', 'content') .'/js/content.admin.js');
 }
 
 /**
