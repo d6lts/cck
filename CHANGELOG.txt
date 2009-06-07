@@ -1,6 +1,11 @@
 //$Id$
+
 CCK 6.x-3.x
 ===========
+
+Bugfixes:
 - #482774 Update breaks when CCK is disabled.
 
-
+Features:
+- #196421 by markus_petrux: Deleting unwanted multiple values / multiple values delta issues.
+- #119102 by markus_petrux: Combo field - group different fields into one.
