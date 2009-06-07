@@ -566,7 +566,12 @@ function content_multigroup_node_form_fix_post(&$elements) {
 function content_multigroup_fix_multivalue_fields($element, &$form_state) {
   $field_name = $element['#field_name'];
   $delta = $element['#delta'];
-  $value = array_merge($form_state['values'][$field_name][$delta][0], array('_remove' => $element['#removed']));
+  if (isset($form_state['values'][$field_name][$delta][0]) && is_array($form_state['values'][$field_name][$delta][0])) {
+    $value = array_merge($form_state['values'][$field_name][$delta][0], array('_remove' => $element['#removed']));
+  }
+  else {
+    $value = array('_remove' => $element['#removed']);
+  }
   form_set_value($element, $value, $form_state);
 }
 
