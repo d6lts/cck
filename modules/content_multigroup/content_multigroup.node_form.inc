@@ -726,6 +726,8 @@ function content_multigroup_add_more_js($type_name_url, $group_name) {
   $group_form[$delta]['#suffix'] = (isset($group_form[$delta]['#suffix']) ? $group_form[$delta]['#suffix'] : '') .'</div>';
   // Prevent duplicate wrapper.
   unset($group_form['#prefix'], $group_form['#suffix']);
+  // We're in the AHAH handler, so the fieldset was expanded.
+  $group_form['#collapsed'] = FALSE;
 
   // If a newly inserted widget contains AHAH behaviors, they normally won't
   // work because AHAH doesn't know about those - it just attaches to the exact
