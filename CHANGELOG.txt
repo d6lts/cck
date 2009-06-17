@@ -1,7 +1,9 @@
 //$Id$
 
-CCK 6.x-2.x
+CCK 6.x-2.4
 ===========
+
+Hotfix release for 2.3:
 - #482774 Update breaks when CCK is disabled.
 
 CCK 6.x-2.3
