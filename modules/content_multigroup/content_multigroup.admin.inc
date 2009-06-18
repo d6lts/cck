@@ -65,6 +65,7 @@ function content_multigroup_field_overview_form_validate($form, &$form_state) {
     }
   }
 
+  $rebuild = FALSE;
   foreach ($fields as $field_name => $field) {
     $new_group = $form_values[$field_name]['parent'];
     $old_group = $form_values[$field_name]['prev_parent'];
@@ -84,7 +85,8 @@ function content_multigroup_field_overview_form_validate($form, &$form_state) {
         $field = $content_type['fields'][$field_name];
         $field['multiple'] = $group_multiple;
         $field = content_field_instance_collapse($field);
-        content_field_instance_update($field);
+        content_field_instance_update($field, FALSE);
+        $rebuild = TRUE;
         drupal_set_message(t('The field %field has been updated to use %multiple values, to match the multiple value setting of the Multigroup %group.', array(
           '%field' => $field['label'], '%multiple' => $multiple_values[$group_multiple], '%group' => $groups[$new_group]['label'])));
       }
@@ -98,6 +100,12 @@ function content_multigroup_field_overview_form_validate($form, &$form_state) {
         drupal_set_message($allowed_out['message']);
       }
     }
+  }
+
+  // Clear caches and rebuild menu only if any field has been updated.
+  if ($rebuild) {
+    content_clear_type_cache(TRUE);
+    menu_rebuild();
   }
 }
 
@@ -438,9 +446,13 @@ function content_multigroup_group_edit_form_submit($form, &$form_state) {
   $groups = fieldgroup_groups($content_type['type']);
   $group = $groups[$form_values['group_name']];
   $group_fields = array_intersect_key($content_type['fields'], $group['fields']);
-  foreach ($group_fields as $field_name => $field) {
-    $field['multiple'] = $form_values['settings']['multigroup']['multiple'];
-    $field = content_field_instance_collapse($field);
-    content_field_instance_update($field);
+  if (!empty($group_fields)) {
+    foreach ($group_fields as $field_name => $field) {
+      $field['multiple'] = $form_values['settings']['multigroup']['multiple'];
+      $field = content_field_instance_collapse($field);
+      content_field_instance_update($field, FALSE);
+    }
+    content_clear_type_cache(TRUE);
+    menu_rebuild();
   }
 }

@@ -11,5 +11,6 @@ Other changes:
 - #421116 Move content.js to js/content.admin.js for consistency with location of new js files.
 
 Features:
-- #196421 by markus_petrux: Deleting unwanted multiple values / multiple values delta issues.
-- #119102 by markus_petrux: Combo field - group different fields into one.
+- #428650 Conditional cache/menu rebuild for content CRUD methods.
+- #196421 Deleting unwanted multiple values / multiple values delta issues.
+- #119102 Combo field - group different fields into one.

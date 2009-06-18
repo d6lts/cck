@@ -690,9 +690,13 @@ function content_display_overview_form_submit($form, &$form_state) {
       $field = content_fields($key, $form['#type_name']);
       // We have some numeric keys here, so we can't use array_merge.
       $field['display_settings'] = $values + $field['display_settings'];
-      content_field_instance_update($field);
+      content_field_instance_update($field, FALSE);
     }
   }
+
+  // Clear caches and rebuild menu.
+  content_clear_type_cache(TRUE);
+  menu_rebuild();
 
   drupal_set_message(t('Your settings have been saved.'));
 }

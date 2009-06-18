@@ -457,6 +457,7 @@ function content_copy_import_form_submit($form, &$form_state) {
   }
 
   // Iterate through the field forms in the import and execute each.
+  $rebuild = FALSE;
   foreach ($imported_fields as $field) {
 
     // Make sure the field doesn't already exist in the type.
@@ -472,7 +473,8 @@ function content_copy_import_form_submit($form, &$form_state) {
       // Might need to overwrite the content type name if a new type was created.
       $field['type_name'] = $type_name;
 
-      $field = content_field_instance_create($field);
+      $field = content_field_instance_create($field, FALSE);
+      $rebuild = TRUE;
       drupal_set_message(t('The field %field_label (%field_name) was added to the content type %type.', array(
         '%field_label' => $field['widget']['label'], '%field_name' => $field_name, '%type' => $type_label)));
 
@@ -480,6 +482,12 @@ function content_copy_import_form_submit($form, &$form_state) {
         fieldgroup_update_fields($field);
       }
     }
+  }
+
+  // Clear caches and rebuild menu only if any field has been created.
+  if ($rebuild) {
+    content_clear_type_cache(TRUE);
+    menu_rebuild();
   }
 
   // Import weights of non-CCK fields.
