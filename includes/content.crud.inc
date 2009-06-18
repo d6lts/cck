@@ -190,8 +190,24 @@ function content_field_instance_collapse($field) {
  *   If there is no prior instance to create this from, we also need:
  *   - type, the type of field to create
  *   - widget_type, the type of widget to use
+ * @param $rebuild
+ *   TRUE to clear content type caches and rebuild menu (default).
+ *   FALSE allows the caller to process several fields at a time quickly, but then
+ *   the caller is reponsible to clear content type caches and rebuild menu as soon
+ *   as all fields have been processed. For example:
+ *   @code
+ *     // Create several fields at a time.
+ *     foreach ($fields as $field) {
+ *       content_field_instance_create($field, FALSE);
+ *     }
+ *     // Clear caches and rebuild menu.
+ *     content_clear_type_cache(TRUE);
+ *     menu_rebuild();
+ *   @endcode
+ * @see content_clear_type_cache()
+ * @see menu_rebuild()
  */
-function content_field_instance_create($field) {
+function content_field_instance_create($field, $rebuild = TRUE) {
   include_once('./'. drupal_get_path('module', 'content') .'/includes/content.admin.inc');
 
   $form_values = $field;
@@ -270,9 +286,10 @@ function content_field_instance_create($field) {
 
   content_alter_schema(array(), $field);
 
-  content_clear_type_cache(TRUE);
-
-  menu_rebuild();
+  if ($rebuild) {
+    content_clear_type_cache(TRUE);
+    menu_rebuild();
+  }
 
   return $field;
 }
@@ -284,8 +301,24 @@ function content_field_instance_create($field) {
  *   An array of properties to update the field with, input either in
  *   the field => widget format used by the content module or as an
  *   array of form values.
+ * @param $rebuild
+ *   TRUE to clear content type caches and rebuild menu (default).
+ *   FALSE allows the caller to process several fields at a time quickly, but then
+ *   the caller is reponsible to clear content type caches and rebuild menu as soon
+ *   as all fields have been processed. For example:
+ *   @code
+ *     // Update several fields at a time.
+ *     foreach ($fields as $field) {
+ *       content_field_instance_update($field, FALSE);
+ *     }
+ *     // Clear caches and rebuild menu.
+ *     content_clear_type_cache(TRUE);
+ *     menu_rebuild();
+ *   @endcode
+ * @see content_clear_type_cache()
+ * @see menu_rebuild()
  */
-function content_field_instance_update($field) {
+function content_field_instance_update($field, $rebuild = TRUE) {
   include_once('./'. drupal_get_path('module', 'content') .'/includes/content.admin.inc');
 
   // Ensure the field description is in the 'expanded' form.
@@ -344,12 +377,14 @@ function content_field_instance_update($field) {
 
   content_alter_schema($prev_field, $field);
 
-  content_clear_type_cache(TRUE);
+  if ($rebuild) {
+    content_clear_type_cache(TRUE);
 
-  // The label is in the menu tree, so we need a menu rebuild
-  // if the label changes.
-  if ($prev_field['widget']['label'] != $field['widget']['label']) {
-   menu_rebuild();
+    // The label is in the menu tree, so we need a menu rebuild
+    // if the label changes.
+    if ($prev_field['widget']['label'] != $field['widget']['label']) {
+      menu_rebuild();
+    }
   }
 
   return $field;
@@ -487,8 +522,29 @@ function content_field_instance_read($param = NULL, $include_inactive = FALSE) {
 
 /**
  * Delete an existing field instance.
+ *
+ * @param $field_name
+ *   The field name to delete.
+ * @param $type_name
+ *   The content type where the field instance is going to be deleted.
+ * @param $rebuild
+ *   TRUE to clear content type caches and rebuild menu (default).
+ *   FALSE allows the caller to process several fields at a time quickly, but then
+ *   the caller is reponsible to clear content type caches and rebuild menu as soon
+ *   as all fields have been processed. For example:
+ *   @code
+ *     // Update several fields at a time.
+ *     foreach ($fields as $field) {
+ *       content_field_instance_delete($field['field_name'], $type_name, FALSE);
+ *     }
+ *     // Clear caches and rebuild menu.
+ *     content_clear_type_cache(TRUE);
+ *     menu_rebuild();
+ *   @endcode
+ * @see content_clear_type_cache()
+ * @see menu_rebuild()
  */
-function content_field_instance_delete($field_name, $type_name) {
+function content_field_instance_delete($field_name, $type_name, $rebuild = TRUE) {
   include_once('./'. drupal_get_path('module', 'content') .'/includes/content.admin.inc');
 
   // Get the previous field value.
@@ -518,8 +574,6 @@ function content_field_instance_delete($field_name, $type_name) {
     content_alter_schema($instance, $new_instance);
   }
 
-  content_clear_type_cache(TRUE);
-
   // If the deleted instance was the last field for the content type,
   // we drop the per-type table. We also consider possibly inactive fields.
   if (!content_field_instance_read(array('type_name' => $field['type_name']), TRUE)) {
@@ -529,7 +583,10 @@ function content_field_instance_delete($field_name, $type_name) {
     }
   }
 
-  menu_rebuild();
+  if ($rebuild) {
+    content_clear_type_cache(TRUE);
+    menu_rebuild();
+  }
 
   return $field;
 }
@@ -546,10 +603,11 @@ function content_module_delete($module) {
   if (db_table_exists(content_instance_tablename())) {
     $results = db_query("SELECT field_name, type_name FROM {". content_instance_tablename() ."} WHERE widget_module = '%s'", $module);
     while ($field = db_fetch_array($results)) {
-      content_field_instance_delete($field['field_name'], $field['type_name']);
+      content_field_instance_delete($field['field_name'], $field['type_name'], FALSE);
     }
     // Force the caches and static arrays to update to the new info.
     content_clear_type_cache(TRUE);
+    menu_rebuild();
   }
 }
 
@@ -624,7 +682,7 @@ function content_type_delete($info) {
   // Currently, content_field_instance_delete doesn't work on those...
   $fields = content_field_instance_read(array('type_name' => $info->type));
   foreach ($fields as $field) {
-    content_field_instance_delete($field['field_name'], $info->type);
+    content_field_instance_delete($field['field_name'], $info->type, FALSE);
   }
   $table = _content_tablename($info->type, CONTENT_DB_STORAGE_PER_CONTENT_TYPE);
   if (db_table_exists($table)) {

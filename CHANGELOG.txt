@@ -1,5 +1,11 @@
 //$Id$
 
+CCK 6.x-2.x
+===========
+
+Features:
+- #428650 Conditional cache/menu rebuild for content CRUD methods.
+
 CCK 6.x-2.4
 ===========
 
