@@ -533,7 +533,7 @@ function content_field_instance_read($param = NULL, $include_inactive = FALSE) {
  *   the caller is reponsible to clear content type caches and rebuild menu as soon
  *   as all fields have been processed. For example:
  *   @code
- *     // Update several fields at a time.
+ *     // Delete several fields at a time.
  *     foreach ($fields as $field) {
  *       content_field_instance_delete($field['field_name'], $type_name, FALSE);
  *     }
