@@ -13,6 +13,10 @@ class content_plugin_display_simple extends views_plugin_display {
   function render() {
     return !empty($this->view->result) || !empty($this->view->style_plugin->definition['even empty']) ? $this->view->style_plugin->render($this->view->result) : '';
   }
+
+  function uses_exposed() {
+    return FALSE;
+  }
 }
 
 class content_plugin_display_references extends content_plugin_display_simple {
