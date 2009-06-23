@@ -483,15 +483,15 @@ function cck_cck_build_modes() {
     ),
     'rss' => array(
       'title' => t('RSS'),
-      'build modes' => array(NODE_BUILD_RSS),
+      'build modes' => array('rss'),
     ),
     'print' => array(
       'title' => t('Print'),
-      'build modes' => array(NODE_BUILD_PRINT),
+      'build modes' => array('print'),
     ),
     'search' => array(
       'title' => t('Search'),
-      'build modes' => array(NODE_BUILD_SEARCH_INDEX, NODE_BUILD_SEARCH_RESULT),
+      'build modes' => array('search_index', 'search_result'),
     ),
   );
   return $modes;
