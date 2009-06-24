@@ -725,7 +725,7 @@ function nodereference_allowed_values($field) {
 /**
  * Fetch an array of all candidate referenced nodes.
  *
- * This info is used in various places (aloowed values, autocomplete results,
+ * This info is used in various places (allowed values, autocomplete results,
  * input validation...). Some of them only need the nids, others nid + titles,
  * others yet nid + titles + rendered row (for display in widgets).
  * The array we return contains all the potentially needed information, and lets
