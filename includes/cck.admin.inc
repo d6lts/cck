@@ -655,12 +655,6 @@ function cck_display_overview_form(&$form_state, $bundle, $contexts_selector = '
         '#options' => $options,
         '#default_value' => isset($defaults[$key]['type']) ? $defaults[$key]['type'] : 'default',
       );
-      // exclude from $content
-      $form[$name][$key]['exclude'] = array(
-        '#type' => 'checkbox',
-        '#options' => array(0 => t('Include'), 1 => t('Exclude')),
-        '#default_value' => isset($defaults[$key]['exclude']) ? $defaults[$key]['exclude'] : 0,
-      );
     }
   }
 
@@ -696,12 +690,6 @@ function cck_display_overview_form(&$form_state, $bundle, $contexts_selector = '
         '#options' => $options,
         '#default_value' => isset($defaults[$key]['format']) ? $defaults[$key]['format'] : 'fieldset',
       );
-      // exclude in $content
-      $form[$name][$key]['exclude'] = array(
-        '#type' => 'checkbox',
-        '#options' => array(0 => t('Include'), 1 => t('Exclude')),
-        '#default_value' => isset($defaults[$key]['exclude']) ? $defaults[$key]['exclude'] : 0,
-      );
     }
     foreach ($group['fields'] as $field_name => $field) {
       $form[$field_name]['parent']['#value'] = $name;
@@ -723,9 +711,8 @@ function cck_display_overview_form_submit($form, &$form_state) {
     // Groups are handled in fieldgroup_display_overview_form_submit().
     if (in_array($key, $form['#fields'])) {
       $instance = field_info_instance($key, $form['#bundle']);
-      // We have some numeric keys here, so we can't use array_merge.
       unset($values['weight'], $values['parent']);
-      $instance['display'] = $values + (array) $instance['display'];
+      $instance['display'] = array_merge($instance['display'], $values);
       field_update_instance($instance);
     }
   }
