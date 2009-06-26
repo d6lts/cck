@@ -219,6 +219,8 @@ function content_field_overview_form(&$form_state, $type_name) {
       'description' => array('#value' => isset($extra[$name]['description']) ? $extra[$name]['description'] : ''),
       'weight' => array('#type' => 'textfield', '#default_value' => $weight, '#size' => 3),
       'parent' => array('#type' => 'hidden', '#default_value' => ''),
+      'configure' => array('#value' => isset($extra[$name]['configure']) ? $extra[$name]['configure'] : ''),
+      'remove' => array('#value' => isset($extra[$name]['remove']) ? $extra[$name]['remove'] : ''),
       'hidden_name' => array('#type' => 'hidden', '#default_value' => $name),
       '#leaf' => TRUE,
       '#root' => TRUE,
