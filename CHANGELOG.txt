@@ -6,6 +6,7 @@ CCK 6.x-2.x
 Features:
 - #428650 Conditional cache/menu rebuild for content CRUD methods.
 - #334945: Save default values when field is hidden because of access permissions.
+- #503258 by eaton: allow 'extra fields' to provide 'configure' and 'remove' links.
 
 Bugfixes:
 - #499696 by DeFr - Noderefernce / Userreference: fix Views mode when the view has exposed filters.
