@@ -500,11 +500,7 @@ function cck_cck_build_modes() {
 /**
  *  Implementation of hook_node_type().
  *
- *  TODO Right way to do this in D7? Not needed for users since the user type is never deleted.
- *   Content types could be deleted. Not sure about other entities.
- *   [yched] : fieldable will need to take care of calling field_rename_bundle(), field_delete_bundle()
- *     when appropriate anyway. Those functions - we don't have them yet :) - will need to call a hook
- *     so that CCK UI is notified of this.
+ *  TODO D7: This should be done in hook_field_[create|rename|delete]_bundle().
  */
 function cck_node_type($op, $info) {
   switch ($op) {
