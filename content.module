@@ -2357,6 +2357,28 @@ function content_content_extra_fields($type_name) {
       'view' => 'body'
     );
   }
+  $extra['revision_information'] = array(
+    'label' => t('Revision information'),
+    'description' => t('Node module form.'),
+    'weight' => 20
+  );
+  $extra['author'] = array(
+    'label' => t('Authoring information'),
+    'description' => t('Node module form.'),
+    'weight' => 20
+  );
+  $extra['options'] = array(
+    'label' => t('Publishing options'),
+    'description' => t('Node module form.'),
+    'weight' => 25
+  );  
+  if (module_exists('comment') && variable_get("comment_$type_name", 2) != 0) {
+    $extra['comment_settings'] = array(
+      'label' => t('Comment settings'),
+      'description' => t('Comment module form.'),
+      'weight' => 30
+    );
+  }  
   if (module_exists('locale') && variable_get("language_content_type_$type_name", 0)) {
     $extra['language'] = array(
       'label' => t('Language'),
