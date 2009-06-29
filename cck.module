@@ -331,6 +331,28 @@ function _cck_node_extra_fields($type_name) {
         'weight' => -5
       );
     }
+    $extra['revision_information'] = array(
+      'label' => t('Revision information'),
+      'description' => t('Node module form.'),
+      'weight' => 20
+    );
+    $extra['author'] = array(
+      'label' => t('Authoring information'),
+      'description' => t('Node module form.'),
+      'weight' => 20
+    );
+    $extra['options'] = array(
+      'label' => t('Publishing options'),
+      'description' => t('Node module form.'),
+      'weight' => 25
+    );  
+    if (module_exists('comment') && variable_get("comment_$type_name", 2) != 0) {
+      $extra['comment_settings'] = array(
+        'label' => t('Comment settings'),
+        'description' => t('Comment module form.'),
+        'weight' => 30
+      );
+    } 
     if (module_exists('locale') && variable_get("language_content_type_$type_name", 0)) {
       $extra['language'] = array(
         'label' => t('Language'),
@@ -357,6 +379,23 @@ function _cck_node_extra_fields($type_name) {
         'label' => t('Book'),
         'description' => t('Book module element.'),
         'weight' => 10
+      );
+    }
+    if ($type_name == 'poll' && module_exists('poll')) {
+      $extra['title'] = array(
+        'label' => t('Poll title'),
+        'description' => t('Poll module title.'),
+        'weight' => -5
+      );
+      $extra['choice_wrapper'] = array(
+        'label' => t('Poll choices'),
+        'description' => t('Poll module choices.'),
+        'weight' => -4
+      );
+      $extra['settings'] = array(
+        'label' => t('Poll settings'),
+        'description' => t('Poll module settings.'),
+        'weight' => -3
       );
     }
     if (module_exists('upload') && variable_get("upload_$type_name", TRUE)) {
