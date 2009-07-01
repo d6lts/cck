@@ -10,6 +10,7 @@ Features:
 
 Bugfixes:
 - #499696 by DeFr - Noderefernce / Userreference: fix Views mode when the view has exposed filters.
+- #498924 - #multiple FAPI attribute is used for a radios and checkboxes in content export forms.
 
 CCK 6.x-2.4
 ===========
