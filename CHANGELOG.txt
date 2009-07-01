@@ -3,16 +3,17 @@
 CCK 6.x-3.x
 ===========
 
+Features:
+- #428650 Conditional cache/menu rebuild for content CRUD methods.
+- #334945 Save default values when field is hidden because of access permissions.
+- #196421 Deleting unwanted multiple values / multiple values delta issues.
+- #119102 Combo field - group different fields into one.
+
 Bugfixes:
 - #482774 Update breaks when CCK is disabled.
 - #479994 by quicksketch: fix "add more' button with devel.module's query logging (multigroup).
 - #499696 by DeFr - Noderefernce / Userreference: fix Views mode when the view has exposed filters.
 - #498924 - #multiple FAPI attribute is used for a radios and checkboxes in content export forms.
 
-Other changes:
+Changes:
 - #421116 Move content.js to js/content.admin.js for consistency with location of new js files.
-
-Features:
-- #428650 Conditional cache/menu rebuild for content CRUD methods.
-- #196421 Deleting unwanted multiple values / multiple values delta issues.
-- #119102 Combo field - group different fields into one.

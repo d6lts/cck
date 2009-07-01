@@ -794,7 +794,7 @@ function theme_content_multigroup_node_form($element) {
 
   $i = 0;
   foreach (element_children($element) as $delta => $key) {
-    if ($key !== $group_name .'_add_more') {
+    if (is_numeric($key)) {
       $cells = array();
       $label = ($show_label == 'above' && !empty($subgroup_labels[$i]) ? theme('content_multigroup_node_label', check_plain(t($subgroup_labels[$i]))) : '');
       $element[$key]['_weight']['#attributes']['class'] = $order_class;
