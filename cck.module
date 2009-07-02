@@ -87,7 +87,7 @@ function cck_menu() {
     'weight' => 2,
   );
   // Create an 'Edit' tab for the user.
-  $items['admin/user/settings/edit'] = array(
+  $items['admin/settings/user/edit'] = array(
     'title' => 'Edit',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('user_admin_settings'),
@@ -345,14 +345,14 @@ function _cck_node_extra_fields($type_name) {
       'label' => t('Publishing options'),
       'description' => t('Node module form.'),
       'weight' => 25
-    );  
+    );
     if (module_exists('comment') && variable_get("comment_$type_name", 2) != 0) {
       $extra['comment_settings'] = array(
         'label' => t('Comment settings'),
         'description' => t('Comment module form.'),
         'weight' => 30
       );
-    } 
+    }
     if (module_exists('locale') && variable_get("language_content_type_$type_name", 0)) {
       $extra['language'] = array(
         'label' => t('Language'),
