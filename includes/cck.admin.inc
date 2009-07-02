@@ -928,19 +928,24 @@ function cck_field_settings_form(&$form_state, $bundle, $field_name) {
  * Save a field's settings after editing.
  */
 function cck_field_settings_form_submit($form, &$form_state) {
-
   $form_values = $form_state['values'];
-  $field = $form_values['field'];
+  $field_values = $form_values['field'];
 
   // Don't allow changes to fields with data.
-  if (cck_field_has_data($field['field_name'])) {
+  if (cck_field_has_data($field_values['field_name'])) {
     return;
   }
 
+  // Merge incoming form values into the existing field.
+  $field = field_info_field($field_values['field_name']);
+  // Remove the 'bundles' element added by field_info_field
+  // TODO: this is ugly, there should be a better way.
+  unset($field['bundles']);
   $bundle = $form['#bundle'];
   $instance = field_info_instance($field['field_name'], $bundle);
 
   // Update the field.
+  $field = array_merge($field, $field_values);
   cck_field_update_field($field);
 
   drupal_set_message(t('Updated field %label field settings.', array('%label' => $instance['label'])));
@@ -955,14 +960,13 @@ function cck_field_settings_form_submit($form, &$form_state) {
  *   field_create_field()
  */
 function cck_field_update_field($field) {
-
   $field_types = field_info_field_types();
   $module = $field_types[$field['type']]['module'];
 
   $defaults = field_info_field_settings($field['type']);
   $field['settings'] = array_merge($defaults, (array) $field['settings']);
   $data = $field;
-  unset($data['columns'], $data['field_name'], $data['type'], $data['locked'], $data['module'], $data['active'], $data['deleted']);
+  unset($data['id'], $data['columns'], $data['field_name'], $data['type'], $data['locked'], $data['module'], $data['cardinality'], $data['active'], $data['deleted']);
   $field['data'] = $data;
 
   drupal_write_record('field_config', $field, array('field_name'));
@@ -1444,6 +1448,9 @@ function cck_field_edit_form_submit($form, &$form_state) {
 
   // Update any field settings that have changed.
   $field = field_info_field($instance['field_name']);
+  // Remove the 'bundles' element added by field_info_field
+  // TODO: this is ugly, there should be a better way.
+  unset($field['bundles']);
   $field = array_merge($field, $form_state['values']['field']);
   cck_field_update_field($field);
 
