@@ -1004,7 +1004,7 @@ function content_field_edit_form(&$form_state, $type_name, $field_name) {
     '#value' => $field['type'],
     '#disabled' => TRUE,
   );
-  $widget_options = content_widget_type_options($field['type'])
+  $widget_options = content_widget_type_options($field['type']);
   $form['basic']['widget_type'] = array(
     '#type' => 'select',
     '#title' => t('Widget type'),
