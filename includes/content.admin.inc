@@ -1004,11 +1004,12 @@ function content_field_edit_form(&$form_state, $type_name, $field_name) {
     '#value' => $field['type'],
     '#disabled' => TRUE,
   );
+  $widget_options = content_widget_type_options($field['type'])
   $form['basic']['widget_type'] = array(
     '#type' => 'select',
     '#title' => t('Widget type'),
-    '#options' => content_widget_type_options($field['type']),
-    '#default_value' => $field['widget']['type'] ? $field['widget']['type'] : $default_widget,
+    '#options' => $widget_options,
+    '#default_value' => $field['widget']['type'] ? $field['widget']['type'] : key($widget_options),
     '#disabled' => TRUE,
   );
   $form['basic']['change'] = array(
