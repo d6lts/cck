@@ -14,6 +14,7 @@ Bugfixes:
 - #479994 by quicksketch: fix "add more' button with devel.module's query logging (multigroup).
 - #499696 by DeFr - Noderefernce / Userreference: fix Views mode when the view has exposed filters.
 - #498924 - #multiple FAPI attribute is used for a radios and checkboxes in content export forms.
+- #409144: Review extra elements for node edit form provided by core modules.
 
 Changes:
 - #421116 Move content.js to js/content.admin.js for consistency with location of new js files.
