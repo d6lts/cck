@@ -3,7 +3,7 @@
 
 /**
  * @file
- *   This file provides a CTools content type for fields.
+ * This file provides a CTools content type for fields.
  */
 
 /**
@@ -66,7 +66,12 @@ function content_content_field_content_type_render($subtype, $conf, $panel_args,
   $formatter = $conf['formatter'];
 
   // Get more information about our field.
-  $field = content_fields($field_name);
+  $field = content_fields($field_name, $node_type);
+
+  // Check view access to the field.
+  if (!content_access('view', $field)) {
+    return;
+  }
 
   // Force panel settings into the field's display settings.
   $field['display_settings']['label']['format'] = $conf['label'] == 'normal' ? 'hidden' : $conf['label'];
@@ -109,7 +114,7 @@ function content_content_field_content_type_edit_form(&$form, &$form_state) {
   list($node_type, $field_name) = explode(':', $form_state['subtype_name'], 2);
 
   // Get all the information about our field.
-  $field = content_fields($field_name);
+  $field = content_fields($field_name, $node_type);
 
   // Get information about all the field types on the site.
   $field_types = _content_field_types();
@@ -146,4 +151,3 @@ function content_content_field_content_type_edit_form_submit(&$form, &$form_stat
 function content_content_field_content_type_admin_title($subtype, $conf, $context) {
   return t('"@s" field (@name)', array('@s' => $context->identifier, '@name' => $subtype));
 }
-

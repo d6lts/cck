@@ -12,6 +12,7 @@ Bugfixes:
 - #499696 by DeFr - Noderefernce / Userreference: fix Views mode when the view has exposed filters.
 - #498924 - #multiple FAPI attribute is used for a radios and checkboxes in content export forms.
 - #409144: Review extra elements for node edit form provided by core modules.
+- #361473: CCK fieldgroup panels doesn't respect CCK field privacy settings.
 
 CCK 6.x-2.4
 ===========
