@@ -24,27 +24,35 @@ function content_content_field_content_type_content_types() {
   $types = array();
 
   // Get all fields on the site.
-  $fields = content_fields();
   $field_types = _content_field_types();
-  $node_types = node_get_types();
 
-  foreach ($fields as $field) {
-    // Name the content type a combination of field and node type names.
-    $content_type_name = $field['type_name'] . ':' . $field['field_name'];
-
-    // Assemble the information about the content type.
-    $info = array();
-    $info['title'] = t('@type: (@field_type) @field', array('@type' => $node_types[$field['type_name']]->name, '@field' => $field['field_name'], '@field_type' => $field_types[$field['type']]['label']));
-
-    if (isset($field_types[$field['type']]['content_icon'])) {
-      $info['icon'] = $field_types[$field['type']]['content_icon'];
+  foreach (content_types() as $type_name => $type) {
+    foreach ($type['fields'] as $field_name => $field) {
+      if (!isset($types[$field_name])) {
+        $types[$field_name] = array(
+          'category' => t('Content'),
+          'title' => t('@widget_label (@field_name) - @field_type', array(
+            '@widget_label' => t($field['widget']['label']),
+            '@field_name' => $field_name,
+            '@field_type' => t($field_types[$field['type']]['label']),
+          )),
+          'description' => t('Field on the referenced node.'),
+          'types' => array(),
+        );
+        if (isset($field_types[$field['type']]['content_icon'])) {
+          $types[$field_name]['icon'] = $field_types[$field['type']]['content_icon'];
+        }
+      }
+      $types[$field_name]['types'][$type_name] = $type['name'];
     }
+  }
 
-    $info['category'] = 'Content';
-    $info['description'] = t('Field on the referenced node.');
-    $info['required context'] = new ctools_context_required(t('Node'), 'node', array('type' => array($field['type_name'])));
-
-    $types[$content_type_name] = $info;
+  // Create the required context for each field related to the content types.
+  foreach ($types as $field_name => $field_content_type) {
+    $types[$field_name]['required context'] = new ctools_context_required(t('Node'), 'node', array(
+      'type' => array_keys($types[$field_name]['types']),
+    ));
+    unset($types[$field_name]['types']);
   }
 
   return $types;
@@ -57,16 +65,19 @@ function content_content_field_content_type_render($subtype, $conf, $panel_args,
   if (is_array($context)) {
     $context = array_pop($context);
   }
-  $node = isset($context->data) ? drupal_clone($context->data) : NULL;
+  // If we do not have a node, then we cannot generate output.
+  if (!isset($context->data)) {
+    return;
+  }
+  $node = drupal_clone($context->data);
 
-  // Extract the node type and field name from the subtype
-  list($node_type, $field_name) = explode(':', $subtype, 2);
+  // Extract the node type from the node in context, the field name from the
+  // panels content type subtype, and get the content field structure.
+  $field_name = $subtype;
+  $field = content_fields($field_name, $node->type);
 
   // Get the formatter that was selected in the settings dialog.
   $formatter = $conf['formatter'];
-
-  // Get more information about our field.
-  $field = content_fields($field_name, $node_type);
 
   // Check view access to the field.
   if (!content_access('view', $field)) {
@@ -81,6 +92,7 @@ function content_content_field_content_type_render($subtype, $conf, $panel_args,
 
   $output = content_view_field($field, $node);
 
+  $block = new stdClass();
   $block->module = 'content';
   $block->delta = $field_name;
   if ($conf['label'] == 'normal') {
@@ -110,11 +122,11 @@ function content_content_field_content_type_edit_form(&$form, &$form_state) {
     '#description' => t('Configure how the label is going to be displayed.'),
   );
 
-  // Extract the node type and field name from the subtype
-  list($node_type, $field_name) = explode(':', $form_state['subtype_name'], 2);
+  // Extract the field name from the panels content type subtype.
+  $field_name = $form_state['subtype_name'];
 
   // Get all the information about our field.
-  $field = content_fields($field_name, $node_type);
+  $field = content_fields($field_name);
 
   // Get information about all the field types on the site.
   $field_types = _content_field_types();
