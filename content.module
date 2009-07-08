@@ -2362,17 +2362,7 @@ function content_content_extra_fields($type_name) {
     'description' => t('Node module form.'),
     'weight' => 20
   );
-  $extra['author'] = array(
-    'label' => t('Authoring information'),
-    'description' => t('Node module form.'),
-    'weight' => 20
-  );
-  $extra['options'] = array(
-    'label' => t('Publishing options'),
-    'description' => t('Node module form.'),
-    'weight' => 25
-  );  
-  if (module_exists('comment') && variable_get("comment_$type_name", 2) != 0) {
+  if (module_exists('comment')) {
     $extra['comment_settings'] = array(
       'label' => t('Comment settings'),
       'description' => t('Comment module form.'),
@@ -2384,6 +2374,13 @@ function content_content_extra_fields($type_name) {
       'label' => t('Language'),
       'description' => t('Locale module form.'),
       'weight' => 0
+    );
+  }
+  if (module_exists('translation') && translation_supported_type($type_name)) {
+    $extra['translation'] = array(
+      'label' => t('Translation settings'),
+      'description' => t('Translation module form.'),
+      'weight' => 30
     );
   }
   if (module_exists('menu')) {
@@ -2405,6 +2402,13 @@ function content_content_extra_fields($type_name) {
       'label' => t('Book'),
       'description' => t('Book module form.'),
       'weight' => 10
+    );
+  }
+  if (module_exists('path')) {
+    $extra['path'] = array(
+      'label' => t('Path settings'),
+      'description' => t('Path module form.'),
+      'weight' => 30
     );
   }
   if ($type_name == 'poll' && module_exists('poll')) {
