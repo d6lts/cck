@@ -8,6 +8,7 @@ Features:
 - #334945 Save default values when field is hidden because of access permissions.
 - #196421 Deleting unwanted multiple values / multiple values delta issues.
 - #119102 Combo field - group different fields into one.
+- #505278 Panels 3 and multiple node type fields.
 
 Bugfixes:
 - #482774 Update breaks when CCK is disabled.
