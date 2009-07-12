@@ -17,6 +17,7 @@ Bugfixes:
 - #409144 Review extra elements for node edit form provided by core modules.
 - #361473 CCK fieldgroup panels doesn't respect CCK field privacy settings.
 - #515984 Multiple field delta ORDER BY incorrect.
+- #414298 by Michelle, merlinofchaos - Follow up to remove fieldgroup.panels.inc (it was moved to panels/content_types).
 
 CCK 6.x-2.4
 ===========
