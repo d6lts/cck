@@ -31,7 +31,7 @@ function content_content_field_content_type_content_types() {
       if (!isset($types[$field_name])) {
         $types[$field_name] = array(
           'category' => t('Content'),
-          'title' => t('@widget_label (@field_name) - @field_type', array(
+          'title' => t('field: @widget_label (@field_name) - @field_type', array(
             '@widget_label' => t($field['widget']['label']),
             '@field_name' => $field_name,
             '@field_type' => t($field_types[$field['type']]['label']),
@@ -85,7 +85,7 @@ function content_content_field_content_type_render($subtype, $conf, $panel_args,
   }
 
   // Force panel settings into the field's display settings.
-  $field['display_settings']['label']['format'] = $conf['label'] == 'normal' ? 'hidden' : $conf['label'];
+  $field['display_settings']['label']['format'] = $conf['label'] == 'normal' || !empty($conf['override_title']) ? 'hidden' : $conf['label'];
   $field['display_settings']['full']['format'] = $formatter;
   $node->build_mode = NODE_BUILD_NORMAL;
   // TODO : allow panel-specific template suggestions for content-field.tpl.php ?
@@ -96,7 +96,7 @@ function content_content_field_content_type_render($subtype, $conf, $panel_args,
   $block->module = 'content';
   $block->delta = $field_name;
   if ($conf['label'] == 'normal') {
-    $block->title = $field['widget']['label'];
+    $block->title = t($field['widget']['label']);
   }
   $block->content = $output;
 
@@ -111,15 +111,14 @@ function content_content_field_content_type_edit_form(&$form, &$form_state) {
 
   $form['label'] = array(
     '#type' => 'select',
-    '#title' => t('Label'),
+    '#title' => t('Field label'),
     '#default_value' => isset($conf['label']) ? $conf['label'] : '',
     '#options' => array(
       'normal' => t('Block title'),
       'above' => t('Above'),
       'inline' => t('Inline'),
-      'hidden' => t('Hidden'),
     ),
-    '#description' => t('Configure how the label is going to be displayed.'),
+    '#description' => t('Configure how the label is going to be displayed. This option takes no effect when "Override title" option is enabled, the specified block title is displayed instead.'),
   );
 
   // Extract the field name from the panels content type subtype.
@@ -142,7 +141,7 @@ function content_content_field_content_type_edit_form(&$form, &$form_state) {
 
   $form['formatter'] = array(
     '#type' => 'select',
-    '#title' => t('Formatter'),
+    '#title' => t('Field formatter'),
     '#default_value' => isset($conf['formatter']) ? $conf['formatter'] : 'default',
     '#options' => $options,
     '#description' => t('Select a formatter.'),
@@ -161,5 +160,16 @@ function content_content_field_content_type_edit_form_submit(&$form, &$form_stat
  * Admin title for field content type.
  */
 function content_content_field_content_type_admin_title($subtype, $conf, $context) {
-  return t('"@s" field (@name)', array('@s' => $context->identifier, '@name' => $subtype));
+  // Get all fields on the site.
+  $field_types = _content_field_types();
+
+  // Get all the information about our field.
+  $field = content_fields($subtype);
+
+  return t('"@s" field: @widget_label (@field_name) - @field_type', array(
+    '@s' => $context->identifier,
+    '@widget_label' => t($field['widget']['label']),
+    '@field_name' => $subtype,
+    '@field_type' => t($field_types[$field['type']]['label']),
+  ));
 }

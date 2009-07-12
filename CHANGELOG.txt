@@ -8,6 +8,8 @@ Features:
 - #334945 Save default values when field is hidden because of access permissions.
 - #503258 by eaton: allow 'extra fields' to provide 'configure' and 'remove' links.
 - #505278 Panels 3 and multiple node type fields.
+- #495582 Reviewed Panels 3 integration (prep work for combo / multigroups).
+  Implementation of fieldgroup_view_group() that can be used to render field groups.
 
 Bugfixes:
 - #499696 by DeFr - Noderefernce / Userreference: fix Views mode when the view has exposed filters.
