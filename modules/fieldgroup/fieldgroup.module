@@ -75,9 +75,6 @@ function fieldgroup_theme() {
     'fieldgroup_display_overview_form' => array(
       'arguments' => array('form' => NULL),
     ),
-    'fieldgroup_content_type' => array(
-      'arguments' => array('vars' => NULL, 'nid' => NULL),
-    ),
   );
 }
 
