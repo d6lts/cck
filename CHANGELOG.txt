@@ -9,6 +9,8 @@ Features:
 - #196421 Deleting unwanted multiple values / multiple values delta issues.
 - #119102 Combo field - group different fields into one.
 - #505278 Panels 3 and multiple node type fields.
+- #495582 Reviewed Panels 3 integration (prep work for combo / multigroups).
+  Implementation of fieldgroup_view_group() that can be used to render field groups.
 
 Bugfixes:
 - #482774 Update breaks when CCK is disabled.
