@@ -157,7 +157,7 @@ class content_handler_field_multiple extends content_handler_field {
     $query = 'SELECT '. implode(', ', $query_columns) .
              ' FROM {'. $db_info['table'] ."}".
              " WHERE vid IN (". implode(',', $vids) .')'.
-             " ORDER BY nid ASC, delta ". ($options['multiple']['multiple_reversed'] ? 'DESC' : 'ASC');
+             " ORDER BY _nid ASC, _delta ". ($options['multiple']['multiple_reversed'] ? 'DESC' : 'ASC');
     $result = db_query($query);
 
     while ($item = db_fetch_array($result)) {
