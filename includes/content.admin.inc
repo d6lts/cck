@@ -1029,10 +1029,11 @@ function content_field_edit_form(&$form_state, $type_name, $field_name) {
     '#type' => 'hidden',
     '#default_value' => $field['widget']['weight'],
   );
-  $additions = module_invoke($widget_type['module'], 'widget_settings', 'form', $field['widget']);
-  if (is_array($additions)) {
-    $form['widget'] = array_merge($form['widget'], $additions);
-  }
+
+  $additions = (array) module_invoke($widget_type['module'], 'widget_settings', 'form', $field['widget']);
+  drupal_alter('widget_settings', $additions, 'form', $field['widget']);
+  $form['widget'] = array_merge($form['widget'], $additions);
+
   $form['widget']['description'] = array(
     '#type' => 'textarea',
     '#title' => t('Help text'),
@@ -1148,10 +1149,9 @@ function content_field_edit_form(&$form_state, $type_name, $field_name) {
     '#value' => serialize($field),
   );
 
-  $additions = module_invoke($field_type['module'], 'field_settings', 'form', $field);
-  if (is_array($additions)) {
-    $form['field'] = array_merge($form['field'], $additions);
-  }
+  $additions = (array) module_invoke($field_type['module'], 'field_settings', 'form', $field);
+  drupal_alter('field_settings', $additions, 'form', $field);
+  $form['field'] = array_merge($form['field'], $additions);
 
   $form['submit'] = array(
     '#type' => 'submit',

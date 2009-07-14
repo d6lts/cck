@@ -140,7 +140,8 @@ function content_views_data() {
   $data = array();
   foreach (content_fields() as $field) {
     $module = $field['module'];
-    $result = module_invoke($module, 'field_settings', 'views data', $field);
+    $result = (array) module_invoke($module, 'field_settings', 'views data', $field);
+    drupal_alter('field_settings', $result, 'views data', $field);
     if (empty($result)) {
       $result = content_views_field_views_data($field);
     }

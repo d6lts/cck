@@ -611,7 +611,7 @@ function content_associate_fields($module) {
   foreach ($types as $type_name => $fields) {
     foreach ($fields as $field) {
       if ($field['module'] == $module && !in_array($field['field_name'], $fields_set)) {
-        $columns = module_invoke($field['module'], 'field_settings', 'database columns', $field);
+        $columns = (array) module_invoke($field['module'], 'field_settings', 'database columns', $field);
         db_query("UPDATE {". content_field_tablename() ."} SET db_columns = '%s' WHERE field_name = '%s'", serialize($columns), $field['field_name']);
         $fields_set[] = $field['field_name'];
       }
