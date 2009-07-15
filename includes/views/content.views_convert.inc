@@ -22,7 +22,8 @@ function content_views_convert($display, $type, &$view, $views_field) {
     foreach ($types as $ctype) {
       foreach ($ctype['fields'] as $field) {
         $module = $field['module'];
-        $result = module_invoke($module, 'field_settings', 'views data', $field);
+        $result = (array) module_invoke($module, 'field_settings', 'views data', $field);
+        drupal_alter('field_settings', $result, 'views data', $field);
         if (empty($result)) {
           // The views field name had the column name appended,
           // like field_name_value or field_username_uid.
