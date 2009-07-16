@@ -1216,7 +1216,7 @@ function cck_field_edit_form(&$form_state, $obj_type, $bundle, $field_name) {
   // Field modules that want to provide their own default value handling
   // or provide no default values should populate $instance['default_value_function']
   // with some function name to make sure CCK doesn't try to intervene.
-  if (empty($instance['default_value_function']) || $instance['default_value_function'] == 'cck_field_default_value') {
+  if (field_behaviors_widget('default value', $instance) == FIELD_BEHAVIOR_DEFAULT && (empty($instance['default_value_function']) || $instance['default_value_function'] == 'cck_field_default_value')) {
     // Store the original default value for use in programmed forms.
     // Set '#default_value' instead of '#value' so programmed values
     // can override whatever we set here.
