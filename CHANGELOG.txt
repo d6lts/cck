@@ -22,6 +22,7 @@ Bugfixes:
 - #361473 CCK fieldgroup panels doesn't respect CCK field privacy settings.
 - #515984 Multiple field delta ORDER BY incorrect.
 - #414298 by Michelle, merlinofchaos - Follow up to remove fieldgroup.panels.inc (it was moved to panels/content_types).
+- #522112 by hefox, prevent malformed condition for vid IN () in views handler for multiple values fields.
 
 Changes:
 - #421116 Move content.js to js/content.admin.js for consistency with location of new js files.
