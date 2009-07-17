@@ -141,6 +141,13 @@ class content_handler_field_multiple extends content_handler_field {
       }
     }
 
+    // It may happend that the multiple values field is related to a non
+    // required relation for which no node data related to the field being
+    // processed here is available.
+    if (empty($vids)) {
+      return parent::pre_render($values);
+    }
+
     // List columns to retrieve.
     $alias = content_views_tablename($field);
     // Prefix aliases with '_' to avoid clashing with field columns names.
