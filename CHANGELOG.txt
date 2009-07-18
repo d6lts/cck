@@ -12,6 +12,7 @@ Features:
   Implementation of fieldgroup_view_group() that can be used to render field groups.
 - #417122 by quicksketch: allow drupal_alter on field and widget settings.
 - #514452 Add new argument $node to content_access() to enhance the context for hook_field_access().
+- #523072 by merlinofchaos - Have nodereference relationships limit CCK field availability as well.
 
 Bugfixes:
 - #499696 by DeFr - Noderefernce / Userreference: fix Views mode when the view has exposed filters.
