@@ -60,7 +60,7 @@ function userreference_field_info() {
     'userreference' => array(
       'label' => t('User reference'),
       'description' => t('Store the ID of a related user as an integer value.'),
-      'content_icon' => 'icon_content_noderef.png',
+//      'content_icon' => 'icon_content_noderef.png',
     ),
   );
 }
