@@ -22,17 +22,34 @@ function nodereference_node_from_noderef_ctools_relationships() {
 }
 
 /**
- * Return a new ctools context based on an existing context
+ * Return a new ctools context based on an existing context.
  */
 function nodereference_node_from_noderef_context($context = NULL, $conf) {
-  // If unset it wants a generic, unfilled context, which is just NULL
+  $field = content_fields($conf['field_name']);
+
+  // If unset it wants a generic, unfilled context, which is just NULL.
   if (empty($context->data)) {
-    return ctools_context_create_empty('node', NULL);
+    $new_context = ctools_context_create_empty('node', NULL);
   }
-  if (isset($context->data->{$conf['field_name']}[0]['nid']) && ($nid = $context->data->{$conf['field_name']}[0]['nid'])) {
+  else if (isset($context->data->{$conf['field_name']}[0]['nid']) && ($nid = $context->data->{$conf['field_name']}[0]['nid'])) {
     if ($node = node_load($nid)) {
-      return ctools_context_create('node', $node);
+      $new_context = ctools_context_create('node', $node);
     }
+  }
+
+  if (!empty($new_context)) {
+    // Have nodereference relationships limit CCK field availability as well.
+    $restrictions = array_keys(array_filter($field['referenceable_types']));
+    if ($restrictions) {
+      if (isset($new_context->restrictions['type'])) {
+        $new_context->restrictions['type'] = array_unique(array_merge($new_context->restrictions['type'], $restrictions));
+      }
+      else {
+        $new_context->restrictions['type'] = $restrictions;
+      }
+    }
+
+    return $new_context;
   }
 }
 
@@ -57,5 +74,3 @@ function nodereference_node_from_noderef_settings_form($conf) {
 
   return $form;
 }
-
-
