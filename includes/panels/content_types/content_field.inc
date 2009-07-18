@@ -80,7 +80,7 @@ function content_content_field_content_type_render($subtype, $conf, $panel_args,
   $formatter = $conf['formatter'];
 
   // Check view access to the field.
-  if (!content_access('view', $field)) {
+  if (!content_access('view', $field, NULL, $node)) {
     return;
   }
 

@@ -18,7 +18,7 @@ function content_permissions_perm() {
  *
  * @see content_access().
  */
-function content_permissions_field_access($op, $field, $account) {
+function content_permissions_field_access($op, $field, $account, $node = NULL) {
   switch ($op) {
     case 'view':
     case 'edit':

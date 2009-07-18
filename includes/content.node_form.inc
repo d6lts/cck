@@ -77,7 +77,7 @@ function content_field_form(&$form, &$form_state, $field, $get_delta = NULL) {
 
     // See if access to this form element is restricted,
     // if so, skip widget processing and just set the value.
-    $access = content_access('edit', $field);
+    $access = content_access('edit', $field, NULL, $node);
     if (!$access) {
       $addition[$field_name] = array(
         '#access' => $access,
