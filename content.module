@@ -765,7 +765,7 @@ function content_field($op, &$node, $field, &$items, $teaser, $page) {
           '#type' => 'content_field',
           '#title' => check_plain(t($field['widget']['label'])),
           '#field_name' => $field['field_name'],
-          '#access' => $formatter_name != 'hidden' && content_access('view', $field),
+          '#access' => $formatter_name != 'hidden' && content_access('view', $field, NULL, $node),
           '#label_display' => $label_display,
           '#node' => $node,
           '#teaser' => $teaser,
@@ -1729,7 +1729,7 @@ function content_format($field, $item, $formatter_name = 'default', $node = NULL
     $field = content_fields($field);
   }
 
-  if (content_access('view', $field) && $formatter = _content_get_formatter($formatter_name, $field['type'])) {
+  if (content_access('view', $field, NULL, $node) && $formatter = _content_get_formatter($formatter_name, $field['type'])) {
     $theme = $formatter['module'] .'_formatter_'. $formatter_name;
 
     $element = array(
@@ -2134,18 +2134,20 @@ function content_default_value(&$form, &$form_state, $field, $delta) {
  *   The field on which the operation is to be performed.
  * @param $account
  *   (optional) The account to check, if not given use currently logged in user.
+ * @param $node
+ *   (optional) The node on which the operation is to be performed.
  * @return
  *   TRUE if the operation is allowed;
  *   FALSE if the operation is denied.
  */
-function content_access($op, $field, $account = NULL) {
+function content_access($op, $field, $account = NULL, $node = NULL) {
   global $user;
 
   if (is_null($account)) {
     $account = $user;
   }
 
-  $access = module_invoke_all('field_access', $op, $field, $account);
+  $access = module_invoke_all('field_access', $op, $field, $account, $node);
   foreach ($access as $value) {
     if ($value === FALSE) {
       return FALSE;
