@@ -14,6 +14,7 @@ Features:
 - #417122 by quicksketch: allow drupal_alter on field and widget settings.
 - #514452 Add new argument $node to content_access() to enhance the context for hook_field_access().
 - #523072 by merlinofchaos - Have nodereference relationships limit CCK field availability as well.
+- #519870 by joachim - Add a note to say offset starts from 0 in grouping options for views handler for multiple values fields.
 
 Bugfixes:
 - #482774 Update breaks when CCK is disabled.
