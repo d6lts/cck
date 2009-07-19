@@ -87,14 +87,16 @@ class content_handler_field_multiple extends content_handler_field {
       '#default_value' => $options['multiple']['multiple_from'],
       '#process' => array('views_process_dependency'),
       '#dependency' => array('edit-options-multiple-group' => array(TRUE)),
+      '#description' => t('(first item is 0)'),
     );
     $form['multiple']['multiple_reversed'] = array(
-      '#title' => t('Reversed (start from last values)'),
+      '#title' => t('Reversed'),
       '#type' => 'checkbox',
       '#default_value' => $options['multiple']['multiple_reversed'],
       '#suffix' => '</div>',
       '#process' => array('views_process_dependency'),
       '#dependency' => array('edit-options-multiple-group' => array(TRUE)),
+      '#description' => t('(start from last values)'),
     );
   }
 
