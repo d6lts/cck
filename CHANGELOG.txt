@@ -14,6 +14,7 @@ Features:
 - #514452 Add new argument $node to content_access() to enhance the context for hook_field_access().
 - #523072 by merlinofchaos - Have nodereference relationships limit CCK field availability as well.
 - #519870 by joachim - Add a note to say offset starts from 0 in grouping options for views handler for multiple values fields.
+- #231453 Allow fields index their columns. Implemented for reference value column in node and user reference fields. Needs update.php.
 
 Bugfixes:
 - #499696 by DeFr - Noderefernce / Userreference: fix Views mode when the view has exposed filters.

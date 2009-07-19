@@ -141,7 +141,7 @@ function userreference_field_settings($op, $field) {
 
     case 'database columns':
       $columns = array(
-        'uid' => array('type' => 'int', 'unsigned' => TRUE,  'not null' => FALSE),
+        'uid' => array('type' => 'int', 'unsigned' => TRUE, 'not null' => FALSE, 'index' => TRUE),
       );
       return $columns;
 
