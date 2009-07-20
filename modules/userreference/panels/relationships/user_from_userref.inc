@@ -24,8 +24,8 @@ function userreference_user_from_userref_ctools_relationships() {
 /**
  * Return a new ctools context based on an existing context.
  */
-function userreference_user_from_userref_context($context = NULL, $conf) {
-  // If unset it wants a generic, unfilled context, which is just NULL
+function userreference_user_from_userref_context($context, $conf) {
+  // If unset it wants a generic, unfilled context, which is just NULL.
   if (empty($context->data)) {
     return ctools_context_create_empty('user', NULL);
   }
@@ -57,4 +57,3 @@ function userreference_user_from_userref_context_settings_form($conf) {
 
   return $form;
 }
-
