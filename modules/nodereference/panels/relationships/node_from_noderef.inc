@@ -24,7 +24,7 @@ function nodereference_node_from_noderef_ctools_relationships() {
 /**
  * Return a new ctools context based on an existing context.
  */
-function nodereference_node_from_noderef_context($context = NULL, $conf) {
+function nodereference_node_from_noderef_context($context, $conf) {
   $field = content_fields($conf['field_name']);
 
   // If unset it wants a generic, unfilled context, which is just NULL.
