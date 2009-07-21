@@ -37,8 +37,9 @@ function content_multigroup_content_multigroup_content_type_content_types() {
 
       // Assemble the information about the content type.
       $info = array(
-        'category' => t('Content'),
-        'title' => t('multigroup: @group in @type', array(
+        'category' => t('Node'),
+        'icon' => 'icon_cck_field_group.png',
+        'title' => t('Multigroup: @group in @type', array(
           '@group' => t($group['label']),
           '@type' => node_get_types('name', $group['type_name']),
         )),
