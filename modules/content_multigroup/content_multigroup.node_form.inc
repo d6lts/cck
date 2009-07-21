@@ -425,11 +425,12 @@ function content_multigroup_node_form_fix_values(&$form, &$form_state, $type_nam
       }
       // Get field weight and remove state from the group and keep track of the
       // current delta for each field item.
-      $group_data[$field_name][$delta] = array_merge($items[$field_name], array(
+      $item_defaults = array(
         '_weight' => $items['_weight'],
         '_remove' => $items['_remove'],
         '_old_delta' => $delta,
-      ));
+      );
+      $group_data[$field_name][$delta] = (is_array($items[$field_name]) ? array_merge($items[$field_name], $item_defaults) : $item_defaults);
       // Store the remove state in the form element as well, so we can restore
       // it during content_multigroup_fix_multivalue_fields().
       $form[$group_name][$delta][$field_name]['#removed'] = $items['_remove'];

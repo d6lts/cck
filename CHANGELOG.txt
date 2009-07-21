@@ -29,6 +29,7 @@ Bugfixes:
 - #522112 by hefox, prevent malformed condition for vid IN () in views handler for multiple values fields.
 - #505278 by Michelle, merlinofchaos - Provide backward compatibility with previous method to build Panels 3 subtype names for fields.
 - #523864 Minor coding style issues in Panels 3 relationships implementations.
+- #83787 Fix PHP warning: array_merge(): Argument #1 is not an array in content_multigroup.node_form.inc on line 432.
 
 Changes:
 - #421116 Move content.js to js/content.admin.js for consistency with location of new js files.
