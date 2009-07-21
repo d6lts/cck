@@ -16,7 +16,7 @@ function userreference_user_from_userref_ctools_relationships() {
     'description' => t('Adds a user from a user reference in a node context; if multiple users are referenced, this will get the first referenced user only.'),
     'required context' => new ctools_context_required(t('Node'), 'node'),
     'context' => 'userreference_user_from_userref_context',
-    'settings form' => 'userreference_usere_from_userref_settings_form',
+    'settings form' => 'userreference_user_from_userref_settings_form',
     'settings form validate' => 'userreference_user_from_userref_settings_form_validate',
   );
 }
@@ -29,6 +29,12 @@ function userreference_user_from_userref_context($context, $conf) {
   if (empty($context->data)) {
     return ctools_context_create_empty('user', NULL);
   }
+
+  // Prevent whitescreens on stale data.
+  if (empty($conf)) {
+    return ctools_context_create_empty('user', NULL);
+  }
+
   if (isset($context->data->{$conf['field_name']}[0]['uid']) && ($uid = $context->data->{$conf['field_name']}[0]['uid'])) {
     if ($account = user_load(array('uid' => $uid))) {
       return ctools_context_create('user', $account);
@@ -39,7 +45,7 @@ function userreference_user_from_userref_context($context, $conf) {
 /**
  * Settings form for the ctools relationship.
  */
-function userreference_user_from_userref_context_settings_form($conf) {
+function userreference_user_from_userref_settings_form($conf) {
   $options = array();
   foreach (content_fields() as $field) {
     if ($field['type'] == 'userreference') {
