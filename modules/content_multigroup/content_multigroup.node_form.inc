@@ -62,8 +62,8 @@ function _content_multigroup_fieldgroup_form(&$form, &$form_state, $form_id, $gr
       break;
 
     default:
-      $group_deltas = range(0, $group_multiple);
       $max_delta = $group_multiple - 1;
+      $group_deltas = range(0, $max_delta);
       break;
   }
 
