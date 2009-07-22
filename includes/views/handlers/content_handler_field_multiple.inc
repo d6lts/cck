@@ -203,7 +203,9 @@ class content_handler_field_multiple extends content_handler_field {
       return parent::render($values);
     }
 
-    $field = $this->content_field;
+    // We're down to a single node here, so we can retrieve the actual field
+    // definition for the node type being considered.
+    $field = content_fields($this->content_field['field_name'], $values->{$this->aliases['type']});
     $options = $this->options;
 
     $vid = $values->{$this->field_alias};
