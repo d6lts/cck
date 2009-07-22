@@ -170,7 +170,6 @@ class content_handler_field extends views_handler_field_node {
     // We're down to a single node here, so we can retrieve the actual field
     // definition for the node type being considered.
     $field = content_fields($this->content_field['field_name'], $values->{$this->aliases['type']});
-
     $options = $this->options;
     $db_info = content_database_info($field);
 
