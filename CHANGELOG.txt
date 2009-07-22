@@ -31,6 +31,7 @@ Bugfixes:
 - #523864 Minor coding style issues in Panels 3 relationships implementations.
 - #83787 Fix PHP warning: array_merge(): Argument #1 is not an array in content_multigroup.node_form.inc on line 432.
 - #481568 by merlinofchaos - Empty property error when attempting to save a user reference in Panels.
+- #510396 by yched - Use field/type definition to render fields in views.
 
 Changes:
 - #421116 Move content.js to js/content.admin.js for consistency with location of new js files.
