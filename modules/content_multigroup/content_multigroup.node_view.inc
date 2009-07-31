@@ -171,7 +171,7 @@ function theme_content_multigroup_display_hr($element) {
  * No output is generated if all fields are empty.
  */
 function theme_content_multigroup_display_table_single($element) {
-  $header = array();
+  $headers = array();
   $rows = array();
   foreach (element_children($element) as $delta) {
     $items = array();
@@ -188,7 +188,7 @@ function theme_content_multigroup_display_table_single($element) {
       $rows[] = array('data' => array(implode("\n", $items)), 'class' => $element[$delta]['#attributes']['class']);
     }
   }
-  return count($rows) ? theme('table', $header, $rows, $element['#attributes']) : '';
+  return count($rows) ? theme('table', $headers, $rows, $element['#attributes']) : '';
 }
 
 /**
@@ -198,10 +198,13 @@ function theme_content_multigroup_display_table_single($element) {
  * No output is generated if all fields are empty.
  */
 function theme_content_multigroup_display_table_multiple($element) {
-  $header = array();
+  $headers = array();
   foreach ($element['#fields'] as $field_name => $field) {
     $label_display = isset($field['display_settings']['label']['format']) ? $field['display_settings']['label']['format'] : 'above';
-    $header[] = $label_display != 'hidden' ? check_plain(t($field['widget']['label'])) : '';
+    $headers[] = array(
+      'data' => ($label_display != 'hidden' ? check_plain(t($field['widget']['label'])) : ''),
+      'class' => 'content-multigroup-cell-'. str_replace('_', '-', $field_name),
+    );
   }
   $rows = array();
   foreach (element_children($element) as $delta) {
@@ -209,7 +212,10 @@ function theme_content_multigroup_display_table_multiple($element) {
     $empty = TRUE;
     foreach ($element['#fields'] as $field_name => $field) {
       $item = drupal_render($element[$delta][$field_name]);
-      $cells[] = array('data' => $item, 'class' => $element[$delta]['#attributes']['class']);
+      $cells[] = array(
+        'data' => $item,
+        'class' => $element[$delta]['#attributes']['class'] .' content-multigroup-cell-'. str_replace('_', '-', $field_name),
+      );
       if (!empty($item)) {
         $empty = FALSE;
       }
@@ -219,5 +225,5 @@ function theme_content_multigroup_display_table_multiple($element) {
       $rows[] = $cells;
     }
   }
-  return count($rows) ? theme('table', $header, $rows, $element['#attributes']) : '';
+  return count($rows) ? theme('table', $headers, $rows, $element['#attributes']) : '';
 }

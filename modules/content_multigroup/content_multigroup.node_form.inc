@@ -768,27 +768,30 @@ function theme_content_multigroup_node_form($element) {
   $subgroup_labels = isset($group['settings']['multigroup']['labels']) ? $group['settings']['multigroup']['labels'] : array();
   $multiple_columns = isset($group['settings']['multigroup']['multiple-columns']) ? $group['settings']['multigroup']['multiple-columns'] : 0;
 
-  $header = array();
+  $headers = array();
   if ($group_multiple >= 1) {
-    $header[] = array('data' => '');
+    $headers[] = array('data' => '');
   }
   if ($multiple_columns) {
     foreach ($group_fields as $field_name => $field) {
       $required = !empty($field['required']) ? '&nbsp;<span class="form-required" title="'. t('This field is required.') .'">*</span>' : '';
-      $header[] = check_plain(t($field['widget']['label'])) . $required;
+      $headers[] = array(
+        'data' => check_plain(t($field['widget']['label'])) . $required,
+        'class' => 'content-multigroup-cell-'. str_replace('_', '-', $field_name),
+      );
     }
     $table_class .= ' content-multigroup-edit-table-multiple-columns';
   }
   else {
     if ($group_multiple >= 1) {
-      $header[0]['colspan'] = 2;
+      $headers[0]['colspan'] = 2;
     }
     $table_class .= ' content-multigroup-edit-table-single-column';
   }
   if ($group_multiple >= 1) {
-    $header[] = array('data' => t('Order'), 'class' => 'content-multiple-weight-header');
+    $headers[] = array('data' => t('Order'), 'class' => 'content-multiple-weight-header');
     if ($group_multiple == 1) {
-      $header[] = array('data' => '<span>'. t('Remove') .'</span>', 'class' => 'content-multiple-remove-header');
+      $headers[] = array('data' => '<span>'. t('Remove') .'</span>', 'class' => 'content-multiple-remove-header');
     }
   }
   $rows = array();
@@ -811,7 +814,10 @@ function theme_content_multigroup_node_form($element) {
       }
       if ($multiple_columns) {
         foreach ($group_fields as $field_name => $field) {
-          $cells[] = array('data' => isset($element[$key][$field_name]) ? drupal_render($element[$key][$field_name]) : '');
+          $cells[] = array(
+            'data' => (isset($element[$key][$field_name]) ? drupal_render($element[$key][$field_name]) : ''),
+            'class' => 'content-multigroup-cell-'. str_replace('_', '-', $field_name),
+          );
         }
       }
       else {
@@ -836,7 +842,7 @@ function theme_content_multigroup_node_form($element) {
   }
 
   drupal_add_css(drupal_get_path('module', 'content_multigroup') .'/content_multigroup.css');
-  $output = theme('table', $header, $rows, array('id' => $table_id, 'class' => $table_class));
+  $output = theme('table', $headers, $rows, array('id' => $table_id, 'class' => $table_class));
   $output .= drupal_render($element[$group_name .'_add_more']);
 
   // Enable drag-n-drop only if the group really allows multiple values.
