@@ -28,6 +28,7 @@ Bugfixes:
 - #523864 Minor coding style issues in Panels 3 relationships implementations.
 - #481568 by merlinofchaos - Empty property error when attempting to save a user reference in Panels.
 - #510396 by yched - Use field/type definition to render fields in views.
+- #393020 by auth - Fieldgroup data is lost when importing to module provided content type with group info for existing fields.
 
 CCK 6.x-2.4
 ===========
