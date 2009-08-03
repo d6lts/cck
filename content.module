@@ -1676,6 +1676,24 @@ function content_allowed_values($field) {
 }
 
 /**
+ * Filter out HTML from allowed values array while leaving entities unencoded.
+ *
+ * @see content_allowed_values()
+ * @see optionwidgets_select_process()
+ * @see content_handler_filter_many_to_one::allowed_values()
+ */
+function content_allowed_values_filter_html(&$options) {
+  foreach ($options as $key => $opt) {
+    if (is_array($opt)) {
+      content_allowed_values_filter_html($options[$key]);
+    }
+    else {
+      $options[$key] = html_entity_decode(strip_tags($opt), ENT_QUOTES);
+    }
+  }
+}
+
+/**
  * Like filter_xss_admin(), but with a shorter list of allowed tags.
  *
  * Used for items entered by administrators, like field descriptions,
