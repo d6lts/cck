@@ -30,6 +30,7 @@ Bugfixes:
 - #481568 by merlinofchaos - Empty property error when attempting to save a user reference in Panels.
 - #510396 by yched - Use field/type definition to render fields in views.
 - #393020 by auth - Fieldgroup data is lost when importing to module provided content type with group info for existing fields.
+- #538872 Diff does not respect field permissions.
 
 CCK 6.x-2.4
 ===========
