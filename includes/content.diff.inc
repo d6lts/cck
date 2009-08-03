@@ -18,6 +18,10 @@ function content_diff(&$old_node, &$new_node) {
     $type = content_types($new_node->type);
     $field_types = _content_field_types();
     foreach ($type['fields'] as $field) {
+      // Ignore fields the current user is not allowed to view.
+      if (!content_access('view', $field, NULL, $new_node)) {
+        continue;
+      }
       $function = $field_types[$field['type']]['module'] . '_content_diff_values';
       $function = function_exists($function) ? $function : 'content_content_diff_values';
       $old_values = array();

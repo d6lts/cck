@@ -36,6 +36,7 @@ Bugfixes:
 - #510396 by yched - Use field/type definition to render fields in views.
 - #526500 Fix maximum number of deltas in multigroups with explicit number of repeats defined.
 - #393020 by auth - Fieldgroup data is lost when importing to module provided content type with group info for existing fields.
+- #538872 Diff does not respect field permissions.
 
 Changes:
 - #421116 Move content.js to js/content.admin.js for consistency with location of new js files.
