@@ -1,7 +1,12 @@
 //$Id$
 
-CCK 6.x-2.x
+CCK 6.x-2.5
 ===========
+
+A few files have been added and/or removed in this package. It is recommended to replace the whole CCK directory with the new one.
+Please visit update.php apply pending updates after installing the new files.
+It also worths to mention that Panels 3 integration has been reviewed and enhanced with display options for fiels and field groups.
+IMPORTANT: All sites using Diff module with CCK for Drupal 6 are strongly encouraged to upgrade to CCK 2.5 (see #538872 below).
 
 Features:
 - #428650 Conditional cache/menu rebuild for content CRUD methods.
