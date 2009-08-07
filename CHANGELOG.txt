@@ -18,6 +18,7 @@ Features:
 - #231453 Allow fields index their columns. Implemented for reference value column in node and user reference fields. Needs update.php.
 - #536730 Enhance cells in multiple column tables with CSS classes related to the fields they contain.
 - #521002 by mh86 - Support for optgroups in allowed values for select elements.
+- Render field descriptions as cell titles when multigroup edit mode is configured with multiple column option.
 
 Bugfixes:
 - #482774 Update breaks when CCK is disabled.

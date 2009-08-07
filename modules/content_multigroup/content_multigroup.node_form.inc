@@ -814,10 +814,14 @@ function theme_content_multigroup_node_form($element) {
       }
       if ($multiple_columns) {
         foreach ($group_fields as $field_name => $field) {
-          $cells[] = array(
+          $cell = array(
             'data' => (isset($element[$key][$field_name]) ? drupal_render($element[$key][$field_name]) : ''),
             'class' => 'content-multigroup-cell-'. str_replace('_', '-', $field_name),
           );
+          if (!empty($cell['data']) && !empty($element[$key][$field_name]['#description'])) {
+            $cell['title'] = $element[$key][$field_name]['#description'];
+          }
+          $cells[] = $cell;
         }
       }
       else {
