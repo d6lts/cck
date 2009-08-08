@@ -20,6 +20,7 @@ Features:
 - #521002 by mh86 - Support for optgroups in allowed values for select elements.
 - Render field descriptions as cell titles when multigroup edit mode is configured with multiple column option.
 - #244896 by stella, canaryMason - Add incremental classes for multiple value fields in views.
+- #416154 Preparation for Content Multigroup integration with Views.
 
 Bugfixes:
 - #482774 Update breaks when CCK is disabled.
