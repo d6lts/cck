@@ -318,9 +318,11 @@ function content_views_tablename($field) {
 
 function theme_content_view_multiple_field($items, $field, $values) {
   $output = '';
+  $i = 0;
   foreach ($items as $item) {
     if (!empty($item) || $item == '0') {
-      $output .= '<div class="field-item">'. $item .'</div>';
+      $output .= '<div class="field-item field-item-'. $i .'">'. $item .'</div>';
+      $i++;
     }
   }
   return $output;
