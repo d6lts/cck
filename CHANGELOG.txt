@@ -3,7 +3,8 @@
 CCK 6.x-2.x
 ===========
 
-
+Features:
+- #244896 by stella, canaryMason - Add incremental classes for multiple value fields in views.
 
 CCK 6.x-2.5
 ===========
