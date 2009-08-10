@@ -294,7 +294,7 @@ function _content_multigroup_node_form_after_build($form, &$form_state) {
   if ($form_state['submitted']) {
     // Fix value positions in $form_state for the fields in multigroups.
     foreach (array_keys($form['#multigroups']) as $group_name) {
-      content_multigroup_node_form_fix_values($form, $form_state, $form['#node']->type, $group_name);
+      content_multigroup_node_form_transpose_elements($form, $form_state, $form['#node']->type, $group_name);
     }
 
     // Fix form element parents for all fields in multigroups.
@@ -397,9 +397,9 @@ function content_multigroup_node_form_validate($form, &$form_state) {
 }
 
 /**
- * Fix value positions in $form_state for the fields in a multigroup.
+ * Transpose element positions in $form_state for the fields in a multigroup.
  */
-function content_multigroup_node_form_fix_values(&$form, &$form_state, $type_name, $group_name) {
+function content_multigroup_node_form_transpose_elements(&$form, &$form_state, $type_name, $group_name) {
   $groups = fieldgroup_groups($type_name);
   $group = $groups[$group_name];
   $group_fields = $form['#multigroups'][$group_name];
@@ -431,9 +431,21 @@ function content_multigroup_node_form_fix_values(&$form, &$form_state, $type_nam
         '_old_delta' => $delta,
       );
       $group_data[$field_name][$delta] = (is_array($items[$field_name]) ? array_merge($items[$field_name], $item_defaults) : $item_defaults);
-      // Store the remove state in the form element as well, so we can restore
-      // it during content_multigroup_fix_multivalue_fields().
+      // Store the remove state and the element weight in the form element as
+      // well, so we can restore them later.
+      // See content_multigroup_fix_multivalue_fields().
+      // See content_multigroup_fix_element_values().
+      $form[$group_name][$delta][$field_name]['#_weight'] = $items['_weight'];
       $form[$group_name][$delta][$field_name]['#removed'] = $items['_remove'];
+
+      // Insert an element valitation callback of our own at the end of the
+      // list to ensure the drag'n'drop weight of the element is not lost by
+      // a form_set_value() operation made by the validation callback of the
+      // widget element.
+      if (!isset($form[$group_name][$delta][$field_name]['#element_validate'])) {
+        $form[$group_name][$delta][$field_name]['#element_validate'] = array();
+      }
+      $form[$group_name][$delta][$field_name]['#element_validate'][] = 'content_multigroup_fix_element_values';
     }
     $form_state['multigroup_removed'][$group_name][$delta] = $items['_remove'];
   }
@@ -543,7 +555,7 @@ function content_multigroup_node_form_fix_parents(&$elements, $multigroups) {
 /**
  * Update posting data to reflect delta changes in the form structure.
  *
- * The $_POST array is fixed in content_multigroup_node_form_fix_values().
+ * The $_POST array is fixed in content_multigroup_node_form_transpose_elements().
  */
 function content_multigroup_node_form_fix_post(&$elements) {
   foreach (element_children($elements) as $key) {
@@ -559,6 +571,23 @@ function content_multigroup_node_form_fix_post(&$elements) {
 
   // Update the form copy of the $_POST array.
   $elements['#post'] = $_POST;
+}
+
+/**
+ * Make sure the '_weight' and '_remove' attributes of the element exist.
+ *
+ * @see content_multigroup_node_form_transpose_elements()
+ */
+function content_multigroup_fix_element_values($element, &$form_state) {
+  $field_name = $element['#field_name'];
+  $delta = $element['#delta'];
+  if (!isset($form_state['values'][$field_name][$delta]['_weight']) || !isset($form_state['values'][$field_name][$delta]['_remove'])) {
+    $value = array('_weight' => $element['#_weight'], '_remove' => $element['#removed']);
+    if (isset($form_state['values'][$field_name][$delta]) && is_array($form_state['values'][$field_name][$delta])) {
+      $value = array_merge($form_state['values'][$field_name][$delta], $value);
+    }
+    form_set_value($element, $value, $form_state);
+  }
 }
 
 /**
