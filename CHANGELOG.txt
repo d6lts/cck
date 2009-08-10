@@ -42,6 +42,7 @@ Bugfixes:
 - #393020 by auth - Fieldgroup data is lost when importing to module provided content type with group info for existing fields.
 - #538872 Diff does not respect field permissions.
 - #522558 Date field jumps delta when date field is emptied or fieldset is deleted.
+- #416134 Userreference, impossible to filter allowed values by blocked users. Requires update.php.
 
 Changes:
 - #421116 Move content.js to js/content.admin.js for consistency with location of new js files.
