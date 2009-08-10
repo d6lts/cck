@@ -21,7 +21,7 @@ Features:
 - Render field descriptions as cell titles when multigroup edit mode is configured with multiple column option.
 - #244896 by stella, canaryMason - Add incremental classes for multiple value fields in views.
 - #416154 Preparation for Content Multigroup integration with Views.
-- #416154 Synchronized deltas Views integration: Filter on equal deltas in multigroups.
+- #416154 by coltrane, skybow - Synchronized deltas Views integration: Filter on equal deltas in multigroups.
 
 Bugfixes:
 - #482774 Update breaks when CCK is disabled.
