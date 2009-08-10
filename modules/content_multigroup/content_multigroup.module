@@ -139,12 +139,12 @@ function content_multigroup_form_alter(&$form, $form_state, $form_id) {
     // Add an additional selector for setting multigroup field display
     // format to the Display Fields screen.
     module_load_include('inc', 'content_multigroup', 'content_multigroup.admin');
-    content_multigroup_display_overview_form($form, $form_state, $form_id);
+    content_multigroup_display_overview_form($form, $form_state);
   }
   elseif ($form_id == 'fieldgroup_group_edit_form') {
     // Alter the Fieldgroup edit form to add Multigroup settings.
     module_load_include('inc', 'content_multigroup', 'content_multigroup.admin');
-    content_multigroup_group_edit_form($form, $form_state, $form_id);
+    content_multigroup_group_edit_form($form, $form_state);
   }
 }
 
