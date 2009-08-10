@@ -6,6 +6,9 @@ CCK 6.x-2.x
 Features:
 - #244896 by stella, canaryMason - Add incremental classes for multiple value fields in views.
 
+Bugfixes:
+- #416134 Userreference, impossible to filter allowed values by blocked users. Requires update.php.
+
 CCK 6.x-2.5
 ===========
 
