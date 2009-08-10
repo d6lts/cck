@@ -4,6 +4,7 @@ CONTENTS OF THIS FILE
 =====================
 - USING MULTIGROUPS
 - FIELDS AND WIDGETS THAT WORK IN MULTIGROUPS
+- VIEWS INTEGRATION
 - TROUBLESHOOTING
 
 
@@ -78,6 +79,13 @@ Custom code and modules that add fields to groups outside of the UI should
 use content_multigroup_allowed_in() and content_multigroup_allowed_out() to
 test whether fields are allowed in or out of a Multigroup. These functions
 can be located in content_multigroup.admin.inc.
+
+
+VIEWS INTEGRATION
+=================
+
+For each multigroup, there is a new filter under "Content multigroup" category
+in Views that provides a method to synchronize fields by delta.
 
 
 TROUBLESHOOTING
