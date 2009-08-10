@@ -234,10 +234,6 @@ function content_multigroup_display_overview_form(&$form, &$form_state) {
     return;
   }
 
-  $groups = array();
-  if (module_exists('fieldgroup')) {
-    $groups = fieldgroup_groups($type_name);
-  }
   $contexts = content_build_modes($contexts_selector);
 
   // Multigroups, extra values.
@@ -252,7 +248,7 @@ function content_multigroup_display_overview_form(&$form, &$form_state) {
     'table-single' => t('Table - Single column'),
     'table-multiple' => t('Table - Multiple columns'),
   );
-  foreach ($groups as $group_name => $group) {
+  foreach (fieldgroup_groups($type_name) as $group_name => $group) {
     if ($group['group_type'] != 'multigroup') {
       continue;
     }
