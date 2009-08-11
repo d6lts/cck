@@ -22,6 +22,7 @@ Features:
 - #244896 by stella, canaryMason - Add incremental classes for multiple value fields in views.
 - #416154 Preparation for Content Multigroup integration with Views.
 - #416154 by coltrane, skybow - Synchronized deltas Views integration: Filter on equal deltas in multigroups.
+- #227129 by igor.ro, Expose "delta" column in multiple value fields to Views.
 
 Bugfixes:
 - #482774 Update breaks when CCK is disabled.

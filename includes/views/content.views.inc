@@ -304,6 +304,52 @@ function content_views_field_views_data($field) {
         );
       }
     }
+
+    // Expose additional delta column for multiple value fields.
+    if ($field['multiple']) {
+      $title = t('@label (!name) - delta', array('@label' => t($field['widget']['label']), '!name' => $field['field_name']));
+      $title_short = t('@label-truncated - delta', array('@label-truncated' => $label_truncated));
+
+      $db_field = 'delta';
+      $data[$db_field] = array(
+        'group' => t('Content'),
+        'title' => $title,
+        'title short' => $title_short,
+        'help' => t('Delta - Appears in: @types', array('@types' => implode(', ', $types))),
+      );
+      $data[$db_field]['field'] = array(
+        'title' => $title,
+        'title short' => $title_short,
+        'field' => $db_field,
+        'table' => $db_info['table'],
+        'handler' => 'views_handler_field_numeric',
+        'click sortable' => TRUE,
+        'additional fields' => $additional_fields,
+        'access callback' => 'content_access',
+        'access arguments' => array('view', $field),
+      );
+      $data[$db_field]['argument'] = array(
+        'field' => $db_field,
+        'table' => $db_info['table'],
+        'handler' => 'views_handler_argument_numeric',
+        'additional fields' => $additional_fields,
+        'empty field name' => t('<No value>'),
+      );
+      $data[$db_field]['filter'] = array(
+        'field' => $db_field,
+        'table' => $db_info['table'],
+        'handler' => 'views_handler_filter_numeric',
+        'additional fields' => $additional_fields,
+        'allow empty' => TRUE,
+      );
+      $data[$db_field]['sort'] = array(
+        'field' => $db_field,
+        'table' => $db_info['table'],
+        'handler' => 'views_handler_sort',
+        'additional fields' => $additional_fields,
+      );
+    }
+
     return array($table_alias => $data);
   }
 }
