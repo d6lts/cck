@@ -9,6 +9,7 @@ Features:
 
 Bugfixes:
 - #416134 Userreference, impossible to filter allowed values by blocked users. Requires update.php.
+- #545942 warning: array_filter() [function.array-filter]: The first argument should be an array in userreference_update_6002().
 
 CCK 6.x-2.5
 ===========
