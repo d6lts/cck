@@ -5,6 +5,7 @@ CCK 6.x-2.x
 
 Features:
 - #244896 by stella, canaryMason - Add incremental classes for multiple value fields in views.
+- #227129 by igor.ro, Expose "delta" column in multiple value fields to Views.
 
 Bugfixes:
 - #416134 Userreference, impossible to filter allowed values by blocked users. Requires update.php.
