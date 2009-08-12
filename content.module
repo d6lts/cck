@@ -1393,9 +1393,14 @@ function _content_get_formatter($formatter_name, $field_type) {
  *   If TRUE, clear the cache and fetch the information from the database again.
  */
 function _content_type_info($reset = FALSE) {
-  static $info;
+  global $language;
+  static $type_info;
 
-  if ($reset || !isset($info)) {
+  if ($reset || !isset($type_info)) {
+    $type_info = array();
+  }
+
+  if (!isset($type_info[$language->language])) {
     // Make sure this function doesn't run until the tables have been created,
     // For instance: when first enabled and called from content_menu(),
     // or when uninstalled and some subsequent field module uninstall
@@ -1407,8 +1412,8 @@ function _content_type_info($reset = FALSE) {
       return array();
     }
 
-    if (!$reset && $cached = cache_get('content_type_info', content_cache_tablename())) {
-      $info = $cached->data;
+    if (!$reset && $cached = cache_get('content_type_info:'. $language->language, content_cache_tablename())) {
+      $type_info[$language->language] = $cached->data;
     }
     else {
       $info = array(
@@ -1477,6 +1482,16 @@ function _content_type_info($reset = FALSE) {
             $type['fields'][$field['field_name']] = $field;
             $db_info = content_database_info($field);
             $type['tables'][$db_info['table']] = $db_info['table'];
+
+            // Allow external modules to translate field strings.
+            $field_strings = array(
+              'widget_label' => $field['widget']['label'],
+              'widget_description' => $field['widget']['description'],
+            );
+            drupal_alter('content_field_strings', $field_strings, $field['field_name']);
+            $field['widget']['label'] = $field_strings['widget_label'];
+            $field['widget']['description'] = $field_strings['widget_description'];
+
             // This means that content_fields($field_name) (no type name)
             // returns the last instance loaded.
             $info['fields'][$field['field_name']] = $field;
@@ -1503,10 +1518,11 @@ function _content_type_info($reset = FALSE) {
         $info['content types'][$type_name] = $type;
       }
 
-      cache_set('content_type_info', $info, content_cache_tablename());
+      cache_set('content_type_info:'. $language->language, $info, content_cache_tablename());
+      $type_info[$language->language] = $info;
     }
   }
-  return $info;
+  return $type_info[$language->language];
 }
 
 /**
@@ -1671,6 +1687,8 @@ function content_allowed_values($field) {
         $allowed_values[$field['field_name']][$opt] = $opt;
       }
     }
+    // Allow external modules to translate allowed values list.
+    drupal_alter('content_allowed_values', $allowed_values[$field['field_name']], $field);
   }
   return $allowed_values[$field['field_name']];
 }
