@@ -1475,7 +1475,6 @@ function _content_type_info($reset = FALSE) {
         $type['tables'] = array();
         if ($fields = content_field_instance_read(array('type_name' => $type_name))) {
           foreach ($fields as $field) {
-            $type['fields'][$field['field_name']] = $field;
             $db_info = content_database_info($field);
             $type['tables'][$db_info['table']] = $db_info['table'];
 
@@ -1484,10 +1483,11 @@ function _content_type_info($reset = FALSE) {
               'widget_label' => $field['widget']['label'],
               'widget_description' => $field['widget']['description'],
             );
-            drupal_alter('content_field_strings', $field_strings, $field['field_name']);
+            drupal_alter('content_field_strings', $field_strings, $field['type_name'], $field['field_name']);
             $field['widget']['label'] = $field_strings['widget_label'];
             $field['widget']['description'] = $field_strings['widget_description'];
 
+            $type['fields'][$field['field_name']] = $field;
             // This means that content_fields($field_name) (no type name)
             // returns the last instance loaded.
             $info['fields'][$field['field_name']] = $field;
