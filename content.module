@@ -1394,13 +1394,9 @@ function _content_get_formatter($formatter_name, $field_type) {
  */
 function _content_type_info($reset = FALSE) {
   global $language;
-  static $type_info;
+  static $info;
 
-  if ($reset || !isset($type_info)) {
-    $type_info = array();
-  }
-
-  if (!isset($type_info[$language->language])) {
+  if ($reset || !isset($info)) {
     // Make sure this function doesn't run until the tables have been created,
     // For instance: when first enabled and called from content_menu(),
     // or when uninstalled and some subsequent field module uninstall
@@ -1413,7 +1409,7 @@ function _content_type_info($reset = FALSE) {
     }
 
     if (!$reset && $cached = cache_get('content_type_info:'. $language->language, content_cache_tablename())) {
-      $type_info[$language->language] = $cached->data;
+      $info = $cached->data;
     }
     else {
       $info = array(
@@ -1519,10 +1515,9 @@ function _content_type_info($reset = FALSE) {
       }
 
       cache_set('content_type_info:'. $language->language, $info, content_cache_tablename());
-      $type_info[$language->language] = $info;
     }
   }
-  return $type_info[$language->language];
+  return $info;
 }
 
 /**
