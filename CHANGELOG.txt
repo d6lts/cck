@@ -49,6 +49,7 @@ Bugfixes:
 - Minor fix in multigroup. Remove the check for module_exists('fieldgroup'), which is something implicit.
 - Minor fix in multigroup. Remove unused argument $form_id from invocation to worker functions in hook_form_alter().
 - #545942 warning: array_filter() [function.array-filter]: The first argument should be an array in userreference_update_6002().
+- #521002 Fix validation errors when using optgroups in allowed values for select elements.
 
 Changes:
 - #421116 Move content.js to js/content.admin.js for consistency with location of new js files.
