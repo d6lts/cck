@@ -232,7 +232,7 @@ function optionwidgets_select_process($element, $edit, &$form_state, $form) {
     $element['#value'] = optionwidgets_data2form($element, $element['#default_value'], $field);
   }
 
-  $options = optionwidgets_options($field);
+  $options = optionwidgets_options($field, FALSE);
 
   // For this specific widget, HTML should be filtered out and entities left unencoded.
   // See content_allowed_values / content_filter_xss / filter_xss.
@@ -389,10 +389,17 @@ function optionwidgets_form2data($element, $field) {
  *
  * See if there is a module hook for the option values.
  * Otherwise, try content_allowed_values() for an options list.
+ *
+ * @param $field
+ *   The field whose allowed values are requested.
+ * @param $flatten
+ *   Optional. Use TRUE to return a flattened array (default).
+ *   FALSE can be used to support optgroups for select widgets
+ *   when allowed values list is generated using PHP code.
  */
-function optionwidgets_options($field) {
+function optionwidgets_options($field, $flatten = TRUE) {
   $function = $field['module'] .'_allowed_values';
-  $options = function_exists($function) ? $function($field) : (array) content_allowed_values($field);
+  $options = function_exists($function) ? $function($field) : (array) content_allowed_values($field, $flatten);
   // Add an empty choice for :
   // - non required radios
   // - non required selects

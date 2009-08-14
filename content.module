@@ -1642,32 +1642,66 @@ function content_transpose_array_rows_cols($array) {
 }
 
 /**
+ * Helper function to flatten an array of allowed values.
+ *
+ * @param $array
+ *   A single or multidimensional array.
+ * @return
+ *   A flattened array.
+ */
+function content_array_flatten($array) {
+  $result = array();
+  if (is_array($array)) {
+    foreach ($array as $key => $value) {
+      if (is_array($value)) {
+        $result += content_array_flatten($value);
+      }
+      else {
+        $result[$key] = $value;
+      }
+    }
+  }
+  return $result;
+}
+
+/**
  *  Create an array of the allowed values for this field.
  *
  *  Used by number and text fields, expects to find either
  *  PHP code that will return the correct value, or a string
  *  with keys and labels separated with '|' and with each
  *  new value on its own line.
+ *
+ * @param $field
+ *   The field whose allowed values are requested.
+ * @param $flatten
+ *   Optional. Use TRUE to return a flattened array (default).
+ *   FALSE can be used to support optgroups for select widgets
+ *   when allowed values list is generated using PHP code.
  */
-function content_allowed_values($field) {
+function content_allowed_values($field, $flatten = TRUE) {
   static $allowed_values;
 
-  if (isset($allowed_values[$field['field_name']])) {
-    return $allowed_values[$field['field_name']];
+  $cid = $field['field_name'] .':'. ($flatten ? '1' : '0');
+  if (isset($allowed_values[$cid])) {
+    return $allowed_values[$cid];
   }
 
-  $allowed_values[$field['field_name']] = array();
+  $allowed_values[$cid] = array();
 
   if (isset($field['allowed_values_php'])) {
     ob_start();
     $result = eval($field['allowed_values_php']);
     if (is_array($result)) {
-      $allowed_values[$field['field_name']] = $result;
+      if ($flatten) {
+        $result = content_array_flatten($result);
+      }
+      $allowed_values[$cid] = $result;
     }
     ob_end_clean();
   }
 
-  if (empty($allowed_values[$field['field_name']]) && isset($field['allowed_values'])) {
+  if (empty($allowed_values[$cid]) && isset($field['allowed_values'])) {
     $list = explode("\n", $field['allowed_values']);
     $list = array_map('trim', $list);
     $list = array_filter($list, 'strlen');
@@ -1676,16 +1710,16 @@ function content_allowed_values($field) {
       $opt = content_filter_xss($opt);
       if (strpos($opt, '|') !== FALSE) {
         list($key, $value) = explode('|', $opt);
-        $allowed_values[$field['field_name']][$key] = (isset($value) && $value !=='') ? $value : $key;
+        $allowed_values[$cid][$key] = (isset($value) && $value !=='') ? $value : $key;
       }
       else {
-        $allowed_values[$field['field_name']][$opt] = $opt;
+        $allowed_values[$cid][$opt] = $opt;
       }
     }
     // Allow external modules to translate allowed values list.
-    drupal_alter('content_allowed_values', $allowed_values[$field['field_name']], $field);
+    drupal_alter('content_allowed_values', $allowed_values[$cid], $field);
   }
-  return $allowed_values[$field['field_name']];
+  return $allowed_values[$cid];
 }
 
 /**
