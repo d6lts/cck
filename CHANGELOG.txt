@@ -14,6 +14,7 @@ Bugfixes:
 - #545942 warning: array_filter() [function.array-filter]: The first argument should be an array in userreference_update_6002().
 - #521002 Fix validation errors when using optgroups in allowed values for select elements.
 - #550252 by GuyPaddock - content_db_index_exists produces SQL errors when creating node reference fields for MySQL 4 (related to #231453).
+- #551280 by xurizaemon - Typo fix for "this field cannot hold more that 3 values" error message.
 
 CCK 6.x-2.5
 ===========
