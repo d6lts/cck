@@ -329,7 +329,7 @@ function optionwidgets_validate($element, &$form_state) {
     }
     if (count($items) > $field['multiple']) {
       $field_key  = $element['#columns'][0];
-      form_error($element[$field_key], t('%name: this field cannot hold more that @count values.', array('%name' => t($field['widget']['label']), '@count' => $field['multiple'])));
+      form_error($element[$field_key], t('%name: this field cannot hold more than @count values.', array('%name' => t($field['widget']['label']), '@count' => $field['multiple'])));
     }
   }
 }
