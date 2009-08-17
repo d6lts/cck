@@ -2102,6 +2102,7 @@ function content_table_schema($field = NULL) {
  *
  * @todo: May we remove this funcion when implemented by Drupal core itself?
  * @link http://drupal.org/node/360854
+ * @link http://dev.mysql.com/doc/refman/5.0/en/extended-show.html
  *
  * @param $table
  *   Name of the table.
@@ -2113,6 +2114,16 @@ function content_table_schema($field = NULL) {
 function content_db_index_exists($table, $name) {
   global $db_type;
   if ($db_type == 'mysql' || $db_type == 'mysqli') {
+    if (version_compare(db_version(), '5.0.3') < 0) {
+      // Earlier versions of MySQL don't support a WHERE clause for SHOW.
+      $result = db_query('SHOW INDEX FROM {'. $table .'}');
+      while ($row = db_fetch_array($result)) {
+        if ($row['Key_name'] == $name) {
+          return TRUE;
+        }
+      }
+      return FALSE;
+    }
     return (bool)db_result(db_query("SHOW INDEX FROM {". $table ."} WHERE key_name = '$name'"));
   }
   elseif ($db_type == 'pgsql') {
