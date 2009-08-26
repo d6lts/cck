@@ -8,6 +8,7 @@ Features:
 - #227129 by igor.ro - Expose "delta" column in multiple value fields to Views.
 - #531662 by neochief - i18n support. Allow external modules to translate field labels, descriptions and allowed values list as typed in the field settings form.
 - #531662 i18n support for fieldgroups.
+- #558420 Accept trimmed titles in nodereference autocomplete validation to prevent title mismatch errors when title ends with space.
 
 Bugfixes:
 - #416134 Userreference, impossible to filter allowed values by blocked users. Requires update.php.
