@@ -17,6 +17,7 @@ Bugfixes:
 - #550252 by GuyPaddock - content_db_index_exists produces SQL errors when creating node reference fields for MySQL 4 (related to #231453).
 - #551280 by xurizaemon - Typo fix for "this field cannot hold more that 3 values" error message.
 - #558744 by chellomere - Fix one of the swedish translation strings to be correct, and much clearer.
+- #562260 by przadka - content_db_index_exists() has wrong syntax for PostgreSQL.
 
 CCK 6.x-2.5
 ===========

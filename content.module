@@ -2127,7 +2127,9 @@ function content_db_index_exists($table, $name) {
     return (bool)db_result(db_query("SHOW INDEX FROM {". $table ."} WHERE key_name = '$name'"));
   }
   elseif ($db_type == 'pgsql') {
-    return (bool)db_result(db_query("SELECT COUNT(indexname) FROM pg_indexes WHERE indexname = '$name'"));
+    // Note that the index names in Schema API for PostgreSQL are prefixed by
+    // the table name and suffixed by '_idx'.
+    return (bool)db_result(db_query("SELECT COUNT(indexname) FROM pg_indexes WHERE indexname = '{". $table ."}_{$name}_idx'"));
   }
   return FALSE;
 }
