@@ -247,12 +247,6 @@ function cck_field_attach_view($output, $obj_type, &$object, $teaser) {
 function cck_field_attach_pre_insert($obj_type, &$object) {
   // Add identifier to the object to be used to alter extra fields in the view.
   list($id, $vid, $bundle) = field_attach_extract_ids($obj_type, $object);
-
-  // Implement hook_devel_generate(), if needed.
-  if (!empty($object->devel_generate)) {
-    include_once('./'. drupal_get_path('module', 'cck') .'/includes/cck.devel.inc');
-    cck_generate_fields($object, $bundle);
-  }
 }
 
 /**
