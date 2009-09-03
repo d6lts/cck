@@ -559,6 +559,11 @@ function cck_node_type($op, $info) {
 function _cck_bundle_admin_path($bundle_name) {
   $bundles = field_info_bundles();
   $bundle_info = $bundles[$bundle_name];
+  // The 'admin' key is not always available
+  // on the module update page.
+  if (!array_key_exists('admin', $bundle_info)) {
+    return;
+  }
   return isset($bundle_info['admin']['real path']) ? $bundle_info['admin']['real path'] : $bundle_info['admin']['path'];
 }
 
