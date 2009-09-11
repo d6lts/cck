@@ -426,7 +426,6 @@ function content_copy_import_form_submit($form, &$form_state) {
     $type_form_state = array('values' => $values);
 
     // There's no API for creating node types, we still have to use drupal_execute().
-    module_load_include('inc', 'node', 'includes/content_types');
     drupal_execute('node_type_form', $type_form_state, $type);
 
     // Reset type and database values once new type has been added.

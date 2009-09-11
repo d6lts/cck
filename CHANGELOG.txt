@@ -20,6 +20,7 @@ Bugfixes:
 - #562260 by przadka - content_db_index_exists() has wrong syntax for PostgreSQL.
 - #567168 by jcmarco - Checkbox required not defined for on/off widgets.
 - #568430 by Jody Lynn - Bad @see in content-field.tpl.php.
+- #572672 by Jan van Diepen - Remove redundant (and bad) inclusion of node/content_types.inc in content_copy_import_form_submit().
 
 CCK 6.x-2.5
 ===========
