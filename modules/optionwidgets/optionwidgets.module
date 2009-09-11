@@ -291,6 +291,7 @@ function optionwidgets_onoff_process($element, $edit, &$form_state, $form) {
     '#type' => 'checkbox',
     '#title' => isset($options[$on_value]) ? $options[$on_value] : '',
     '#description' => $element['#description'],
+    '#required' => isset($element['#required']) ? $element['#required'] : $field['required'],
     '#default_value' => isset($element['#value'][$field_key][0]) ? $element['#value'][$field_key][0] == $on_value : FALSE,
     '#return_value' => $on_value,
   );
