@@ -22,7 +22,7 @@
  * Each $item in $items contains:
  * - 'view' - the themed view for that item
  *
- * @see template_preprocess_field()
+ * @see template_preprocess_content_field()
  */
 ?>
 <?php if (!$field_empty) : ?>
