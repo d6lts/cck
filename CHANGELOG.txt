@@ -18,6 +18,7 @@ Bugfixes:
 - #551280 by xurizaemon - Typo fix for "this field cannot hold more that 3 values" error message.
 - #558744 by chellomere - Fix one of the swedish translation strings to be correct, and much clearer.
 - #562260 by przadka - content_db_index_exists() has wrong syntax for PostgreSQL.
+- #567168 by jcmarco - Checkbox required not defined for on/off widgets.
 
 CCK 6.x-2.5
 ===========
