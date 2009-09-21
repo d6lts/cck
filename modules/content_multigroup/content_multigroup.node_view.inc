@@ -14,6 +14,7 @@ function _content_multigroup_fieldgroup_view(&$node, &$element, $group, $context
 
   $node_copy = drupal_clone($node);
   $group_name = $group['group_name'];
+  $group_class = 'content-multigroup-'. str_replace('_', '-', $group_name);
   $group_multiple = (int)$group['settings']['multigroup']['multiple'];
   $subgroup_settings = isset($group['settings']['multigroup']['subgroup']) ? $group['settings']['multigroup']['subgroup'] : array();
   $show_label = isset($subgroup_settings['label']) ? $subgroup_settings['label'] : 'above';
@@ -80,25 +81,28 @@ function _content_multigroup_fieldgroup_view(&$node, &$element, $group, $context
 
     switch ($subgroup_format) {
       case 'simple':
+        $element['#attributes']['class'] = $group_class;
         $element[$delta]['#theme'] = 'content_multigroup_display_simple';
         $element[$delta]['#fields'] = $group_fields;
         break;
       case 'fieldset':
+        $element['#attributes']['class'] = $group_class;
         $element[$delta]['#type'] = 'content_multigroup_display_fieldset';
         $element[$delta]['#fields'] = $group_fields;
         break;
       case 'hr':
+        $element['#attributes']['class'] = $group_class;
         $element[$delta]['#theme'] = 'content_multigroup_display_hr';
         $element[$delta]['#fields'] = $group_fields;
         break;
       case 'table-single':
         $element['#theme'] = 'content_multigroup_display_table_single';
-        $element['#attributes']['class'] = 'content-multigroup-display-table-single-column';
+        $element['#attributes']['class'] = $group_class .' content-multigroup-display-table-single-column';
         $element['#fields'] = $group_fields;
         break;
       case 'table-multiple':
         $element['#theme'] = 'content_multigroup_display_table_multiple';
-        $element['#attributes']['class'] = 'content-multigroup-display-table-multiple-columns';
+        $element['#attributes']['class'] = $group_class .' content-multigroup-display-table-multiple-columns';
         $element['#fields'] = $group_fields;
         break;
     }
