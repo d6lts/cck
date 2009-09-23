@@ -21,6 +21,7 @@ Bugfixes:
 - #567168 by jcmarco - Checkbox required not defined for on/off widgets.
 - #568430 by Jody Lynn - Bad @see in content-field.tpl.php.
 - #572672 by Jan van Diepen - Remove redundant (and bad) inclusion of node/content_types.inc in content_copy_import_form_submit().
+- #585048 Setting "All users" in "User status that can be referenced" option reverts to "Blocked users".
 
 CCK 6.x-2.5
 ===========
