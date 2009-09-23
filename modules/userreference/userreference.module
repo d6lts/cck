@@ -81,7 +81,7 @@ function userreference_field_settings($op, $field) {
       $form['referenceable_status'] = array(
         '#type' => 'radios',
         '#title' => t('User status that can be referenced'),
-        '#default_value' => isset($field['referenceable_status']) ? (int)$field['referenceable_status'] : '',
+        '#default_value' => isset($field['referenceable_status']) ? $field['referenceable_status'] : '',
         '#options' => array('' => t('All users'), 1 => t('Active users'), 0 => t('Blocked users')),
       );
       if (module_exists('views')) {
