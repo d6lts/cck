@@ -60,6 +60,7 @@ Bugfixes:
 - #568430 by Jody Lynn - Bad @see in content-field.tpl.php.
 - #572672 by Jan van Diepen - Remove redundant (and bad) inclusion of node/content_types.inc in content_copy_import_form_submit().
 - #585048 Setting "All users" in "User status that can be referenced" option reverts to "Blocked users".
+- #589306 warning: Invalid argument supplied for foreach() in includes/panels/content_types/content_field.inc on line 166.
 
 Changes:
 - #421116 Move content.js to js/content.admin.js for consistency with location of new js files.
