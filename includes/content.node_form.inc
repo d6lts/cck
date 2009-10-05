@@ -158,7 +158,7 @@ function content_multiple_value_form(&$form, &$form_state, $field, $items) {
 
     case 1:
       $deltas = array_keys($items);
-      $current_item_count = isset($form_state['item_count'][$field_name]) ? $form_state['item_count'][$field_name] : max(1, count($deltas));
+      $current_item_count = max(1, (isset($form_state['item_count'][$field_name]) ? $form_state['item_count'][$field_name] : count($deltas)));
       $max = (!empty($deltas) ? max($deltas) : -1);
       while (count($deltas) < $current_item_count) {
         $max++;
