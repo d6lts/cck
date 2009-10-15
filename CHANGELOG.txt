@@ -62,6 +62,7 @@ Bugfixes:
 - #585048 Setting "All users" in "User status that can be referenced" option reverts to "Blocked users".
 - #589306 warning: Invalid argument supplied for foreach() in includes/panels/content_types/content_field.inc on line 166.
 - #551188 "Add another item" for FileField widgets causes Invalid argument supplied for foreach() in content.node_form.inc on line 456.
+- #605152 by pokurek - Missing number formatter fr_2.
 
 Changes:
 - #421116 Move content.js to js/content.admin.js for consistency with location of new js files.
