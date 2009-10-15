@@ -23,6 +23,7 @@ Bugfixes:
 - #572672 by Jan van Diepen - Remove redundant (and bad) inclusion of node/content_types.inc in content_copy_import_form_submit().
 - #585048 Setting "All users" in "User status that can be referenced" option reverts to "Blocked users".
 - #589306 warning: Invalid argument supplied for foreach() in includes/panels/content_types/content_field.inc on line 166.
+- #605152 by pokurek - Missing number formatter fr_2.
 
 CCK 6.x-2.5
 ===========

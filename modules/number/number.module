@@ -21,6 +21,7 @@ function number_theme() {
     'number_formatter_be_2' => array('arguments' => array('element' => NULL), 'function' => 'theme_number_formatter_generic'),
     'number_formatter_fr_0' => array('arguments' => array('element' => NULL), 'function' => 'theme_number_formatter_generic'),
     'number_formatter_fr_1' => array('arguments' => array('element' => NULL), 'function' => 'theme_number_formatter_generic'),
+    'number_formatter_fr_2' => array('arguments' => array('element' => NULL), 'function' => 'theme_number_formatter_generic'),
     'number_formatter_unformatted' => array('arguments' => array('element' => NULL)),
   );
 }
