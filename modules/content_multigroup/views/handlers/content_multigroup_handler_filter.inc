@@ -93,7 +93,7 @@ class content_multigroup_handler_filter extends views_handler_filter {
     foreach ($this->_get_multigroup_fields() as $table_alias => $field) {
       if ($table_alias != $this->options['content_multigroup_master_field']) {
         $alias = $this->query->ensure_table($table_alias, $this->relationship);
-        $this->query->table_queue[$table_alias]['join']->extra = $base_alias  .'.delta = '. $alias .'.delta';
+        $this->query->table_queue[$alias]['join']->extra = $base_alias  .'.delta = '. $alias .'.delta';
       }
     }
   }
