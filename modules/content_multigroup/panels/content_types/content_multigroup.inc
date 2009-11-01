@@ -126,6 +126,8 @@ function content_multigroup_content_multigroup_content_type_edit_form(&$form, &$
   $subgroup_options = array(
     'simple' => t('Simple'),
     'fieldset' => t('Fieldset'),
+    'fieldset_collapsible' => t('Fieldset - collapsible'),
+    'fieldset_collapsed' => t('Fieldset - collapsed'),
     'hr' => t('Horizontal line'),
     'table-single' => t('Table - Single column'),
     'table-multiple' => t('Table - Multiple columns'),

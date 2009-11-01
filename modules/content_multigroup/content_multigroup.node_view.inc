@@ -85,6 +85,10 @@ function _content_multigroup_fieldgroup_view(&$node, &$element, $group, $context
         $element[$delta]['#theme'] = 'content_multigroup_display_simple';
         $element[$delta]['#fields'] = $group_fields;
         break;
+      case 'fieldset_collapsed':
+        $element[$delta]['#collapsed'] = TRUE;
+      case 'fieldset_collapsible':
+        $element[$delta]['#collapsible'] = TRUE;
       case 'fieldset':
         $element['#attributes']['class'] = $group_class;
         $element[$delta]['#type'] = 'content_multigroup_display_fieldset';

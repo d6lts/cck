@@ -244,6 +244,8 @@ function content_multigroup_display_overview_form(&$form, &$form_state) {
   $options = array(
     'simple' => t('Simple'),
     'fieldset' => t('Fieldset'),
+    'fieldset_collapsible' => t('Fieldset - collapsible'),
+    'fieldset_collapsed' => t('Fieldset - collapsed'),
     'hr' => t('Horizontal line'),
     'table-single' => t('Table - Single column'),
     'table-multiple' => t('Table - Multiple columns'),
