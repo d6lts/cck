@@ -43,6 +43,12 @@ function content_types_overview() {
     }
   }
 
+  // Allow external modules alter the table headers and rows.
+  foreach (module_implements('content_types_overview_alter') as $module) {
+    $function = $module .'_content_types_overview_alter';
+    $function($header, $rows);
+  }
+
   if (empty($rows)) {
     $rows[] = array(array('data' => t('No content types available.'), 'colspan' => '7', 'class' => 'message'));
   }
