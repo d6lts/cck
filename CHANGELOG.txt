@@ -28,6 +28,7 @@ Features:
 - #558420 Accept trimmed titles in nodereference autocomplete validation to prevent title mismatch errors when title ends with space.
 - #580156 Wrap multigroups with unique CSS classes in node view.
 - #544542 Allow subgroup fieldsets in a multigroup to be collapsible.
+- #596428 by NancyDru - Allow external modules alter the content type list.
 
 Bugfixes:
 - #482774 Update breaks when CCK is disabled.
