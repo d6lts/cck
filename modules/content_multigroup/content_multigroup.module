@@ -129,6 +129,12 @@ function content_multigroup_form_alter(&$form, $form_state, $form_id) {
       $form['field']['multiple']['#access'] = FALSE;
     }
   }
+  elseif ($form_id == 'content_field_edit_form' && isset($form_state['change_basic'])) {
+    // This is the basic field settings form. It should not be possible to
+    // choose a widget type that is not compatible with multigroups.
+    module_load_include('inc', 'content_multigroup', 'content_multigroup.admin');
+    content_multigroup_field_basic_form($form, $form_state);
+  }
   elseif ($form_id == 'content_field_overview_form') {
     // Validation for creating/moving fields and groups on the
     // Manage Fields screen.

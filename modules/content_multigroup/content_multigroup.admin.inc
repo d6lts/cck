@@ -217,7 +217,58 @@ function content_multigroup_allowed_out($field, $group) {
 }
 
 /**
- * Menu callback; presents a listing of fields display settings for a content type.
+ * Alter the basic field settings form.
+ *
+ * It should not be possible to choose a widget type that is not compatible
+ * with multigroups.
+ */
+function content_multigroup_field_basic_form(&$form, &$form_state) {
+  $field_name = $form['basic']['field_name']['#value'];
+  $type_name = $form['type_name']['#value'];
+
+  // Ignore this field if it is not part of a field group.
+  if (!($group_name = fieldgroup_get_group($type_name, $field_name))) {
+    return;
+  }
+
+  // Retrieve information about the group the field is in.
+  $groups = fieldgroup_groups($type_name);
+  $group = $groups[$group_name];
+
+  // Ignore this field if it is not part of a multigroup.
+  if ($group['group_type'] != 'multigroup') {
+    return;
+  }
+
+  // Retrieve information about the field itself.
+  $field = content_fields($field_name, $type_name);
+
+  // Check if the widget can be moved out of the multigroup.
+  $allowed_out = content_multigroup_allowed_out($field, $group);
+  if (!$allowed_out['allowed']) {
+    $form['basic']['widget_type']['#disabled'] = TRUE;
+    $form['basic']['widget_type']['#suffix'] = '<div class="warning">'. t('The widget type cannot be changed because the field %field already has data created and this widget stores data differently in a Standard group than in a Multigroup. Allowing this change could result in the loss of data.', array('%field' => $field['widget']['label'])) .'</div>';
+    return;
+  }
+
+  // Remove from the list of available widgets those that are not
+  // compatible with multigroups.
+  $widget_types = _content_widget_types();
+  foreach (array_keys($form['basic']['widget_type']['#options']) as $widget_type) {
+    if ($field['widget']['type'] != $widget_type) {
+      $field_copy = $field;
+      $field_copy['widget']['type'] = $widget_type;
+      $field_copy['widget']['module'] = $widget_types[$widget_type]['module'];
+      $allowed_in = content_multigroup_allowed_in($field_copy, $group);
+      if (!$allowed_in['allowed']) {
+        unset($form['basic']['widget_type']['#options'][$widget_type]);
+      }
+    }
+  }
+}
+
+/**
+ * Alter the "Display fields" form.
  *
  * Add an additional selector for setting multigroup field display format.
  */

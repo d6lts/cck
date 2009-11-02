@@ -65,6 +65,7 @@ Bugfixes:
 - #551188 "Add another item" for FileField widgets causes Invalid argument supplied for foreach() in content.node_form.inc on line 456.
 - #605152 by pokurek - Missing number formatter fr_2.
 - #618910 Multigroup filter fails when using relationship.
+- #538458 Do not allow to change the widget type for fields in multigroups when the change is not compatible.
 
 Changes:
 - #421116 Move content.js to js/content.admin.js for consistency with location of new js files.
