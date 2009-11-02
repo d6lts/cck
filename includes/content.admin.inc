@@ -258,6 +258,9 @@ function content_field_overview_form(&$form_state, $type_name) {
         '#field_suffix' => '</span>&lrm;',
         '#attributes' => array('dir'=>'ltr'),
         '#size' => 15,
+        // Field names are limited to 32 characters including the 'field_'
+        // prefix which is 6 characters long.
+        '#maxlength' => 26,
         '#description' => t('Field name (a-z, 0-9, _)'),
       ),
       'type' => array(
@@ -329,6 +332,9 @@ function content_field_overview_form(&$form_state, $type_name) {
         '#field_suffix' => '</span>&lrm;',
         '#attributes' => array('dir'=>'ltr'),
         '#size' => 15,
+        // Group names are limited to 32 characters including the 'group_'
+        // prefix which is 6 characters long.
+        '#maxlength' => 26,
         '#description' => t('Group name (a-z, 0-9, _)'),
       ),
       'group_option' => array(
