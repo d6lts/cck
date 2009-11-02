@@ -26,6 +26,7 @@ Bugfixes:
 - #589306 warning: Invalid argument supplied for foreach() in includes/panels/content_types/content_field.inc on line 166.
 - #605152 by pokurek - Missing number formatter fr_2.
 - #604830 by mattyoung - 32 characters limit on field and group identifiers in "Manage fields" screen.
+- #464030 by eojthebrave - Typo in content_copy.module help.
 
 CCK 6.x-2.5
 ===========
