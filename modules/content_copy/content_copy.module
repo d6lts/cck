@@ -94,7 +94,7 @@ function content_copy_export_form(&$form_state) {
   }
 
   $form['#step'] = $step;
-  $form['#prefix'] = t('This form will process a content type and one or more fields from that type and export the settings. The export created by this process can be copied and pasted as an import into the current or any other database. The import will add the fields to into an existing content type or create a new content type that includes the selected fields.');
+  $form['#prefix'] = t('This form will process a content type and one or more fields from that type and export the settings. The export created by this process can be copied and pasted as an import into the current or any other database. The import will add the fields to an existing content type or create a new content type that includes the selected fields.');
 
   switch ($step) {
     case 1: // Select a content type.
