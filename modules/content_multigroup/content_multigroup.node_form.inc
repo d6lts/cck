@@ -395,8 +395,24 @@ function content_multigroup_node_form_validate($form, &$form_state) {
       }
     }
 
-    if ($group_required && count($non_empty_subgroups) == 0) {
-      form_set_error('', t('Group @name requires one collection of fields minimum.', array('@name' => t($group['label']))));
+    if (empty($non_empty_subgroups)) {
+      if ($group_required) {
+        // This multigroup is required, but we have no subgroup of items.
+        form_set_error('', t('Group @name requires one collection of fields minimum.', array('@name' => t($group['label']))));
+      }
+      else {
+        // This multigroup is not required and we have no subgroup of items,
+        // which is correct. However, we now need to ensure CCK will not fire
+        // validation errors related to the fields in this multigroup from
+        // content_multiple_value_nodeapi_validate().
+        // To do so, we are creating a private array in the $form_state, and
+        // that will be available from the $node object processed during
+        // hook_nodeapi('validate'), which is where CCK enforces field
+        // requirement for multiple value fields.
+        foreach (array_keys($group_fields) as $field_name) {
+          $form_state['values']['_content_ignore_required_fields'][$field_name] = TRUE;
+        }
+      }
     }
   }
 }
