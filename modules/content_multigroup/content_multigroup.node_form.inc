@@ -79,6 +79,11 @@ function _content_multigroup_fieldgroup_form(&$form, &$form_state, $form_id, $gr
   }
   $form['#multigroups'][$group_name] = $group_fields;
 
+  // Add a visual indication to the fieldgroup title if the multigroup is required.
+  if (!empty($group['settings']['multigroup']['required'])) {
+    $form[$group_name]['#title'] .= '&nbsp;<span class="form-required" title="'. t('This group requires one collection of fields minimum.') .'">*</span>';
+  }
+
   // Attach our own after build handler to the form, used to fix posting data
   // and the form structure, moving fields back to their original positions.
   // That is, move them from group->delta->field back to field->delta.

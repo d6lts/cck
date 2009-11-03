@@ -69,6 +69,7 @@ Bugfixes:
 - #538458 Do not allow to change the widget type for fields in multigroups when the change is not compatible.
 - #604830 by mattyoung - 32 characters limit on field and group identifiers in "Manage fields" screen.
 - #464030 by eojthebrave - Typo in content_copy.module help.
+- #577590 Add a visual indication to the fieldgroup title if the multigroup is required.
 
 Changes:
 - #421116 Move content.js to js/content.admin.js for consistency with location of new js files.
