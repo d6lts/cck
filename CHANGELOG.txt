@@ -71,6 +71,7 @@ Bugfixes:
 - #464030 by eojthebrave - Typo in content_copy.module help.
 - #577590 Add a visual indication to the fieldgroup title if the multigroup is required.
 - #577590 Prevent validation errors when multigroup is not required and no subgroup of fields if filled in.
+- #577580 Multigroup fields with empty values loose their ordering when saved via node_save.
 
 Changes:
 - #421116 Move content.js to js/content.admin.js for consistency with location of new js files.

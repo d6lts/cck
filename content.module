@@ -1035,6 +1035,16 @@ function content_storage($op, $node) {
 
             // Preserve deltas when loading items from database.
             if (isset($row['delta'])) {
+              // Make sure multiple value fields have consecutive deltas.
+              if ($row['delta'] > 0 && !isset($additions[$field_name][$row['delta']-1])) {
+                $empty = array();
+                foreach (array_keys($db_info['columns']) as $column) {
+                  $empty[$column] = NULL;
+                }
+                for ($delta = max(array_keys($additions[$field_name])) + 1; $delta < $row['delta']; $delta++) {
+                  $additions[$field_name][$delta] = $empty;
+                }
+              }
               $additions[$field_name][$row['delta']] = $item;
             }
             else {
