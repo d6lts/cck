@@ -27,6 +27,7 @@ Bugfixes:
 - #605152 by pokurek - Missing number formatter fr_2.
 - #604830 by mattyoung - 32 characters limit on field and group identifiers in "Manage fields" screen.
 - #464030 by eojthebrave - Typo in content_copy.module help.
+- #614292 by DeFr - Fix CCK Reference fields based on views broken by recent change in views_plugin_style Views 2.7 (#502348).
 
 CCK 6.x-2.5
 ===========
