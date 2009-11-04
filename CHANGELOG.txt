@@ -72,6 +72,7 @@ Bugfixes:
 - #577590 Add a visual indication to the fieldgroup title if the multigroup is required.
 - #577590 Prevent validation errors when multigroup is not required and no subgroup of fields if filled in.
 - #577580 Multigroup fields with empty values loose their ordering when saved via node_save.
+- #614292 by DeFr - Fix CCK Reference fields based on views broken by recent change in views_plugin_style Views 2.7 (#502348).
 
 Changes:
 - #421116 Move content.js to js/content.admin.js for consistency with location of new js files.
