@@ -1,7 +1,12 @@
 //$Id$
 
-CCK 6.x-2.x
+CCK 6.x-2.6
 ===========
+
+Please visit update.php apply pending updates after uploading the new files.
+
+This release:
+- The main reason to pack this release is to keep CCK in sync with recent changes in Views 2.7 that broke the advanced views feature in Node reference fields.
 
 Features:
 - #244896 by stella, canaryMason - Add incremental classes for multiple value fields in views.
