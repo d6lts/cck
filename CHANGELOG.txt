@@ -3,6 +3,8 @@
 CCK 6.x-2.x
 ===========
 
+Bugfixes:
+- #625768 CCK 6.x-2.6, got fatal error on update.php while running userreference_update_6002().
 
 
 CCK 6.x-2.6
