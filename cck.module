@@ -51,132 +51,6 @@ function cck_menu_alter(&$items) {
   // TODO : same thing for admin/content/taxonomy
 }
 
-/**
- * Implementation of hook_menu().
- */
-function cck_menu() {
-  // Set up menus for both content types and user settings.
-
-  $items = array();
-  $items['admin/build/fields'] = array(
-    'title' => 'Fields',
-    'description' => 'Manage custom fields that have been added to content types or users.',
-    'page callback' => 'cck_fields_list',
-    'access arguments' => array('administer content types'),
-    'type' => MENU_NORMAL_ITEM,
-  );
-  $items['admin/build/fields/list'] = array(
-    'title' => 'Field list',
-    'page callback' => 'cck_fields_list',
-    'access arguments' => array('administer content types'),
-    'type' => MENU_DEFAULT_LOCAL_TASK,
-    'weight' => 1,
-  );
-  // TODO D7 : remove, debug code
-  $items['admin/build/fields/field-info'] = array(
-    'title' => 'Field Info (debug)',
-    'page callback' => 'cck_debug_field_info',
-    'access arguments' => array('administer content types'),
-    'type' => MENU_LOCAL_TASK,
-    'weight' => 2,
-  );
-  $items['admin/build/types/field-info'] = array(
-    'title' => 'Field Info (debug)',
-    'page callback' => 'cck_debug_field_info',
-    'access arguments' => array('administer content types'),
-    'type' => MENU_LOCAL_TASK,
-    'weight' => 2,
-  );
-
-  // Make sure this doesn't fire until field_bundles is working,
-  // and tables are updated, needed to avoid errors on initial installation.
-  if (!defined('MAINTENANCE_MODE')) {
-    // Create tabs for all possible bundles.
-    foreach (field_info_fieldable_types() as $obj_type => $info) {
-      foreach ($info['bundles'] as $bundle_name => $bundle_info) {
-        if (isset($bundle_info['admin'])) {
-          // Extract informations from the bundle description.
-          $path = $bundle_info['admin']['path'];
-          $bundle_arg = isset($bundle_info['admin']['bundle argument']) ? $bundle_info['admin']['bundle argument'] : $bundle_name;
-          $access = array_intersect_key($bundle_info['admin'], drupal_map_assoc(array('access callback', 'access arguments')));
-
-          $items[$path .'/fields'] = array(
-            'title' => 'Manage fields',
-            'page callback' => 'drupal_get_form',
-            'page arguments' => array('cck_field_overview_form', $obj_type, $bundle_arg),
-            'type' => MENU_LOCAL_TASK,
-            'weight' => 1,
-          ) + $access;
-          // A dummy function to trigger a page refresh so that
-          // field menus get rebuilt correctly when new fields are added.
-          $items[$path .'/fields/refresh'] = array(
-            'title' => 'Refresh menu',
-            'page callback' => 'drupal_get_form',
-            'page arguments' => array('cck_field_menu_refresh', $obj_type, $bundle_arg),
-            'type' => MENU_CALLBACK,
-            'weight' => 1,
-          ) + $access;
-          $items[$path .'/display'] = array(
-            'title' => 'Display fields',
-            'page callback' => 'drupal_get_form',
-            'page arguments' => array('cck_display_overview_form', $obj_type, $bundle_arg),
-            'type' => MENU_LOCAL_TASK,
-            'weight' => 2,
-          ) + $access;
-
-          // 'Display fields' tab and context secondary tabs.
-          $tabs = cck_build_modes($obj_type);
-          foreach ($tabs as $key => $tab) {
-            $items[$path .'/display/'. $key] = array(
-              'title' => $tab['title'],
-              'page arguments' => array('cck_display_overview_form', $obj_type, $bundle_arg, $key),
-              'type' => $key == 'basic' ? MENU_DEFAULT_LOCAL_TASK : MENU_LOCAL_TASK,
-              'weight' => $key == 'basic' ? 0 : 1,
-            ) + $access;
-          }
-
-          // Add tabs for any instances that are already created.
-          $instances = field_info_instances($bundle_name);
-          foreach ($instances as $instance) {
-            $field_name = $instance['field_name'];
-            $items[$path .'/fields/'. $field_name] = array(
-              'title' => $instance['label'],
-              'page callback' => 'drupal_get_form',
-              'page arguments' => array('cck_field_edit_form', $obj_type, $bundle_arg, $field_name),
-              'type' => MENU_LOCAL_TASK,
-            ) + $access;
-            $items[$path .'/fields/'. $field_name .'/edit'] = array(
-              'title' => 'Configure instance settings',
-              'page callback' => 'drupal_get_form',
-              'page arguments' => array('cck_field_edit_form', $obj_type, $bundle_arg, $field_name),
-              'type' => MENU_DEFAULT_LOCAL_TASK,
-            ) + $access;
-            $items[$path .'/fields/'. $field_name .'/field-settings'] = array(
-              'title' => 'Configure field settings',
-              'page callback' => 'drupal_get_form',
-              'page arguments' => array('cck_field_settings_form', $obj_type, $bundle_arg, $field_name),
-              'type' => MENU_LOCAL_TASK,
-            ) + $access;
-            $items[$path .'/fields/'. $field_name .'/widget-type'] = array(
-              'title' => 'Change widget type',
-              'page callback' => 'drupal_get_form',
-              'page arguments' => array('cck_widget_type_form', $obj_type, $bundle_arg, $field_name),
-              'type' => MENU_LOCAL_TASK,
-            ) + $access;
-            $items[$path .'/fields/'. $field_name .'/remove'] = array(
-              'title' => 'Remove instance',
-              'page callback' => 'drupal_get_form',
-              'page arguments' => array('cck_field_remove_form', $obj_type, $bundle_arg, $field_name),
-              'type' => MENU_LOCAL_TASK,
-            ) + $access;
-          }
-        }
-      }
-    }
-  }
-  return $items;
-}
-
 function cck_debug_field_info() {
   if (drupal_function_exists('dsm')) {
     module_load_include('inc', 'field', 'field.info');
@@ -187,27 +61,6 @@ function cck_debug_field_info() {
   else {
     return t('You need to enable devel.module to see this page');
   }
-}
-
-/**
- * Implementation of hook_theme().
- */
-function cck_theme() {
-  $path = drupal_get_path('module', 'cck') .'/theme';
-  require_once "./$path/theme.inc";
-
-  return array(
-    'cck_field_overview_form' => array(
-      'template' => 'cck-admin-field-overview-form',
-      'path' => $path,
-      'arguments' => array('form' => NULL),
-    ),
-    'cck_display_overview_form' => array(
-      'template' => 'cck-admin-display-overview-form',
-      'path' => $path,
-      'arguments' => array('form' => NULL),
-    ),
-  );
 }
 
 /**
@@ -480,46 +333,6 @@ function cck_build_modes($obj_type, $tab_selector = NULL) {
 }
 
 /**
- * Implementation of hook_cck_build_modes(), on behalf of other core modules.
- *
- * @return
- * An array describing the build modes defined by the module, grouped by tabs.
- *
- * Expected format:
- * array(
- *   // A module can add its render modes to a tab defined by another module.
- *   'tab1' => array(
- *     'title' => t('The human-readable title of the tab'),
- *     'build modes' => array('mymodule_mode1', 'mymodule_mode2'),
- *   ),
- *   'tab2' => array(
- *     // ...
- *   ),
- * );
- */
-function cck_cck_build_modes() {
-  $modes = array(
-    'basic' => array(
-      'title' => t('Basic'),
-      'build modes' => array('teaser', 'full'),
-    ),
-    'rss' => array(
-      'title' => t('RSS'),
-      'build modes' => array('rss'),
-    ),
-    'print' => array(
-      'title' => t('Print'),
-      'build modes' => array('print'),
-    ),
-    'search' => array(
-      'title' => t('Search'),
-      'build modes' => array('search_index', 'search_result'),
-    ),
-  );
-  return $modes;
-}
-
-/**
  *  Implementation of hook_node_type().
  *
  *  TODO D7: This should be done in hook_field_[create|rename|delete]_bundle().
@@ -545,20 +358,6 @@ function cck_node_type($op, $info) {
       variable_del('cck_extra_weights_'. $info->type);
       break;
   }
-}
-
-/**
- * Helper function to create the right administration path for a bundle.
- */
-function _cck_bundle_admin_path($bundle_name) {
-  $bundles = field_info_bundles();
-  $bundle_info = $bundles[$bundle_name];
-  // The 'admin' key is not always available
-  // on the module update page.
-  if (!array_key_exists('admin', $bundle_info)) {
-    return;
-  }
-  return isset($bundle_info['admin']['real path']) ? $bundle_info['admin']['real path'] : $bundle_info['admin']['path'];
 }
 
 /**

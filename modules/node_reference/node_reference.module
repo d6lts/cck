@@ -26,26 +26,26 @@ function node_reference_menu() {
 function node_reference_theme() {
   return array(
     'node_reference_select' => array(
-      'arguments' => array('element' => NULL),
+      'render element' => 'element',
     ),
     'node_reference_buttons' => array(
-      'arguments' => array('element' => NULL),
+      'render element' => 'element',
     ),
     'node_reference_autocomplete' => array(
-      'arguments' => array('element' => NULL),
+      'render element' => 'element',
     ),
     'field_formatter_node_reference_default' => array(
-      'arguments' => array('element'),
+      'render element' => 'element',
     ),
     'field_formatter_node_reference_plain' => array(
-      'arguments' => array('element'),
+      'render element' => 'element',
     ),
     'field_formatter_node_reference_full' => array(
-      'arguments' => array('element'),
+      'render element' => 'element',
       'function' => 'theme_field_formatter_node_reference_node',
     ),
     'field_formatter_node_reference_teaser' => array(
-      'arguments' => array('element'),
+      'render element' => 'element',
       'function' => 'theme_field_formatter_node_reference_node',
     ),
   );
@@ -67,13 +67,13 @@ function node_reference_field_info() {
 }
 
 /**
- * Implementation of hook_field_columns().
+ * Implementation of hook_field_schema().
  */
-function node_reference_field_columns($field) {
+function node_reference_field_schema($field) {
   $columns = array(
     'nid' => array('type' => 'int', 'unsigned' => TRUE, 'not null' => FALSE),
   );
-  return $columns;
+  return array('columns' => $columns);
 }
 
 /**
@@ -110,9 +110,10 @@ function node_reference_field($op, $node, $field, &$items, $teaser, $page) {
             $ids[] = $item['nid'];
           }
           else {
-            $error_element = isset($item['_error_element']) ? $item['_error_element'] : '';
-            if (is_array($item) && isset($item['_error_element'])) unset($item['_error_element']);
-            form_set_error($error_element, t("%name: invalid input.", array('%name' => t($field['widget']['label']))));
+            $errors[$field['field_name']][$langcode][$delta][] = array(
+              'error' => 'valid_nid',
+              'message' => t("%name: invalid input.", array('%name' => t($field['widget']['label']))),
+            );
           }
         }
       }
@@ -121,10 +122,11 @@ function node_reference_field($op, $node, $field, &$items, $teaser, $page) {
         $refs = _node_reference_potential_references($field, '', NULL, $ids);
         foreach ($items as $delta => $item) {
           if (is_array($item)) {
-            $error_element = isset($item['_error_element']) ? $item['_error_element'] : '';
-            if (is_array($item) && isset($item['_error_element'])) unset($item['_error_element']);
             if (!empty($item['nid']) && !isset($refs[$item['nid']])) {
-              form_set_error($error_element, t("%name: this post can't be referenced.", array('%name' => t($field['widget']['label']))));
+              $errors[$field['field_name']][$langcode][$delta][] = array(
+                'error' => 'valid_nid',
+                'message' => t("%name: this post can't be referenced.", array('%name' => t($field['widget']['label']))),
+              );              
             }
           }
         }
@@ -299,7 +301,7 @@ function node_reference_field_widget_info() {
 }
 
 /**
- * Implementation of FAPI hook_elements().
+ * Implementation of FAPI hook_element_info().
  *
  * Any FAPI callbacks needed for individual widgets can be declared here,
  * and the element will be passed to those callbacks for processing.
@@ -310,7 +312,7 @@ function node_reference_field_widget_info() {
  * Autocomplete_path is not used by text_widget but other widgets can use it
  * (see node_reference and userreference).
  */
-function node_reference_elements() {
+function node_reference_element_info() {
   return array(
     'node_reference_select' => array(
       '#input' => TRUE,
@@ -393,7 +395,7 @@ function node_reference_field_widget_settings_form($instance) {
  * @return
  *   the form item for a single element for this field
  */
-function node_reference_field_widget(&$form, &$form_state, $field, $instance, $items, $delta = 0) {
+function node_reference_field_widget(&$form, &$form_state, $field, $instance, $langcode, $items, $delta = 0) {
   switch ($instance['widget']['type']) {
     case 'node_reference_select':
       $element = array(
@@ -421,6 +423,13 @@ function node_reference_field_widget(&$form, &$form_state, $field, $instance, $i
 }
 
 /**
+ * Implementation of hook_field_widget_error().
+ */
+function nodereference_field_widget_error($element, $error) {
+  form_error($element['nid'], $error['message']);
+} 	  	 
+
+/**
  * Value for a node_reference autocomplete element.
  *
  * Substitute in the node title for the node nid.
@@ -444,7 +453,7 @@ function node_reference_autocomplete_value($element, $edit = FALSE) {
  *
  * The $field and $instance arrays are in $form['#fields'][$element['#field_name']].
  */
-function node_reference_select_process($element, $edit, $form_state, $form) {
+function node_reference_select_process($element, $form_state, $form) {
   // The node_reference_select widget doesn't need to create its own
   // element, it can wrap around the options_select element.
   // This will create a new, nested instance of the field.
@@ -478,7 +487,7 @@ function node_reference_select_process($element, $edit, $form_state, $form) {
  *
  * The $field and $instance arrays are in $form['#fields'][$element['#field_name']].
  */
-function node_reference_buttons_process($element, $edit, $form_state, $form) {
+function node_reference_buttons_process($element, $form_state, $form) {
   // The node_reference_select widget doesn't need to create its own
   // element, it can wrap around the options_select element.
   // This will create a new, nested instance of the field.
@@ -511,7 +520,7 @@ function node_reference_buttons_process($element, $edit, $form_state, $form) {
  * note that $element['#value'] is already set.
  *
  */
-function node_reference_autocomplete_process($element, $edit, $form_state, $form) {
+function node_reference_autocomplete_process($element, $form_state, $form) {
 
   // The node_reference autocomplete widget doesn't need to create its own
   // element, it can wrap around the text_textfield element and add an autocomplete
@@ -538,13 +547,6 @@ function node_reference_autocomplete_process($element, $edit, $form_state, $form
   }
   array_unshift($element[$field_key]['#element_validate'], 'node_reference_autocomplete_validate');
 
-  // Used so that hook_field('validate') knows where to flag an error.
-  $element['_error_element'] = array(
-    '#type' => 'value',
-    // Wrapping the element around a text_textfield element creates a
-    // nested element, so the final id will look like 'field-name-0-nid-nid'.
-    '#value' => implode('][', array_merge($element['#parents'], array($field_key, $field_key))),
-  );
   return $element;
 }
 
@@ -823,6 +825,7 @@ function node_reference_field_settings_form($field) {
     '#multiple' => TRUE,
     '#default_value' => is_array($field['settings']['referenceable_types']) ? $field['settings']['referenceable_types'] : array(),
     '#options' => array_map('check_plain', node_type_get_names()),
+    '#disabled' => $has_data,
   );
   return $form;
 }
