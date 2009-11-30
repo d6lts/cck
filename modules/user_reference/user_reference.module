@@ -373,9 +373,9 @@ function user_reference_field_widget(&$form, &$form_state, $field, $instance, $l
 /**
  * Implementation of hook_field_widget_error().
  */
-function nodereference_field_widget_error($element, $error) {
+function user_reference_field_widget_error($element, $error) {
   form_error($element['uid'], $error['message']);
-} 	  	 
+}
 
 /**
  * Value for a user_reference autocomplete element.
