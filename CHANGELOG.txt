@@ -74,6 +74,7 @@ Bugfixes:
 - #577580 Multigroup fields with empty values loose their ordering when saved via node_save.
 - #614292 by DeFr - Fix CCK Reference fields based on views broken by recent change in views_plugin_style Views 2.7 (#502348).
 - #625768 CCK 6.x-2.6, got fatal error on update.php while running userreference_update_6002().
+- #640488 warning: max() [function.max]: Array must contain at least one element in content.module on line 1044.
 
 Changes:
 - #421116 Move content.js to js/content.admin.js for consistency with location of new js files.

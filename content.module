@@ -1041,8 +1041,11 @@ function content_storage($op, $node) {
                 foreach (array_keys($db_info['columns']) as $column) {
                   $empty[$column] = NULL;
                 }
-                for ($delta = max(array_keys($additions[$field_name])) + 1; $delta < $row['delta']; $delta++) {
-                  $additions[$field_name][$delta] = $empty;
+                $next_delta = !empty($additions[$field_name]) ? (max(array_keys($additions[$field_name])) + 1) : 0;
+                for ($delta = $next_delta; $delta < $row['delta']; $delta++) {
+                  if (!isset($additions[$field_name][$delta])) {
+                    $additions[$field_name][$delta] = $empty;
+                  }
                 }
               }
               $additions[$field_name][$row['delta']] = $item;
