@@ -358,9 +358,8 @@ function node_reference_field_widget(&$form, &$form_state, $field, $instance, $l
  * Replace the node title with a node nid.
  */
 function node_reference_autocomplete_value($element, $edit = FALSE, $form_state) {
-  $field_key  = $element['#columns'][0];
-  if (!empty($element['#default_value'][$field_key])) {
-    $nid = $element['#default_value'][$field_key];
+  if (!empty($element['#default_value'])) {
+    $nid = $element['#default_value'];
 
     $q = db_select('node', 'n');
     $node_title_alias = $q->addField('n', 'title');
@@ -375,8 +374,7 @@ function node_reference_autocomplete_value($element, $edit = FALSE, $form_state)
   else {
     $value = NULL;
   }
-  $ret = array($field_key => $value);
-  return $ret;
+  return $value;
 }
 
 /**
