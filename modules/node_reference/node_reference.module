@@ -381,7 +381,7 @@ function node_reference_autocomplete_value($element, $edit = FALSE, $form_state)
  * Validate an autocomplete element.
  */
 function node_reference_autocomplete_validate($element, &$form_state, $form) {
-  $value = $element['#value']['nid'];
+  $value = $element['#value'];
   $nid = NULL;
   if (!empty($value)) {
     $field_name = $element['#field_name'];
@@ -391,7 +391,7 @@ function node_reference_autocomplete_validate($element, &$form_state, $form) {
       // Explicit [nid:n].
       list(, $title, $nid) = $matches;
       if (!empty($title) && ($n = node_load($nid)) && $title != $n->title[LANGUAGE_NONE][0]['value']) {
-        form_error($element['nid'], t('%name: title mismatch. Please check your selection.', array('%name' => t($instance['label']))));
+        form_error($element, t('%name: title mismatch. Please check your selection.', array('%name' => t($instance['label']))));
       }
     }
     else {
@@ -399,10 +399,10 @@ function node_reference_autocomplete_validate($element, &$form_state, $form) {
       $field = field_info_field($field_name);
       $reference = _node_reference_potential_references($field, $value, 'equals', NULL, 1);
       if (empty($reference)) {
-        form_error($element['nid'], t('%name: found no valid post with that title.', array('%name' => t($instance['label']))));
+        form_error($element, t('%name: found no valid post with that title.', array('%name' => t($instance['label']))));
       }
       else {
-        // TODO: the best thing would be to present the user with an
+        // @todo The best thing would be to present the user with an
         // additional form, allowing the user to choose between valid
         // candidates with the same title. ATM, we pick the first
         // matching candidate...
@@ -598,7 +598,7 @@ function node_reference_preprocess_node(&$vars) {
  *
  * When preparing a translation, load any translations of existing
  * references.
- * TODO: Core doc: "This hook may or may not survive in Field API".
+ * @todo Core doc: "This hook may or may not survive in Field API".
  * So it is currently not verified.
  */
 function node_reference_field_prepare_translation($obj_type, $object, $field, $instance, $langcode, &$items) {
