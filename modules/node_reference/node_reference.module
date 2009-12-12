@@ -158,31 +158,45 @@ function node_reference_field_formatter_info() {
 /**
  * Implements hook_field_formatter().
  */
-function node_reference_field_formatter($object_type, $object, $field, $instance, $langcode, $display, $items, $delta) {
-  $item = $items[$delta];
+function node_reference_field_formatter($obj_type, $object, $field, $instance, $langcode, $items, $display) {
+  $result = array();
+
+  // Collect the list of node ids.
+  $nids = array();
+  foreach ($items as $delta => $item) {
+    $nids[$item['nid']] = $item['nid'];
+  }
 
   switch ($display['type']) {
     case 'node_reference_default':
-      $result = array(
-        '#type' => 'link',
-        '#title' => _node_reference_titles($item['nid']),
-        '#href' => 'node/' . $item['nid'],
-      );
-      break;
-
     case 'node_reference_plain':
-      $result = array(
-        '#markup' => check_plain(_node_reference_titles($item['nid'])),
-      );
+      $titles = _node_reference_get_node_titles($nids);
+      foreach ($items as $delta => $item) {
+        if ($display['type'] == 'node_reference_default') {
+          $result[$delta] = array(
+            '#type' => 'link',
+            '#title' => $titles[$item['nid']],
+            '#href' => 'node/' . $item['nid'],
+          );
+        }
+        else {
+          $result[$delta] = array(
+            '#markup' => check_plain($titles[$item['nid']]),
+          );
+        }
+      }
       break;
 
     // @todo Abstract on 'build mode' (see how image field does with image
     // styles).
     case 'node_reference_full':
     case 'node_reference_teaser':
+      // Extract build mode from the formatter name.
+      $build_mode = str_replace('node_reference_', '', $display['type']);
+
       // To prevent infinite recursion caused by reference cycles, we store
       // diplayed nodes in a recursion queue.
-      $recursion_queue = drupal_static(__FUNCTION__, array());
+      $recursion_queue = &drupal_static(__FUNCTION__, array());
 
       // If no 'referencing object' is set, we are starting a new 'reference
       // thread' and need to reset the queue.
@@ -192,29 +206,53 @@ function node_reference_field_formatter($object_type, $object, $field, $instance
 
       // If the object being built is a node, add it to the recursion queue.
       if ($obj_type == 'node') {
-        list($id) = entity_extract_ids($object_type, $object);
+        list($id) = entity_extract_ids($obj_type, $object);
         $recursion_queue[] = $id;
       }
 
-      if (in_array($item['nid'], $recursion_queue)) {
-        // If the node has already been rendered earlier in this 'thread',
-        // just display the node title as a link.
-        $result = array(
-          '#type' => 'link',
-          '#title' => _node_reference_titles($item['nid']),
-          '#href' => 'node/' . $item['nid'],
-        );
+      // Check the recursion queue to determine which nodes should be fully
+      // displayed, and which nodes will ony be displayed as a title.
+      $nids_titles = array();
+      $nids_display = array();
+      foreach ($nids as $nid) {
+        if (in_array($item['nid'], $recursion_queue)) {
+          $nids_titles[$nid] = $nid;
+        }
+        else {
+          $nids_display[$nid] = $nid;
+        }
       }
-      elseif ($node = node_load($item['nid'])) {
-        $node->referencing_object = $object;
-        $node->referencing_field = $field['field_name'];
-        // Save the node title in the static cache.
-        _node_reference_titles($item['nid'], $node->title);
 
-        // Extract build mode from the formatter name.
-        $build_mode = str_replace('node_reference_', '', $display['type']);
-        $result = node_build($referenced_node, $build_mode);
+      // Load and build the fully displayed nodes.
+      if ($nids_display) {
+        $nodes = node_load_multiple($nids_display);
+        foreach ($nids_display as $nid) {
+          _node_reference_get_node_titles(array(), array($nodes[$nid]->title));
+          $nodes[$nid]->referencing_object = $object;
+          $nodes[$nid]->referencing_field = $field['field_name'];
+        }
+        $nodes_built = node_build_multiple($nodes, $build_mode);
       }
+
+      // Fetch the titles of the other nodes.
+      if ($nids_titles) {
+        $titles = _node_reference_get_node_titles($nids_titles);
+      }
+
+      // Assemble the render array.
+      foreach ($items as $delta => $item) {
+        if (in_array($item['nid'], $nids_display)) {
+          $result[$delta] = $nodes_built['nodes'][$item['nid']];
+        }
+        else {
+          $result[$delta] = array(
+            '#type' => 'link',
+            '#title' => $titles[$item['nid']],
+            '#href' => 'node/' . $item['nid'],
+          );
+        }
+      }
+
       break;
   }
 
@@ -226,26 +264,38 @@ function node_reference_field_formatter($object_type, $object, $field, $instance
  *
  * Store node titles collected in the curent request.
  */
-function _node_reference_titles($nid, $known_title = NULL) {
-  $titles = &drupal_static(__FUNCTION__);
+function _node_reference_get_node_titles($nids, $known_titles = array()) {
+  $titles = &drupal_static(__FUNCTION__, array());
 
-  if (!isset($titles[$nid])) {
-    if (isset($known_title)) {
-      $titles[$nid] = $known_title;
-    }
-    else {
-      $query = db_select('node', 'n');
-      $node_title_alias = $query->addField('n', 'title');
-      $query->addTag('node_access')
-        ->condition('n.nid', $nid)
-        ->range(0, 1)
-        ->execute();
-      $titles[$nid] = $query->fetchField();
+  // Save titles we receive.
+  $titles += $known_titles;
+
+  // Collect nids to retrieve from database.
+  $nids_query = array();
+  foreach ($nids as $nid) {
+    if (!isset($titles[$nid])) {
+      $nids_query[] = $nid;
     }
   }
+  if ($nids_query) {
+    $query = db_select('node', 'n')
+      ->fields('n', array('nid', 'title'))
+      ->condition('n.nid', $nids)
+      // @todo Node access should be checked in hook_field_sanitize() or
+      // hook_field_prepare_view().
+      ->addTag('node_access');
+    $titles += $query->execute()->fetchAllKeyed();
+  }
 
-  return $titles[$nid];
+  // Build the results array.
+  $return = array();
+  foreach ($nids as $nid) {
+    $return[$nid] = isset($titles[$nid]) ? $titles[$nid] : '';
+  }
+
+  return $return;
 }
+
 
 /**
  * Implements hook_field_widget_info().
