@@ -139,6 +139,8 @@ function node_reference_field_formatter_info() {
       'description' => t('Display the title of the referenced node as plain text.'),
       'field types' => array('node_reference'),
     ),
+    // @todo Abstract on 'build mode' (see how image field does with image
+    // styles).
     'node_reference_full' => array(
       'label'       => t('Full node'),
       'description' => t('Display the title of the referenced node as a full node view.'),
@@ -154,97 +156,69 @@ function node_reference_field_formatter_info() {
 }
 
 /**
- * Theme function for 'default' node_reference field formatter.
+ * Implements hook_field_formatter().
  */
-function theme_field_formatter_node_reference_default($variables) {
-  $element = $variables['element'];
-  if (!empty($element['#item']['nid']) && is_numeric($nid = $element['#item']['nid'])
-  && ($title = _node_reference_titles($nid))) {
-    $ret = l($title, 'node/' . $nid);
-  }
-  else {
-    $ret = '';
-  }
-  return $ret;
-}
+function node_reference_field_formatter($object_type, $object, $field, $instance, $langcode, $display, $items, $delta) {
+  $item = $items[$delta];
 
-/**
- * Theme function for 'plain' node_reference field formatter.
- */
-function theme_field_formatter_node_reference_plain($variables) {
-  $element = $variables['element'];
-  if (!empty($element['#item']['nid']) && is_numeric($nid = $element['#item']['nid'])
-  && ($title = _node_reference_titles($nid))) {
-    $ret = check_plain($title);
-  }
-  else {
-    $ret = '';
-  }
-  return $ret;
-}
+  switch ($display['type']) {
+    case 'node_reference_default':
+      $result = array(
+        '#type' => 'link',
+        '#title' => _node_reference_titles($item['nid']),
+        '#href' => 'node/' . $item['nid'],
+      );
+      break;
 
-/**
- * Theme function for 'full node' node_reference field formatter.
- */
-function theme_field_formatter_node_reference_full($variables) {
-  return _node_reference_node_formatter($variables);
-}
+    case 'node_reference_plain':
+      $result = array(
+        '#markup' => check_plain(_node_reference_titles($item['nid'])),
+      );
+      break;
 
-/**
- * Theme function for 'teaser' node_reference field formatter.
- */
-function theme_field_formatter_node_reference_teaser($variables) {
-  return _node_reference_node_formatter($variables);
-}
+    // @todo Abstract on 'build mode' (see how image field does with image
+    // styles).
+    case 'node_reference_full':
+    case 'node_reference_teaser':
+      // To prevent infinite recursion caused by reference cycles, we store
+      // diplayed nodes in a recursion queue.
+      $recursion_queue = drupal_static(__FUNCTION__, array());
 
-/**
- * Actual implementation for 'full' and 'teaser' node_reference field formatters.
- * @see theme_field_formatter_node_reference_full().
- * @see theme_field_formatter_node_reference_teaser().
- *
- * @param $variables
- * @return string
- */
-function _node_reference_node_formatter($variables) {
-  static $recursion_queue = array();
+      // If no 'referencing object' is set, we are starting a new 'reference
+      // thread' and need to reset the queue.
+      if (!isset($object->referencing_object)) {
+        $recursion_queue = array();
+      }
 
-  $element = $variables['element'];
-  $ret = '';
+      // If the object being built is a node, add it to the recursion queue.
+      if ($obj_type == 'node') {
+        list($id) = entity_extract_ids($object_type, $object);
+        $recursion_queue[] = $id;
+      }
 
-  if (!empty($element['#item']['nid']) && is_numeric($nr_nid = $element['#item']['nid'])) {
-    $node = $element['#object'];
-    $field = field_info_field($element['#field_name']);
+      if (in_array($item['nid'], $recursion_queue)) {
+        // If the node has already been rendered earlier in this 'thread',
+        // just display the node title as a link.
+        $result = array(
+          '#type' => 'link',
+          '#title' => _node_reference_titles($item['nid']),
+          '#href' => 'node/' . $item['nid'],
+        );
+      }
+      elseif ($node = node_load($item['nid'])) {
+        $node->referencing_object = $object;
+        $node->referencing_field = $field['field_name'];
+        // Save the node title in the static cache.
+        _node_reference_titles($item['nid'], $node->title);
 
-    // If no 'referencing node' is set, we are starting a new 'reference
-    // thread'. This is not redundant with the array() initializer on
-    // $recursion queue, because the formatter may be invoked several times
-    // during a single page cycle, when multiple node references have to be
-    // displayed, and the initializer only covers the first.
-    if (!isset($node->referencing_node)) {
-      $recursion_queue = array();
-    }
-
-    $recursion_queue[] = $node->nid;
-    if (in_array($nr_nid, $recursion_queue)) {
-      // Prevent infinite recursion caused by reference cycles: if the node has
-      // already been rendered earlier in this 'thread', fall back to 'default'
-      // (node title) formatter.
-      $ret = theme('field_formatter_node_reference_default', $variables);
-    }
-    elseif ($referenced_node = node_load($nr_nid)) {
-      $referenced_node->referencing_node = $node;
-      $referenced_node->referencing_field = $field;
-      _node_reference_titles($nr_nid, $referenced_node->title);
-      // other values: 'node_reference_teaser'
-      $build_mode = ($element['#formatter'] == 'node_reference_full')
-        ? 'full'
-        : 'teaser';
-      $ret = node_build($referenced_node, $build_mode);
-      $ret = drupal_render($ret);
-    }
+        // Extract build mode from the formatter name.
+        $build_mode = str_replace('node_reference_', '', $display['type']);
+        $result = node_build($referenced_node, $build_mode);
+      }
+      break;
   }
 
-  return $ret;
+  return $result;
 }
 
 /**
@@ -253,22 +227,21 @@ function _node_reference_node_formatter($variables) {
  * Store node titles collected in the curent request.
  */
 function _node_reference_titles($nid, $known_title = NULL) {
-  static $titles = array();
+  $titles = &drupal_static(__FUNCTION__);
 
   if (!isset($titles[$nid])) {
-    if ($known_title) {
-      $title = $known_title;
+    if (isset($known_title)) {
+      $titles[$nid] = $known_title;
     }
     else {
-      $q = db_select('node', 'n');
-      $node_title_alias = $q->addField('n', 'title');
-      $q->addTag('node_access')
+      $query = db_select('node', 'n');
+      $node_title_alias = $query->addField('n', 'title');
+      $query->addTag('node_access')
         ->condition('n.nid', $nid)
-        ->range(0, 1);
-      $result = $q->execute();
-      $title = $result->fetchField();
+        ->range(0, 1)
+        ->execute();
+      $titles[$nid] = $query->fetchField();
     }
-  $titles[$nid] = $title ? $title : '';
   }
 
   return $titles[$nid];
