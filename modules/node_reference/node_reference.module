@@ -476,6 +476,9 @@ function nodereference_field_widget_error($element, $error) {
  *     ),
  *     ...
  *   )
+ *  @todo Check whether we still need the 'rendered' value (hook_options_list()
+ *  does not need it anymore). Should probably be clearer after the 'Views'
+ *  mode is ported.
  */
 function _node_reference_potential_references($field, $string = '', $match = 'contains', $ids = array(), $limit = NULL) {
   static $results = array();
@@ -652,22 +655,15 @@ function node_reference_field_prepare_translation($obj_type, $object, $field, $i
 }
 
 /**
- * Implements hook_allowed_values().
- *
- * @see options_options()
- * @link http://drupal.org/node/639466 @endlink
- *
- * A problem with this function is that its result set can be as large
- * as the whole set of nodes on a site, which can be huge.
- *
- * @param array $field
+ * Implements hook_options_list().
  */
-function node_reference_allowed_values($field) {
+function node_reference_options_list($field) {
   $references = _node_reference_potential_references($field);
 
+  // @todo Support optgroups ? I think this was added in late CCK D6.
   $options = array();
   foreach ($references as $key => $value) {
-    $options[$key] = $value['rendered'];
+    $options[$key] = $value['title'];
   }
   return $options;
 }
