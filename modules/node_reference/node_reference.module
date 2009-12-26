@@ -218,7 +218,7 @@ function node_reference_field_formatter_view($obj_type, $object, $field, $instan
       $nids_titles = array();
       $nids_display = array();
       foreach ($nids as $nid) {
-        if (in_array($item['nid'], $recursion_queue)) {
+        if (in_array($nid, $recursion_queue)) {
           $nids_titles[$nid] = $nid;
         }
         else {
