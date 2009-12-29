@@ -364,7 +364,7 @@ function content_multiple_value_nodeapi_validate(&$node, $field, &$items, $form)
   $items = content_set_empty($field, $items);
 
   // Enforce field requirement settings.
-  if ($field['required'] && empty($node->_content_ignore_required_fields[$field_name])) {
+  if ($field['required'] && empty($node->_content_ignore_required_fields[$field_name]) && content_access('edit', $field, NULL, $node)) {
     // Count non-empty items.
     $count = 0;
     $function = $field['module'] .'_content_is_empty';
