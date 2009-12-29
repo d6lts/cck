@@ -77,6 +77,7 @@ Bugfixes:
 - #640488 warning: max() [function.max]: Array must contain at least one element in content.module on line 1044.
 - #649106 by thekevinday: Fix content_copy_form_alter(), where $form_state argument is not passed by reference.
 - #669800 Do not enforce required attribute for multiple value fields the current user is not allowed to edit.
+- Fix validation of required fields and multigroups.
 
 Changes:
 - #421116 Move content.js to js/content.admin.js for consistency with location of new js files.

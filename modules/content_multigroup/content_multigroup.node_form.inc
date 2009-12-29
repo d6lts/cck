@@ -359,59 +359,79 @@ function content_multigroup_node_form_validate($form, &$form_state) {
     $group = $groups[$group_name];
     $group_required = isset($group['settings']['multigroup']['required']) ? $group['settings']['multigroup']['required'] : 1;
 
-    $non_empty_subgroups = array();
+    $non_empty_subgroups = $non_removed_subgroups = $required_field_errors = array();
     foreach ($group_fields as $field_name => $field) {
+      // Tell the content module that it is not needed to enforce requirement
+      // of fields in this multigroup because we are doing it here.
+      // See content_multiple_value_nodeapi_validate().
+      $form_state['values']['_content_ignore_required_fields'][$field_name] = TRUE;
+
       foreach ($form_state['values'][$field_name] as $delta => $item) {
         // Ignore subgroups flagged for removal.
-        if (!$form_state['multigroup_removed'][$group_name][$delta]) {
-          $is_empty_function = $field['module'] .'_content_is_empty';
-          if ($is_empty_function($form_state['values'][$field_name][$delta], $field)) {
-            if ($field['required']) {
-              if (!empty($item['_error_element'])) {
-                // Here we don't know the number of elements and subelements a
-                // widget could have been added to the form, so we need to extract
-                // components from the top, where we have group/delta/field, and
-                // then push back field/delta on top of the list.
-                $error_element = explode('][', $item['_error_element']);
-                array_shift($error_element);
-                array_shift($error_element);
-                array_shift($error_element);
-                array_unshift($error_element, $field_name, $delta);
-                $error_element = implode('][', $error_element);
-              }
-              else {
-                $error_element = '';
-              }
-              form_set_error($error_element, t('!name field is required in group @group.', array(
-                '!name' => $form[$group_name][$delta][$field_name]['#title'],
-                '@group' => t($group['label']),
-              )));
-            }
+        if ($form_state['multigroup_removed'][$group_name][$delta]) {
+          continue;
+        }
+        // Keep track of non-removed subgroups.
+        $non_removed_subgroups[$delta] = TRUE;
+
+        $is_empty_function = $field['module'] .'_content_is_empty';
+        if ($is_empty_function($form_state['values'][$field_name][$delta], $field)) {
+          // Ignore fields that are not required.
+          if (!$field['required']) {
+            continue;
+          }
+
+          // Build an error message for this field in this subgroup, but do
+          // not flag it, yet.
+          if (!empty($item['_error_element'])) {
+            // Here we don't know the number of elements and subelements a
+            // widget could have added to the form, so we need to extract
+            // components from the top, where we have group/delta/field, and
+            // then push back field/delta on top of the list.
+            $error_element = explode('][', $item['_error_element']);
+            array_shift($error_element);
+            array_shift($error_element);
+            array_shift($error_element);
+            array_unshift($error_element, $field_name, $delta);
+            $error_element = implode('][', $error_element);
           }
           else {
-            $non_empty_subgroups[$delta] = TRUE;
+            $error_element = '';
           }
+          $required_field_errors[$delta][$field_name] = array(
+            'element' => $error_element,
+            'message' => t('!name field is required in group @group.', array(
+              '!name' => $form[$group_name][$delta][$field_name]['#title'],
+              '@group' => t($group['label']),
+            )),
+          );
+        }
+        else {
+          $non_empty_subgroups[$delta] = TRUE;
         }
       }
     }
 
-    if (empty($non_empty_subgroups)) {
-      if ($group_required) {
-        // This multigroup is required, but we have no subgroup of items.
-        form_set_error('', t('Group @name requires one collection of fields minimum.', array('@name' => t($group['label']))));
+    // Required multigroups require at least one non-empty subgroup of fields.
+    if ($group_required && empty($non_empty_subgroups)) {
+      form_set_error('', t('Group @name requires one collection of fields minimum.', array('@name' => t($group['label']))));
+      continue;
+    }
+
+    // Do not enforce field requirements if there is only one non-removed
+    // subgroup of fields, and that subgroup is empty.
+    if (count($non_removed_subgroups) == 1) {
+      $delta = key($non_removed_subgroups);
+      if (isset($required_field_errors[$delta]) && !isset($non_empty_subgroups[$delta])) {
+        unset($required_field_errors[$delta]);
       }
-      else {
-        // This multigroup is not required and we have no subgroup of items,
-        // which is correct. However, we now need to ensure CCK will not fire
-        // validation errors related to the fields in this multigroup from
-        // content_multiple_value_nodeapi_validate().
-        // To do so, we are creating a private array in the $form_state, and
-        // that will be available from the $node object processed during
-        // hook_nodeapi('validate'), which is where CCK enforces field
-        // requirement for multiple value fields.
-        foreach (array_keys($group_fields) as $field_name) {
-          $form_state['values']['_content_ignore_required_fields'][$field_name] = TRUE;
-        }
+    }
+
+    // Ok, now we can flag errors for all required fields that have not been
+    // filled in when they should.
+    foreach ($required_field_errors as $delta => $error_list) {
+      foreach ($error_list as $field_name => $error_info) {
+        form_set_error($error_info['element'], $error_info['message']);
       }
     }
   }
