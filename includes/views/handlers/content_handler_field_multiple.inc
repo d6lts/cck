@@ -36,14 +36,19 @@ class content_handler_field_multiple extends content_handler_field {
     }
   }
 
-  function options(&$options) {
-    parent::options($options);
+  function option_definition() {
+    $options = parent::option_definition();
+
     $options['multiple'] = array(
-      'group' => TRUE,
-      'multiple_number' => '',
-      'multiple_from' => '',
-      'multiple_reversed' => FALSE,
+      'contains' => array(
+        'group' => array('default' => TRUE),
+        'multiple_number' => array('default' => ''),
+        'multiple_from' => array('default' => ''),
+        'multiple_reversed' => array('default' => FALSE),
+      ),
     );
+
+    return $options;
   }
 
   /**
