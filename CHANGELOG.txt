@@ -29,6 +29,7 @@ Features:
 - #580156 Wrap multigroups with unique CSS classes in node view.
 - #544542 Allow subgroup fieldsets in a multigroup to be collapsible.
 - #596428 by NancyDru - Allow external modules alter the content type list.
+- #670344 by dagmar: Make CCK compatible with both, views 2 and views 3.
 
 Bugfixes:
 - #482774 Update breaks when CCK is disabled.
