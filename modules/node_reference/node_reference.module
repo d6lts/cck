@@ -396,7 +396,7 @@ function node_reference_autocomplete_value($element, $input = FALSE, $form_state
       $result = $q->execute();
       // @todo If no result (node doesn't exist or no access).
       $value = $result->fetchField();
-      $value .= ' [nid:'. $nid .']';
+      $value .= ' [nid:' . $nid . ']';
       return $value;
     }
   }
@@ -451,7 +451,7 @@ function node_reference_autocomplete_validate($element, &$form_state, $form) {
 /**
  * Implements hook_field_widget_error().
  */
-function nodereference_field_widget_error($element, $error) {
+function node_reference_field_widget_error($element, $error) {
   form_error($element['nid'], $error['message']);
 }
 
@@ -493,7 +493,7 @@ function nodereference_field_widget_error($element, $error) {
  *  mode is ported.
  */
 function _node_reference_potential_references($field, $string = '', $match = 'contains', $ids = array(), $limit = NULL) {
-  static $results = array();
+  $results = &drupal_static(__FUNCTION__, array());
 
   // Create unique id for static cache.
   $cid = $field['field_name'] . ':' . $match . ':'
@@ -586,7 +586,7 @@ function node_reference_autocomplete($field_name, $string = '') {
   $references = _node_reference_potential_references($field, $string, $match, array(), 10);
   foreach ($references as $id => $row) {
     // Add a class wrapper for a few required CSS overrides.
-    $matches[$row['title'] ." [nid:$id]"] = '<div class="reference-autocomplete">'. $row['rendered'] . '</div>';
+    $matches[$row['title'] . " [nid:$id]"] = '<div class="reference-autocomplete">' . $row['rendered'] . '</div>';
   }
   drupal_json_output($matches);
 }
@@ -624,10 +624,10 @@ function node_reference_preprocess_node(&$vars) {
   if (!empty($vars['node']->referencing_field)) {
     $node = $vars['node'];
     $field = $node->referencing_field;
-    $vars['template_files'][] = 'node-node_reference';
-    $vars['template_files'][] = 'node-node_reference-' . $field['field_name'];
-    $vars['template_files'][] = 'node-node_reference-' . $node->type;
-    $vars['template_files'][] = 'node-node_reference-' . $field['field_name'] .'-'. $node->type;
+    $vars['theme_hook_suggestions'][] = 'node-reference';
+    $vars['theme_hook_suggestions'][] = 'node-reference__' . $field['field_name'];
+    $vars['theme_hook_suggestions'][] = 'node-reference__' . $node->type;
+    $vars['theme_hook_suggestions'][] = 'node-reference__' . $field['field_name'] . '__' . $node->type;
   }
 }
 
