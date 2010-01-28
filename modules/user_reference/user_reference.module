@@ -7,7 +7,7 @@
  */
 
 /**
- * Implementation of hook_menu().
+ * Implements hook_menu().
  */
 function user_reference_menu() {
   $items = array();
@@ -21,30 +21,7 @@ function user_reference_menu() {
 }
 
 /**
- * Implementation of hook_theme().
- */
-function user_reference_theme() {
-  return array(
-    'user_reference_select' => array(
-      'render element' => 'element',
-    ),
-    'user_reference_buttons' => array(
-      'render element' => 'element',
-    ),
-    'user_reference_autocomplete' => array(
-      'render element' => 'element',
-    ),
-    'field_formatter_user_reference_default' => array(
-      'render element' => 'element',
-    ),
-    'field_formatter_user_reference_plain' => array(
-      'render element' => 'element',
-    ),
-  );
-}
-
-/**
- * Implementation of hook_field_info().
+ * Implements hook_field_info().
  */
 function user_reference_field_info() {
   return array(
@@ -59,310 +36,259 @@ function user_reference_field_info() {
 }
 
 /**
- * Implementation of hook_field_form().
+ * Implements hook_field_schema();
  */
-function user_reference_field_form($field) {
+function user_reference_field_schema($field) {
+  $columns = array(
+    'uid' => array(
+      'type' => 'int',
+      'unsigned' => TRUE,
+      'not null' => FALSE,
+    ),
+  );
+  return array(
+    'columns' => $columns,
+    'indexes' => array('uid' => array('uid')), // useful to find back-references
+  );
+}
+
+/**
+ * Implements hook_field_settings_form().
+ */
+function user_reference_field_settings_form($field, $instance, $has_data) {
+  $settings = $field['settings'];
+
   $form = array();
   $form['referenceable_roles'] = array(
     '#type' => 'checkboxes',
     '#title' => t('User roles that can be referenced'),
-    '#default_value' => isset($field['settings']['referenceable_roles']) && is_array($field['settings']['referenceable_roles']) ? array_filter($field['settings']['referenceable_roles']) : array(),
+    '#default_value' => is_array($settings['referenceable_roles'])
+       ? array_filter($settings['referenceable_roles'])
+       : array(),
     '#options' => user_roles(1),
+    '#disabled' => $has_data,
   );
   $form['referenceable_status'] = array(
     '#type' => 'checkboxes',
     '#title' => t('User status that can be referenced'),
-    '#default_value' => isset($field['settings']['referenceable_status']) && is_array($field['settings']['referenceable_status']) ? array_filter($field['settings']['referenceable_status']) : array(1),
+    '#default_value' => is_array($settings['referenceable_status'])
+      ? array_filter($settings['referenceable_status'])
+      : array(1),
     '#options' => array(1 => t('Active'), 0 => t('Blocked')),
+    '#disabled' => $has_data,
   );
   return $form;
 }
 
 /**
- * Implementation of hook_field_schema();
+ * Implements hook_field_validate().
+ *
+ * Possible error codes:
+ * - 'invalid_uid': uid is not valid for the field (not a valid user id, or the user is not referenceable).
  */
-function user_reference_field_schema($field) {
-  $columns = array(
-    'uid' => array('type' => 'int', 'unsigned' => TRUE,  'not null' => FALSE),
-  );
-  return array('columns' => $columns);
-}
+function user_reference_field_validate($obj_type, $object, $field, $instance, $langcode, $items, &$errors) {
+  // Extract uids to check.
+  $ids = array();
 
-/**
- * Implementation of hook_field().
- */
-function user_reference_field($op, $node, $field, &$items, $teaser, $page) {
-  switch ($op) {
-    case 'validate':
-      // Extract uids to check.
-      $ids = array();
-      foreach ($items as $delta => $item) {
-        if (is_array($item) && !empty($item['uid'])) {
-          if (is_numeric($item['uid'])) {
-            $ids[] = $item['uid'];
-          }
-          else {
-            $errors[$field['field_name']][$langcode][$delta][] = array(
-              'error' => 'valid_uid',
-              'message' => t('%name: invalid input.', array('%name' => t($field['widget']['label']))),
-            );
-          }
+  // First check non-numeric uid's to avoid losing time with them.
+  foreach ($items as $delta => $item) {
+    if (is_array($item) && !empty($item['uid'])) {
+      if (is_numeric($item['uid'])) {
+        $ids[] = $item['uid'];
+      }
+      else {
+        $errors[$field['field_name']][$langcode][$delta][] = array(
+          'error' => 'invalid_uid',
+          'message' => t('%name: invalid input.',
+            array('%name' => t($field['widget']['label']))),
+        );
+      }
+    }
+  }
+  // Prevent performance hog if there are no ids to check.
+  if ($ids) {
+    $refs = _user_reference_potential_references($field, '', NULL, $ids);
+    foreach ($items as $delta => $item) {
+      if (is_array($item)) {
+        if (!empty($item['uid']) && !isset($refs[$item['uid']])) {
+          $errors[$field['field_name']][$langcode][$delta][] = array(
+            'error' => 'invalid_uid',
+            'message' => t("%name: this user can't be referenced.",
+              array('%name' => t($field['widget']['label']))),
+          );
         }
       }
-      // Prevent performance hog if there are no ids to check.
-      if ($ids) {
-        $refs = _user_reference_potential_references($field, '', NULL, $ids);
-        foreach ($items as $delta => $item) {
-          if (is_array($item)) {
-            $error_element = isset($item['_error_element']) ? $item['_error_element'] : '';
-            if (is_array($item) && isset($item['_error_element'])) unset($item['_error_element']);
-            if (!empty($item['uid']) && !isset($refs[$item['uid']])) {
-              $errors[$field['field_name']][$langcode][$delta][] = array(
-                'error' => 'valid_uid',
-                'message' => t('%name: invalid user.', array('%name' => t($field['widget']['label']))),
-              );
-            }
-          }
-        }
-      }
-      return $items;
+    }
   }
 }
 
 /**
- * Implementation of hook_field_is_empty().
+ * Implements hook_field_is_empty().
  */
 function user_reference_field_is_empty($item, $field) {
-  if (empty($item['uid'])) {
-    return TRUE;
-  }
-  return FALSE;
+  return empty($item['uid']);
 }
 
 /**
- * Implementation of hook_field_formatter_info().
+ * Implements hook_field_formatter_info().
  */
 function user_reference_field_formatter_info() {
   return array(
     'user_reference_default' => array(
       'label' => t('Default'),
+      'description' => t("Display the name of the referenced user as a link to the user's profile page."),
       'field types' => array('user_reference'),
-      'behaviors' => array(
-        'multiple values' => FIELD_BEHAVIOR_DEFAULT,
-      ),
     ),
     'user_reference_plain' => array(
       'label' => t('Plain text'),
+      'description' => t('Display the name of the referenced user as plain text.'),
       'field types' => array('user_reference'),
-      'behaviors' => array(
-        'multiple values' => FIELD_BEHAVIOR_DEFAULT,
-      ),
     ),
   );
 }
 
 /**
- * Theme function for 'default' user_reference field formatter.
+ * Implements hook_field_formatter_view().
  */
-function theme_field_formatter_user_reference_default($element) {
-  $output = '';
-  if (isset($element['#item']['uid']) && $account = user_load($element['#item']['uid'])) {
-    $output = theme('username', $account);
+function user_reference_field_formatter_view($obj_type, $object, $field, $instance, $langcode, $items, $display) {
+  $result = array();
+
+  // @todo Optimisation: use hook_field_formatter_prepare_view() to load
+  // user names or full user objects in 'multiple' mode.
+
+  // Collect the list of user ids.
+  $uids = array();
+  foreach ($items as $delta => $item) {
+    $uids[$item['uid']] = $item['uid'];
   }
-  return $output;
+
+  switch ($display['type']) {
+    case 'user_reference_default':
+    case 'user_reference_plain':
+      $titles = _user_reference_get_user_names($uids);
+      foreach ($items as $delta => $item) {
+        if ($display['type'] == 'user_reference_default') {
+          $result[$delta] = array(
+            '#type' => 'link',
+            '#title' => $titles[$item['uid']],
+            '#href' => 'user/' . $item['uid'],
+          );
+        }
+        else {
+          $result[$delta] = array(
+            '#markup' => check_plain($titles[$item['uid']]),
+          );
+        }
+      }
+      break;
+  }
+
+  return $result;
 }
 
 /**
- * Theme function for 'plain' user_reference field formatter.
+ * Helper function for widgets and formatters.
+ *
+ * Store user names collected in the curent request.
  */
-function theme_field_formatter_user_reference_plain($element) {
-  $output = '';
-  if (isset($element['#item']['uid']) && $account = user_load(array('uid' => $element['#item']['uid']))) {
-    $output = $account->name;
+function _user_reference_get_user_names($uids, $known_titles = array()) {
+  $titles = &drupal_static(__FUNCTION__, array());
+
+  // Save titles we receive.
+  $titles += $known_titles;
+
+  // Collect nids to retrieve from database.
+  $uids_query = array();
+  foreach ($uids as $uid) {
+    if (!isset($titles[$uid])) {
+      $uids_query[] = $uid;
+    }
   }
-  return $output;
+  if ($uids_query) {
+    $query = db_select('users', 'u')
+      ->fields('u', array('uid', 'name'))
+      ->condition('u.uid', $uids);
+    $titles += $query->execute()->fetchAllKeyed();
+  }
+
+  // Build the results array.
+  $return = array();
+  foreach ($uids as $uid) {
+    $return[$uid] = isset($titles[$uid]) ? $titles[$uid] : '';
+  }
+
+  return $return;
 }
 
 /**
- * Implementation of hook_field_widget_info().
- *
- * We need custom handling of multiple values for the user_reference_select
- * widget because we need to combine them into a options list rather
- * than display multiple elements.
- *
- * We will use the field module's default handling for default value.
- *
- * Callbacks can be omitted if default handing is used.
- * They're included here just so this module can be used
- * as an example for custom modules that might do things
- * differently.
+ * Implements hook_field_widget_info().
  */
 function user_reference_field_widget_info() {
   return array(
-    'user_reference_select' => array(
-      'label' => t('Select list'),
-      'field types' => array('user_reference'),
-      'settings' => array(
-         // TODO : should be an instance setting now
-        'reverse_link' => 0
-      ),
-      'behaviors' => array(
-        'multiple values' => FIELD_BEHAVIOR_CUSTOM,
-        'default value' => FIELD_BEHAVIOR_DEFAULT,
-      ),
-    ),
-    'user_reference_buttons' => array(
-      'label' => t('Check boxes/radio buttons'),
-      'field types' => array('user_reference'),
-      'settings' => array(
-         // TODO : should be an instance setting now
-        'reverse_link' => 0
-      ),
-      'behaviors' => array(
-        'multiple values' => FIELD_BEHAVIOR_CUSTOM,
-        'default value' => FIELD_BEHAVIOR_DEFAULT,
-      ),
-    ),
     'user_reference_autocomplete' => array(
       'label' => t('Autocomplete text field'),
+      'description' => t('Display the list of referenceable users as a textfield with autocomplete behaviour.'),
       'field types' => array('user_reference'),
       'settings' => array(
         'autocomplete_match' => 'contains',
         'size' => 60,
-        // TODO : should be an instance setting now
-        'reverse_link' => 0,
-      ),
-      'behaviors' => array(
-        'multiple values' => FIELD_BEHAVIOR_DEFAULT,
-        'default value' => FIELD_BEHAVIOR_DEFAULT,
+        'autocomplete_path' => 'user_reference/autocomplete',
       ),
     ),
   );
 }
 
 /**
- * Implementation of FAPI hook_element_info().
- *
- * Any FAPI callbacks needed for individual widgets can be declared here,
- * and the element will be passed to those callbacks for processing.
- *
- * Drupal will automatically theme the element using a theme with
- * the same name as the hook_elements key.
- *
- * Autocomplete_path is not used by text_widget but other widgets can use it
- * (see nodereference and user_reference).
+ * Implements hook_field_widget_info_alter().
  */
-function user_reference_element_info() {
-  return array(
-    'user_reference_select' => array(
-      '#input' => TRUE,
-      '#columns' => array('uid'), '#delta' => 0,
-      '#process' => array('user_reference_select_process'),
-    ),
-    'user_reference_buttons' => array(
-      '#input' => TRUE,
-      '#columns' => array('uid'), '#delta' => 0,
-      '#process' => array('user_reference_buttons_process'),
-    ),
-    'user_reference_autocomplete' => array(
-      '#input' => TRUE,
-      '#columns' => array('name'), '#delta' => 0,
-      '#process' => array('user_reference_autocomplete_process'),
-      '#autocomplete_path' => FALSE,
-      ),
-    );
+function user_reference_field_widget_info_alter(&$info) {
+  $info['options_select']['field types'][] = 'user_reference';
+  $info['options_buttons']['field types'][] = 'user_reference';
 }
 
 /**
- * Implementation of hook_field_widget_settings_form().
+ * Implements hook_field_widget_settings_form().
  */
-function user_reference_field_widget_settings_form($instance) {
-  $form = array();
-  $widget = $instance['widget'];
+function user_reference_field_widget_settings_form($field, $instance) {
+  $widget   = $instance['widget'];
   $defaults = field_info_widget_settings($widget['type']);
   $settings = array_merge($defaults, $widget['settings']);
+
+  $form = array();
   if ($widget['type'] == 'user_reference_autocomplete') {
     $form['autocomplete_match'] = array(
-      '#type' => 'select',
-      '#title' => t('Autocomplete matching'),
-      '#default_value' => $settings['autocomplete_match'],
-      '#options' => array(
-        'starts_with' => t('Starts with'),
-        'contains' => t('Contains'),
+      '#type'             => 'select',
+      '#title'            => t('Autocomplete matching'),
+      '#default_value'    => $settings['autocomplete_match'],
+      '#options'          => array(
+        'starts_with'     => t('Starts with'),
+        'contains'        => t('Contains'),
       ),
-      '#description' => t('Select the method used to collect autocomplete suggestions. Note that <em>Contains</em> can cause performance issues on sites with thousands of users.'),
+      '#description'      => t('Select the method used to collect autocomplete suggestions. Note that <em>Contains</em> can cause performance issues on sites with thousands of users.'),
     );
     $form['size'] = array(
-      '#type' => 'textfield',
-      '#title' => t('Size of textfield'),
-      '#default_value' => $size,
+      '#type'             => 'textfield',
+      '#title'            => t('Size of textfield'),
+      '#default_value'    => $settings['size'],
       '#element_validate' => array('_element_validate_integer_positive'),
-      '#required' => TRUE,
+      '#required'         => TRUE,
     );
   }
-  // TODO : should be an instance setting now.
-  $form['reverse_link'] = array(
-    '#type' => 'checkbox',
-    '#title' => t('Reverse link'),
-    '#default_value' => isset($widget['reverse_link']) ? $widget['reverse_link'] : 0,
-    '#description' => t('If selected, a reverse link back to the referencing node will displayed on the referenced user record.'),
-  );
  return $form;
 }
 
 /**
- * Implementation of hook_field_widget().
- *
- * Attach a single form element to the form. It will be built out and
- * validated in the callback(s) listed in hook_elements. We build it
- * out in the callbacks rather than here in hook_widget so it can be
- * plugged into any module that can provide it with valid
- * $field information.
- *
- * Field module will set the weight, field name and delta values
- * for each form element. This is a change from earlier CCK versions
- * where the widget managed its own multiple values.
- *
- * If there are multiple values for this field, the field module will
- * call this function as many times as needed.
- *
- * @param $form
- *   the entire form array, $form['#node'] holds node information
- * @param $form_state
- *   the form_state, $form_state['values'][$field['field_name']]
- *   holds the field's form values.
- * @param $field
- *   The field structure.
- * @param $instance
- *   the field instance array
- * @param $items
- *   array of default values for this field
- * @param $delta
- *   the order of this item in the array of subelements (0, 1, 2, etc)
- *
- * @return
- *   the form item for a single element for this field
+ * Implements hook_field_widget_form().
  */
-function user_reference_field_widget(&$form, &$form_state, $field, $instance, $langcode, $items, $delta = 0) {
+function user_reference_field_widget_form(&$form, &$form_state, $field, $instance, $langcode, $items, $delta, $base) {
   switch ($instance['widget']['type']) {
-    case 'user_reference_select':
-      $element = array(
-        '#type' => 'user_reference_select',
-        '#default_value' => $items,
-      );
-      break;
-
-    case 'user_reference_buttons':
-      $element = array(
-        '#type' => 'user_reference_buttons',
-        '#default_value' => $items,
-      );
-      break;
-
     case 'user_reference_autocomplete':
-      $element = array(
-        '#type' => 'user_reference_autocomplete',
-        '#default_value' => isset($items[$delta]) ? $items[$delta] : NULL,
+      $element['uid'] = $base + array(
+        '#type' => 'textfield',
+        '#default_value' => isset($items[$delta]['uid']) ? $items[$delta]['uid'] : NULL,
+        '#autocomplete_path' => $instance['widget']['settings']['autocomplete_path'] . '/' . $field['field_name'],
+        '#size' => $instance['widget']['settings']['size'],
+        '#element_validate' => array('user_reference_autocomplete_validate'),
         '#value_callback' => 'user_reference_autocomplete_value',
       );
       break;
@@ -371,193 +297,81 @@ function user_reference_field_widget(&$form, &$form_state, $field, $instance, $l
 }
 
 /**
- * Implementation of hook_field_widget_error().
- */
-function user_reference_field_widget_error($element, $error) {
-  form_error($element['uid'], $error['message']);
-}
-
-/**
- * Value for a user_reference autocomplete element.
+ * Value callback for a user_reference autocomplete element.
  *
  * Substitute in the user name for the uid.
  */
-function user_reference_autocomplete_value($element, $edit = FALSE) {
-  $field_key  = $element['#columns'][0];
-  if (!empty($element['#default_value'][$field_key])) {
-    $value = db_result(db_query("SELECT name FROM {users} WHERE uid = '%d'", $element['#default_value'][$field_key]));
-    return array($field_key => $value);
-  }
-  return array($field_key => NULL);
-}
+function user_reference_autocomplete_value($element, $input = FALSE, $form_state) {
+  if ($input === FALSE) {
+    // We're building the displayed 'default value': expand the raw uid into
+    // "user name [uid:n]".
+    $uid = $element['#default_value'];
+    if (!empty($uid)) {
+      $q = db_select('users', 'u');
+      $q->addField('u', 'name');
 
-/**
- * Process an individual element.
- *
- * Build the form element. When creating a form using FAPI #process,
- * note that $element['#value'] is already set.
- *
- * The $field and $instance arrays are in $form['#fields'][$element['#field_name']].
- */
-function user_reference_select_process($element, $form_state, $form) {
-  // The user_reference_select widget doesn't need to create its own
-  // element, it can wrap around the options_select element.
-  // Add a validation step where the value can be unwrapped.
-  $field_key  = $element['#columns'][0];
-  $element[$field_key] = array(
-    '#type' => 'options_select',
-    '#default_value' => isset($element['#value']) ? $element['#value'] : '',
-    // The following values were set by the field module and need
-    // to be passed down to the nested element.
-    '#title' => $element['#title'],
-    '#required' => $element['#required'],
-    '#description' => $element['#description'],
-    '#field_name' => $element['#field_name'],
-    '#bundle' => $element['#bundle'],
-    '#delta' => $element['#delta'],
-    '#columns' => $element['#columns'],
-  );
-  if (empty($element[$field_key]['#element_validate'])) {
-    $element[$field_key]['#element_validate'] = array();
-  }
-  array_unshift($element[$field_key]['#element_validate'], 'user_reference_options_validate');
-  return $element;
-}
-
-/**
- * Process an individual element.
- *
- * Build the form element. When creating a form using FAPI #process,
- * note that $element['#value'] is already set.
- *
- * The $field and $instance arrays are in $form['#fields'][$element['#field_name']].
- */
-function user_reference_buttons_process($element, $form_state, $form) {
-  // The user_reference_select widget doesn't need to create its own
-  // element, it can wrap around the options_select element.
-  // Add a validation step where the value can be unwrapped.
-  $field_key  = $element['#columns'][0];
-  $element[$field_key] = array(
-    '#type' => 'options_buttons',
-    '#default_value' => isset($element['#value']) ? $element['#value'] : '',
-    // The following values were set by the field module and need
-    // to be passed down to the nested element.
-    '#title' => $element['#title'],
-    '#required' => $element['#required'],
-    '#description' => $element['#description'],
-    '#field_name' => $element['#field_name'],
-    '#bundle' => $element['#bundle'],
-    '#delta' => $element['#delta'],
-    '#columns' => $element['#columns'],
-  );
-  if (empty($element[$field_key]['#element_validate'])) {
-    $element[$field_key]['#element_validate'] = array();
-  }
-  array_unshift($element[$field_key]['#element_validate'], 'user_reference_options_validate');
-  return $element;
-}
-
-/**
- * Process an individual element.
- *
- * Build the form element. When creating a form using FAPI #process,
- * note that $element['#value'] is already set.
- *
- * The $field and $instance arrays are in $form['#fields'][$element['#field_name']].
- */
-function user_reference_autocomplete_process($element, $form_state, $form) {
-  // The user_reference autocomplete widget doesn't need to create its own
-  // element, it can wrap around the text_textfield element and add an autocomplete
-  // path and some extra processing to it.
-  // Add a validation step where the value can be unwrapped.
-  $field_key  = $element['#columns'][0];
-
-  $element[$field_key] = array(
-    '#type' => 'text_textfield',
-    '#default_value' => isset($element['#value']) ? $element['#value'] : '',
-    '#autocomplete_path' => 'user_reference/autocomplete/'. $element['#field_name'],
-    // The following values were set by the field module and need
-    // to be passed down to the nested element.
-    '#title' => $element['#title'],
-    '#required' => $element['#required'],
-    '#description' => $element['#description'],
-    '#field_name' => $element['#field_name'],
-    '#bundle' => $element['#bundle'],
-    '#delta' => $element['#delta'],
-    '#columns' => $element['#columns'],
-  );
-  if (empty($element[$field_key]['#element_validate'])) {
-    $element[$field_key]['#element_validate'] = array();
-  }
-  array_unshift($element[$field_key]['#element_validate'], 'user_reference_autocomplete_validate');
-  return $element;
-}
-
-/**
- * Validate a select/buttons element.
- *
- * Remove the wrapper layer and set the right element's value.
- * We don't know exactly where this element is, so we drill down
- * through the element until we get to our key.
- *
- * We use $form_state['values'] instead of $element['#value']
- * to be sure we have the most accurate value when other modules
- * like options are using #element_validate to alter the value.
- */
-function user_reference_options_validate($element, &$form_state) {
-  $field_key  = $element['#columns'][0];
-
-  $value = $form_state['values'];
-  $new_parents = array();
-  foreach ($element['#parents'] as $parent) {
-    $value = $value[$parent];
-    // Use === to be sure we get right results if parent is a zero (delta) value.
-    if ($parent === $field_key) {
-      $element['#parents'] = $new_parents;
-      form_set_value($element, $value, $form_state);
-      break;
+      $q->condition('u.uid', $uid)
+        ->range(0, 1);
+      $result = $q->execute();
+      // @todo If no result (user doesn't exist).
+      $value = $result->fetchField();
+      $value .= ' [uid:' . $uid . ']';
+      return $value;
     }
-    $new_parents[] = $parent;
   }
 }
 
 /**
- * Validate an autocomplete element.
- *
- * Remove the wrapper layer and set the right element's value.
- * This will move the nested value at 'field-name-0-uid-uid'
- * back to its original location, 'field-name-0-uid'.
+ * Validation callback for a user_reference autocomplete element.
  */
-function user_reference_autocomplete_validate($element, &$form_state) {
-  $field_name = $element['#field_name'];
-  $bundle = $element['#bundle'];
-  $field = field_fields($field_name, $bundle);
-  $field_key = $element['#columns'][0];
-  $value = $element['#value'][$field_key];
+function user_reference_autocomplete_validate($element, &$form_state, $form) {
+  $field = $form['#fields'][$element['#field_name']]['field'];
+  $instance = $form['#fields'][$element['#field_name']]['instance'];
+
+  $value = $element['#value'];
   $uid = NULL;
+
   if (!empty($value)) {
-    $reference = _user_reference_potential_references($field, $value, 'equals', NULL, 1);
-    if (empty($reference)) {
-      form_error($element[$field_key], t('%name: found no valid user with that name.', array('%name' => t($field['widget']['label']))));
+    // Check whether we have an explicit "[uid:n]" input.
+    preg_match('/^(?:\s*|(.*) )?\[\s*uid\s*:\s*(\d+)\s*\]$/', $value, $matches);
+    if (!empty($matches)) {
+      // Explicit uid. Check that the 'name' part matches the actual name for
+      // the uid.
+      list(, $name, $uid) = $matches;
+      if (!empty($name)) {
+        $names = _user_reference_get_user_names(array($uid));
+        if ($name != $names[$uid]) {
+          form_error($element, t('%name: name mismatch. Please check your selection.', array('%name' => t($instance['label']))));
+        }
+      }
     }
     else {
-      $uid = key($reference);
+      // No explicit uid (the submitted value was not populated by autocomplete
+      // selection). Get the uid of a referencable user from the entered name.
+      $reference = _user_reference_potential_references($field, $value, 'equals', NULL, 1);
+      if ($reference) {
+        // @todo The best thing would be to present the user with an
+        // additional form, allowing the user to choose between valid
+        // candidates with the same name. ATM, we pick the first
+        // matching candidate...
+        $uid = key($reference);
+      }
+      else {
+        form_error($element, t('%name: found no valid user with that name.', array('%name' => t($instance['label']))));
+      }
     }
   }
+
+  // Set the element's value as the user id that was extracted from the entered
+  // input.
   form_set_value($element, $uid, $form_state);
 }
 
 /**
- * Implementation of hook_allowed_values().
+ * Implements hook_field_widget_error().
  */
-function user_reference_allowed_values($field) {
-  $references = _user_reference_potential_references($field);
-
-  $options = array();
-  foreach ($references as $key => $value) {
-    $options[$key] = $value['rendered'];
-  }
-  return $options;
+function user_reference_field_widget_error($element, $error) {
+  form_error($element['uid'], $error['message']);
 }
 
 /**
@@ -593,16 +407,14 @@ function user_reference_allowed_values($field) {
  *   )
  */
 function _user_reference_potential_references($field, $string = '', $match = 'contains', $ids = array(), $limit = NULL) {
-  static $results = array();
+  $results = &drupal_static(__FUNCTION__, array());
 
   // Create unique id for static cache.
-  $cid = $field['field_name'] .':'. $match .':'. ($string !== '' ? $string : implode('-', $ids)) .':'. $limit;
+  $cid = $field['field_name'] . ':' . $match . ':'
+    . ($string !== '' ? $string : implode('-', $ids))
+    . ':' . $limit;
   if (!isset($results[$cid])) {
-    $references = FALSE;
-    // TODO : reintegrate Views mode ?
-    if ($references === FALSE) {
-      $references = _user_reference_potential_references_standard($field, $string, $match, $ids, $limit);
-    }
+    $references = _user_reference_potential_references_standard($field, $string, $match, $ids, $limit);
 
     // Store the results.
     $results[$cid] = !empty($references) ? $references : array();
@@ -612,88 +424,109 @@ function _user_reference_potential_references($field, $string = '', $match = 'co
 }
 
 /**
- * Helper function for _user_reference_potential_references():
- * referenceable users defined by user role and status
+ * Helper function for _user_reference_potential_references().
+ *
+ * List of referenceable users defined by user role and status.
  */
 function _user_reference_potential_references_standard($field, $string = '', $match = 'contains', $ids = array(), $limit = NULL) {
-  $where = array();
-  $args = array();
-  $join = array();
+  // Avoid useless work
+  if (!count($field['settings']['referenceable_status']) || !count($field['settings']['referenceable_roles'])) {
+    return array();
+  }
+
+  $query = db_select('users', 'u');
+  $user_uid_alias    = $query->addField('u', 'uid');
+  $user_name_alias   = $query->addField('u', 'name');
+  $user_status_alias = $query->addField('u', 'status');
+
+  if (is_array($field['settings']['referenceable_status'])) {
+    $query->condition('u.status', $field['settings']['referenceable_status']);
+  }
+
+  if (is_array($field['settings']['referenceable_roles']) && (!in_array(DRUPAL_AUTHENTICATED_RID, $field['settings']['referenceable_roles']))) {
+    $query->join('users_roles', 'r', 'u.uid = r.uid');
+    $query->addField('r', 'rid');
+    $query->condition('r.rid', $field['settings']['referenceable_roles']);
+  }
 
   if ($string !== '') {
-    $match_operators = array(
-      'contains' => "LIKE '%%%s%%'",
-      'equals' => "= '%s'",
-      'starts_with' => "LIKE '%s%%'",
-    );
-    $where[] = 'u.name '. (isset($match_operators[$match]) ? $match_operators[$match] : $match_operators['contains']);
-    $args[] = $string;
+    $args = array();
+    switch ($match) {
+      case 'contains':
+        $name_clause = 'u.name LIKE :match';
+        $args['match'] = '%' . $string . '%';
+        break;
+
+      case 'starts_with':
+        $name_clause = 'u.name LIKE :match';
+        $args['match'] = $string . '%';
+        break;
+
+      case 'equals':
+      default: // no match type or incorrect match type: use "="
+        $name_clause = 'u.name = :match';
+        $args['match'] = $string;
+        break;
+    }
+    $query->where($name_clause, $args);
   }
   elseif ($ids) {
-    $where[] = 'u.uid IN (' . db_placeholders($ids) . ')';
-    $args = array_merge($args, $ids);
-  }
-  else {
-    $where[] = "u.uid > 0";
+    $query->condition($user_uid_alias, $ids, 'IN', $ids);
   }
 
-  $roles = array();
-  if (isset($field['settings']['referenceable_roles']) && is_array($field['settings']['referenceable_roles'])) {
-    // keep only selected checkboxes
-    $roles = array_filter($field['settings']['referenceable_roles']);
-    // filter invalid values that seems to get through sometimes ??
-    $roles = array_intersect(array_keys(user_roles(1)), $roles);
-  }
-  if (!empty($roles) && !in_array(DRUPAL_AUTHENTICATED_RID, $roles)) {
-    $where[] = "r.rid IN (". implode($roles, ',') .")";
-    $join[] = 'LEFT JOIN {users_roles} r ON u.uid = r.uid';
+  $query
+    ->orderBy($user_name_alias);
+
+  if ($limit) {
+    $query->range(0, $limit);
   }
 
-  $status = array();
-  if (isset($field['settings']['referenceable_status']) && is_array($field['settings']['referenceable_status'])) {
-    // keep only selected checkboxes
-    $status = array_filter($field['settings']['referenceable_status']);
-  }
-  if (!empty($status)) {
-    // Limit query if only one status should be referenced.
-    if (count($status) == 1) {
-      $where[] = "u.status = ". array_pop($status);
-    }
-  }
-
-  $users = array();
-  $where_clause = $where ? 'WHERE ('. implode(') AND (', $where) .')' : '';
-  $result = db_query('SELECT u.name, u.uid FROM {users} u '. implode(' ', $join) ." $where_clause ORDER BY u.name ASC", $args);
-  while ($user = db_fetch_object($result)) {
-    $users[$user->uid] = array(
-      'title' => $user->name,
+  $result = $query->execute();
+  $references = array();
+  foreach ($result->fetchAll() as $user) {
+    $references[$user->uid] = array(
+      'title'    => $user->name,
       'rendered' => check_plain($user->name),
     );
   }
-  return $users;
+  return $references;
 }
 
 /**
  * Menu callback; Retrieve a pipe delimited string of autocomplete suggestions for existing users
  */
 function user_reference_autocomplete($field_name, $string = '') {
-  $fields = field_info_fields();
-  $field = $fields[$field_name];
+  $field = field_info_field($field_name);
+
   $match = isset($field['widget']['autocomplete_match']) ? $field['widget']['autocomplete_match'] : 'contains';
   $matches = array();
 
   $references = _user_reference_potential_references($field, $string, $match, array(), 10);
   foreach ($references as $id => $row) {
     // Add a class wrapper for a few required CSS overrides.
-    $matches[$row['title']] = '<div class="reference-autocomplete">'. $row['rendered'] . '</div>';
+    $matches[$row['title'] . " [uid:$id]"] = '<div class="reference-autocomplete">' . $row['rendered'] . '</div>';
   }
-  drupal_json($matches);
+  drupal_json_output($matches);
+}
+
+/**
+ * Implements hook_options_list().
+ */
+function user_reference_options_list($field) {
+  $references = _user_reference_potential_references($field);
+
+  // @todo Support optgroups ? I think this was added in late CCK D6.
+  $options = array();
+  foreach ($references as $key => $value) {
+    $options[$key] = $value['title'];
+  }
+  return $options;
 }
 
 /**
  * Implementation of hook_user_load().
  */
-function user_reference_user_load(&$accounts) {
+/*function user_reference_user_load(&$accounts) {
 
   // Only add links if we are on the user 'view' page.
   if (arg(0) != 'user' || arg(2)) {
@@ -733,12 +566,12 @@ function user_reference_user_load(&$accounts) {
     $accounts[$uid]->user_reference = $additions;
   }
   return;
-}
+}*/
 
 /**
  * Implementation of hook_user_view().
  */
-function user_reference_user_view(&$account) {
+/*function user_reference_user_view(&$account) {
   if (!empty($account->user_reference)) {
     $node_types = content_types();
     $additions = array();
@@ -746,7 +579,7 @@ function user_reference_user_view(&$account) {
     foreach ($account->user_reference as $node_type => $nodes) {
       foreach ($nodes as $node) {
         if ($node->reverse_link) {
-          $values[$node_type][] = l($node->title, 'node/'. $node->nid);
+          $values[$node_type][] = l($node->title, 'node/' . $node->nid);
         }
       }
       if (isset($values[$node_type])) {
@@ -766,49 +599,4 @@ function user_reference_user_view(&$account) {
       );
     }
   }
-}
-
-/**
- * FAPI theme for an individual elements.
- *
- * The textfield or select is already rendered by the
- * textfield or select themes and the html output
- * lives in $element['#children']. Override this theme to
- * make custom changes to the output.
- *
- * $element['#field_name'] contains the field name
- * $element['#delta]  is the position of this element in the group
- */
-function theme_user_reference_select($element) {
-  return $element['#children'];
-}
-
-function theme_user_reference_buttons($element) {
-  return $element['#children'];
-}
-
-function theme_user_reference_autocomplete($element) {
-  return $element['#children'];
-}
-
-/**
- * Implementation of hook_field_settings_form().
- */
-function user_reference_field_settings_form($field) {
-  $form = array();
-  $form['referenceable_roles'] = array(
-    '#type' => 'checkboxes',
-    '#title' => t('User roles that can be referenced'),
-    '#default_value' => isset($field['settings']['referenceable_roles']) && is_array($field['settings']['referenceable_roles']) ? array_filter($field['settings']['referenceable_roles']) : array(),
-    '#options' => user_roles(1),
-     '#disabled' => $has_data,
-  );
-  $form['referenceable_status'] = array(
-    '#type' => 'checkboxes',
-    '#title' => t('User status that can be referenced'),
-    '#default_value' => isset($field['settings']['referenceable_status']) && is_array($field['settings']['referenceable_status']) ? array_filter($field['settings']['referenceable_status']) : array(1),
-    '#options' => array(1 => t('Active'), 0 => t('Blocked')),
-    '#disabled' => $has_data,
-  );
-  return $form;
-}
+}*/
