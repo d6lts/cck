@@ -525,6 +525,7 @@ function _node_reference_potential_references_standard($field, $string = '', $ma
   $node_title_alias = $query->addField('n', 'title', 'node_title');
   $node_type_alias  = $query->addField('n', 'type',  'node_type');
   $query->addTag('node_access');
+  $query->addMetaData('id', ' _node_reference_potential_references_standard');
 
   if (is_array($field['settings']['referenceable_types'])) {
     $query->condition('n.type', $field['settings']['referenceable_types'], 'IN');

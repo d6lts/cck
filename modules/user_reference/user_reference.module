@@ -438,6 +438,7 @@ function _user_reference_potential_references_standard($field, $string = '', $ma
   $user_uid_alias    = $query->addField('u', 'uid');
   $user_name_alias   = $query->addField('u', 'name');
   $user_status_alias = $query->addField('u', 'status');
+  $query->addMetaData('id', ' _user_reference_potential_references_standard');
 
   if (is_array($field['settings']['referenceable_status'])) {
     $query->condition('u.status', $field['settings']['referenceable_status']);
