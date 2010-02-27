@@ -80,7 +80,7 @@ function node_reference_field_settings_form($field, $instance, $has_data) {
  * Possible error codes:
  * - 'invalid_nid': nid is not valid for the field (not a valid node id, or the node is not referenceable).
  */
-function node_reference_field_validate($obj_type, $object, $field, $instance, $langcode, $items, &$errors) {
+function node_reference_field_validate($entity_type, $entity, $field, $instance, $langcode, $items, &$errors) {
   // Extract nids to check.
   $ids = array();
 
@@ -94,7 +94,7 @@ function node_reference_field_validate($obj_type, $object, $field, $instance, $l
         $errors[$field['field_name']][$langcode][$delta][] = array(
           'error' => 'invalid_nid',
           'message' => t("%name: invalid input.",
-             array('%name' => t($field['widget']['label']))),
+             array('%name' => $instance['label'])),
         );
       }
     }
@@ -108,7 +108,7 @@ function node_reference_field_validate($obj_type, $object, $field, $instance, $l
           $errors[$field['field_name']][$langcode][$delta][] = array(
             'error' => 'invalid_nid',
             'message' => t("%name: this post can't be referenced.",
-              array('%name' => t($field['widget']['label']))),
+              array('%name' => $instance['label'])),
           );
         }
       }
@@ -158,7 +158,7 @@ function node_reference_field_formatter_info() {
 /**
  * Implements hook_field_formatter_view().
  */
-function node_reference_field_formatter_view($obj_type, $object, $field, $instance, $langcode, $items, $display) {
+function node_reference_field_formatter_view($entity_type, $entity, $field, $instance, $langcode, $items, $display) {
   $result = array();
 
   // @todo Optimisation: use hook_field_formatter_prepare_view() to load
@@ -201,15 +201,15 @@ function node_reference_field_formatter_view($obj_type, $object, $field, $instan
       // diplayed nodes in a recursion queue.
       $recursion_queue = &drupal_static(__FUNCTION__, array());
 
-      // If no 'referencing object' is set, we are starting a new 'reference
+      // If no 'referencing entity' is set, we are starting a new 'reference
       // thread' and need to reset the queue.
-      if (!isset($object->referencing_object)) {
+      if (!isset($entity->referencing_entity)) {
         $recursion_queue = array();
       }
 
-      // If the object being built is a node, add it to the recursion queue.
-      if ($obj_type == 'node') {
-        list($id) = entity_extract_ids($obj_type, $object);
+      // If the entity being built is a node, add it to the recursion queue.
+      if ($entity_type == 'node') {
+        list($id) = entity_extract_ids($entity_type, $entity);
         $recursion_queue[] = $id;
       }
 
@@ -231,7 +231,7 @@ function node_reference_field_formatter_view($obj_type, $object, $field, $instan
         $nodes = node_load_multiple($nids_display);
         foreach ($nids_display as $nid) {
           _node_reference_get_node_titles(array(), array($nodes[$nid]->title));
-          $nodes[$nid]->referencing_object = $object;
+          $nodes[$nid]->referencing_entity = $entity;
           $nodes[$nid]->referencing_field = $field['field_name'];
         }
         $nodes_built = node_view_multiple($nodes, $build_mode);
@@ -360,10 +360,10 @@ function node_reference_field_widget_settings_form($field, $instance) {
 /**
  * Implements hook_field_widget_form().
  */
-function node_reference_field_widget_form(&$form, &$form_state, $field, $instance, $langcode, $items, $delta, $base) {
+function node_reference_field_widget_form(&$form, &$form_state, $field, $instance, $langcode, $items, $delta, $element) {
   switch ($instance['widget']['type']) {
     case 'node_reference_autocomplete':
-      $element['nid'] = $base + array(
+      $element += array(
         '#type' => 'textfield',
         '#default_value' => isset($items[$delta]['nid']) ? $items[$delta]['nid'] : NULL,
         '#autocomplete_path' => $instance['widget']['settings']['autocomplete_path'] . '/' . $field['field_name'],
@@ -374,7 +374,7 @@ function node_reference_field_widget_form(&$form, &$form_state, $field, $instanc
       break;
   }
 
-  return $element;
+  return array('nid' => $element);
 }
 
 /**
@@ -406,8 +406,8 @@ function node_reference_autocomplete_value($element, $input = FALSE, $form_state
  * Validation callback for a node_reference autocomplete element.
  */
 function node_reference_autocomplete_validate($element, &$form_state, $form) {
-  $field = $form['#fields'][$element['#field_name']]['field'];
-  $instance = $form['#fields'][$element['#field_name']]['instance'];
+  $field = $form_state['field'][$element['#field_name']][$element['#language']]['field'];
+  $instance = $form_state['field'][$element['#field_name']][$element['#language']]['instance'];
 
   $value = $element['#value'];
   $nid = NULL;
@@ -422,7 +422,7 @@ function node_reference_autocomplete_validate($element, &$form_state, $form) {
       if (!empty($title)) {
         $titles = _node_reference_get_node_titles(array($nid));
         if ($title != $titles[$nid]) {
-          form_error($element, t('%name: title mismatch. Please check your selection.', array('%name' => t($instance['label']))));
+          form_error($element, t('%name: title mismatch. Please check your selection.', array('%name' => $instance['label'])));
         }
       }
     }
@@ -438,7 +438,7 @@ function node_reference_autocomplete_validate($element, &$form_state, $form) {
         $nid = key($reference);
       }
       else {
-        form_error($element, t('%name: found no valid post with that title.', array('%name' => t($instance['label']))));
+        form_error($element, t('%name: found no valid post with that title.', array('%name' => $instance['label'])));
       }
     }
   }
@@ -451,7 +451,7 @@ function node_reference_autocomplete_validate($element, &$form_state, $form) {
 /**
  * Implements hook_field_widget_error().
  */
-function node_reference_field_widget_error($element, $error) {
+function node_reference_field_widget_error($element, $error, $form, &$form_state) {
   form_error($element['nid'], $error['message']);
 }
 
@@ -639,12 +639,12 @@ function node_reference_preprocess_node(&$vars) {
  * @todo Core doc: "This hook may or may not survive in Field API".
  * So it is currently not verified.
  */
-function node_reference_field_prepare_translation($obj_type, $object, $field, $instance, $langcode, &$items) {
+function node_reference_field_prepare_translation($entity_type, $entity, $field, $instance, $langcode, &$items) {
   $addition = array();
   $addition[$field['field_name']] = array();
-  if (isset($object->translation_source->$field['field_name'])
-  && is_array($object->translation_source->$field['field_name'])) {
-    foreach ($object->translation_source->$field['field_name'] as $key => $reference) {
+  if (isset($entity->translation_source->$field['field_name'])
+  && is_array($entity->translation_source->$field['field_name'])) {
+    foreach ($entity->translation_source->$field['field_name'] as $key => $reference) {
       $reference_node = node_load($reference['nid']);
       // Test if the referenced node type is translatable and, if so,
       // load translations if the reference is not for the current language.
