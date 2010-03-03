@@ -1,6 +1,6 @@
 ; $Id$
-name = CCK Field UI
-description = Add custom fields to users or content types using a User Interface.
+name = CCK
+description = Miscellaneous functions not handled by core.
 package = CCK
 core = 7.x
 files[] = cck.module
