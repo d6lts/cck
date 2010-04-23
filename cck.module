@@ -92,6 +92,7 @@ function cck_field_get_setting($setting, $setting_type, $field, $instance = NULL
 function cck_field_set_setting($setting, $setting_type, $value, $field, $instance = NULL) {
   // Delete any prior values.
   $bundle = ($setting_type == 'field' || empty($instance)) ? NULL : $instance['bundle'];
+  $entity_type = ($setting_type == 'field' || empty($instance)) ? NULL : $instance['entity_type'];
   if ($setting_type == 'field' || empty($instance)) {
     db_delete('cck_field_settings')
       ->condition('field_name', $field['field_name'])
@@ -102,6 +103,7 @@ function cck_field_set_setting($setting, $setting_type, $value, $field, $instanc
   else {
     db_delete('cck_field_settings')
       ->condition('field_name', $field['field_name'])
+      ->condition('entity_type', $entity_type)
       ->condition('bundle', $bundle)
       ->condition('setting', $setting)
       ->condition('setting_type', $setting_type)
@@ -113,6 +115,7 @@ function cck_field_set_setting($setting, $setting_type, $value, $field, $instanc
   }
   $record = array(
     'field_name' => $field['field_name'],
+    'entity_type' => $entity_type,
     'bundle' => $bundle,
     'setting' => $setting,
     'setting_option' => $value,

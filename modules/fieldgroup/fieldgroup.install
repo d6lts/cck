@@ -7,14 +7,12 @@
  */
 function fieldgroup_install() {
   db_query("UPDATE {system} SET weight = 9 WHERE name = 'fieldgroup'");
-  drupal_install_schema('fieldgroup');
 }
 
 /**
  * Implementation of hook_uninstall().
  */
 function fieldgroup_uninstall() {
-  drupal_uninstall_schema('fieldgroup');
 }
 
 /**

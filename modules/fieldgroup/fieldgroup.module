@@ -24,28 +24,29 @@ function fieldgroup_init() {
  */
 function fieldgroup_menu() {
   $items = array();
-
   // Make sure this doesn't fire until field_info_fieldable_types() is working,
   // needed to avoid errors on initial installation.
   if (!defined('MAINTENANCE_MODE')) {
     // Create tabs for all possible bundles.
     $bundles = field_info_bundles();
-    foreach ($bundles as $bundle_name => $bundle_label) {
-      $admin_path = _cck_bundle_admin_path($bundle_name);
-      $items[$admin_path .'/groups/%'] = array(
-        'title' => 'Edit group',
-        'page callback' => 'drupal_get_form',
-        'page arguments' => array('fieldgroup_group_edit_form', $bundle_name, 5),
-        'access arguments' => array('administer content types'),
-        'type' => MENU_CALLBACK,
-      );
-      $items[$admin_path .'/groups/%/remove'] = array(
-        'title' => 'Edit group',
-        'page callback' => 'drupal_get_form',
-        'page arguments' => array('fieldgroup_remove_group', $bundle_name, 5),
-        'access arguments' => array('administer content types'),
-        'type' => MENU_CALLBACK,
-      );
+    foreach ($bundles as $entity_type => $info) {
+      foreach ($info as $bundle_name => $bundle) {
+        $admin_path = _field_ui_bundle_admin_path($entity_type, $bundle_name);
+        $items[$admin_path .'/groups/%'] = array(
+          'title' => 'Edit group',
+          'page callback' => 'drupal_get_form',
+          'page arguments' => array('fieldgroup_group_edit_form', $bundle_name, 5),
+          'access arguments' => array('administer content types'),
+          'type' => MENU_CALLBACK,
+        );
+        $items[$admin_path .'/groups/%/remove'] = array(
+          'title' => 'Edit group',
+          'page callback' => 'drupal_get_form',
+          'page arguments' => array('fieldgroup_remove_group', $bundle_name, 5),
+          'access arguments' => array('administer content types'),
+          'type' => MENU_CALLBACK,
+        );
+      }
     }
   }
   return $items;

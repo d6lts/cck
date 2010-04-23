@@ -4,15 +4,13 @@
  * Implementation of hook_install().
  */
 function cck_install() {
-  drupal_install_schema('cck');
+  
 }
-
 
 /**
  * Implementation of hook_uninstall().
  */
 function cck_uninstall() {
-  drupal_uninstall_schema('cck');
   db_query("DELETE FROM {variable} WHERE name LIKE 'cck_extra_weights_%'");
 }
 
@@ -24,6 +22,7 @@ function cck_uninstall() {
  * don't want in core.
  */
 function cck_schema() {
+ 
   $schema['cck_field_settings'] = array(
     'fields' => array(
       'field_name' => array(
@@ -31,6 +30,12 @@ function cck_schema() {
         'length' => 32,
         'not null' => TRUE,
         'description' => 'The name of the field.',
+      ),
+      'entity_type' => array(
+        'type' => 'varchar',
+        'length' => 32,
+        'not null' => TRUE,
+        'default' => ''
       ),
       'bundle' => array(
         'type' => 'varchar',
@@ -61,31 +66,3 @@ function cck_schema() {
   return $schema;
 }
 
-/*
-// TODO need to make the following changes to update existing data:
-// Set up and move to content module to handle upgrade path:
-
-function content_update_7000() {
- 
-  - Add new columns for:
-      - deleted: defaults to 0
-      - data: contains serialized array of complete $instance.
-  - Module-defined field settings are now at $field['settings'][...]
-  - Module-defined widget settings are now at $instance['widget']['settings']
-  - Module-defined instance settings are at $instance['settings']
-  - Field settings should be limited to settings that affect the schema,
-    all others should be instance settings.
-  - Display is now $instance['display'] instead of $instance['display_settings']
-  - Display format now adds label to every context instead of one label at the top level, for a more consistent structure.  
-  - Rename display options, formatter names are now prefixed with field name.      
-  - No more content type: $field['widget']['type_name'] becomes $instance['bundle']
-  - Required is now $instance['required'] instead of $field['required']
-  - Label is now $instance['label'] instead of $field['widget']['label']
-  - Description is now $instance['description'] instead of $field['widget']['description']
-  - Weight is now $instance['weight'] instead of $field['widget']['weight']
-  - Text module textareas are now a separate field type so the db schema won't change.
-  - Text module format columns are always set and don't change by field settings so the db schema won't change.
-  - Text and Number with allowed values are now made into List field types.
-  - Default values are moved out of the field settings into the cck_field_settings table maintained by CCK
-}
-*/
