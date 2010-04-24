@@ -30,7 +30,7 @@ function cck_menu_alter(&$items) {
 }
 
 function cck_debug_field_info() {
-  if (drupal_function_exists('dsm')) {
+  if (function_exists('dsm')) {
     module_load_include('inc', 'field', 'field.info');
     dsm(_field_info_collate_types());
     dsm(_field_info_collate_fields());

@@ -19,6 +19,7 @@ function content_migrate_select($form, &$form_state) {
   $options = array('available' => array(), 'converted' => array(), 'missing' => array());
   
   $field_values = content_migrate_get_field_values();
+  
   if (empty($field_values)) {
     drupal_set_message(t('There is no D6 field information in this database.'));
     return $form;
@@ -28,23 +29,31 @@ function content_migrate_select($form, &$form_state) {
   $new_fields = array_keys(field_info_fields());
   
   // Figure out which field and widget modules are available.
-  $available_modules = array_unique(array_merge(module_implements('field_info'), module_implements('widget_info')));
+  $available_modules = array_unique(array_merge(module_implements('field_info'), module_implements('field_widget_info')));
   
   foreach ($field_values as $field_name => $field_value) {
     $bundles = array();
     $missing_module = !in_array($field_value['module'], $available_modules);
+    $missing_modules = $missing_module ? array($field_value['module']) : array();
     $instance_values = content_migrate_get_instance_values(NULL, $field_name);
+    
+    // Debug
+    //dsm($field_value);
+    //dsm($instance_values);
+    
     foreach ($instance_values as $bundle => $instance_value) {
       $bundles[] = $type_names[$bundle];
       $label = $instance_value['label'];
       if (!in_array($instance_value['widget']['module'], $available_modules)) {
         $missing_module = TRUE;
+        $missing_modules[] = $instance_value['widget']['module'];
       }
     }
     $data = array(
       0 => $field_name,
       1 => $field_value['type'],
       2 => implode(', ', $bundles),
+      3 => empty($missing_modules) ? '' : t('Missing modules: @list', array('@list' => implode(', ', $missing_modules))),
     );
     if (in_array($field_name, $new_fields)) {
       $options['converted'][$field_name] = $data;
@@ -58,7 +67,7 @@ function content_migrate_select($form, &$form_state) {
     }
   }
 
-  $header = array(t('Field'), t('Field type'), t('Content type(s)'));
+  $header = array(t('Field'), t('Field type'), t('Content type(s)'), t('Other information'));
   $form['#tree'] = TRUE;
   $form['available'] = array(
     '#type' => 'fieldset',
@@ -216,35 +225,36 @@ function _content_migrate_batch_process_create_fields($field_names) {
       drupal_set_message(t("Error creating field @field_name", array('@field_name' => $field_name)), 'error'); 
       drupal_set_message($e, 'error');
     }
+    field_info_cache_clear();
 
   }
-  //dsm($field_values);
   $context['finished'] = TRUE;
 } 
 
 /**
  * Batch operation callback to migrate data.
  * Copy old table data to new field table.
- * 
- * TODO This query still needs work.
  */
 function _content_migrate_batch_process_migrate_data($field_name) {
   $field_value = content_migrate_get_field_values($field_name);
-  $field = $context['fields'][$field_name];
-  foreach ($info['instances'] as $instance_value) {
+  $instance_values = content_migrate_get_instance_values(NULL, $field_name);
+  
+  $field = field_info_field($field_name);
+  //$instances = field_read_instances(array('field_id' => $field['id']));
+  foreach ($instance_values as $instance_value) {
     
     $old_table          = content_migrate_old_table($field_value, $instance_value);
     $old_cols           = content_migrate_old_columns($field_value, $instance_value);
     $new_table          = content_migrate_new_table($field);
     $new_revision_table = content_migrate_new_revision($field);
     $new_columns        = content_migrate_new_columns($field);
-
+    
     $query = db_select($old_table, 'old');
     
     // We need a new columns for bundle name, entity type, and language.
-    $query->addExpression($instance_value['bundle'], 'bundle');
+    $query->addExpression("'". $instance_value['bundle'] ."'", 'bundle');
     $query->addExpression(1, 'etid');
-    $query->addExpression(LANGUAGE_NONE, 'language');
+    $query->addExpression("'". LANGUAGE_NONE ."'", 'language');
     
     // There are new names for what were the nid and vid columns.
     $query->addField('old', 'nid', 'entity_id');
@@ -280,29 +290,6 @@ function _content_migrate_batch_process_migrate_data($field_name) {
       drupal_set_message(t('Data could not be migrated for field @field_name in bundle @bundle.', array(
         '@field_name' => $field_name, '@bundle' => $instance_value['bundle'])), 'error');
       drupal_set_message($e, 'error');
-    }
-  }
-}
-
-function content_migrate_test() {
-  $field_values = content_migrate_get_field_values();
-  dsm($field_values);
-  foreach ($field_values as $field_name => $field_value) {
-    field_delete_field($field_name);
-    $field = field_create_field($field_value);
-    dsm($field);
-    $instance_values = content_migrate_get_instance_values(NULL, $field_name);
-    foreach ($instance_values as $instance_value) {
-    
-      $old_table          = content_migrate_old_table($field_value, $instance_value);
-      $old_cols           = content_migrate_old_columns($field_value, $instance_value);
-      $new_table          = content_migrate_new_table($field);
-      $new_revision_table = content_migrate_new_revision($field);
-      $new_columns        = content_migrate_new_columns($field);
-      dsm($old_table);
-      dsm($old_cols);
-      dsm($new_table);
-      dsm($new_columns);
     }
   }
 }
