@@ -601,3 +601,57 @@ function user_reference_options_list($field) {
     }
   }
 }*/
+
+/**
+ * Implements hook_content_migrate_field_alter().
+ * 
+ * Use this to tweak the conversion of field settings
+ * from the D6 style to the D7 style for specific
+ * situations not handled by basic conversion,
+ * as when field types or settings are changed.
+ * 
+ * $field_value['widget_type'] is available to
+ * see what widget type was originally used.
+ */
+function user_reference_content_migrate_field_alter(&$field_value) {
+  switch ($field_value['module']) {
+    case 'userreference':
+      $field_value['module'] = 'user_reference';
+      $field_value['type'] = 'user_reference';
+      break;
+  }
+}
+
+/**
+ * Implements hook_content_migrate_instance_alter().
+ * 
+ * Use this to tweak the conversion of instance or widget settings
+ * from the D6 style to the D7 style for specific
+ * situations not handled by basic conversion, as when
+ * formatter or widget names or settings are changed.
+ */
+function user_reference_content_migrate_instance_alter(&$instance_value) {
+  // The module name for the instance was corrected
+  // by the change in user_reference_content_migrate_field_alter().
+  switch ($instance_value['module']) {
+    case 'user_reference':
+      // The formatter names changed, all are prefixed
+      // with 'user_reference_'.
+      foreach ($instance_value['display'] as $context => $settings) {
+        $instance_value['display'][$context]['type'] = 'user_reference_'. $settings['type'];
+      } 
+      switch ($instance_value['widget']['type']) {
+        case 'userreference_autocomplete':
+          $instance_value['widget']['type'] = 'user_reference_autocomplete';
+          break;
+        case 'userreference_select':
+          $instance_value['widget']['type'] = 'options_select';
+          $instance_value['widget']['module'] = 'options';
+          break;
+        case 'userreference_buttons':
+          $instance_value['widget']['type'] = 'options_buttons';
+          $instance_value['widget']['module'] = 'options';
+      }
+      break;
+  }
+}
