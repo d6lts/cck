@@ -722,6 +722,7 @@ function node_reference_content_migrate_instance_alter(&$instance_value) {
       switch ($instance_value['widget']['type']) {
         case 'nodereference_autocomplete':
           $instance_value['widget']['type'] = 'node_reference_autocomplete';
+          $instance_value['widget']['module'] = 'node_reference';
           break;
         case 'nodereference_select':
           $instance_value['widget']['type'] = 'options_select';

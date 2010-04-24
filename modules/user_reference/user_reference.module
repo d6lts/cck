@@ -643,6 +643,7 @@ function user_reference_content_migrate_instance_alter(&$instance_value) {
       switch ($instance_value['widget']['type']) {
         case 'userreference_autocomplete':
           $instance_value['widget']['type'] = 'user_reference_autocomplete';
+          $instance_value['widget']['module'] = 'user_reference';
           break;
         case 'userreference_select':
           $instance_value['widget']['type'] = 'options_select';
