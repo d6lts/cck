@@ -72,7 +72,7 @@ function content_migrate_get_field_values($field_name = NULL) {
       // could adjust the field based on that information.
       // Needed so optionwidgets can change the field type
       // from text or numeric to list. 
-      unset($field_value['widget_type']);
+      unset($field_value['widget_type'], $field_value['allowed_values_php']);
       
       // We retain $field_value['columns'] and $field_value['db_storage']
       // even though they are not used or different in D7 
@@ -136,7 +136,7 @@ function content_migrate_get_instance_values($bundle = NULL, $field_name = NULL)
       // Core does not support this, but retain it so 
       // another module can do something with it
       // in drupal_alter.
-      $instance_value['default_value_php'] = $instance_value['widget_settings']['default_value_php'];
+      $instance_value['settings']['default_value_php'] = $instance_value['widget_settings']['default_value_php'];
     
       // Build widget values.
       $instance_value['widget'] = array();
@@ -168,6 +168,9 @@ function content_migrate_get_instance_values($bundle = NULL, $field_name = NULL)
     
       // Let modules change these values.
       drupal_alter('content_migrate_instance', $instance_value);
+      
+      // Get rid of this value once CCK or some other module has handled it.
+      unset($instance_value['settings']['default_value_php']);
     
       // Add instance information to instance array.
       $instance_values['instances'][$instance_value['bundle']][$instance_value['field_name']] = $instance_value;

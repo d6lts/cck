@@ -35,7 +35,8 @@ function cck_schema() {
         'type' => 'varchar',
         'length' => 32,
         'not null' => TRUE,
-        'default' => ''
+        'default' => '',
+        'description' => 'The name of the entity type, NULL for field settings.',
       ),
       'bundle' => array(
         'type' => 'varchar',
@@ -43,6 +44,12 @@ function cck_schema() {
         'not null' => FALSE,
         'description' => 'The name of the bundle, NULL for field settings.',
       ),
+     'language' => array(
+        'type' => 'varchar',
+        'length' => 32,
+        'not null' => FALSE,
+        'description' => 'The name of the language, NULL for field settings.',
+      ),     
       'setting_type' => array(
         'type' => 'varchar',
         'length' => 32,
@@ -53,7 +60,7 @@ function cck_schema() {
         'type' => 'varchar',
         'length' => 128,
         'not null' => TRUE,
-        'description' => 'The name of the setting that CCK is managing.',
+        'description' => 'The name of the setting that CCK is managing (default_value_php, allowed_values_php, etc).',
       ),
       'setting_option' => array(
         'type' => 'text',
@@ -66,3 +73,24 @@ function cck_schema() {
   return $schema;
 }
 
+function cck_update_7000() {
+  if (!db_field_exists('cck_field_settings', 'entity_type')) {
+    $field = array(
+      'type' => 'varchar',
+      'length' => 32,
+      'not null' => TRUE,
+      'default' => '',
+      'description' => 'The name of the entity type, NULL for field settings.',
+    );
+    db_add_field('cck_field_settings', 'entity_type', $field);
+  }
+  if (!db_field_exists('cck_field_settings', 'language')) {
+    $field = array(
+      'type' => 'varchar',
+      'length' => 32,
+      'not null' => FALSE,
+      'description' => 'The name of the language, NULL for field settings.',
+    );     
+    db_add_field('cck_field_settings', 'language', $field);
+  }
+}

@@ -130,7 +130,6 @@ function content_migrate_select($form, &$form_state) {
  * @TODO add a confirmation on the rollback submission.
  */
 function content_migrate_rollback_submit($form, &$form_state) {
-  $ret = array();
   $field_names = array_filter($form_state['values']['converted']['data']);
   foreach ($field_names as $field_name) {
     $field = field_info_field($field_name);
@@ -145,7 +144,7 @@ function content_migrate_rollback_submit($form, &$form_state) {
     // and we need to remove all traces of the 
     // new field for later migrations to work.
     $new_table = content_migrate_new_table($field);
-    db_drop_table($ret, $new_table);
+    db_drop_table($new_table);
     
     $instances = field_read_instances(array('field_id' => $field['id']), array('include_deleted' => 1));
     foreach ($instances as $instance) {
