@@ -19,14 +19,25 @@ function cck_permission() {
 }
 
 /**
- * Implementation of hook_menu_alter().
+ * Add fields to allowed values form to allow
+ * users to input a function or a PHP snippet
+ * that will return the allowed values.
  */
-function cck_menu_alter(&$items) {
-  // Customize the content types page with our own callback
-  $items['admin/build/types']['page callback'] = 'cck_types_overview';
-  $items['admin/build/types']['file'] = 'cck.admin.inc';
-  $items['admin/build/types']['file path'] = drupal_get_path('module', 'cck') .'/includes';
-  // TODO : same thing for admin/content/taxonomy
+function cck_form_alter(&$form, $form_state, $form_id) {
+  switch ($form_id) {
+    case 'field_ui_field_settings_form':
+      $field = field_info_field($form['field']['field_name']['#value']);
+      if ($field['module'] == 'list') {
+        cck_allowed_values_form($form, $form_state, $field);
+      }
+      break;
+    case 'field_ui_field_edit_form':
+      $field = $form['#field'];
+      if ($field['module'] == 'list') {
+        cck_allowed_values_form($form, $form_state, $field);
+      }
+      break;
+  }
 }
 
 function cck_debug_field_info() {
@@ -61,17 +72,18 @@ function cck_serialized_settings() {
 function cck_field_get_setting($setting, $setting_type, $field, $instance = NULL) {
   if ($setting_type == 'field' || empty($instance)) {
     $value = db_select('cck_field_settings', 'fs')->fields('fs', array('setting_option'))
+      ->condition('fs.field_name', $field['field_name'])
       ->condition('fs.setting', $setting)
       ->condition('fs.setting_type', $setting_type)
-      ->condition('fs.field_name', $field['field_name'])
       ->execute()->fetchField();
   }
   else {
     $value = db_select('cck_field_settings', 'fs')->fields('fs', array('setting_option'))
+      ->condition('fs.field_name', $field['field_name'])
+      ->condition('fs.entity_type', $instance['entity_type'])
+      ->condition('fs.bundle', $instance['bundle'])
       ->condition('fs.setting', $setting)
       ->condition('fs.setting_type', $setting_type)
-      ->condition('fs.field_name', $field['field_name'])
-      ->condition('fs.bundle', $instance['bundle'])
       ->execute()->fetchField();
   }
 
@@ -126,6 +138,89 @@ function cck_field_set_setting($setting, $setting_type, $value, $field, $instanc
 }
 
 /**
+ * Callback to return allowed values constructed
+ * from php code snippet.
+ */
+function cck_allowed_values_php($field, $flatten = TRUE) {
+  $allowed_values = array();
+  ob_start();
+  $result = eval(cck_field_get_setting('allowed_values_php', 'field', $field));
+  if (is_array($result)) {
+    if ($flatten) {
+      $result = cck_array_flatten($result);
+    }
+    $allowed_values = $result;
+  }
+  ob_end_clean();
+  return $allowed_values;
+}
+
+/**
+ * Helper function to flatten an array of allowed values.
+ *
+ * @param $array
+ *   A single or multidimensional array.
+ * @return
+ *   A flattened array.
+ */
+function cck_array_flatten($array) {
+  $result = array();
+  if (is_array($array)) {
+    foreach ($array as $key => $value) {
+      if (is_array($value)) {
+        $result += cck_array_flatten($value);
+      }
+      else {
+        $result[$key] = $value;
+      }
+    }
+  }
+  return $result;
+}
+
+/**
+ * Add fields to allowed values form to allow
+ * users to input a function or a PHP snippet
+ * that will return the allowed values.
+ */
+function cck_allowed_values_form(&$form, $form_state, $field) { 
+  
+  $php_code = cck_field_get_setting('allowed_values_php', 'field', $field);
+  $allowed_values_function = $form['field']['settings']['allowed_values_function']['#value'];
+  if (!empty($php_code)) {
+    $allowed_values_function = 'cck_allowed_values_php';
+  }
+  
+  // Add a field where users can specify a function 
+  // to return the allowed values list.
+  $form['field']['settings']['allowed_values_function'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Allowed values function'),
+    '#default_value' => $allowed_values_function,
+    '#description' => t('The name of a function that will return the allowed values list.'),
+  );
+        
+  // Add a field where users can specify some PHP
+  // code that will return the allowed values list.
+  $function = $field['module'] . '_field_schema';
+  $schema = $function($field);
+  $columns = array_keys($schema['columns']);  
+  $sample = t("return array(\n  0 => array(@columns),\n  // You'll usually want to stop here. Provide more values\n  // if you want your 'default value' to be multi-valued:\n  1 => array(@columns),\n  2 => ...\n);", array('@columns' => implode(', ', $columns)));
+            
+  $form['field']['settings']['allowed_values_php'] = array(
+    '#access' => user_access('Use PHP input for field settings (dangerous - grant with care)'),
+    '#type' => 'textarea',
+    '#title' => t('Allowed values PHP code'),
+    '#default_value' => $php_code,
+    '#description' => t('Advanced usage only: PHP code that returns a default value. Should not include &lt;?php ?&gt; delimiters. If this field is filled out, the value returned by this code will override any value specified above. Expected format: <pre>!sample</pre>To figure out the expected format, you can use the <em>devel load</em> tab provided by <a href="@link_devel">devel module</a> on a content page.', array(
+      '!sample' => $sample,
+      '@link_devel' => 'http://www.drupal.org/project/devel',
+    )),
+  );
+    
+}
+
+/**
  * Implementation of hook_field_default_value().
  *
  * Helper function to return the correct default value for a field
@@ -160,27 +255,19 @@ function cck_field_default_value($obj_type, $object, $field, $instance) {
 }
 
 /**
- * Helper function to identify inactive fields.
+ * Implements hook_content_migrate_field_alter().
+ * 
+ * Use this to tweak the conversion of field settings
+ * from the D6 style to the D7 style for specific
+ * situations not handled by basic conversion,
+ * as when field types or settings are changed.
+ * 
+ * $field_value['widget_type'] is available to
+ * see what widget type was originally used.
  */
-function cck_inactive_fields($type_name = NULL) {
-//  module_load_include('inc', 'field', 'includes/field.crud');
-//  if (!empty($type_name)) {
-//    $param = array('type_name' => $type_name);
-//    $inactive = array($type_name => array());
-//  }
-//  else {
-//    $param = array();
-//    $inactive = array();
-//  }
-//  $all = field_field_instance_read($param, TRUE);
-//  $active = array_keys(field_fields());
-//  foreach ($all as $field) {
-//    if (!in_array($field['field_name'], $active)) {
-//      $inactive[$field['type_name']][$field['field_name']] = field_field_instance_expand($field);
-//    }
-//  }
-//  if (!empty($type_name)) {
-//    return $inactive[$type_name];
-//  }
-//  return $inactive;
+function cck_content_migrate_field_alter(&$field_value) {
+  if (isset($field_value['settings']['allowed_values_php'])) {
+    $field_value['settings']['allowed_values_function'] = 'cck_allowed_values_php';
+    cck_field_set_setting('allowed_values_php', 'field', $field_value['settings']['allowed_values_php'], $field_value);
+  }
 }
