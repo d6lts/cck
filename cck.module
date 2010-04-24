@@ -40,6 +40,48 @@ function cck_form_alter(&$form, $form_state, $form_id) {
   }
 }
 
+/**
+ * Add fields to allowed values form to allow
+ * users to input a function or a PHP snippet
+ * that will return the allowed values.
+ */
+function cck_allowed_values_form(&$form, $form_state, $field) { 
+  
+  $php_code = cck_field_get_setting('allowed_values_php', 'field', $field);
+  $allowed_values_function = $form['field']['settings']['allowed_values_function']['#value'];
+  if (!empty($php_code)) {
+    $allowed_values_function = 'cck_allowed_values_php';
+  }
+  
+  // Add a field where users can specify a function 
+  // to return the allowed values list.
+  $form['field']['settings']['allowed_values_function'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Allowed values function'),
+    '#default_value' => $allowed_values_function,
+    '#description' => t('The name of a function that will return the allowed values list.'),
+  );
+        
+  // Add a field where users can specify some PHP
+  // code that will return the allowed values list.
+  $function = $field['module'] . '_field_schema';
+  $schema = $function($field);
+  $columns = array_keys($schema['columns']);  
+  $sample = t("return array(\n  0 => array(@columns),\n  // You'll usually want to stop here. Provide more values\n  // if you want your 'default value' to be multi-valued:\n  1 => array(@columns),\n  2 => ...\n);", array('@columns' => implode(', ', $columns)));
+            
+  $form['field']['settings']['allowed_values_php'] = array(
+    '#access' => user_access('Use PHP input for field settings (dangerous - grant with care)'),
+    '#type' => 'textarea',
+    '#title' => t('Allowed values PHP code'),
+    '#default_value' => $php_code,
+    '#description' => t('Advanced usage only: PHP code that returns a default value. Should not include &lt;?php ?&gt; delimiters. If this field is filled out, the value returned by this code will override any value specified above. Expected format: <pre>!sample</pre>To figure out the expected format, you can use the <em>devel load</em> tab provided by <a href="@link_devel">devel module</a> on a content page.', array(
+      '!sample' => $sample,
+      '@link_devel' => 'http://www.drupal.org/project/devel',
+    )),
+  );
+    
+}
+
 function cck_debug_field_info() {
   if (function_exists('dsm')) {
     module_load_include('inc', 'field', 'field.info');
