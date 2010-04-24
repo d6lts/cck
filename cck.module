@@ -266,7 +266,7 @@ function cck_field_default_value($obj_type, $object, $field, $instance) {
  * see what widget type was originally used.
  */
 function cck_content_migrate_field_alter(&$field_value) {
-  if (isset($field_value['settings']['allowed_values_php'])) {
+  if (!empty($field_value['settings']['allowed_values_php'])) {
     $field_value['settings']['allowed_values_function'] = 'cck_allowed_values_php';
     cck_field_set_setting('allowed_values_php', 'field', $field_value['settings']['allowed_values_php'], $field_value);
   }
