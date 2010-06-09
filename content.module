@@ -345,6 +345,7 @@ function content_nodeapi(&$node, $op, $teaser, $page) {
       break;
 
     case 'view':
+    case 'print':
       content_view($node, $teaser, $page);
       break;
   }

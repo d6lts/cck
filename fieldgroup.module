@@ -363,6 +363,7 @@ function fieldgroup_content_admin_field_remove_submit($form_id, &$form_values) {
 function fieldgroup_nodeapi(&$node, $op, $teaser, $page) {
   switch ($op) {
     case 'view':
+    case 'print':
       $context = $teaser ? 'teaser' : 'full';
       foreach (fieldgroup_groups($node->type) as $group_name => $group) {
         $label = $group['settings']['display']['label'] == 'above';

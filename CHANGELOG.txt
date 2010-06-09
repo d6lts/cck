@@ -5,6 +5,7 @@
 
 5--1.11
 =======
+- #195688 by jcnventura, add print option to nodeapi.
 - Add db_rewrite_sql() check to nodereference formatters.
 - #339753 by MrGeneYUss: fix invalid admin/content/types/[type]/edit path (not actually used in the UI).
 - #341538 by gianfrasoft: fix SQL errors on field creation on rare circumstances.
