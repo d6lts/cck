@@ -4,6 +4,7 @@ CCK 6.x-3.x
 ===========
 
 Features:
+- #692822 by Dave Reid, add authoring info and publishing options to CCK extra fields.
 - #428650 Conditional cache/menu rebuild for content CRUD methods.
 - #334945 Save default values when field is hidden because of access permissions.
 - #196421 Deleting unwanted multiple values / multiple values delta issues.
