@@ -179,6 +179,7 @@ function nodereference_field_formatter($field, $item, $formatter, $node) {
     }
     elseif ($referenced_node = node_load($item['nid'])) {
       $referenced_node->referencing_node = $node;
+      $referenced_node->referencing_field = $field;
       $titles[$item['nid']] = $referenced_node->title;
     }
   }
