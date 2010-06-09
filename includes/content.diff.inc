@@ -11,7 +11,7 @@
 /**
  * Implementation of hook_diff()
  */
-function content_diff(&$old_node, &$new_node) {
+function content_diff($old_node, $new_node) {
   $result = array();
   // Prevent against invalid 'nodes' built by broken 3rd party code.
   if (isset($new_node->type)) {
