@@ -9,6 +9,7 @@ Features:
 - #670344 by dagmar: Make CCK compatible with both, views 2 and views 3.
 
 Bugfixes:
+- #769592 by vkareh, add default values to nodeapi.
 - #714762 by Robbert, make diff module integration PHP5 compliant.
 - Add db_rewrite_sql() check to nodereference formatters.
 - #625768 CCK 6.x-2.6, got fatal error on update.php while running userreference_update_6002().
