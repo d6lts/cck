@@ -4,6 +4,7 @@ CCK 6.x-2.x
 ===========
 
 Features:
+- #780566 by stella, add drupal_alter() for content_allowed_values lists created by userreference and nodereference.
 - #692822 by Dave Reid, add authoring info and publishing options to CCK extra fields.
 - #670344 by dagmar: Make CCK compatible with both, views 2 and views 3.
 

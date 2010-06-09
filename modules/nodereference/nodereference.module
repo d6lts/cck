@@ -720,6 +720,9 @@ function nodereference_allowed_values($field) {
   foreach ($references as $key => $value) {
     $options[$key] = $value['rendered'];
   }
+  
+  drupal_alter('content_allowed_values', $options, $field);
+
   return $options;
 }
 
