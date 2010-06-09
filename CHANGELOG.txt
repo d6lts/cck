@@ -32,6 +32,7 @@ Features:
 - #670344 by dagmar: Make CCK compatible with both, views 2 and views 3.
 
 Bugfixes:
+- Add db_rewrite_sql() check to nodereference formatters.
 - #482774 Update breaks when CCK is disabled.
 - #479994 by quicksketch: fix "add more' button with devel.module's query logging (multigroup).
 - #499696 by DeFr - Noderefernce / Userreference: fix Views mode when the view has exposed filters.
