@@ -678,8 +678,6 @@ function node_reference_options_list($field) {
   foreach ($references as $key => $value) {
     $options[$key] = $value['title'];
   }
-  
-  drupal_alter('options_list', $options, $field);
 
   return $options;
 }
