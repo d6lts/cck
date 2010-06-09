@@ -24,6 +24,13 @@ class content_plugin_display_references extends content_plugin_display_simple {
     $options = $this->get_option('content_options');
 
     if ($options['string'] !== '') {
+      $like = $GLOBALS["db_type"] == 'pgsql' ? "ILIKE" : "LIKE";
+      $match_clauses = array(
+        'contains' => "$like '%%%s%%'",
+         'equals' => "= '%s'",
+        'starts_with' => "$like '%s%%'",
+       );
+    
       $match_clauses = array(
         'contains' => "LIKE '%%%s%%'",
         'equals' => "= '%s'",

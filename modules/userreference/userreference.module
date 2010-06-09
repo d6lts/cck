@@ -779,10 +779,11 @@ function _userreference_potential_references_standard($field, $string = '', $mat
   $join = array();
 
   if ($string !== '') {
-    $match_operators = array(
-      'contains' => "LIKE '%%%s%%'",
+    $like = $GLOBALS["db_type"] == 'pgsql' ? "ILIKE" : "LIKE";
+    $match_clauses = array(
+      'contains' => "$like '%%%s%%'",
       'equals' => "= '%s'",
-      'starts_with' => "LIKE '%s%%'",
+      'starts_with' => "$like '%s%%'",
     );
     $where[] = 'u.name '. (isset($match_operators[$match]) ? $match_operators[$match] : $match_operators['contains']);
     $args[] = $string;
