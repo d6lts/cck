@@ -4,6 +4,7 @@ CCK 6.x-2.x
 ===========
 
 Features:
+- #692822 by Dave Reid, add authoring info and publishing options to CCK extra fields.
 - #670344 by dagmar: Make CCK compatible with both, views 2 and views 3.
 
 Bugfixes:
