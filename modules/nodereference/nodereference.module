@@ -317,6 +317,7 @@ function theme_nodereference_formatter_full_teaser($element) {
     if ($referenced_node = node_load($element['#item']['nid'])) {
       if (_nodereference_titles($element['#item']['nid'])) {
         $referenced_node->referencing_node = $node;
+        $referenced_node->referencing_field = $field;
         $output = node_view($referenced_node, $element['#formatter'] == 'teaser');
       }
     }
