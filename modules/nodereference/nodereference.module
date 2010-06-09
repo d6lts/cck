@@ -315,10 +315,10 @@ function theme_nodereference_formatter_full_teaser($element) {
       return theme('nodereference_formatter_default', $element);
     }
     if ($referenced_node = node_load($element['#item']['nid'])) {
-      $referenced_node->referencing_node = $node;
-      $referenced_node->referencing_field = $field;
-      _nodereference_titles($element['#item']['nid'], $referenced_node->title);
-      $output = node_view($referenced_node, $element['#formatter'] == 'teaser');
+      if (_nodereference_titles($element['#item']['nid'])) {
+        $referenced_node->referencing_node = $node;
+        $output = node_view($referenced_node, $element['#formatter'] == 'teaser');
+      }
     }
   }
   return $output;
@@ -332,7 +332,7 @@ function theme_nodereference_formatter_full_teaser($element) {
 function _nodereference_titles($nid, $known_title = NULL) {
   static $titles = array();
   if (!isset($titles[$nid])) {
-    $title = $known_title ? $known_title : db_result(db_query("SELECT title FROM {node} WHERE nid=%d", $nid));
+    $title = $known_title ? $known_title : db_result(db_query(db_rewrite_sql("SELECT n.title FROM {node} n WHERE n.nid=%d"), $nid));
     $titles[$nid] = $title ? $title : '';
   }
   return $titles[$nid];
