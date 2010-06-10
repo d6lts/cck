@@ -783,7 +783,7 @@ function _userreference_potential_references_standard($field, $string = '', $mat
       'equals' => "= '%s'",
       'starts_with' => "$like '%s%%'",
     );
-    $where[] = 'u.name '. (isset($match_operators[$match]) ? $match_operators[$match] : $match_operators['contains']);
+    $where[] = 'u.name '. (isset($match_clauses[$match]) ? $match_clauses[$match] : $match_clauses['contains']);
     $args[] = $string;
   }
   elseif ($ids) {
