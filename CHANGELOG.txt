@@ -36,7 +36,7 @@ Bugfixes:
 - #470470 by neilnz, use iLIKE for postgres selects.
 - #769592 by vkareh, add default values to nodeapi.
 - #714762 by Robbert, make diff module integration PHP5 compliant.
-- Add db_rewrite_sql() check to nodereference formatters.
+- Add sanitization to nodereference formatters.
 - #482774 Update breaks when CCK is disabled.
 - #479994 by quicksketch: fix "add more' button with devel.module's query logging (multigroup).
 - #499696 by DeFr - Noderefernce / Userreference: fix Views mode when the view has exposed filters.
