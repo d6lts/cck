@@ -14,8 +14,8 @@ function node_reference_menu() {
   $items['node_reference/autocomplete'] = array(
     'title' => 'node_reference autocomplete',
     'page callback' => 'node_reference_autocomplete',
-    'access arguments' => array('access content'),
-    'type' => MENU_CALLBACK
+    'access callback' => 'node_reference_autocomplete_access',
+    'type' => MENU_CALLBACK,
   );
   return $items;
 }
@@ -117,6 +117,56 @@ function node_reference_field_validate($entity_type, $entity, $field, $instance,
 }
 
 /**
+ * Implements hook_field_prepare_view().
+ */
+function node_reference_field_prepare_view($entity_type, $entities, $field, $instances, $langcode, &$items) {
+  // @todo : do we need the static ?
+  $fetched_nodes = &drupal_static(__FUNCTION__, array());
+
+  // Extract nids to check.
+  $ids = array();
+  foreach ($items as $id => $entity_items) {
+    foreach ($entity_items as $delta => $item) {
+      if (is_array($item)) {
+        // Default to 'not accessible'.
+        $items[$id][$delta]['access'] = FALSE;
+        if (!empty($item['nid']) && is_numeric($item['nid'])) {
+          $ids[$item['nid']] = $item['nid'];
+        }
+      }
+    }
+  }
+
+  if ($ids) {
+    // Load information about nids that we haven't already loaded during
+    // this page request.
+    $missing_ids = array_diff($ids, array_keys($fetched_nodes));
+    if (!empty($missing_ids)) {
+      $query = db_select('node', 'n')
+        ->fields('n')
+        ->condition('n.nid', $missing_ids)
+        ->addTag('node_access');
+      if (!user_access('administer nodes')) {
+        $query->condition('status', 1);
+      }
+      $results = $query->execute();
+      foreach ($results as $row) {
+        $fetched_nodes[$row->nid] = $row;
+      }
+    }
+
+    foreach ($items as $id => $entity_items) {
+      foreach ($entity_items as $delta => $item) {
+        if (is_array($item) && !empty($item['nid']) && isset($fetched_nodes[$item['nid']]) && $item['nid']) {
+          $items[$id][$delta]['node'] = $fetched_nodes[$item['nid']];
+          $items[$id][$delta]['access'] = TRUE;
+        }
+      }
+    }
+  }
+}
+
+/**
  * Implements hook_field_is_empty().
  */
 function node_reference_field_is_empty($item, $field) {
@@ -156,36 +206,67 @@ function node_reference_field_formatter_info() {
 }
 
 /**
+ * Implements hook_field_formatter_prepare_view().
+ */
+function node_reference_field_formatter_prepare_view($entity_type, $entities, $field, $instances, $langcode, &$items, $displays) {
+  // Preload all nodes referenced by items using 'full entity' formatters.
+
+  // Collect nids to load.
+  // @todo : can we make clever use of the recusrion queue here ?
+  $nids = array();
+  foreach ($displays as $id => $display) {
+    if ($display['type'] == 'node_reference_full' || $display['type'] == 'node_reference_teaser') {
+      foreach ($items[$id] as $delta => $item) {
+        if ($item['access']) {
+          $nids[$item['nid']] = $item['nid'];
+        }
+      }
+    }
+  }
+  $nodes = node_load_multiple($nids);
+
+  // Add the loaded nodes to the items.
+  foreach ($displays as $id => $display) {
+    if ($display['type'] == 'node_reference_full' || $display['type'] == 'node_reference_teaser') {
+      foreach ($items[$id] as $delta => $item) {
+        if ($item['access']) {
+          $items[$id][$delta]['node'] = $nodes[$item['nid']];
+        }
+      }
+    }
+  }
+}
+
+/**
  * Implements hook_field_formatter_view().
  */
 function node_reference_field_formatter_view($entity_type, $entity, $field, $instance, $langcode, $items, $display) {
   $result = array();
 
-  // @todo Optimisation: use hook_field_formatter_prepare_view() to load
-  // node titles or full nodes in 'multiple' mode.
-
-  // Collect the list of node ids.
-  $nids = array();
-  foreach ($items as $delta => $item) {
-    $nids[$item['nid']] = $item['nid'];
-  }
-
   switch ($display['type']) {
     case 'node_reference_default':
     case 'node_reference_plain':
-      $titles = _node_reference_get_node_titles($nids);
       foreach ($items as $delta => $item) {
-        if ($display['type'] == 'node_reference_default') {
-          $result[$delta] = array(
-            '#type' => 'link',
-            '#title' => $titles[$item['nid']],
-            '#href' => 'node/' . $item['nid'],
-          );
-        }
-        else {
-          $result[$delta] = array(
-            '#markup' => check_plain($titles[$item['nid']]),
-          );
+        if ($item['access']) {
+          $node = $item['node'];
+          if ($display['type'] == 'node_reference_default') {
+            $uri = entity_uri('node', $node);
+            $result[$delta] = array(
+              '#type' => 'link',
+              '#title' => $node->title,
+              '#href' => $uri['path'],
+              '#options' => $uri['options'],
+            );
+          }
+          else {
+            $result[$delta] = array(
+              '#markup' => check_plain($node->title),
+            );
+          }
+          if (!$node->status) {
+            $result[$delta]['#prefix'] = '<span class="node-unpublished">';
+            $result[$delta]['#suffix'] = '</span>';
+          }
         }
       }
       break;
@@ -195,7 +276,7 @@ function node_reference_field_formatter_view($entity_type, $entity, $field, $ins
     case 'node_reference_full':
     case 'node_reference_teaser':
       // Extract build mode from the formatter name.
-      $build_mode = str_replace('node_reference_', '', $display['type']);
+      $view_mode = str_replace('node_reference_', '', $display['type']);
 
       // To prevent infinite recursion caused by reference cycles, we store
       // diplayed nodes in a recursion queue.
@@ -203,102 +284,64 @@ function node_reference_field_formatter_view($entity_type, $entity, $field, $ins
 
       // If no 'referencing entity' is set, we are starting a new 'reference
       // thread' and need to reset the queue.
+      // @todo Bug: $entity->referencing_entity on nodes referenced in a different
+      // thread on the page. E.g: 1 references 1+2 / 2 references 1+2 / visit homepage.
+      // We'd need a more accurate way...
       if (!isset($entity->referencing_entity)) {
         $recursion_queue = array();
       }
 
-      // If the entity being built is a node, add it to the recursion queue.
+      // The recursion queue only needs to track nodes.
       if ($entity_type == 'node') {
         list($id) = entity_extract_ids($entity_type, $entity);
-        $recursion_queue[] = $id;
+        $recursion_queue[$id] = $id;
       }
 
       // Check the recursion queue to determine which nodes should be fully
-      // displayed, and which nodes will ony be displayed as a title.
-      $nids_titles = array();
-      $nids_display = array();
-      foreach ($nids as $nid) {
-        if (in_array($nid, $recursion_queue)) {
-          $nids_titles[$nid] = $nid;
-        }
-        else {
-          $nids_display[$nid] = $nid;
+      // displayed, and which nodes will only be displayed as a title.
+      $nodes_display = array();
+      foreach ($items as $delta => $item) {
+        if ($item['access'] && !isset($recursion_queue[$item['nid']])) {
+          $nodes_display[$item['nid']] = $item['node'];
         }
       }
 
       // Load and build the fully displayed nodes.
-      if ($nids_display) {
-        $nodes = node_load_multiple($nids_display);
-        foreach ($nids_display as $nid) {
-          _node_reference_get_node_titles(array(), array($nodes[$nid]->title));
-          $nodes[$nid]->referencing_entity = $entity;
-          $nodes[$nid]->referencing_field = $field['field_name'];
+      if ($nodes_display) {
+        foreach ($nodes_display as $nid => $node) {
+          $nodes_display[$nid]->referencing_entity = $entity;
+          $nodes_display[$nid]->referencing_field = $field['field_name'];
         }
-        $nodes_built = node_view_multiple($nodes, $build_mode);
-      }
-
-      // Fetch the titles of the other nodes.
-      if ($nids_titles) {
-        $titles = _node_reference_get_node_titles($nids_titles);
+        $nodes_built = node_view_multiple($nodes_display, $view_mode);
       }
 
       // Assemble the render array.
       foreach ($items as $delta => $item) {
-        if (in_array($item['nid'], $nids_display)) {
-          $result[$delta] = $nodes_built['nodes'][$item['nid']];
-        }
-        else {
-          $result[$delta] = array(
-            '#type' => 'link',
-            '#title' => $titles[$item['nid']],
-            '#href' => 'node/' . $item['nid'],
-          );
+        if ($item['access']) {
+          if (isset($nodes_display[$item['nid']])) {
+            $result[$delta] = $nodes_built['nodes'][$item['nid']];
+          }
+          else {
+            $node = $item['node'];
+            $uri = entity_uri('node', $node);
+            $result[$delta] = array(
+              '#type' => 'link',
+              '#title' => $node->title,
+              '#href' => $uri['path'],
+              '#options' => $uri['options'],
+            );
+            if (!$node->status) {
+              $result[$delta]['#prefix'] = '<span class="node-unpublished">';
+              $result[$delta]['#suffix'] = '</span>';
+            }
+          }
         }
       }
-
       break;
   }
 
   return $result;
 }
-
-/**
- * Helper function for widgets and formatters.
- *
- * Store node titles collected in the curent request.
- */
-function _node_reference_get_node_titles($nids, $known_titles = array()) {
-  $titles = &drupal_static(__FUNCTION__, array());
-
-  // Save titles we receive.
-  $titles += $known_titles;
-
-  // Collect nids to retrieve from database.
-  $nids_query = array();
-  foreach ($nids as $nid) {
-    if (!isset($titles[$nid])) {
-      $nids_query[] = $nid;
-    }
-  }
-  if ($nids_query) {
-    $query = db_select('node', 'n')
-      ->fields('n', array('nid', 'title'))
-      ->condition('n.nid', $nids)
-      // @todo Node access should be checked in hook_field_sanitize() or
-      // hook_field_prepare_view().
-      ->addTag('node_access');
-    $titles += $query->execute()->fetchAllKeyed();
-  }
-
-  // Build the results array.
-  $return = array();
-  foreach ($nids as $nid) {
-    $return[$nid] = isset($titles[$nid]) ? $titles[$nid] : '';
-  }
-
-  return $return;
-}
-
 
 /**
  * Implements hook_field_widget_info().
@@ -366,7 +409,7 @@ function node_reference_field_widget_form(&$form, &$form_state, $field, $instanc
       $element += array(
         '#type' => 'textfield',
         '#default_value' => isset($items[$delta]['nid']) ? $items[$delta]['nid'] : NULL,
-        '#autocomplete_path' => $instance['widget']['settings']['autocomplete_path'] . '/' . $field['field_name'],
+        '#autocomplete_path' => $instance['widget']['settings']['autocomplete_path'] . '/' . $instance['entity_type'] . '/' . $field['field_name'],
         '#size' => $instance['widget']['settings']['size'],
         '#element_validate' => array('node_reference_autocomplete_validate'),
         '#value_callback' => 'node_reference_autocomplete_value',
@@ -420,8 +463,12 @@ function node_reference_autocomplete_validate($element, &$form_state, $form) {
       // the nid.
       list(, $title, $nid) = $matches;
       if (!empty($title)) {
-        $titles = _node_reference_get_node_titles(array($nid));
-        if ($title != $titles[$nid]) {
+        $real_title = db_select('node', 'n')
+          ->fields('n', array('title'))
+          ->condition('n.nid', $nid)
+          ->execute()
+          ->fetchField();
+        if (trim($title) != trim($real_title)) {
           form_error($element, t('%name: title mismatch. Please check your selection.', array('%name' => $instance['label'])));
         }
       }
@@ -535,25 +582,25 @@ function _node_reference_potential_references_standard($field, $string = '', $ma
     $args = array();
     switch ($match) {
       case 'contains':
-        $title_clause = 'n.title LIKE :match';
-        $args['match'] = '%' . $string . '%';
+        $op = 'LIKE';
+        $value = '%' . $string . '%';
         break;
 
       case 'starts_with':
-        $title_clause = 'n.title LIKE :match';
-        $args['match'] = $string . '%';
+        $op = 'LIKE';
+        $value = $string . '%';
         break;
 
       case 'equals':
       default: // no match type or incorrect match type: use "="
-        $title_clause = 'n.title = :match';
-        $args['match'] = $string;
+        $op = '=';
+        $value = $string . '%';
         break;
     }
-    $query->where($title_clause, $args);
+    $query->condition('n.title', $value, $op);
   }
   elseif ($ids) {
-    $query->condition($node_nid_alias, $ids, 'IN', $ids);
+    $query->condition('n.nid', $ids, 'IN', $ids);
   }
 
   $query
@@ -576,11 +623,22 @@ function _node_reference_potential_references_standard($field, $string = '', $ma
 }
 
 /**
+ * Menu access callback for the autocomplete path.
+ *
+ * Check for both 'edit' and 'view' access in the unlikely event
+ * a user has edit but not view access.
+ */
+function node_reference_autocomplete_access($entity_type, $field_name) {
+  return user_access('access content') && ($field = field_info_field($field_name)) && field_access('view', $field, $entity_type) && field_access('edit', $field, $entity_type);
+}
+
+/**
  * Menu callback for the autocomplete results.
  */
-function node_reference_autocomplete($field_name, $string = '') {
+function node_reference_autocomplete($entity_type, $field_name, $string = '') {
   $field = field_info_field($field_name);
 
+  // @todo broken - this is in $field['widget']['settings']['autocomplete_match'] - we'd need the $instance.
   $match = isset($field['widget']['autocomplete_match']) ? $field['widget']['autocomplete_match'] : 'contains';
   $matches = array();
 
@@ -637,8 +695,7 @@ function node_reference_preprocess_node(&$vars) {
  *
  * When preparing a translation, load any translations of existing
  * references.
- * @todo Core doc: "This hook may or may not survive in Field API".
- * So it is currently not verified.
+ * @todo Correctly implement after http://drupal.org/node/362021 is fixed.
  */
 function node_reference_field_prepare_translation($entity_type, $entity, $field, $instance, $langcode, &$items) {
   $addition = array();
@@ -684,12 +741,12 @@ function node_reference_options_list($field) {
 
 /**
  * Implements hook_content_migrate_field_alter().
- * 
+ *
  * Use this to tweak the conversion of field settings
  * from the D6 style to the D7 style for specific
  * situations not handled by basic conversion,
  * as when field types or settings are changed.
- * 
+ *
  * $field_value['widget_type'] is available to
  * see what widget type was originally used.
  */
@@ -704,7 +761,7 @@ function node_reference_content_migrate_field_alter(&$field_value) {
 
 /**
  * Implements hook_content_migrate_instance_alter().
- * 
+ *
  * Use this to tweak the conversion of instance or widget settings
  * from the D6 style to the D7 style for specific
  * situations not handled by basic conversion, as when
@@ -719,7 +776,7 @@ function node_reference_content_migrate_instance_alter(&$instance_value) {
       // with 'node_reference_'.
       foreach ($instance_value['display'] as $context => $settings) {
         $instance_value['display'][$context]['type'] = 'node_reference_'. $settings['type'];
-      } 
+      }
       switch ($instance_value['widget']['type']) {
         case 'nodereference_autocomplete':
           $instance_value['widget']['type'] = 'node_reference_autocomplete';
