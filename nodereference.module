@@ -189,7 +189,7 @@ function nodereference_field_formatter($field, $item, $formatter, $node) {
       $titles[$item['nid']] = $title ? $title : '';
     }
   }
-  if (empty($titles[$item['nid']]) {
+  if (empty($titles[$item['nid']])) {
     return '';
   }
   switch ($formatter) {
