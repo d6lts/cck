@@ -579,25 +579,20 @@ function _node_reference_potential_references_standard($field, $string = '', $ma
   }
 
   if ($string !== '') {
-    $args = array();
     switch ($match) {
       case 'contains':
-        $op = 'LIKE';
-        $value = '%' . $string . '%';
+        $query->condition('n.title', '%' . $string . '%', 'LIKE');
         break;
 
       case 'starts_with':
-        $op = 'LIKE';
-        $value = $string . '%';
+        $query->condition('n.title', $string . '%', 'LIKE');
         break;
 
       case 'equals':
       default: // no match type or incorrect match type: use "="
-        $op = '=';
-        $value = $string . '%';
+        $query->condition('n.title', $string);
         break;
     }
-    $query->condition('n.title', $value, $op);
   }
   elseif ($ids) {
     $query->condition('n.nid', $ids, 'IN', $ids);
