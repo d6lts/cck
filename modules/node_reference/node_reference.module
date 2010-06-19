@@ -149,15 +149,12 @@ function node_reference_field_prepare_view($entity_type, $entities, $field, $ins
       if (!user_access('administer nodes')) {
         $query->condition('status', 1);
       }
-      $results = $query->execute();
-      foreach ($results as $row) {
-        $fetched_nodes[$row->nid] = $row;
-      }
+      $fetched_nodes = $query->execute()->fetchAllAssoc('nid');
     }
 
     foreach ($items as $id => $entity_items) {
       foreach ($entity_items as $delta => $item) {
-        if (is_array($item) && !empty($item['nid']) && isset($fetched_nodes[$item['nid']]) && $item['nid']) {
+        if (is_array($item) && !empty($item['nid']) && isset($fetched_nodes[$item['nid']])) {
           $items[$id][$delta]['node'] = $fetched_nodes[$item['nid']];
           $items[$id][$delta]['access'] = TRUE;
         }
