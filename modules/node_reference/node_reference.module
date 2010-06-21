@@ -11,10 +11,12 @@
  */
 function node_reference_menu() {
   $items = array();
-  $items['node_reference/autocomplete'] = array(
+  $items['node_reference/autocomplete/%/%'] = array(
     'title' => 'node_reference autocomplete',
     'page callback' => 'node_reference_autocomplete',
+    'page arguments' => array(2, 3),
     'access callback' => 'node_reference_autocomplete_access',
+    'access arguments' => array(2, 3),
     'type' => MENU_CALLBACK,
   );
   return $items;
