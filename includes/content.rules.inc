@@ -335,7 +335,12 @@ function _content_rules_field_has_value($node_value, $value) {
   // Loop over multiple fields
   foreach ($value as $delta => $sub_value) {
     // Check if all properties of the value are there in the node value too
-    if (count(array_diff_assoc($sub_value, $node_value[$delta])) != 0) {
+    if (is_array($sub_value) && is_array($node_value[$delta])) {
+      if (count(array_diff_assoc($sub_value, $node_value[$delta])) != 0) {
+        return FALSE;
+      }
+    }
+    elseif ($sub_value !== $node_value[$delta]) {
       return FALSE;
     }
   }
