@@ -2252,7 +2252,10 @@ function content_access($op, $field, $account = NULL, $node = NULL) {
   if (is_null($account)) {
     $account = $user;
   }
-
+  // Check for valid field data.
+  if (!isset($field['field_name'])) {
+    return FALSE;
+  }
   $access = module_invoke_all('field_access', $op, $field, $account, $node);
   foreach ($access as $value) {
     if ($value === FALSE) {
