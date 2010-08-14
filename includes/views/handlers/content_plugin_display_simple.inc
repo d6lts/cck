@@ -27,14 +27,8 @@ class content_plugin_display_references extends content_plugin_display_simple {
       $like = $GLOBALS["db_type"] == 'pgsql' ? "ILIKE" : "LIKE";
       $match_clauses = array(
         'contains' => "$like '%%%s%%'",
-         'equals' => "= '%s'",
-        'starts_with' => "$like '%s%%'",
-       );
-    
-      $match_clauses = array(
-        'contains' => "LIKE '%%%s%%'",
         'equals' => "= '%s'",
-        'starts_with' => "LIKE '%s%%'",
+        'starts_with' => "$like '%s%%'",
       );
       $clause = isset($match_clauses[$options['match']]) ? $match_clauses[$options['match']] : $match_clauses['contains'];
       $alias = $this->view->query->ensure_table($options['table']);
