@@ -3,6 +3,17 @@
 CCK 6.x-2.x
 ===========
 
+
+
+CCK 6.x-2.8
+===========
+
+Bugfixes:
+- SA-CONTRIB-2010-088 follow up fix for nodereference_autocomplete_access() and content_access().
+
+CCK 6.x-2.7
+===========
+
 Features:
 - #692822 by Dave Reid, add authoring info and publishing options to CCK extra fields.
 - #670344 by dagmar: Make CCK compatible with both, views 2 and views 3.
@@ -14,6 +25,7 @@ Bugfixes:
 - Add db_rewrite_sql() check to nodereference formatters.
 - #625768 CCK 6.x-2.6, got fatal error on update.php while running userreference_update_6002().
 - #649106 by thekevinday: Fix content_copy_form_alter(), where $form_state argument is not passed by reference.
+- #446390 by mani.atico and fago: improve rules condition to be more robust when checking for empty values.
 
 CCK 6.x-2.6
 ===========
