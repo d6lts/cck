@@ -2489,7 +2489,7 @@ function content_content_extra_fields($type_name) {
       'description' => t('Comment module form.'),
       'weight' => 30
     );
-  }  
+  }
   if (module_exists('locale') && variable_get("language_content_type_$type_name", 0)) {
     $extra['language'] = array(
       'label' => t('Language'),
