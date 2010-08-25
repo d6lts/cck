@@ -3,7 +3,7 @@
 CCK 6.x-2.x
 ===========
 
-
+- #863226 by KarenS, make sure we have a function that will return inactive instances when other instances of the same field are still active.
 
 CCK 6.x-2.8
 ===========

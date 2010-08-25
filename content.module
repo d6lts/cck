@@ -2680,3 +2680,30 @@ function content_inactive_fields($type_name = NULL) {
   }
   return $inactive;
 }
+
+ 
+/**
+ * Helper function to identify inactive instances.
+ * This will be the same results as content_inactive_fields(),
+ * EXCEPT that his function will return inactive instances even 
+ * if the fields have other (shared) instances that are still active.
+ */
+function content_inactive_instances($type_name = NULL) {
+  module_load_include('inc', 'content', 'includes/content.crud');
+  if (!empty($type_name)) {
+    $param = array('type_name' => $type_name);
+    $inactive = array($type_name => array());
+  }
+  else {
+    $param = array();
+    $inactive = array();
+  }
+  $all = content_field_instance_read($param, TRUE);
+  foreach ($all as $field) {
+    $inactive[$field['type_name']][$field['field_name']] = content_field_instance_expand($field);
+  }
+  if (!empty($type_name)) {
+    return $inactive[$type_name];
+  }
+  return $inactive;
+}
