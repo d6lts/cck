@@ -4,6 +4,7 @@ CCK 6.x-3.x
 ===========
 
 Features:
+- #863226 by KarenS, make sure we have a function that will return inactive instances when other instances of the same field are still active.
 - #692822 by Dave Reid, add authoring info and publishing options to CCK extra fields.
 - #428650 Conditional cache/menu rebuild for content CRUD methods.
 - #334945 Save default values when field is hidden because of access permissions.
