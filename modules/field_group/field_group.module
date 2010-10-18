@@ -161,14 +161,14 @@ function _field_groups_extend_overview_table(&$form, &$form_state, $display_over
     $table['#parent_options'][$name] = $group->label;
   }
   $table['#parent_options']['_add_new_group'] = t('Add new group');
-  // Gather parenting data.
+
+  // Gather parenting data, and update existing rows accordingly.
   $parents = array();
   foreach ($groups as $name => $group) {
     foreach ($group->children as $child) {
       $parents[$child] = $name;
     }
   }
-  // Update existing rows accordingly.
   foreach (element_children($table) as $name) {
     $row = &$table[$name];
     $row['parent_wrapper']['parent']['#options'] = $table['#parent_options'];
@@ -179,6 +179,9 @@ function _field_groups_extend_overview_table(&$form, &$form_state, $display_over
   foreach ($groups as $name => $group) {
     $id = strtr($name, '_', '-');
     $js_rows_data[$id] = array('type' => 'group', 'name' => $name);
+    // A group cannot be selected as its own parent.
+    $parent_options = $table['#parent_options'];
+    unset($parent_options[$name]);
     $table[$name] = array(
       '#attributes' => array('class' => array('draggable', 'field-group'), 'id' => $id),
       '#row_type' => 'group',
@@ -198,7 +201,8 @@ function _field_groups_extend_overview_table(&$form, &$form_state, $display_over
       'parent_wrapper' => array(
         'parent' => array(
           '#type' => 'select',
-          '#options' =>  $table['#parent_options'],
+          '#options' =>  $parent_options,
+          '#empty_value' => '',
           '#default_value' => isset($parents[$name]) ? $parents[$name] : '',
           '#attributes' => array('class' => array('field-parent')),
           '#parents' => array('fields', $name, 'parent'),
@@ -354,6 +358,9 @@ function _field_groups_extend_overview_table(&$form, &$form_state, $display_over
 
   // Additional row: add new group.
   $name = '_add_new_group';
+  // A group cannot be selected as its own parent.
+  $parent_options = $table['#parent_options'];
+  unset($parent_options[$name]);
   $table[$name] = array(
     '#attributes' => array('class' => array('draggable', 'field-group', 'add-new')),
     '#row_type' => 'add_new_group',
@@ -378,7 +385,8 @@ function _field_groups_extend_overview_table(&$form, &$form_state, $display_over
     'parent_wrapper' => array(
       'parent' => array(
         '#type' => 'select',
-        '#options' => $table['#parent_options'],
+        '#options' => $parent_options,
+        '#empty_value' => '',
         '#attributes' => array('class' => array('field-parent')),
         '#prefix' => '<div class="add-new-placeholder">&nbsp;</div>',
         '#parents' => array('fields', $name, 'parent'),
