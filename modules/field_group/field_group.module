@@ -761,7 +761,6 @@ function field_group_field_attach_view_alter(&$element, $context) {
  * Attach groups to the form / object.
  */
 function field_group_attach_groups(&$element, $view_mode) {
-
   $entity_type = $element['#entity_type'];
   $bundle = $element['#bundle'];
 
