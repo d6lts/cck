@@ -26,8 +26,6 @@ Drupal.fieldUIDisplayOverview.group.prototype = {
   },
 
   regionChange: function (region, recurse) {
-    $.debug(this.region + ' --> ' + region, this.name);
-
     // Default recurse to true.
     recurse = (recurse == undefined) || recurse;
 
