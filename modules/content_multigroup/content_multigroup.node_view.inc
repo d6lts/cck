@@ -109,6 +109,11 @@ function _content_multigroup_fieldgroup_view(&$node, &$element, $group, $context
         $element['#attributes']['class'] = $group_class .' content-multigroup-display-table-multiple-columns';
         $element['#fields'] = $group_fields;
         break;
+      case 'ul':
+        $element['#theme'] = 'content_multigroup_display_ul';
+        $element['#attributes']['class'] = $group_class;
+        $element['#fields'] = $group_fields;
+        break;
     }
   }
 
@@ -234,4 +239,23 @@ function theme_content_multigroup_display_table_multiple($element) {
     }
   }
   return count($rows) ? theme('table', $headers, $rows, $element['#attributes']) : '';
+}
+
+/**
+ * Theme a subgroup of fields in an unordered list.
+ *
+ * No output is generated if all fields are empty.
+ */
+function theme_content_multigroup_display_ul($element) {
+  $items = array();
+  foreach (element_children($element) as $delta) {
+    foreach ($element['#fields'] as $field_name => $field) {
+      $item = drupal_render($element[$delta][$field_name]);
+      if (!empty($item)) {
+        $items[] = $item;
+      }  
+    }
+  }
+  $element['#attributes']['class'] .= ' content-multigroup';
+  return count($items) ? theme('item_list', $items, $element['#title'], 'ul', $element['#attributes']) : '';
 }

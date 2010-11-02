@@ -80,6 +80,10 @@ function content_multigroup_theme() {
       'arguments' => array('element' => NULL),
       'file' => 'content_multigroup.node_view.inc',
     ),
+    'content_multigroup_display_ul' => array(
+      'arguments' => array('element' => NULL),
+      'file' => 'content_multigroup.node_view.inc',
+    ),
   );
 }
 

@@ -5,3 +5,4 @@ dependencies[] = content
 dependencies[] = fieldgroup
 package = CCK
 core = 6.x
+

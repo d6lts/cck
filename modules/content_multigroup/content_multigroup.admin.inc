@@ -300,6 +300,7 @@ function content_multigroup_display_overview_form(&$form, &$form_state) {
     'hr' => t('Horizontal line'),
     'table-single' => t('Table - Single column'),
     'table-multiple' => t('Table - Multiple columns'),
+    'ul' => t('Unordered List'),
   );
   foreach (fieldgroup_groups($type_name) as $group_name => $group) {
     if ($group['group_type'] != 'multigroup') {
