@@ -52,7 +52,13 @@ function node_reference_field_schema($field) {
   );
   return array(
     'columns' => $columns,
-    'indexes' => array('nid' => array('nid')), // useful to find back-references
+    'indexes' => array('nid' => array('nid')),
+    'foreign keys' => array(
+      'nid' => array(
+        'table' => 'node',
+        'columns' => array('nid' => 'nid'),
+      ),
+    ),
   );
 }
 
