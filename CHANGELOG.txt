@@ -34,6 +34,7 @@ Features:
 - #670344 by dagmar: Make CCK compatible with both, views 2 and views 3.
 
 Bugfixes:
+- #887742 by yched: fix notices in _content_get_formatter() in some Views
 - #470470 by neilnz, use iLIKE for postgres selects.
 - #769592 by vkareh, add default values to nodeapi.
 - #714762 by Robbert, make diff module integration PHP5 compliant.
