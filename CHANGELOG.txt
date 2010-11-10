@@ -3,7 +3,8 @@
 CCK 6.x-2.x
 ===========
 
-- #863226 by KarenS, make sure we have a function that will return inactive instances when other instances of the same field are still active.
+- #863226 by KarenS: make sure we have a function that will return inactive instances when other instances of the same field are still active.
+- #887742 by yched: fix notices in _content_get_formatter() in some Views
 
 CCK 6.x-2.8
 ===========
