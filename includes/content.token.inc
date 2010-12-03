@@ -24,7 +24,10 @@ function token_content_build_modes() {
 function content_token_values($type, $object = NULL) {
   $tokens = array();
   if ($type == 'node') {
-    $node = $object;
+    // Let PHP free the $node object when we are done. Working directly on the
+    // incoming $object causes memory leak issues on long-running scripts such
+    // as migrations. See http://drupal.org/node/736440.
+    $node = clone $object;
     // Prevent against invalid 'nodes' built by broken 3rd party code.
     if (isset($node->type)) {
       $type = content_types($node->type);
