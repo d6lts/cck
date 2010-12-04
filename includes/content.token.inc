@@ -29,7 +29,7 @@ function content_token_values($type, $object = NULL) {
       // Let PHP free the $node object when we are done. Working directly on the
       // incoming $object causes memory leak issues on long-running scripts such
       // as migrations. See http://drupal.org/node/736440.
-      $node = clone $object;
+      $node = drupal_clone($object);
       $type = content_types($node->type);
       $node->build_mode = 'token';
       $node->content = array();
