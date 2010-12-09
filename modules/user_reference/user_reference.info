@@ -1,6 +1,0 @@
-; $Id$
-name = User Reference
-description = Defines a field type for referencing a user from a node.
-files[]=user_reference.module
-package = CCK
-core = 7.x
