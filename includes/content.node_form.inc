@@ -322,7 +322,7 @@ function content_add_more_js($type_name_url, $field_name) {
   $form_element = content_field_form($form, $form_state, $field);
   // Let other modules alter it.
   // We pass an empty array as hook_form_alter's usual 'form_state' parameter,
-  // instead of $form_atate (for reasons we may never remember).
+  // instead of $form_state (for reasons we may never remember).
   // However, this argument is still expected to be passed by-reference
   // (and PHP5.3 will throw an error if it isn't.) This leads to:
   $data = &$form_element;
