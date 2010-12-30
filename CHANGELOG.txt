@@ -34,6 +34,7 @@ Features:
 - #670344 by dagmar: Make CCK compatible with both, views 2 and views 3.
 
 Bugfixes:
+- #894880 by yched: fix notices in check_plain() when rendering empty 'plain text' values
 - #705512 by cha0s, roderick: 'add more' button - fix PHP5.3 compatibility
 - #736440 by yched, dhthwy: fix memory leaks on long running migration scripts (e.g. migrate.module)
 - #887742 by yched: fix notices in _content_get_formatter() in some Views

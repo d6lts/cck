@@ -171,7 +171,7 @@ function text_field($op, &$node, $field, &$items, $teaser, $page) {
           $text = isset($item['value']) ? check_markup($item['value'], $item['format'], $check) : '';
         }
         else {
-          $text = check_plain($item['value']);
+          $text = isset($item['value']) ? check_plain($item['value']) : '';
         }
         $items[$delta]['safe'] = $text;
       }
