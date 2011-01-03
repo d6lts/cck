@@ -2357,7 +2357,7 @@ function theme_content_exclude($content, $object, $context) {
  * TODO : this should live in theme/theme.inc, but then the preprocessor
  * doesn't get called when the theme overrides the template. Bug in theme layer ?
  */
-function content_preprocess_content_field(&$variables) {
+function template_preprocess_content_field(&$variables) {
   $element = $variables['element'];
   $field = content_fields($element['#field_name'], $element['#node']->type);
 

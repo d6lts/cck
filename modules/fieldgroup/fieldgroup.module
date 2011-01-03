@@ -881,7 +881,7 @@ function theme_fieldgroup_fieldset($element) {
  *
  * @see fieldgroup-simple.tpl.php
  */
-function fieldgroup_preprocess_fieldgroup_simple(&$vars) {
+function template_preprocess_fieldgroup_simple(&$vars) {
   $element = $vars['element'];
 
   $vars['group_name'] = $element['#group_name'];
