@@ -35,6 +35,7 @@ Features:
 - #670344 by dagmar: Make CCK compatible with both, views 2 and views 3.
 
 Bugfixes:
+- #435520 by yched, sun: Fix text fields rendered as 'n/a' in some cases
 - #728472 by Darren Oh : Ensure the module's preprocess functions run first
 - #894880 by yched: fix notices in check_plain() when rendering empty 'plain text' values
 - #705512 by cha0s, roderick: 'add more' button - fix PHP5.3 compatibility
