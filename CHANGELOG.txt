@@ -4,6 +4,7 @@ CCK 6.x-3.x
 ===========
 
 Features:
+- #932680 by Dave Reid: Token integration : allow using of Token API's new $options
 - #863226 by KarenS, make sure we have a function that will return inactive instances when other instances of the same field are still active.
 - #692822 by Dave Reid, add authoring info and publishing options to CCK extra fields.
 - #428650 Conditional cache/menu rebuild for content CRUD methods.
