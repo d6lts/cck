@@ -6,9 +6,10 @@ CCK 6.x-2.x
 - #863226 by KarenS: make sure we have a function that will return inactive instances when other instances of the same field are still active.
 - #887742 by yched: fix notices in _content_get_formatter() in some Views
 - #736440 by yched, dhthwy: fix memory leaks on long running migration scripts (e.g. migrate.module)
-- #705512 by cha0s, roderick: 'add more' button - fix PHP5.3 compatibility
+- #705512 by cha0s, roderick: 'add more' button - fix PHP 5.3 compatibility
 - #894880 by yched: fix notices in check_plain() when rendering empty 'plain text' values
-- #728472 by Darren Oh : Ensure the module's preprocess functions run first
+- #728472 by Darren Oh: Ensure the module's preprocess functions run first
+- #932680 by Dave Reid: Token integration : allow using of Token API's new $options param
 
 CCK 6.x-2.8
 ===========

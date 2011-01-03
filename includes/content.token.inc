@@ -21,7 +21,7 @@ function token_content_build_modes() {
 }
 
 // Two helper functions that generate appropriate tokens for CCK-added fields.
-function content_token_values($type, $object = NULL) {
+function content_token_values($type, $object = NULL, $options = array()) {
   $tokens = array();
   if ($type == 'node') {
     // Prevent against invalid 'nodes' built by broken 3rd party code.
@@ -43,7 +43,7 @@ function content_token_values($type, $object = NULL) {
         $items = $node->{$field['field_name']};
         $function = $field_types[$field['type']]['module'] . '_token_values';
         if (!empty($items) && function_exists($function)) {
-          $token_values = $function('field', $items);
+          $token_values = $function('field', $items, $options);
           foreach ($token_values as $token => $value) {
             $tokens[$field['field_name'] .'-'. $token] = $value;
           }
@@ -92,7 +92,7 @@ if (module_exists('nodereference')) {
     }
   }
 
-  function nodereference_token_values($type, $object = NULL) {
+  function nodereference_token_values($type, $object = NULL, $options = array()) {
     if ($type == 'field') {
       $item = $object[0];
 
@@ -121,7 +121,7 @@ if (module_exists('number')) {
     }
   }
 
-  function number_token_values($type, $object = NULL) {
+  function number_token_values($type, $object = NULL, $options = array()) {
     if ($type == 'field') {
       $item = $object[0];
 
@@ -145,7 +145,7 @@ if (module_exists('text')) {
     }
   }
 
-  function text_token_values($type, $object = NULL) {
+  function text_token_values($type, $object = NULL, $options = array()) {
     if ($type == 'field') {
       $item = $object[0];
 
@@ -171,7 +171,7 @@ if (module_exists('userreference')) {
     }
   }
 
-  function userreference_token_values($type, $object = NULL) {
+  function userreference_token_values($type, $object = NULL, $options = array()) {
     if ($type == 'field') {
       $item = $object[0];
 
