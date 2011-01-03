@@ -9,8 +9,10 @@ CCK 6.x-2.x
 - #705512 by cha0s, roderick: 'add more' button - fix PHP 5.3 compatibility
 - #894880 by yched: fix notices in check_plain() when rendering empty 'plain text' values
 - #728472 by Darren Oh: Ensure the module's preprocess functions run first
-- #932680 by Dave Reid: Token integration : allow using of Token API's new $options param
+- #932680 by Dave Reid: Token integration - allow using of Token API's new $options param
+- #986612 by Dave Reid: Token integration - fix variable name clash (harmless in normal cases)
 - #435520 by yched, sun: Fix text fields rendered as 'n/a' in some cases
+
 
 CCK 6.x-2.8
 ===========

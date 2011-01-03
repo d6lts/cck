@@ -30,7 +30,7 @@ function content_token_values($type, $object = NULL, $options = array()) {
       // incoming $object causes memory leak issues on long-running scripts such
       // as migrations. See http://drupal.org/node/736440.
       $node = drupal_clone($object);
-      $type = content_types($node->type);
+      $content_type = content_types($node->type);
       $node->build_mode = 'token';
       $node->content = array();
       content_view($node);
@@ -39,7 +39,7 @@ function content_token_values($type, $object = NULL, $options = array()) {
       content_alter($node);
 
       $field_types = _content_field_types();
-      foreach ($type['fields'] as $field) {
+      foreach ($content_type['fields'] as $field) {
         $items = $node->{$field['field_name']};
         $function = $field_types[$field['type']]['module'] . '_token_values';
         if (!empty($items) && function_exists($function)) {
