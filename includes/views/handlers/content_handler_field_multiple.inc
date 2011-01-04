@@ -191,14 +191,19 @@ class content_handler_field_multiple extends content_handler_field {
    * Fields rendered with the 'group multiple' option use <div> markers,
    * and thus shouldn't be wrapped in a <span>.
    */
-  function element_type() {
+  function element_type($none_supported = FALSE, $default_empty = FALSE) {
+    // If this is not a grouped field, use the parent method.
     if (!$this->defer_query) {
-      return parent::element_type();
+      return parent::element_type($none_supported, $default_empty);
     }
 
-    if (isset($this->definition['element type'])) {
-      return $this->definition['element type'];
+    // The 'element_type' property denotes Views 3.x ('semantic views'
+    // functionnality). If the property is set, and not set to '' ("default"),
+    // let the generic method handle the output.
+    if (isset($this->options['element_type']) && $this->options['element_type'] !== '') {
+      return parent::element_type($none_supported, $default_empty);
     }
+
     return 'div';
   }
 

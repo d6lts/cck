@@ -12,7 +12,7 @@ CCK 6.x-2.x
 - #932680 by Dave Reid: Token integration - allow using of Token API's new $options param
 - #986612 by Dave Reid: Token integration - fix variable name clash (harmless in normal cases)
 - #435520 by yched, sun: Fix text fields rendered as 'n/a' in some cases
-
+- #1008184 by merlinofchaos, bojanz, dereine, yched: Adapt to Views 3 "semantic views" feature (backwards compatible with Views 2)
 
 CCK 6.x-2.8
 ===========
