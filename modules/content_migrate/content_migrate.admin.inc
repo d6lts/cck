@@ -197,6 +197,7 @@ function _content_migrate_batch_process_create_fields($field_names) {
     // Create the field and store the new field 
     // definition in $context so we can retrieve it later. 
     try {
+      // @bug mradcliffe - $data doesn't seem to exist in this context..
       unset($data['field']['columns']);
       unset($data['field']['db_storage']); 
       $field = field_create_field($field_value);
@@ -209,7 +210,7 @@ function _content_migrate_batch_process_create_fields($field_names) {
       foreach ($instance_values as $bundle => $instance_value) {
         try {
           $instance = field_create_instance($instance_value); 
-          $context['instances'][$fieldname][$instance['bundle']] = $instance;
+          $context['instances'][$field_name][$instance['bundle']] = $instance;
           drupal_set_message(t("Created instance of @field_name in bundle @bundle.", array(
             '@field_name' => $field_name, '@bundle' => $type_names[$instance['bundle']])));
         }
@@ -248,34 +249,34 @@ function _content_migrate_batch_process_migrate_data($field_name) {
     $new_revision_table = content_migrate_new_revision($field);
     $new_columns        = content_migrate_new_columns($field);
     
-    $query = db_select($old_table, 'old');
+    $query = db_select($old_table, 'old_table');
     
-    // We need a new columns for bundle name, entity type, and language.
+    // We need new columns for bundle name, entity type, and language.
     $query->addExpression("'". $instance_value['bundle'] ."'", 'bundle');
-    $query->addExpression(1, 'etid');
+    $query->addExpression("'node'", 'entity_type');
     $query->addExpression("'". LANGUAGE_NONE ."'", 'language');
     
     // There are new names for what were the nid and vid columns.
-    $query->addField('old', 'nid', 'entity_id');
-    $query->addField('old', 'vid', 'revision_id');
+    $query->addField('old_table', 'nid', 'entity_id');
+    $query->addField('old_table', 'vid', 'revision_id');
     
     // Add the field columns to the select query.
     // Use the new column names as aliases in case the 
     // name changed, hopefully none did.
     foreach ($old_cols as $key => $col) {
-      $query->addField('old', $col, $new_columns[$key]);
+      $query->addField('old_table', $col, $new_columns[$key]);
     }
     
     // Add delta, or construct it if missing.
     if (content_migrate_storage_type($field_value, $instance_value) == CONTENT_DB_STORAGE_PER_FIELD) {
-      $query->addField('old', 'delta', 'delta');
+      $query->addField('old_table', 'delta', 'delta');
     }
     else {
       $query->addExpression(0, 'delta');
     }
     
     // Now copy the data to the new field tables.
-    try {
+//    try {
       db_insert($new_table)
         ->from($query)
         ->execute();
@@ -284,11 +285,11 @@ function _content_migrate_batch_process_migrate_data($field_name) {
         ->execute();
       drupal_set_message(t('Data migrated for field @field_name in bundle @bundle.', array(
         '@field_name' => $field_name, '@bundle' => $instance_value['bundle'])));
-    }
+/*    }
     catch (Exception $e) {
       drupal_set_message(t('Data could not be migrated for field @field_name in bundle @bundle.', array(
         '@field_name' => $field_name, '@bundle' => $instance_value['bundle'])), 'error');
       drupal_set_message($e, 'error');
-    }
+    } */
   }
 }

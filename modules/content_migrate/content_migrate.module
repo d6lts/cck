@@ -127,7 +127,7 @@ function content_migrate_get_instance_values($bundle = NULL, $field_name = NULL)
       foreach (array('widget_settings', 'display_settings', 'global_settings') as $key) {
         $instance_value[$key] = (!empty($instance_value[$key])) ? (array) unserialize($instance_value[$key]) : array();
       }
-    
+     
       // Build instance values.
       $instance_value['bundle'] = $instance_value['type_name'];
       $instance_value['active'] = $instance_value['widget_active'];
@@ -136,8 +136,10 @@ function content_migrate_get_instance_values($bundle = NULL, $field_name = NULL)
       // Core does not support this, but retain it so 
       // another module can do something with it
       // in drupal_alter.
-      $instance_value['settings']['default_value_php'] = $instance_value['widget_settings']['default_value_php'];
-    
+      if (isset($instance_value['widget_settings']['default_value_php'])) {
+        $instance_value['settings']['default_value_php'] = $instance_value['widget_settings']['default_value_php'];
+      }
+
       // Build widget values.
       $instance_value['widget'] = array();
       
@@ -151,34 +153,41 @@ function content_migrate_get_instance_values($bundle = NULL, $field_name = NULL)
     
       // Build display values.
       $instance_value['display'] = $instance_value['display_settings'];
-      $label = $instance_value['display']['label'];
-      unset($instance_value['display']['label']);
-      foreach ($instance_value['display'] as $context => $settings) {
+      $label = $instance_value['display_settings']['label'];
+      foreach ($instance_value['display_settings'] as $context => $settings) {
+
+        // @TODO Multigroup fields have some unexpected elements, we need to work out what should happen to them.
+        if ($context == 'parent' || $context == 'weight') {
+          continue;
+        }
         $instance_value['display'][$context]['label'] = $label['format'];
         
         // The format used in D6 may not match the formatter in D7.
         // Fix it using drupal_alter().
         $instance_value['display'][$context]['type'] = $settings['format'];
         $instance_value['display'][$context]['settings'] = field_info_formatter_settings($settings['format']);
-        unset($instance_value['display'][$context]['exclude'], $instance_value['display'][$context]['format']);
+
       }
-    
+      
       // Unset unneeded values.
-      unset($instance_value['type_name'], $instance_value['global_settings'], $instance_value['widget_settings'], $instance_value['display_settings'], $instance_value['widget_module'], $instance_value['widget_active'], $instance_value['widget']['settings']['default_value'], $instance_value['widget']['settings']['default_value_php']);
-    
+      unset($instance_value['type_name'], $instance_value['global_settings'], $instance_value['widget_settings'], $instance_value['display_settings'], $instance_value['widget_module'], $instance_value['widget_active']);
+      
+      // Unset some values that don't exist on all fields.
+      if (isset($instance_value['widget']['settings']['default_value'])) unset($instance_value['widget']['settings']['default_value']);
+      if (isset($instance_value['widget']['settings']['default_value_php'])) unset($instance_value['widget']['settings']['default_value_php']);
+
       // Let modules change these values.
       drupal_alter('content_migrate_instance', $instance_value);
       
       // Get rid of this value once CCK or some other module has handled it.
-      unset($instance_value['settings']['default_value_php']);
-    
+      if (isset($instance_value['settings']['default_value_php'])) unset($instance_value['settings']['default_value_php']);
+
       // Add instance information to instance array.
       $instance_values['instances'][$instance_value['bundle']][$instance_value['field_name']] = $instance_value;
       $instance_values['fields'][$instance_value['field_name']][$instance_value['bundle']] = $instance_value;
       
     }
   }
-  
   if (!empty($bundle)) {
     if (!empty($field_name)) {
       return $instance_values['instances'][$bundle][$field_name];
