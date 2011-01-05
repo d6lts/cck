@@ -197,13 +197,17 @@ function _content_migrate_batch_process_create_fields($field_names) {
     // Create the field and store the new field 
     // definition in $context so we can retrieve it later. 
     try {
-      // @bug mradcliffe - $data doesn't seem to exist in this context..
-      unset($data['field']['columns']);
-      unset($data['field']['db_storage']); 
-      $field = field_create_field($field_value);
-      $context['fields'][$field_name] = $field;
-      drupal_set_message(t("Created field @field_name", array('@field_name' => $field_name))); 
-       // Create each of the new instances and store 
+      // A shared field may already have been created, check first.
+      $field = field_info_field('node', $field_value['field_name']);
+      if (empty($field)) {
+        unset($field_value['columns']);
+        unset($field_value['db_storage']);   
+        $field = field_create_field($field_value);
+        $context['fields'][$field_name] = $field;
+        drupal_set_message(t("Created field @field_name", array('@field_name' => $field_name)));
+      }
+ 
+      // Create each of the new instances and store 
       // the new instance definitions in $context.
       $instance_values = content_migrate_get_instance_values(NULL, $field_name);
 
@@ -213,6 +217,7 @@ function _content_migrate_batch_process_create_fields($field_names) {
           $context['instances'][$field_name][$instance['bundle']] = $instance;
           drupal_set_message(t("Created instance of @field_name in bundle @bundle.", array(
             '@field_name' => $field_name, '@bundle' => $type_names[$instance['bundle']])));
+          
         }
         catch (Exception $e) {
           drupal_set_message(t('Error creating instance of @field_name in bundle @bundle.', array(
@@ -241,7 +246,7 @@ function _content_migrate_batch_process_migrate_data($field_name) {
   
   $field = field_info_field($field_name);
   //$instances = field_read_instances(array('field_id' => $field['id']));
-  foreach ($instance_values as $instance_value) {
+  foreach ($instance_values as $bundle => $instance_value) {
     
     $old_table          = content_migrate_old_table($field_value, $instance_value);
     $old_cols           = content_migrate_old_columns($field_value, $instance_value);
@@ -250,9 +255,11 @@ function _content_migrate_batch_process_migrate_data($field_name) {
     $new_columns        = content_migrate_new_columns($field);
     
     $query = db_select($old_table, 'old_table');
+    $query->join('node', 'n', 'old_table.nid=n.nid');
+    $query->condition('type', $bundle);
     
     // We need new columns for bundle name, entity type, and language.
-    $query->addExpression("'". $instance_value['bundle'] ."'", 'bundle');
+    $query->addExpression("'$bundle'", 'bundle');
     $query->addExpression("'node'", 'entity_type');
     $query->addExpression("'". LANGUAGE_NONE ."'", 'language');
     
@@ -268,13 +275,14 @@ function _content_migrate_batch_process_migrate_data($field_name) {
     }
     
     // Add delta, or construct it if missing.
-    if (content_migrate_storage_type($field_value, $instance_value) == CONTENT_DB_STORAGE_PER_FIELD) {
+    // Shared, non-multiple fields do not have a delta but are still in per-field tables.
+    if ($field_value['cardinality'] != 1 && content_migrate_storage_type($field_value, $instance_value) == CONTENT_DB_STORAGE_PER_FIELD) {
       $query->addField('old_table', 'delta', 'delta');
     }
     else {
       $query->addExpression(0, 'delta');
     }
-    
+
     // Now copy the data to the new field tables.
 //    try {
       db_insert($new_table)
@@ -284,7 +292,7 @@ function _content_migrate_batch_process_migrate_data($field_name) {
         ->from($query)
         ->execute();
       drupal_set_message(t('Data migrated for field @field_name in bundle @bundle.', array(
-        '@field_name' => $field_name, '@bundle' => $instance_value['bundle'])));
+        '@field_name' => $field_name, '@bundle' => $bundle)));
 /*    }
     catch (Exception $e) {
       drupal_set_message(t('Data could not be migrated for field @field_name in bundle @bundle.', array(
