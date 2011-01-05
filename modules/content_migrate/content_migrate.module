@@ -337,6 +337,22 @@ function content_migrate_content_migrate_field_alter(&$field_value) {
       if (empty($field_value['settings']['max_length'])) {
         $field_value['settings']['max_length'] = 255;
       }
+
+      // The allowed values list should now be stored as an array.
+      $allowed_values = array();
+      if (!empty($field_value['settings']['allowed_values'])) {
+        $allowed_values;
+        foreach (explode("\n", $field_value['settings']['allowed_values']) as $value) {
+          if (empty($value)) continue;
+          if (strstr($value, '|')) {
+            $parts = explode('|', $value);
+            $allowed_values[trim($parts[0])] = trim($parts[1]);
+          }
+          else {
+            $allowed_values[] = trim($value);
+          }
+        }
+      }
       
       // Text fields using optionwidgets are
       // now List fields.
@@ -345,10 +361,12 @@ function content_migrate_content_migrate_field_alter(&$field_value) {
         case 'optionwidgets_select':
           $field_value['type'] = 'list_text';
           $field_value['module'] = 'list';
+          $field_value['settings']['allowed_values'] = $allowed_values;
           break;
         case 'optionwidgets_onoff':
           $field_value['type'] = 'list_boolean';
           $field_value['module'] = 'list';
+          $field_value['settings']['allowed_values'] = $allowed_values;
           break;  
         case 'text_textarea':
           $field_value['type'] = 'text_long';
