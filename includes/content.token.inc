@@ -39,13 +39,13 @@ function content_token_values($type, $object = NULL, $options = array()) {
       content_alter($node);
 
       $field_types = _content_field_types();
-      foreach ($content_type['fields'] as $field) {
-        $items = $node->{$field['field_name']};
+      foreach ($content_type['fields'] as $field_name => $field) {
+        $items = isset($node->{$field_name}) ? $node->{$field_name} : array();
         $function = $field_types[$field['type']]['module'] . '_token_values';
         if (!empty($items) && function_exists($function)) {
-          $token_values = $function('field', $items, $options);
+          $token_values = (array) $function('field', $items, $options);
           foreach ($token_values as $token => $value) {
-            $tokens[$field['field_name'] .'-'. $token] = $value;
+            $tokens[$field_name .'-'. $token] = $value;
           }
         }
       }
