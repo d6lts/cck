@@ -193,7 +193,7 @@ function _content_migrate_batch_process_create_fields($field_names) {
   foreach ($field_names as $field_name) {
     $context['message'] = "creating field $field_name";
     $field_value = content_migrate_get_field_values($field_name);
-    
+
     // Create the field and store the new field 
     // definition in $context so we can retrieve it later. 
     try {
@@ -203,10 +203,10 @@ function _content_migrate_batch_process_create_fields($field_names) {
       $field = field_create_field($field_value);
       $context['fields'][$field_name] = $field;
       drupal_set_message(t("Created field @field_name", array('@field_name' => $field_name))); 
-      
-      // Create each of the new instances and store 
+       // Create each of the new instances and store 
       // the new instance definitions in $context.
       $instance_values = content_migrate_get_instance_values(NULL, $field_name);
+
       foreach ($instance_values as $bundle => $instance_value) {
         try {
           $instance = field_create_instance($instance_value); 
