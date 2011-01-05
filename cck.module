@@ -70,6 +70,7 @@ function cck_allowed_values_form(&$form, $form_state, $field) {
         
   // Add a field where users can specify some PHP
   // code that will return the allowed values list.
+  module_load_include('install', $field['module']);
   $function = $field['module'] . '_field_schema';
   $schema = $function($field);
   $columns = array_keys($schema['columns']);  
@@ -113,6 +114,7 @@ function cck_default_value_form(&$form, $form_state, $field) {
         
   // Add a field where users can specify some PHP
   // code that will return the default value.
+  module_load_include('install', $field['module']);
   $function = $field['module'] . '_field_schema';
   $schema = $function($field);
   $columns = array_keys($schema['columns']);  
