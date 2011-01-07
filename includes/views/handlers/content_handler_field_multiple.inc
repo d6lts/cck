@@ -204,6 +204,14 @@ class content_handler_field_multiple extends content_handler_field {
       return parent::element_type($none_supported, $default_empty);
     }
 
+    if ($default_empty) {
+      return '';
+    }
+
+    if (isset($this->definition['element type'])) {
+      return $this->definition['element type'];
+    }
+
     return 'div';
   }
 

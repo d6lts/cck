@@ -145,6 +145,14 @@ class content_handler_field extends views_handler_field_node {
       return parent::element_type($none_supported, $default_empty);
     }
 
+    if ($default_empty) {
+      return '';
+    }
+
+    if (isset($this->definition['element type'])) {
+      return $this->definition['element type'];
+    }
+
     // TODO Figure out exactly when to return a div or a <span>. Any field
     // that ever needs to be shown inline in Views UI. It needs to return
     // a div for textareas to prevent wrapping a <span> around a <p>.
