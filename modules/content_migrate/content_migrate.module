@@ -425,6 +425,11 @@ function content_migrate_content_migrate_field_alter(&$field_value, $instance_va
       // default_image is now a field setting.
       $field_value['settings']['default_image'] = $instance_value['widget']['settings']['default_image'];
       break;
+    case 'filefield':
+      // Module names and types changed.
+      $field_value['module'] = 'file';
+      $field_value['type'] = 'file';
+      break;
   }
 }
 
@@ -482,6 +487,19 @@ function content_migrate_content_migrate_instance_alter(&$instance_value, $field
                
       // default_image is now a field setting.
       unset($instance_value['widget']['settings']['default_image']);
+      break;
+
+    case 'filefield':
+      // Module names and types changed.
+      $instance_value['widget']['module'] = 'file';
+      $instance_value['widget']['type'] = 'file_generic';
+
+      // Some settings had name changes.
+      $instance_value['widget']['settings']['file_directory'] = $instance_value['widget']['settings']['file_path'];
+      unset($instance_value['widget']['settings']['file_path']);
+      $instance_value['widget']['settings']['max_filesize'] = $instance_value['widget']['settings']['max_filesize_per_file'];
+      unset($instance_value['widget']['settings']['max_filesize_per_file']);
+
       break;
   }
  
@@ -577,6 +595,81 @@ function content_migrate_content_migrate_instance_alter(&$instance_value, $field
         $instance_value['display'][$context]['type'] = $new_type[$settings['type']];
         $instance_value['display'][$context]['settings'] = $new_settings[$settings['type']];
       }
+      break;
+  }
+}
+
+
+/**
+ * Implements hook_content_migrate_data_record_alter().
+ *
+ * Tweaks individual records in a field
+ */
+function content_migrate_content_migrate_data_record_alter(&$record, $field) {
+
+  switch($field['type']) {
+    case 'image':
+      // Map D6 imagefield field columns to D7 image field columns.
+      if (!empty($record[$field['field_name'] . '_title']) && ($data = unserialize($record[$field['field_name'] . '_title']))) {
+        $record[$field['field_name'] . '_alt'] = $data['alt'];
+        $record[$field['field_name'] . '_title'] = $data['title'];
+      }
+      else {
+        unset($record[$field['field_name'] . '_alt']);
+        unset($record[$field['field_name'] . '_title']);
+      }
+
+    // Fall through.
+    case 'file':
+      // Map D6 filefield field columns to D7 file field columns.
+      if (!empty($record[$field['field_name'] . '_description']) && ($data = unserialize($record[$field['field_name'] . '_description']))) {
+        $record[$field['field_name'] . '_description'] = $data['description'];
+      }
+      else {
+        unset($record[$field['field_name'] . '_description']);
+      }
+
+      // Copies imagefield data from the old 'files' table into 'files_managed' and sets file_usage
+      // Mostly copied from system_update_7061, which does the same for the D6 core 'upload' module
+
+      $nid = $record['entity_id'];
+      $fid = $record[$field['field_name'] . '_fid'];
+
+      if (empty($fid)) {
+        $record = NULL;
+        return;
+      };
+
+      $file = db_select('files', 'f')->fields('f', array('fid', 'uid', 'filename', 'filepath', 'filemime', 'filesize', 'timestamp', 'status'))->condition('fid', $fid)->execute()->fetchObject();
+
+      $basename = variable_get('file_directory_path', conf_path() . '/files');
+      $scheme = file_default_scheme() . '://';
+
+      // We will convert filepaths to uri using the default scheme
+      // and stripping off the existing file directory path.
+      $file->uri = $scheme . str_replace($basename, '', $file->filepath);
+      $file->uri = file_stream_wrapper_uri_normalize($file->uri);
+      unset($file->filepath);
+
+      // Insert into the file_managed table.
+      // Each fid should only be stored once in file_managed.
+      db_merge('file_managed')
+        ->key(array(
+          'fid' => $file->fid,
+        ))
+        ->fields(array(
+          'uid' => $file->uid,
+          'filename' => $file->filename,
+          'uri' => $file->uri,
+          'filemime' => $file->filemime,
+          'filesize' => $file->filesize,
+          'status' => $file->status,
+          'timestamp' => $file->timestamp,
+        ))
+        ->execute();
+
+      // Add the usage entry for the file.
+      file_usage_add($file, 'file', 'node', $nid);
       break;
   }
 }

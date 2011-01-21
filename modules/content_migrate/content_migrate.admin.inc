@@ -326,9 +326,11 @@ function _content_migrate_batch_process_migrate_data($field_name, &$context) {
     // Let modules alter this before the insert.
     drupal_alter('content_migrate_data_record', $record, $context['sandbox']['field']);
 
-    // @TODO We are not handling revisions correctly yet. Just getting a simple insert working.
-    drupal_write_record($context['sandbox']['new_table'], $record);
-    drupal_write_record($context['sandbox']['new_revision_table'], $record);
+    if (!empty($record)) {
+      // @TODO We are not handling revisions correctly yet. Just getting a simple insert working.
+      drupal_write_record($context['sandbox']['new_table'], $record);
+      drupal_write_record($context['sandbox']['new_revision_table'], $record);
+    }
   }
 
   // Update our progress information.
