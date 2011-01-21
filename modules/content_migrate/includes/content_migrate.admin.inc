@@ -1,10 +1,8 @@
 <?php
 // $Id$
-/*
-
 /**
  * @file content_migrate.admin.inc
- * Contains page callbacks for the module.
+ * Code to process field data migration, moved into a separate file for efficiency.
  */
 
 /**
@@ -169,7 +167,7 @@ function content_migrate_select_submit($form, &$form_state) {
 function _content_migrate_batch($field_names) {
   $batch = array(
     'title' => t('Migrating data'),
-    'file'  => drupal_get_path('module', 'content_migrate') . '/content_migrate.admin.inc',
+    'file'  => drupal_get_path('module', 'content_migrate') . '/includes/content_migrate.admin.inc',
     'operations' => array(
       array('_content_migrate_batch_process_create_fields', array($field_names)),
     ),
