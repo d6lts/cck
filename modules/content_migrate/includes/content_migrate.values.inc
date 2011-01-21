@@ -1,4 +1,5 @@
 <?php
+// $Id$
 /**
  * @file content_migrate.values.inc
  * Code to produce D7-style field and instance values from the data in D6 tables.

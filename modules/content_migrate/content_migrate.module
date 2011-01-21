@@ -35,8 +35,8 @@ function content_migrate_menu() {
  *   Optionally request only a specific field name.
  */
 function content_migrate_get_field_values($field_name = NULL) {
-  module_load_include('inc', 'content_migrate', 'content_migrate.values');
-  return _content_migrate_get_field_values($field_name)
+  module_load_include('inc', 'content_migrate', 'includes/content_migrate.values');
+  return _content_migrate_get_field_values($field_name);
 }
 
 /**
@@ -49,8 +49,8 @@ function content_migrate_get_field_values($field_name = NULL) {
  *   Optionally request only instances of a specific field_name.
  */
 function content_migrate_get_instance_values($bundle = NULL, $field_name = NULL) {
-  module_load_include('inc', 'content_migrate', 'content_migrate.values');
-  return _content_migrate_get_instance_values($bundle, $field_name)
+  module_load_include('inc', 'content_migrate', 'includes/content_migrate.values');
+  return _content_migrate_get_instance_values($bundle, $field_name);
 }
 
 /**
@@ -211,6 +211,6 @@ function content_migrate_content_migrate_instance_alter(&$instance_value, $field
 function content_migrate_content_migrate_data_record_alter(&$record, $field) {
 
   module_load_include('inc', 'content_migrate', 'modules/content_migrate.filefield');
-  content_migrate_filefield_date_record_alter($record, $field);
+  content_migrate_filefield_data_record_alter($record, $field);
 
 }
