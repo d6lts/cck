@@ -17,7 +17,6 @@ function content_migrate_select($form, &$form_state) {
   $options = array('available' => array(), 'converted' => array(), 'missing' => array());
   
   $field_values = content_migrate_get_field_values();
-  
   if (empty($field_values)) {
     drupal_set_message(t('There is no D6 field information in this database.'));
     return $form;
@@ -264,6 +263,7 @@ function _content_migrate_batch_process_migrate_data($field_name, &$context) {
       ->fields($node_alias, array('title', 'type'))
       ->fields('old_table', array('nid'))
       ->orderBy('nid', 'ASC')
+      ->distinct()
       ->execute();
     
     $nodes = array();

@@ -84,7 +84,7 @@ function content_migrate_storage_type($field_value) {
   if (isset($field_value['db_storage'])) {
     return $field_value['db_storage'];
   }
-  elseif ($field_value['cardinality'] > 1 || $field_value['cardinality'] == FIELD_CARDINALITY_UNLIMITED) {
+  elseif ($field_value['cardinality'] != 1 || $field_value['cardinality'] == FIELD_CARDINALITY_UNLIMITED) {
     $storage = CONTENT_DB_STORAGE_PER_FIELD;
   }
   else {
