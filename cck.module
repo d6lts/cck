@@ -31,6 +31,8 @@ function cck_form_alter(&$form, $form_state, $form_id) {
     case 'field_ui_field_settings_form':
       $field = field_info_field($form['field']['field_name']['#value']);
       if ($field['module'] == 'list') {
+        // @todo : core should put that for us.
+        $form['#field'] = $field;
         cck_allowed_values_form($form, $form_state, $field);
         $form['#validate'][] = 'cck_allowed_values_validate';
       }
@@ -59,6 +61,19 @@ function cck_allowed_values_form(&$form, $form_state, $field) {
     $allowed_values_function = 'cck_allowed_values_php';
   }
 
+  // Add a field where users can specify some PHP
+  // code that will return the allowed values list.
+  $form['field']['settings']['allowed_values_php'] = array(
+    '#access' => user_access('Use PHP input for field settings (dangerous - grant with care)'),
+    '#type' => 'textarea',
+    '#title' => t('Allowed values PHP code'),
+    '#default_value' => $php_code,
+    '#description' => t('Advanced usage only: PHP code that returns an array of allowed values. Should not include &lt;?php ?&gt; delimiters. If this field is filled out, the value returned by this code will be used as the response to the function <strong>cck_allowed_values_php</strong> and will override any other allowed values list or function specified above. Expected format: <pre>!sample</pre>', array(
+      '!sample' => t("return array(\n  value_1 => label_1,\n  value_2 => label_2\n  ...\n);"),
+    )),
+    '#weight' => 5,
+  );
+
   // Add a field where users can specify a function
   // to return the allowed values list.
   $form['field']['settings']['allowed_values_function'] = array(
@@ -66,27 +81,13 @@ function cck_allowed_values_form(&$form, $form_state, $field) {
     '#title' => t('Allowed values function'),
     '#default_value' => $allowed_values_function,
     '#description' => t('The name of a function that will return the allowed values list.'),
+    '#weight' => 6,
+    '#states' => array(
+      'visible' => array(
+        ':input[name="field[settings][allowed_values_php]"]' => array('empty' => TRUE),
+      ),
+    )
   );
-
-  // Add a field where users can specify some PHP
-  // code that will return the allowed values list.
-  module_load_include('install', $field['module']);
-  $schema = module_invoke($field['module'], 'field_schema', $field);
-  $columns = array_keys($schema['columns']);
-
-  $sample = t("return array(\n  0 => array(@columns),\n  // You'll usually want to stop here. Provide more values\n  // if you want your 'default value' to be multi-valued:\n  1 => array(@columns),\n  2 => ...\n);", array('@columns' => implode(', ', $columns)));
-
-  $form['field']['settings']['allowed_values_php'] = array(
-    '#access' => user_access('Use PHP input for field settings (dangerous - grant with care)'),
-    '#type' => 'textarea',
-    '#title' => t('Allowed values PHP code'),
-    '#default_value' => $php_code,
-    '#description' => t('Advanced usage only: PHP code that returns a default value. Should not include &lt;?php ?&gt; delimiters. If this field is filled out, the value returned by this code will be used as the response to the function <strong>cck_allowed_values_php</strong> and will override any other allowed values list or function specified above. Expected format: <pre>!sample</pre>To figure out the expected format, you can use the <em>devel load</em> tab provided by <a href="@link_devel">devel module</a> on a content page.', array(
-      '!sample' => $sample,
-      '@link_devel' => 'http://www.drupal.org/project/devel',
-    )),
-  );
-
 }
 
 /**
@@ -96,21 +97,11 @@ function cck_allowed_values_form(&$form, $form_state, $field) {
  */
 function cck_default_value_form(&$form, $form_state, $field) {
   $instance = field_info_instance($form['instance']['entity_type']['#value'], $field['field_name'], $form['instance']['bundle']['#value']);
-  $langcode = $form['instance']['default_value_widget'][$field['field_name']]['#language'];
-  $default_value_function = $instance['settings']['default_value_function'];
-  $php_code = cck_field_get_setting('default_value_php', 'instance', $field, $instance, $langcode);
+  $default_value_function = !empty($instance['default_value_function']) ? $instance['default_value_function'] : '';
+  $php_code = cck_field_get_setting('default_value_php', 'instance', $field, $instance);
   if (!empty($php_code)) {
     $default_value_function = 'cck_default_value_php';
   }
-
-  // Add a field where users can specify a function
-  // to return the default value.
-  $form['instance']['default_value_widget']['default_value_function'] = array(
-    '#type' => 'textfield',
-    '#title' => t('Default value function'),
-    '#default_value' => $default_value_function,
-    '#description' => t('The name of a function that will return the default value.'),
-  );
 
   // Add a field where users can specify some PHP
   // code that will return the default value.
@@ -128,14 +119,31 @@ function cck_default_value_form(&$form, $form_state, $field) {
       '!sample' => $sample,
       '@link_devel' => 'http://www.drupal.org/project/devel',
     )),
+    '#weight' => 5,
+    '#parents' => array('instance', 'default_value_php'),
   );
 
+  // Add a field where users can specify a function
+  // to return the default value.
+  $form['instance']['default_value_widget']['default_value_function'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Default value function'),
+    '#default_value' => $default_value_function,
+    '#description' => t('The name of a function that will return the default value.'),
+    '#states' => array(
+      'visible' => array(
+        ':input[name="instance[default_value_php]"]' => array('empty' => TRUE),
+      ),
+    ),
+    '#weight' => 6,
+    '#parents' => array('instance', 'default_value_function'),
+  );
 }
 
 /**
  * Validation handler to store php allowed values.
  */
-function cck_allowed_values_validate(&$element, &$form_state) {
+function cck_allowed_values_validate(&$form, &$form_state) {
   $field = $form['#field'];
 
   $php_code = $form_state['values']['field']['settings']['allowed_values_php'];
@@ -146,26 +154,28 @@ function cck_allowed_values_validate(&$element, &$form_state) {
   elseif (empty($php_code) && $allowed_values_function == 'cck_allowed_values_php') {
     $allowed_values_function = '';
   }
-  form_set_value($element['field']['settings']['allowed_values_function'], $allowed_values_function, $form_state);
+  form_set_value($form['field']['settings']['allowed_values_function'], $allowed_values_function, $form_state);
+  // @todo This should be done at submit time, not validate.
   cck_field_set_setting('allowed_values_php', 'field', $php_code, $field);
 }
 
 /**
  * Validation handler to store php default values.
  */
-function cck_default_value_validate(&$element, &$form_state) {
+function cck_default_value_validate(&$form, &$form_state) {
   $field = $form['#field'];
   $instance = $form['#instance'];
 
   $default_value_function = $form_state['values']['instance']['default_value_function'];
-  $php_code = $form_state['values']['instance']['default_value_widget']['default_value_php'];
+  $php_code = $form_state['values']['instance']['default_value_php'];
   if (!empty($php_code)) {
     $default_value_function = 'cck_default_value_php';
   }
   elseif (empty($php_code) && $default_value_function == 'cck_default_value_php') {
     $default_value_function = '';
   }
-  form_set_value($element['instance']['default_value_widget']['default_value_function'], $default_value_function, $form_state);
+  form_set_value($form['instance']['default_value_widget']['default_value_function'], $default_value_function, $form_state);
+  // @todo This should be done at submit time, not validate.
   cck_field_set_setting('default_value_php', 'instance', $php_code, $field, $instance);
 }
 
@@ -278,14 +288,11 @@ function cck_default_value_php($entity_type, $entity, $field, $instance, $langco
   $default_value = array();
   ob_start();
   $result = eval(cck_field_get_setting('default_value_php', 'instance', $field, $instance, $langcode, $flatten = TRUE));
-  if (is_array($result)) {
-    if ($flatten) {
-      $result = cck_array_flatten($result);
-    }
-    $allowed_values = $result;
-  }
   ob_end_clean();
-  return $allowed_values;
+  if (is_array($result)) {
+    $default_value = $result;
+  }
+  return $default_value;
 }
 
 /**
@@ -296,13 +303,13 @@ function cck_allowed_values_php($field, $flatten = TRUE) {
   $allowed_values = array();
   ob_start();
   $result = eval(cck_field_get_setting('allowed_values_php', 'field', $field));
+  ob_end_clean();
   if (is_array($result)) {
     if ($flatten) {
       $result = cck_array_flatten($result);
     }
     $allowed_values = $result;
   }
-  ob_end_clean();
   return $allowed_values;
 }
 
