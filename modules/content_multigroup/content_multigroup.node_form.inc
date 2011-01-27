@@ -74,6 +74,8 @@ function _content_multigroup_fieldgroup_form(&$form, &$form_state, $form_id, $gr
   $form[$group_name]['#group_label'] = $group['label'];
   $form[$group_name]['#group_fields'] = $group_fields;
   $form[$group_name]['#tree'] = TRUE;
+  // Multigroups cannot be vertical tabs, don't let Vertical Tabs module try to do that.
+  $form[$group_name]['#group'] = FALSE;
   if (!isset($form['#multigroups'])) {
     $form['#multigroups'] = array();
   }
@@ -110,11 +112,13 @@ function _content_multigroup_fieldgroup_form(&$form, &$form_state, $form_id, $gr
   if (!in_array('content_multigroup_node_form_pre_render', $form['#pre_render'])) {
     array_unshift($form['#pre_render'], 'content_multigroup_node_form_pre_render');
   }
-
+  $elements[$group_name] = array();
   foreach ($group_deltas as $delta) {
-    content_multigroup_group_form($form, $form_state, $group, $delta);
+    $element = content_multigroup_group_form($form, $form_state, $group, $delta);
+    $elements[$group_name] = array_merge($elements[$group_name], $element[$group_name]);
   }
-
+  $form[$group_name] = $elements[$group_name];
+  
   // Unset the original group field values now that we've moved them.
   foreach (array_keys($group_fields) as $field_name) {
     unset($form[$group_name][$field_name]);
@@ -131,36 +135,49 @@ function _content_multigroup_fieldgroup_form(&$form, &$form_state, $form_id, $gr
  * Called in form_alter and by AHAH add more.
  */
 function content_multigroup_group_form(&$form, &$form_state, $group, $delta) {
+  module_load_include('inc', 'content', 'includes/content.node_form');
+  $element = array();
+  $type_name = $group['type_name'];
+  $content_type = content_types($type_name);
   $group_name = $group['group_name'];
-  if ($group['group_type'] != 'multigroup' || empty($form[$group_name]) || empty($form['#multigroups']) || empty($form['#multigroups'][$group_name])) {
+
+  if (!isset($form[$group_name])) {//nested AHAH, not initial build
+    $element[$group_name] = content_get_form_element($group_name, $type_name, $form);
+  }
+  else {//initial build (via content_multigroup_fieldgroup_form) or non-nested AHAH
+    $element[$group_name] = $form[$group_name];
+  }
+  if (($group['group_type'] != 'multigroup') 
+      || (!(empty($element[$group['group_name']]['#access'])) && $element[$group['group_name']]['#access'] != TRUE) 
+      || empty($element[$group['group_name']])) {
     return;
   }
-  module_load_include('inc', 'content', 'includes/content.node_form');
-
-  $node = $form['#node'];
+  
   $group_fields = $form['#multigroups'][$group_name];
+  $element[$group_name]['#fields'] = array_keys($group_fields);
+  $node = $form['#node'];
   $group_multiple = $group['settings']['multigroup']['multiple'];
 
   foreach ($group_fields as $field_name => $field) {
-    if (empty($form[$group_name][$delta])) {
-      $form[$group_name] += array($delta => array($field_name => array()));
+    if (empty($element[$group_name][$delta])) {
+      $element[$group_name] += array($delta => array($field_name => array()));
     }
     else {
-      $form[$group_name][$delta][$field_name] = array();
+      $element[$group_name][$delta][$field_name] = array();
     }
-
-    $item_count = (isset($form_state['item_count'][$group_name]) ? $form_state['item_count'][$group_name] : $form[$group_name]['#item_count']);
-    $form[$group_name][$delta]['_weight'] = array(
+    
+    $item_count = (isset($form_state['item_count'][$group_name]) ? $form_state['item_count'][$group_name] : $element[$group_name]['#item_count']);
+    $element[$group_name][$delta]['_weight'] = array(
       '#type' => 'weight',
       '#delta' => $item_count, // this 'delta' is the 'weight' element's property
       '#default_value' => $delta,
       '#weight' => 100,
     );
-
+    
     // Add a checkbox to allow users remove a single delta subgroup.
     // See content_set_empty() and theme_content_multigroup_node_form().
     if ($group_multiple == 1) {
-      $form[$group_name][$delta]['_remove'] = array(
+      $element[$group_name][$delta]['_remove'] = array(
         '#type' => 'checkbox',
         '#attributes' => array('class' => 'content-multiple-remove-checkbox'),
         '#default_value' => isset($form_state['multigroup_removed'][$group_name][$delta]) ? $form_state['multigroup_removed'][$group_name][$delta] : 0,
@@ -205,7 +222,7 @@ function content_multigroup_group_form(&$form, &$form_state, $group, $delta) {
     if (content_handle('widget', 'multiple values', $field) == CONTENT_HANDLE_CORE) {
       $field_form = content_field_form($form, $form_state, $field, $delta);
       $value = array_key_exists($delta, $field_form[$field_name]) ? $delta : 0;
-      $form[$group_name][$delta][$field_name] = $field_form[$field_name][$value];
+      $element[$group_name][$delta][$field_name] = $field_form[$field_name][$value];
     }
     else {
       // When the form is submitted, get the element data from the form values.
@@ -229,14 +246,16 @@ function content_multigroup_group_form(&$form, &$form_state, $group, $delta) {
         $field_form[$field_name]['#element_validate'] = array();
       }
       $field_form[$field_name]['#element_validate'][] = 'content_multigroup_fix_multivalue_fields';
-
-      $form[$group_name][$delta][$field_name] = $field_form[$field_name];
+      
+      $element[$group_name][$delta][$field_name] = $field_form[$field_name];
     }
-    $form[$group_name][$delta][$field_name]['#weight'] = $field['widget']['weight'];
+    $element[$group_name][$delta][$field_name]['#weight'] = $field['widget']['weight'];
   }
 
   // Reset the form '#node' back to its original value.
   $form['#node'] = $node;
+  
+  return $element;
 }
 
 /**
@@ -365,6 +384,22 @@ function content_multigroup_node_form_validate($form, &$form_state) {
       // of fields in this multigroup because we are doing it here.
       // See content_multiple_value_nodeapi_validate().
       $form_state['values']['_content_ignore_required_fields'][$field_name] = TRUE;
+
+      // FIXME: why is this happening?
+      // $form_state['values'][$field_name] ends up missing sometimes and $form_state['values'][$group_name][0][$field_name] contains the actual data
+      // This is a hack/temporary-fix such that whenever this situation happens, the data ends up where it should be
+      //
+      if (!array_key_exists($field_name, $form_state['values'])){
+        foreach ($form_state['values'][$group_name] as $delta => $item) {
+          if (is_numeric($delta) && is_array($form_state['values'][$group_name][$delta]) && array_key_exists('_remove', $form_state['values'][$group_name][$delta])){
+            // In the case where '_remove' is set to 1 (TRUE), then the field is to be removed.
+            // Do not bother copying removed fields and they will be auto-deleted from the form and the database!
+            if (!$form_state['values'][$group_name][$delta]['_remove']){
+              $form_state['values'][$field_name][$delta] = $form_state['values'][$group_name][$delta][$field_name];
+            }
+          }
+        }
+      }
 
       foreach ($form_state['values'][$field_name] as $delta => $item) {
         // Ignore subgroups flagged for removal.
@@ -716,6 +751,7 @@ function content_multigroup_add_more_js($type_name_url, $group_name) {
   $content_type = content_types($type_name_url);
   $groups = fieldgroup_groups($content_type['type']);
   $group = $groups[$group_name];
+  $parents = fieldgroup_get_parents($content_type['type'], $group_name);
 
   if (($group['settings']['multigroup']['multiple'] != 1) || empty($_POST['form_build_id'])) {
     // Invalid request.
@@ -767,14 +803,15 @@ function content_multigroup_add_more_js($type_name_url, $group_name) {
   // Build our new form element for the whole group, asking for one more element.
   $delta = max(array_keys($_POST[$group_name])) + 1;
   $form_state['item_count'] = array($group_name => count($_POST[$group_name]) + 1);
-  content_multigroup_group_form($form, $form_state, $group, $delta);
-
+  $form_element = content_multigroup_group_form($form, $form_state, $group, $delta);
   // Rebuild weight deltas to make sure they all are equally dimensioned.
-  foreach ($form[$group_name] as $key => $item) {
+  foreach ($form_element[$group_name] as $key => $item) {
     if (is_numeric($key) && isset($item['_weight']) && is_array($item['_weight'])) {
-      $form[$group_name][$key]['_weight']['#delta'] = $delta;
+      $form_element[$group_name][$key]['_weight']['#delta'] = $delta;
     }
-  }
+  }  
+  // Add the new element at the right place in the (original, unbuilt) form.
+  content_set_form_element($group_name, $content_type['type'], $form, $form_element[$group_name]);
 
   // Save the new definition of the form.
   $form_state['values'] = array();
@@ -791,7 +828,8 @@ function content_multigroup_add_more_js($type_name_url, $group_name) {
   $form = form_builder($_POST['form_id'], $form, $form_state);
 
   // Render the new output.
-  $group_form = $form[$group_name];
+  $group_form = content_get_form_element($group_name, $content_type['type'], $form);
+
   // We add a div around the new content to receive the ahah effect.
   $group_form[$delta]['#prefix'] = '<div class="ahah-new-content">'. (isset($group_form[$delta]['#prefix']) ? $group_form[$delta]['#prefix'] : '');
   $group_form[$delta]['#suffix'] = (isset($group_form[$delta]['#suffix']) ? $group_form[$delta]['#suffix'] : '') .'</div>';

@@ -265,6 +265,7 @@ function content_multiple_value_form(&$form, &$form_state, $field, $items) {
     $form_element[$field_name .'_add_more']['#prefix'] = '<div class="content-add-more clear-block">';
     $form_element[$field_name .'_add_more']['#suffix'] = '</div>';
   }
+
   return $form_element;
 }
 
@@ -411,6 +412,7 @@ function content_add_more_submit($form, &$form_state) {
  * Menu callback for AHAH addition of new empty widgets.
  */
 function content_add_more_js($type_name_url, $field_name) {
+  $content_type = content_types($type_name_url);
   $type = content_types($type_name_url);
   $field = content_fields($field_name, $type['type']);
 
@@ -475,12 +477,7 @@ function content_add_more_js($type_name_url, $field_name) {
   drupal_alter('form', $data, 'content_add_more_js');
 
   // Add the new element at the right place in the (original, unbuilt) form.
-  if (module_exists('fieldgroup') && ($group_name = _fieldgroup_field_get_group($type['type'], $field_name))) {
-    $form[$group_name][$field_name] = $form_element[$field_name];
-  }
-  else {
-    $form[$field_name] = $form_element[$field_name];
-  }
+  content_set_form_element($field_name, $type['type'], $form, $form_element[$field_name]);
 
   // Save the new definition of the form.
   $form_state['values'] = array();
@@ -497,7 +494,8 @@ function content_add_more_js($type_name_url, $field_name) {
   $form = form_builder($_POST['form_id'], $form, $form_state);
 
   // Render the new output.
-  $field_form = (!empty($group_name)) ? $form[$group_name][$field_name] : $form[$field_name];
+  $field_form = content_get_form_element($field_name, $type['type'], $form);
+
   // We add a div around the new content to receive the ahah effect.
   $field_form[$delta]['#prefix'] = '<div class="ahah-new-content">'. (isset($field_form[$delta]['#prefix']) ? $field_form[$delta]['#prefix'] : '');
   $field_form[$delta]['#suffix'] = (isset($field_form[$delta]['#suffix']) ? $field_form[$delta]['#suffix'] : '') .'</div>';
@@ -521,3 +519,73 @@ function content_add_more_js($type_name_url, $field_name) {
   print drupal_to_js(array('status' => TRUE, 'data' => $output));
   exit;
 }
+
+/**
+ * Store an element into a form.
+ *
+ * @param $name
+ *   The field name.
+ * @param $type
+ *   The content type where the field instance belongs to.
+ * @param $form
+ *   The form to store this field element into.
+ * @param $element
+ *   The form element to store.
+ */
+function content_set_form_element($name, $type, &$form, $element) {
+  $is_group = substr($name, 0, 6) == 'group_';
+  if (module_exists('fieldgroup') && ($parents = fieldgroup_get_parents($type, $name))) {
+    $reference = &$form;
+    if ($is_group) {
+      array_shift($parents);
+      $parents = array_reverse($parents);
+    }
+    else {
+      $parents = array_reverse($parents);
+    }
+    
+    foreach (array_values($parents) as $group_name) {
+      $reference = &$reference[$group_name];
+    }
+    
+    $reference[$name] = $element;
+    
+  }
+  else {
+    $form[$name] = $element;
+  }
+}
+
+/**
+ * Retrieve an element from a form.
+ *
+ * @param $name
+ *   The field name.
+ * @param $type
+ *   The content type where the field instance belongs to.
+ * @param $form
+ *   The form to retrieve this field element from.
+ */
+function content_get_form_element($name, $type, $form) {
+  $is_group = substr($name, 0, 6) == 'group_';
+  if (module_exists('fieldgroup') && ($parents = fieldgroup_get_parents($type, $name))) {
+    $reference = &$form;
+    if ($is_group) {
+      array_shift($parents);
+      $parents = array_reverse($parents);
+    }
+    else {
+      $parents = array_reverse($parents);
+    }
+    
+    foreach (array_values($parents) as $group_name) {
+      $reference = &$reference[$group_name];
+    }
+    
+    return $reference[$name];
+  }
+  else {
+    return $form[$name];
+  }
+}
+

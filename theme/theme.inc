@@ -18,7 +18,7 @@ function template_preprocess_content_field_overview_form(&$vars) {
 
   $order = _content_overview_order($form, $form['#field_rows'], $form['#group_rows']);
   $rows = array();
-
+ 
   // Identify the 'new item' keys in the form, they look like
   // _add_new_field, add_new_group.
   $keys = array_keys($form);
@@ -28,10 +28,11 @@ function template_preprocess_content_field_overview_form(&$vars) {
       $add_rows[] = $key;
     }
   }
+
   while ($order) {
     $key = reset($order);
     $element = &$form[$key];
-
+  
     // Only display the 'Add' separator if the 'add' rows are still
     // at the end of the table.
     if (!isset($added_separator)) {
@@ -82,9 +83,7 @@ function template_preprocess_content_field_overview_form(&$vars) {
   $vars['submit'] = drupal_render($form);
 
   // Add tabledrag behavior.
-//  drupal_add_tabledrag('content-field-overview', 'match', 'parent', 'group-parent', 'group-parent', 'field-name', FALSE, 1);
-  drupal_add_tabledrag('content-field-overview', 'match', 'parent', 'group-parent', 'group-parent', 'field-name', TRUE, 1);
-//  drupal_add_tabledrag('content-field-overview', 'order', 'sibling', 'field-weight', NULL, NULL, FALSE);
+  drupal_add_tabledrag('content-field-overview', 'match', 'parent', 'group-parent', 'group-parent', 'field-name', TRUE, 10);
   drupal_add_tabledrag('content-field-overview', 'order', 'sibling', 'field-weight');
 
   // Add settings for the update selects behavior.
