@@ -142,7 +142,7 @@ function content_multigroup_group_form(&$form, &$form_state, $group, $delta) {
   $group_name = $group['group_name'];
 
   if (!isset($form[$group_name])) {//nested AHAH, not initial build
-    $element[$group_name] = content_get_form_element($group_name, $type_name, $form);
+    $element[$group_name] = array_shift(content_get_nested_elements($form, $group_name));
   }
   else {//initial build (via content_multigroup_fieldgroup_form) or non-nested AHAH
     $element[$group_name] = $form[$group_name];
@@ -751,7 +751,6 @@ function content_multigroup_add_more_js($type_name_url, $group_name) {
   $content_type = content_types($type_name_url);
   $groups = fieldgroup_groups($content_type['type']);
   $group = $groups[$group_name];
-  $parents = fieldgroup_get_parents($content_type['type'], $group_name);
 
   if (($group['settings']['multigroup']['multiple'] != 1) || empty($_POST['form_build_id'])) {
     // Invalid request.
@@ -811,7 +810,7 @@ function content_multigroup_add_more_js($type_name_url, $group_name) {
     }
   }  
   // Add the new element at the right place in the (original, unbuilt) form.
-  content_set_form_element($group_name, $content_type['type'], $form, $form_element[$group_name]);
+  $success = content_set_nested_elements($form, $group_name, $form_element[$group_name]);
 
   // Save the new definition of the form.
   $form_state['values'] = array();
@@ -828,7 +827,7 @@ function content_multigroup_add_more_js($type_name_url, $group_name) {
   $form = form_builder($_POST['form_id'], $form, $form_state);
 
   // Render the new output.
-  $group_form = content_get_form_element($group_name, $content_type['type'], $form);
+  $group_form = array_shift(content_get_nested_elements($form, $group_name));
 
   // We add a div around the new content to receive the ahah effect.
   $group_form[$delta]['#prefix'] = '<div class="ahah-new-content">'. (isset($group_form[$delta]['#prefix']) ? $group_form[$delta]['#prefix'] : '');

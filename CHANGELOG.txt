@@ -4,6 +4,7 @@ CCK 6.x-3.x
 ===========
 
 Features:
+- #849420 by Roberto Gerola, rconstantine, thekevinday, ericduran, KarenS Add ability to nest fieldgroups within other fieldgroups.
 - #1008184 by merlinofchaos, bojanz, dereine, yched: Adapt to Views 3 "semantic views" feature (backwards compatible with Views 2)
 - #932680 by Dave Reid: Token integration : allow using of Token API's new $options
 - #863226 by KarenS, make sure we have a function that will return inactive instances when other instances of the same field are still active.
