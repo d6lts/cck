@@ -586,7 +586,7 @@ function fieldgroup_build_content($group, &$node, $teaser, $page) {
   $label = $group['settings']['display']['label'] == 'above';
   $element = array(
     '#title' => $label ? check_plain(t($group['label'])) : '',
-    '#description' => $label ? content_filter_xss(t($group['settings']['display']['description'])) : '',
+    '#description' => $label & !empty($group['settings']['display']['description']) ? content_filter_xss(t($group['settings']['display']['description'])) : '',
   );
   $format = isset($group['settings']['display'][$context]['format']) ? $group['settings']['display'][$context]['format'] : 'fieldset';
 
