@@ -265,18 +265,18 @@ function _fieldgroup_get_tree($type_name, $parent = '', $depth = -1, $max_depth 
 
     $result = db_query("SELECT * FROM {". fieldgroup_tablename() ."} WHERE type_name='%s' ORDER BY weight", $type_name);
     while ($group = db_fetch_array($result)) {
-	  $group['settings'] = unserialize($group['settings']);
-	  $group['fields'] = array();
+	    $group['settings'] = unserialize($group['settings']);
+      $group['fields'] = array();
 	
       // Allow external modules to translate field group strings.
-	  $group_strings = array(
-	    'label' => $group['label'],
-		  'form_description' => $group['settings']['form']['description'],
-		  'display_description' => $group['settings']['display']['description'],
-	  );
-	  $group['label'] = $group_strings['label'];
-	  $group['settings']['form']['description'] = $group_strings['form_description'];
-	  $group['settings']['display']['description'] = $group_strings['display_description'];
+	    $group_strings = array(
+	      'label' => $group['label'],
+		    'form_description' => $group['settings']['form']['description'],
+		    'display_description' => $group['settings']['display']['description'],
+	    );
+	    $group['label'] = $group_strings['label'];
+	    $group['settings']['form']['description'] = $group_strings['form_description'];
+	    $group['settings']['display']['description'] = $group_strings['display_description'];
 	
       $children[$type_name][$group['parent']][] = $group['group_name'];
       $parents[$type_name][$group['group_name']][] = $group['parent'];
