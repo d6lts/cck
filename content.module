@@ -848,22 +848,15 @@ function content_field($op, &$node, $field, &$items, $teaser, $page) {
 
       // The location of the field's rendered output depends on whether the
       // field is in a fieldgroup or not.
-      $wrapper = NULL;
-      if (isset($node->content[$field['field_name']])) {
-        $wrapper = $node->content[$field['field_name']];
-      }
-      elseif (module_exists('fieldgroup') && ($group_name = fieldgroup_get_group($node->type, $field['field_name'])) && isset($node->content[$group_name]['group'][$field['field_name']])) {
-        $wrapper = $node->content[$group_name]['group'][$field['field_name']];
-      }
-
-      if ($wrapper) {
+      $wrappers = content_get_nested_elements($node->content, $field['field_name']);
+      foreach ($wrappers as $wrapper) {
         $element = $wrapper['field'];
         // '#single' is not set if the field is hidden or inaccessible.
         if (isset($element['#single'])) {
           if (!empty($element['#single'])) {
             // Single value formatter.
             foreach (element_children($element['items']) as $delta) {
-              // '#chilren' is not set if the field is empty.
+              // '#children' is not set if the field is empty.
               $items[$delta]['view'] = isset($element['items'][$delta]['#children']) ? $element['items'][$delta]['#children'] : '';
             }
           }
@@ -885,19 +878,11 @@ function content_field($op, &$node, $field, &$items, $teaser, $page) {
 
       // The location of the field's rendered output depends on whether the
       // field is in a fieldgroup or not.
-      $wrapper = NULL;
-      if (isset($node->content[$field['field_name']])) {
-        $wrapper = $node->content[$field['field_name']];
+      $wrappers = content_get_nested_elements($node->content, $field['field_name']);
+      foreach ($wrappers as $wrapper) {
+        // '#children' is not set if the field is empty.
+        $addition[$field['field_name'] .'_rendered'] .= isset($wrapper['#children']) ? $wrapper['#children'] : '';
       }
-      elseif (module_exists('fieldgroup') && ($group_name = fieldgroup_get_group($node->type, $field['field_name'])) && isset($node->content[$group_name]['group'][$field['field_name']])) {
-        $wrapper = $node->content[$group_name]['group'][$field['field_name']];
-      }
-
-      if ($wrapper) {
-        // '#chilren' is not set if the field is empty.
-        $addition[$field['field_name'] .'_rendered'] = isset($wrapper['#children']) ? $wrapper['#children'] : '';
-      }
-
       return $addition;
 
     case 'prepare translation':
