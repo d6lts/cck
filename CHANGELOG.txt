@@ -8,6 +8,7 @@ Features
 - #1008184 by merlinofchaos, bojanz, dereine, yched: Adapt to Views 3 "semantic views" feature (backwards compatible with Views 2)
 
 Bugfixes:
+- #696620 Make sure non-empty descriptions don't run through translator.
 - #863226 by KarenS: make sure we have a function that will return inactive instances when other instances of the same field are still active.
 - #887742 by yched: fix notices in _content_get_formatter() in some Views
 - #736440 by yched, dhthwy: fix memory leaks on long running migration scripts (e.g. migrate.module)
@@ -17,6 +18,7 @@ Bugfixes:
 - #986612 by Dave Reid: Token integration - fix variable name clash (harmless in normal cases)
 - #435520 by yched, sun: Fix text fields rendered as 'n/a' in some cases
 - #739490 by foripepe: Token integration - fix notices during token generation
+>>>>>>> 1.1.6.410
 
 CCK 6.x-2.8
 ===========
