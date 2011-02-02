@@ -385,22 +385,6 @@ function content_multigroup_node_form_validate($form, &$form_state) {
       // See content_multiple_value_nodeapi_validate().
       $form_state['values']['_content_ignore_required_fields'][$field_name] = TRUE;
 
-      // FIXME: why is this happening?
-      // $form_state['values'][$field_name] ends up missing sometimes and $form_state['values'][$group_name][0][$field_name] contains the actual data
-      // This is a hack/temporary-fix such that whenever this situation happens, the data ends up where it should be
-      //
-      if (!array_key_exists($field_name, $form_state['values'])){
-        foreach ($form_state['values'][$group_name] as $delta => $item) {
-          if (is_numeric($delta) && is_array($form_state['values'][$group_name][$delta]) && array_key_exists('_remove', $form_state['values'][$group_name][$delta])){
-            // In the case where '_remove' is set to 1 (TRUE), then the field is to be removed.
-            // Do not bother copying removed fields and they will be auto-deleted from the form and the database!
-            if (!$form_state['values'][$group_name][$delta]['_remove']){
-              $form_state['values'][$field_name][$delta] = $form_state['values'][$group_name][$delta][$field_name];
-            }
-          }
-        }
-      }
-
       foreach ($form_state['values'][$field_name] as $delta => $item) {
         // Ignore subgroups flagged for removal.
         if ($form_state['multigroup_removed'][$group_name][$delta]) {
