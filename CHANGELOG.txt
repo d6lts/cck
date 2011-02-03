@@ -37,6 +37,9 @@ Features:
 - #670344 by dagmar: Make CCK compatible with both, views 2 and views 3.
 
 Bugfixes:
+- Multigroups were defaulting to 'required' when created, should default to 'not required'.
+- #766734 Restructure multigroup field layout to be consistent with other fieldgroups, and use 
+  content_get_nested_elements() to grab the right values no matter how the fields are structured.
 - #739490 by foripepe: Token integration - fix notices during token generation
 - #986612 by Dave Reid: Token integration - fix variable name clash (harmless in normal cases)
 - #435520 by yched, sun: Fix text fields rendered as 'n/a' in some cases

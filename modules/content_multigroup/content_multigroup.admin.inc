@@ -433,7 +433,7 @@ function content_multigroup_group_edit_form(&$form, &$form_state) {
   $form['settings']['multigroup']['required'] = array(
     '#type' => 'checkbox',
     '#title' => t('Required'),
-    '#default_value' => isset($group['settings']['multigroup']['required']) ? $group['settings']['multigroup']['required'] : 1,
+    '#default_value' => !empty($group['settings']['multigroup']['required']) ? $group['settings']['multigroup']['required'] : 0,
     '#description' => t('Enable this option to require a minimum of one collection of fields in this Multigroup.'),
   );
 
