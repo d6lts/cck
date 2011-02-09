@@ -260,7 +260,7 @@ function _content_migrate_batch_process_migrate_data($field_name, &$context) {
     $query = db_select($old_table, 'old_table', array('fetch' => PDO::FETCH_ASSOC));
     $node_alias = $query->join('node', 'n', 'old_table.nid=n.nid');
     $result = $query
-      ->fields($node_alias, array('title', 'type'))
+      ->fields($node_alias, array('title', 'type', 'vid'))
       ->fields('old_table', array('nid'))
       ->orderBy('nid', 'ASC')
       ->distinct()
@@ -268,7 +268,7 @@ function _content_migrate_batch_process_migrate_data($field_name, &$context) {
     
     $nodes = array();
     foreach ($result as $row) {
-      $nodes[] = array('nid' => $row['nid'], 'title' => $row['title'], 'type' => $row['type']);
+      $nodes[] = array('nid' => $row['nid'], 'title' => $row['title'], 'type' => $row['type'], 'vid' => $row['vid']);
     }
     $context['sandbox']['progress'] = 0;
     $context['sandbox']['max'] = count($nodes);
@@ -325,8 +325,9 @@ function _content_migrate_batch_process_migrate_data($field_name, &$context) {
     drupal_alter('content_migrate_data_record', $record, $context['sandbox']['field']);
 
     if (!empty($record)) {
-      // @TODO We are not handling revisions correctly yet. Just getting a simple insert working.
-      drupal_write_record($context['sandbox']['new_table'], $record);
+      if ($record['revision_id'] == $node['vid']) {
+        drupal_write_record($context['sandbox']['new_table'], $record);
+      }
       drupal_write_record($context['sandbox']['new_revision_table'], $record);
     }
   }

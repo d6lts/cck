@@ -343,6 +343,71 @@ class ContentMigrateTextTestCase extends ContentMigrateTestCase {
   }
 
   /**
+   * Test multiple revision text field migration to Drupal 7.
+   */
+  function testMultiRevisionTextFieldMigration() {
+
+    // We need a field to migrate.
+    $test_field = $this->setupField('text', 'text_textfield', 0, 0, '');
+
+    // Save the field and field_instance to the database. And alter table.
+    $this->createField($test_field);
+
+    // Create a node with a field value.
+    $settings = array('type' => $this->content_type->type);
+    $test_node = $this->drupalCreateNode($settings);
+    $value = $this->randomName(10);
+    $this->createFieldData($value, $test_field, $test_node, 'content_type_' . $settings['type']);
+
+    // Revise the node and the field value.
+    $test_node2 = $this->drupalCreateNode(get_object_vars($test_node));    
+    $value2 = $this->randomName(10);
+    $this->createFieldData($value2, $test_field, $test_node2, 'content_type_' . $settings['type']);
+
+    // Okay, let's login.
+    $this->drupalLogin($this->admin_user);
+
+    $id = str_replace('_', '-', $test_field['field_name']);
+
+    $this->drupalGet('admin/structure/content_migrate');
+    $this->assertNoFieldChecked('edit-available-data-' . $id, t('Found form field for CCK field %field.', array('%field' => $test_field['field_name'])));
+
+    $edit = array(
+      'available[data][' . $test_field['field_name'] . ']' => $test_field['field_name'],
+    );
+    $this->drupalPost('admin/structure/content_migrate', $edit, t('Migrate selected fields'));
+
+    // Check to see if the node has the field label on it.
+    $this->drupalGet('node/' . $test_node2->nid);
+    $this->assertText($test_field['label'], t('Found field, %field, on node %node.', array('%field' => $test_field['field_name'], '%node' => $test_node2->title)));
+    $this->assertText($value2, t('Found field value, %value, on node %node.', array('%value' => $value2, '%node' => $test_node2->title)));
+
+    // Get previous revision
+    $this->drupalGet("node/$test_node->nid/revisions/$test_node->vid/view");
+    $this->assertText($test_field['label'], t('Found field, %field, on node %node.', array('%field' => $test_field['field_name'], '%node' => $test_node->title)));
+    $this->assertText($value, t('Found field value, %value, on node %node.', array('%value' => $value, '%node' => $test_node->title)));
+
+    // Check data integrity.
+    $node = node_load($test_node2->nid);
+    $field_name = $test_field['field_name'];
+    $this->assertEqual($node->{$field_name}[LANGUAGE_NONE][0]['value'], $value2, t('Field value, %value, is equal to original value, %old.', array('%value' => $node->{$test_field['field_name']}[LANGUAGE_NONE][0]['value'], '%old' => $value2)));
+
+    // Check the node edit form.
+    $this->drupalGet('node/' . $test_node2->nid . '/edit');
+    $this->assertFieldById('edit-' . $id . '-' . LANGUAGE_NONE . '-0-value', $value2, t('Found form field on the node edit page.'));
+
+    // Check to make sure field instance is displayed on the manage fields page.
+    $this->drupalGet('admin/structure/types/manage/' . $this->content_type->type . '/fields');
+    $this->assertText($test_field['label'], t('Found label, %label, for field, %field, on content type field administration page.', array('%field' => $test_field['field_name'], '%label' => $test_field['label'])));
+
+    // @todo Do we want to confirm every setting?
+    $this->drupalGet('admin/structure/types/manage/' . $this->content_type->type . '/fields/' . $test_field['field_name']);
+
+
+    $this->drupalLogout();
+  }
+
+  /**
    * Test multiple valued text fields.
    */
   function testMultiValueTextFieldMigration() {
