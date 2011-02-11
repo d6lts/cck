@@ -44,26 +44,24 @@ function content_migrate_number_field_alter(&$field_value, $instance_value) {
         case 'optionwidgets_onoff':
           $field_value['type'] = 'list_boolean';
           $field_value['module'] = 'list';
-          break;  
+          break;
       }
-      break;  
+      break;
   }
 
 }
 
 /**
  * Implements hook_content_migrate_instance_alter().
- * 
+ *
  * Use this to tweak the conversion of instance or widget settings
  * from the D6 style to the D7 style for specific
  * situations not handled by basic conversion, as when
  * formatter or widget names or settings are changed.
  */
 function content_migrate_number_instance_alter(&$instance_value, $field_value) {
-
-  // Switch 
-  switch ($instance_value['widget']['module']) {      
-    case 'number':    
+  switch ($field_value['module']) {
+    case 'number':
       // The number formatters and formatter settings
       // have changed.
       $new_type = array(
@@ -139,13 +137,15 @@ function content_migrate_number_instance_alter(&$instance_value, $field_value) {
           'decimal_separator' => ', ',
           'scale' => 2,
           'prefix_suffix' => TRUE,
-        ),                          
+        ),
       );
       foreach ($instance_value['display'] as $context => $settings) {
-        $instance_value['display'][$context]['type'] = $new_type[$settings['type']];
-        $instance_value['display'][$context]['settings'] = $new_settings[$settings['type']];
+        if ($settings['module'] == 'number') {
+          $instance_value['display'][$context]['type'] = $new_type[$settings['type']];
+          $instance_value['display'][$context]['settings'] = $new_settings[$settings['type']];
+        }
       }
       break;
   }
- 
+
 }

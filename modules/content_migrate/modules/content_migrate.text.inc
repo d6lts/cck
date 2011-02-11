@@ -69,23 +69,23 @@ function content_migrate_text_field_alter(&$field_value, $instance_value) {
 
 /**
  * Implements hook_content_migrate_instance_alter().
- * 
+ *
  * Use this to tweak the conversion of instance or widget settings
  * from the D6 style to the D7 style for specific
  * situations not handled by basic conversion, as when
  * formatter or widget names or settings are changed.
  */
 function content_migrate_text_instance_alter(&$instance_value, $field_value) {
-
-  // Switch 
-  switch ($instance_value['widget']['module']) {
+  switch ($field_value['module']) {
     case 'text':
       // The formatter names changed, all are prefixed
       // with 'text_'.
       foreach ($instance_value['display'] as $context => $settings) {
-        $instance_value['display'][$context]['type'] = 'text_'. $settings['type'];
-      }     
+        if ($settings['module'] == 'text') {
+          $instance_value['display'][$context]['type'] = 'text_'. $settings['type'];
+        }
+      }
       break;
   }
- 
+
 }
