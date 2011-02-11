@@ -6,20 +6,16 @@
  */
 
 /**
- * Form generator for the migration selection form.
- * 
- * @todo Make this into a nice table where you have 
- * an option to check all available fields to migrate
- * them all at once.
+ * Determine which fields can be migrated, have already been migrated, and are
+ * unable to be migrated due to missing modules.
  */
-function content_migrate_select($form, &$form_state) {
-  $form = array();
+function content_migrate_get_options() {
   $options = array('available' => array(), 'converted' => array(), 'missing' => array());
   
   $field_values = content_migrate_get_field_values();
   if (empty($field_values)) {
     drupal_set_message(t('There is no D6 field information in this database.'));
-    return $form;
+    return FALSE;
   }
 
   $type_names = node_type_get_names();
@@ -62,6 +58,22 @@ function content_migrate_select($form, &$form_state) {
     else {
       $options['available'][$field_name] = $data;
     }
+  }
+  return $options;
+}
+
+/**
+ * Form generator for the migration selection form.
+ * 
+ * @todo Make this into a nice table where you have 
+ * an option to check all available fields to migrate
+ * them all at once.
+ */
+function content_migrate_select($form, &$form_state) {
+  $form = array();
+  $options = content_migrate_get_options();
+  if (!$options) {
+    return $form;
   }
 
   $header = array(t('Field'), t('Field type'), t('Content type(s)'), t('Other information'));
