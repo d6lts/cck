@@ -139,12 +139,13 @@ class ContentMigrateTestCase extends DrupalWebTestCase {
    * the field definition input.
    * @param $field field definition array
    */
-  public function createField($field) {
+  public function createField($field, $shared = FALSE) {
     // Insert field
     $new_field = array(
       'field_name' => $field['field_name'],
       'type' => $field['type'],
       'global_settings' => serialize($field['global_settings']),
+      'multiple' => $field['multiple'],
       'required' => $field['required'],
       'db_storage' => $field['db_storage'],
       'module' => $field['module'],
@@ -176,37 +177,36 @@ class ContentMigrateTestCase extends DrupalWebTestCase {
     $query = db_insert('content_node_field_instance', $options)->fields($new_instance);
     $ret = $query->execute();
     $this->assertNotIdentical($ret, FALSE, t('Successfully inserted field instance, %field %type, into content_node_field_instance.', array('%field' => $new_field['field_name'], '%type' => $this->content_type->type)));
+    $table = 'content_type_' . $this->content_type->type;
 
-    // @todo Alter content_type table
-    $db_columns = array(
-      'type' => $field['db_columns']['value']['type'],
-      'size' => $field['db_columns']['value']['size'],
-      'not null' => $field['db_columns']['value']['not null'],
-      'default' => $field['db_columns']['value']['default'],
-//      ':normal' => true,
-    );
-
-    if ($field['multiple'] <> 0) {
-      $field_table = 'content_' . $field['field_name'];
-      $table = array(
+    if ($field['multiple'] <> 0 || $shared) {
+      $table = 'content_' . $field['field_name'];
+      $schema = array(
         'fields' => array(
           'vid' => array('type' => 'int', 'not null' => TRUE, 'default' => 0),
           'nid' => array('type' => 'int', 'not null' => TRUE, 'default' => 0),
-          'delta' => array('type' => 'int', 'not null' => TRUE, 'default' => 0),
-          $field['field_name'] . '_value' => $db_columns, 
         ),
         'primary key' => array('vid', 'delta'),
         'indexes' => array(
           'nid' => array('nid'),
         ),
       );
-
-      db_create_table($field_table, $table);
-      $this->assertTrue(db_table_exists($field_table), t('Successfully added field table %table.', array('%table' => $field_table)));
+      if ($field['multiple'] <> 0) {
+        $schema['fields']['delta'] = array('type' => 'int', 'not null' => TRUE, 'default' => 0);
+      }
+      db_create_table($table, $schema);
+      $this->assertTrue(db_table_exists($table), t('Successfully added field table %table.', array('%table' => $table)));
     }
-    else {
-      db_add_field('content_type_' . $this->content_type->type, $field['field_name'] . '_value', $db_columns);
-      $this->assertTrue(db_field_exists('content_type_' . $this->content_type->type, $field['field_name'] . '_value'), t('Successfully added field %field to table %table.', array('%field' => $field['field_name'], '%table' => 'content_type_' . $this->content_type->type))); 
+
+    foreach ($field['db_columns'] as $key => $value) {
+      $db_columns = $field['db_columns'][$key];
+      foreach (array('views', 'sortable') as $item) {
+        if (isset($db_columns[$item])) {
+          unset($item);
+        }
+      }
+      db_add_field($table, $field['field_name'] . '_' . $key, $db_columns);
+      $this->assertTrue(db_field_exists($table, $field['field_name'] . '_' . $key), t('Successfully added field %field to table %table.', array('%field' => $field['field_name'], '%table' => $table))); 
     }
 
   }
@@ -223,22 +223,26 @@ class ContentMigrateTestCase extends DrupalWebTestCase {
    * @param $table just in case, we'll include the table name
    * @param $delta defaults to NULL
    */
-  public function createFieldData($data, $field, $node, $table, $delta = NULL) {
+  public function createFieldData($data, $field, $node, $table, $delta = NULL, $shared = FALSE) {
     $fields = array(
       'vid' => $node->vid,
       'nid' => $node->nid,
-      $field['field_name'] . '_value' => $data,
     );
+    foreach ($data as $key => $value) {
+      $fields[$field['field_name'] .'_'. $key] = $value;
+    }
 
-    if ($field['multiple'] <> 0 && isset($delta)) {
-      $fields['delta'] = $delta;
+    if ($field['multiple'] <> 0 || $shared) {
       $table = 'content_' . $field['field_name'];
+    }
+    if ($field['multiple'] <> 0) {
+      $fields['delta'] = $delta;
     }
     $options = array('return' => Database::RETURN_INSERT_ID);
     $query = db_insert($table, $options)->fields($fields);
     $ret = $query->execute();
 
-    $this->assertNotIdentical($ret, FALSE, t('Successfully inserted %data into field %field for node %node', array('%data' => $data, '%field' => $field['field_name'], '%node' => $node->title)));
+    $this->assertNotIdentical($ret, FALSE, t('Successfully inserted %data into field %field for node %node', array('%data' => serialize($data), '%field' => $field['field_name'], '%node' => $node->title)));
   }
 
 }
@@ -277,8 +281,7 @@ class ContentMigrateTextTestCase extends ContentMigrateTestCase {
     $field['db_columns']['value']['not null'] = false;
     $field['db_columns']['value']['sortable'] = true;
     $field['db_columns']['value']['views'] = true;
-    $field['db_columns']['value']['default'] = ''; // for db_add_field()
-
+ 
     if ($multiple <> 0) {
       $field['db_storage'] = 0;
     }
@@ -302,7 +305,7 @@ class ContentMigrateTextTestCase extends ContentMigrateTestCase {
     $test_node = $this->drupalCreateNode($settings);
 
     // Add arbitrary field data to the node.
-    $value = $this->randomName(10);
+    $value = array('value' => $this->randomName(10));
     $this->createFieldData($value, $test_field, $test_node, 'content_type_' . $settings['type']);
 
     // Okay, let's login.
@@ -325,11 +328,11 @@ class ContentMigrateTextTestCase extends ContentMigrateTestCase {
     // Check data integrity.
     $node = node_load($test_node->nid);
     $field_name = $test_field['field_name'];
-    $this->assertEqual($node->{$field_name}[LANGUAGE_NONE][0]['value'], $value, t('Field value, %value, is equal to original value, %old.', array('%value' => $node->{$test_field['field_name']}[LANGUAGE_NONE][0]['value'], '%old' => $value)));
+    $this->assertEqual($node->{$field_name}[LANGUAGE_NONE][0]['value'], $value['value'], t('Field value, %value, is equal to original value, %old.', array('%value' => $node->{$test_field['field_name']}[LANGUAGE_NONE][0]['value'], '%old' => $value['value'])));
 
     // Check the node edit form.
     $this->drupalGet('node/' . $test_node->nid . '/edit');
-    $this->assertFieldById('edit-' . $id . '-' . LANGUAGE_NONE . '-0-value', $value, t('Found form field on the node edit page.'));
+    $this->assertFieldById('edit-' . $id . '-' . LANGUAGE_NONE . '-0-value', $value['value'], t('Found form field on the node edit page.'));
 
     // Check to make sure field instance is displayed on the manage fields page.
     $this->drupalGet('admin/structure/types/manage/' . $this->content_type->type . '/fields');
@@ -356,12 +359,12 @@ class ContentMigrateTextTestCase extends ContentMigrateTestCase {
     // Create a node with a field value.
     $settings = array('type' => $this->content_type->type);
     $test_node = $this->drupalCreateNode($settings);
-    $value = $this->randomName(10);
+    $value = array('value' => $this->randomName(10));
     $this->createFieldData($value, $test_field, $test_node, 'content_type_' . $settings['type']);
 
     // Revise the node and the field value.
     $test_node2 = $this->drupalCreateNode(get_object_vars($test_node));    
-    $value2 = $this->randomName(10);
+    $value2 = array('value' => $this->randomName(10));
     $this->createFieldData($value2, $test_field, $test_node2, 'content_type_' . $settings['type']);
 
     // Okay, let's login.
@@ -380,21 +383,21 @@ class ContentMigrateTextTestCase extends ContentMigrateTestCase {
     // Check to see if the node has the field label on it.
     $this->drupalGet('node/' . $test_node2->nid);
     $this->assertText($test_field['label'], t('Found field, %field, on node %node.', array('%field' => $test_field['field_name'], '%node' => $test_node2->title)));
-    $this->assertText($value2, t('Found field value, %value, on node %node.', array('%value' => $value2, '%node' => $test_node2->title)));
+    $this->assertText($value2['value'], t('Found field value, %value, on node %node.', array('%value' => $value2['value'], '%node' => $test_node2->title)));
 
     // Get previous revision
     $this->drupalGet("node/$test_node->nid/revisions/$test_node->vid/view");
     $this->assertText($test_field['label'], t('Found field, %field, on node %node.', array('%field' => $test_field['field_name'], '%node' => $test_node->title)));
-    $this->assertText($value, t('Found field value, %value, on node %node.', array('%value' => $value, '%node' => $test_node->title)));
+    $this->assertText($value['value'], t('Found field value, %value, on node %node.', array('%value' => $value['value'], '%node' => $test_node->title)));
 
     // Check data integrity.
     $node = node_load($test_node2->nid);
     $field_name = $test_field['field_name'];
-    $this->assertEqual($node->{$field_name}[LANGUAGE_NONE][0]['value'], $value2, t('Field value, %value, is equal to original value, %old.', array('%value' => $node->{$test_field['field_name']}[LANGUAGE_NONE][0]['value'], '%old' => $value2)));
+    $this->assertEqual($node->{$field_name}[LANGUAGE_NONE][0]['value'], $value2['value'], t('Field value, %value, is equal to original value, %old.', array('%value' => $node->{$test_field['field_name']}[LANGUAGE_NONE][0]['value'], '%old' => $value2['value'])));
 
     // Check the node edit form.
     $this->drupalGet('node/' . $test_node2->nid . '/edit');
-    $this->assertFieldById('edit-' . $id . '-' . LANGUAGE_NONE . '-0-value', $value2, t('Found form field on the node edit page.'));
+    $this->assertFieldById('edit-' . $id . '-' . LANGUAGE_NONE . '-0-value', $value2['value'], t('Found form field on the node edit page.'));
 
     // Check to make sure field instance is displayed on the manage fields page.
     $this->drupalGet('admin/structure/types/manage/' . $this->content_type->type . '/fields');
@@ -424,7 +427,7 @@ class ContentMigrateTextTestCase extends ContentMigrateTestCase {
 
     // Add arbitrary field data to the node.
     for ($i = 0; $i < 3; $i++) {
-      $values[$i] = $this->randomName(10);
+      $values[$i] = array('value' => $this->randomName(10));
       $this->createFieldData($values[$i], $test_field, $test_node, 'content_type_' . $settings['type'], $i);
     }
 
@@ -474,7 +477,8 @@ class ContentMigrateTextTestCase extends ContentMigrateTestCase {
     for ($i = 0; $i < 3; $i++) {
       $nodes[$i] = $this->drupalCreateNode($settings);
       // Add arbitrary field data to the node.
-      $this->createFieldData($this->randomName(10), $test_field, $nodes[$i], 'content_type_' . $settings['type']);
+      $value = array('value' => $this->randomName(10));
+      $this->createFieldData($value, $test_field, $nodes[$i], 'content_type_' . $settings['type']);
     }
 
     // Okay let's do the work.
@@ -548,8 +552,7 @@ class ContentMigrateListTestCase extends ContentMigrateTestCase {
     $field['db_columns']['value']['not null'] = false;
     $field['db_columns']['value']['sortable'] = true;
     $field['db_columns']['value']['views'] = true;
-    $field['db_columns']['value']['default'] = ''; // for db_add_field()
-
+ 
     if ($multiple <> 0) {
       $field['db_storage'] = 0;
     }
@@ -561,7 +564,7 @@ class ContentMigrateListTestCase extends ContentMigrateTestCase {
     // We need a field to migrate.
     $values = array();
     for ($i = 0; $i < 5; $i++) {
-      $val = $this->randomName(10);
+      $val = array('value' => $this->randomName(10));
       $values[$val] = $val;
       if ($i == 0) {
         $default = $val;
@@ -599,7 +602,7 @@ class ContentMigrateListTestCase extends ContentMigrateTestCase {
     $this->assertText($test_field['label'], t('Found field, %field, on node %node.', array('%field' => $test_field['field_name'], '%node' => $node->title)));
 
     $this->drupalGet('node/' . $node->nid . '/edit');
-    $this->assertOptionSelected('edit-' . $id . '-' . LANGUAGE_NONE, $data, t('Value, %value, was selected in the select list in the node edit form.', array('%value' => $data)));
+    $this->assertOptionSelected('edit-' . $id . '-' . LANGUAGE_NONE, $data, t('Value, %value, was selected in the select list in the node edit form.', array('%value' => $data['value'])));
 
     // Check to make sure field instance is displayed on the manage fields page.
     $this->drupalGet('admin/structure/types/manage/' . $this->content_type->type . '/fields');
