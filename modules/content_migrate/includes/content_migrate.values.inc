@@ -164,6 +164,7 @@ function _content_migrate_get_instance_values($bundle = NULL, $field_name = NULL
         $instance_value['display'][$context]['type'] = $settings['format'];
         $instance_value['display'][$context]['settings'] = field_info_formatter_settings($settings['format']);
         $instance_value['display'][$context]['weight'] = $instance_value['weight'];
+        $instance_value['display'][$context]['module'] = $instance_value['widget_module'];
 
       }
       

@@ -564,13 +564,13 @@ class ContentMigrateListTestCase extends ContentMigrateTestCase {
     // We need a field to migrate.
     $values = array();
     for ($i = 0; $i < 5; $i++) {
-      $val = array('value' => $this->randomName(10));
-      $values[$val] = $val;
+      $val = $this->randomName(10);
+      $values['value'][$val] = $val;
       if ($i == 0) {
-        $default = $val;
+        $default = array('value' => $val);
       }
       else if ($i == 2) {
-        $data = $val;
+        $data = array('value' => $val);
       }
     }
     $test_field = $this->setupField('text', 'optionwidgets_select', 0, 0, $default, $values);

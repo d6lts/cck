@@ -38,7 +38,12 @@ function content_migrate_number_field_alter(&$field_value, $instance_value) {
       switch ($instance_value['widget']['type']) {
         case 'optionwidgets_buttons':
         case 'optionwidgets_select':
-          $field_value['type'] = 'list_number';
+          if ($field_value['type'] == 'number_integer') {
+            $field_value['type'] = 'list_integer';
+          }
+          else {
+            $field_value['type'] = 'list_float';
+          }
           $field_value['module'] = 'list';
           break;
         case 'optionwidgets_onoff':
@@ -140,10 +145,8 @@ function content_migrate_number_instance_alter(&$instance_value, $field_value) {
         ),
       );
       foreach ($instance_value['display'] as $context => $settings) {
-        if ($settings['module'] == 'number') {
-          $instance_value['display'][$context]['type'] = $new_type[$settings['type']];
-          $instance_value['display'][$context]['settings'] = $new_settings[$settings['type']];
-        }
+        $instance_value['display'][$context]['type'] = $new_type[$settings['type']];
+        $instance_value['display'][$context]['settings'] = $new_settings[$settings['type']];
       }
       break;
   }

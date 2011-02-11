@@ -81,9 +81,7 @@ function content_migrate_text_instance_alter(&$instance_value, $field_value) {
       // The formatter names changed, all are prefixed
       // with 'text_'.
       foreach ($instance_value['display'] as $context => $settings) {
-        if ($settings['module'] == 'text') {
-          $instance_value['display'][$context]['type'] = 'text_'. $settings['type'];
-        }
+        $instance_value['display'][$context]['type'] = 'text_'. $settings['type'];
       }
       break;
   }
