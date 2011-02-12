@@ -299,6 +299,9 @@ function _content_migrate_batch_process_migrate_data($field_name, &$context) {
   // Process one node in each batch.
 
   $node = array_shift($context['sandbox']['nodes']);
+  if (!$node) {
+    return;
+  }
 
   // Construct an record to insert into the new field table
   // from the data in the old table.
