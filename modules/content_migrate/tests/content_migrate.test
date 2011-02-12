@@ -539,7 +539,7 @@ class ContentMigrateListTestCase extends ContentMigrateTestCase {
     $field['global_settings']['max_length'] = '';
     $field['global_settings']['allowed_values'] = '';
     $i = 0;
-    foreach ($values as $name => $val) {
+    foreach ($values['value'] as $name => $val) {
       if ($i <> 0) {
         $field['global_settings']['allowed_values'] .= "\n";
       }
@@ -602,7 +602,7 @@ class ContentMigrateListTestCase extends ContentMigrateTestCase {
     $this->assertText($test_field['label'], t('Found field, %field, on node %node.', array('%field' => $test_field['field_name'], '%node' => $node->title)));
 
     $this->drupalGet('node/' . $node->nid . '/edit');
-    $this->assertOptionSelected('edit-' . $id . '-' . LANGUAGE_NONE, $data, t('Value, %value, was selected in the select list in the node edit form.', array('%value' => $data['value'])));
+    $this->assertOptionSelected('edit-' . $id . '-' . LANGUAGE_NONE, $data['value'], t('Value, %value, was selected in the select list in the node edit form.', array('%value' => $data['value'])));
 
     // Check to make sure field instance is displayed on the manage fields page.
     $this->drupalGet('admin/structure/types/manage/' . $this->content_type->type . '/fields');
@@ -611,7 +611,7 @@ class ContentMigrateListTestCase extends ContentMigrateTestCase {
     // Make sure allowed values matches.
     $n = 0;
     $allowed_values = '';
-    foreach ($values as $val => $label) {
+    foreach ($values['value'] as $val => $label) {
       if ($n <> 0) {
         $allowed_values .= "\n";
       }
