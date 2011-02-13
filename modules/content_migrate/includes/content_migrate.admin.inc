@@ -140,6 +140,12 @@ function content_migrate_select($form, &$form_state) {
  */
 function content_migrate_rollback_submit($form, &$form_state) {
   $field_names = array_filter($form_state['values']['converted']['data']);
+}
+
+/**
+ * Helper function to perform rollback.
+ */
+function content_migrate_rollback($field_names) {
   foreach ($field_names as $field_name) {
     $field = field_info_field($field_name);
     
@@ -197,10 +203,10 @@ function _content_migrate_batch($field_names) {
 /**
  * Batch operation callback to create fields.
  */
-function _content_migrate_batch_process_create_fields($field_names) {
+function _content_migrate_batch_process_create_fields($field_names, &$context) {
   $type_names = node_type_get_names();
   foreach ($field_names as $field_name) {
-    $context['message'] = "creating field $field_name";
+    $context['message'] = t('"Creating field: %field', array('%field' => $field_name));
     $field_value = content_migrate_get_field_values($field_name);
 
     // Create the field and store the new field 
