@@ -140,6 +140,7 @@ function content_migrate_select($form, &$form_state) {
  */
 function content_migrate_rollback_submit($form, &$form_state) {
   $field_names = array_filter($form_state['values']['converted']['data']);
+  content_migrate_rollback($field_names);
 }
 
 /**
