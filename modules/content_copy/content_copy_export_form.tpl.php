@@ -1,5 +1,4 @@
 <?php
-// $Id$
 
 if ($form['#step'] == 2):
   if ($rows): ?>

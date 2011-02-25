@@ -1,4 +1,3 @@
-// $Id$
 
 Content Construction Kit
 ------------------------

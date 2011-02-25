@@ -1,5 +1,4 @@
 <?php
-// $Id$
 /**
  * @file
  * Allows administrators to associate custom fields to content types.

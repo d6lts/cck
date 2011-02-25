@@ -1,5 +1,4 @@
 <?php
-// $Id$
 
 /**
  * @file fieldgroup-simple.tpl.php

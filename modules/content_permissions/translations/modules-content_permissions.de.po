@@ -1,4 +1,3 @@
-# $Id$
 # German translation of CCK
 # Copyright 2006 Lukas Gangoly <lukas.gangoly@univie.ac.at>
 # Copyright 2006 Jakob Petsovits <jpetso@gmx.at>
