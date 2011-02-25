@@ -1,4 +1,3 @@
-; $Id$
 name = Content Migrate
 description = Migrate fields and field data from CCK D6 format to the D7 field format. Required to migrate data, can be disabled once all fields have been migrated.
 core = 7.x

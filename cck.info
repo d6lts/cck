@@ -1,4 +1,3 @@
-; $Id$
 name = CCK
 description = Miscellaneous field functions not handled by core.
 package = CCK

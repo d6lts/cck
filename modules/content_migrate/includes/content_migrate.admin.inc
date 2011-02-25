@@ -1,5 +1,4 @@
 <?php
-// $Id$
 /**
  * @file content_migrate.admin.inc
  * Code to process field data migration, moved into a separate file for efficiency.

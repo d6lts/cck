@@ -1,5 +1,4 @@
 <?php
-// $Id$
 
 /**
  * @file content_migrate.drush.inc
