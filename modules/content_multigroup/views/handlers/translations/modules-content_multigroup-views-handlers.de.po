@@ -1,4 +1,3 @@
-# $Id$
 #
 # LANGUAGE translation of Drupal (modules-content_multigroup-views-handlers)
 # Copyright 2009 NAME <EMAIL@ADDRESS>

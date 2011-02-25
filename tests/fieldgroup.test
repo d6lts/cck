@@ -1,5 +1,4 @@
 <?php
-// $Id$
 
 class FieldgroupCRUDTest extends ContentCrudTestCase {
   var $last_group     = NULL;

@@ -1,4 +1,3 @@
-# $Id$
 # Portuguese translation of Drupal (general)
 # Copyright 2007 Fernando Silva <fernando.silva@openquest.pt>
 # Generated from files:

@@ -1,4 +1,3 @@
-; $Id$
 name = Content Permissions
 description = Set field-level permissions for CCK fields.
 package = CCK

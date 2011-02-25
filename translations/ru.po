@@ -1,4 +1,3 @@
-# $Id$
 #
 # Russian translation of Drupal (content_admin.inc)
 # Copyright 2007 vadbars <vadbars@mail.ru>

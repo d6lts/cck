@@ -1,4 +1,3 @@
-; $Id$
 name = Content
 description = Allows administrators to define new content types.
 package = CCK

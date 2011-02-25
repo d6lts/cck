@@ -1,4 +1,3 @@
-# $Id$
 #
 # Swedish translation of Drupal (optionwidgets)
 # Generated from files:

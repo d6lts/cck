@@ -1,4 +1,3 @@
-// $Id$
 
 /**
  * Private namespace for local methods.
