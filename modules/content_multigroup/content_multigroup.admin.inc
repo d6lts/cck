@@ -307,6 +307,7 @@ function content_multigroup_display_overview_form(&$form, &$form_state) {
   $groups = array();
   $groups = fieldgroup_groups($type_name);
   $contexts = content_build_modes($contexts_selector);
+  $all_contexts = content_build_modes();
 
   // Multigroups, extra values.
   $label_options = array(
@@ -344,16 +345,28 @@ function content_multigroup_display_overview_form(&$form, &$form_state) {
         '#default_value' => isset($subgroup_settings['label']) ? $subgroup_settings['label'] : 'above',
       );
     }
-    foreach ($contexts as $key => $title) {
-      $form[$subgroup_name][$key]['format'] = array(
-        '#type' => 'select',
-        '#options' => $options,
-        '#default_value' => isset($subgroup_settings[$key]['format']) ? $subgroup_settings[$key]['format'] : 'fieldset',
-      );
-      $form[$subgroup_name][$key]['exclude'] = array('#type' => 'value', '#value' => 0);
+
+    // Allow a format selection for contexts on the current tab.
+    // Store other contexts as hidden values so they don't get lost.
+    foreach ($all_contexts as $key => $title) {
+      if (array_key_exists($key, $contexts)) {
+        $form[$subgroup_name][$key]['format'] = array(
+          '#type' => 'select',
+          '#options' => $options,
+          '#default_value' => isset($subgroup_settings[$key]['format']) ? $subgroup_settings[$key]['format'] : 'fieldset',
+        );
+        $form[$subgroup_name][$key]['exclude'] = array('#type' => 'value', '#value' => 0);
+      }
+      else {
+        $form[$subgroup_name][$key]['format'] = array(
+          '#type' => 'hidden',
+          '#value' => isset($subgroup_settings[$key]['format']) ? $subgroup_settings[$key]['format'] : 'fieldset',
+        );
+        $form[$subgroup_name][$key]['exclude'] = array('#type' => 'value', '#value' => 0);
+      
+      }
     }
   }
-
   $form['#submit'] = array_merge(array('content_multigroup_display_overview_form_submit'), $form['#submit']);
 }
 
@@ -365,8 +378,7 @@ function content_multigroup_display_overview_form(&$form, &$form_state) {
  */
 function content_multigroup_display_overview_form_submit($form, &$form_state) {
   $groups = fieldgroup_groups($form['#type_name']);
-  $reset_cache = FALSE;
-
+  //$reset_cache = FALSE;
   // Find any subgroups we inserted into the display fields form,
   // save our settings, and remove them from $form_state.
   foreach ($form_state['values'] as $key => $values) {
@@ -413,7 +425,6 @@ function content_multigroup_group_edit_form(&$form, &$form_state) {
     '#collapsed' => FALSE,
     '#collapsible' => TRUE,
   );
-
   if (isset($group['settings']['multigroup']['subgroup'])) {
     // Preserve subgroup display settings.
     $form['settings']['multigroup']['subgroup'] = array(

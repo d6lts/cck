@@ -697,7 +697,8 @@ function fieldgroup_display_overview_form_submit($form, &$form_state) {
           foreach ($values['settings']['multigroup'] as $group_key => $group_values){
             $group['settings']['multigroup'][$group_key] = $values['settings']['multigroup'][$group_key];
           }
-        } else {
+        } 
+        else {
           $group['settings']['multigroup'] = $values['settings']['multigroup'];
         }
         unset($values['settings']['multigroup']);
