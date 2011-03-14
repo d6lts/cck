@@ -375,7 +375,7 @@ function content_multigroup_node_form_validate($form, &$form_state) {
 
   foreach ($form['#multigroups'] as $group_name => $group_fields) {
     $group = $groups[$group_name];
-    $group_required = isset($group['settings']['multigroup']['required']) ? $group['settings']['multigroup']['required'] : 1;
+    $group_required = isset($group['settings']['multigroup']['required']) ? $group['settings']['multigroup']['required'] : 0;
 
     $non_empty_subgroups = $non_removed_subgroups = $required_field_errors = array();
     foreach ($group_fields as $field_name => $field) {

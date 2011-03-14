@@ -2,6 +2,7 @@
 CCK 6.x-3.x
 ===========
 
+- Multigroup validation was defaulting to 'required' when created, should default to 'not required'.
 - #1092044 Make sure all multigroup formats are preserved, even if not visible on the current tab.
 
 CCK 6.x-3.0-alpha1
