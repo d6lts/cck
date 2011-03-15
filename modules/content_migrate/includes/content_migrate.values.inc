@@ -151,7 +151,9 @@ function _content_migrate_get_instance_values($bundle = NULL, $field_name = NULL
       $instance_value['display'] = array();
       $label = $instance_value['display_settings']['label'];
       foreach ($instance_value['display_settings'] as $context => $settings) {
-
+        if ($context == 'label') {
+          continue;
+        }
         // @TODO Multigroup fields have some unexpected elements, we need to work out what should happen to them.
         if ($context == 'parent' || $context == 'weight') {
           continue;
