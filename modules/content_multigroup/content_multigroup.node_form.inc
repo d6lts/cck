@@ -103,14 +103,27 @@ function _content_multigroup_fieldgroup_form(&$form, &$form_state, $form_id, $gr
     array_unshift($form['#validate'], 'content_multigroup_node_form_validate');
   }
 
-  // Attach our own pre_render handler to the form, used to fix the required
-  // attribute of all fields in multigroups.
-  if (!isset($form['#pre_render'])) {
-    $form['#pre_render'] = array();
+  // Disable required flag during FormAPI validation, except when building the
+  // form for an 'Add more values' request, then replace it in pre_render.
+  // To avoid re-creating this array of values over and over, create it once
+  // and store it as a form attribute.
+  $form['#multigroup_required_fields'] = array();
+  if (empty($form_state['multigroup_add_more'])) {
+    foreach ($form['#multigroups'] as $group_name => $group_fields) {
+      foreach ($group_fields as $field_name => $field) {
+        if ($field['required']) {
+          $form['#multigroup_required_fields'][$group_name][$field_name] = TRUE;
+        }
+      }
+    }
+    if (!isset($form['#pre_render'])) {
+      $form['#pre_render'] = array();
+    }
+    if (!in_array('content_multigroup_node_form_pre_render', $form['#pre_render'])) {
+      array_unshift($form['#pre_render'], 'content_multigroup_node_form_pre_render');
+    }
   }
-  if (!in_array('content_multigroup_node_form_pre_render', $form['#pre_render'])) {
-    array_unshift($form['#pre_render'], 'content_multigroup_node_form_pre_render');
-  }
+
   $elements[$group_name] = array();
   foreach ($group_deltas as $delta) {
     $element = content_multigroup_group_form($form, $form_state, $group, $delta);
@@ -263,17 +276,7 @@ function content_multigroup_group_form(&$form, &$form_state, $group, $delta) {
  * Required fields should display the required star in the rendered form.
  */
 function content_multigroup_node_form_pre_render(&$form) {
-  foreach ($form['#multigroups'] as $group_name => $group_fields) {
-    $required_fields = array();
-    foreach ($group_fields as $field_name => $field) {
-      if ($field['required']) {
-        $required_fields[] = $field_name;
-      }
-    }
-    if (!empty($required_fields)) {
-      content_multigroup_node_form_fix_required($form[$group_name], $required_fields, TRUE);
-    }
-  }
+  content_multigroup_node_form_fix_required($form, TRUE);
   return $form;
 }
 
@@ -302,17 +305,7 @@ function _content_multigroup_node_form_after_build($form, &$form_state) {
   // Disable required flag during FormAPI validation, except when building the
   // form for an 'Add more values' request.
   $required = !empty($form_state['multigroup_add_more']);
-  foreach ($form['#multigroups'] as $group_name => $group_fields) {
-    $required_fields = array();
-    foreach ($group_fields as $field_name => $field) {
-      if ($field['required']) {
-        $required_fields[] = $field_name;
-      }
-    }
-    if (!empty($required_fields)) {
-      content_multigroup_node_form_fix_required($form[$group_name], $required_fields, $required);
-    }
-  }
+  content_multigroup_node_form_fix_required($form, $required);
 
   if ($form_state['submitted']) {
     // Fix value positions in $form_state for the fields in multigroups.
@@ -348,18 +341,23 @@ function _content_multigroup_node_form_after_build($form, &$form_state) {
  *
  * @see content_multigroup_node_form_validate().
  */
-function content_multigroup_node_form_fix_required(&$elements, $required_fields, $required) {
-  foreach (element_children($elements) as $key) {
-    if (isset($elements[$key]) && $elements[$key]) {
-
-      if (count($elements[$key]['#array_parents']) >= 3 && in_array($elements[$key]['#array_parents'][2], $required_fields) && isset($elements[$key]['#required'])) {
-        $elements[$key]['#required'] = $required;
+function content_multigroup_node_form_fix_required(&$form, $required) {
+  foreach ($form['#multigroup_required_fields'] as $group_name => $field) {
+    foreach ($field as $field_name => $value) {
+      $elements = &content_get_nested_elements($form, $field_name);
+      foreach ($elements as &$element) {
+        $cols = $form['#field_info'][$field_name]['columns'];
+        $element['#required'] = $required;
+        foreach ($cols as $column => $info) {
+          $values = &content_get_nested_elements($element, $column);
+          foreach ($values as &$value) {
+            $value['#required'] = $required;
+          }
+        }
       }
-
-      // Recurse through all children elements.
-      content_multigroup_node_form_fix_required($elements[$key], $required_fields, $required);
     }
   }
+  return;
 }
 
 /**
@@ -385,6 +383,9 @@ function content_multigroup_node_form_validate($form, &$form_state) {
       $form_state['values']['_content_ignore_required_fields'][$field_name] = TRUE;
 
       foreach ($form_state['values'][$field_name] as $delta => $item) {
+        // Keep track of the highest delta value for this group.
+        $max_delta = $delta;
+
         // Ignore subgroups flagged for removal.
         if ($form_state['multigroup_removed'][$group_name][$delta]) {
           continue;
@@ -435,13 +436,19 @@ function content_multigroup_node_form_validate($form, &$form_state) {
       form_set_error('', t('Group @name requires one collection of fields minimum.', array('@name' => t($group['label']))));
       continue;
     }
-
-    // Do not enforce field requirements if there is only one non-removed
-    // subgroup of fields, and that subgroup is empty.
-    if (count($non_removed_subgroups) == 1) {
-      $delta = key($non_removed_subgroups);
-      if (isset($required_field_errors[$delta]) && !isset($non_empty_subgroups[$delta])) {
-        unset($required_field_errors[$delta]);
+    
+    // Force remove any empty groups so they will collapse. 
+    // Don't flag errors on empty groups.
+    for ($delta = 0; $delta <= $max_delta; $delta++) {
+      if (!isset($non_empty_subgroups[$delta]) && isset($non_removed_subgroups[$delta])) {
+        unset($non_removed_subgroups[$delta]);
+        $form_state['multigroup_removed'][$group_name][$delta] = TRUE;
+        foreach ($group_fields as $field_name => $item) {
+          $form_state['values'][$field_name][$delta]['_remove'] = TRUE;
+        }
+        if (isset($required_field_errors[$delta])) {
+          unset($required_field_errors[$delta]);
+        }
       }
     }
 

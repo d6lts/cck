@@ -2,6 +2,9 @@
 CCK 6.x-3.x
 ===========
 
+
+- #1081072 Must be able to save empty, non-required, multigroup, even if it contains required fields.
+- #522564 Remove empty groups even if not marked 'remove'.
 - Multigroup validation was defaulting to 'required' when created, should default to 'not required'.
 - #1092044 Make sure all multigroup formats are preserved, even if not visible on the current tab.
 
