@@ -9,6 +9,7 @@ Features:
 - #536260 by Agileware: Make "Add more values" button text themeable.
 
 Bugfixes:
+- #1063338 by DeFr: Fix undefined indexes for FIELD_NAME_rendered and others.
 - Fix undefined group name index in fieldgroup_nodeapi.
 - #1053566 by DamienMcKenna: Fix undefined index errors in _fieldgroup_get_tree().
 - #1081072 Must be able to save empty, non-required, multigroup, even if it contains required fields.

@@ -1114,7 +1114,7 @@ function theme_fieldgroup_fieldset($element) {
 function template_preprocess_fieldgroup_simple(&$vars) {
   $element = $vars['element'];
 
-  $vars['parent'] = $element['#parent'];
+  $vars['parent'] = isset($element['#parent']) ? $element['#parent'] : NULL;
   $vars['group_name'] = $element['#group_name'];
   $vars['group_name_css'] = strtr($element['#group_name'], '_', '-');
   $vars['label'] = isset($element['#title']) ? $element['#title'] : '';;
