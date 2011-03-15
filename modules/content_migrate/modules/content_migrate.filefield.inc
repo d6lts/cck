@@ -53,12 +53,15 @@ function content_migrate_filefield_instance_alter(&$instance_value, $field_value
       unset($instance_value['widget']['settings']['file_path']);
       $instance_value['settings']['file_extensions'] = $instance_value['widget']['settings']['file_extensions'];
       unset($instance_value['widget']['settings']['file_extensions']);
-      $instance_value['settings']['max_filesize'] = $instance_value['widget']['settings']['max_filesize_per_file'];
-      unset($instance_value['widget']['settings']['max_filesize_per_file']);
-      $instance_value['settings']['max_resolution'] = $instance_value['widget']['settings']['max_resolution'];
-      unset($instance_value['widget']['settings']['max_resolution']);
-      $instance_value['settings']['min_resolution'] = $instance_value['widget']['settings']['min_resolution'];
-      unset($instance_value['widget']['settings']['min_resolution']);
+      $settings = array(
+        'max_filesize' => 0,
+        'max_resolution' => 0,
+        'min_resolution' => 0,
+      );
+      foreach ($settings as $setting => $default_value) {
+        $instance_value['settings'][$setting] = isset($instance_value['widget']['settings'][$setting]) ? $instance_value['widget']['settings'][$setting] : $default_value;
+        unset($instance_value['widget']['settings'][$setting]);
+      }
 
       // What is the difference between alt and custom_alt on the old field?
       $instance_value['settings']['alt_field'] = $instance_value['widget']['settings']['custom_alt'];
