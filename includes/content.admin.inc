@@ -1686,6 +1686,8 @@ function _content_overview_order(&$form, $field_rows, $group_rows) {
     // readjust the depth and parenting of fieldgroup
     $nested = array();
     foreach ($group_rows as $name) {
+      if (empty($form[$name]['#depth'])) $form[$name]['#depth'] = 0;
+        
       // Skip top level groups, only nested groups need adjustment.
       if ($parent = $form[$name]['parent']['#value']) {
         $form[$name]['#depth'] = $form[$parent]['#depth'] + 1;
