@@ -7,6 +7,7 @@ Features
 - #1008184 by merlinofchaos, bojanz, dereine, yched: Adapt to Views 3 "semantic views" feature (backwards compatible with Views 2)
 
 Bugfixes:
+- Fix warning: Creating default object from empty value in template_preprocess_content_display_overview_form() (line 134 of ..theme.inc).
 - #1063338 by DeFr: Fix undefined indexes for FIELD_NAME_rendered and others.
 - #696620 Make sure non-empty descriptions don't run through translator.
 - #863226 by KarenS: make sure we have a function that will return inactive instances when other instances of the same field are still active.
