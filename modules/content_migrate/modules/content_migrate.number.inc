@@ -14,7 +14,6 @@
  * as when field types or settings are changed.
  */
 function content_migrate_number_field_alter(&$field_value, $instance_value) {
-  
   switch ($field_value['type']) {
    
     case 'number_integer':
@@ -50,6 +49,13 @@ function content_migrate_number_field_alter(&$field_value, $instance_value) {
           $field_value['module'] = 'list';
           break;
       }
+
+      // The allowed values list should now be stored as an array.
+      $allowed_values = array();
+      if (!empty($field_value['settings']['allowed_values'])) {
+        $allowed_values = content_migrate_extract_allowed_values($field_value['settings']['allowed_values'], $field_value['type']);
+      }
+      $field_value['settings']['allowed_values'] = $allowed_values;
       break;
   }
 

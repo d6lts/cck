@@ -26,22 +26,6 @@ function content_migrate_text_field_alter(&$field_value, $instance_value) {
         $field_value['settings']['max_length'] = 255;
       }
 
-      // The allowed values list should now be stored as an array.
-      $allowed_values = array();
-      if (!empty($field_value['settings']['allowed_values'])) {
-        $allowed_values;
-        foreach (explode("\n", $field_value['settings']['allowed_values']) as $value) {
-          if (empty($value)) continue;
-          if (strstr($value, '|')) {
-            $parts = explode('|', $value);
-            $allowed_values[trim($parts[0])] = trim($parts[1]);
-          }
-          else {
-            $allowed_values[] = trim($value);
-          }
-        }
-      }
-      
       // Text fields using optionwidgets are
       // now List fields.
       switch ($instance_value['widget']['type']) {
@@ -49,18 +33,33 @@ function content_migrate_text_field_alter(&$field_value, $instance_value) {
         case 'optionwidgets_select':
           $field_value['type'] = 'list_text';
           $field_value['module'] = 'list';
-          $field_value['settings']['allowed_values'] = $allowed_values;
           break;
+
         case 'optionwidgets_onoff':
           $field_value['type'] = 'list_boolean';
           $field_value['module'] = 'list';
-          $field_value['settings']['allowed_values'] = $allowed_values;
-          break;  
+          break;
+
         case 'text_textarea':
           $field_value['type'] = 'text_long';
           unset($field_value['settings']['max_length']);
-          break;  
+          break;
+
       }
+
+      // The allowed values list should now be stored as an array.
+      switch ($field_value['type']) {
+        case 'list_text':
+        case 'list_boolean':
+          $allowed_values = array();
+          if (!empty($field_value['settings']['allowed_values'])) {
+            $allowed_values = content_migrate_extract_allowed_values($field_value['settings']['allowed_values'], $field_value['type']);
+          }
+          $field_value['settings']['allowed_values'] = $allowed_values;
+          break;
+
+      }
+
       break;
   }
 
