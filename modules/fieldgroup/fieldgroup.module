@@ -762,7 +762,7 @@ function fieldgroup_nodeapi(&$node, $op, $teaser = NULL, $page = NULL) {
         //reorder the groups from the inside-out in order to avoid writing a recursive function
         while ($max_depth >= 0) {
           foreach ($group_rows as $name) {
-            if ($node->content[$name]['#depth'] == $max_depth) {
+            if (!empty($node->content[$name]) && $node->content[$name]['#depth'] == $max_depth) {
               $parent = $node->content[$name]['#group_parent'];
               if (isset($parent) && $parent != '') {
                 $node->content[$parent]['group'][$name] = $node->content[$name];
