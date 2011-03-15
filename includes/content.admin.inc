@@ -327,7 +327,7 @@ function content_field_overview_form(&$form_state, $type_name) {
   if (!empty($group_types)) {
     $current_group_options = $group_options;
     $options = fieldgroup_types();
-    unset($current_group_options[_add_new_group]);
+    unset($current_group_options['_add_new_group']);
     $weight++;
     $name = '_add_new_group';
     $form[$name] = array(
