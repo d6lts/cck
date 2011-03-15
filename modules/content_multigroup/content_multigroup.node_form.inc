@@ -690,7 +690,7 @@ function content_multigroup_add_more(&$form, &$form_state, $group) {
   $form_element[$group_name .'_add_more'] = array(
     '#type' => 'submit',
     '#name' => $group_name .'_add_more',
-    '#value' => t('Add more values'),
+    '#value' => theme('content_multigroup_add_more_label', $group_name),
     '#weight' => $group_multiple + 1,
     '#submit' => array('content_multigroup_add_more_submit'),
     '#ahah' => array(
@@ -960,4 +960,11 @@ function theme_content_multigroup_node_form($element) {
  */
 function theme_content_multigroup_node_label($text) {
   return !empty($text) ? '<h3>'. $text .'</h3>' : '';
+}
+
+/**
+ * Theme the label for the "Add more values" button
+ */
+function theme_content_multigroup_add_more_label($group_name) {
+  return t('Add more values');
 }

@@ -59,6 +59,10 @@ function content_multigroup_theme() {
       'arguments' => array('text' => NULL),
       'file' => 'content_multigroup.node_form.inc',
     ),
+    'content_multigroup_add_more_label' => array(
+      'arguments' => array('group_name' => NULL),
+      'file' => 'content_multigroup.node_form.inc',
+    ),
     'content_multigroup_display_simple' => array(
       'arguments' => array('element' => NULL),
       'file' => 'content_multigroup.node_view.inc',
