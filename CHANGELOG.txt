@@ -2,7 +2,14 @@
 CCK 6.x-3.x
 ===========
 
+CCK 6.x-3.0-alpha2
+==================
 
+Features:
+- #536260 by Agileware: Make "Add more values" button text themeable.
+
+Bugfixes:
+- #1053566 by DamienMcKenna: Fix undefined index errors in _fieldgroup_get_tree().
 - #1081072 Must be able to save empty, non-required, multigroup, even if it contains required fields.
 - #522564 Remove empty groups even if not marked 'remove'.
 - Multigroup validation was defaulting to 'required' when created, should default to 'not required'.
