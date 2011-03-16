@@ -2,7 +2,9 @@
 CCK 6.x-3.x
 ===========
 
+- #1093928 Required option lists do not have an empty option available. Add one to avoid 'An illegal choice has been detected' errors for empty groups.
 - #1081072 Fix Cannot use a scalar value as an array problem when using optionwidgets. 
+
 CCK 6.x-3.0-alpha2
 ==================
 

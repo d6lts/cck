@@ -357,6 +357,11 @@ function content_multigroup_node_form_fix_required(&$elements, $required_fields,
     if (isset($elements[$key]) && $elements[$key]) {
       if (count($elements[$key]['#parents']) >= 3 && in_array($elements[$key]['#parents'][2], $required_fields) && isset($elements[$key]['#required'])) {
         $elements[$key]['#required'] = $required;
+        // Required option lists do not have an empty option available. Add one to avoid 'An illegal choice has been detected' errors.
+        if (!$required && !empty($elements[$key]['#options']) && substr($elements[$key]['#id'], -7) != '_weight') {
+          $empty = array('' => '');
+          $elements[$key]['#options'] = $empty + $elements[$key]['#options'];
+        }
       }
 
       // Recurse through all children elements.
