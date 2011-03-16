@@ -2,6 +2,7 @@
 CCK 6.x-3.x
 ===========
 
+- #1081072 Fix Cannot use a scalar value as an array problem when using optionwidgets. 
 CCK 6.x-3.0-alpha2
 ==================
 

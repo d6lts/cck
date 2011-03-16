@@ -276,7 +276,12 @@ function content_multigroup_group_form(&$form, &$form_state, $group, $delta) {
  * Required fields should display the required star in the rendered form.
  */
 function content_multigroup_node_form_pre_render(&$form) {
-  content_multigroup_node_form_fix_required($form, TRUE);
+  foreach ($form['#multigroups'] as $group_name => $group_fields) {
+    $required_fields = $form['#multigroup_required_fields'][$group_name];
+    if (!empty($required_fields)) {
+      content_multigroup_node_form_fix_required($form[$group_name], $required_fields, TRUE);
+    }
+  }
   return $form;
 }
 
@@ -305,7 +310,13 @@ function _content_multigroup_node_form_after_build($form, &$form_state) {
   // Disable required flag during FormAPI validation, except when building the
   // form for an 'Add more values' request.
   $required = !empty($form_state['multigroup_add_more']);
-  content_multigroup_node_form_fix_required($form, $required);
+  foreach ($form['#multigroups'] as $group_name => $group_fields) {
+    $required_fields = $form['#multigroup_required_fields'][$group_name];
+    if (!empty($required_fields)) {
+      content_multigroup_node_form_fix_required($form[$group_name], $required_fields, $required);
+    }
+  }
+
 
   if ($form_state['submitted']) {
     // Fix value positions in $form_state for the fields in multigroups.
@@ -341,23 +352,17 @@ function _content_multigroup_node_form_after_build($form, &$form_state) {
  *
  * @see content_multigroup_node_form_validate().
  */
-function content_multigroup_node_form_fix_required(&$form, $required) {
-  foreach ($form['#multigroup_required_fields'] as $group_name => $field) {
-    foreach ($field as $field_name => $value) {
-      $elements = &content_get_nested_elements($form, $field_name);
-      foreach ($elements as &$element) {
-        $cols = $form['#field_info'][$field_name]['columns'];
-        $element['#required'] = $required;
-        foreach ($cols as $column => $info) {
-          $values = &content_get_nested_elements($element, $column);
-          foreach ($values as &$value) {
-            $value['#required'] = $required;
-          }
-        }
+function content_multigroup_node_form_fix_required(&$elements, $required_fields, $required) {
+  foreach (element_children($elements) as $key) {
+    if (isset($elements[$key]) && $elements[$key]) {
+      if (count($elements[$key]['#parents']) >= 3 && in_array($elements[$key]['#parents'][2], $required_fields) && isset($elements[$key]['#required'])) {
+        $elements[$key]['#required'] = $required;
       }
+
+      // Recurse through all children elements.
+      content_multigroup_node_form_fix_required($elements[$key], $required_fields, $required);
     }
   }
-  return;
 }
 
 /**
@@ -571,7 +576,7 @@ function content_multigroup_node_form_transpose_elements(&$form, &$form_state, $
  */
 function content_multigroup_node_form_fix_deltas(&$elements, $form_deltas) {
   foreach (element_children($elements) as $key) {
-    if (isset($elements[$key]) && $elements[$key]) {
+    if (isset($elements[$key]) && $elements[$key] && substr($key, -9) != '_add_more') {
 
       // Fix the second item, the delta value, of the element's '#parents' array.
       $elements[$key]['#parents'][1] = $form_deltas[$elements[$key]['#parents'][1]];
