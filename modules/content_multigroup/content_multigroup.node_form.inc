@@ -103,27 +103,6 @@ function _content_multigroup_fieldgroup_form(&$form, &$form_state, $form_id, $gr
     array_unshift($form['#validate'], 'content_multigroup_node_form_validate');
   }
 
-  // Disable required flag during FormAPI validation, except when building the
-  // form for an 'Add more values' request, then replace it in pre_render.
-  // To avoid re-creating this array of values over and over, create it once
-  // and store it as a form attribute.
-  $form['#multigroup_required_fields'] = array();
-  if (empty($form_state['multigroup_add_more'])) {
-    foreach ($form['#multigroups'] as $group_name => $group_fields) {
-      foreach ($group_fields as $field_name => $field) {
-        if ($field['required']) {
-          $form['#multigroup_required_fields'][$group_name][$field_name] = TRUE;
-        }
-      }
-    }
-    if (!isset($form['#pre_render'])) {
-      $form['#pre_render'] = array();
-    }
-    if (!in_array('content_multigroup_node_form_pre_render', $form['#pre_render'])) {
-      array_unshift($form['#pre_render'], 'content_multigroup_node_form_pre_render');
-    }
-  }
-
   $elements[$group_name] = array();
   foreach ($group_deltas as $delta) {
     $element = content_multigroup_group_form($form, $form_state, $group, $delta);
@@ -134,6 +113,28 @@ function _content_multigroup_fieldgroup_form(&$form, &$form_state, $form_id, $gr
   // Unset the original group field values now that we've moved them.
   foreach (array_keys($group_fields) as $field_name) {
     unset($form[$group_name][$field_name]);
+  }
+
+  // Disable required flag during FormAPI validation, except when building the
+  // form for an 'Add more values' request, then replace it in pre_render.
+  // To avoid re-creating this array of values over and over, create it once
+  // and store it as a form attribute.
+  $form['#multigroup_required_fields'] = array();
+  if (empty($form_state['multigroup_add_more'])) {
+    foreach ($form['#multigroups'] as $group_name => $group_fields) {
+      foreach ($group_fields as $field_name => $field) {
+        if ($field['required']) {
+          $form['#multigroup_required_fields'][$group_name][$field_name] = TRUE;
+          $form['#field_info'][$field_name]['required'] = FALSE;
+        }
+      }
+    }
+    if (!isset($form['#pre_render'])) {
+      $form['#pre_render'] = array();
+    }
+    if (!in_array('content_multigroup_node_form_pre_render', $form['#pre_render'])) {
+      array_unshift($form['#pre_render'], 'content_multigroup_node_form_pre_render');
+    }
   }
 
   if (($add_more = content_multigroup_add_more($form, $form_state, $group)) !== FALSE) {
