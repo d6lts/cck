@@ -277,7 +277,7 @@ function content_multigroup_group_form(&$form, &$form_state, $group, $delta) {
  */
 function content_multigroup_node_form_pre_render(&$form) {
   foreach ($form['#multigroups'] as $group_name => $group_fields) {
-    $required_fields = $form['#multigroup_required_fields'][$group_name];
+    $required_fields = array_keys($form['#multigroup_required_fields'][$group_name]);
     if (!empty($required_fields)) {
       content_multigroup_node_form_fix_required($form[$group_name], $required_fields, TRUE);
     }
@@ -311,7 +311,7 @@ function _content_multigroup_node_form_after_build($form, &$form_state) {
   // form for an 'Add more values' request.
   $required = !empty($form_state['multigroup_add_more']);
   foreach ($form['#multigroups'] as $group_name => $group_fields) {
-    $required_fields = $form['#multigroup_required_fields'][$group_name];
+    $required_fields = array_keys($form['#multigroup_required_fields'][$group_name]);
     if (!empty($required_fields)) {
       content_multigroup_node_form_fix_required($form[$group_name], $required_fields, $required);
     }
