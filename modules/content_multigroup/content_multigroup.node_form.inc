@@ -426,7 +426,9 @@ function content_multigroup_node_form_validate($form, &$form_state) {
             $error_element = implode('][', $error_element);
           }
           else {
-            $error_element = '';
+            // Imagefield does not use error_element, sets error on the field.
+            // Are there others that need different treatment?
+            $error_element = $field_name;
           }
           $required_field_errors[$delta][$field_name] = array(
             'element' => $error_element,
