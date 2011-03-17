@@ -5,6 +5,10 @@ CCK 6.x-3.x
 CCK 6.x-3.0-alpha3
 ==================
 
+- #1081072 Imagefield validation does not use error_element, needs a tweak so that the empty required field gets highlighted correctly.
+- #1081072 Imagefield validation requires that we alter the field_info values or it will still require an image in an empty group.
+- Fix miscellaneous undefined index errors.
+- #1081072 Tweak fix for required fields inside non-required group so not all fields are highlighted.
 - #1093928 Required option lists do not have an empty option available. Add one to avoid 'An illegal choice has been detected' errors for empty groups.
 - #1081072 Fix Cannot use a scalar value as an array problem when using optionwidgets. 
 
