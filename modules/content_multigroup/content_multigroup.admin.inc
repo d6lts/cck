@@ -71,7 +71,7 @@ function content_multigroup_field_overview_form_validate($form, &$form_state) {
   foreach ($groups as $key => $values) {
     if (in_array($key, $group_rows)) {
       $parent = $form_values[$key]['parent'];
-      $parent_info = $form_values[$parent];
+      $parent_info = !empty($parent) ? $form_values[$parent] : array();
       if (!empty($parent) && $parent_info['group']['group_type'] == 'multigroup') {
         $error_message = t('You cannot place any kind of group inside a multigroup. The group @name was moved back to where it started.', array('@name' => $key));
         form_set_value($form[$key]['weight'], $form[$key]['weight']['#default_value'], $form_state);

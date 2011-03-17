@@ -223,7 +223,7 @@ function content_multigroup_group_form(&$form, &$form_state, $group, $delta) {
         $callback = content_callback('widget', 'default value', $field) == CONTENT_CALLBACK_CUSTOM ? $field['widget']['module'] .'_default_value' : 'content_default_value';
         if (function_exists($callback)) {
           $items = $callback($form, $form_state, $field, 0);
-          $value = $items[0];
+          $value = !empty($items) ? $items[0] : '';
         }
       }
       $node_copy->$field_name = array($delta => $value);
