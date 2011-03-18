@@ -49,12 +49,13 @@ function content_migrate_filefield_instance_alter(&$instance_value, $field_value
       $instance_value['widget']['type'] = 'image';
 
       // Most settings became instance settings instead of widget settings, with a couple name changes.
-      $instance_value['settings']['file_directory'] = $instance_value['widget']['settings']['file_path'];
+      $instance_value['settings']['file_directory'] = isset($instance_value['widget']['settings']['file_path']) ? $instance_value['widget']['settings']['file_path'] : '';
       unset($instance_value['widget']['settings']['file_path']);
-      $instance_value['settings']['file_extensions'] = $instance_value['widget']['settings']['file_extensions'];
+      $instance_value['settings']['max_filesize'] = isset($instance_value['widget']['settings']['max_filesize_per_file']) ? $instance_value['widget']['settings']['max_filesize_per_file'] : 0;
+      unset($instance_value['widget']['settings']['max_filesize_per_file']);
+      $instance_value['settings']['file_extensions'] = isset($instance_value['widget']['settings']['file_extensions']) ? $instance_value['widget']['settings']['file_extensions'] : '';
       unset($instance_value['widget']['settings']['file_extensions']);
       $settings = array(
-        'max_filesize' => 0,
         'max_resolution' => 0,
         'min_resolution' => 0,
       );
