@@ -106,7 +106,7 @@ function drush_content_migrate_field_structure($field_name) {
   drush_log(dt('Migrating structure for !field', array('!fields' => $field_name)), 'status');
   module_load_include('inc', 'content_migrate', 'includes/content_migrate.admin');
   $context = array();
-  _content_migrate_batch_process_create_fields(array($field_name), $context);
+  _content_migrate_batch_process_create_fields($field_name, $context);
 }
 
 function drush_content_migrate_field_data($field_name) {

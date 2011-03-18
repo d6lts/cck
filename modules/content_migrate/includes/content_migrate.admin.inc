@@ -185,9 +185,7 @@ function _content_migrate_batch($field_names) {
   $batch = array(
     'title' => t('Migrating data'),
     'file'  => drupal_get_path('module', 'content_migrate') . '/includes/content_migrate.admin.inc',
-    'operations' => array(
-      array('_content_migrate_batch_process_create_fields', array($field_names)),
-    ),
+    'operations' => array(),
     'finished' => "Field migration is finished",
     'init_message' => t("Fields migration is starting."),
     'progress_message' => t('Processed @current out of @total.'),
@@ -195,6 +193,7 @@ function _content_migrate_batch($field_names) {
   );
   // Migrate field data one field at a time.
   foreach ($field_names as $field_name) {
+    $batch['operations'][] = array('_content_migrate_batch_process_create_fields', array($field_name));
     $batch['operations'][] = array('_content_migrate_batch_process_migrate_data', array($field_name));
   }
   batch_set($batch);
@@ -203,51 +202,49 @@ function _content_migrate_batch($field_names) {
 /**
  * Batch operation callback to create fields.
  */
-function _content_migrate_batch_process_create_fields($field_names, &$context) {
+function _content_migrate_batch_process_create_fields($field_name, &$context) {
   $type_names = node_type_get_names();
-  foreach ($field_names as $field_name) {
-    $context['message'] = t('"Creating field: %field', array('%field' => $field_name));
-    $field_value = content_migrate_get_field_values($field_name);
+  $context['message'] = t('"Creating field: %field', array('%field' => $field_name));
+  $field_value = content_migrate_get_field_values($field_name);
 
-    // Create the field and store the new field 
-    // definition in $context so we can retrieve it later. 
-    try {
-      // A shared field may already have been created, check first.
-      $field = field_info_field('node', $field_value['field_name']);
-      if (empty($field)) {
-        unset($field_value['columns']);
-        unset($field_value['db_storage']);   
-        $field = field_create_field($field_value);
-        $context['fields'][$field_name] = $field;
-        drupal_set_message(t("Created field @field_name", array('@field_name' => $field_name)));
-      }
+  // Create the field and store the new field 
+  // definition in $context so we can retrieve it later. 
+  try {
+    // A shared field may already have been created, check first.
+    $field = field_info_field('node', $field_value['field_name']);
+    if (empty($field)) {
+      unset($field_value['columns']);
+      unset($field_value['db_storage']);   
+      $field = field_create_field($field_value);
+      $context['fields'][$field_name] = $field;
+      drupal_set_message(t("Created field @field_name", array('@field_name' => $field_name)));
+    }
  
-      // Create each of the new instances and store 
-      // the new instance definitions in $context.
-      $instance_values = content_migrate_get_instance_values(NULL, $field_name);
+    // Create each of the new instances and store 
+    // the new instance definitions in $context.
+    $instance_values = content_migrate_get_instance_values(NULL, $field_name);
 
-      foreach ($instance_values as $bundle => $instance_value) {
-        try {
-          $instance = field_create_instance($instance_value); 
-          $context['instances'][$field_name][$instance['bundle']] = $instance;
-          drupal_set_message(t("Created instance of @field_name in bundle @bundle.", array(
-            '@field_name' => $field_name, '@bundle' => $type_names[$instance['bundle']])));
-          
-        }
-        catch (Exception $e) {
-          drupal_set_message(t('Error creating instance of @field_name in bundle @bundle.', array(
-            '@field_name' => $field_name, '@bundle' => $type_names[$instance_value['bundle']])), 'error');
-          drupal_set_message($e, 'error');
-        }
+    foreach ($instance_values as $bundle => $instance_value) {
+      try {
+        $instance = field_create_instance($instance_value); 
+        $context['instances'][$field_name][$instance['bundle']] = $instance;
+        drupal_set_message(t("Created instance of @field_name in bundle @bundle.", array(
+          '@field_name' => $field_name, '@bundle' => $type_names[$instance['bundle']])));
+        
+      }
+      catch (Exception $e) {
+        drupal_set_message(t('Error creating instance of @field_name in bundle @bundle.', array(
+          '@field_name' => $field_name, '@bundle' => $type_names[$instance_value['bundle']])), 'error');
+        drupal_set_message($e, 'error');
       }
     }
-    catch (Exception $e) {
-      drupal_set_message(t("Error creating field @field_name", array('@field_name' => $field_name)), 'error'); 
-      drupal_set_message($e, 'error');
-    }
-    field_info_cache_clear();
-
   }
+  catch (Exception $e) {
+    drupal_set_message(t("Error creating field @field_name", array('@field_name' => $field_name)), 'error'); 
+    drupal_set_message($e, 'error');
+  }
+  field_info_cache_clear();
+
   $context['finished'] = TRUE;
 } 
 
