@@ -76,6 +76,10 @@ function content_migrate_text_field_alter(&$field_value, $instance_value) {
 function content_migrate_text_instance_alter(&$instance_value, $field_value) {
   switch ($field_value['module']) {
     case 'text':
+
+      // The text processing setting got switched from a field setting to an instance setting.
+      $instance_value['settings']['text_processing'] = $field_value['settings']['text_processing'];
+
       // The formatter names changed, all are prefixed
       // with 'text_'.
       foreach ($instance_value['display'] as $context => $settings) {
