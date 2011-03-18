@@ -23,7 +23,8 @@ function content_migrate_text_field_alter(&$field_value, $instance_value) {
       // The max_length field can no longer be empty 
       // or it will create a SQL error.
       if (empty($field_value['settings']['max_length'])) {
-        $field_value['settings']['max_length'] = 255;
+        $field_value['type'] = 'text_long';
+        unset($field_value['settings']['max_length']);
       }
 
       // Text fields using optionwidgets are
@@ -41,8 +42,7 @@ function content_migrate_text_field_alter(&$field_value, $instance_value) {
           break;
 
         case 'text_textarea':
-          $field_value['type'] = 'text_long';
-          unset($field_value['settings']['max_length']);
+        case 'text_textfield':
           break;
 
       }
