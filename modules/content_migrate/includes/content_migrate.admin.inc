@@ -275,7 +275,7 @@ function _content_migrate_batch_process_migrate_data($field_name, &$context) {
     $query = db_select($old_table, 'old_table', array('fetch' => PDO::FETCH_ASSOC));
     $node_alias = $query->join('node', 'n', 'old_table.nid=n.nid');
     $result = $query
-      ->fields($node_alias, array('title', 'type', 'vid'))
+      ->fields($node_alias, array('title', 'type', 'vid', 'language'))
       ->fields('old_table', array('nid'))
       ->orderBy('nid', 'ASC')
       ->distinct()
@@ -283,7 +283,7 @@ function _content_migrate_batch_process_migrate_data($field_name, &$context) {
     
     $nodes = array();
     foreach ($result as $row) {
-      $nodes[] = array('nid' => $row['nid'], 'title' => $row['title'], 'type' => $row['type'], 'vid' => $row['vid']);
+      $nodes[] = array('nid' => $row['nid'], 'title' => $row['title'], 'type' => $row['type'], 'vid' => $row['vid'], 'language' => $row['language']);
     }
     $context['sandbox']['progress'] = 0;
     $context['sandbox']['max'] = count($nodes);
@@ -314,7 +314,7 @@ function _content_migrate_batch_process_migrate_data($field_name, &$context) {
   // We need new columns for bundle name, entity type, and language.
   $query->addExpression("'". $node['type'] ."'", 'bundle');
   $query->addExpression("'node'", 'entity_type');
-  $query->addExpression("'". LANGUAGE_NONE ."'", 'language');
+  $query->addExpression("'". $node['language'] ."'", 'language');
     
   // There are new names for what were the nid and vid columns.
   $query->addField('old_table', 'nid', 'entity_id');
