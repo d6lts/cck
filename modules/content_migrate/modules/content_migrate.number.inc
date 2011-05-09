@@ -150,10 +150,11 @@ function content_migrate_number_instance_alter(&$instance_value, $field_value) {
         ),
       );
       foreach ($instance_value['display'] as $context => $settings) {
-        $instance_value['display'][$context]['type'] = $new_type[$settings['type']];
-        $instance_value['display'][$context]['settings'] = $new_settings[$settings['type']];
+        if (array_key_exists($settings['type'], $new_type)) {
+          $instance_value['display'][$context]['type'] = $new_type[$settings['type']];
+          $instance_value['display'][$context]['settings'] = $new_settings[$settings['type']];
+        }
       }
       break;
   }
-
 }
