@@ -337,10 +337,20 @@ function _content_migrate_batch_process_migrate_data($field_name, &$context) {
   $query->condition('nid', $node['nid']);
   $result = $query->execute();
 
+  $field = field_info_field($field_name);
   foreach ($result as $record) {
   
     // Let modules alter this before the insert.
     drupal_alter('content_migrate_data_record', $record, $context['sandbox']['field']);
+
+    // Don't save empty values.
+    if (!empty($record)) {
+      $function = $field['module'] . '_field_is_empty';
+      function_exists($function);
+      if ($function($record, $field)) {
+        $record = NULL;
+      }
+    }
 
     if (!empty($record)) {
       if ($record['revision_id'] == $node['vid']) {
