@@ -37,8 +37,11 @@ function content_migrate_get_options() {
       $bundles[] = $type_names[$bundle];
       $label = $instance_value['label'];
       if (!in_array($instance_value['widget']['module'], $available_modules)) {
-        $missing_module = TRUE;
-        $missing_modules[] = $instance_value['widget']['module'];
+        // A missing widget module is not fatal, but we should warn the user.
+        //$missing_module = TRUE;
+        if ($instance_value['widget']['module'] != $field_value['module']) {
+          $missing_modules[] = $instance_value['widget']['module'];
+        }
       }
     }
     $data = array(
@@ -204,6 +207,10 @@ function _content_migrate_batch($field_names) {
  */
 function _content_migrate_batch_process_create_fields($field_name, &$context) {
   $type_names = node_type_get_names();
+  $allowed_fields = field_info_field_types();
+  $allowed_widgets = field_info_widget_types();
+  $allowed_formatters = field_info_formatter_types();
+  
   $context['message'] = t('"Creating field: %field', array('%field' => $field_name));
   $field_value = content_migrate_get_field_values($field_name);
 
@@ -226,6 +233,21 @@ function _content_migrate_batch_process_create_fields($field_name, &$context) {
 
     foreach ($instance_values as $bundle => $instance_value) {
       try {
+
+        // Warn about missing or invalid widgets or formatters.
+        if (!array_key_exists($instance_value['widget']['type'], $allowed_widgets)) {
+          drupal_set_message(t('The @widget widget is not available for the @field field, setting to default widget.', array('@widget' => $instance_value['widget']['type'], '@field' => $field_name)), 'warning');
+        }
+
+        foreach ($instance_value['display'] as $context => $settings) {
+          if ($context == 'label' || $context == 'parent' || $context == 'weight') {
+            continue;
+          }
+          if (!array_key_exists( $settings['type'], $allowed_formatters)) {
+            drupal_set_message(t('The @formatter formatter used in the @context context is not available for the @field field, setting to default formatter.', array('@formatter' => $settings['type'], '@context' => $context, '@field' => $field_name)), 'warning');
+          }
+        }
+
         $instance = field_create_instance($instance_value); 
         $context['instances'][$field_name][$instance['bundle']] = $instance;
         drupal_set_message(t("Created instance of @field_name in bundle @bundle.", array(

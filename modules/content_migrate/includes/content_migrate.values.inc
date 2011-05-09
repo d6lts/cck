@@ -93,7 +93,7 @@ function _content_migrate_get_field_values($field_name = NULL) {
  */
 function _content_migrate_get_instance_values($bundle = NULL, $field_name = NULL) {
   $instance_values = &drupal_static(__FUNCTION__);
-  
+
   if (empty($instance_values) && db_table_exists('content_node_field_instance')) {
     $instance_values = array();
     $query = db_select('content_node_field_instance', 'ni', array('fetch' => PDO::FETCH_ASSOC));
