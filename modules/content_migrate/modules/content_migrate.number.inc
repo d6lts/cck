@@ -76,7 +76,7 @@ function content_migrate_number_instance_alter(&$instance_value, $field_value) {
       // have changed.
       $new_type = array(
         'unformatted' => 'number_unformatted',
-        'default' => 'number_decimal',
+        'default' => $field_value['type'] == 'number_integer' ? 'number_integer' : 'number_decimal',
         'us_0' => 'number_integer',
         'us_1' => 'number_decimal',
         'us_2' => 'number_decimal',
@@ -155,6 +155,12 @@ function content_migrate_number_instance_alter(&$instance_value, $field_value) {
           $instance_value['display'][$context]['settings'] = $new_settings[$settings['type']];
         }
       }
+
+      // Min, max, prefix, and suffix moved to instance settings.
+      $instance_value['settings']['min'] = $field_value['settings']['min'];
+      $instance_value['settings']['max'] = $field_value['settings']['max'];
+      $instance_value['settings']['prefix'] = $field_value['settings']['prefix'];
+      $instance_value['settings']['suffix'] = $field_value['settings']['suffix'];
       break;
   }
 }
