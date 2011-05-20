@@ -213,12 +213,13 @@ function _content_migrate_batch_process_create_fields($field_name, &$context) {
   
   $context['message'] = t('"Creating field: %field', array('%field' => $field_name));
   $field_value = content_migrate_get_field_values($field_name);
+  $instance_info = field_info_instances('node');
 
   // Create the field and store the new field 
   // definition in $context so we can retrieve it later. 
   try {
     // A shared field may already have been created, check first.
-    $field = field_info_field('node', $field_value['field_name']);
+    $field = field_info_field($field_value['field_name']);
     if (empty($field)) {
       unset($field_value['columns']);
       unset($field_value['db_storage']);   
@@ -239,24 +240,26 @@ function _content_migrate_batch_process_create_fields($field_name, &$context) {
           drupal_set_message(t('The @widget widget is not available for the @field field, setting to default widget.', array('@widget' => $instance_value['widget']['type'], '@field' => $field_name)), 'warning');
         }
 
-        foreach ($instance_value['display'] as $context => $settings) {
-          if ($context == 'label' || $context == 'parent' || $context == 'weight') {
+        foreach ($instance_value['display'] as $view_mode => $settings) {
+          if ($view_mode == 'label' || $view_mode == 'parent' || $view_mode == 'weight') {
             continue;
           }
           if (!array_key_exists( $settings['type'], $allowed_formatters)) {
-            drupal_set_message(t('The @formatter formatter used in the @context context is not available for the @field field, setting to default formatter.', array('@formatter' => $settings['type'], '@context' => $context, '@field' => $field_name)), 'warning');
+            drupal_set_message(t('The @formatter formatter used in the @view_mode view mode is not available for the @field field, setting to default formatter.', array('@formatter' => $settings['type'], '@view_mode' => $view_mode, '@field' => $field_name)), 'warning');
           }
         }
 
-        $instance = field_create_instance($instance_value); 
-        $context['instances'][$field_name][$instance['bundle']] = $instance;
-        drupal_set_message(t("Created instance of @field_name in bundle @bundle.", array(
-          '@field_name' => $field_name, '@bundle' => $type_names[$instance['bundle']])));
+        if (!isset($instance_info[$bundle][$field_name])) {
+          $instance = field_create_instance($instance_value); 
+          $context['instances'][$field_name][$bundle] = $instance;
+          drupal_set_message(t("Created instance of @field_name in bundle @bundle.", array(
+            '@field_name' => $field_name, '@bundle' => $type_names[$bundle])));
+        }
         
       }
       catch (Exception $e) {
         drupal_set_message(t('Error creating instance of @field_name in bundle @bundle.', array(
-          '@field_name' => $field_name, '@bundle' => $type_names[$instance_value['bundle']])), 'error');
+          '@field_name' => $field_name, '@bundle' => $type_names[$bundle])), 'error');
         drupal_set_message($e, 'error');
       }
     }
@@ -345,8 +348,8 @@ function _content_migrate_batch_process_migrate_data($field_name, &$context) {
   // Add the field columns to the select query.
   // Use the new column names as aliases in case the 
   // name changed, hopefully none did.
-  foreach ($context['sandbox']['old_cols'] as $key => $col) {
-    $query->addField('old_table', $col, $context['sandbox']['new_cols'][$key]);
+  foreach ($context['sandbox']['old_cols'] as $column_name => $db_column_name) {
+    $query->addField('old_table', $db_column_name, $context['sandbox']['new_cols'][$column_name]);
   }
     
   // Add delta, or construct it if missing.
@@ -368,9 +371,18 @@ function _content_migrate_batch_process_migrate_data($field_name, &$context) {
     // Don't save empty values.
     if (!empty($record)) {
       $function = $field['module'] . '_field_is_empty';
-      function_exists($function);
-      if ($function($record, $field)) {
-        $record = NULL;
+      if (function_exists($function)) {
+        // The $record array has the database columns as keys, which drupal_write_record() will need,
+        // but the _field_is_empty() function will be looking for the short, normalized column name.
+        $item = array();
+        foreach ($context['sandbox']['new_cols'] as $column_name => $db_column_name) {
+          if (array_key_exists($db_column_name, $record)) {
+            $item[$column_name] = $record[$db_column_name];
+          }
+        }
+        if ($function($item, $field)) {
+          $record = NULL;
+        }
       }
     }
 
