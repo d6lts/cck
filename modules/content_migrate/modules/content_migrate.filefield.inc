@@ -102,7 +102,7 @@ function content_migrate_filefield_instance_alter(&$instance_value, $field_value
  *
  * Tweaks individual records in a field.
  */
-function content_migrate_filefield_data_record_alter(&$record, $field) {
+function content_migrate_filefield_data_record_alter(&$record, $field, $instance) {
 
   switch($field['type']) {
     case 'image':

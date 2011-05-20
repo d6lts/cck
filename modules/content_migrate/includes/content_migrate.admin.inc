@@ -328,6 +328,9 @@ function _content_migrate_batch_process_migrate_data($field_name, &$context) {
     return;
   }
 
+  $field = $context['sandbox']['fields'][$field_name];
+  $instance = $context['sandbox']['instances'][$field_name][$node['type']];
+
   // Construct an record to insert into the new field table
   // from the data in the old table.
 
@@ -359,11 +362,10 @@ function _content_migrate_batch_process_migrate_data($field_name, &$context) {
   $query->condition('nid', $node['nid']);
   $result = $query->execute();
 
-  $field = field_info_field($field_name);
   foreach ($result as $record) {
   
     // Let modules alter this before the insert.
-    drupal_alter('content_migrate_data_record', $record, $context['sandbox']['field']);
+    drupal_alter('content_migrate_data_record', $record, $field, $instance);
 
     // Don't save empty values.
     if (!empty($record)) {
