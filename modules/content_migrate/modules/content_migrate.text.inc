@@ -104,7 +104,7 @@ function content_migrate_text_data_record_alter(&$record, $field, $instance) {
 
   switch($field_value['module']) {
     case 'text':
-      if (!empty($instance_value['settings']['text_processing'])) {
+      if (!empty($instance['settings']['text_processing'])) {
         // Adapted from node_update_7006(), to adjust the filter format values 
         // from the old numeric to the new text formats. Ensure we have a valid value.
         if (!in_array($record[$field['field_name'] . '_format'], $existing_formats)) {
