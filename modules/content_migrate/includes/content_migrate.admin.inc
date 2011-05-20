@@ -241,9 +241,6 @@ function _content_migrate_batch_process_create_fields($field_name, &$context) {
         }
 
         foreach ($instance_value['display'] as $view_mode => $settings) {
-          if ($view_mode == 'label' || $view_mode == 'parent' || $view_mode == 'weight') {
-            continue;
-          }
           if (!array_key_exists( $settings['type'], $allowed_formatters)) {
             drupal_set_message(t('The @formatter formatter used in the @view_mode view mode is not available for the @field field, setting to default formatter.', array('@formatter' => $settings['type'], '@view_mode' => $view_mode, '@field' => $field_name)), 'warning');
           }
