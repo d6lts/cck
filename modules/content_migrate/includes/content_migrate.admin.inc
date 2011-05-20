@@ -328,8 +328,8 @@ function _content_migrate_batch_process_migrate_data($field_name, &$context) {
     return;
   }
 
-  $field = $context['sandbox']['fields'][$field_name];
-  $instance = $context['sandbox']['instances'][$field_name][$node['type']];
+  $field = field_info_field($field_name);
+  $instance = field_info_instance('node', $field_name, $node['type']);
 
   // Construct an record to insert into the new field table
   // from the data in the old table.

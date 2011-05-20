@@ -205,10 +205,10 @@ function content_migrate_content_migrate_instance_alter(&$instance_value, $field
  *
  * Tweaks individual records in a field.
  */
-function content_migrate_content_migrate_data_record_alter(&$record, $field) {
+function content_migrate_content_migrate_data_record_alter(&$record, $field, $instance) {
 
   module_load_include('inc', 'content_migrate', 'modules/content_migrate.filefield');
-  content_migrate_filefield_data_record_alter($record, $field);
+  content_migrate_filefield_data_record_alter($record, $field, $instance);
 
 }
 
