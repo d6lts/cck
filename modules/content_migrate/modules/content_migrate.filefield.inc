@@ -18,6 +18,7 @@ function content_migrate_filefield_field_alter(&$field_value, $instance_value) {
   // There are a bunch of custom imagefield widgets. If they at least start the widget name with 'imagefield' this will work.
   if (substr($instance_value['widget']['type'], 0, 10) == 'imagefield') {
     // Module names and types changed.
+    $field_value['messages'][] = t("Changed field type: The '@field' field type will be changed from '@type' to 'image'.", array('@type' => $field_value['type'], '@field' => $field_value['field_name'], '@widget' => $instance_value['widget']['type']));
     $field_value['module'] = 'image';
     $field_value['type'] = 'image';
     // default_image is now a field setting.
@@ -26,6 +27,7 @@ function content_migrate_filefield_field_alter(&$field_value, $instance_value) {
   // There are a bunch of custom filefield widgets. If they at least start the widget name with 'filefield' this will work.
   if (substr($instance_value['widget']['type'], 0, 9) == 'filefield') {
     // Module names and types changed.
+    $field_value['messages'][] = t("Changed field type: The '@field' field type will be changed from '@type' to 'file'.", array('@type' => $field_value['type'], '@field' => $field_value['field_name'], '@widget' => $instance_value['widget']['type']));
     $field_value['module'] = 'file';
     $field_value['type'] = 'file';
   }
