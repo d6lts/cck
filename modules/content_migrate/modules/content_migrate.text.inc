@@ -20,29 +20,53 @@ function content_migrate_text_field_alter(&$field_value, $instance_value) {
       // Text fields are translatable.      
       $field_value['translatable'] = TRUE;
 
-      // The max_length field can no longer be empty 
-      // or it will create a SQL error.
-      if (empty($field_value['settings']['max_length'])) {
-        $field_value['type'] = 'text_long';
-        unset($field_value['settings']['max_length']);
-      }
-
-      // Text fields using optionwidgets are
-      // now List fields.
       switch ($instance_value['widget']['type']) {
+
+        // Text fields using optionwidgets are
+        // now List fields.
         case 'optionwidgets_buttons':
         case 'optionwidgets_select':
+          $field_value['messages'][] = t("Changed field type: The '@field' field uses a '@widget' widget. The field type will be changed from '@type' to 'list_text'.", array('@type' => $field_value['type'], '@field' => $field_value['field_name'], '@widget' => $instance_value['widget']['type']));
           $field_value['type'] = 'list_text';
           $field_value['module'] = 'list';
+          // Lists don't have a max_length setting.
+          if (isset($field_value['settings']['max_length'])) {
+            unset($field_value['settings']['max_length']);
+          }
           break;
 
         case 'optionwidgets_onoff':
+          $field_value['messages'][] = t("Changed field type: The '@field' field uses a '@widget' widget. The field type will be changed from '@type' to 'list_boolean'.", array('@type' => $field_value['type'], '@field' => $field_value['field_name'], '@widget' => $instance_value['widget']['type']));
           $field_value['type'] = 'list_boolean';
           $field_value['module'] = 'list';
+          // Lists don't have a max_length setting.
+          if (isset($field_value['settings']['max_length'])) {
+            unset($field_value['settings']['max_length']);
+          }
           break;
 
+        // The max_length field can no longer be empty 
+        // or it will create a SQL error. There also have been
+        // changes to the way text fields and widgets are configured.
+        // In D6, if you left max_length empty CCK would create a long_text field,
+        // even if you were using a textfield widget. In D7 it is not
+        // possible to have a long_text field with a textfield widget.
+        // We are now forced to figure out what to do with this data.
+    
+        // It is so easy to leave the length unset that it is likely that any
+        // any field with a missing length that uses a textfield widget 
+        // was intended to be a varchar field, so we will make that change.    
         case 'text_textarea':
+          if (empty($field_value['settings']['max_length'])) {
+            $field_value['type'] = 'text_long';
+          }
+          break;
         case 'text_textfield':
+          if (empty($field_value['settings']['max_length'])) {
+            $field_value['type'] = 'text';
+            $field_value['settings']['max_length'] = 255;
+            $field_value['messages'][] = t("Invalid field/widget combination: The field '@field' in the bundle '@bundle' is an unlimited length field using a textfield widget, not allowed in D7. The field length will be set to 255.", array('@field' => $field_value['field_name'], '@bundle' => $instance_value['bundle']));
+          }
           break;
 
       }

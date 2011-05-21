@@ -88,6 +88,12 @@ function content_migrate_storage_type($field_value) {
   }
   else {
     $instance_values = content_migrate_get_instance_values(NULL, $field_value['field_name']);
+    foreach ($instance_values as $bundle => $instance_value) {
+      if (isset($instance_value['messages'])) { 
+        $messages = array_merge($messages, $instance_value['messages']);    
+        unset($instance_values[$bundle]['messages']);
+      }
+    }
     if (count($instance_values) > 1) {
       $storage = CONTENT_DB_STORAGE_PER_FIELD;
     }

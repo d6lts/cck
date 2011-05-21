@@ -37,14 +37,17 @@ function content_migrate_number_field_alter(&$field_value, $instance_value) {
         case 'optionwidgets_buttons':
         case 'optionwidgets_select':
           if ($field_value['type'] == 'number_integer') {
+            $field_value['messages'][] = t("Changed field type: The '@field' field uses a '@widget' widget. The field type will be changed from '@type' to 'list_integer'.", array('@type' => $field_value['type'], '@field' => $field_value['field_name'], '@widget' => $instance_value['widget']['type']));
             $field_value['type'] = 'list_integer';
           }
           else {
+            $field_value['messages'][] = t("Changed field type: The '@field' field uses a '@widget' widget. The field type will be changed from '@type' to 'list_float'.", array('@type' => $field_value['type'], '@field' => $field_value['field_name'], '@widget' => $instance_value['widget']['type']));
             $field_value['type'] = 'list_float';
           }
           $field_value['module'] = 'list';
           break;
         case 'optionwidgets_onoff':
+          $field_value['messages'][] = t("Changed field type: The '@field' field uses a '@widget' widget. The field type will be changed from '@type' to 'list_boolean'.", array('@type' => $field_value['type'], '@field' => $field_value['field_name'], '@widget' => $instance_value['widget']['type']));
           $field_value['type'] = 'list_boolean';
           $field_value['module'] = 'list';
           break;

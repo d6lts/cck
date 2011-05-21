@@ -9,9 +9,11 @@
  * unable to be migrated due to missing modules.
  */
 function content_migrate_get_options() {
+
   $options = array('available' => array(), 'converted' => array(), 'missing' => array());
   
   $field_values = content_migrate_get_field_values();
+
   if (empty($field_values)) {
     drupal_set_message(t('There is no D6 field information in this database.'));
     return FALSE;
@@ -24,31 +26,36 @@ function content_migrate_get_options() {
   $available_modules = array_unique(array_merge(module_implements('field_info'), module_implements('field_widget_info')));
   
   foreach ($field_values as $field_name => $field_value) {
+    $messages = array();
     $bundles = array();
     $missing_module = !in_array($field_value['module'], $available_modules);
-    $missing_modules = $missing_module ? array($field_value['module']) : array();
+    if ($missing_module) {
+      $messages[] = '<span class="error">' . t("Missing field module: '@field'. This field cannot be migrated.", array('@field' => $field_value['module'])) . '</span>';
+    }
+    if (isset($field_value['messages'])) {
+      $messages = array_merge($messages, $field_value['messages']);
+      unset($field_value['messages']);
+    }
+
     $instance_values = content_migrate_get_instance_values(NULL, $field_name);
-    
+
     // Debug
     //dsm($field_value);
     //dsm($instance_values);
     
     foreach ($instance_values as $bundle => $instance_value) {
+      if (isset($instance_value['messages'])) { 
+        $messages = array_merge($messages, $instance_value['messages']);    
+        unset($instance_values[$bundle]['messages']);
+      }
       $bundles[] = $type_names[$bundle];
       $label = $instance_value['label'];
-      if (!in_array($instance_value['widget']['module'], $available_modules)) {
-        // A missing widget module is not fatal, but we should warn the user.
-        //$missing_module = TRUE;
-        if ($instance_value['widget']['module'] != $field_value['module']) {
-          $missing_modules[] = $instance_value['widget']['module'];
-        }
-      }
     }
     $data = array(
       0 => $field_name,
       1 => $field_value['type'],
-      2 => implode(', ', $bundles),
-      3 => empty($missing_modules) ? '' : t('Missing modules: @list', array('@list' => implode(', ', $missing_modules))),
+      2 => theme('item_list', array('items' => $bundles)),
+      3 => theme('item_list', array('items' => $messages)),
     );
     if (in_array($field_name, $new_fields)) {
       $options['converted'][$field_name] = $data;
@@ -85,7 +92,7 @@ function content_migrate_select($form, &$form_state) {
     '#collapsible' => TRUE,
     '#collapsed' => count($options['available']) < 1,
     '#title' => t('Available fields'),
-    '#description' => t('Fields that have not yet been migrated but are available for migration.'),
+    '#description' => t('Fields that have not yet been migrated but are available for migration. <strong>Please carefully read the messages next to each field before migrating it to understand changes that might be made.</strong>'),
   );
   $form['available']['data'] = array(
     '#type' => 'tableselect',
@@ -206,6 +213,8 @@ function _content_migrate_batch($field_names) {
  * Batch operation callback to create fields.
  */
 function _content_migrate_batch_process_create_fields($field_name, &$context) {
+  $messages = array();
+  $errors = array();
   $type_names = node_type_get_names();
   $allowed_fields = field_info_field_types();
   $allowed_widgets = field_info_widget_types();
@@ -213,6 +222,10 @@ function _content_migrate_batch_process_create_fields($field_name, &$context) {
   
   $context['message'] = t('"Creating field: %field', array('%field' => $field_name));
   $field_value = content_migrate_get_field_values($field_name);
+  if (isset($field_value['messages'])) {
+    $messages = $field_value['messages'];
+    unset($field_value['messages']);
+  }
   $instance_info = field_info_instances('node');
 
   // Create the field and store the new field 
@@ -225,7 +238,7 @@ function _content_migrate_batch_process_create_fields($field_name, &$context) {
       unset($field_value['db_storage']);   
       $field = field_create_field($field_value);
       $context['fields'][$field_name] = $field;
-      drupal_set_message(t("Created field @field_name", array('@field_name' => $field_name)));
+      $messages[] = t("Created field @field_name", array('@field_name' => $field_name));
     }
  
     // Create each of the new instances and store 
@@ -235,37 +248,38 @@ function _content_migrate_batch_process_create_fields($field_name, &$context) {
     foreach ($instance_values as $bundle => $instance_value) {
       try {
 
-        // Warn about missing or invalid widgets or formatters.
-        if (!array_key_exists($instance_value['widget']['type'], $allowed_widgets)) {
-          drupal_set_message(t('The @widget widget is not available for the @field field, setting to default widget.', array('@widget' => $instance_value['widget']['type'], '@field' => $field_name)), 'warning');
-        }
-
-        foreach ($instance_value['display'] as $view_mode => $settings) {
-          if (!array_key_exists( $settings['type'], $allowed_formatters)) {
-            drupal_set_message(t('The @formatter formatter used in the @view_mode view mode is not available for the @field field, setting to default formatter.', array('@formatter' => $settings['type'], '@view_mode' => $view_mode, '@field' => $field_name)), 'warning');
-          }
+        if (isset($instance_value['messages'])) { 
+          $messages = array_merge($messages, $instance_value['messages']);    
+          unset($instance_value['messages']);
         }
 
         if (!isset($instance_info[$bundle][$field_name])) {
           $instance = field_create_instance($instance_value); 
           $context['instances'][$field_name][$bundle] = $instance;
-          drupal_set_message(t("Created instance of @field_name in bundle @bundle.", array(
-            '@field_name' => $field_name, '@bundle' => $type_names[$bundle])));
+          $messages[] = t("Created instance of @field_name in bundle @bundle.", array(
+            '@field_name' => $field_name, '@bundle' => $type_names[$bundle]));
         }
         
       }
       catch (Exception $e) {
-        drupal_set_message(t('Error creating instance of @field_name in bundle @bundle.', array(
-          '@field_name' => $field_name, '@bundle' => $type_names[$bundle])), 'error');
-        drupal_set_message($e, 'error');
+        $errors[] = t('Error creating instance of @field_name in bundle @bundle.', array(
+          '@field_name' => $field_name, '@bundle' => $type_names[$bundle]));
+        $errors[] = $e;
       }
     }
   }
   catch (Exception $e) {
-    drupal_set_message(t("Error creating field @field_name", array('@field_name' => $field_name)), 'error'); 
-    drupal_set_message($e, 'error');
+    $errors[] = t("Error creating field @field_name", array('@field_name' => $field_name)); 
+    $errors[] = $e;
   }
   field_info_cache_clear();
+
+  foreach ($messages as $message) {
+    drupal_set_message($message, 'warning');
+  }
+  foreach ($errors as $error) {
+    drupal_set_message($error, 'error');
+  }
 
   $context['finished'] = TRUE;
 } 
@@ -280,7 +294,13 @@ function _content_migrate_batch_process_migrate_data($field_name, &$context) {
   if (!isset($context['sandbox']['progress'])) {
 
     $field_value = content_migrate_get_field_values($field_name);
+    if (isset($field_value['messages'])) {
+      unset($field_value['messages']);
+    }
     $instance_values = content_migrate_get_instance_values(NULL, $field_name);
+    if (isset($instance_values['messages'])) {
+      unset($instance_values['messages']);
+    }
     $types = array();
     foreach ($instance_values as $bundle => $instance_value) {
       $types[] = $bundle;
