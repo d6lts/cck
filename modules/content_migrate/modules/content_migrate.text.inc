@@ -18,7 +18,9 @@ function content_migrate_text_field_alter(&$field_value, $instance_value) {
     case 'text':
 
       // Text fields are translatable.      
-      $field_value['translatable'] = TRUE;
+      // See the debate going on at http://drupal.org/node/1164852.
+      // Reverting back to setting all nodes as untranslated.
+      //$field_value['translatable'] = TRUE;
 
       switch ($instance_value['widget']['type']) {
 

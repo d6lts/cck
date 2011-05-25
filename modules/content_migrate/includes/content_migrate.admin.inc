@@ -9,7 +9,6 @@
  * unable to be migrated due to missing modules.
  */
 function content_migrate_get_options() {
-
   $options = array('available' => array(), 'converted' => array(), 'missing' => array());
   
   $field_values = content_migrate_get_field_values();
@@ -38,6 +37,7 @@ function content_migrate_get_options() {
     }
 
     $instance_values = content_migrate_get_instance_values(NULL, $field_name);
+
 
     // Debug
     //dsm($field_value);
@@ -357,9 +357,15 @@ function _content_migrate_batch_process_migrate_data($field_name, &$context) {
   $query = db_select($context['sandbox']['old_table'], 'old_table', array('fetch' => PDO::FETCH_ASSOC));
     
   // We need new columns for bundle name, entity type, and language.
+  // See the debate going on at http://drupal.org/node/1164852.
+  // Reverting back to setting all nodes as untranslated.
+  $language = LANGUAGE_NONE;
+  if ($field['translatable']) {
+    //$language = $node['language'];
+  }
   $query->addExpression("'". $node['type'] ."'", 'bundle');
   $query->addExpression("'node'", 'entity_type');
-  $query->addExpression("'". $node['language'] ."'", 'language');
+  $query->addExpression("'". $language ."'", 'language');
     
   // There are new names for what were the nid and vid columns.
   $query->addField('old_table', 'nid', 'entity_id');
