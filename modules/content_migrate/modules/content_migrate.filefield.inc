@@ -109,7 +109,7 @@ function content_migrate_filefield_data_record_alter(&$record, $field, $instance
   switch($field['type']) {
     case 'image':
       // Map D6 imagefield field columns to D7 image field columns.
-      if (!empty($record[$field['field_name'] . '_title']) && ($data = unserialize($record[$field['field_name'] . '_title']))) {
+      if (!empty($record[$field['field_name'] . '_data']) && ($data = unserialize($record[$field['field_name'] . '_data']))) {
         $record[$field['field_name'] . '_alt'] = $data['alt'];
         $record[$field['field_name'] . '_title'] = $data['title'];
       }
@@ -121,11 +121,16 @@ function content_migrate_filefield_data_record_alter(&$record, $field, $instance
     // Fall through.
     case 'file':
       // Map D6 filefield field columns to D7 file field columns.
-      if (!empty($record[$field['field_name'] . '_description']) && ($data = unserialize($record[$field['field_name'] . '_description']))) {
+      if (!empty($record[$field['field_name'] . '_data']) && ($data = unserialize($record[$field['field_name'] . '_data'])) && isset($data['description'])) {
         $record[$field['field_name'] . '_description'] = $data['description'];
       }
       else {
         unset($record[$field['field_name'] . '_description']);
+      }
+
+      if (isset($record[$field['field_name'] . '_list')) {
+        $record[$field['field_name'] . '_display'] = $record[$field['field_name'] . '_list'];
+        unset($record[$field['field_name'] . '_list');
       }
 
       // Copies imagefield data from the old 'files' table into 'files_managed' and sets file_usage
