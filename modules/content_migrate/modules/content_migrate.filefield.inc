@@ -30,6 +30,11 @@ function content_migrate_filefield_field_alter(&$field_value, $instance_value) {
     $field_value['messages'][] = t("Changed field type: The '@field' field type will be changed from '@type' to 'file'.", array('@type' => $field_value['type'], '@field' => $field_value['field_name'], '@widget' => $instance_value['widget']['type']));
     $field_value['module'] = 'file';
     $field_value['type'] = 'file';
+    // Some settings have changed names.
+    unset($field_value['settings']['list_field']);
+    $field_value['settings']['display_field'] = $field_value['settings']['list_field'];
+    $field_value['settings']['display_default'] = $field_value['settings']['list_default'];
+    unset($field_value['settings']['list_default']);
   }
 }
 
@@ -87,12 +92,26 @@ function content_migrate_filefield_instance_alter(&$instance_value, $field_value
       $instance_value['widget']['module'] = 'file';
       $instance_value['widget']['type'] = 'file_generic';
 
-      // Some settings had name changes.
-      $instance_value['widget']['settings']['file_directory'] = $instance_value['widget']['settings']['file_path'];
+      // Some settings had name changes, or moved from the widget to the
+      // instance.
+      $instance_value['settings']['file_directory'] = $instance_value['widget']['settings']['file_path'];
       unset($instance_value['widget']['settings']['file_path']);
-      $instance_value['widget']['settings']['max_filesize'] = $instance_value['widget']['settings']['max_filesize_per_file'];
+      $instance_value['settings']['file_extensions'] = $instance_value['widget']['settings']['file_extensions'];
+      unset($instance_value['widget']['settings']['file_extensions']);
+      $instance_value['settings']['max_filesize'] = $instance_value['widget']['settings']['max_filesize_per_file'];
       unset($instance_value['widget']['settings']['max_filesize_per_file']);
 
+      // This setting is gone.
+      unset($instance_value['widget']['settings']['max_filesize_per_node']);
+
+      // Translate formatter names.
+      foreach ($instance_value['display'] as $context => $settings) {
+        // Note; the 'path_plain' D6 formatter has disappeared.
+        if (in_array($settings['type'], array('default', 'url_plain'))) {
+          $instance_value['display'][$context]['type'] = 'file_'. $settings['type'];
+          $instance_value['display'][$context]['moduke'] = 'file';
+        }
+      }
       break;
   }
  
