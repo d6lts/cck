@@ -47,7 +47,53 @@ function content_migrate_filefield_field_alter(&$field_value, $instance_value) {
  * formatter or widget names or settings are changed.
  */
 function content_migrate_filefield_instance_alter(&$instance_value, $field_value) {
+  // Translate formatters.
+  // There are a bunch of custom imagefield / filefield widgets. If they at
+  // least start the widget name with 'imagefield' / 'filefield', we can detect
+  // them and translate formatters accordingly
+  if (substr($instance_value['widget']['type'], 0, 10) == 'imagefield') {
+    foreach ($instance_value['display'] as $context => $settings) {
+      switch ($settings['type']) {
+        case 'image_plain':
+          $instance_value['display'][$context]['type'] = 'image';
+          $instance_value['display'][$context]['module'] = 'image';
+          $instance_value['display'][$context]['settings'] = array(
+            'image_style' => '',
+            'image_link' => '',
+          );
+          break;
 
+        case 'image_nodelink':
+          $instance_value['display'][$context]['type'] = 'image';
+          $instance_value['display'][$context]['module'] = 'image';
+          $instance_value['display'][$context]['settings'] = array(
+            'image_style' => '',
+            'image_link' => 'content',
+          );
+          break;
+
+        case 'image_imagelink':
+          $instance_value['display'][$context]['type'] = 'image';
+          $instance_value['display'][$context]['module'] = 'image';
+          $instance_value['display'][$context]['settings'] = array(
+            'image_style' => '',
+            'image_link' => 'file',
+          );
+          break;
+      }
+    }
+  }
+  if (substr($instance_value['widget']['type'], 0, 9) == 'filefield') {
+    foreach ($instance_value['display'] as $context => $settings) {
+      // Note; the 'path_plain' D6 formatter has disappeared.
+      if (in_array($settings['type'], array('default', 'url_plain'))) {
+        $instance_value['display'][$context]['type'] = 'file_'. $settings['type'];
+        $instance_value['display'][$context]['moduke'] = 'file';
+      }
+    }
+  }
+
+  // Translate the original imagefield and fielfield widgets.
   switch ($instance_value['widget']['module']) {
   
     case 'imagefield':
@@ -85,38 +131,6 @@ function content_migrate_filefield_instance_alter(&$instance_value, $field_value
                
       // default_image is now a field setting.
       unset($instance_value['widget']['settings']['default_image']);
-
-      // Translate formatters.
-      foreach ($instance_value['display'] as $context => $settings) {
-        switch ($settings['type']) {
-          case 'image_plain':
-            $instance_value['display'][$context]['type'] = 'image';
-            $instance_value['display'][$context]['module'] = 'image';
-            $instance_value['display'][$context]['settings'] = array(
-              'image_style' => '',
-              'image_link' => '',
-            );
-            break;
-
-          case 'image_nodelink':
-            $instance_value['display'][$context]['type'] = 'image';
-            $instance_value['display'][$context]['module'] = 'image';
-            $instance_value['display'][$context]['settings'] = array(
-              'image_style' => '',
-              'image_link' => 'content',
-            );
-            break;
-
-          case 'image_imagelink':
-            $instance_value['display'][$context]['type'] = 'image';
-            $instance_value['display'][$context]['module'] = 'image';
-            $instance_value['display'][$context]['settings'] = array(
-              'image_style' => '',
-              'image_link' => 'file',
-            );
-            break;
-        }
-      }
       break;
 
     case 'filefield':
@@ -136,17 +150,8 @@ function content_migrate_filefield_instance_alter(&$instance_value, $field_value
       // This setting is gone.
       unset($instance_value['widget']['settings']['max_filesize_per_node']);
 
-      // Translate formatter names.
-      foreach ($instance_value['display'] as $context => $settings) {
-        // Note; the 'path_plain' D6 formatter has disappeared.
-        if (in_array($settings['type'], array('default', 'url_plain'))) {
-          $instance_value['display'][$context]['type'] = 'file_'. $settings['type'];
-          $instance_value['display'][$context]['moduke'] = 'file';
-        }
-      }
       break;
   }
- 
 }
 
 
