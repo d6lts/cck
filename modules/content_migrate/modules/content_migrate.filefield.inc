@@ -85,6 +85,38 @@ function content_migrate_filefield_instance_alter(&$instance_value, $field_value
                
       // default_image is now a field setting.
       unset($instance_value['widget']['settings']['default_image']);
+
+      // Translate formatters.
+      foreach ($instance_value['display'] as $context => $settings) {
+        switch ($settings['type']) {
+          case 'image_plain':
+            $instance_value['display'][$context]['type'] = 'image';
+            $instance_value['display'][$context]['module'] = 'image';
+            $instance_value['display'][$context]['settings'] = array(
+              'image_style' => '',
+              'image_link' => '',
+            );
+            break;
+
+          case 'image_nodelink':
+            $instance_value['display'][$context]['type'] = 'image';
+            $instance_value['display'][$context]['module'] = 'image';
+            $instance_value['display'][$context]['settings'] = array(
+              'image_style' => '',
+              'image_link' => 'content',
+            );
+            break;
+
+          case 'image_imagelink':
+            $instance_value['display'][$context]['type'] = 'image';
+            $instance_value['display'][$context]['module'] = 'image';
+            $instance_value['display'][$context]['settings'] = array(
+              'image_style' => '',
+              'image_link' => 'file',
+            );
+            break;
+        }
+      }
       break;
 
     case 'filefield':
