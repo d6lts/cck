@@ -31,8 +31,8 @@ function content_migrate_filefield_field_alter(&$field_value, $instance_value) {
     $field_value['module'] = 'file';
     $field_value['type'] = 'file';
     // Some settings have changed names.
-    unset($field_value['settings']['list_field']);
     $field_value['settings']['display_field'] = $field_value['settings']['list_field'];
+    unset($field_value['settings']['list_field']);
     $field_value['settings']['display_default'] = $field_value['settings']['list_default'];
     unset($field_value['settings']['list_default']);
   }
