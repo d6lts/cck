@@ -2,6 +2,8 @@
 CCK 6.x-3.x
 ===========
 
+- #1097548 by DeFr: Fixed warning on node forms for multigroups without any required fields.
+
 CCK 6.x-3.0-alpha3
 ==================
 

@@ -122,6 +122,7 @@ function _content_multigroup_fieldgroup_form(&$form, &$form_state, $form_id, $gr
   $form['#multigroup_required_fields'] = array();
   if (empty($form_state['multigroup_add_more'])) {
     foreach ($form['#multigroups'] as $group_name => $group_fields) {
+      $form['#multigroup_required_fields'][$group_name] = array();
       foreach ($group_fields as $field_name => $field) {
         if ($field['required']) {
           $form['#multigroup_required_fields'][$group_name][$field_name] = TRUE;
