@@ -207,6 +207,25 @@ function _content_migrate_get_instance_values($bundle = NULL, $field_name = NULL
       // Get rid of this value once CCK or some other module has handled it.
       if (isset($instance_value['widget']['settings']['default_value_php'])) unset($instance_value['widget']['settings']['default_value_php']);
 
+      // Translate D6 core build modes. Some hook_content_migrate_instance_alter()
+      // implementations (e.g. date) need the old indexes to retrieve additional
+      // data, so we do this after the hook has run.
+      $mapping = array(
+        2 => 'search_index',
+        3 => 'search_result',
+        4 => 'rss',
+        5 => 'print',
+      );
+      $new_displays = array();
+      foreach ($instance_value['display'] as $context => $settings) {
+        $new_context = isset($mapping[$context]) ? $mapping[$context] : $context;
+        $new_displays[$new_context] = $settings;
+      }
+      // Additionally, set 'default' view mode to the settings used by
+      // 'full'.
+      $new_displays['default'] = $new_displays['full'];
+      $instance_value['display'] = $new_displays;
+
       // Warn about missing or invalid widgets.
       if (!array_key_exists($instance_value['widget']['type'], $allowed_widgets)) {
         $instance_value['messages'][] = t("Missing widget: The '@widget' widget is not available for the @field field, it will be set to the default widget.", array('@widget' => $instance_value['widget']['type'], '@field' => $instance_value['field_name']));
