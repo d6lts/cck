@@ -112,11 +112,19 @@ function drush_content_migrate_field_structure($field_name) {
 function drush_content_migrate_field_data($field_name) {
   drush_log(dt('Migrating data for !field', array('!field' => $field_name)), 'status');
   module_load_include('inc', 'content_migrate', 'includes/content_migrate.admin');
-  $context = array(
-    'sandbox' => array(),
+  $batch = array(
+    'title' => t('Migrating data'),
+    'file'  => drupal_get_path('module', 'content_migrate') . '/includes/content_migrate.admin.inc',
+    'operations' => array(array('_content_migrate_batch_process_migrate_data', array($field_name))),
+    'finished' => "Field migration is finished",
+    'init_message' => t("Fields migration is starting."),
+    'progress_message' => t('Processed @current out of @total.'),
+    'error_message' => t('Field migration has encountered an error.'),
   );
-  _content_migrate_batch_process_migrate_data($field_name, $context);
-  drush_log(strip_tags($context['message']), 'status');
+  batch_set($batch);
+  $batch =& batch_get();
+  $batch['progressive'] = FALSE;
+  drush_backend_batch_process();
 }
 
 /**
