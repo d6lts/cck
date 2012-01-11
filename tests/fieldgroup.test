@@ -1,5 +1,7 @@
 <?php
 
+module_load_include('test', 'content', 'tests/content.crud');
+
 class FieldgroupCRUDTest extends ContentCrudTestCase {
   var $last_group     = NULL;
   var $next_group_n   = 1;
