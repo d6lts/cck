@@ -1,0 +1,7 @@
+name = Content Test
+description = Test module for CCK.
+package = CCK
+core = 6.x
+dependencies[] = schema
+hidden = TRUE
+files[] = content_test.module
