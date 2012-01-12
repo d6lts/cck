@@ -2,6 +2,7 @@
 CCK 6.x-3.x
 ===========
 
+- Issue #1401950 by KarenS, Add empty test module with dependency on schema to make schema available to testbot.
 - Issue #1363036 by markdorison, Fix Class 'ContentCrudTestCase' not found message in tests.
 - #1097548 by DeFr: Fixed warning on node forms for multigroups without any required fields.
 
