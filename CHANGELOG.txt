@@ -7,6 +7,8 @@ CCK 6.x-3.x
 - #998494 by zhangtaihao: Fix Node Reference field always displaying 10 results
   when using the Advanced View option (with Views 6.x-3.x)
 - #1167004 by DeFr: Dramatically enhance node display performance issues.
+- #1189090 by gaurishankar, yched: Fixed warnings on multigroups with no
+  required fields.
 
 CCK 6.x-3.0-alpha3
 ==================

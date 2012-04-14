@@ -109,7 +109,7 @@ function _content_multigroup_fieldgroup_form(&$form, &$form_state, $form_id, $gr
     $elements[$group_name] = array_merge($elements[$group_name], $element[$group_name]);
   }
   $form[$group_name] = $elements[$group_name];
-  
+
   // Unset the original group field values now that we've moved them.
   foreach (array_keys($group_fields) as $field_name) {
     unset($form[$group_name][$field_name]);
@@ -161,12 +161,12 @@ function content_multigroup_group_form(&$form, &$form_state, $group, $delta) {
   else {//initial build (via content_multigroup_fieldgroup_form) or non-nested AHAH
     $element[$group_name] = $form[$group_name];
   }
-  if (($group['group_type'] != 'multigroup') 
-      || (!(empty($element[$group['group_name']]['#access'])) && $element[$group['group_name']]['#access'] != TRUE) 
+  if (($group['group_type'] != 'multigroup')
+      || (!(empty($element[$group['group_name']]['#access'])) && $element[$group['group_name']]['#access'] != TRUE)
       || empty($element[$group['group_name']])) {
     return;
   }
-  
+
   $group_fields = $form['#multigroups'][$group_name];
   $element[$group_name]['#fields'] = array_keys($group_fields);
   $node = $form['#node'];
@@ -179,7 +179,7 @@ function content_multigroup_group_form(&$form, &$form_state, $group, $delta) {
     else {
       $element[$group_name][$delta][$field_name] = array();
     }
-    
+
     $item_count = (isset($form_state['item_count'][$group_name]) ? $form_state['item_count'][$group_name] : $element[$group_name]['#item_count']);
     $element[$group_name][$delta]['_weight'] = array(
       '#type' => 'weight',
@@ -187,7 +187,7 @@ function content_multigroup_group_form(&$form, &$form_state, $group, $delta) {
       '#default_value' => $delta,
       '#weight' => 100,
     );
-    
+
     // Add a checkbox to allow users remove a single delta subgroup.
     // See content_set_empty() and theme_content_multigroup_node_form().
     if ($group_multiple == 1) {
@@ -260,7 +260,7 @@ function content_multigroup_group_form(&$form, &$form_state, $group, $delta) {
         $field_form[$field_name]['#element_validate'] = array();
       }
       $field_form[$field_name]['#element_validate'][] = 'content_multigroup_fix_multivalue_fields';
-      
+
       $element[$group_name][$delta][$field_name] = $field_form[$field_name];
     }
     $element[$group_name][$delta][$field_name]['#weight'] = $field['widget']['weight'];
@@ -268,7 +268,7 @@ function content_multigroup_group_form(&$form, &$form_state, $group, $delta) {
 
   // Reset the form '#node' back to its original value.
   $form['#node'] = $node;
-  
+
   return $element;
 }
 
@@ -279,8 +279,8 @@ function content_multigroup_group_form(&$form, &$form_state, $group, $delta) {
  */
 function content_multigroup_node_form_pre_render(&$form) {
   foreach ($form['#multigroups'] as $group_name => $group_fields) {
-    $required_fields = array_keys($form['#multigroup_required_fields'][$group_name]);
-    if (!empty($required_fields)) {
+    if (!empty($form['#multigroup_required_fields'][$group_name])) {
+      $required_fields = array_keys($form['#multigroup_required_fields'][$group_name]);
       content_multigroup_node_form_fix_required($form[$group_name], $required_fields, TRUE);
     }
   }
@@ -313,8 +313,8 @@ function _content_multigroup_node_form_after_build($form, &$form_state) {
   // form for an 'Add more values' request.
   $required = !empty($form_state['multigroup_add_more']);
   foreach ($form['#multigroups'] as $group_name => $group_fields) {
-    $required_fields = array_keys($form['#multigroup_required_fields'][$group_name]);
-    if (!empty($required_fields)) {
+    if (!empty($form['#multigroup_required_fields'][$group_name])) {
+      $required_fields = array_keys($form['#multigroup_required_fields'][$group_name]);
       content_multigroup_node_form_fix_required($form[$group_name], $required_fields, $required);
     }
   }
@@ -450,8 +450,8 @@ function content_multigroup_node_form_validate($form, &$form_state) {
       form_set_error('', t('Group @name requires one collection of fields minimum.', array('@name' => t($group['label']))));
       continue;
     }
-    
-    // Force remove any empty groups so they will collapse. 
+
+    // Force remove any empty groups so they will collapse.
     // Don't flag errors on empty groups.
     for ($delta = 0; $delta <= $max_delta; $delta++) {
       if (!isset($non_empty_subgroups[$delta]) && isset($non_removed_subgroups[$delta])) {
@@ -812,7 +812,7 @@ function content_multigroup_add_more_js($type_name_url, $group_name) {
     if (is_numeric($key) && isset($item['_weight']) && is_array($item['_weight'])) {
       $form_element[$group_name][$key]['_weight']['#delta'] = $delta;
     }
-  }  
+  }
   // Add the new element at the right place in the (original, unbuilt) form.
   $success = content_set_nested_elements($form, $group_name, $form_element[$group_name]);
 
