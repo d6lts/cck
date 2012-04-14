@@ -88,7 +88,7 @@ function content_migrate_filefield_instance_alter(&$instance_value, $field_value
       // Note; the 'path_plain' D6 formatter has disappeared.
       if (in_array($settings['type'], array('default', 'url_plain'))) {
         $instance_value['display'][$context]['type'] = 'file_'. $settings['type'];
-        $instance_value['display'][$context]['moduke'] = 'file';
+        $instance_value['display'][$context]['module'] = 'file';
       }
     }
   }
