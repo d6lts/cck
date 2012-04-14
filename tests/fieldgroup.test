@@ -18,7 +18,7 @@ class FieldgroupCRUDTest extends ContentCrudTestCase {
   /**
    * Creates a fieldgroup with a predictable name. Also makes all future calls to functions
    * which take an optional fieldgroup use this one as the default.
-   * @param $settings Array to be passed to fieldgroup_save_group. 
+   * @param $settings Array to be passed to fieldgroup_save_group.
    * @param $content_type Either a content type object, or the index of an acquired content type
    * @return The newly created fieldgroup.
    */
@@ -59,7 +59,7 @@ class FieldgroupCRUDTest extends ContentCrudTestCase {
     $group = $settings + $defaults;
     fieldgroup_save_group($type_name, $group);
     $this->last_group = $group_name;
-    
+
     foreach ($fields as $field_name) {
       $form_values = array(
         'field_name' => $field_name,
@@ -75,7 +75,7 @@ class FieldgroupCRUDTest extends ContentCrudTestCase {
 }
 
 class testFieldgroupFields extends FieldgroupCRUDTest {
-  function getInfo() {
+  public static function getInfo() {
     return array(
       'name' => t('Fieldgroups'),
       'description' => t('Test creating fields in fieldgroups.'),
@@ -116,7 +116,7 @@ class testFieldgroupFields extends FieldgroupCRUDTest {
     $this->assertText($group_name, 'Group name displayed');
     $this->drupalGet($admin_type_url .'/display');
     $this->assertText($group_name, 'Group name displayed');
-    
+
     // Create a node with 2 values set in each of 2 fields.
     $value1 = $this->randomName(5);
     $value2 = $this->randomName(5);
@@ -165,7 +165,7 @@ class testFieldgroupFields extends FieldgroupCRUDTest {
     // Clear the content cache to re-generate the node display.
     cache_clear_all('content:', content_cache_tablename(), TRUE);
 
-    // Checking that the outside group is displayed is sufficient to tell us they got nested, 
+    // Checking that the outside group is displayed is sufficient to tell us they got nested,
     // because it has no fields and empty groups are not displayed.
 
     $this->drupalGet('node/'. $node->nid);
