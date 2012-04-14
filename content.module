@@ -14,6 +14,13 @@ define('CONTENT_CALLBACK_CUSTOM', 0x0004);
 define('CONTENT_HANDLE_CORE', 0x0001);
 define('CONTENT_HANDLE_MODULE', 0x0002);
 
+// We do not use hook_init(), since that hook is not fired in update.php, and we
+// need token generation to be active within hook_update_N() (e.g. for
+// node_save() calls.)
+if (module_exists('token')) {
+  module_load_include('inc', 'content', 'includes/content.token');
+}
+
 function content_help($path, $arg) {
   switch ($path) {
     case 'admin/help#content':
@@ -44,9 +51,6 @@ function content_flush_caches() {
  */
 function content_init() {
   drupal_add_css(drupal_get_path('module', 'content') .'/theme/content-module.css');
-  if (module_exists('token') && !function_exists('content_token_values')) {
-    module_load_include('inc', 'content', 'includes/content.token');
-  }
   if (module_exists('diff') && !function_exists('content_diff')) {
     module_load_include('inc', 'content', 'includes/content.diff');
   }
@@ -2681,11 +2685,11 @@ function content_inactive_fields($type_name = NULL) {
   return $inactive;
 }
 
- 
+
 /**
  * Helper function to identify inactive instances.
  * This will be the same results as content_inactive_fields(),
- * EXCEPT that his function will return inactive instances even 
+ * EXCEPT that his function will return inactive instances even
  * if the fields have other (shared) instances that are still active.
  */
 function content_inactive_instances($type_name = NULL) {

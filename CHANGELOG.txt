@@ -7,6 +7,7 @@ Bugfixes:
 - #998494 by zhangtaihao: Fix Node Reference field always displaying 10 results
   when using the Advanced View option (with Views 6.x-3.x)
 - #1423432 by sun: Fixed testInfo() methods throws PHP notices.
+- #1533506 by yched: Fixed field tokens not available in hook_update_N().
 
 CCK 6.x-2.9
 ===========
