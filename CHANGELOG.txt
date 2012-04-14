@@ -6,6 +6,7 @@ Bugfixes:
   schema available to testbot.
 - #998494 by zhangtaihao: Fix Node Reference field always displaying 10 results
   when using the Advanced View option (with Views 6.x-3.x)
+- #1423432 by sun: Fixed testInfo() methods throws PHP notices.
 
 CCK 6.x-2.9
 ===========
