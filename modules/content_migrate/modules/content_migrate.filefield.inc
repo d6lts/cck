@@ -7,7 +7,7 @@
 
 /**
  * Implements hook_content_migrate_field_alter().
- * 
+ *
  * Use this to tweak the conversion of field settings
  * from the D6 style to the D7 style for specific
  * situations not handled by basic conversion,
@@ -40,7 +40,7 @@ function content_migrate_filefield_field_alter(&$field_value, $instance_value) {
 
 /**
  * Implements hook_content_migrate_instance_alter().
- * 
+ *
  * Use this to tweak the conversion of instance or widget settings
  * from the D6 style to the D7 style for specific
  * situations not handled by basic conversion, as when
@@ -95,7 +95,7 @@ function content_migrate_filefield_instance_alter(&$instance_value, $field_value
 
   // Translate the original imagefield and fielfield widgets.
   switch ($instance_value['widget']['module']) {
-  
+
     case 'imagefield':
       // Module names and types changed.
       $instance_value['widget']['module'] = 'image';
@@ -128,7 +128,7 @@ function content_migrate_filefield_instance_alter(&$instance_value, $field_value
       unset($instance_value['widget']['settings']['alt']);
       unset($instance_value['widget']['settings']['max_filesize_per_node']);
       unset($instance_value['widget']['settings']['title_type']);
-               
+
       // default_image is now a field setting.
       unset($instance_value['widget']['settings']['default_image']);
       break;
@@ -200,7 +200,16 @@ function content_migrate_filefield_data_record_alter(&$record, $field, $instance
         return;
       };
 
-      $file = db_select('files', 'f')->fields('f', array('fid', 'uid', 'filename', 'filepath', 'filemime', 'filesize', 'timestamp', 'status'))->condition('fid', $fid)->execute()->fetchObject();
+      $file = db_select('files', 'f')
+        ->fields('f', array('fid', 'uid', 'filename', 'filepath', 'filemime', 'filesize', 'timestamp', 'status'))
+        ->condition('fid', $fid)
+        ->execute()
+        ->fetchObject();
+
+      // In case of unknown file, just abort.
+      if (!is_object($file)) {
+        return;
+      }
 
       $basename = variable_get('file_directory_path', conf_path() . '/files');
       $scheme = file_default_scheme() . '://';
