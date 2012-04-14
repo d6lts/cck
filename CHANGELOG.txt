@@ -1,11 +1,12 @@
 CCK 6.x-3.x
 ===========
 
-- Issue #1401950 by KarenS, Add empty test module with dependency on schema to make schema available to testbot.
-- Issue #1363036 by markdorison, Fix Class 'ContentCrudTestCase' not found message in tests.
+- #1401950 by KarenS, Add empty test module with dependency on schema to make schema available to testbot.
+- #1363036 by markdorison, Fix Class 'ContentCrudTestCase' not found message in tests.
 - #1097548 by DeFr: Fixed warning on node forms for multigroups without any required fields.
 - #998494 by zhangtaihao: Fix Node Reference field always displaying 10 results
   when using the Advanced View option (with Views 6.x-3.x)
+- #1167004 by DeFr: Dramatically enhance node display performance issues.
 
 CCK 6.x-3.0-alpha3
 ==================

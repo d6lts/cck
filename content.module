@@ -703,7 +703,7 @@ function content_associate_fields($module) {
  *     ),
  *   );
  */
-function content_field($op, &$node, $field, &$items, $teaser, $page) {
+function content_field($op, &$node, $field, &$items, $teaser, $page, $wrappers = NULL) {
   switch ($op) {
     case 'validate':
       // If the field is configured for multiple values and these are handled
@@ -847,8 +847,13 @@ function content_field($op, &$node, $field, &$items, $teaser, $page) {
       // Note: Doing this in 'preprocess_node' breaks token integration.
 
       // The location of the field's rendered output depends on whether the
-      // field is in a fieldgroup or not.
-      $wrappers = content_get_nested_elements($node->content, $field['field_name']);
+      // field is in a fieldgroup or not. _content_field_invoke_default() takes
+      // care of pre-searching all fields and providing the wrappers. In case of
+      // direct calls, search the wrappers ourselves.
+      if (is_null($wrappers)) {
+        $wrappers = content_get_nested_elements($node->content, $field['field_name']);
+      }
+
       foreach ($wrappers as $wrapper) {
         $element = $wrapper['field'];
         // '#single' is not set if the field is hidden or inaccessible.
@@ -877,8 +882,12 @@ function content_field($op, &$node, $field, &$items, $teaser, $page) {
       $addition = array($field['field_name'] .'_rendered' => '');
 
       // The location of the field's rendered output depends on whether the
-      // field is in a fieldgroup or not.
-      $wrappers = content_get_nested_elements($node->content, $field['field_name']);
+      // field is in a fieldgroup or not. _content_field_invoke_default() takes
+      // care of pre-searching all fields and providing the wrappers. In case of
+      // direct calls, search the wrappers ourselves.
+      if (is_null($wrappers)) {
+        $wrappers = content_get_nested_elements($node->content, $field['field_name']);
+      }
       foreach ($wrappers as $wrapper) {
         // '#children' is not set if the field is empty.
         $addition[$field['field_name'] .'_rendered'] .= isset($wrapper['#children']) ? $wrapper['#children'] : '';
@@ -1330,9 +1339,16 @@ function _content_field_invoke_default($op, &$node, $teaser = NULL, $page = NULL
     return content_storage($op, $node);
   }
   else {
+    // The 'alter' and 'preprocess_node' ops need the location of each field
+    // within the $node->content array. Search once for all fields rather than
+    // letting content_field() search for each field individually.
+    if (in_array($op, array('alter', 'preprocess_node'))) {
+      $all_wrappers = content_get_nested_elements($node->content, array_keys($type['fields']));
+    }
     foreach ($type['fields'] as $field) {
       $items = isset($node->$field['field_name']) ? $node->$field['field_name'] : array();
-      $result = content_field($op, $node, $field, $items, $teaser, $page);
+      $wrappers = isset($all_wrappers) ? $all_wrappers[$field['field_name']] : NULL;
+      $result = content_field($op, $node, $field, $items, $teaser, $page, $wrappers);
       if (is_array($result)) {
         $return = array_merge($return, $result);
       }
@@ -2733,7 +2749,7 @@ function content_inactive_fields($type_name = NULL) {
 /**
  * Helper function to identify inactive instances.
  * This will be the same results as content_inactive_fields(),
- * EXCEPT that his function will return inactive instances even 
+ * EXCEPT that his function will return inactive instances even
  * if the fields have other (shared) instances that are still active.
  */
 function content_inactive_instances($type_name = NULL) {
@@ -2762,21 +2778,21 @@ function content_inactive_instances($type_name = NULL) {
  * for a field by name, no matter how deeply nested it is within
  * fieldgroups or multigroups, or to find the multiple value
  * sub-elements within a field element by name (i.e. 'value' or
- * 'nid'). You can also use this function to see if an item exists 
+ * 'nid'). You can also use this function to see if an item exists
  * in a form (the return will be an empty array if it does not exist).
  *
- * A field/group will generally only exist once in a form but the 
- * function can also be used to locate all the 'value' elements 
+ * A field/group will generally only exist once in a form but the
+ * function can also be used to locate all the 'value' elements
  * within a multiple value field if you pass the multiple value field
  * as the $form argument;
  *
- * For example, for a field named field_custom,  the following will 
- * pluck out the form element for this field from the node form, 
+ * For example, for a field named field_custom,  the following will
+ * pluck out the form element for this field from the node form,
  * no matter how deeply it is nested within fieldgroups or fieldsets:
  *
  * $element = array_shift(content_get_nested_elements($node_form, 'field_custom'));
  *
- * You can prefix the function with '&' to retrieve the element by 
+ * You can prefix the function with '&' to retrieve the element by
  * reference to alter it directly:
  *
  * $elements = &content_get_nested_elements($form, 'field_custom');
@@ -2795,24 +2811,63 @@ function content_inactive_instances($type_name = NULL) {
  * @param $form
  *   The form array to search.
  * @param $field_name
- *   The name or key of the form elements to return. Can be a field name, a group name, or a sub-field.
+ *   The key of the form elements to return (can be a field name, a group name,
+ *   or a sub-field), or an array of names.
  * @return
  *   An array of all matching form elements, returned by reference.
  */
 function &content_get_nested_elements(&$form, $field_name) {
-  $elements = array();
-  foreach (element_children($form) as $key) {
-    if ($key === $field_name) {
-      $elements[] = &$form[$key];
-    }
-    else if (is_array($form[$key])) {
-      $nested_form = &$form[$key];
-      if ($sub_elements = &content_get_nested_elements($nested_form, $field_name)) {
-        $elements = array_merge($elements, $sub_elements);
+  // Handle single-field and multi-fields calls.
+  if (is_array($field_name)) {
+    $single = FALSE;
+    $names = drupal_map_assoc($field_name);
+  }
+  else {
+    $single = TRUE;
+    $names = array($field_name => $field_name);
+  }
+
+  // Initialize the results array.
+  $results = array_fill_keys(array_keys($names), array());
+
+  // Search for the elements within the $form. Start at the top-level,
+  // sub-elements will be added as we walk the form.
+  $queue = array(&$form);
+  while ($current = &_content_shift($queue)) {
+    foreach (element_children($current) as $key) {
+      $element = &$current[$key];
+      // If this is one of the elements we are looking for, push it in the
+      // results.
+      if (isset($names[$key])) {
+        $results[$key][] = $element;
+      }
+      // Else push the element in our search queue.
+      else if (is_array($current[$key])) {
+        $queue[] = $element;
       }
     }
   }
-  return $elements;
+
+  return $single ? $results[$field_name] : $results;
+}
+
+/**
+ * Returns the first element of an array by reference.
+ *
+ * This is conceptually equivalent to PHP built-in array_shift, but the
+ * element is returned by reference to allow the caller to modify it.
+ *
+ * @param $array
+ *   The array whose first element's should be returned.
+ * @return mixed
+ *    A reference to the variable that was the first array element.
+ */
+function &_content_shift(&$array) {
+  reset($array);
+  $k = key($array);
+  $v = &$array[$k];
+  unset($array[$k]);
+  return $v;
 }
 
 /**

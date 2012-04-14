@@ -320,7 +320,7 @@ function _content_multigroup_node_form_after_build($form, &$form_state) {
   }
 
 
-  if ($form_state['submitted']) {
+  if ($form_state['submitted'] && !$form_state['multigroup_add_more']) {
     // Fix value positions in $form_state for the fields in multigroups.
     foreach (array_keys($form['#multigroups']) as $group_name) {
       content_multigroup_node_form_transpose_elements($form, $form_state, $form['#node']->type, $group_name);
