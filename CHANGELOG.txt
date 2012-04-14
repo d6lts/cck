@@ -10,6 +10,7 @@ CCK 6.x-3.x
 - #1189090 by gaurishankar, yched: Fixed warnings on multigroups with no
   required fields.
 - #1423432 by sun: Fixed testInfo() methods throws PHP notices.
+- #1533506 by yched: Fixed field tokens not available in hook_update_N().
 
 CCK 6.x-3.0-alpha3
 ==================
