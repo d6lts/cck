@@ -2,7 +2,10 @@ CCK 6.x-2.x-dev
 ===========
 
 Bugfixes:
-- Issue #1401950 by KarenS, Add empty test module with dependency on schema to make schema available to testbot.
+- #1401950 by KarenS, Add empty test module with dependency on schema to make
+  schema available to testbot.
+- #998494 by zhangtaihao: Fix Node Reference field always displaying 10 results
+  when using the Advanced View option (with Views 6.x-3.x)
 
 CCK 6.x-2.9
 ===========
