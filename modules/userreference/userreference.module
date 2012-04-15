@@ -5,6 +5,11 @@
  * Defines a field type for referencing a user from a node.
  */
 
+// We do not use hook_init(), since that hook is not fired in update.php, and we
+// need token generation to be active within hook_update_N() (e.g. for
+// node_save() calls.)
+require_once dirname(__FILE__) . '/userreference.token.inc';
+
 /**
  * Implementation of hook_menu().
  */
