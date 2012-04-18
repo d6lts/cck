@@ -49,9 +49,6 @@ function content_flush_caches() {
  */
 function content_init() {
   drupal_add_css(drupal_get_path('module', 'content') .'/theme/content-module.css');
-  if (module_exists('token') && !function_exists('content_token_values')) {
-    module_load_include('inc', 'content', 'includes/content.token');
-  }
   if (module_exists('diff') && !function_exists('content_diff')) {
     module_load_include('inc', 'content', 'includes/content.diff');
   }
