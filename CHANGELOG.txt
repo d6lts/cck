@@ -11,6 +11,8 @@ CCK 6.x-3.x
   required fields.
 - #1423432 by sun: Fixed testInfo() methods throws PHP notices.
 - #1533506 by yched: Fixed field tokens not available in hook_update_N().
+- #1442886 by pdrake: Fixed fatal error "failed opening theme.inc" in some edge
+  cases.
 
 CCK 6.x-3.0-alpha3
 ==================
