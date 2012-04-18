@@ -2832,23 +2832,26 @@ function &content_get_nested_elements(&$form, $field_name) {
     $names = array($field_name => $field_name);
   }
 
-  // Initialize the results array.
-  $results = array_fill_keys(array_keys($names), array());
+  // Initialize the results array (array_fill_keys() is only available in PHP
+  // 5.2+).
+  $results = array();
+  foreach ($names as $name) {
+    $results[$name] = array();
+  }
 
   // Search for the elements within the $form. Start at the top-level,
   // sub-elements will be added as we walk the form.
   $queue = array(&$form);
   while ($current = &_content_shift($queue)) {
     foreach (element_children($current) as $key) {
-      $element = &$current[$key];
       // If this is one of the elements we are looking for, push it in the
       // results.
       if (isset($names[$key])) {
-        $results[$key][] = $element;
+        $results[$key][] = &$current[$key];
       }
       // Else push the element in our search queue.
-      else if (is_array($current[$key])) {
-        $queue[] = $element;
+      elseif (is_array($current[$key])) {
+        $queue[] = &$current[$key];
       }
     }
   }
