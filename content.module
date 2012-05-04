@@ -2847,7 +2847,7 @@ function &content_get_nested_elements(&$form, $field_name) {
         $results[$key][] = &$current[$key];
       }
       // Else push the element in our search queue.
-      elseif (is_array($current[$key])) {
+      elseif (is_array($current[$key]) && !empty($current[$key])) {
         $queue[] = &$current[$key];
       }
     }
