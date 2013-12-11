@@ -22,7 +22,9 @@ function content_migrate_filefield_field_alter(&$field_value, $instance_value) {
     $field_value['module'] = 'image';
     $field_value['type'] = 'image';
     // default_image is now a field setting.
-    $field_value['settings']['default_image'] = $instance_value['widget']['settings']['default_image'];
+    if (array_key_exists('default_image', $instance_value['widget']['settings'])) {
+      $field_value['settings']['default_image'] = $instance_value['widget']['settings']['default_image'];
+    }
   }
   // There are a bunch of custom filefield widgets. If they at least start the widget name with 'filefield' this will work.
   if (substr($instance_value['widget']['type'], 0, 9) == 'filefield') {
