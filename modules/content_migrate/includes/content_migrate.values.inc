@@ -139,7 +139,7 @@ function _content_migrate_get_instance_values($bundle = NULL, $field_name = NULL
         'module' => $instance_value['module'],
         'settings' => unserialize($instance_value['global_settings']),
       );
-      unset($instance_value['type'], $instance_value['module'], $instance_value['required'], $instance_value['global_settings']);
+      unset($instance_value['type'], $instance_value['module'], $instance_value['global_settings']);
 
       // All Drupal 6 instances were attached to nodes.
       $instance_value['entity_type'] = 'node';
