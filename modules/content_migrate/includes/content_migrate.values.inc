@@ -227,8 +227,8 @@ function _content_migrate_get_instance_values($bundle = NULL, $field_name = NULL
         $new_displays[$new_context] = $settings;
       }
       // Additionally, set 'default' view mode to the settings used by
-      // 'full'.
-      $new_displays['default'] = $new_displays['full'];
+      // 'full'. Set to array() if 'full' doesn't exist.
+      $new_displays['default'] = isset($new_displays['full']) ? $new_displays['full'] : array();
       $instance_value['display'] = $new_displays;
 
       // Warn about missing or invalid widgets.
