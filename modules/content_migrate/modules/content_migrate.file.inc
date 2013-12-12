@@ -32,8 +32,10 @@ function file_content_migrate_field_alter(&$field_value, $instance_value) {
     $field_value['module'] = 'file';
     $field_value['type'] = 'file';
     // Some settings have changed names.
-    $field_value['settings']['display_field'] = $field_value['settings']['list_field'];
-    unset($field_value['settings']['list_field']);
+    if (array_key_exists('list_field', $field_value['settings'])) {
+      $field_value['settings']['display_field'] = $field_value['settings']['list_field'];
+      unset($field_value['settings']['list_field']);
+    }
     $field_value['settings']['display_default'] = $field_value['settings']['list_default'];
     unset($field_value['settings']['list_default']);
   }
