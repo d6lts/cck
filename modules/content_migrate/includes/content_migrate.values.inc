@@ -176,6 +176,7 @@ function _content_migrate_get_instance_values($bundle = NULL, $field_name = NULL
       $instance_value['display'] = array();
       $label = $instance_value['display_settings']['label'];
       $missing_formatters = array();
+      $excluded_display = array();
       foreach ($instance_value['display_settings'] as $context => $settings) {
         if ($context == 'label') {
           continue;
@@ -236,14 +237,22 @@ function _content_migrate_get_instance_values($bundle = NULL, $field_name = NULL
         $instance_value['messages'][] = t("Missing widget: The '@widget' widget is not available for the @field field, it will be set to the default widget.", array('@widget' => $instance_value['widget']['type'], '@field' => $instance_value['field_name']));
       }
 
-      // Warn about missing or invalid formatters.
-      foreach ($instance_value['display'] as $context => $settings) {
+      // Warn about missing or invalid formatters, and the deprecated 'exclude'
+      // setting.
+      foreach ($instance_value['display'] as $context => &$settings) {
         if ($settings['type'] != 'default' && !array_key_exists($settings['type'], $allowed_formatters)) {
           $missing_formatters[$settings['type']][] = $context;
         }
+        if (!empty($settings['exclude'])) {
+          $excluded_display[] = $context;
+        }
+        unset($settings['exclude']);
       }
-      foreach ($missing_formatters as $formatter => $context) {
-        $instance_value['messages'][] = t("Missing formatter: The '@formatter' formatter used in @view_mode view modes for the @field field is not available, these displays will be reset to the default formatter.", array('@formatter' => $formatter, '@view_mode' => count($context), '@field' => $instance_value['field_name']));
+      foreach ($missing_formatters as $formatter => $contexts) {
+        $instance_value['messages'][] = t("Missing formatter: The '@formatter' formatter used in @view_mode view modes for the @field field is not available, these displays will be reset to the default formatter.", array('@formatter' => $formatter, '@view_mode' => count($contexts), '@field' => $instance_value['field_name']));
+      }
+      if ($excluded_display) {
+        $instance_value['messages'][] = t("Deprecated 'exclude' option: The @field field uses the deprecated 'exclude' option in @view_mode view modes. This option will be ignored, and the field will be displayed with the selected formatters.", array('@view_mode' => count($excluded_display), '@field' => $instance_value['field_name']));
       }
 
       // Add instance information to instance array.
