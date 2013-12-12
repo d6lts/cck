@@ -137,6 +137,7 @@ function content_migrate_old_columns($field_value, $instance_value) {
   }
   return $columns;
 }
+
 /**
  * Helper function for figuring out column names
  * to be used when storing D7 field data.
@@ -158,64 +159,6 @@ function content_migrate_new_columns($field) {
       return $columns;
     }
   }
-}
-
-/**
- * Implements hook_content_migrate_field_alter().
- * 
- * Use this to tweak the conversion of field settings
- * from the D6 style to the D7 style for specific
- * situations not handled by basic conversion,
- * as when field types or settings are changed.
- */
-function content_migrate_content_migrate_field_alter(&$field_value, $instance_value) {
-
-  module_load_include('inc', 'content_migrate', 'modules/content_migrate.filefield');
-  content_migrate_filefield_field_alter($field_value, $instance_value);
-
-  module_load_include('inc', 'content_migrate', 'modules/content_migrate.text');
-  content_migrate_text_field_alter($field_value, $instance_value);
-
-  module_load_include('inc', 'content_migrate', 'modules/content_migrate.number');
-  content_migrate_number_field_alter($field_value, $instance_value);
-
-}
-
-/**
- * Implements hook_content_migrate_instance_alter().
- * 
- * Use this to tweak the conversion of instance or widget settings
- * from the D6 style to the D7 style for specific
- * situations not handled by basic conversion, as when
- * formatter or widget names or settings are changed.
- */
-function content_migrate_content_migrate_instance_alter(&$instance_value, $field_value) {
-
-  module_load_include('inc', 'content_migrate', 'modules/content_migrate.filefield');
-  content_migrate_filefield_instance_alter($instance_value, $field_value);
-
-  module_load_include('inc', 'content_migrate', 'modules/content_migrate.text');
-  content_migrate_text_instance_alter($instance_value, $field_value);
-
-  module_load_include('inc', 'content_migrate', 'modules/content_migrate.number');
-  content_migrate_number_instance_alter($instance_value, $field_value);
-
-  module_load_include('inc', 'content_migrate', 'modules/content_migrate.optionwidgets');
-  content_migrate_optionwidgets_instance_alter($instance_value, $field_value); 
-
-}
-
-
-/**
- * Implements hook_content_migrate_data_record_alter().
- *
- * Tweaks individual records in a field.
- */
-function content_migrate_content_migrate_data_record_alter(&$record, $field, $instance) {
-
-  module_load_include('inc', 'content_migrate', 'modules/content_migrate.filefield');
-  content_migrate_filefield_data_record_alter($record, $field, $instance);
-
 }
 
 /**

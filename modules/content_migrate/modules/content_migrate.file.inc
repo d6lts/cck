@@ -1,8 +1,7 @@
 <?php
 /**
- * @file content_migrate.filefield.inc
- * Code to implement hook_content_migrate_field_alter, content_migrate_instance_alter() and content_migrate_data_record_alter()
- * on behalf of the former filefield and imagefield modules, moved into a separate file for efficiency.
+ * @file content_migrate.file.inc
+ * Code to implement Content Migrate hooks on behalf of the File module.
  */
 
 /**
@@ -13,7 +12,7 @@
  * situations not handled by basic conversion,
  * as when field types or settings are changed.
  */
-function content_migrate_filefield_field_alter(&$field_value, $instance_value) {
+function file_content_migrate_field_alter(&$field_value, $instance_value) {
 
   // There are a bunch of custom imagefield widgets. If they at least start the widget name with 'imagefield' this will work.
   if (substr($instance_value['widget']['type'], 0, 10) == 'imagefield') {
@@ -48,7 +47,7 @@ function content_migrate_filefield_field_alter(&$field_value, $instance_value) {
  * situations not handled by basic conversion, as when
  * formatter or widget names or settings are changed.
  */
-function content_migrate_filefield_instance_alter(&$instance_value, $field_value) {
+function file_content_migrate_instance_alter(&$instance_value, $field_value) {
   // Translate formatters.
   // There are a bunch of custom imagefield / filefield widgets. If they at
   // least start the widget name with 'imagefield' / 'filefield', we can detect
@@ -204,7 +203,7 @@ function content_migrate_filefield_instance_alter(&$instance_value, $field_value
  *
  * Tweaks individual records in a field.
  */
-function content_migrate_filefield_data_record_alter(&$record, $field, $instance) {
+function file_content_migrate_data_record_alter(&$record, $field, $instance) {
 
   switch($field['type']) {
     case 'image':

@@ -4,6 +4,13 @@
  * Code to process field data migration, moved into a separate file for efficiency.
  */
 
+// Load the include files for each supported module. It is safe to do this here
+// as this file is loaded for all actual processing.
+include_once(dirname(__FILE__) . '/../modules/content_migrate.file.inc');
+include_once(dirname(__FILE__) . '/../modules/content_migrate.number.inc');
+include_once(dirname(__FILE__) . '/../modules/content_migrate.options.inc');
+include_once(dirname(__FILE__) . '/../modules/content_migrate.text.inc');
+
 /**
  * Determine which fields can be migrated, have already been migrated, and are
  * unable to be migrated due to missing modules.
@@ -391,7 +398,8 @@ function _content_migrate_batch_process_migrate_data($field_name, &$context) {
     $result = $query->execute();
 
     foreach ($result as $record) {
-  
+      module_load_include('inc', 'content_migrate', 'modules/content_migrate.' . $field['module']);
+
       // Let modules alter this before the insert.
       drupal_alter('content_migrate_data_record', $record, $field, $instance);
 
