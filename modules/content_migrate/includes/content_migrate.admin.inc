@@ -390,6 +390,10 @@ function _content_migrate_batch_process_migrate_data($field_name, &$context) {
 
     $node = array_shift($context['sandbox']['nodes']);
     if (!$node) {
+      // Rollback the field if there was a data migration error.
+      if ($context['sandbox']['rollback'] == TRUE) {
+        content_migrate_rollback(array($field_name));
+      }
       return;
     }
     $instance = field_info_instance('node', $field_name, $node['type']);
@@ -400,32 +404,44 @@ function _content_migrate_batch_process_migrate_data($field_name, &$context) {
     foreach ($result as $record) {
       module_load_include('inc', 'content_migrate', 'modules/content_migrate.' . $field['module']);
 
-      // Let modules alter this before the insert.
-      drupal_alter('content_migrate_data_record', $record, $field, $instance);
+      try {
 
-      // Don't save empty values.
-      if (!empty($record)) {
-        $function = $field['module'] . '_field_is_empty';
-        if (function_exists($function)) {
-          // The $record array has the database columns as keys, which drupal_write_record() will need,
-          // but the _field_is_empty() function will be looking for the short, normalized column name.
-          $item = array();
-          foreach ($context['sandbox']['new_cols'] as $column_name => $db_column_name) {
-            if (array_key_exists($db_column_name, $record)) {
-              $item[$column_name] = $record[$db_column_name];
+        // Let modules alter this before the insert.
+        drupal_alter('content_migrate_data_record', $record, $field, $instance);
+
+        // Don't save empty values.
+        if (!empty($record)) {
+          $function = $field['module'] . '_field_is_empty';
+          if (function_exists($function)) {
+            // The $record array has the database columns as keys, which drupal_write_record() will need,
+            // but the _field_is_empty() function will be looking for the short, normalized column name.
+            $item = array();
+            foreach ($context['sandbox']['new_cols'] as $column_name => $db_column_name) {
+              if (array_key_exists($db_column_name, $record)) {
+                $item[$column_name] = $record[$db_column_name];
+              }
+            }
+            if ($function($item, $field)) {
+              $record = NULL;
             }
           }
-          if ($function($item, $field)) {
-            $record = NULL;
+        }
+
+        if (!empty($record)) {
+          if ($record['revision_id'] == $node['vid']) {
+            drupal_write_record($context['sandbox']['new_table'], $record);
           }
+          drupal_write_record($context['sandbox']['new_revision_table'], $record);
         }
       }
-
-      if (!empty($record)) {
-        if ($record['revision_id'] == $node['vid']) {
-          drupal_write_record($context['sandbox']['new_table'], $record);
-        }
-        drupal_write_record($context['sandbox']['new_revision_table'], $record);
+      catch (Exception $e) {
+        // An error has occurred trying to migrate a record of this field.
+        // Set this field to be rolledback and display a detailed error message.
+        $context['sandbox']['rollback'] = TRUE;
+        $exception = t('<p>Requesting rollback of field "@field" due to failure to convert record:</p>' .
+            '<p>@record</p>  <p>Cause:</p> <p>@cause</p>',
+            array('@field' => $field_name, '@record' => var_export($record, TRUE), '@cause' => $e));
+        drupal_set_message($exception, 'error');
       }
     }
 
@@ -441,5 +457,3 @@ function _content_migrate_batch_process_migrate_data($field_name, &$context) {
   }
 
 }
-
-
