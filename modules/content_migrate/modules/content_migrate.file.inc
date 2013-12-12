@@ -189,8 +189,10 @@ function file_content_migrate_instance_alter(&$instance_value, $field_value) {
       unset($instance_value['widget']['settings']['file_path']);
       $instance_value['settings']['file_extensions'] = $instance_value['widget']['settings']['file_extensions'];
       unset($instance_value['widget']['settings']['file_extensions']);
-      $instance_value['settings']['max_filesize'] = $instance_value['widget']['settings']['max_filesize_per_file'];
-      unset($instance_value['widget']['settings']['max_filesize_per_file']);
+      if (array_key_exists('max_filesize_per_file', $instance_value['widget']['settings'])) {
+        $instance_value['settings']['max_filesize'] = $instance_value['widget']['settings']['max_filesize_per_file'];
+        unset($instance_value['widget']['settings']['max_filesize_per_file']);
+      }
 
       // This setting is gone.
       unset($instance_value['widget']['settings']['max_filesize_per_node']);
