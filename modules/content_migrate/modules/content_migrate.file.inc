@@ -250,8 +250,8 @@ function file_content_migrate_data_record_alter(&$record, $field, $instance) {
         ->fetchObject();
 
       // In case of unknown file, just abort.
-      if (!is_object($file)) {
-        return;
+      if ((!is_object($file)) || is_null($file->fid)) {
+        break;
       }
 
       $basename = variable_get('file_directory_path', conf_path() . '/files');
