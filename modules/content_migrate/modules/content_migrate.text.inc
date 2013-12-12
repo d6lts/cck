@@ -145,4 +145,45 @@ function text_content_migrate_data_record_alter(&$record, $field, $instance) {
       }
       break;
   }
+
+  switch ($field['type']) {
+    case 'list_boolean':
+      static $legacy_values;
+
+      if (is_null($legacy_values)) {
+        $legacy_values = array();
+      }
+
+      // D6 only supported SQL storage, so it's ok to do this.
+      $field_name = $field['field_name'] . '_value';
+
+      // Replace the legacy value with the new values, which are always numeric.
+      // The legacy values are inserted via content_migrate_text_field_alter().
+      if (!empty($record[$field_name])) {
+        if (!isset($legacy_values[$field['field_name']])) {
+          // Default to an empty array.
+          $legacy_values[$field['field_name']] = array();
+
+          // Load the D6 field's specs.
+          $field_specs = db_select('content_node_field', 'nf')
+            ->fields('nf')
+            ->condition('nf.field_name', $field['field_name'])
+            ->execute()
+            ->fetchObject();
+          $field_specs->global_settings = unserialize($results->global_settings);
+
+          // Convert the legacy allowed values.
+          if (!empty($field_specs->global_settings['allowed_values'])) {
+            $legacy = content_migrate_extract_allowed_values($field_specs->global_settings['allowed_values'], NULL);
+            $legacy_values[$field['field_name']] = $legacy;
+          }
+        }
+        $legacy_keys = array_keys($legacy_values[$field['field_name']]);
+
+        // Casting this as an integer ensures the value is always either 0 or 1.
+        $record[$field_name] = (int) array_search($record[$field_name], $legacy_keys);
+      }
+
+      break;
+  }
 }

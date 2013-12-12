@@ -176,7 +176,7 @@ function content_migrate_new_columns($field) {
  * @param string $legacy_values
  *   D6-style string containing key|value pairs delimited by newlines.
  * @param string $field_type
- *   The type of field to build the allowed_values array for.
+ *   The type of field to build the allowed_values array for. Optional.
  *
  * @return array
  *   Array of keys and values.
@@ -184,14 +184,8 @@ function content_migrate_new_columns($field) {
  * @see list_allowed_values_string()
  * @see list_extract_allowed_values()
  */
-function content_migrate_extract_allowed_values($legacy_values, $field_type) {
+function content_migrate_extract_allowed_values($legacy_values, $field_type = NULL) {
   $allowed_values = array();
-
-  if ($field_type == 'list_boolean') {
-    // Initialize these so the order is proper, even if both keys aren't
-    // defined in the legacy string.
-    $allowed_values = array(0 => 0, 1 => 1);
-  }
 
   if (!empty($legacy_values)) {
     foreach (explode("\n", $legacy_values) as $value) {
@@ -204,6 +198,37 @@ function content_migrate_extract_allowed_values($legacy_values, $field_type) {
       else {
         $allowed_values[$value] = $value;
       }
+    }
+  }
+
+  // Fix boolean fields. In D6 the boolean selector used the first value as the
+  // 'no' option, the second as the 'yes' option; if there was only one value
+  // the field did not work correctly and it was not possible to save a 'yes'
+  // value. As a result, it is safe to always use the first value as 'no' and
+  // the second value as 'yes'.
+  if ($field_type == 'list_boolean') {
+    // Work with a copy of the fields.
+    $new_values = $allowed_values;
+
+    // D7 requires boolean fields to have the keys 0 and 1.
+    $allowed_values = array(
+      0 => 0,
+      1 => 1,
+    );
+
+    // Get the keys of the converted data.
+    $keys = array_keys($new_values);
+
+    // Replace the 'no' value. If no value was found, it will default to '0'.
+    if (!empty($keys)) {
+      $key = array_shift($keys);
+      $allowed_values[0] = $new_values[$key];
+    }
+
+    // Replace the 'yes' value. If no value was found, it will default to '1'.
+    if (!empty($keys)) {
+      $key = array_shift($keys);
+      $allowed_values[1] = $new_values[$key];
     }
   }
 
