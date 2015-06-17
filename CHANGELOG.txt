@@ -1,5 +1,10 @@
 //$Id$
 
+CCK 6.x-2.10
+============
+
+Security: Open Redirect - SA-CONTRIB-2015-126
+
 CCK 6.x-2.9
 ===========
 
