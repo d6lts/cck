@@ -11,6 +11,11 @@ Bugfixes:
 - #1442886 by pdrake: Fixed fatal error "failed opening theme.inc" in some edge
   cases.
 
+CCK 6.x-2.10
+============
+
+Security: Open Redirect - SA-CONTRIB-2015-126
+
 CCK 6.x-2.9
 ===========
 
