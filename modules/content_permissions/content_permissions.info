@@ -3,8 +3,3 @@ description = Set field-level permissions for CCK fields.
 package = CCK
 core = 6.x
 dependencies[] = content
-; Information added by Drupal 6 LTS vendors on 2017-04-18
-version = "6.x-3.0-alpha5"
-core = "6.x"
-project = "cck"
-datestamp = "1492545714"
