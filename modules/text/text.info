@@ -4,3 +4,8 @@ description = Defines simple text field types.
 dependencies[] = content
 package = CCK
 core = 6.x
+; Information added by Drupal 6 LTS vendors on 2017-04-18
+version = "6.x-2.11"
+core = "6.x"
+project = "cck"
+datestamp = "1492545528"
