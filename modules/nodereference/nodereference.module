@@ -924,6 +924,10 @@ function _nodereference_potential_references_standard($field, $string = '', $mat
     return array();
   }
 
+  if (!user_access('administer nodes')) {
+    $where[] = 'n.status = 1';
+  }
+
   if ($string !== '') {
     $like = $GLOBALS["db_type"] == 'pgsql' ? "ILIKE" : "LIKE";
     $match_clauses = array(
