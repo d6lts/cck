@@ -136,7 +136,7 @@ class content_handler_field extends views_handler_field_node {
   /**
    * Return DIV or SPAN based upon the field's element type.
    */
-  function element_type($none_supported = FALSE, $default_empty = FALSE) {
+  function element_type($none_supported = FALSE, $default_empty = FALSE, $inline = FALSE) {
     // The 'element_type' property denotes Views 3.x ('semantic views'
     // functionnality). If the property is set, and not set to '' ("default"),
     // let the generic method handle the output.

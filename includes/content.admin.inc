@@ -1279,7 +1279,8 @@ function content_field_edit_form_validate($form, &$form_state) {
     elseif (!empty($form_values['default_value_widget'])) {
       // Fields that handle their own multiple values may use an expected
       // value as the top-level key, so just pop off the top element.
-      $key = array_shift(array_keys($form_values['default_value_widget']));
+      $keys = array_keys($form_values['default_value_widget']);
+      $key = array_shift($keys);
       $default_value = $form_values['default_value_widget'][$key];
       $is_code = FALSE;
       form_set_value(array('#parents' => array('default_value_php')), '', $form_state);
