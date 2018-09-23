@@ -45,8 +45,8 @@ function _content_multigroup_fieldgroup_form(&$form, &$form_state, $form_id, $gr
       $group_deltas = array();
       $max_delta = -1;
       foreach (array_keys($group_fields) as $field_name) {
-        if (!empty($node->$field_name) && is_array($node->$field_name)) {
-          foreach (array_keys($node->$field_name) as $delta) {
+        if (!empty($node->{$field_name}) && is_array($node->{$field_name})) {
+          foreach (array_keys($node->{$field_name}) as $delta) {
             $group_deltas[$delta] = $delta;
           }
           sort($group_deltas);
@@ -211,8 +211,8 @@ function content_multigroup_group_form(&$form, &$form_state, $group, $delta) {
 
     // There may be missing delta values for fields that were
     // never created, so check first.
-    if (!empty($node->$field_name) && isset($node->{$field_name}[$delta])) {
-      $node_copy->$field_name = array($delta => $node->{$field_name}[$delta]);
+    if (!empty($node->{$field_name}) && isset($node->{$field_name}[$delta])) {
+      $node_copy->{$field_name} = array($delta => $node->{$field_name}[$delta]);
     }
     else {
       $value = NULL;
@@ -228,7 +228,7 @@ function content_multigroup_group_form(&$form, &$form_state, $group, $delta) {
           $value = !empty($items) ? $items[0] : '';
         }
       }
-      $node_copy->$field_name = array($delta => $value);
+      $node_copy->{$field_name} = array($delta => $value);
     }
     $form['#node'] = $node_copy;
 

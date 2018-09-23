@@ -6,7 +6,7 @@ dependencies[] = schema
 hidden = TRUE
 files[] = content_test.module
 ; Information added by Drupal 6 LTS vendors on 2017-04-18
-version = "6.x-3.0-alpha5-php7-1"
+version = "6.x-3.0-alpha5-php7-2"
 core = "6.x"
 project = "cck"
 datestamp = "1537735254"

@@ -1915,7 +1915,7 @@ function content_field_batch_update($updates, &$context) {
 function content_field_replace($nid, $updates) {
   $node = node_load($nid, NULL, TRUE);
   foreach ($updates as $field_name => $update) {
-    $items = isset($node->$field_name) ? $node->$field_name : array();
+    $items = isset($node->{$field_name}) ? $node->{$field_name} : array();
     foreach ($items as $delta => $value) {
       $field_mask = (isset($update['delta']) && isset($update['alt_mask']) && $delta >= $update['delta']) ? $update['alt_mask'] : $mask['mask'];
       // Merge the mask into the field values to do the replacements.
@@ -1923,7 +1923,7 @@ function content_field_replace($nid, $updates) {
     }
     // Test if the new values will make items qualify as empty.
     $items = content_set_empty($field, $items);
-    $node->$field_name = $items;
+    $node->{$field_name} = $items;
   }
   node_save($node);
   return $node;
