@@ -1308,6 +1308,7 @@ function content_field_edit_form_validate($form, &$form_state) {
       $field_function = $field_type['module'] .'_field';
 
       $errors_before = form_get_errors();
+      $errors_before = is_array($errors_before) ? count($errors_before) : 0;
 
       // Widget now does its own validation, should be no need
       // to add anything for widget validation here.
@@ -1317,7 +1318,8 @@ function content_field_edit_form_validate($form, &$form_state) {
       // The field validation routine won't set an error on the right field,
       // so set it here.
       $errors_after = form_get_errors();
-      if (count($errors_after) > count($errors_before)) {
+      $errors_after = is_array($errors_after) ? count($errors_after) : 0;
+      if ($errors_after > $errors_before) {
         if (trim($form_values['default_value_php'])) {
           form_set_error('default_value_php', t("The PHP code for 'default value' returned @value, which is invalid.", array(
             '@value' => print_r($default_value, TRUE))));
