@@ -34,7 +34,7 @@ function content_rules_action_populate_field($node, $settings, $element, &$state
   $value = _content_rules_get_field_value($settings, $state);
 
   if (!empty($field) && is_array($value)) {
-    $node->$settings['field_name'] = $value;
+    $node->{$settings['field_name']} = $value;
     return array('node' => $node);
   }
 }
@@ -238,7 +238,7 @@ function content_rules_field_has_value($node, $settings) {
     return FALSE;
   }
 
-  return _content_rules_field_has_value($node->$settings['field_name'], $value);
+  return _content_rules_field_has_value($node->{$settings['field_name']}, $value);
 }
 
 /**
@@ -265,7 +265,7 @@ function content_rules_field_changed($node1, $node2, $settings) {
   // Get information about the field.
   $field = content_fields($settings['field_name'], $node1->type);
 
-  return !empty($field) && !_content_rules_field_has_value($node1->$settings['field_name'], $node2->$settings['field_name']);
+  return !empty($field) && !_content_rules_field_has_value($node1->{$settings['field_name']}, $node2->{$settings['field_name']});
 }
 
 function content_rules_field_changed_form($settings, &$form, &$form_state) {
