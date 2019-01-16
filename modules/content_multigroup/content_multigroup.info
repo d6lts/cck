@@ -6,8 +6,8 @@ package = CCK
 core = 6.x
 
 
-; Information added by Drupal 6 LTS vendors on 2017-04-18
-version = "6.x-3.0-alpha5-php7-2"
+; Information added by Drupal 6 LTS vendors on 2018-10-08
+version = "6.x-3.0-alpha6"
 core = "6.x"
 project = "cck"
-datestamp = "1537735254"
+datestamp = "1539021669"
