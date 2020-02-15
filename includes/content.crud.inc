@@ -546,7 +546,8 @@ function content_field_instance_delete($field_name, $type_name, $rebuild = TRUE)
   include_once('./'. drupal_get_path('module', 'content') .'/includes/content.admin.inc');
 
   // Get the previous field value.
-  $field = array_pop(content_field_instance_read(array('field_name' => $field_name, 'type_name' => $type_name)));
+  $field = content_field_instance_read(array('field_name' => $field_name, 'type_name' => $type_name));
+  $field = array_pop($field);
 
   // Invoke hook_content_fieldapi().
   module_invoke_all('content_fieldapi', 'delete instance', $field);
