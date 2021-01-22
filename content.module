@@ -1227,7 +1227,7 @@ function content_write_record($table, &$object, $update = array()) {
     }
 
     // Build arrays for the fields, placeholders, and values in our query.
-    if (isset($object->$field) || array_key_exists($field, $object)) {
+    if (isset($object->$field) || is_object($object) ? property_exists($object, $field) : array_key_exists($field, $object)) {
       $fields[] = $field;
       if (isset($object->$field)) {
         $placeholders[] = db_type_placeholder($info['type']);
