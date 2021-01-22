@@ -121,7 +121,7 @@ class ContentCrudTestCase extends DrupalWebTestCase {
       }
     }
     $this->assertEqual(count($mismatches), 0, t('Table !table matches schema: !details',
-      array('!table' => $table, '!details' => implode($mismatches, ', '))));
+      array('!table' => $table, '!details' => implode(', ', $mismatches))));
 
     // Second test: check the schema matches the actual db structure.
     // This is the part that relies on schema.module.
@@ -142,7 +142,7 @@ class ContentCrudTestCase extends DrupalWebTestCase {
       $compare = array('status' => 'unknown', 'reasons' => array(t('cannot enable schema module')));
     }
     $this->assertEqual($compare['status'], 'same', t('Table schema for !table matches database: !details',
-      array('!table' => $table, '!details' => implode($compare['reasons'], ', '))));
+      array('!table' => $table, '!details' => implode(', ', $compare['reasons']))));
   }
 
   // Node data helper functions
