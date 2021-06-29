@@ -813,7 +813,7 @@ function _userreference_potential_references_standard($field, $string = '', $mat
     $roles = array_intersect(array_keys(user_roles(1)), $roles);
   }
   if (!empty($roles) && !in_array(DRUPAL_AUTHENTICATED_RID, $roles)) {
-    $where[] = "r.rid IN (". implode($roles, ',') .")";
+    $where[] = "r.rid IN (". implode(',', $roles) .")";
     $join[] = 'LEFT JOIN {users_roles} r ON u.uid = r.uid';
   }
 
