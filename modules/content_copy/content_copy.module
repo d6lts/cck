@@ -619,7 +619,7 @@ function content_copy_get_macro() {
   }
 }
 
-function template_preprocess_content_copy_export_form($vars) {
+function template_preprocess_content_copy_export_form(&$vars) {
   $form = &$vars['form'];
 
   if ($form['#step'] == 2) {
